@@ -1,0 +1,106 @@
+
+# Arduino MBED Core and platform.
+#
+# For more info:
+# https://github.com/arduino/Arduino/wiki/Arduino-IDE-1.5---3rd-party-Hardware-specification
+
+name=MBED Boards
+version=1.0.0
+
+# Compile variables
+# ------------------------
+
+compiler.warning_flags=-w
+compiler.warning_flags.none=-w
+compiler.warning_flags.default=
+compiler.warning_flags.more=-Wall
+compiler.warning_flags.all=-Wall -Wextra
+
+compiler.path={build.compiler_path}
+compiler.c.cmd={build.crossprefix}gcc
+compiler.c.flags=-c -I. {compiler.warning_flags} -Os -g -nostdlib {build.defines} -MMD -std=gnu11 -mtune={build.mcu}
+compiler.c.elf.cmd={build.crossprefix}g++
+compiler.c.elf.flags=-Wl,--gc-sections {compiler.warning_flags} -Wl,--as-needed
+compiler.S.flags=-c -g -x assembler-with-cpp -Os -mtune={build.mcu}
+compiler.cpp.cmd={build.crossprefix}g++
+compiler.cpp.flags=-c -I. {compiler.warning_flags} -g -Os -nostdlib {build.defines} -MMD -std=gnu++11 -mtune={build.mcu}
+compiler.ar.cmd={build.crossprefix}ar
+compiler.ar.flags=rcs
+compiler.objcopy.cmd=
+compiler.objcopy.eep.flags=
+compiler.elf2hex.bin.flags=-O binary
+compiler.elf2hex.hex.flags=-O ihex -R .eeprom
+compiler.elf2hex.cmd={build.crossprefix}objcopy
+compiler.ldflags=
+compiler.libraries.ldflags=
+compiler.size.cmd={build.crossprefix}size
+compiler.define=-DARDUINO=
+
+# this can be overriden in boards.txt
+build.extra_flags=
+build.extra.startobjects=
+build.extra.endobjects=
+compiler.mbed=
+compiler.export_cmake=y
+
+# These can be overridden in platform.local.txt
+compiler.c.extra_flags=
+compiler.c.elf.extra_flags=
+compiler.S.extra_flags=
+compiler.cpp.extra_flags=
+compiler.ar.extra_flags=
+compiler.objcopy.eep.extra_flags=
+compiler.elf2hex.extra_flags=
+
+
+# USB Flags
+# ---------
+build.usb_flags=
+
+# Default usb manufacturer will be replaced at compile time using
+# numeric vendor ID if available or by board's specific value.
+#build.usb_manufacturer="Unknown"
+
+
+# Linux compile patterns
+# -----------------------
+
+## Compile c files
+recipe.c.o.pattern="{compiler.path}{compiler.c.cmd}" {compiler.c.flags} -DARDUINO={runtime.ide.version} -DARDUINO_{build.board} -DARDUINO_ARCH_{build.arch} -DARDUINO_LINUX {build.extra_flags} {compiler.c.extra_flags} "-I{build.core.path}/api/deprecated" -I{build.core.path}/mbed {includes} -o "{object_file}" "{source_file}"
+
+## Compile c++ files
+recipe.cpp.o.pattern="{compiler.path}{compiler.cpp.cmd}" {compiler.cpp.flags} -DARDUINO={runtime.ide.version} -DARDUINO_{build.board} -DARDUINO_ARCH_{build.arch} -DARDUINO_LINUX {build.extra_flags} {compiler.cpp.extra_flags} "-I{build.core.path}/api/deprecated" -I{build.core.path}/mbed  {includes} "{source_file}" -o "{object_file}"
+
+## Create archives
+recipe.ar.pattern="{compiler.path}{compiler.ar.cmd}" {compiler.ar.flags} {compiler.ar.extra_flags} "{archive_file_path}" "{object_file}"
+
+## Combine gc-sections, archives, and objects
+recipe.c.combine.pattern="{compiler.path}{compiler.c.elf.cmd}"  "-L{build.path}" {compiler.c.elf.flags} {compiler.c.elf.extra_flags} "-T{build.variant.path}/{build.ldscript}" "-Wl,-Map,{build.path}/{build.project_name}.map" --specs=nano.specs --specs=nosys.specs {compiler.ldflags} -o "{build.path}/{build.project_name}.elf" {object_files} -Wl,--start-group {compiler.mbed} {compiler.libraries.ldflags} -lm "{build.path}/{archive_file}" -Wl,--end-group
+
+## Create eeprom
+recipe.objcopy.eep.pattern=
+
+## Create output (bin file)
+recipe.objcopy.bin.pattern="{compiler.path}{compiler.elf2hex.cmd}" {compiler.elf2hex.bin.flags} {compiler.elf2hex.extra_flags} "{build.path}/{build.project_name}.elf" "{build.path}/{build.project_name}.bin"
+
+## Create output (hex file)
+recipe.objcopy.hex.pattern="{compiler.path}{compiler.elf2hex.cmd}" {compiler.elf2hex.hex.flags} {compiler.elf2hex.extra_flags} "{build.path}/{build.project_name}.elf" "{build.path}/{build.project_name}.hex"
+
+## Compute size
+recipe.size.pattern="{compiler.path}{compiler.size.cmd}" -A "{build.path}/{build.project_name}.elf"
+recipe.size.regex=\.text\s+([0-9]+).*
+
+## Save hex
+recipe.output.tmp_file={build.project_name}.elf
+recipe.output.save_file={build.project_name}.{build.variant}.elf
+
+# Uploader tools
+# ---------------------
+
+tools.openocd.path={runtime.tools.openocd-0.9.0-arduino6-static.path}
+tools.openocd.cmd=bin/openocd
+tools.openocd.cmd.windows=bin/openocd.exe
+
+tools.openocd.upload.params.verbose=-d2
+tools.openocd.upload.params.quiet=-d0
+tools.openocd.upload.pattern="{path}/{cmd}" {upload.verbose} -s "{path}/share/openocd/scripts/" -f interface/stlink-v2.cfg -f target/stm32f4x_stlink.cfg -c "telnet_port disabled; init; reset init; halt; flash write_image erase {{{build.path}/{build.project_name}.elf}}; reset run; shutdown"
