@@ -1,5 +1,5 @@
 /*
-  wiring.c - Partial implementation of the Wiring API for the ATmega8.
+  wiring_digital.c - digital input and output functions
   Part of Arduino - http://www.arduino.cc/
 
   Copyright (c) 2005-2006 David A. Mellis
@@ -18,25 +18,37 @@
   Public License along with this library; if not, write to the
   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
   Boston, MA  02111-1307  USA
+
+  Modified 28 September 2010 by Mark Sproul
 */
 
-#include "wiring_private.h"
+#include "Arduino.h"
+#include "pins_arduino.h"
 
-unsigned long millis()
+static gpio_t gpio[100];
+
+void pinMode(uint8_t pin, PinMode mode)
 {
+  switch (mode) {
+    case INPUT:
+      gpio_init_inout(&gpio[pin], (PinName)pin, PIN_INPUT, PullNone, 0);
+      break;
+    case OUTPUT:
+      gpio_init_inout(&gpio[pin], (PinName)pin, PIN_OUTPUT, PullNone, 0);
+      break;
+    case INPUT_PULLUP:
+      gpio_init_inout(&gpio[pin], (PinName)pin, PIN_INPUT, PullUp, 0);
+      break;
+  }
 }
 
-unsigned long micros() {
-}
 
-void delay(unsigned long ms)
+void digitalWrite(uint8_t pin, PinStatus val)
 {
+	gpio_write(&gpio[pin], (int)val);
 }
 
-/* Delay for the given number of microseconds.  Assumes a 1, 8, 12, 16, 20 or 24 MHz clock. */
-void delayMicroseconds(unsigned int us)
+PinStatus digitalRead(uint8_t pin)
 {
+	return (PinStatus)gpio_read(&gpio[pin]);
 }
-
-void init()
-{}
