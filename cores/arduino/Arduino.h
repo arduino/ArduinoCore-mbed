@@ -23,16 +23,19 @@
 // TEMP: include proper CMSIS
 inline void NVIC_SystemReset() {}
 
+#include "mbed_config.h"
+
 #ifdef __cplusplus
 #define PinMode MbedPinMode
+#define Stream MbedStream
 #include "mbed.h"
 #undef PinMode
+#undef String
 #endif
 
 #define PinMode ArduinoPinMode
+#define Stream ArduinoStream
 #include "api/ArduinoAPI.h"
-#undef PinMode
-#define PinMode ArduinoPinMode
 
 #ifdef __cplusplus
 extern "C"{

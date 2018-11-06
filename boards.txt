@@ -8,12 +8,15 @@ stm32f429.build.compiler_path={runtime.tools.arm-none-eabi-gcc.path}/bin/
 # TEMPORARY NATIVE COMPILATION
 stm32f429.build.variant=cortex-m4
 stm32f429.build.mcu=cortex-m4
-stm32f429.build.extra_flags=--specs=nosys.specs
+stm32f429.build.extra_flags=
 stm32f429.build.architecture=cortex-m4
 stm32f429.build.board=STM32F429
 stm32f429.build.ldscript=linker_script.ld
-stm32f429.build.defines=
-stm32f429.compiler.ldflags=
+stm32f429.compiler.mbed.defines=@{build.variant.path}/defines.txt
+stm32f429.compiler.mbed.ldflags=@{build.variant.path}/ldflags.txt
+stm32f429.compiler.mbed.cflags=@{build.variant.path}/cflags.txt
+stm32f429.compiler.mbed.cxxflags=@{build.variant.path}/cxxflags.txt
+stm32f429.compiler.mbed.includes=${build.variant.path}/includes.txt
 stm32f429.compiler.mbed={build.variant.path}/libs/libmbed.a
 stm32f429.vid.0=0x8087
 stm32f429.pid.0=0x101f

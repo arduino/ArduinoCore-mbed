@@ -1,15 +1,24 @@
 export BOARDNAME=DISCO_F429ZI
-export ARDUINOCORE=~/ArduinoCore-mbed/cores/arduino/mbed/
+export ARDUINOCORE=~/ArduinoCore-mbed/variant/$BOARDNAME/
 
 mbed new mbed-os-program
 cd mbed-os-program
 mbed target $BOARDNAME
 mbed toolchain GCC_ARM
-echo "int main(int argc, char** argv) {}" > main.c
+echo -e "#include \"mbed.h\"\nint main() {Thread thd;}" > main.cpp
 mbed compile -v | grep "Macros:" > $BOARDNAME.macros.txt
+cat $BOARDNAME.macros.txt | cut -f2 -d":" > $ARDUINOCORE/defines.txt
+xargs -n 1 < ./BUILD/$BOARDNAME/GCC_ARM/.include* | sed -e 's#./mbed-os#{build.core.path}/mbed#g' | sed -e 's#-I/.*$##' | tac  > $ARDUINOCORE/includes.txt
+
+#TODO: remove -MDD from flags
+
+gron ./BUILD/$BOARDNAME/GCC_ARM/.profile-c | grep json.flags | cut -f2 -d"\"" > $ARDUINOCORE/cflags.txt
+gron ./BUILD/$BOARDNAME/GCC_ARM/.profile-cxx | grep json.flags | cut -f2 -d"\"" > $ARDUINOCORE/cxxflags.txt
+gron ./BUILD/$BOARDNAME/GCC_ARM/.profile-ld | grep json.flags | cut -f2 -d"\"" > $ARDUINOCORE/ldflags.txt
+
 arm-none-eabi-ar rcs BUILD/mbed-core-$BOARDNAME.a `xargs -n 1 < ./BUILD/$BOARDNAME/GCC_ARM/.link_options.txt | grep "\.o" | grep -v "main.o"`
-cp mbed-os/mbed.h $ARDUINOCORE
-cd mbed-os && cat mbed.h | grep "\.h" | cut -f2 -d "\"" | xargs -I % cp --parents % $ARDUINOCORE
+cd mbed-os && find . | grep "\.h" | xargs -I % cp --parents % $ARDUINOCORE/../../cores/arduino/mbed
+cd BUILD && find . | grep "\.h" | xargs -I % cp  % $ARDUINOCORE/../../cores/arduino/mbed
 
 # find a way to extract PinNames.h and device.h
 # patch Callback.h
