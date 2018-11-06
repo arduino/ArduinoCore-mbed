@@ -17,6 +17,7 @@ stm32f429.compiler.mbed.ldflags=@{build.variant.path}/ldflags.txt
 stm32f429.compiler.mbed.cflags=@{build.variant.path}/cflags.txt
 stm32f429.compiler.mbed.cxxflags=@{build.variant.path}/cxxflags.txt
 stm32f429.compiler.mbed.includes=${build.variant.path}/includes.txt
+stm32f429.compiler.mbed.extra_ldflags=-Wl,--start-group -lstdc++ -lsupc++ -lm -lc -lgcc -lnosys -Wl,--end-group -lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
 stm32f429.compiler.mbed={build.variant.path}/libs/libmbed.a
 stm32f429.vid.0=0x8087
 stm32f429.pid.0=0x101f
