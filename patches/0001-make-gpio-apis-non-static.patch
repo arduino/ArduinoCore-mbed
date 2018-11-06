@@ -1,20 +1,20 @@
-From 9747c709c688d2c34309daa8732439a0a3e2df43 Mon Sep 17 00:00:00 2001
+From 49500ae3be162d6dd0167195fe3811dc6a6763b3 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Tue, 6 Nov 2018 16:23:20 +0100
 Subject: [PATCH] make gpio apis non static
 
 ---
- targets/TARGET_STM/gpio_object.c | 69 ++++++++++++++++++++++++++++++++
+ targets/TARGET_STM/gpio_object.c | 70 ++++++++++++++++++++++++++++++++
  targets/TARGET_STM/gpio_object.h | 26 ++----------
- 2 files changed, 72 insertions(+), 23 deletions(-)
+ 2 files changed, 73 insertions(+), 23 deletions(-)
  create mode 100644 targets/TARGET_STM/gpio_object.c
 
 diff --git a/targets/TARGET_STM/gpio_object.c b/targets/TARGET_STM/gpio_object.c
 new file mode 100644
-index 000000000..44173403a
+index 000000000..4d3279836
 --- /dev/null
 +++ b/targets/TARGET_STM/gpio_object.c
-@@ -0,0 +1,69 @@
+@@ -0,0 +1,70 @@
 +/* mbed Microcontroller Library
 + *******************************************************************************
 + * Copyright (c) 2016, STMicroelectronics
@@ -51,6 +51,7 @@ index 000000000..44173403a
 +#include "PeripheralNames.h"
 +#include "PinNames.h"
 +#include "gpio_object.h"
++#include "device.h"
 +
 +#ifdef __cplusplus
 +extern "C" {
