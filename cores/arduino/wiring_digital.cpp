@@ -18,29 +18,25 @@
   Public License along with this library; if not, write to the
   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
   Boston, MA  02111-1307  USA
-
-  Modified 28 September 2010 by Mark Sproul
 */
 
 #include "Arduino.h"
 #include "pins_arduino.h"
 
-static gpio_t gpio[100];
-
 void pinMode(uint8_t pin, PinMode mode)
 {
   switch (mode) {
     case INPUT:
-      gpio_init_inout(&gpio[pin], (PinName)pin, PIN_INPUT, PullNone, 0);
+      DigitalIn((PinName)pin).mode(PullNone);
       break;
     case OUTPUT:
-      gpio_init_inout(&gpio[pin], (PinName)pin, PIN_OUTPUT, PullNone, 0);
+      DigitalOut((PinName)pin);
       break;
     case INPUT_PULLUP:
-      gpio_init_inout(&gpio[pin], (PinName)pin, PIN_INPUT, PullUp, 0);
+      DigitalIn((PinName)pin).mode(PullUp);
       break;
     case INPUT_PULLDOWN:
-      gpio_init_inout(&gpio[pin], (PinName)pin, PIN_INPUT, PullDown, 0);
+      DigitalIn((PinName)pin).mode(PullDown);
       break;
   }
 }
@@ -48,10 +44,10 @@ void pinMode(uint8_t pin, PinMode mode)
 
 void digitalWrite(uint8_t pin, PinStatus val)
 {
-	gpio_write(&gpio[pin], (int)val);
+	DigitalOut((PinName)pin).write((int)val);
 }
 
 PinStatus digitalRead(uint8_t pin)
 {
-	return (PinStatus)gpio_read(&gpio[pin]);
+	return (PinStatus)DigitalIn((PinName)pin).read();
 }
