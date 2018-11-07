@@ -39,6 +39,9 @@ void pinMode(uint8_t pin, PinMode mode)
     case INPUT_PULLUP:
       gpio_init_inout(&gpio[pin], (PinName)pin, PIN_INPUT, PullUp, 0);
       break;
+    case INPUT_PULLDOWN:
+      gpio_init_inout(&gpio[pin], (PinName)pin, PIN_INPUT, PullDown, 0);
+      break;
   }
 }
 

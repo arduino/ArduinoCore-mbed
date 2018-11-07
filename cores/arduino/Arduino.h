@@ -30,7 +30,7 @@ inline void NVIC_SystemReset() {}
 #define Stream MbedStream
 #include "mbed.h"
 #undef PinMode
-#undef String
+#undef Stream
 #endif
 
 #define PinMode ArduinoPinMode

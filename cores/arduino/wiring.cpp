@@ -22,11 +22,13 @@
 
 #include "wiring_private.h"
 
-unsigned long millis()
+inline unsigned long millis()
 {
+  return us_ticker_read() / 1000L;
 }
 
-unsigned long micros() {
+inline unsigned long micros() {
+  return us_ticker_read();
 }
 
 void delay(unsigned long ms)
