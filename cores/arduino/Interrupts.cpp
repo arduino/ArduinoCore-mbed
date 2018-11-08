@@ -19,11 +19,11 @@
 #include "Arduino.h"
 
 void attachInterruptParam(pin_size_t interruptNum, voidFuncPtrParam func, PinStatus mode, void* param) {
-  // need to check if destructor also destroys the callback object
+  InterruptIn* irq = new InterruptIn((PinName)interruptNum);
   if (mode == FALLING) {
-    InterruptIn((PinName)interruptNum).fall(callback(func, param));
+    irq->fall(callback(func, param));
   } else {
-    InterruptIn((PinName)interruptNum).rise(callback(func, param));
+    irq->rise(callback(func, param));
   }
 }
 
