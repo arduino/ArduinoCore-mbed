@@ -56,5 +56,8 @@ extern "C"{
 } // extern "C"
 #endif
 
+#include "Serial.h"
+#define Serial UART1
+
 #include "pins_arduino.h"
 #endif
