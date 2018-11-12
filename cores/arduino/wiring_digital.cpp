@@ -27,16 +27,16 @@ void pinMode(uint8_t pin, PinMode mode)
 {
   switch (mode) {
     case INPUT:
-      DigitalIn((PinName)pin).mode(PullNone);
+      mbed::DigitalIn((PinName)pin).mode(PullNone);
       break;
     case OUTPUT:
-      DigitalOut((PinName)pin);
+      mbed::DigitalOut((PinName)pin);
       break;
     case INPUT_PULLUP:
-      DigitalIn((PinName)pin).mode(PullUp);
+      mbed::DigitalIn((PinName)pin).mode(PullUp);
       break;
     case INPUT_PULLDOWN:
-      DigitalIn((PinName)pin).mode(PullDown);
+      mbed::DigitalIn((PinName)pin).mode(PullDown);
       break;
   }
 }
@@ -44,10 +44,10 @@ void pinMode(uint8_t pin, PinMode mode)
 
 void digitalWrite(uint8_t pin, PinStatus val)
 {
-	DigitalOut((PinName)pin).write((int)val);
+	mbed::DigitalOut((PinName)pin).write((int)val);
 }
 
 PinStatus digitalRead(uint8_t pin)
 {
-	return (PinStatus)DigitalIn((PinName)pin).read();
+	return (PinStatus)mbed::DigitalIn((PinName)pin).read();
 }

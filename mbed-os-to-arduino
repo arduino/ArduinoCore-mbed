@@ -11,6 +11,7 @@ cat $BOARDNAME.macros.txt | cut -f2 -d":" > $ARDUINOCORE/defines.txt
 xargs -n 1 < ./BUILD/$BOARDNAME/GCC_ARM/.include* | sed -e 's#./mbed-os#{build.core.path}/mbed#g' | sed -e 's#-I/.*$##' | tac  > $ARDUINOCORE/includes.txt
 
 #TODO: remove -MDD from flags
+#TODO: remove "using namespace mbed" from mbed.h
 
 gron ./BUILD/$BOARDNAME/GCC_ARM/.profile-c | grep json.flags | cut -f2 -d"\"" > $ARDUINOCORE/cflags.txt
 gron ./BUILD/$BOARDNAME/GCC_ARM/.profile-cxx | grep json.flags | cut -f2 -d"\"" > $ARDUINOCORE/cxxflags.txt

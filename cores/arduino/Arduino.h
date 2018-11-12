@@ -27,17 +27,14 @@ inline void NVIC_SystemReset() {}
 
 #ifdef __cplusplus
 #define PinMode MbedPinMode
-#define Stream MbedStream
 #include "mbed.h"
 #undef PinMode
-#undef Stream
 #endif
 
-#define PinMode ArduinoPinMode
-#define Stream ArduinoStream
 #include "api/ArduinoAPI.h"
 
 #ifdef __cplusplus
+using namespace arduino;
 extern "C"{
 #endif
 

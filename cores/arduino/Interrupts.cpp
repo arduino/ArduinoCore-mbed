@@ -19,11 +19,11 @@
 #include "Arduino.h"
 
 void attachInterruptParam(pin_size_t interruptNum, voidFuncPtrParam func, PinStatus mode, void* param) {
-  InterruptIn* irq = new InterruptIn((PinName)interruptNum);
+  mbed::InterruptIn* irq = new mbed::InterruptIn((PinName)interruptNum);
   if (mode == FALLING) {
-    irq->fall(callback(func, param));
+    irq->fall(mbed::callback(func, param));
   } else {
-    irq->rise(callback(func, param));
+    irq->rise(mbed::callback(func, param));
   }
 }
 
