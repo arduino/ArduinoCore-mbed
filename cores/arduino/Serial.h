@@ -27,10 +27,11 @@ class UART : public HardwareSerial {
 		operator bool();
 
 	private:
-		void on_rx();
+		void on_rx(int howmany);
 		mbed::Serial* _serial = NULL;
 		PinName tx, rx;
 		RingBufferN<256> rx_buffer;
+		uint8_t intermediate_buf[4];
 };
 }
 

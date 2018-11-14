@@ -6,9 +6,6 @@
 
 using namespace arduino;
 
-static EventQueue queue(4 * EVENTS_EVENT_SIZE);
-static rtos::Thread t;
-
 void UART::begin(unsigned long baudrate, uint16_t config) {
 	begin(baudrate);
 	_serial->format();
@@ -17,16 +14,13 @@ void UART::begin(unsigned long baudrate, uint16_t config) {
 void UART::begin(unsigned long baudrate) {
 	if (_serial == NULL) {
 		_serial = new mbed::Serial(tx, rx, baudrate);
-		t.start(mbed::callback(&queue, &EventQueue::dispatch_forever));
 	}
-	//_serial->attach(queue.event(mbed::callback(this, &UART::on_rx)));
+	_serial->read(intermediate_buf, 1, mbed::callback(this, &UART::on_rx));
 }
 
-void UART::on_rx() {
-	while (_serial->readable() > 0) {
-		int ret = _serial->getc();
-		rx_buffer.store_char(ret);
-	}
+void UART::on_rx(int howmany) {
+	rx_buffer.store_char(intermediate_buf[0]);
+	_serial->read(intermediate_buf, 1, mbed::callback(this, &UART::on_rx));
 }
 
 void UART::end() {
@@ -36,7 +30,7 @@ void UART::end() {
 }
 
 int UART::available() {
-	on_rx();
+	//on_rx();
 	return rx_buffer.available();
 }
 
