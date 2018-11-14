@@ -103,5 +103,6 @@
 #include "platform/ScopedLock.h"
 
 using namespace std;
+using namespace mbed;
 
 #endif
