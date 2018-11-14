@@ -54,5 +54,6 @@ NetworkInterface *arduino::WiFiClass::get_network() {
 }
 
 // every specialization library should declare its own WiFI object: eg
-// 
-// WiFiClass WiFi(&);
+//
+// static ESP8266Interface wifi_if(PD_8, PD_9);
+// arduino::WiFiClass WiFi(&wifi_if);
