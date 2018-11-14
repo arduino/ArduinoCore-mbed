@@ -15,12 +15,16 @@ void UART::begin(unsigned long baudrate) {
 	if (_serial == NULL) {
 		_serial = new mbed::Serial(tx, rx, baudrate);
 	}
+	#ifdef DEVICE_SERIAL_ASYNCH
 	_serial->read(intermediate_buf, 1, mbed::callback(this, &UART::on_rx));
+	#endif
 }
 
 void UART::on_rx(int howmany) {
 	rx_buffer.store_char(intermediate_buf[0]);
+	#ifdef DEVICE_SERIAL_ASYNCH
 	_serial->read(intermediate_buf, 1, mbed::callback(this, &UART::on_rx));
+	#endif
 }
 
 void UART::end() {
@@ -30,7 +34,6 @@ void UART::end() {
 }
 
 int UART::available() {
-	//on_rx();
 	return rx_buffer.available();
 }
 
