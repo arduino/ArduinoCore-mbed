@@ -1,5 +1,5 @@
 export BOARDNAME=DISCO_F429ZI
-export ARDUINOCORE=~/ArduinoCore-mbed/variant/$BOARDNAME/
+export ARDUINOCORE=~/ArduinoCore-mbed/variants/$BOARDNAME/
 
 mbed new mbed-os-program
 cd mbed-os-program
@@ -17,11 +17,13 @@ gron ./BUILD/$BOARDNAME/GCC_ARM/.profile-cxx | grep json.flags | cut -f2 -d"\"" 
 gron ./BUILD/$BOARDNAME/GCC_ARM/.profile-ld | grep json.flags | cut -f2 -d"\"" > $ARDUINOCORE/ldflags.txt
 
 arm-none-eabi-ar rcs BUILD/mbed-core-$BOARDNAME.a `xargs -n 1 < ./BUILD/$BOARDNAME/GCC_ARM/.link_options.txt | grep "\.o" | grep -v "main.o"`
+cp BUILD/mbed-core-$BOARDNAME.a $ARDUINOCORE/libs/libmbed.a
 cd mbed-os && find . | grep "\.h" | xargs -I % cp --parents % $ARDUINOCORE/../../cores/arduino/mbed
-cd BUILD && find . | grep "\.h" | xargs -I % cp  % $ARDUINOCORE/../../cores/arduino/mbed
+#cd BUILD && find . | grep "\.h" | xargs -I % cp  % $ARDUINOCORE/../../cores/arduino/mbed
+cp ./BUILD/$BOARDNAME/GCC_ARM/.link_script.ld $ARDUINOCORE/linker_script.ld
 
-# find a way to extract PinNames.h and device.h
-# patch Callback.h
+# ~find a way to extract PinNames.h and device.h~
+# ~patch Callback.h~
 # copy linker script (eg. BUILD/DISCO_F429ZI/GCC_ARM/.link_script.ld)
 
 openocd -f interface/stlink-v2.cfg -f target/stm32f4x_stlink.cfg  -c "init"  -c "reset init" -c "halt" -c "flash write_image erase ./BUILD/$BOARDNAME/GCC_ARM/mbed-os-program.elf" -c "verify_image ./BUILD/$BOARDNAME/GCC_ARM/mbed-os-program.elf" -c "reset run" -c shutdown
