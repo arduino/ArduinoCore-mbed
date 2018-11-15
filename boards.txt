@@ -32,16 +32,16 @@ stm32f429.upload.native_usb=false
 
 ##############################################################
 
-odinw2.name=ODINW2 Mbed target
+odinw2.name=MBED CONNECT ODINW2
 odinw2.build.core=arduino
 odinw2.build.crossprefix=arm-none-eabi-
 odinw2.build.compiler_path={runtime.tools.arm-none-eabi-gcc.path}/bin/
 
-odinw2.build.variant=MTB_UBLOX_ODIN_W2
+odinw2.build.variant=MBED_CONNECT_ODIN
 odinw2.build.mcu=cortex-m4
 odinw2.build.extra_flags=
 odinw2.build.architecture=cortex-m4
-odinw2.build.board=MTB_UBLOX_ODIN_W2
+odinw2.build.board=MBED_CONNECT_ODIN
 odinw2.build.ldscript=linker_script.ld
 odinw2.compiler.mbed.defines=@{build.variant.path}/defines.txt
 odinw2.compiler.mbed.ldflags=@{build.variant.path}/ldflags.txt
@@ -55,11 +55,10 @@ odinw2.pid.0=0x101f
 
 odinw2.upload.via_ssh=true
 odinw2.upload.tool=openocd
-odinw2.upload.config=-f interface/stlink-v2.cfg -f target/stm32f4x_stlink.cfg
+odinw2.upload.config=-f interface/cmsis-dap.cfg -f target/stm32f4x.cfg
 odinw2.upload.protocol=sam-ba
 odinw2.upload.maximum_size=10000000
 odinw2.upload.use_1200bps_touch=false
 odinw2.upload.wait_for_upload_port=false
 odinw2.upload.native_usb=false
 
-###############################################################
