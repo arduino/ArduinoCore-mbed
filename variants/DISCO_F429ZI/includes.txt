@@ -1,11 +1,3 @@
-
-
-
-
-
-
-
-
 -I{build.core.path}/mbed/targets/TARGET_STM/TARGET_STM32F4/device
 -I{build.core.path}/mbed/targets/TARGET_STM/TARGET_STM32F4/TARGET_STM32F429xI/device
 -I{build.core.path}/mbed/targets/TARGET_STM/TARGET_STM32F4/TARGET_STM32F429xI/TARGET_DISCO_F429ZI
@@ -205,6 +197,9 @@
 -I{build.core.path}/mbed/components/wifi/esp8266-driver/ESP8266
 -I{build.core.path}/mbed/components/wifi/esp8266-driver
 -I{build.core.path}/mbed/components/wifi
+-I{build.core.path}/mbed/components/802.15.4_RF/stm-s2lp-rf-driver/stm-s2lp-rf-driver
+-I{build.core.path}/mbed/components/802.15.4_RF/stm-s2lp-rf-driver/source
+-I{build.core.path}/mbed/components/802.15.4_RF/stm-s2lp-rf-driver
 -I{build.core.path}/mbed/components/802.15.4_RF/mcr20a-rf-driver/source
 -I{build.core.path}/mbed/components/802.15.4_RF/mcr20a-rf-driver/mcr20a-rf-driver
 -I{build.core.path}/mbed/components/802.15.4_RF/mcr20a-rf-driver
