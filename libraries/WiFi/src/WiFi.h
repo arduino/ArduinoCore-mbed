@@ -35,6 +35,8 @@ extern "C" {
 
 namespace arduino {
 
+typedef void* (*voidPrtFuncPtr)(void);
+
 class WiFiClass
 {
 private:
@@ -45,6 +47,8 @@ public:
     static uint16_t _server_port[MAX_SOCK_NUM];
 
     WiFiClass(WiFiInterface* _if) : wifi_if(_if) {};
+
+    WiFiClass(voidPrtFuncPtr _cb) : cb(_cb) {};
 
     /*
      * Get the first socket available
@@ -277,6 +281,7 @@ public:
 private:
     char* _ssid;
     WiFiInterface* wifi_if;
+    voidPrtFuncPtr cb;
 };
 
 }

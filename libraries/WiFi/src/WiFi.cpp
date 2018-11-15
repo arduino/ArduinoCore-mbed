@@ -9,6 +9,10 @@ int arduino::WiFiClass::begin(char* ssid, const char *passphrase) {
         return WL_CONNECT_FAILED;
     }
 
+    if (wifi_if == NULL) {
+       wifi_if = (WiFiInterface*)cb();
+    }
+
     // too long? break it off
     if (strlen(ssid) > 32) ssid[32] = 0;
     memcpy(_ssid, ssid, 33);
