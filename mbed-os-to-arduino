@@ -6,6 +6,8 @@ cd mbed-os-program
 mbed target $BOARDNAME
 mbed toolchain GCC_ARM
 echo -e "#include \"mbed.h\"\nint main() {Thread thd;}" > main.cpp
+echo -e "{\n \"target_overrides\": {\n   \"*\": {\n      \"platform.stdio-buffered-serial\": true,\n      \"platform.stdio-baud-rate\": 115200,\n      \"platform.default-serial-baud-rate\": 115200\n   }\n }\n}\n" > mbed_app.json
+
 mbed compile -v | grep "Macros:" > $BOARDNAME.macros.txt
 cat $BOARDNAME.macros.txt | cut -f2 -d":" > $ARDUINOCORE/defines.txt
 xargs -n 1 < ./BUILD/$BOARDNAME/GCC_ARM/.include* | sed -e 's#./mbed-os#{build.core.path}/mbed#g' | sed -e 's#-I/.*$##' | tac  > $ARDUINOCORE/includes.txt
