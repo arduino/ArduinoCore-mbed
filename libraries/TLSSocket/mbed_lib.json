@@ -1,0 +1,9 @@
+{
+    "name": "tls-socket",
+    "macros": [
+        "MBEDTLS_SHA1_C"
+    ],
+    "config": {
+        "debug-level": 0
+    }
+}
