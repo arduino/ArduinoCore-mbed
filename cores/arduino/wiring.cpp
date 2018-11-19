@@ -22,12 +22,12 @@
 
 #include "wiring_private.h"
 
-inline unsigned long millis()
+unsigned long millis()
 {
   return us_ticker_read() / 1000L;
 }
 
-inline unsigned long micros() {
+unsigned long micros() {
   return us_ticker_read();
 }
 
