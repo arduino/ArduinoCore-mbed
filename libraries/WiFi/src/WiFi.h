@@ -27,7 +27,6 @@ extern "C" {
 #include "Arduino.h"
 #include "api/IPAddress.h"
 #include "WiFiClient.h"
-#include "WiFiSSLClient.h"
 #include "WiFiServer.h"
 #include "WiFiUdp.h"
 
@@ -276,7 +275,7 @@ public:
     friend class WiFiServer;
 
 public:
-    NetworkInterface *get_network();
+    NetworkInterface *getNetwork();
 
 private:
     char* _ssid;

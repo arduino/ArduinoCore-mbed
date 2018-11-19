@@ -16,7 +16,7 @@ arduino::WiFiUDP::WiFiUDP() {
 uint8_t arduino::WiFiUDP::begin(uint16_t port) {
     // success = 1, fail = 0
 
-    nsapi_error_t rt = _socket.open(WiFi.get_network());
+    nsapi_error_t rt = _socket.open(WiFi.getNetwork());
     if (rt != NSAPI_ERROR_OK) {
         return 0;
     }

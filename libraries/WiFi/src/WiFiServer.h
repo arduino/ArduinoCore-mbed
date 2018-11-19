@@ -22,6 +22,7 @@ extern "C" {
 }
 
 #include "api/Server.h"
+#include "TCPServer.h"
 
 namespace arduino {
 

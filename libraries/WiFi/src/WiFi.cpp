@@ -17,16 +17,16 @@ int arduino::WiFiClass::begin(char* ssid, const char *passphrase) {
     if (strlen(ssid) > 32) ssid[32] = 0;
     memcpy(_ssid, ssid, 33);
 
-    //tr_debug("Connecting to '%s'", _ssid);
+    Serial.println("Connecting to " + String(_ssid));
     nsapi_error_t ret = wifi_if->connect(ssid, passphrase, NSAPI_SECURITY_WPA2);
 
     if (ret == NSAPI_ERROR_OK) {
-        //tr_debug("Connected to WiFi");
-        //tr_debug("IP address: %s", wifi_if->get_ip_address());
-        //tr_debug("MAC address: %s", wifi_if->get_mac_address());
+        Serial.println("Connected to WiFi");
+        Serial.println("IP address: " +  String(wifi_if->get_ip_address()));
+        Serial.println("MAC address: " + String(wifi_if->get_mac_address()));
     }
     else {
-        //tr_debug("Failed to connect to WiFi (%d)", ret);
+        Serial.println("Failed to connect to WiFi " + String(ret));
     }
 
     return ret == NSAPI_ERROR_OK ? WL_CONNECTED : WL_CONNECT_FAILED;
@@ -53,7 +53,7 @@ arduino::IPAddress arduino::WiFiClass::localIP() {
     return addr;
 }
 
-NetworkInterface *arduino::WiFiClass::get_network() {
+NetworkInterface *arduino::WiFiClass::getNetwork() {
     return wifi_if;
 }
 

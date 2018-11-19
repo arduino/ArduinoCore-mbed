@@ -24,7 +24,7 @@
 
 namespace arduino {
 
-class WiFiSSLClient : public WiFiClient {
+class WiFiSSLClient : public arduino::WiFiClient {
 
 public:
 	WiFiSSLClient();

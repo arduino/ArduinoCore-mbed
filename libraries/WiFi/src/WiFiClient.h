@@ -19,9 +19,13 @@
 
 #ifndef wificlient_h
 #define wificlient_h
+
+#include "WiFi.h"
 #include "api/Print.h"
 #include "api/Client.h"
 #include "api/IPAddress.h"
+#include "TLSSocket.h"
+#include "TCPSocket.h"
 
 namespace arduino {
 
@@ -29,7 +33,6 @@ class WiFiClient : public arduino::Client {
 
 public:
   WiFiClient();
-  WiFiClient(uint8_t sock);
 
   uint8_t status();
   virtual int connect(IPAddress ip, uint16_t port);
@@ -45,7 +48,9 @@ public:
   virtual void flush();
   virtual void stop();
   virtual uint8_t connected();
-  virtual operator bool();
+  virtual operator bool() {
+    return sock != NULL;
+  }
 
   virtual IPAddress remoteIP();
   virtual uint16_t remotePort();
@@ -56,10 +61,13 @@ public:
 
 private:
   static uint16_t _srcport;
-  uint8_t _sock;   //not used
-  uint16_t  _socket;
+  TCPSocket* sock;
+  TLSSocket* sock_ssl;
+  RingBufferN<256> rxBuffer;
+  uint8_t _status;
 
   uint8_t getFirstSocket();
+  void getStatus();
 };
 
 }
