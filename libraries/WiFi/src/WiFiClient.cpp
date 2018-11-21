@@ -7,9 +7,6 @@ extern WiFiClass WiFi;
 #endif
 
 arduino::WiFiClient::WiFiClient() {
-	sock = new TCPSocket(WiFi.getNetwork());
-	sock->sigio(mbed::callback(this, &WiFiClient::getStatus));
-	sock->set_blocking(false);
 }
 
 uint8_t arduino::WiFiClient::status() {
@@ -17,6 +14,14 @@ uint8_t arduino::WiFiClient::status() {
 }
 
 void arduino::WiFiClient::getStatus() {
+    uint8_t data[256];
+    int ret = sock->recv(data, rxBuffer.availableForStore());
+    for (int i = 0; i < ret; i++) {
+      rxBuffer.store_char(data[i]);
+    }
+    if (ret < 0 && ret != NSAPI_ERROR_WOULD_BLOCK) {
+        _status = WL_CONNECTION_LOST;
+    }
 }
 
 
@@ -24,7 +29,18 @@ int arduino::WiFiClient::connect(IPAddress ip, uint16_t port) {
 }
 
 int arduino::WiFiClient::connect(const char *host, uint16_t port) {
-	sock->connect(host, port);
+	if (sock == NULL) {
+		sock = new TCPSocket(WiFi.getNetwork());
+	}
+	//sock->sigio(mbed::callback(this, &WiFiClient::getStatus));
+	//sock->set_blocking(false);
+	sock->set_timeout(5000);
+	int ret = sock->connect(host, port);
+	if (ret == 0) {
+		return 1;
+	} else {
+		return 0;
+	}
 }
 
 int arduino::WiFiClient::connectSSL(IPAddress ip, uint16_t port) {
@@ -45,11 +61,7 @@ size_t arduino::WiFiClient::write(const uint8_t *buf, size_t size) {
 }
 
 int arduino::WiFiClient::available() {
-	uint8_t data[256];
-	int ret = sock->recv(data, 256);
-    for (int i = 0; i < ret; i++) {
-      rxBuffer.store_char(data[i]);
-    }
+	getStatus();
     return rxBuffer.available();
 }
 
@@ -69,7 +81,7 @@ int arduino::WiFiClient::read(uint8_t *data, size_t len) {
 	}
 
 	if ((int)len > avail) {
-		avail = len;
+		len = avail;
 	}
 
 	for (size_t i = 0; i < len; i++) {
@@ -92,7 +104,7 @@ void arduino::WiFiClient::stop() {
 }
 
 uint8_t arduino::WiFiClient::connected() {
-	return 1;
+	return _status != WL_CONNECTION_LOST;
 }
 
 IPAddress arduino::WiFiClient::remoteIP() {

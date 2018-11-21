@@ -66,7 +66,6 @@ private:
   RingBufferN<256> rxBuffer;
   uint8_t _status;
 
-  uint8_t getFirstSocket();
   void getStatus();
 };
 
