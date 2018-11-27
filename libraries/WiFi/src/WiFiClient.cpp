@@ -34,8 +34,8 @@ int arduino::WiFiClient::connect(const char *host, uint16_t port) {
 	}
 	//sock->sigio(mbed::callback(this, &WiFiClient::getStatus));
 	//sock->set_blocking(false);
-	sock->set_timeout(5000);
-	int ret = sock->connect(host, port);
+	sock->set_timeout(1000);
+	int ret = ((TCPSocket*)sock)->connect(host, port);
 	if (ret == 0) {
 		return 1;
 	} else {
@@ -44,12 +44,22 @@ int arduino::WiFiClient::connect(const char *host, uint16_t port) {
 }
 
 int arduino::WiFiClient::connectSSL(IPAddress ip, uint16_t port) {
-
 }
 
 int arduino::WiFiClient::connectSSL(const char *host, uint16_t port) {
-	sock_ssl->open(WiFi.getNetwork());
-	sock_ssl->connect(host, port);
+	if (sock == NULL) {
+		sock = new TLSSocket(WiFi.getNetwork());
+	}
+	if (beforeConnect) {
+		beforeConnect();
+	}
+	sock->set_timeout(1000);
+	int ret = ((TLSSocket*)sock)->connect(host, port);
+	if (ret == 0) {
+		return 1;
+	} else {
+		return 0;
+	}
 }
 
 size_t arduino::WiFiClient::write(uint8_t c) {
@@ -61,7 +71,9 @@ size_t arduino::WiFiClient::write(const uint8_t *buf, size_t size) {
 }
 
 int arduino::WiFiClient::available() {
-	getStatus();
+	if (rxBuffer.available() == 0) {
+		getStatus();
+	}
     return rxBuffer.available();
 }
 

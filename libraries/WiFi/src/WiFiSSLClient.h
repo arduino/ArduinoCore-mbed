@@ -22,16 +22,26 @@
 
 #include "WiFiClient.h"
 
+extern const char CA_CERTIFICATES[];
+
 namespace arduino {
 
 class WiFiSSLClient : public arduino::WiFiClient {
 
 public:
-	WiFiSSLClient();
-	WiFiSSLClient(uint8_t sock);
+  WiFiSSLClient();
 
-	virtual int connect(IPAddress ip, uint16_t port);
-	virtual int connect(const char* host, uint16_t port);
+  int connect(IPAddress ip, uint16_t port) {
+    return connectSSL(ip, port);
+  }
+  int connect(const char* host, uint16_t port) {
+    return connectSSL(host, port);
+  }
+
+private:
+  int setRootCA() {
+    return ((TLSSocket*)sock)->set_root_ca_cert(CA_CERTIFICATES);
+  }
 };
 
 }

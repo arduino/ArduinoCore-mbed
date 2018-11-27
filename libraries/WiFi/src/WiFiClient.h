@@ -35,36 +35,43 @@ public:
   WiFiClient();
 
   uint8_t status();
-  virtual int connect(IPAddress ip, uint16_t port);
-  virtual int connect(const char *host, uint16_t port);
-  virtual int connectSSL(IPAddress ip, uint16_t port);
-  virtual int connectSSL(const char *host, uint16_t port);
-  virtual size_t write(uint8_t);
-  virtual size_t write(const uint8_t *buf, size_t size);
-  virtual int available();
-  virtual int read();
-  virtual int read(uint8_t *buf, size_t size);
-  virtual int peek();
-  virtual void flush();
-  virtual void stop();
-  virtual uint8_t connected();
-  virtual operator bool() {
+  int connect(IPAddress ip, uint16_t port);
+  int connect(const char *host, uint16_t port);
+  int connectSSL(IPAddress ip, uint16_t port);
+  int connectSSL(const char *host, uint16_t port);
+  size_t write(uint8_t);
+  size_t write(const uint8_t *buf, size_t size);
+  int available();
+  int read();
+  int read(uint8_t *buf, size_t size);
+  int peek();
+  void flush();
+  void stop();
+  uint8_t connected();
+  operator bool() {
     return sock != NULL;
   }
 
-  virtual IPAddress remoteIP();
-  virtual uint16_t remotePort();
+  IPAddress remoteIP();
+  uint16_t remotePort();
 
   friend class WiFiServer;
+  friend class WiFiSSLClient;
 
   using Print::write;
 
+protected:
+
+  void onBeforeConnect(mbed::Callback<int(void)> cb) {
+    beforeConnect = cb;
+  }
+
 private:
   static uint16_t _srcport;
-  TCPSocket* sock;
-  TLSSocket* sock_ssl;
+  Socket* sock;
   RingBufferN<256> rxBuffer;
   uint8_t _status;
+  mbed::Callback<int(void)> beforeConnect;
 
   void getStatus();
 };
