@@ -102,4 +102,4 @@ tools.openocd.cmd.windows=bin/openocd.exe
 
 tools.openocd.upload.params.verbose=-d2
 tools.openocd.upload.params.quiet=-d0
-tools.openocd.upload.pattern="{path}/{cmd}" {upload.verbose} -s "{path}/share/openocd/scripts/" {upload.config} -c "telnet_port disabled; init; reset init; halt; flash write_image erase {build.path}/{build.project_name}.elf; reset run; shutdown"
+tools.openocd.upload.pattern="{path}/{cmd}" {upload.verbose} -s "{path}/share/openocd/scripts/" {upload.config} -c "telnet_port disabled; init; reset init; halt; adapter_khz 10000; flash write_image erase {build.path}/{build.project_name}.elf; reset run; shutdown"
