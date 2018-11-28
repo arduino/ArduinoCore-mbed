@@ -103,7 +103,7 @@
 #include "platform/FunctionPointer.h"
 #include "platform/ScopedLock.h"
 
-using namespace mbed;
+//using namespace mbed;
 using namespace std;
 
 #endif
