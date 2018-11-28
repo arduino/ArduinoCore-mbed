@@ -25,7 +25,7 @@ public:
     virtual void end();
 
 private:
-    SPISettings settings;
+    SPISettings settings = SPISettings(0, MSBFIRST, SPI_MODE0);
     mbed::SPI* dev;
     int _miso;
     int _mosi;

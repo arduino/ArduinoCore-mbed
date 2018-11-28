@@ -48,7 +48,7 @@ void arduino::MbedSPI::detachInterrupt() {
 }
 
 void arduino::MbedSPI::begin() {
-    dev = new mbed::SPI((PinName)_miso, (PinName)_mosi, (PinName)_sck);
+    dev = new mbed::SPI((PinName)_mosi, (PinName)_miso, (PinName)_sck);
 }
 
 void arduino::MbedSPI::end() {
