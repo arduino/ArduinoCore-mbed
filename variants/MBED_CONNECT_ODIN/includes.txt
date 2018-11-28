@@ -232,7 +232,6 @@
 -I{build.core.path}/mbed/features
 -I{build.core.path}/mbed/events/equeue
 -I{build.core.path}/mbed/events
--I{build.core.path}/mbed/drivers
 -I{build.core.path}/mbed/components/wifi/esp8266-driver/ESP8266
 -I{build.core.path}/mbed/components/wifi/esp8266-driver
 -I{build.core.path}/mbed/components/wifi
