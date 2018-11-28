@@ -2,7 +2,7 @@
   wiring_digital.c - digital input and output functions
   Part of Arduino - http://www.arduino.cc/
 
-  Copyright (c) 2005-2006 David A. Mellis
+  Copyright (c) 2018 Arduino SA
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -23,7 +23,7 @@
 #include "Arduino.h"
 #include "pins_arduino.h"
 
-void pinMode(uint8_t pin, PinMode mode)
+void pinMode(pin_size_t pin, PinMode mode)
 {
   switch (mode) {
     case INPUT:
@@ -42,12 +42,12 @@ void pinMode(uint8_t pin, PinMode mode)
 }
 
 
-void digitalWrite(uint8_t pin, PinStatus val)
+void digitalWrite(pin_size_t pin, PinStatus val)
 {
 	mbed::DigitalOut((PinName)pin).write((int)val);
 }
 
-PinStatus digitalRead(uint8_t pin)
+PinStatus digitalRead(pin_size_t pin)
 {
 	return (PinStatus)mbed::DigitalIn((PinName)pin).read();
 }
