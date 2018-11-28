@@ -16,6 +16,7 @@
 #ifndef MBED_H
 #define MBED_H
 
+#include "mbed_config.h"
 #include "platform/mbed_version.h"
 
 #if MBED_CONF_RTOS_PRESENT

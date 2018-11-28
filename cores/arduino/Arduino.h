@@ -23,8 +23,6 @@
 // TEMP: include proper CMSIS
 inline void NVIC_SystemReset() {}
 
-#include "mbed_config.h"
-
 #ifdef __cplusplus
 #define PinMode MbedPinMode
 #include "mbed.h"
