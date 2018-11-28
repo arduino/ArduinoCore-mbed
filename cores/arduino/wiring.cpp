@@ -43,3 +43,7 @@ void delayMicroseconds(unsigned int us)
 
 void init()
 {}
+
+void yield() {
+  rtos::ThisThread::yield();
+}
