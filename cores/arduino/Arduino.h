@@ -50,6 +50,12 @@ extern "C"{
 #define NOT_A_PORT 255
 #define NOT_AN_INTERRUPT 255
 
+// undefine stdlib's abs if encountered
+#ifdef abs
+#undef abs
+#endif // abs
+#define abs(x) ((x)>0?(x):-(x))
+
 #ifdef __cplusplus
 } // extern "C"
 #endif
