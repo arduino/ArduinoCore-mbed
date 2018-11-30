@@ -50,7 +50,6 @@ uint8_t arduino::MbedI2C::endTransmission(void) {
 uint8_t arduino::MbedI2C::requestFrom(uint8_t address, size_t len, bool stopBit) {
 	char buf[256];
 	int ret = master->read(address << 1, buf, len, !stopBit);
-	Serial.println(ret);
 	if (ret != 0) {
 		return 0;
 	}
