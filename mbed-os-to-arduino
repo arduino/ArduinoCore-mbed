@@ -24,12 +24,18 @@ xargs -n 1 < ./BUILD/$BOARDNAME/GCC_ARM/.include* | sed -e 's#./mbed-os#{build.c
 arm-none-eabi-ar rcs BUILD/mbed-core-$BOARDNAME.a `xargs -n 1 < ./BUILD/$BOARDNAME/GCC_ARM/.link_options.txt | grep "\.o" | grep -v "main.o"`
 cp BUILD/mbed-core-$BOARDNAME.a $ARDUINOCORE/libs/libmbed.a
 cd mbed-os && find . | grep "\.h" | xargs -I % cp --parents % $ARDUINOCORE/../../cores/arduino/mbed
-#cd BUILD && find . | grep "\.h" | xargs -I % cp  % $ARDUINOCORE/../../cores/arduino/mbed
 cp ./BUILD/$BOARDNAME/GCC_ARM/.link_script.ld $ARDUINOCORE/linker_script.ld
 cp ./BUILD/$BOARDNAME/GCC_ARM/mbed_config.h $ARDUINOCORE/
 
 # add #include "mbed_config.h" in "mbed.h"
 
-# TODO: mbed_config? should be part of the variant?
-
 openocd -f interface/stlink-v2.cfg -f target/stm32f4x_stlink.cfg  -c "init"  -c "reset init" -c "halt" -c "flash write_image erase ./BUILD/$BOARDNAME/GCC_ARM/mbed-os-program.elf" -c "verify_image ./BUILD/$BOARDNAME/GCC_ARM/mbed-os-program.elf" -c "reset run" -c shutdown
+
+
+##################
+
+Using Arduino as an mbed library
+
+echo -e "arduino/cores/arduino/main.cpp\n arduino/cores/arduino/mbed/\narduino/libraries/" > .mbedignore
+#add ARDUINO_AS_MBED_LIBRARY=1 to macros section in mbed_app.json
+echo "https://github.com/arduino/ArduinoCore-mbed#bf6e64771ebe20285b0364756dff856ebbc679dc" > arduino.lib
