@@ -1,5 +1,6 @@
 /* mbed Microcontroller Library
  * Copyright (c) 2006-2017 ARM Limited
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -237,6 +238,9 @@ private:
 
     /** Release mutex */
     virtual void api_unlock(void);
+
+    /** Unbuffered write - invoked when write called from critical section */
+    ssize_t write_unbuffered(const char *buf_ptr, size_t length);
 
     /** Software serial buffers
      *  By default buffer size is 256 for TX and 256 for RX. Configurable through mbed_app.json

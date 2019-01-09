@@ -42,8 +42,14 @@ public:
      *  network interface.
      *
      *  @param stack    Network stack as target for socket
+     *
+     *  @deprecated since mbed-os-5.11
      */
     template <typename S>
+    MBED_DEPRECATED_SINCE("mbed-os-5.11",
+                          "The TCPSocket(S *stack) constructor is deprecated."
+                          "It discards the open() call return value."
+                          "Use another constructor and call open() explicitly, instead.")
     TCPSocket(S *stack)
     {
         open(stack);
@@ -158,9 +164,9 @@ public:
      *  The server socket must be bound and set to listen for connections.
      *  On a new connection, returns connected network socket which user is expected to call close()
      *  and that deallocates the resources. Referencing a returned pointer after a close()
-     *  call is not allowed and leads to undefined behaviour.
+     *  call is not allowed and leads to undefined behavior.
      *
-     *  By default, accept blocks until incomming connection occurs. If socket is set to
+     *  By default, accept blocks until incoming connection occurs. If socket is set to
      *  non-blocking or times out, error is set to NSAPI_ERROR_WOULD_BLOCK.
      *
      *  @param error      pointer to storage of the error value or NULL

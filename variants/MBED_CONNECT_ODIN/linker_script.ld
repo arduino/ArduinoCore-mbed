@@ -1,3 +1,4 @@
+M_CRASH_DATA_RAM_SIZE = 0x100;
 MEMORY
 {
   FLASH (rx) : ORIGIN = 0x08000000, LENGTH = 2048k
@@ -38,6 +39,17 @@ SECTIONS
     __exidx_end = .;
     __etext = .;
     _sidata = .;
+    .crash_data_ram :
+    {
+        . = ALIGN(8);
+        __CRASH_DATA_RAM__ = .;
+        __CRASH_DATA_RAM_START__ = .;
+        KEEP(*(.keep.crash_data_ram))
+        *(.m_crash_data_ram)
+        . += M_CRASH_DATA_RAM_SIZE;
+        . = ALIGN(8);
+        __CRASH_DATA_RAM_END__ = .;
+    } > RAM
     .data : AT (__etext)
     {
         __data_start__ = .;

@@ -22,7 +22,7 @@
 #ifndef MBED_FLASHIAP_H
 #define MBED_FLASHIAP_H
 
-#if defined (DEVICE_FLASH) || defined(DOXYGEN_ONLY)
+#if DEVICE_FLASH || defined(DOXYGEN_ONLY)
 
 #include "flash_api.h"
 #include "platform/SingletonPtr.h"
@@ -33,14 +33,18 @@
 // Export ROM end address
 #if defined(TOOLCHAIN_GCC_ARM)
 extern uint32_t __etext;
-#define FLASHIAP_ROM_END ((uint32_t) &__etext)
+extern uint32_t __data_start__;
+extern uint32_t __data_end__;
+#define FLASHIAP_APP_ROM_END_ADDR (((uint32_t) &__etext) + ((uint32_t) &__data_end__) - ((uint32_t) &__data_start__))
 #elif defined(TOOLCHAIN_ARM)
 extern uint32_t Load$$LR$$LR_IROM1$$Limit[];
-#define FLASHIAP_ROM_END ((uint32_t)Load$$LR$$LR_IROM1$$Limit)
+#define FLASHIAP_APP_ROM_END_ADDR ((uint32_t)Load$$LR$$LR_IROM1$$Limit)
 #elif defined(TOOLCHAIN_IAR)
 #pragma section=".rodata"
 #pragma section=".text"
-#define FLASHIAP_ROM_END (std::max((uint32_t) __section_end(".rodata"), (uint32_t) __section_end(".text")))
+#pragma section=".init_array"
+#define FLASHIAP_APP_ROM_END_ADDR std::max(std::max((uint32_t) __section_end(".rodata"), (uint32_t) __section_end(".text")), \
+                                  (uint32_t) __section_end(".init_array"))
 #endif
 
 namespace mbed {
@@ -131,6 +135,14 @@ public:
      */
     uint32_t get_page_size() const;
 
+    /** Get the flash erase value
+     *
+     *  Get the value we read after erase operation
+     *  @return flash erase value
+     */
+    uint8_t get_erase_value() const;
+
+#if !defined(DOXYGEN_ONLY)
 private:
 
     /* Check if address and size are aligned to a sector
@@ -144,6 +156,7 @@ private:
     flash_t _flash;
     uint8_t *_page_buf;
     static SingletonPtr<PlatformMutex> _mutex;
+#endif
 };
 
 } /* namespace mbed */

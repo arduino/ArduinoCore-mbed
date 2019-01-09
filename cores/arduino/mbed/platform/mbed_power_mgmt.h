@@ -7,6 +7,7 @@
 
 /* mbed Microcontroller Library
  * Copyright (c) 2006-2018 ARM Limited
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,8 +47,8 @@ extern "C" {
  *
  * # Defined behavior
  * * The lock is a counter
- * * The lock can be locked up to USHRT_MAX - Verified by ::test_lock_eq_ushrt_max and ::test_lock_gt_ushrt_max
- * * The lock has to be equally unlocked as locked - Verified by ::test_lone_unlock and ::test_lock_eq_ushrt_max
+ * * The lock can be locked up to USHRT_MAX - Verified by ::test_lock_eq_ushrt_max
+ * * The lock has to be equally unlocked as locked - Verified by ::test_lock_eq_ushrt_max
  * * The function sleep_manager_lock_deep_sleep_internal() locks the automatic deep mode selection - Verified by ::test_lock_unlock
  * * The function sleep_manager_unlock_deep_sleep_internal() unlocks the automatic deep mode selection - Verified by ::test_lock_unlock
  * * The function sleep_manager_sleep_auto() chooses the sleep or deep sleep modes based on the lock - Verified by ::test_sleep_auto
@@ -261,7 +262,7 @@ us_timestamp_t mbed_uptime(void);
  *
  * @note Does not affect the debug sub-system
  */
-static inline void system_reset(void)
+MBED_NORETURN static inline void system_reset(void)
 {
     NVIC_SystemReset();
 }

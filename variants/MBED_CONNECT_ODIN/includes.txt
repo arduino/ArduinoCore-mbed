@@ -14,7 +14,6 @@
 -I{build.core.path}/mbed/rtos/TARGET_CORTEX/rtx5/Include
 -I{build.core.path}/mbed/rtos/TARGET_CORTEX/rtx5
 -I{build.core.path}/mbed/rtos/TARGET_CORTEX/rtx4
--I{build.core.path}/mbed/rtos/TARGET_CORTEX/TARGET_CORTEX_M
 -I{build.core.path}/mbed/rtos/TARGET_CORTEX
 -I{build.core.path}/mbed/rtos
 -I{build.core.path}/mbed/platform
@@ -22,6 +21,13 @@
 -I{build.core.path}/mbed/hal
 -I{build.core.path}/mbed/features/storage/nvstore/source
 -I{build.core.path}/mbed/features/storage/nvstore
+-I{build.core.path}/mbed/features/storage/kvstore/tdbstore
+-I{build.core.path}/mbed/features/storage/kvstore/securestore
+-I{build.core.path}/mbed/features/storage/kvstore/kv_map
+-I{build.core.path}/mbed/features/storage/kvstore/global_api
+-I{build.core.path}/mbed/features/storage/kvstore/filesystemstore
+-I{build.core.path}/mbed/features/storage/kvstore/conf
+-I{build.core.path}/mbed/features/storage/kvstore
 -I{build.core.path}/mbed/features/storage/filesystem/littlefs/littlefs
 -I{build.core.path}/mbed/features/storage/filesystem/littlefs
 -I{build.core.path}/mbed/features/storage/filesystem/fat/ChaN
@@ -95,6 +101,7 @@
 -I{build.core.path}/mbed/features/nanostack/sal-stack-nanostack/source/MAC/virtual_rf
 -I{build.core.path}/mbed/features/nanostack/sal-stack-nanostack/source/MAC/IEEE802_15_4
 -I{build.core.path}/mbed/features/nanostack/sal-stack-nanostack/source/MAC
+-I{build.core.path}/mbed/features/nanostack/sal-stack-nanostack/source/DHCPv6_client
 -I{build.core.path}/mbed/features/nanostack/sal-stack-nanostack/source/DHCPv6_Server
 -I{build.core.path}/mbed/features/nanostack/sal-stack-nanostack/source/Core/include
 -I{build.core.path}/mbed/features/nanostack/sal-stack-nanostack/source/Core
@@ -133,6 +140,7 @@
 -I{build.core.path}/mbed/features/mbedtls/targets/TARGET_STM
 -I{build.core.path}/mbed/features/mbedtls/platform/inc
 -I{build.core.path}/mbed/features/mbedtls/platform
+-I{build.core.path}/mbed/features/mbedtls/inc/psa
 -I{build.core.path}/mbed/features/mbedtls/inc/mbedtls
 -I{build.core.path}/mbed/features/mbedtls/inc
 -I{build.core.path}/mbed/features/mbedtls
@@ -191,11 +199,11 @@
 -I{build.core.path}/mbed/features/cellular/framework/targets/GEMALTO/CINTERION
 -I{build.core.path}/mbed/features/cellular/framework/targets/GEMALTO
 -I{build.core.path}/mbed/features/cellular/framework/targets
+-I{build.core.path}/mbed/features/cellular/framework/device
 -I{build.core.path}/mbed/features/cellular/framework/common
 -I{build.core.path}/mbed/features/cellular/framework/AT
 -I{build.core.path}/mbed/features/cellular/framework/API
 -I{build.core.path}/mbed/features/cellular/framework
--I{build.core.path}/mbed/features/cellular/easy_cellular
 -I{build.core.path}/mbed/features/cellular
 -I{build.core.path}/mbed/features/FEATURE_BLE/targets/TARGET_CORDIO_ODIN_W2
 -I{build.core.path}/mbed/features/FEATURE_BLE/targets/TARGET_CORDIO/stack/mbed_os_adaptation
@@ -227,11 +235,14 @@
 -I{build.core.path}/mbed/features/FEATURE_BLE/ble/services
 -I{build.core.path}/mbed/features/FEATURE_BLE/ble/pal
 -I{build.core.path}/mbed/features/FEATURE_BLE/ble/generic
+-I{build.core.path}/mbed/features/FEATURE_BLE/ble/gap
+-I{build.core.path}/mbed/features/FEATURE_BLE/ble/common
 -I{build.core.path}/mbed/features/FEATURE_BLE/ble
 -I{build.core.path}/mbed/features/FEATURE_BLE
 -I{build.core.path}/mbed/features
 -I{build.core.path}/mbed/events/equeue
 -I{build.core.path}/mbed/events
+-I{build.core.path}/mbed/drivers
 -I{build.core.path}/mbed/components/wifi/esp8266-driver/ESP8266
 -I{build.core.path}/mbed/components/wifi/esp8266-driver
 -I{build.core.path}/mbed/components/wifi

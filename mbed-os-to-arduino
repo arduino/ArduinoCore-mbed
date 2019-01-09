@@ -10,13 +10,14 @@ echo -e "{\n\"macros\": [\n\"MBED_HEAP_STATS_ENABLED=1\",\n\"MBED_STACK_STATS_EN
 
 mbed compile -v | grep "Macros:" > $BOARDNAME.macros.txt
 cat $BOARDNAME.macros.txt | cut -f2 -d":" > $ARDUINOCORE/defines.txt
+echo " -DMBED_NO_GLOBAL_USING_DIRECTIVE=1" >> $ARDUINOCORE/defines.txt
 xargs -n 1 < ./BUILD/$BOARDNAME/GCC_ARM/.include* | sed -e 's#./mbed-os#{build.core.path}/mbed#g' | sed -e 's#-I/.*$##' | tac  > $ARDUINOCORE/includes.txt
 
 #TODO: remove -MDD from flags
 
-gron ./BUILD/$BOARDNAME/GCC_ARM/.profile-c | grep json.flags | cut -f2 -d"\"" > $ARDUINOCORE/cflags.txt
-gron ./BUILD/$BOARDNAME/GCC_ARM/.profile-cxx | grep json.flags | cut -f2 -d"\"" > $ARDUINOCORE/cxxflags.txt
-gron ./BUILD/$BOARDNAME/GCC_ARM/.profile-ld | grep json.flags | cut -f2 -d"\"" > $ARDUINOCORE/ldflags.txt
+./gron ./BUILD/$BOARDNAME/GCC_ARM/.profile-c | grep json.flags | cut -f2 -d"\"" > $ARDUINOCORE/cflags.txt
+./gron ./BUILD/$BOARDNAME/GCC_ARM/.profile-cxx | grep json.flags | cut -f2 -d"\"" > $ARDUINOCORE/cxxflags.txt
+./gron ./BUILD/$BOARDNAME/GCC_ARM/.profile-ld | grep json.flags | cut -f2 -d"\"" > $ARDUINOCORE/ldflags.txt
 
 #TODO: sanitize gron output (or move to python)
 
@@ -25,6 +26,9 @@ cp BUILD/mbed-core-$BOARDNAME.a $ARDUINOCORE/libs/libmbed.a
 cd mbed-os && find . | grep "\.h" | xargs -I % cp --parents % $ARDUINOCORE/../../cores/arduino/mbed
 #cd BUILD && find . | grep "\.h" | xargs -I % cp  % $ARDUINOCORE/../../cores/arduino/mbed
 cp ./BUILD/$BOARDNAME/GCC_ARM/.link_script.ld $ARDUINOCORE/linker_script.ld
+cp ./BUILD/$BOARDNAME/GCC_ARM/mbed_config.h $ARDUINOCORE/
+
+# add #include "mbed_config.h" in "mbed.h"
 
 # TODO: mbed_config? should be part of the variant?
 

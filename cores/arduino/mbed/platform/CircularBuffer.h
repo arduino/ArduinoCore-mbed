@@ -1,5 +1,6 @@
 /* mbed Microcontroller Library
  * Copyright (c) 2015 ARM Limited
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,7 +99,7 @@ public:
         }
         _pool[_head++] = data;
         if (_head == BufferSize) {
-                _head = 0;
+            _head = 0;
         }
         if (_head == _tail) {
             _full = true;

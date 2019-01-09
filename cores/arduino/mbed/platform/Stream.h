@@ -1,5 +1,6 @@
 /* mbed Microcontroller Library
  * Copyright (c) 2006-2013 ARM Limited
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +21,7 @@
 #include "platform/FileLike.h"
 #include "platform/FileHandle.h"
 #include "platform/NonCopyable.h"
+#include "mbed_toolchain.h"
 #include <cstdio>
 #include <cstdarg>
 
@@ -32,8 +34,6 @@ namespace mbed {
  */
 
 extern void mbed_set_unbuffered_stream(std::FILE *_file);
-extern int mbed_getc(std::FILE *_file);
-extern char *mbed_gets(char *s, int size, std::FILE *_file);
 
 /** File stream
  *
@@ -49,10 +49,10 @@ public:
     int puts(const char *s);
     int getc();
     char *gets(char *s, int size);
-    int printf(const char *format, ...);
-    int scanf(const char *format, ...);
-    int vprintf(const char *format, std::va_list args);
-    int vscanf(const char *format, std::va_list args);
+    int printf(const char *format, ...) MBED_PRINTF_METHOD(1, 2);
+    int scanf(const char *format, ...) MBED_SCANF_METHOD(1, 2);
+    int vprintf(const char *format, std::va_list args) MBED_PRINTF_METHOD(1, 0);
+    int vscanf(const char *format, std::va_list args) MBED_SCANF_METHOD(1, 0);
 
     operator std::FILE *()
     {

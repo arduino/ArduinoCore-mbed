@@ -24,7 +24,14 @@
 class NetworkStackstub : public NetworkStack {
 public:
     std::list<nsapi_error_t> return_values;
-    nsapi_error_t return_value = 0;
+    nsapi_error_t return_value;
+    SocketAddress return_socketAddress;
+
+    NetworkStackstub()
+    {
+        return_value = 0;
+    }
+
     virtual const char *get_ip_address()
     {
         return "127.0.0.1";
@@ -47,10 +54,9 @@ public:
 protected:
     virtual nsapi_error_t socket_open(nsapi_socket_t *handle, nsapi_protocol_t proto)
     {
-        if (return_value == NSAPI_ERROR_OK && return_values.front() == NSAPI_ERROR_OK)
-        {
+        if (return_value == NSAPI_ERROR_OK && return_values.front() == NSAPI_ERROR_OK) {
             // Make sure a non-NULL value is returned if error is not expected
-            *handle = reinterpret_cast<nsapi_socket_t*>(1234);
+            *handle = reinterpret_cast<nsapi_socket_t *>(1234);
         }
         return return_value;
     };
@@ -68,8 +74,7 @@ protected:
     };
     virtual nsapi_error_t socket_connect(nsapi_socket_t handle, const SocketAddress &address)
     {
-        if (!return_values.empty())
-        {
+        if (!return_values.empty()) {
             nsapi_error_t ret = return_values.front();
             return_values.pop_front();
             return ret;
@@ -84,8 +89,7 @@ protected:
     virtual nsapi_size_or_error_t socket_send(nsapi_socket_t handle,
                                               const void *data, nsapi_size_t size)
     {
-        if (!return_values.empty())
-        {
+        if (!return_values.empty()) {
             nsapi_error_t ret = return_values.front();
             return_values.pop_front();
             return ret;
@@ -95,8 +99,7 @@ protected:
     virtual nsapi_size_or_error_t socket_recv(nsapi_socket_t handle,
                                               void *data, nsapi_size_t size)
     {
-        if (!return_values.empty())
-        {
+        if (!return_values.empty()) {
             nsapi_error_t ret = return_values.front();
             return_values.pop_front();
             return ret;
@@ -111,8 +114,10 @@ protected:
     virtual nsapi_size_or_error_t socket_recvfrom(nsapi_socket_t handle, SocketAddress *address,
                                                   void *buffer, nsapi_size_t size)
     {
-        if (!return_values.empty())
-        {
+        if (return_socketAddress != SocketAddress()) {
+            *address = return_socketAddress;
+        }
+        if (!return_values.empty()) {
             nsapi_error_t ret = return_values.front();
             return_values.pop_front();
             return ret;
