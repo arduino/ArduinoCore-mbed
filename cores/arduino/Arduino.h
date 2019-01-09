@@ -20,19 +20,28 @@
 #ifndef Arduino_h
 #define Arduino_h
 
-// TEMP: include proper CMSIS
-inline void NVIC_SystemReset() {}
-
-#ifdef __cplusplus
+#if defined(__cplusplus)
+#if !defined(ARDUINO_AS_MBED_LIBRARY)
 #define PinMode MbedPinMode
+#endif
 #include "mbed.h"
 #undef PinMode
 #endif
 
+#if defined(ARDUINO_AS_MBED_LIBRARY)
+#define PinMode ArduinoPinMode
+#endif
+
 #include "api/ArduinoAPI.h"
 
-#ifdef __cplusplus
+#if defined(ARDUINO_AS_MBED_LIBRARY)
+#undef PinMode
+#endif
+
+#if defined(__cplusplus)
+#if !defined(ARDUINO_AS_MBED_LIBRARY)
 using namespace arduino;
+#endif
 extern "C"{
 #endif
 
