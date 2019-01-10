@@ -27,6 +27,8 @@
 //#define __packed __attribute__ ((__packed__))
 //#endif
 
+namespace mbed {
+
 class USBHAL {
 public:
     /* Configuration */
@@ -140,4 +142,6 @@ private:
 
 
 };
+
+}
 #endif

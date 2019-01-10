@@ -94,6 +94,9 @@ enum FUNCTION_KEY {
  *
  * @endcode
  */
+
+namespace mbed {
+
 class USBKeyboard: public USBHID, public Stream {
 public:
 
@@ -186,4 +189,5 @@ private:
 
 };
 
+}
 #endif

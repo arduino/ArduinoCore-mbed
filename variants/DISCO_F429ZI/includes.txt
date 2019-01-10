@@ -1,3 +1,11 @@
+-I{build.core.path}/mbed/features/unsupported/USBDevice/targets/TARGET_STM
+-I{build.core.path}/mbed/features/unsupported/USBDevice/USBSerial
+-I{build.core.path}/mbed/features/unsupported/USBDevice/USBMSD
+-I{build.core.path}/mbed/features/unsupported/USBDevice/USBMIDI
+-I{build.core.path}/mbed/features/unsupported/USBDevice/USBHID
+-I{build.core.path}/mbed/features/unsupported/USBDevice/USBDevice
+-I{build.core.path}/mbed/features/unsupported/USBDevice/USBAudio
+-I{build.core.path}/mbed/features/unsupported/USBDevice
 -I{build.core.path}/mbed/targets/TARGET_STM/TARGET_STM32F4/device
 -I{build.core.path}/mbed/targets/TARGET_STM/TARGET_STM32F4/TARGET_STM32F429xI/device
 -I{build.core.path}/mbed/targets/TARGET_STM/TARGET_STM32F4/TARGET_STM32F429xI/TARGET_DISCO_F429ZI

@@ -104,6 +104,9 @@ enum MOUSE_TYPE
  *
  * @endcode
  */
+
+namespace mbed {
+
 class USBMouse: public USBHID
 {
     public:
@@ -207,4 +210,5 @@ class USBMouse: public USBHID
         bool mouseSend(int8_t x, int8_t y, uint8_t buttons, int8_t z);
 };
 
+}
 #endif

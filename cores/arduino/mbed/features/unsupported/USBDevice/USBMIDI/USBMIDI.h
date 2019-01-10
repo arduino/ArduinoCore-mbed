@@ -50,6 +50,9 @@
 * }
 * @endcode
 */
+
+namespace mbed {
+
 class USBMIDI: public USBDevice {
 public:
 
@@ -109,4 +112,5 @@ private:
     void (*midi_evt)(MIDIMessage);
 };
 
+}
 #endif

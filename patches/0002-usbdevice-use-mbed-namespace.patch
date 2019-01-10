@@ -1,0 +1,375 @@
+From 20d346c83604f5ab76bbafc4069a4077c5efe15e Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Thu, 10 Jan 2019 18:47:20 +0100
+Subject: [PATCH] usbdevice: use mbed namespace
+
+---
+ features/unsupported/USBDevice/USBAudio/USBAudio.cpp       | 2 +-
+ features/unsupported/USBDevice/USBAudio/USBAudio.h         | 3 +++
+ features/unsupported/USBDevice/USBDevice/USBDevice.cpp     | 1 +
+ features/unsupported/USBDevice/USBDevice/USBDevice.h       | 4 +++-
+ features/unsupported/USBDevice/USBDevice/USBHAL.h          | 4 ++++
+ features/unsupported/USBDevice/USBHID/USBHID.cpp           | 1 +
+ features/unsupported/USBDevice/USBHID/USBHID.h             | 3 +++
+ features/unsupported/USBDevice/USBHID/USBKeyboard.cpp      | 1 +
+ features/unsupported/USBDevice/USBHID/USBKeyboard.h        | 4 ++++
+ features/unsupported/USBDevice/USBHID/USBMouse.cpp         | 2 ++
+ features/unsupported/USBDevice/USBHID/USBMouse.h           | 4 ++++
+ features/unsupported/USBDevice/USBHID/USBMouseKeyboard.cpp | 2 ++
+ features/unsupported/USBDevice/USBHID/USBMouseKeyboard.h   | 4 ++++
+ features/unsupported/USBDevice/USBMIDI/USBMIDI.cpp         | 1 +
+ features/unsupported/USBDevice/USBMIDI/USBMIDI.h           | 4 ++++
+ features/unsupported/USBDevice/USBMSD/USBMSD.cpp           | 2 ++
+ features/unsupported/USBDevice/USBMSD/USBMSD.h             | 4 ++++
+ features/unsupported/USBDevice/USBSerial/USBCDC.cpp        | 2 ++
+ features/unsupported/USBDevice/USBSerial/USBCDC.h          | 4 +++-
+ features/unsupported/USBDevice/USBSerial/USBSerial.cpp     | 2 ++
+ features/unsupported/USBDevice/USBSerial/USBSerial.h       | 3 +++
+ 21 files changed, 54 insertions(+), 3 deletions(-)
+
+diff --git a/features/unsupported/USBDevice/USBAudio/USBAudio.cpp b/features/unsupported/USBDevice/USBAudio/USBAudio.cpp
+index ce1f70c25..538580d36 100644
+--- a/features/unsupported/USBDevice/USBAudio/USBAudio.cpp
++++ b/features/unsupported/USBDevice/USBAudio/USBAudio.cpp
+@@ -20,7 +20,7 @@
+ #include "USBAudio.h"
+ #include "USBAudio_Types.h"
+ 
+-
++using namespace mbed;
+ 
+ USBAudio::USBAudio(uint32_t frequency_in, uint8_t channel_nb_in, uint32_t frequency_out, uint8_t channel_nb_out, uint16_t vendor_id, uint16_t product_id, uint16_t product_release): USBDevice(vendor_id, product_id, product_release) {
+     mute = 0;
+diff --git a/features/unsupported/USBDevice/USBAudio/USBAudio.h b/features/unsupported/USBDevice/USBAudio/USBAudio.h
+index e72f42e55..ef388a600 100644
+--- a/features/unsupported/USBDevice/USBAudio/USBAudio.h
++++ b/features/unsupported/USBDevice/USBAudio/USBAudio.h
+@@ -66,6 +66,8 @@
+ * }
+ * @endcode
+ */
++namespace mbed {
++
+ class USBAudio: public USBDevice {
+ public:
+ 
+@@ -385,4 +387,5 @@ private:
+ 
+ };
+ 
++}
+ #endif
+diff --git a/features/unsupported/USBDevice/USBDevice/USBDevice.cpp b/features/unsupported/USBDevice/USBDevice/USBDevice.cpp
+index 438174fe2..0f29b4e0b 100644
+--- a/features/unsupported/USBDevice/USBDevice/USBDevice.cpp
++++ b/features/unsupported/USBDevice/USBDevice/USBDevice.cpp
+@@ -23,6 +23,7 @@
+ #include "USBDescriptor.h"
+ 
+ //#define DEBUG
++using namespace mbed;
+ 
+ /* Device status */
+ #define DEVICE_STATUS_SELF_POWERED  (1U<<0)
+diff --git a/features/unsupported/USBDevice/USBDevice/USBDevice.h b/features/unsupported/USBDevice/USBDevice/USBDevice.h
+index 60a280ed6..f220384c2 100644
+--- a/features/unsupported/USBDevice/USBDevice/USBDevice.h
++++ b/features/unsupported/USBDevice/USBDevice/USBDevice.h
+@@ -23,6 +23,8 @@
+ #include "USBDevice_Types.h"
+ #include "USBHAL.h"
+ 
++namespace mbed {
++
+ class USBDevice: public USBHAL
+ {
+ public:
+@@ -268,5 +270,5 @@ private:
+     uint8_t currentAlternate;
+ };
+ 
+-
++}
+ #endif
+diff --git a/features/unsupported/USBDevice/USBDevice/USBHAL.h b/features/unsupported/USBDevice/USBDevice/USBHAL.h
+index 55ae2e646..864dd8ae6 100644
+--- a/features/unsupported/USBDevice/USBDevice/USBHAL.h
++++ b/features/unsupported/USBDevice/USBDevice/USBHAL.h
+@@ -27,6 +27,8 @@
+ //#define __packed __attribute__ ((__packed__))
+ //#endif
+ 
++namespace mbed {
++
+ class USBHAL {
+ public:
+     /* Configuration */
+@@ -140,4 +142,6 @@ private:
+ 
+ 
+ };
++
++}
+ #endif
+diff --git a/features/unsupported/USBDevice/USBHID/USBHID.cpp b/features/unsupported/USBDevice/USBHID/USBHID.cpp
+index da5059ed1..18e55ab5e 100644
+--- a/features/unsupported/USBDevice/USBHID/USBHID.cpp
++++ b/features/unsupported/USBDevice/USBHID/USBHID.cpp
+@@ -20,6 +20,7 @@
+ #include "USBHAL.h"
+ #include "USBHID.h"
+ 
++using namespace mbed;
+ 
+ USBHID::USBHID(uint8_t output_report_length, uint8_t input_report_length, uint16_t vendor_id, uint16_t product_id, uint16_t product_release, bool connect): USBDevice(vendor_id, product_id, product_release)
+ {
+diff --git a/features/unsupported/USBDevice/USBHID/USBHID.h b/features/unsupported/USBDevice/USBHID/USBHID.h
+index 0178283cc..ec270e247 100644
+--- a/features/unsupported/USBDevice/USBHID/USBHID.h
++++ b/features/unsupported/USBDevice/USBHID/USBHID.h
+@@ -47,6 +47,8 @@
+  * @endcode
+  */
+ 
++namespace mbed {
++
+ class USBHID: public USBDevice {
+ public:
+ 
+@@ -171,4 +173,5 @@ private:
+     uint8_t input_length;
+ };
+ 
++}
+ #endif
+diff --git a/features/unsupported/USBDevice/USBHID/USBKeyboard.cpp b/features/unsupported/USBDevice/USBHID/USBKeyboard.cpp
+index 900f97d08..b1e23316b 100644
+--- a/features/unsupported/USBDevice/USBHID/USBKeyboard.cpp
++++ b/features/unsupported/USBDevice/USBHID/USBKeyboard.cpp
+@@ -23,6 +23,7 @@
+ #define REPORT_ID_KEYBOARD 1
+ #define REPORT_ID_VOLUME   3
+ 
++using namespace mbed;
+ 
+ typedef struct {
+     unsigned char usage;
+diff --git a/features/unsupported/USBDevice/USBHID/USBKeyboard.h b/features/unsupported/USBDevice/USBHID/USBKeyboard.h
+index e88f637fc..812b79c22 100644
+--- a/features/unsupported/USBDevice/USBHID/USBKeyboard.h
++++ b/features/unsupported/USBDevice/USBHID/USBKeyboard.h
+@@ -94,6 +94,9 @@ enum FUNCTION_KEY {
+  *
+  * @endcode
+  */
++
++namespace mbed {
++
+ class USBKeyboard: public USBHID, public Stream {
+ public:
+ 
+@@ -186,4 +189,5 @@ private:
+ 
+ };
+ 
++}
+ #endif
+diff --git a/features/unsupported/USBDevice/USBHID/USBMouse.cpp b/features/unsupported/USBDevice/USBHID/USBMouse.cpp
+index e7dfb6cda..a265d95c3 100644
+--- a/features/unsupported/USBDevice/USBHID/USBMouse.cpp
++++ b/features/unsupported/USBDevice/USBHID/USBMouse.cpp
+@@ -19,6 +19,8 @@
+ #include "stdint.h"
+ #include "USBMouse.h"
+ 
++using namespace mbed;
++
+ bool USBMouse::update(int16_t x, int16_t y, uint8_t button, int8_t z) {
+     switch (mouse_type) {
+         case REL_MOUSE:
+diff --git a/features/unsupported/USBDevice/USBHID/USBMouse.h b/features/unsupported/USBDevice/USBHID/USBMouse.h
+index 9371b0e85..527fcab47 100644
+--- a/features/unsupported/USBDevice/USBHID/USBMouse.h
++++ b/features/unsupported/USBDevice/USBHID/USBMouse.h
+@@ -104,6 +104,9 @@ enum MOUSE_TYPE
+  *
+  * @endcode
+  */
++
++namespace mbed {
++
+ class USBMouse: public USBHID
+ {
+     public:
+@@ -207,4 +210,5 @@ class USBMouse: public USBHID
+         bool mouseSend(int8_t x, int8_t y, uint8_t buttons, int8_t z);
+ };
+ 
++}
+ #endif
+diff --git a/features/unsupported/USBDevice/USBHID/USBMouseKeyboard.cpp b/features/unsupported/USBDevice/USBHID/USBMouseKeyboard.cpp
+index 5c544a80b..55ada745b 100644
+--- a/features/unsupported/USBDevice/USBHID/USBMouseKeyboard.cpp
++++ b/features/unsupported/USBDevice/USBHID/USBMouseKeyboard.cpp
+@@ -19,6 +19,8 @@
+ #include "stdint.h"
+ #include "USBMouseKeyboard.h"
+ 
++using namespace mbed;
++
+ typedef struct {
+     unsigned char usage;
+     unsigned char modifier;
+diff --git a/features/unsupported/USBDevice/USBHID/USBMouseKeyboard.h b/features/unsupported/USBDevice/USBHID/USBMouseKeyboard.h
+index fb2bbc6d9..de2d7a304 100644
+--- a/features/unsupported/USBDevice/USBHID/USBMouseKeyboard.h
++++ b/features/unsupported/USBDevice/USBHID/USBMouseKeyboard.h
+@@ -67,6 +67,9 @@
+  * }
+  * @endcode
+  */
++
++namespace mbed {
++
+ class USBMouseKeyboard: public USBHID, public Stream
+ {
+     public:
+@@ -217,4 +220,5 @@ class USBMouseKeyboard: public USBHID, public Stream
+         virtual int _getc() { return -1;}
+ };
+ 
++}
+ #endif
+diff --git a/features/unsupported/USBDevice/USBMIDI/USBMIDI.cpp b/features/unsupported/USBDevice/USBMIDI/USBMIDI.cpp
+index fb37d3d1d..f3db51454 100644
+--- a/features/unsupported/USBDevice/USBMIDI/USBMIDI.cpp
++++ b/features/unsupported/USBDevice/USBMIDI/USBMIDI.cpp
+@@ -19,6 +19,7 @@
+ #include "stdint.h"
+ #include "USBMIDI.h"
+ 
++using namespace mbed;
+ 
+ USBMIDI::USBMIDI(uint16_t vendor_id, uint16_t product_id, uint16_t product_release)
+  : USBDevice(vendor_id, product_id, product_release), cur_data(0), data_end(true)
+diff --git a/features/unsupported/USBDevice/USBMIDI/USBMIDI.h b/features/unsupported/USBDevice/USBMIDI/USBMIDI.h
+index c69cae14c..a89a7ebc4 100644
+--- a/features/unsupported/USBDevice/USBMIDI/USBMIDI.h
++++ b/features/unsupported/USBDevice/USBMIDI/USBMIDI.h
+@@ -50,6 +50,9 @@
+ * }
+ * @endcode
+ */
++
++namespace mbed {
++
+ class USBMIDI: public USBDevice {
+ public:
+ 
+@@ -109,4 +112,5 @@ private:
+     void (*midi_evt)(MIDIMessage);
+ };
+ 
++}
+ #endif
+diff --git a/features/unsupported/USBDevice/USBMSD/USBMSD.cpp b/features/unsupported/USBDevice/USBMSD/USBMSD.cpp
+index 21d50f9b9..c8b910e9c 100644
+--- a/features/unsupported/USBDevice/USBMSD/USBMSD.cpp
++++ b/features/unsupported/USBDevice/USBMSD/USBMSD.cpp
+@@ -55,6 +55,8 @@
+ // max packet size
+ #define MAX_PACKET  MAX_PACKET_SIZE_EPBULK
+ 
++using namespace mbed;
++
+ // CSW Status
+ enum Status {
+     CSW_PASSED,
+diff --git a/features/unsupported/USBDevice/USBMSD/USBMSD.h b/features/unsupported/USBDevice/USBMSD/USBMSD.h
+index 8d83c1a85..96b868b79 100644
+--- a/features/unsupported/USBDevice/USBMSD/USBMSD.h
++++ b/features/unsupported/USBDevice/USBMSD/USBMSD.h
+@@ -55,6 +55,9 @@
+  * If disk_status() returns 1 (disk not initialized), then disk_initialize() is called. After this step, connect() will collect information
+  * such as the number of blocks and the memory size.
+  */
++
++namespace mbed {
++
+ class USBMSD: public USBDevice {
+ public:
+ 
+@@ -248,4 +251,5 @@ private:
+     void fail();
+ };
+ 
++}
+ #endif
+diff --git a/features/unsupported/USBDevice/USBSerial/USBCDC.cpp b/features/unsupported/USBDevice/USBSerial/USBCDC.cpp
+index ce48d3215..afca199b9 100644
+--- a/features/unsupported/USBDevice/USBSerial/USBCDC.cpp
++++ b/features/unsupported/USBDevice/USBSerial/USBCDC.cpp
+@@ -19,6 +19,8 @@
+ #include "stdint.h"
+ #include "USBCDC.h"
+ 
++using namespace mbed;
++
+ static uint8_t cdc_line_coding[7]= {0x80, 0x25, 0x00, 0x00, 0x00, 0x00, 0x08};
+ 
+ #define DEFAULT_CONFIGURATION (1)
+diff --git a/features/unsupported/USBDevice/USBSerial/USBCDC.h b/features/unsupported/USBDevice/USBSerial/USBCDC.h
+index 3cd3785d7..fc11382e7 100644
+--- a/features/unsupported/USBDevice/USBSerial/USBCDC.h
++++ b/features/unsupported/USBDevice/USBSerial/USBCDC.h
+@@ -26,6 +26,8 @@
+ 
+ #include "USBDevice.h"
+ 
++namespace mbed {
++
+ class USBCDC: public USBDevice {
+ public:
+ 
+@@ -130,5 +132,5 @@ protected:
+     volatile bool terminal_connected;
+ 
+ };
+-
++}
+ #endif
+diff --git a/features/unsupported/USBDevice/USBSerial/USBSerial.cpp b/features/unsupported/USBDevice/USBSerial/USBSerial.cpp
+index e0906f336..bf55aa1d9 100644
+--- a/features/unsupported/USBDevice/USBSerial/USBSerial.cpp
++++ b/features/unsupported/USBDevice/USBSerial/USBSerial.cpp
+@@ -19,6 +19,8 @@
+ #include "stdint.h"
+ #include "USBSerial.h"
+ 
++using namespace mbed;
++
+ int USBSerial::_putc(int c) {
+     if (!terminal_connected)
+         return 0;
+diff --git a/features/unsupported/USBDevice/USBSerial/USBSerial.h b/features/unsupported/USBDevice/USBSerial/USBSerial.h
+index 69ed61abf..fad7452a5 100644
+--- a/features/unsupported/USBDevice/USBSerial/USBSerial.h
++++ b/features/unsupported/USBDevice/USBSerial/USBSerial.h
+@@ -44,6 +44,8 @@
+ * }
+ * @endcode
+ */
++namespace mbed {
++
+ class USBSerial: public USBCDC, public Stream {
+ public:
+ 
+@@ -174,4 +176,5 @@ private:
+     void (*settingsChangedCallback)(int baud, int bits, int parity, int stop);
+ };
+ 
++}
+ #endif
+-- 
+2.20.0
+

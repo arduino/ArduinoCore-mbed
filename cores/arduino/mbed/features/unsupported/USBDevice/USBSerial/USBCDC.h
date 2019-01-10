@@ -26,6 +26,8 @@
 
 #include "USBDevice.h"
 
+namespace mbed {
+
 class USBCDC: public USBDevice {
 public:
 
@@ -130,5 +132,5 @@ protected:
     volatile bool terminal_connected;
 
 };
-
+}
 #endif

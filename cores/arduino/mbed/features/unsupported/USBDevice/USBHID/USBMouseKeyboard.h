@@ -67,6 +67,9 @@
  * }
  * @endcode
  */
+
+namespace mbed {
+
 class USBMouseKeyboard: public USBHID, public Stream
 {
     public:
@@ -217,4 +220,5 @@ class USBMouseKeyboard: public USBHID, public Stream
         virtual int _getc() { return -1;}
 };
 
+}
 #endif
