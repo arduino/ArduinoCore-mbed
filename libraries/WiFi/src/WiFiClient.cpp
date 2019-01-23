@@ -48,7 +48,8 @@ int arduino::WiFiClient::connectSSL(IPAddress ip, uint16_t port) {
 
 int arduino::WiFiClient::connectSSL(const char *host, uint16_t port) {
 	if (sock == NULL) {
-		sock = new TLSSocket(WiFi.getNetwork());
+		sock = new TLSSocket();
+		((TLSSocket*)sock)->open(WiFi.getNetwork());
 	}
 	if (beforeConnect) {
 		beforeConnect();
