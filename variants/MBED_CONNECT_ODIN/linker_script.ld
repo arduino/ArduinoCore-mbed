@@ -1,4 +1,5 @@
 M_CRASH_DATA_RAM_SIZE = 0x100;
+STACK_SIZE = 1024;
 MEMORY
 {
   FLASH (rx) : ORIGIN = 0x08000000, LENGTH = 2048k
@@ -99,7 +100,7 @@ SECTIONS
     } > RAM
     __StackTop = ORIGIN(RAM) + LENGTH(RAM);
     _estack = __StackTop;
-    __StackLimit = __StackTop - SIZEOF(.stack_dummy);
+    __StackLimit = __StackTop - STACK_SIZE;
     PROVIDE(__stack = __StackTop);
     ASSERT(__StackLimit >= __HeapLimit, "region RAM overflowed with stack")
 }

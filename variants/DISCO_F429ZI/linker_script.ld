@@ -1,3 +1,4 @@
+STACK_SIZE = 1024;
 M_CRASH_DATA_RAM_SIZE = 0x100;
 MEMORY
 {
@@ -99,7 +100,7 @@ SECTIONS
     } > RAM
     __StackTop = ORIGIN(RAM) + LENGTH(RAM);
     _estack = __StackTop;
-    __StackLimit = __StackTop - SIZEOF(.stack_dummy);
+    __StackLimit = __StackTop - STACK_SIZE;
     PROVIDE(__stack = __StackTop);
     ASSERT(__StackLimit >= __HeapLimit, "region RAM overflowed with stack")
 }
