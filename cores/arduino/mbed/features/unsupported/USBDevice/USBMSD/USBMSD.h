@@ -55,9 +55,6 @@
  * If disk_status() returns 1 (disk not initialized), then disk_initialize() is called. After this step, connect() will collect information
  * such as the number of blocks and the memory size.
  */
-
-namespace mbed {
-
 class USBMSD: public USBDevice {
 public:
 
@@ -251,5 +248,4 @@ private:
     void fail();
 };
 
-}
 #endif

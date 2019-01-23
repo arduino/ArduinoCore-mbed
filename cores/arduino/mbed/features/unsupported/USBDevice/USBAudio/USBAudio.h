@@ -66,8 +66,6 @@
 * }
 * @endcode
 */
-namespace mbed {
-
 class USBAudio: public USBDevice {
 public:
 
@@ -387,5 +385,4 @@ private:
 
 };
 
-}
 #endif

@@ -47,8 +47,6 @@
  * @endcode
  */
 
-namespace mbed {
-
 class USBHID: public USBDevice {
 public:
 
@@ -173,5 +171,4 @@ private:
     uint8_t input_length;
 };
 
-}
 #endif

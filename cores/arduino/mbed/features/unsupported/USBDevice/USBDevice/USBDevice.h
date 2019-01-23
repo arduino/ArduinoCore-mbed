@@ -23,8 +23,6 @@
 #include "USBDevice_Types.h"
 #include "USBHAL.h"
 
-namespace mbed {
-
 class USBDevice: public USBHAL
 {
 public:
@@ -270,5 +268,5 @@ private:
     uint8_t currentAlternate;
 };
 
-}
+
 #endif

@@ -18,7 +18,7 @@
 #define ODIN_WIFI_INTERFACE_H
 
 #include "WiFiInterface.h"
-#ifdef DEVICE_WIFI_AP
+#if DEVICE_WIFI_AP
 #include "UbloxWiFiSoftAPInterface.h"
 #endif
 
@@ -46,7 +46,7 @@ struct wlan_scan_indication_s;
 /** OdinWiFiInterface class
  *  Implementation of the WiFiInterface for the ODIN-W2 module
  */
-#ifdef DEVICE_WIFI_AP
+#if DEVICE_WIFI_AP
 class OdinWiFiInterface : public WiFiInterface, public UbloxWiFiSoftAPInterface, public EMACInterface
 #else
 class OdinWiFiInterface : public WiFiInterface, public EMACInterface
@@ -141,7 +141,7 @@ public:
      */
     virtual nsapi_error_t set_timeout(int ms);
 
-#ifdef DEVICE_WIFI_AP
+#if DEVICE_WIFI_AP
 
     /** Set IP config for access point
          *
@@ -367,13 +367,13 @@ private:
 
     friend struct wlan_callb_s;
 
-    Mutex                               _mutex;
-    Queue<odin_wifi_msg_s, 6>           _in_queue;
-    Queue<odin_wifi_msg_s, 1>           _out_queue;
-    Queue<odin_wifi_msg_s, 1>           _cache_queue;
-    MemoryPool<odin_wifi_msg_s, 7>      *_msg_pool;
-    Thread                              _thread;
-    Timer                               _timer;
+    rtos::Mutex                               _mutex;
+    rtos::Queue<odin_wifi_msg_s, 6>           _in_queue;
+    rtos::Queue<odin_wifi_msg_s, 1>           _out_queue;
+    rtos::Queue<odin_wifi_msg_s, 1>           _cache_queue;
+    rtos::MemoryPool<odin_wifi_msg_s, 7>      *_msg_pool;
+    rtos::Thread                              _thread;
+    mbed::Timer                               _timer;
 
     bool    _debug;
     int     _dbg_timeout;

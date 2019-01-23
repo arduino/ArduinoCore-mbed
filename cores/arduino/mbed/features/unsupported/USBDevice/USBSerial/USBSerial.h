@@ -44,8 +44,6 @@
 * }
 * @endcode
 */
-namespace mbed {
-
 class USBSerial: public USBCDC, public Stream {
 public:
 
@@ -176,5 +174,4 @@ private:
     void (*settingsChangedCallback)(int baud, int bits, int parity, int stop);
 };
 
-}
 #endif
