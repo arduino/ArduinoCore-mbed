@@ -44,9 +44,6 @@
 typedef uint32_t lorawan_time_t;
 #endif
 
-// Radio wake-up time from sleep - unit ms.
-#define RADIO_WAKEUP_TIME                           1
-
 /*!
  * Sets the length of the LoRaMAC footer field.
  * Mainly indicates the MIC field length.
@@ -78,8 +75,8 @@ typedef uint32_t lorawan_time_t;
  */
 // reject if user tries to set more than MTU
 #if MBED_CONF_LORA_TX_MAX_SIZE > 255
-    #warning "Cannot set TX Max size more than MTU=255"
-    #define MBED_CONF_LORA_TX_MAX_SIZE              255
+#warning "Cannot set TX Max size more than MTU=255"
+#define MBED_CONF_LORA_TX_MAX_SIZE              255
 #endif
 
 /*!
@@ -1128,12 +1125,6 @@ typedef struct {
     bool is_repeater_supported;
 
     /*!
-     * IsPacketCounterFixed enables the MIC field tests by fixing the
-     * ul_frame_counter value
-     */
-    bool is_ul_frame_counter_fixed;
-
-    /*!
      * Used for test purposes. Disables the opening of the reception windows.
      */
     bool is_rx_window_enabled;
@@ -1265,8 +1256,8 @@ typedef struct {
 
     /*!
      * LoRaMac reception windows delay
-     * \remark normal frame: RxWindowXDelay = ReceiveDelayX - RADIO_WAKEUP_TIME
-     *         join frame  : RxWindowXDelay = JoinAcceptDelayX - RADIO_WAKEUP_TIME
+     * \remark normal frame: RxWindowXDelay = ReceiveDelayX - Offset
+     *         join frame  : RxWindowXDelay = JoinAcceptDelayX - Offset
      */
     uint32_t rx_window1_delay;
     uint32_t rx_window2_delay;

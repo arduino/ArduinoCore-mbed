@@ -1,5 +1,6 @@
 /* mbed Microcontroller Library
  * Copyright (c) 2018 ARM Limited
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,9 +100,8 @@ template <uint32_t polynomial = POLY_32BIT_ANSI, uint8_t width = 32>
 class MbedCRC {
 
 public:
-    enum CrcMode
-    {
-#ifdef DEVICE_CRC
+    enum CrcMode {
+#if DEVICE_CRC
         HARDWARE = 0,
 #endif
         TABLE = 1,
@@ -165,7 +165,7 @@ public:
 
         status = compute_partial_stop(crc);
         if (0 != status) {
-           *crc = 0;
+            *crc = 0;
         }
 
         return status;
@@ -198,7 +198,7 @@ public:
         int32_t status = 0;
 
         switch (_mode) {
-#ifdef DEVICE_CRC
+#if DEVICE_CRC
             case HARDWARE:
                 hal_crc_compute_partial((uint8_t *)buffer, size);
                 *crc = 0;
@@ -232,7 +232,7 @@ public:
     {
         MBED_ASSERT(crc != NULL);
 
-#ifdef DEVICE_CRC
+#if DEVICE_CRC
         if (_mode == HARDWARE) {
             lock();
             crc_mbed_config_t config;
@@ -264,7 +264,7 @@ public:
     {
         MBED_ASSERT(crc != NULL);
 
-#ifdef DEVICE_CRC
+#if DEVICE_CRC
         if (_mode == HARDWARE) {
             *crc = hal_crc_get_result();
             unlock();
@@ -303,6 +303,7 @@ public:
         return width;
     }
 
+#if !defined(DOXYGEN_ONLY)
 private:
     uint32_t _initial_value;
     uint32_t _final_xor;
@@ -313,9 +314,9 @@ private:
 
     /** Acquire exclusive access to CRC hardware/software.
      */
-     void lock()
+    void lock()
     {
-#ifdef DEVICE_CRC
+#if DEVICE_CRC
         if (_mode == HARDWARE) {
             mbed_crc_mutex->lock();
         }
@@ -326,7 +327,7 @@ private:
      */
     virtual void unlock()
     {
-#ifdef DEVICE_CRC
+#if DEVICE_CRC
         if (_mode == HARDWARE) {
             mbed_crc_mutex->unlock();
         }
@@ -484,8 +485,7 @@ private:
                     p_crc = (p_crc >> 4) ^ crc_table[(p_crc ^ (data[i] >> 0)) & 0xf];
                     p_crc = (p_crc >> 4) ^ crc_table[(p_crc ^ (data[i] >> 4)) & 0xf];
                 }
-            }
-            else {
+            } else {
                 for (crc_data_size_t byte = 0; byte < size; byte++) {
                     data_byte = reflect_bytes(data[byte]) ^ (p_crc >> (width - 8));
                     p_crc = crc_table[data_byte] ^ (p_crc << 8);
@@ -503,7 +503,7 @@ private:
     {
         MBED_STATIC_ASSERT(width <= 32, "Max 32-bit CRC supported");
 
-#ifdef DEVICE_CRC
+#if DEVICE_CRC
         if (POLY_32BIT_REV_ANSI == polynomial) {
             _crc_table = (uint32_t *)Table_CRC_32bit_Rev_ANSI;
             _mode = TABLE;
@@ -548,6 +548,7 @@ private:
         }
         _mode = (_crc_table != NULL) ? TABLE : BITWISE;
     }
+#endif
 };
 
 #if   defined ( __CC_ARM )

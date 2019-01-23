@@ -1,5 +1,6 @@
 /* mbed Microcontroller Library
  * Copyright (c) 2006-2013 ARM Limited
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +19,9 @@
 
 #include "platform/platform.h"
 
-#if defined (DEVICE_SERIAL) || defined(DOXYGEN_ONLY)
+#if DEVICE_SERIAL || defined(DOXYGEN_ONLY)
 
+#include "mbed_toolchain.h"
 #include "drivers/SerialBase.h"
 #include "hal/serial_api.h"
 #include "platform/NonCopyable.h"
@@ -86,7 +88,7 @@ public:
      */
     int puts(const char *str);
 
-    int printf(const char *format, ...);
+    int printf(const char *format, ...) MBED_PRINTF_METHOD(1, 2);
 
 #if !(DOXYGEN_ONLY)
 protected:

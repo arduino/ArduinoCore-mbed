@@ -8,24 +8,38 @@ mbed toolchain GCC_ARM
 echo -e "#include \"mbed.h\"\nint main() {Thread thd;}" > main.cpp
 echo -e "{\n\"macros\": [\n\"MBED_HEAP_STATS_ENABLED=1\",\n\"MBED_STACK_STATS_ENABLED=1\",\n\"MBED_MEM_TRACING_ENABLED=1\"\n],\n\"target_overrides\": {\n   \"*\": {\n\"platform.stdio-buffered-serial\": true,\n\"platform.stdio-baud-rate\": 115200,\n\"platform.default-serial-baud-rate\": 115200\n}\n}\n}\n" > mbed_app.json
 
-mbed compile -v | grep "Macros:" > $BOARDNAME.macros.txt
+mbed compile -v --source .  --source ./mbed-os/features/unsupported/USBDevice | grep "Macros:" > $BOARDNAME.macros.txt
 cat $BOARDNAME.macros.txt | cut -f2 -d":" > $ARDUINOCORE/defines.txt
+echo " -DMBED_NO_GLOBAL_USING_DIRECTIVE=1" >> $ARDUINOCORE/defines.txt
 xargs -n 1 < ./BUILD/$BOARDNAME/GCC_ARM/.include* | sed -e 's#./mbed-os#{build.core.path}/mbed#g' | sed -e 's#-I/.*$##' | tac  > $ARDUINOCORE/includes.txt
+cat $ARDUINOCORE/includes.txt | sed -e 's#mbed-os#{build.core.path}/mbed#g'  > $ARDUINOCORE/includes.txt
+
+#TODO: remove -I{build.core.path}/mbed/drivers from includes.txt (name clashing with libraries)
+
 
 #TODO: remove -MDD from flags
 
-gron ./BUILD/$BOARDNAME/GCC_ARM/.profile-c | grep json.flags | cut -f2 -d"\"" > $ARDUINOCORE/cflags.txt
-gron ./BUILD/$BOARDNAME/GCC_ARM/.profile-cxx | grep json.flags | cut -f2 -d"\"" > $ARDUINOCORE/cxxflags.txt
-gron ./BUILD/$BOARDNAME/GCC_ARM/.profile-ld | grep json.flags | cut -f2 -d"\"" > $ARDUINOCORE/ldflags.txt
+./gron ./BUILD/$BOARDNAME/GCC_ARM/.profile-c | grep json.flags | cut -f2 -d"\"" > $ARDUINOCORE/cflags.txt
+./gron ./BUILD/$BOARDNAME/GCC_ARM/.profile-cxx | grep json.flags | cut -f2 -d"\"" > $ARDUINOCORE/cxxflags.txt
+./gron ./BUILD/$BOARDNAME/GCC_ARM/.profile-ld | grep json.flags | cut -f2 -d"\"" > $ARDUINOCORE/ldflags.txt
 
 #TODO: sanitize gron output (or move to python)
 
 arm-none-eabi-ar rcs BUILD/mbed-core-$BOARDNAME.a `xargs -n 1 < ./BUILD/$BOARDNAME/GCC_ARM/.link_options.txt | grep "\.o" | grep -v "main.o"`
 cp BUILD/mbed-core-$BOARDNAME.a $ARDUINOCORE/libs/libmbed.a
-cd mbed-os && find . | grep "\.h" | xargs -I % cp --parents % $ARDUINOCORE/../../cores/arduino/mbed
-#cd BUILD && find . | grep "\.h" | xargs -I % cp  % $ARDUINOCORE/../../cores/arduino/mbed
+cd mbed-os && find . | grep "\.h" | xargs -I % cp --parents % $ARDUINOCORE/../../cores/arduino/mbed && cd ..
 cp ./BUILD/$BOARDNAME/GCC_ARM/.link_script.ld $ARDUINOCORE/linker_script.ld
+cp ./BUILD/$BOARDNAME/GCC_ARM/mbed_config.h $ARDUINOCORE/
 
-# TODO: mbed_config? should be part of the variant?
+# add #include "mbed_config.h" in "mbed.h"
 
 openocd -f interface/stlink-v2.cfg -f target/stm32f4x_stlink.cfg  -c "init"  -c "reset init" -c "halt" -c "flash write_image erase ./BUILD/$BOARDNAME/GCC_ARM/mbed-os-program.elf" -c "verify_image ./BUILD/$BOARDNAME/GCC_ARM/mbed-os-program.elf" -c "reset run" -c shutdown
+
+
+##################
+
+Using Arduino as an mbed library
+
+echo -e "arduino/cores/arduino/main.cpp\n arduino/cores/arduino/mbed/\narduino/libraries/" > .mbedignore
+#add ARDUINO_AS_MBED_LIBRARY=1 to macros section in mbed_app.json
+echo "https://github.com/arduino/ArduinoCore-mbed#bf6e64771ebe20285b0364756dff856ebbc679dc" > arduino.lib

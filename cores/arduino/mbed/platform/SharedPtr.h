@@ -1,5 +1,6 @@
 /* mbed Microcontroller Library
  * Copyright (c) 2006-2018 ARM Limited
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +25,12 @@
 
 #include "platform/mbed_critical.h"
 
+namespace mbed {
+
 /** Shared pointer class.
   *
   * A shared pointer is a "smart" pointer that retains ownership of an object using
-  * reference counting accross all smart pointers referencing that object.
+  * reference counting across all smart pointers referencing that object.
   *
   * @code
   * #include "platform/SharedPtr.h"
@@ -284,5 +287,11 @@ bool operator!= (U lhs, const SharedPtr<T> &rhs)
 {
     return ((T *) lhs != rhs.get());
 }
+
+} /* namespace mbed */
+
+#ifndef MBED_NO_GLOBAL_USING_DIRECTIVE
+using mbed::SharedPtr;
+#endif
 
 #endif // __SHAREDPTR_H__

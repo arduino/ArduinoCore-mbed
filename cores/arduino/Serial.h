@@ -1,8 +1,5 @@
-#include "api/HardwareSerial.h"
 #include "api/RingBuffer.h"
-#include "mbed/drivers/Serial.h"
-#include "mbed/rtos/Thread.h"
-#include "mbed/events/EventQueue.h"
+#include "Arduino.h"
 
 #ifdef __cplusplus
 
@@ -35,7 +32,7 @@ class UART : public HardwareSerial {
 };
 }
 
-extern UART UART1;
+extern arduino::UART UART1;
 
 #endif
 #endif

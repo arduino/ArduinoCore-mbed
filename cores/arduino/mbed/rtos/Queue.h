@@ -37,7 +37,7 @@ namespace rtos {
  */
 
 /** The Queue class represents a collection of objects that are stored first by
- *  order of priorty, and then in first-in, first-out (FIFO) order.
+ *  order of priority, and then in first-in, first-out (FIFO) order.
  *
  * You can use a queue when you need to store data and then access it in the same
  * order that it has been stored. The order in which you retrieve the data is in
@@ -63,14 +63,15 @@ public:
      *
      * @note You cannot call this function from ISR context.
     */
-    Queue() {
+    Queue()
+    {
         memset(&_obj_mem, 0, sizeof(_obj_mem));
         osMessageQueueAttr_t attr = { 0 };
         attr.mq_mem = _queue_mem;
         attr.mq_size = sizeof(_queue_mem);
         attr.cb_mem = &_obj_mem;
         attr.cb_size = sizeof(_obj_mem);
-        _id = osMessageQueueNew(queue_sz, sizeof(T*), &attr);
+        _id = osMessageQueueNew(queue_sz, sizeof(T *), &attr);
         MBED_ASSERT(_id);
     }
 
@@ -78,7 +79,8 @@ public:
      *
      * @note You cannot call this function from ISR context.
      */
-    ~Queue() {
+    ~Queue()
+    {
         osMessageQueueDelete(_id);
     }
 
@@ -88,7 +90,8 @@ public:
      *
      * @note You may call this function from ISR context.
      */
-    bool empty() const {
+    bool empty() const
+    {
         return osMessageQueueGetCount(_id) == 0;
     }
 
@@ -98,7 +101,8 @@ public:
      *
      * @note You may call this function from ISR context.
      */
-    bool full() const {
+    bool full() const
+    {
         return osMessageQueueGetSpace(_id) == 0;
     }
 
@@ -139,7 +143,8 @@ public:
      *       parameter is set to 0.
      *
      */
-    osStatus put(T* data, uint32_t millisec=0, uint8_t prio=0) {
+    osStatus put(T *data, uint32_t millisec = 0, uint8_t prio = 0)
+    {
         return osMessageQueuePut(_id, &data, prio, millisec);
     }
 
@@ -178,7 +183,8 @@ public:
      * @note  You may call this function from ISR context if the millisec
      *        parameter is set to 0.
      */
-    osEvent get(uint32_t millisec=osWaitForever) {
+    osEvent get(uint32_t millisec = osWaitForever)
+    {
         osEvent event;
         T *data = NULL;
         osStatus_t res = osMessageQueueGet(_id, &data, NULL, millisec);
@@ -206,7 +212,7 @@ public:
 
 private:
     osMessageQueueId_t            _id;
-    char                          _queue_mem[queue_sz * (sizeof(T*) + sizeof(mbed_rtos_storage_message_t))];
+    char                          _queue_mem[queue_sz * (sizeof(T *) + sizeof(mbed_rtos_storage_message_t))];
     mbed_rtos_storage_msg_queue_t _obj_mem;
 };
 /** @}*/

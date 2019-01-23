@@ -7,6 +7,7 @@
  */
 /* mbed Microcontroller Library
  * Copyright (c) 2006-2013 ARM Limited
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +25,7 @@
 #define MBED_ASSERT_H
 
 #include "mbed_preprocessor.h"
+#include "mbed_toolchain.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,7 +39,7 @@ extern "C" {
  *  @param file File where assertation failed.
  *  @param line Failing assertation line number.
  */
-void mbed_assert_internal(const char *expr, const char *file, int line);
+MBED_NORETURN void mbed_assert_internal(const char *expr, const char *file, int line);
 
 #ifdef __cplusplus
 }

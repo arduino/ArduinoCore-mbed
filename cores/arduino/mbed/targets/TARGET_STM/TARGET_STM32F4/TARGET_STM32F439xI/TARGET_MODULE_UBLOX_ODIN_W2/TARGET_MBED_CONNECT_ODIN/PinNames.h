@@ -173,8 +173,8 @@ typedef enum {
 #endif
 
     // DAPLink
-    USBRX      = PA_10,
-    USBTX      = PA_9,
+    USBRX      = STDIO_UART_RX,
+    USBTX      = STDIO_UART_TX,
     SWDIO      = PA_15,
     SWCLK      = PA_14,
     NTRST      = PB_4,

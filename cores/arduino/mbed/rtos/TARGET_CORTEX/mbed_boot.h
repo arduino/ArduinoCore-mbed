@@ -1,5 +1,6 @@
 /* mbed Microcontroller Library
  * Copyright (c) 2018-2018 ARM Limited
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +52,7 @@ extern "C" {
 
 /* Define stack sizes if they haven't been set already */
 #if !defined(ISR_STACK_SIZE)
-    #define ISR_STACK_SIZE ((uint32_t)1024)
+#define ISR_STACK_SIZE ((uint32_t)1024)
 #endif
 
 /* Heap limits - only used if set */

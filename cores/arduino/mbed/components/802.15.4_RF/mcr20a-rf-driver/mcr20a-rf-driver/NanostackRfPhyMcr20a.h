@@ -17,10 +17,8 @@
 #ifndef NANOSTACK_PHY_MCR20A_H_
 #define NANOSTACK_PHY_MCR20A_H_
 
+#if defined(MBED_CONF_NANOSTACK_CONFIGURATION) && DEVICE_SPI && defined(MBED_CONF_RTOS_PRESENT)
 #include "mbed.h"
-
-#if defined(MBED_CONF_NANOSTACK_CONFIGURATION) && DEVICE_SPI
-
 #include "NanostackRfPhy.h"
 
 // Arduino pin defaults for convenience
@@ -55,12 +53,12 @@ public:
     virtual void set_mac_address(uint8_t *mac);
 
 private:
-    SPI _spi;
-    DigitalOut _rf_cs;
-    DigitalOut _rf_rst;
-    InterruptIn _rf_irq;
-    DigitalIn _rf_irq_pin;
-    Thread _irq_thread;
+    mbed::SPI _spi;
+    mbed::DigitalOut _rf_cs;
+    mbed::DigitalOut _rf_rst;
+    mbed::InterruptIn _rf_irq;
+    mbed::DigitalIn _rf_irq_pin;
+    rtos::Thread _irq_thread;
 
     void _pins_set();
     void _pins_clear();

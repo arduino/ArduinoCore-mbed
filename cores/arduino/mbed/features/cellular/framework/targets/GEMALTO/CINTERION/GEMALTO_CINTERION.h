@@ -25,12 +25,32 @@ namespace mbed {
 class GEMALTO_CINTERION : public AT_CellularDevice {
 public:
 
-    GEMALTO_CINTERION(events::EventQueue &queue);
+    GEMALTO_CINTERION(FileHandle *fh);
     virtual ~GEMALTO_CINTERION();
 
-public: // CellularDevice
-    virtual CellularNetwork *open_network(FileHandle *fh);
-    virtual nsapi_error_t init_module(FileHandle *fh);
+protected: // AT_CellularDevice
+    virtual AT_CellularNetwork *open_network_impl(ATHandler &at);
+    virtual AT_CellularContext *create_context_impl(ATHandler &at, const char *apn);
+public:
+    virtual nsapi_error_t init_module();
+    virtual uint16_t get_send_delay() const;
+
+    /** Actual model of cellular module is needed to make AT command adaptation at runtime
+     *  to support many different models in one cellular driver.
+     */
+    enum Module {
+        ModuleUnknown = 0,
+        ModuleELS61,
+        ModuleBGS2,
+        ModuleEMS31,
+    };
+    static Module get_module();
+
+private:
+    static Module _module;
+    void init_module_bgs2();
+    void init_module_els61();
+    void init_module_ems31();
 };
 
 } // namespace mbed

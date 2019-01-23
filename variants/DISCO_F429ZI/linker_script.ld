@@ -1,24 +1,16 @@
-M_VECTOR_RAM_SIZE = 0x400;
-STACK_SIZE = 0x400;
-HEAP_SIZE = 0x6000;
+M_CRASH_DATA_RAM_SIZE = 0x100;
 MEMORY
 {
-    VECTORS (rx) : ORIGIN = 0x08000000, LENGTH = 0x400
-    FLASH (rx) : ORIGIN = 0x08000000 + 0x400, LENGTH = 2048k - 0x400
-    CCM (rwx) : ORIGIN = 0x10000000, LENGTH = 64K
-    RAM (rwx) : ORIGIN = 0x20000000, LENGTH = 192k
+  FLASH (rx) : ORIGIN = 0x08000000, LENGTH = 2048k
+  CCM (rwx) : ORIGIN = 0x10000000, LENGTH = 64K
+  RAM (rwx) : ORIGIN = 0x200001B0, LENGTH = 192k - (0x1AC+0x4)
 }
 ENTRY(Reset_Handler)
 SECTIONS
 {
-    .isr_vector :
-    {
-        __vector_table = .;
-        KEEP(*(.isr_vector))
-         . = ALIGN(8);
-    } > VECTORS
     .text :
     {
+        KEEP(*(.isr_vector))
         *(.text*)
         KEEP(*(.init))
         KEEP(*(.fini))
@@ -47,19 +39,19 @@ SECTIONS
     __exidx_end = .;
     __etext = .;
     _sidata = .;
-    .interrupts_ram :
+    .crash_data_ram :
     {
         . = ALIGN(8);
-        __VECTOR_RAM__ = .;
-        __interrupts_ram_start__ = .;
-        *(.m_interrupts_ram)
-        . += M_VECTOR_RAM_SIZE;
+        __CRASH_DATA_RAM__ = .;
+        __CRASH_DATA_RAM_START__ = .;
+        KEEP(*(.keep.crash_data_ram))
+        *(.m_crash_data_ram)
+        . += M_CRASH_DATA_RAM_SIZE;
         . = ALIGN(8);
-        __interrupts_ram_end__ = .;
+        __CRASH_DATA_RAM_END__ = .;
     } > RAM
-    .data :
+    .data : AT (__etext)
     {
-        PROVIDE( __etext = LOADADDR(.data) );
         __data_start__ = .;
         _sdata = .;
         *(vtable)
@@ -82,17 +74,8 @@ SECTIONS
         . = ALIGN(8);
         __data_end__ = .;
         _edata = .;
-    } > RAM AT > FLASH
-    .uninitialized (NOLOAD):
-    {
-        . = ALIGN(32);
-        __uninitialized_start = .;
-        *(.uninitialized)
-        KEEP(*(.keep.uninitialized))
-        . = ALIGN(32);
-        __uninitialized_end = .;
     } > RAM
-    .bss (NOLOAD):
+    .bss :
     {
         . = ALIGN(8);
         __bss_start__ = .;
@@ -103,15 +86,20 @@ SECTIONS
         __bss_end__ = .;
         _ebss = .;
     } > RAM
-    .heap (NOLOAD):
+    .heap (COPY):
     {
         __end__ = .;
         end = __end__;
-        . += HEAP_SIZE;
+        *(.heap*)
         __HeapLimit = .;
     } > RAM
+    .stack_dummy (COPY):
+    {
+        *(.stack*)
+    } > RAM
     __StackTop = ORIGIN(RAM) + LENGTH(RAM);
-    __stack = __StackTop;
-    __StackLimit = __StackTop - STACK_SIZE;
-    ASSERT(__StackLimit >= __HeapLimit, "Region RAM overflowed with stack and heap")
+    _estack = __StackTop;
+    __StackLimit = __StackTop - SIZEOF(.stack_dummy);
+    PROVIDE(__stack = __StackTop);
+    ASSERT(__StackLimit >= __HeapLimit, "region RAM overflowed with stack")
 }
