@@ -62,3 +62,35 @@ odinw2.upload.use_1200bps_touch=false
 odinw2.upload.wait_for_upload_port=false
 odinw2.upload.native_usb=false
 
+##############################################################
+
+nucleo_h7.name=NUCLEO H7
+nucleo_h7.build.core=arduino
+nucleo_h7.build.crossprefix=arm-none-eabi-
+nucleo_h7.build.compiler_path={runtime.tools.arm-none-eabi-gcc.path}/bin/
+
+nucleo_h7.build.variant=NUCLEO_H743ZI
+nucleo_h7.build.mcu=cortex-m7
+nucleo_h7.build.extra_flags=
+nucleo_h7.build.architecture=cortex-m7
+nucleo_h7.build.board=NUCLEO_H743ZI
+nucleo_h7.build.ldscript=linker_script.ld
+nucleo_h7.compiler.mbed.defines=@{build.variant.path}/defines.txt
+nucleo_h7.compiler.mbed.ldflags=@{build.variant.path}/ldflags.txt
+nucleo_h7.compiler.mbed.cflags=@{build.variant.path}/cflags.txt
+nucleo_h7.compiler.mbed.cxxflags=@{build.variant.path}/cxxflags.txt
+nucleo_h7.compiler.mbed.includes=${build.variant.path}/includes.txt
+nucleo_h7.compiler.mbed.extra_ldflags=-lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
+nucleo_h7.compiler.mbed={build.variant.path}/libs/libmbed.a
+nucleo_h7.vid.0=0x0483
+nucleo_h7.pid.0=0x374e
+
+nucleo_h7.upload.via_ssh=true
+nucleo_h7.upload.tool=openocd
+nucleo_h7.upload.config=-f interface/stlink-v3.cfg -f target/stm32h7x.cfg
+nucleo_h7.upload.protocol=sam-ba
+nucleo_h7.upload.maximum_size=10000000
+nucleo_h7.upload.use_1200bps_touch=false
+nucleo_h7.upload.wait_for_upload_port=false
+nucleo_h7.upload.native_usb=false
+
