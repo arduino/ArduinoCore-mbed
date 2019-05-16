@@ -94,3 +94,38 @@ nucleo_h7.upload.use_1200bps_touch=false
 nucleo_h7.upload.wait_for_upload_port=false
 nucleo_h7.upload.native_usb=false
 
+##############################################################
+
+nrf52840.name=NRF52840
+nrf52840.build.core=arduino
+nrf52840.build.crossprefix=arm-none-eabi-
+nrf52840.build.compiler_path={runtime.tools.arm-none-eabi-gcc.path}/bin/
+
+nrf52840.build.variant=NRF52840_DK
+nrf52840.build.mcu=cortex-m4
+nrf52840.build.extra_flags=
+nrf52840.build.architecture=cortex-m4
+nrf52840.build.board=NRF52840_DK
+nrf52840.build.ldscript=linker_script.ld
+nrf52840.compiler.mbed.defines=@{build.variant.path}/defines.txt
+nrf52840.compiler.mbed.ldflags=@{build.variant.path}/ldflags.txt
+nrf52840.compiler.mbed.cflags=@{build.variant.path}/cflags.txt
+nrf52840.compiler.mbed.cxxflags=@{build.variant.path}/cxxflags.txt
+nrf52840.compiler.mbed.includes=${build.variant.path}/includes.txt
+nrf52840.compiler.mbed.extra_ldflags=-lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
+nrf52840.compiler.mbed={build.variant.path}/libs/libmbed.a {build.variant.path}/libs/libcc_310_core.a {build.variant.path}/libs/libcc_310_ext.a {build.variant.path}/libs/libcc_310_trng.a
+nrf52840.vid.0=0x0483
+nrf52840.pid.0=0x374e
+
+nrf52840.build.sd_name=s132
+nrf52840.build.sd_version=6.1.1
+nrf52840.build.sd_fwid=0x00B7
+
+nrf52840.upload.tool=nrfutil
+nrf52840.upload.protocol=nrfutil
+nrf52840.upload.use_1200bps_touch=true
+nrf52840.upload.wait_for_upload_port=true
+nrf52840.upload.native_usb=true
+nrf52840.upload.maximum_size=290816
+nrf52840.upload.maximum_data_size=51072
+
