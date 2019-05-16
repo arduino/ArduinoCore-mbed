@@ -1,5 +1,6 @@
-/* mbed Microcontroller Library
- * Copyright (c) 2018-2018 ARM Limited
+/*
+ * Copyright (c) 2018-2019, Arm Limited and affiliates.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +35,7 @@ enum  {
     USB_EP_ATTR_ALLOW_INT = 1 << USB_EP_TYPE_INT,
     USB_EP_ATTR_ALLOW_ISO = 1 << USB_EP_TYPE_ISO,
     USB_EP_ATTR_ALLOW_ALL = USB_EP_ATTR_ALLOW_CTRL | USB_EP_ATTR_ALLOW_BULK |
-                             USB_EP_ATTR_ALLOW_INT | USB_EP_ATTR_ALLOW_ISO,
+                            USB_EP_ATTR_ALLOW_INT | USB_EP_ATTR_ALLOW_ISO,
 
     USB_EP_ATTR_DIR_IN = 0 << 4,
     USB_EP_ATTR_DIR_OUT = 1 << 4,

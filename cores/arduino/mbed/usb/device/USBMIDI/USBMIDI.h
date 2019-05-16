@@ -1,5 +1,6 @@
-/* mbed Microcontroller Library
- * Copyright (c) 2018-2018 ARM Limited
+/*
+ * Copyright (c) 2018-2019, Arm Limited and affiliates.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,7 +135,7 @@ public:
      *
      * @param callback code to call when a packet is received
      */
-    void attach(Callback<void()> callback);
+    void attach(mbed::Callback<void()> callback);
 
 
 protected:
@@ -173,7 +174,7 @@ private:
     usb_ep_t _bulk_out;
     uint8_t _config_descriptor[0x65];
 
-    Callback<void()> _callback;
+    mbed::Callback<void()> _callback;
 
     void _init();
     void _in_callback();

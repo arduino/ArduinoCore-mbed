@@ -1,5 +1,6 @@
-/* mbed Microcontroller Library
- * Copyright (c) 2018-2018 ARM Limited
+/*
+ * Copyright (c) 2018-2019, Arm Limited and affiliates.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,6 +123,13 @@ public:
      */
     void attach(mbed::Callback<void()> cb);
 
+    /**
+    * Check if MSD device was removed/unmounted on the host side.
+    *
+    * @returns true if device was removed/unmounted on the host side
+    */
+    bool media_removed();
+
 protected:
 
     /*
@@ -181,7 +189,8 @@ private:
     };
 
     // Bulk-only CBW
-    typedef MBED_PACKED(struct) {
+    typedef MBED_PACKED(struct)
+    {
         uint32_t Signature;
         uint32_t Tag;
         uint32_t DataLength;
@@ -192,7 +201,8 @@ private:
     } CBW;
 
     // Bulk-only CSW
-    typedef MBED_PACKED(struct) {
+    typedef MBED_PACKED(struct)
+    {
         uint32_t Signature;
         uint32_t Tag;
         uint32_t DataResidue;
@@ -201,6 +211,9 @@ private:
 
     // If this class has been initialized
     bool _initialized;
+
+    // If msd device has been unmounted by host
+    volatile bool _media_removed;
 
     //state of the bulk-only state machine
     Stage _stage;
@@ -237,12 +250,12 @@ private:
     uint32_t _bulk_out_size;
 
     // Interrupt to thread deferral
-    PolledQueue _queue;
-    Task<void()> _in_task;
-    Task<void()> _out_task;
-    Task<void()> _reset_task;
-    Task<void(const setup_packet_t *)> _control_task;
-    Task<void()> _configure_task;
+    events::PolledQueue _queue;
+    events::Task<void()> _in_task;
+    events::Task<void()> _out_task;
+    events::Task<void()> _reset_task;
+    events::Task<void(const setup_packet_t *)> _control_task;
+    events::Task<void()> _configure_task;
 
     BlockDevice *_bd;
     rtos::Mutex _mutex_init;

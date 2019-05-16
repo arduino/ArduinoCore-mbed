@@ -1,6 +1,8 @@
 /*
  * mbed Microcontroller Library
  * Copyright (c) 2017-2018 Future Electronics
+ * Copyright (c) 2018-2019 Cypress Semiconductor Corporation
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +51,13 @@ extern const PinMap PinMap_SPI_SCLK[];
 extern const PinMap PinMap_SPI_SSEL[];
 #endif
 
+//*** QSPI ***
+#if DEVICE_QSPI
+extern const PinMap PinMap_QSPI_SCLK[]; 
+extern const PinMap PinMap_QSPI_DATA[];
+extern const PinMap PinMap_QSPI_SSEL[];
+#endif
+    
 //*** ADC ***
 #if DEVICE_ANALOGIN
 extern const PinMap PinMap_ADC[];

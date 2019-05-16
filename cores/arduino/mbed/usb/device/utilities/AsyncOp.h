@@ -1,5 +1,6 @@
-/* mbed Microcontroller Library
- * Copyright (c) 2018-2018 ARM Limited
+/*
+ * Copyright (c) 2018-2019, Arm Limited and affiliates.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +53,7 @@ public:
      *
      * @note - the host object's lock MUST NOT be held when this call is made
      */
-    void wait(rtos::Mutex *host_mutex, uint32_t milliseconds=osWaitForever);
+    void wait(rtos::Mutex *host_mutex, uint32_t milliseconds = osWaitForever);
 
     /**
      * Abort this asynchronous operation

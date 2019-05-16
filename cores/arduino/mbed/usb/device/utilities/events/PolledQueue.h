@@ -1,5 +1,6 @@
-/* events
- * Copyright (c) 2018 ARM Limited
+/*
+ * Copyright (c) 2018-2019, Arm Limited and affiliates.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +40,7 @@ public:
      *
      *  @param cb Callback called when dispatch needs to be called
      */
-    PolledQueue(mbed::Callback<void()> cb=NULL);
+    PolledQueue(mbed::Callback<void()> cb = NULL);
 
     virtual ~PolledQueue();
 

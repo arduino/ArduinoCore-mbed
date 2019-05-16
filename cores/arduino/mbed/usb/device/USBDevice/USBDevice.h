@@ -1,5 +1,6 @@
-/* mbed Microcontroller Library
- * Copyright (c) 2018-2018 ARM Limited
+/*
+ * Copyright (c) 2018-2019, Arm Limited and affiliates.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +18,7 @@
 #ifndef USBDEVICE_H
 #define USBDEVICE_H
 
-#include "mbed.h"
+#include <stddef.h>
 #include "USBDevice_Types.h"
 #include "USBPhy.h"
 #include "mbed_critical.h"
@@ -404,7 +405,7 @@ protected:
      * @param data Buffer to send or receive if the result is Send or Receive
      * @param size Size to transfer if the result is Send or Receive
      */
-    void complete_request(RequestResult result, uint8_t *data=NULL, uint32_t size=0);
+    void complete_request(RequestResult result, uint8_t *data = NULL, uint32_t size = 0);
 
     /**
     * Called by USBDevice on data stage completion

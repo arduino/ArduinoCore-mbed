@@ -42,7 +42,7 @@
 
 #include <stdint.h>
 #include "events/EventQueue.h"
-#include "platform/mbed_critical.h"
+#include "platform/mbed_atomic.h"
 #include "platform/Callback.h"
 #include "platform/NonCopyable.h"
 #include "platform/ScopedLock.h"
@@ -54,6 +54,9 @@
 
 class LoRaPHY;
 
+/** LoRaWANStack Class
+ * A controller layer for LoRaWAN MAC and PHY
+ */
 class LoRaWANStack: private mbed::NonCopyable<LoRaWANStack> {
 
 public:

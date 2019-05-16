@@ -1,5 +1,6 @@
-/* mbed Microcontroller Library
- * Copyright (c) 2018-2018 ARM Limited
+/*
+ * Copyright (c) 2018-2019, Arm Limited and affiliates.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +18,7 @@
 #ifndef MIDIMESSAGE_H
 #define MIDIMESSAGE_H
 
-#include "mbed.h"
+#include <stdint.h>
 
 #define MAX_MIDI_MESSAGE_SIZE 256 // Max message size. SysEx can be up to 65536 but 256 should be fine for most usage
 

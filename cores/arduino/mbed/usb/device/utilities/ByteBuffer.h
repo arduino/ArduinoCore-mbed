@@ -1,5 +1,6 @@
-/* mbed Microcontroller Library
- * Copyright (c) 2018-2018 ARM Limited
+/*
+ * Copyright (c) 2018-2019, Arm Limited and affiliates.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +28,7 @@ public:
      *
      * @param size Number of bytes this buffer can hold
      */
-    ByteBuffer(uint32_t size=0);
+    ByteBuffer(uint32_t size = 0);
 
     /**
      * Delete this byte buffer

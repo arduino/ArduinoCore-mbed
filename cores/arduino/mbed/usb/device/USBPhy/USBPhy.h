@@ -1,5 +1,6 @@
-/* mbed Microcontroller Library
- * Copyright (c) 2018-2018 ARM Limited
+/*
+ * Copyright (c) 2018-2019, Arm Limited and affiliates.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -178,7 +179,7 @@ public:
      * can be used, the functionality of those endpoints and the
      * resource cost.
      */
-    virtual const usb_ep_table_t* endpoint_table() = 0;
+    virtual const usb_ep_table_t *endpoint_table() = 0;
 
     /**
      * Set wMaxPacketSize of endpoint 0
@@ -282,7 +283,7 @@ public:
      * Finish a read on the given endpoint
      *
      * @param endpoint Endpoint to check
-     * @return true if data was read false otherwise
+     * @return The number of bytes received
      */
     virtual uint32_t endpoint_read_result(usb_ep_t endpoint) = 0;
 

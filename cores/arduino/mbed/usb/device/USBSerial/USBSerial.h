@@ -1,5 +1,6 @@
-/* mbed Microcontroller Library
- * Copyright (c) 2018-2018 ARM Limited
+/*
+ * Copyright (c) 2018-2019, Arm Limited and affiliates.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +42,7 @@
 * }
 * @endcode
 */
-class USBSerial: public USBCDC, public Stream {
+class USBSerial: public USBCDC, public mbed::Stream {
 public:
 
     /**
@@ -57,7 +58,7 @@ public:
     * @param product_release Your product_release (default: 0x0001)
     *
     */
-    USBSerial(bool connect_blocking=true, uint16_t vendor_id=0x1f00, uint16_t product_id=0x2012, uint16_t product_release=0x0001);
+    USBSerial(bool connect_blocking = true, uint16_t vendor_id = 0x1f00, uint16_t product_id = 0x2012, uint16_t product_release = 0x0001);
 
     /**
     * Fully featured constructor
@@ -76,7 +77,7 @@ public:
     * @param product_release Your product_release (default: 0x0001)
     *
     */
-    USBSerial(USBPhy *phy, uint16_t vendor_id=0x1f00, uint16_t product_id=0x2012, uint16_t product_release=0x0001);
+    USBSerial(USBPhy *phy, uint16_t vendor_id = 0x1f00, uint16_t product_id = 0x2012, uint16_t product_release = 0x0001);
 
     /**
      * Destroy this object
@@ -149,7 +150,7 @@ public:
         USBCDC::lock();
 
         if ((mptr != NULL) && (tptr != NULL)) {
-            rx = Callback<void()>(mptr, tptr);
+            rx = mbed::Callback<void()>(mptr, tptr);
         }
 
         USBCDC::unlock();
@@ -165,7 +166,7 @@ public:
         USBCDC::lock();
 
         if (fptr != NULL) {
-            rx = Callback<void()>(fptr);
+            rx = mbed::Callback<void()>(fptr);
         }
 
         USBCDC::unlock();
@@ -176,7 +177,7 @@ public:
      *
      * @param cb Callback to attach
      */
-    void attach(Callback<void()> &cb)
+    void attach(mbed::Callback<void()> &cb)
     {
         USBCDC::lock();
 
@@ -211,7 +212,7 @@ protected:
     }
 
 private:
-    Callback<void()> rx;
+    mbed::Callback<void()> rx;
     void (*_settings_changed_callback)(int baud, int bits, int parity, int stop);
 };
 
