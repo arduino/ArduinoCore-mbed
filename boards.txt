@@ -119,7 +119,7 @@ nrf52840.pid.0=0x374e
 
 nrf52840.build.sd_name=s132
 nrf52840.build.sd_version=6.1.1
-nrf52840.build.sd_fwid=0x00B7
+nrf52840.build.sd_fwid=0xFFFE
 
 nrf52840.upload.tool=nrfutil
 nrf52840.upload.protocol=nrfutil
