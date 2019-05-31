@@ -43,7 +43,7 @@ extern "C" {
 /* Private constants ---------------------------------------------------------*/
 
 /* Private macros ------------------------------------------------------------*/
-#if defined(USE_FULL_LL_DRIVER)
+#if 1 //mbed
 /** @defgroup SPI_LL_Private_Macros SPI Private Macros
   * @{
   */
@@ -392,7 +392,7 @@ typedef struct
   * @}
   */
 
-#if defined(USE_FULL_LL_DRIVER)
+#if 1 //mbed
 
 /** @defgroup SPI_LL_EC_CRC_CALCULATION CRC Calculation
   * @{
@@ -2524,7 +2524,7 @@ __STATIC_INLINE uint32_t LL_SPI_GetTxCRC(SPI_TypeDef *SPIx)
   * @}
   */
 
-#if defined(USE_FULL_LL_DRIVER)
+#if 1 //mbed
 /** @defgroup SPI_LL_EF_Init Initialization and de-initialization functions
   * @{
   */
@@ -2548,7 +2548,7 @@ void        LL_SPI_StructInit(LL_SPI_InitTypeDef *SPI_InitStruct);
 /* Private macros ------------------------------------------------------------*/
 
 /* Exported types ------------------------------------------------------------*/
-#if defined(USE_FULL_LL_DRIVER)
+#if 1 //mbed
 /** @defgroup I2S_LL_ES_INIT I2S Exported Init structure
   * @{
   */
@@ -2694,7 +2694,7 @@ typedef struct
   * @}
   */
 
-#if defined(USE_FULL_LL_DRIVER)
+#if 1 //mbed
 
 /** @defgroup I2S_LL_EC_MCLK_OUTPUT MCLK Output
   * @{
@@ -3660,7 +3660,7 @@ __STATIC_INLINE void LL_I2S_TransmitData32(SPI_TypeDef *SPIx, uint32_t TxData)
   */
 
 
-#if defined(USE_FULL_LL_DRIVER)
+#if 1 //mbed
 /** @defgroup SPI_LL_EF_Init Initialization and de-initialization functions
   * @{
   */

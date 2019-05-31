@@ -54,7 +54,7 @@ extern "C" {
 
 /* Private macros ------------------------------------------------------------*/
 /* Exported types ------------------------------------------------------------*/
-#if defined(USE_FULL_LL_DRIVER)
+#if 1 //mbed
 /** @defgroup COMP_LL_ES_INIT COMP Exported Init structure
   * @{
   */
@@ -718,7 +718,7 @@ __STATIC_INLINE uint32_t LL_COMP_ReadOutputLevel(COMP_TypeDef *COMPx)
   * @}
   */
 
-#if defined(USE_FULL_LL_DRIVER)
+#if 1 //mbed
 /** @defgroup COMP_LL_EF_Init Initialization and de-initialization functions
   * @{
   */

@@ -24,7 +24,7 @@ stm32f429.pid.0=0x101f
 stm32f429.upload.via_ssh=true
 stm32f429.upload.tool=openocd
 stm32f429.upload.protocol=sam-ba
-stm32f429.upload.config=-f interface/stlink-v2.cfg -f target/stm32f4x_stlink.cfg
+stm32f429.upload.config=-f interface/stlink.cfg -f target/stm32f4x_stlink.cfg
 stm32f429.upload.maximum_size=10000000
 stm32f429.upload.use_1200bps_touch=false
 stm32f429.upload.wait_for_upload_port=false
@@ -87,12 +87,44 @@ nucleo_h7.pid.0=0x374e
 
 nucleo_h7.upload.via_ssh=true
 nucleo_h7.upload.tool=openocd
-nucleo_h7.upload.config=-f interface/stlink-v3.cfg -f target/stm32h7x.cfg
+nucleo_h7.upload.config=-f board/stm32h7x3i_eval.cfg
 nucleo_h7.upload.protocol=sam-ba
 nucleo_h7.upload.maximum_size=10000000
 nucleo_h7.upload.use_1200bps_touch=false
 nucleo_h7.upload.wait_for_upload_port=false
 nucleo_h7.upload.native_usb=false
+
+##############################################################
+
+envie_m4.name=ENVIE M4
+envie_m4.build.core=arduino
+envie_m4.build.crossprefix=arm-none-eabi-
+envie_m4.build.compiler_path={runtime.tools.arm-none-eabi-gcc.path}/bin/
+
+envie_m4.build.variant=ENVIE_M4
+envie_m4.build.mcu=cortex-m4
+envie_m4.build.extra_flags=
+envie_m4.build.architecture=cortex-m4
+envie_m4.build.board=ENVIE_M4
+envie_m4.build.ldscript=linker_script.ld
+envie_m4.compiler.mbed.defines=@{build.variant.path}/defines.txt
+envie_m4.compiler.mbed.ldflags=@{build.variant.path}/ldflags.txt
+envie_m4.compiler.mbed.cflags=@{build.variant.path}/cflags.txt
+envie_m4.compiler.mbed.cxxflags=@{build.variant.path}/cxxflags.txt
+envie_m4.compiler.mbed.includes=${build.variant.path}/includes.txt
+envie_m4.compiler.mbed.extra_ldflags=-lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
+envie_m4.compiler.mbed={build.variant.path}/libs/libmbed.a
+envie_m4.vid.0=0x0483
+envie_m4.pid.0=0x374e
+
+envie_m4.upload.via_ssh=true
+envie_m4.upload.tool=openocd
+envie_m4.upload.config=-f board/envie.cfg
+envie_m4.upload.protocol=sam-ba
+envie_m4.upload.maximum_size=10000000
+envie_m4.upload.use_1200bps_touch=false
+envie_m4.upload.wait_for_upload_port=false
+envie_m4.upload.native_usb=false
 
 ##############################################################
 
@@ -107,6 +139,7 @@ nrf52840.build.extra_flags=
 nrf52840.build.architecture=cortex-m4
 nrf52840.build.board=NRF52840_DK
 nrf52840.build.ldscript=linker_script.ld
+nrf52840.build.zip.pattern="{tools.nrfutil.cmd}" dfu genpkg --dev-type 0x0052 --sd-req {build.sd_fwid} --application "{build.path}/{build.project_name}.hex" "{build.path}/{build.project_name}.zip"
 nrf52840.compiler.mbed.defines=@{build.variant.path}/defines.txt
 nrf52840.compiler.mbed.ldflags=@{build.variant.path}/ldflags.txt
 nrf52840.compiler.mbed.cflags=@{build.variant.path}/cflags.txt
