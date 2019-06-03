@@ -302,17 +302,13 @@
 #define NRF_SDH_SOC_STACK_OBSERVER_PRIO                                       0                                                                                                // defined by library:softdevice
 #define NRF_SDH_STACK_OBSERVER_PRIO_LEVELS                                    2                                                                                                // defined by library:softdevice
 #define NRF_SDH_STATE_OBSERVER_PRIO_LEVELS                                    2                                                                                                // defined by library:softdevice
-#define NRF_SD_BLE_API_VERSION                                                5                                                                                                // defined by library:softdevice
+#define NRF_SD_BLE_API_VERSION                                                6                                                                                                // defined by library:softdevice
 #define NS_USE_EXTERNAL_MBED_TLS                                                                                                                                               // defined by library:nanostack
 #define PEER_MANAGER_ENABLED                                                  1                                                                                                // defined by library:softdevice
 #define S140                                                                                                                                                                   // defined by library:softdevice
 #define SOFTDEVICE_PRESENT                                                    1                                                                                                // defined by library:softdevice
 #define SWI_DISABLE0                                                                                                                                                           // defined by library:nordic
-#define SWI_DISABLE1                                                                                                                                                           // defined by library:softdevice
-#define SWI_DISABLE2                                                                                                                                                           // defined by library:softdevice
-#define SWI_DISABLE3                                                                                                                                                           // defined by library:softdevice
-#define SWI_DISABLE4                                                                                                                                                           // defined by library:softdevice
-#define SWI_DISABLE5                                                                                                                                                           // defined by library:softdevice
+#define SWI_DISABLE1                                                          1                                                                                                // defined by library:softdevice
 #define UNITY_INCLUDE_CONFIG_H                                                                                                                                                 // defined by library:utest
 #define _RTE_                                                                                                                                                                  // defined by library:rtos
 

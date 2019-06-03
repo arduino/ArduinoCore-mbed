@@ -159,6 +159,6 @@ nrf52840.upload.protocol=nrfutil
 nrf52840.upload.use_1200bps_touch=true
 nrf52840.upload.wait_for_upload_port=true
 nrf52840.upload.native_usb=true
-nrf52840.upload.maximum_size=290816
-nrf52840.upload.maximum_data_size=51072
+nrf52840.upload.maximum_size=1000000
+nrf52840.upload.maximum_data_size=1000000
 
