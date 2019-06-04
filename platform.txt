@@ -18,12 +18,12 @@ compiler.warning_flags.all=-Wall -Wextra
 
 compiler.path={build.compiler_path}
 compiler.c.cmd={build.crossprefix}gcc
-compiler.c.flags=-c -I. {compiler.warning_flags} -Os -g -nostdlib {compiler.mbed.defines} {compiler.mbed.cflags} -MMD -std=gnu11 -mcpu={build.mcu}
+compiler.c.flags=-c -I. {compiler.warning_flags} -Os -g -nostdlib @{compiler.mbed.defines} @{compiler.mbed.cflags} -MMD -std=gnu11 -mcpu={build.mcu}
 compiler.c.elf.cmd={build.crossprefix}g++
 compiler.c.elf.flags=-Wl,--gc-sections {compiler.warning_flags} -Wl,--as-needed
 compiler.S.flags=-c -g -x assembler-with-cpp -Os -mcpu={build.mcu}
 compiler.cpp.cmd={build.crossprefix}g++
-compiler.cpp.flags=-c -I. {compiler.warning_flags} -g -Os -nostdlib {compiler.mbed.defines} {compiler.mbed.cxxflags} -MMD -std=gnu++11 -mcpu={build.mcu}
+compiler.cpp.flags=-c -I. {compiler.warning_flags} -g -Os -nostdlib @{compiler.mbed.defines} @{compiler.mbed.cxxflags} -MMD -std=gnu++11 -mcpu={build.mcu}
 compiler.ar.cmd={build.crossprefix}ar
 compiler.ar.flags=rcs
 compiler.objcopy.cmd=
@@ -65,17 +65,20 @@ build.zip.pattern={recipe.size.pattern}
 # Linux compile patterns
 # -----------------------
 
+## Prepare include file
+recipe.hooks.prebuild.1.pattern="{runtime.tools.expand-property-map.path}" -in "{compiler.mbed.includes}" -out "{build.path}/preprocess/includes.txt"
+
 ## Compile c files
-recipe.c.o.pattern="{compiler.path}{compiler.c.cmd}" {compiler.c.flags} -DARDUINO={runtime.ide.version} -DARDUINO_{build.board} -DARDUINO_ARCH_{build.arch}  {build.extra_flags} {compiler.c.extra_flags} "-I{build.core.path}/api/deprecated" {includes} {compiler.mbed.includes} -o "{object_file}" "{source_file}"
+recipe.c.o.pattern="{compiler.path}{compiler.c.cmd}" {compiler.c.flags} -DARDUINO={runtime.ide.version} -DARDUINO_{build.board} -DARDUINO_ARCH_{build.arch}  {build.extra_flags} {compiler.c.extra_flags} "-I{build.core.path}/api/deprecated" {includes} "@{build.path}/preprocess/includes.txt" -o "{object_file}" "{source_file}"
 
 ## Compile c++ files
-recipe.cpp.o.pattern="{compiler.path}{compiler.cpp.cmd}" {compiler.cpp.flags} -DARDUINO={runtime.ide.version} -DARDUINO_{build.board} -DARDUINO_ARCH_{build.arch} {build.extra_flags} {compiler.cpp.extra_flags} "-I{build.core.path}/api/deprecated" {includes} {compiler.mbed.includes} "{source_file}" -o "{object_file}"
+recipe.cpp.o.pattern="{compiler.path}{compiler.cpp.cmd}" {compiler.cpp.flags} -DARDUINO={runtime.ide.version} -DARDUINO_{build.board} -DARDUINO_ARCH_{build.arch} {build.extra_flags} {compiler.cpp.extra_flags} "-I{build.core.path}/api/deprecated" {includes} "@{build.path}/preprocess/includes.txt" "{source_file}" -o "{object_file}"
 
 ## Create archives
 recipe.ar.pattern="{compiler.path}{compiler.ar.cmd}" {compiler.ar.flags} {compiler.ar.extra_flags} "{archive_file_path}" "{object_file}"
 
 ## Combine gc-sections, archives, and objects
-recipe.c.combine.pattern="{compiler.path}{compiler.c.elf.cmd}"  "-L{build.path}" {compiler.c.elf.flags} {compiler.c.elf.extra_flags} {compiler.mbed.ldflags} "-T{build.variant.path}/{build.ldscript}" "-Wl,-Map,{build.path}/{build.project_name}.map" --specs=nano.specs --specs=nosys.specs {compiler.ldflags} -o "{build.path}/{build.project_name}.elf" {object_files} -Wl,--whole-archive "{build.path}/{archive_file}" {compiler.mbed} -Wl,--no-whole-archive -Wl,--start-group {compiler.mbed.extra_ldflags} {compiler.libraries.ldflags} -Wl,--end-group
+recipe.c.combine.pattern="{compiler.path}{compiler.c.elf.cmd}"  "-L{build.path}" {compiler.c.elf.flags} {compiler.c.elf.extra_flags} @{compiler.mbed.ldflags} "-T{build.variant.path}/{build.ldscript}" "-Wl,-Map,{build.path}/{build.project_name}.map" --specs=nano.specs --specs=nosys.specs {compiler.ldflags} -o "{build.path}/{build.project_name}.elf" {object_files} -Wl,--whole-archive "{build.path}/{archive_file}" {compiler.mbed} -Wl,--no-whole-archive -Wl,--start-group {compiler.mbed.extra_ldflags} {compiler.libraries.ldflags} -Wl,--end-group
 
 ## Create eeprom
 recipe.objcopy.eep.pattern=
