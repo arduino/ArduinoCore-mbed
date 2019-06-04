@@ -22,9 +22,6 @@ Remove the symlink to `api` you can find in  `$sketchbook/hardware/arduino/mbed/
 
 Open Arduino IDE; you should now see three new targets under `MBED boards` label
 
-## Arduino builder modification
-To handle the large number of include paths used by mbed, arduino-builder must be replaced with [this](https://github.com/arduino/arduino-builder/pull/307) reference-aware version.
-
 ## Adding an mbed target
 
 Adding a target is a mostly automatic procedure that involves running https://github.com/bcmi-labs/ArduinoCore-mbed/blob/master/mbed-os-to-arduino after setting `BOARDNAME` and `ARDUINOCORE` env variables.
