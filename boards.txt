@@ -17,7 +17,7 @@ odinw2.compiler.mbed.cflags={build.variant.path}/cflags.txt
 odinw2.compiler.mbed.cxxflags={build.variant.path}/cxxflags.txt
 odinw2.compiler.mbed.includes={build.variant.path}/includes.txt
 odinw2.compiler.mbed.extra_ldflags=-lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
-odinw2.compiler.mbed={build.variant.path}/libs/libmbed.a
+odinw2.compiler.mbed="{build.variant.path}/libs/libmbed.a"
 odinw2.vid.0=0x8087
 odinw2.pid.0=0x101f
 
@@ -49,7 +49,7 @@ envie_m4.compiler.mbed.cflags={build.variant.path}/cflags.txt
 envie_m4.compiler.mbed.cxxflags={build.variant.path}/cxxflags.txt
 envie_m4.compiler.mbed.includes={build.variant.path}/includes.txt
 envie_m4.compiler.mbed.extra_ldflags=-lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
-envie_m4.compiler.mbed={build.variant.path}/libs/libmbed.a
+envie_m4.compiler.mbed="{build.variant.path}/libs/libmbed.a"
 envie_m4.vid.0=0x0483
 envie_m4.pid.0=0x374e
 
@@ -64,7 +64,7 @@ envie_m4.upload.native_usb=false
 
 ##############################################################
 
-nrf52840.name=NRF52840
+nrf52840.name=Arduino Nano33BLE
 nrf52840.build.core=arduino
 nrf52840.build.crossprefix=arm-none-eabi-
 nrf52840.build.compiler_path={runtime.tools.arm-none-eabi-gcc.path}/bin/
@@ -82,9 +82,9 @@ nrf52840.compiler.mbed.cflags={build.variant.path}/cflags.txt
 nrf52840.compiler.mbed.cxxflags={build.variant.path}/cxxflags.txt
 nrf52840.compiler.mbed.includes={build.variant.path}/includes.txt
 nrf52840.compiler.mbed.extra_ldflags=-lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
-nrf52840.compiler.mbed={build.variant.path}/libs/libmbed.a {build.variant.path}/libs/libcc_310_core.a {build.variant.path}/libs/libcc_310_ext.a {build.variant.path}/libs/libcc_310_trng.a
-nrf52840.vid.0=0x0483
-nrf52840.pid.0=0x374e
+nrf52840.compiler.mbed="{build.variant.path}/libs/libmbed.a" "{build.variant.path}/libs/libcc_310_core.a" "{build.variant.path}/libs/libcc_310_ext.a" "{build.variant.path}/libs/libcc_310_trng.a"
+nrf52840.vid.0=0x2341
+nrf52840.pid.0=0x005a
 
 nrf52840.build.sd_name=s132
 nrf52840.build.sd_version=6.1.1
