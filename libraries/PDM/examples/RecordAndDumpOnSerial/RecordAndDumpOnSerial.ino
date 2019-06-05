@@ -1,12 +1,14 @@
 #include "PDM.h"
-#include "USBSerial.h"
 
-mbed::DigitalOut led((PinName)40);
+//mbed::DigitalOut led((PinName)40);
 
-USBSerial SerialUSB(true, 0x2341, 0x005a);
+// Temporary patch to get unbuffered writes
+mbed::UARTSerial serial(SERIAL1_TX, SERIAL1_RX, 1000000);
 
-mbed::UARTSerial serial((PinName)35, (PinName)42, 1000000);
+const int led = 40;
+int led_status = HIGH;
 
+#if 0
 /*
    This snippet allows to redirect stdout/stderr on a Stream at your choice
    Attention: it must be in mbed namespace to override the weak core definition
@@ -20,26 +22,23 @@ FileHandle *mbed_target_override_console(int fd) {
   return &serial;
 }
 }
+#endif
 
 uint8_t buffer[1024];
 volatile int idx = 0;
 
 void toggle() {
-  led = !led;
+  if (led_status == HIGH) {
+    led_status = LOW;
+  } else {
+    led_status = HIGH;
+  }
+  digitalWrite(led, led_status);
 }
 
 void send(void* buf, size_t size) {
   memcpy(buffer, buf, size);
   idx = 1;
-}
-
-#define DFU_MAGIC_SERIAL_ONLY_RESET   0x4e
-void checkSerial(int baud, int bits, int parity, int stop)
-{
-  if (baud == 1200) {
-    NRF_POWER->GPREGRET = DFU_MAGIC_SERIAL_ONLY_RESET;
-    NVIC_SystemReset();
-  }
 }
 
 void setup() {
@@ -49,22 +48,13 @@ void setup() {
   // The IRQ can call a naked function or one with buffer and size
   PDM.onReceive(send);
   PDM.onReceive(toggle);
-  SerialUSB.attach(checkSerial);
+
+  pinMode(led, OUTPUT);
 }
 
 void loop() {
   if (idx == 1) {
     serial.write(buffer, DEFAULT_PDM_BUFFER_SIZE);
-    fflush(stdout);
     idx = 0;
   }
-  /*
-    int available = PDM.available();
-    if (available) {
-      int ret = PDM.read(buffer, available);
-      fwrite(buffer, available, 1, stdout);
-      fflush(stdout);
-      idx += ret;
-    }
-  */
 }

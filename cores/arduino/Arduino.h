@@ -69,8 +69,19 @@ extern "C"{
 } // extern "C"
 #endif
 
-#include "Serial.h"
-#define Serial UART1
-
 #include "pins_arduino.h"
+
+#include "Serial.h"
+#if defined(SERIAL_CDC)
+#define Serial SerialUSB
+#define Serial1 UART1
+#define Serial2 UART2
+#define Serial3 UART3
+#else
+#define Serial UART1
+#define Serial1 UART2
+#define Serial2 UART3
+
+#endif
+
 #endif
