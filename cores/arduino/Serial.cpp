@@ -64,4 +64,4 @@ UART::operator bool() {
 	return 1;
 }
 
-UART UART1(USBTX, USBRX);
+UART UART1(STDIO_UART_TX, STDIO_UART_RX);
