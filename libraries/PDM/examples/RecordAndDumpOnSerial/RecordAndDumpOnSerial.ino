@@ -1,28 +1,18 @@
 #include "PDM.h"
+#include "USBSerial.h"
+#include "USBAudio.h"
 
-//mbed::DigitalOut led((PinName)40);
+// After defining USE_USB_AUDIO the board will behave as an USB sound card
+// You will, however, lose the chance to retrigger the bootloader via CDC Serial.
+// To program a new sketch, double click the RESET button and wait for the serial port to be enumerated again.
+// If USE_USB_AUDIO is not defined the stream will be sent via CDC Serial
 
-// Temporary patch to get unbuffered writes
-mbed::UARTSerial serial(SERIAL1_TX, SERIAL1_RX, 1000000);
-
-const int led = 40;
-int led_status = HIGH;
-
-#if 0
-/*
-   This snippet allows to redirect stdout/stderr on a Stream at your choice
-   Attention: it must be in mbed namespace to override the weak core definition
-*/
-namespace mbed {
-FileHandle *mbed_override_console(int fd) {
-  return &serial;
-}
-
-FileHandle *mbed_target_override_console(int fd) {
-  return &serial;
-}
-}
+#ifdef USE_USB_AUDIO
+USBAudio audio(true, 16000, 1, 16000, 1);
 #endif
+
+const int led = 41;
+int led_status = HIGH;
 
 uint8_t buffer[1024];
 volatile int idx = 0;
@@ -43,7 +33,7 @@ void send(void* buf, size_t size) {
 
 void setup() {
   // Start the PDM as MONO @ 16KHz : gain @20
-  // At this frequency you have 15ms in the callcack to use the returned buffer
+  // At this frequency you have 15ms in the callback to use the returned buffer
   PDM.begin(1, 16000, 20);
   // The IRQ can call a naked function or one with buffer and size
   PDM.onReceive(send);
@@ -54,7 +44,11 @@ void setup() {
 
 void loop() {
   if (idx == 1) {
-    serial.write(buffer, DEFAULT_PDM_BUFFER_SIZE);
+#ifdef USE_USB_AUDIO
+    audio.write(buffer, DEFAULT_PDM_BUFFER_SIZE);
+#else
+    SerialUSB.send(buffer, DEFAULT_PDM_BUFFER_SIZE);
+#endif
     idx = 0;
   }
 }
