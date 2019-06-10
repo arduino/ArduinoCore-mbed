@@ -1,10 +1,27 @@
-export BOARDNAME=DISCO_F429ZI
-export ARDUINOCORE=~/ArduinoCore-mbed/variants/$BOARDNAME/
+#!/bin/bash -ex
 
+MBED_CORE_LOCATION=$1
+BOARDNAMES=(ENVIE_M4 MBED_CONNECT_ODIN NRF52840_DK)
+
+#always work in /tmp
+cd /tmp/
+
+if [ ! -d mbed-os-program ]; then
 mbed new mbed-os-program
+fi
 cd mbed-os-program
-
+# checkout the mbed-os version you prefer
 # cd mbed-os && git checkout --track origin/feature-hal-spec-usb-device && cd ..
+
+if [ ! -f gron ]; then
+echo "Please copy gron executable here"
+exit 1
+fi
+
+for BOARDNAME in "${BOARDNAMES[@]}"
+do
+
+export ARDUINOCORE=$MBED_CORE_LOCATION/variants/$BOARDNAME/
 
 mbed target $BOARDNAME
 mbed toolchain GCC_ARM
@@ -17,8 +34,6 @@ echo " -DMBED_NO_GLOBAL_USING_DIRECTIVE=1" >> $ARDUINOCORE/defines.txt
 xargs -n 1 < ./BUILD/$BOARDNAME/GCC_ARM/.include* | sed -e 's#-I./mbed-os#-iwithprefixbefore/mbed#g' | sed '/^-I./ d' | tac  > $ARDUINOCORE/includes.txt
 
 #TODO: remove -I{build.core.path}/mbed/drivers from includes.txt (name clashing with libraries)
-
-
 #TODO: remove -MDD from flags
 
 ./gron ./BUILD/$BOARDNAME/GCC_ARM/.profile-c | grep json.flags | cut -f2 -d"\"" > $ARDUINOCORE/cflags.txt
@@ -32,12 +47,14 @@ cp BUILD/mbed-core-$BOARDNAME.a $ARDUINOCORE/libs/libmbed.a
 cp ./BUILD/$BOARDNAME/GCC_ARM/.link_script.ld $ARDUINOCORE/linker_script.ld
 cp ./BUILD/$BOARDNAME/GCC_ARM/mbed_config.h $ARDUINOCORE/
 
-# add #include "mbed_config.h" in "mbed.h"
+done
 
+rm -rf $ARDUINOCORE/../../cores/arduino/mbed/*
 cd mbed-os && find . | grep "\.h" | xargs -I % cp --parents % $ARDUINOCORE/../../cores/arduino/mbed && cd ..
 
-openocd -f interface/stlink-v2.cfg -f target/stm32f4x_stlink.cfg  -c "init"  -c "reset init" -c "halt" -c "flash write_image erase ./BUILD/$BOARDNAME/GCC_ARM/mbed-os-program.elf" -c "verify_image ./BUILD/$BOARDNAME/GCC_ARM/mbed-os-program.elf" -c "reset run" -c shutdown
+#TODO: add #include "mbed_config.h" in "mbed.h"
 
+exit 0
 
 ##################
 
