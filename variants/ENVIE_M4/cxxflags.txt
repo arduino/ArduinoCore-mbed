@@ -1,6 +1,6 @@
 -Wvla
 -fno-rtti
--std=gnu++98
+-std=gnu++14
 -DMBED_TRAP_ERRORS_ENABLED=1
 -Os
 -Wall

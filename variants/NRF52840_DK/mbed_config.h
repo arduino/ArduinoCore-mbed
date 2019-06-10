@@ -100,6 +100,7 @@
 #define MBED_CONF_LWIP_PPP_THREAD_STACKSIZE                                   768                                                                                              // set by library:lwip
 #define MBED_CONF_LWIP_SOCKET_MAX                                             4                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_TCPIP_THREAD_STACKSIZE                                 1200                                                                                             // set by library:lwip
+#define MBED_CONF_LWIP_TCP_CLOSE_TIMEOUT                                      1000                                                                                             // set by library:lwip
 #define MBED_CONF_LWIP_TCP_ENABLED                                            1                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_TCP_MAXRTX                                             6                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_TCP_SERVER_MAX                                         4                                                                                                // set by library:lwip

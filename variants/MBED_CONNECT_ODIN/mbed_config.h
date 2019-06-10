@@ -43,8 +43,8 @@
 #define DM_NUM_ADV_SETS                                                       3                                                                                                // set by library:cordio
 #define DM_NUM_PHYS                                                           3                                                                                                // set by library:cordio
 #define DM_SYNC_MAX                                                           1                                                                                                // set by library:cordio
-#define L2C_COC_CHAN_MAX                                                      8                                                                                                // set by library:cordio
-#define L2C_COC_REG_MAX                                                       4                                                                                                // set by library:cordio
+#define L2C_COC_CHAN_MAX                                                      1                                                                                                // set by library:cordio
+#define L2C_COC_REG_MAX                                                       1                                                                                                // set by library:cordio
 #define LPTICKER_DELAY_TICKS                                                  1                                                                                                // set by target:FAMILY_STM32
 #define MBED_CONF_ATMEL_RF_ASSUME_SPACED_SPI                                  1                                                                                                // set by library:atmel-rf[STM]
 #define MBED_CONF_ATMEL_RF_FULL_SPI_SPEED                                     7500000                                                                                          // set by library:atmel-rf
@@ -59,6 +59,7 @@
 #define MBED_CONF_CELLULAR_USE_APN_LOOKUP                                     1                                                                                                // set by library:cellular
 #define MBED_CONF_CORDIO_DESIRED_ATT_MTU                                      23                                                                                               // set by library:cordio
 #define MBED_CONF_CORDIO_MAX_PREPARED_WRITES                                  4                                                                                                // set by library:cordio
+#define MBED_CONF_CORDIO_RX_ACL_BUFFER_SIZE                                   70                                                                                               // set by library:cordio
 #define MBED_CONF_DRIVERS_UART_SERIAL_RXBUF_SIZE                              256                                                                                              // set by library:drivers
 #define MBED_CONF_DRIVERS_UART_SERIAL_TXBUF_SIZE                              256                                                                                              // set by library:drivers
 #define MBED_CONF_ESP8266_DEBUG                                               0                                                                                                // set by library:esp8266
@@ -113,6 +114,7 @@
 #define MBED_CONF_LWIP_PPP_THREAD_STACKSIZE                                   768                                                                                              // set by library:lwip
 #define MBED_CONF_LWIP_SOCKET_MAX                                             4                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_TCPIP_THREAD_STACKSIZE                                 1200                                                                                             // set by library:lwip
+#define MBED_CONF_LWIP_TCP_CLOSE_TIMEOUT                                      1000                                                                                             // set by library:lwip
 #define MBED_CONF_LWIP_TCP_ENABLED                                            1                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_TCP_MAXRTX                                             6                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_TCP_SERVER_MAX                                         4                                                                                                // set by library:lwip

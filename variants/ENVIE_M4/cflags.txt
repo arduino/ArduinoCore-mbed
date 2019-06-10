@@ -1,4 +1,4 @@
--std=gnu99
+-std=gnu11
 -DMBED_TRAP_ERRORS_ENABLED=1
 -Os
 -Wall

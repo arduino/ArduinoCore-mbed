@@ -1,4 +1,3 @@
-
 -iwithprefixbefore/mbed/usb/device/utilities/events
 -iwithprefixbefore/mbed/usb/device/utilities
 -iwithprefixbefore/mbed/usb/device/targets/TARGET_NORDIC/TARGET_MCU_NRF52840
@@ -304,7 +303,6 @@
 -iwithprefixbefore/mbed/features
 -iwithprefixbefore/mbed/events/equeue
 -iwithprefixbefore/mbed/events
--iwithprefixbefore/mbed/drivers
 -iwithprefixbefore/mbed/components/wifi/esp8266-driver/ESP8266
 -iwithprefixbefore/mbed/components/wifi/esp8266-driver
 -iwithprefixbefore/mbed/components/wifi
@@ -323,4 +321,3 @@
 -iwithprefixbefore/mbed/cmsis/TARGET_CORTEX_M
 -iwithprefixbefore/mbed/cmsis
 -iwithprefixbefore/mbed
--iwithprefixbefore.

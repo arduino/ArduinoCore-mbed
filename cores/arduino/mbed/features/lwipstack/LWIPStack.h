@@ -272,6 +272,14 @@ public:
      */
     virtual nsapi_error_t get_dns_server(int index, SocketAddress *address, const char *interface_name);
 
+    /** Add a domain name server to list of servers to query
+     *
+     *  @param address  Destination for the host address
+     *  @param interface_name  Network interface name
+     *  @return         NSAPI_ERROR_OK on success, negative error code on failure
+     */
+    virtual nsapi_error_t add_dns_server(const SocketAddress &address, const char *interface_name);
+
     /** Get the local IP address
      *
      *  @return         Null-terminated representation of the local IP address
@@ -582,11 +590,12 @@ private:
     static void tcpip_thread_callback(void *ptr);
 
     char ip_address[40];
-    rtos::Semaphore tcpip_inited;
     Interface *default_interface;
     LWIPMemoryManager memory_manager;
     osThreadId tcpip_thread_id;
     rtos::Mutex adaptation;
+    rtos::EventFlags _event_flag;
+    static const int TCP_CLOSED_FLAG = 0x4u;
 };
 
 #endif /* LWIPSTACK_H_ */
