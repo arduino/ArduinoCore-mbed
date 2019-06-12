@@ -52,7 +52,10 @@ class MbedI2C : public HardwareI2C
     virtual int available();
 
 private:
+
+#ifdef DEVICE_I2CSLAVE
     mbed::I2CSlave* slave;
+#endif
     mbed::I2C*      master;
     int _sda;
     int _scl;
@@ -68,3 +71,5 @@ extern arduino::MbedI2C Wire;
 #elif DEVICE_I2C > 1
 extern arduino::MbedI2C Wire1;
 #endif
+
+typedef arduino::MbedI2C TwoWire;

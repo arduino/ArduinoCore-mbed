@@ -7,26 +7,32 @@ void arduino::MbedI2C::begin() {
 }
 
 void arduino::MbedI2C::begin(uint8_t slaveAddr) {
+#ifdef DEVICE_I2CSLAVE
 	slave = new mbed::I2CSlave((PinName)_sda, (PinName)_scl);
 	slave->address(slaveAddr);
+#endif
 }
 
 void arduino::MbedI2C::end() {
 	if (master != NULL) {
 		delete master;
 	}
+#ifdef DEVICE_I2CSLAVE
 	if (slave != NULL) {
 		delete slave;
 	}
+#endif
 }
 
 void arduino::MbedI2C::setClock(uint32_t freq) {
 	if (master != NULL) {
 		master->frequency(freq);
 	}
+#ifdef DEVICE_I2CSLAVE
 	if (slave != NULL) {
 		slave->frequency(freq);
 	}
+#endif
 }
 
 void arduino::MbedI2C::beginTransmission(uint8_t address) {
