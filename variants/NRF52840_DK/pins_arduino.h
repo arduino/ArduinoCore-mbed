@@ -17,6 +17,13 @@
 
 #define DFU_MAGIC_SERIAL_ONLY_RESET   0x4e
 
+#define I2C_SDA				31
+#define I2C_SCL				2
+
+#define SPI_MISO			40
+#define SPI_MOSI			33
+#define SPI_SCK				13
+
 static inline void _ontouch1200bps_() {
 	NRF_POWER->GPREGRET = DFU_MAGIC_SERIAL_ONLY_RESET;
 	NVIC_SystemReset();
