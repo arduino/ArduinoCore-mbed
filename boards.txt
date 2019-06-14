@@ -49,7 +49,7 @@ envie_m4.compiler.mbed.cflags={build.variant.path}/cflags.txt
 envie_m4.compiler.mbed.cxxflags={build.variant.path}/cxxflags.txt
 envie_m4.compiler.mbed.includes={build.variant.path}/includes.txt
 envie_m4.compiler.mbed.extra_ldflags=-lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
-envie_m4.compiler.mbed="{build.variant.path}/libs/libmbed.a"
+envie_m4.compiler.mbed="{build.variant.path}/libs/libmbed.a" "{build.variant.path}/libs/libopenamp.a"
 envie_m4.vid.0=0x0483
 envie_m4.pid.0=0x374e
 

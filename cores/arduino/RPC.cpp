@@ -1,3 +1,5 @@
+#ifdef TARGET_STM32H747_CM4
+
 #include "RPC.h"
 
 int RPC::rpmsg_recv_service_callback(struct rpmsg_endpoint *ept, void *data,
@@ -79,3 +81,5 @@ int RPC::request(service_request* s) {
 }
 
 arduino::RPC RPC1;
+
+#endif

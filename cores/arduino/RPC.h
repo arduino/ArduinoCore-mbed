@@ -1,4 +1,5 @@
 #ifdef __cplusplus
+#ifdef TARGET_STM32H747_CM4
 
 #ifndef __ARDUINO_RPC_IMPLEMENTATION__
 #define __ARDUINO_RPC_IMPLEMENTATION__
@@ -65,5 +66,6 @@ class RPC : public Stream {
 
 extern arduino::RPC RPC1;
 
+#endif
 #endif
 #endif
