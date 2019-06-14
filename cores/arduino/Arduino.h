@@ -81,7 +81,8 @@ extern "C"{
 #define Serial UART1
 #define Serial1 UART2
 #define Serial2 UART3
-
 #endif
+
+#include "RPC.h"
 
 #endif
