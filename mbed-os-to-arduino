@@ -42,7 +42,7 @@ xargs -n 1 < ./BUILD/$BOARDNAME/GCC_ARM/.include* | sed -e 's#-I./mbed-os#-iwith
 
 #TODO: sanitize gron output (or move to python)
 
-arm-none-eabi-ar rcs BUILD/mbed-core-$BOARDNAME.a `xargs -n 1 < ./BUILD/$BOARDNAME/GCC_ARM/.link_options.txt | grep "\.o" | grep -v "main.o"`
+arm-none-eabi-ar rcs BUILD/mbed-core-$BOARDNAME.a `xargs -n 1 < ./BUILD/$BOARDNAME/GCC_ARM/.link_options.txt | grep "\.o" | grep -v "/main\.o"`
 cp BUILD/mbed-core-$BOARDNAME.a $ARDUINOCORE/libs/libmbed.a
 cp ./BUILD/$BOARDNAME/GCC_ARM/.link_script.ld $ARDUINOCORE/linker_script.ld
 cp ./BUILD/$BOARDNAME/GCC_ARM/mbed_config.h $ARDUINOCORE/

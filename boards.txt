@@ -117,7 +117,7 @@ nrf52840_nosd.compiler.mbed.cflags={build.variant.path}/cflags.txt
 nrf52840_nosd.compiler.mbed.cxxflags={build.variant.path}/cxxflags.txt
 nrf52840_nosd.compiler.mbed.includes={build.variant.path}/includes.txt
 nrf52840_nosd.compiler.mbed.extra_ldflags=-lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
-nrf52840_nosd.compiler.mbed="{build.variant.path}/libs/libmbed.a"
+nrf52840_nosd.compiler.mbed="{build.variant.path}/libs/libmbed.a" "{build.variant.path}/libs/libcc_310_core.a" "{build.variant.path}/libs/libcc_310_ext.a" "{build.variant.path}/libs/libcc_310_trng.a"
 nrf52840_nosd.vid.0=0x2341
 nrf52840_nosd.pid.0=0x005a
 
