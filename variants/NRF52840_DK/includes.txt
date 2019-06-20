@@ -303,6 +303,7 @@
 -iwithprefixbefore/mbed/features
 -iwithprefixbefore/mbed/events/equeue
 -iwithprefixbefore/mbed/events
+-iwithprefixbefore/mbed/drivers
 -iwithprefixbefore/mbed/components/wifi/esp8266-driver/ESP8266
 -iwithprefixbefore/mbed/components/wifi/esp8266-driver
 -iwithprefixbefore/mbed/components/wifi

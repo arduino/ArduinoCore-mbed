@@ -29,4 +29,7 @@ static inline void _ontouch1200bps_() {
 	NVIC_SystemReset();
 }
 
+#define MBED_CONF_FLASHIAP_BLOCK_DEVICE_BASE_ADDRESS	0x10000
+#define MBED_CONF_FLASHIAP_BLOCK_DEVICE_SIZE			0xF0000
+
 #endif //__PINS_ARDUINO__
