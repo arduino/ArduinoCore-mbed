@@ -18,12 +18,12 @@ compiler.warning_flags.all=-Wall -Wextra
 
 compiler.path={build.compiler_path}
 compiler.c.cmd={build.crossprefix}gcc
-compiler.c.flags=-c -I. {compiler.warning_flags} -Os -g -nostdlib "@{compiler.mbed.defines}" "@{compiler.mbed.cflags}" -MMD -std=gnu11 -mcpu={build.mcu}
+compiler.c.flags=-c -I. {compiler.warning_flags} -Os -g -nostdlib "@{compiler.mbed.defines}" "@{compiler.mbed.cflags}" -MMD -mcpu={build.mcu}
 compiler.c.elf.cmd={build.crossprefix}g++
 compiler.c.elf.flags=-Wl,--gc-sections {compiler.warning_flags} -Wl,--as-needed
 compiler.S.flags=-c -g -x assembler-with-cpp -Os -mcpu={build.mcu}
 compiler.cpp.cmd={build.crossprefix}g++
-compiler.cpp.flags=-c -I. {compiler.warning_flags} -g -Os -nostdlib "@{compiler.mbed.defines}" "@{compiler.mbed.cxxflags}" -MMD -std=gnu++11 -mcpu={build.mcu}
+compiler.cpp.flags=-c -I. {compiler.warning_flags} -g -Os -nostdlib "@{compiler.mbed.defines}" "@{compiler.mbed.cxxflags}" -MMD -mcpu={build.mcu}
 compiler.ar.cmd={build.crossprefix}ar
 compiler.ar.flags=rcs
 compiler.objcopy.cmd=
