@@ -2,6 +2,8 @@
 
 #include "RPC.h"
 
+extern int signal_rpc_available(void *data, size_t len);
+
 int RPC::rpmsg_recv_service_callback(struct rpmsg_endpoint *ept, void *data,
                                        size_t len, uint32_t src, void *priv)
 {
@@ -9,6 +11,9 @@ int RPC::rpmsg_recv_service_callback(struct rpmsg_endpoint *ept, void *data,
   service_request* s = ((service_request *) data);
   if (s->code == REQUEST_REBOOT) {
     NVIC_SystemReset();
+  }
+  if (s->code == CALL_FUNCTION) {
+    signal_rpc_available(s->data, len - sizeof(s->code));
   }
   return 0;
 }
@@ -77,7 +82,12 @@ size_t RPC::write(uint8_t c) {
 }
 
 int RPC::request(service_request* s) {
-  return OPENAMP_send(&rp_endpoints[0], s, sizeof(*s) + s->length);
+  return OPENAMP_send(&rp_endpoints[0], s, sizeof(*s));
+}
+
+size_t RPC::write(enum endpoints_t ep, const uint8_t* buf, size_t len) {
+  OPENAMP_send(&rp_endpoints[ep], buf, len);
+  return len;
 }
 
 arduino::RPC RPC1;

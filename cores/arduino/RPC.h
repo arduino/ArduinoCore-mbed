@@ -10,8 +10,15 @@ extern "C" {
 #define boolean   boolean_t
 #include "openamp.h"
 #undef boolean
+#ifdef bool
 #define boolean   bool
+#endif
 }
+
+enum endpoints_t {
+	ENDPOINT_SERVICE = 0,
+	ENDPOINT_RAW
+};
 
 enum service_request_code_t {
   REQUEST_REBOOT = 0x7F7F7F7F,
@@ -20,8 +27,6 @@ enum service_request_code_t {
 
 typedef struct _service_request {
   enum service_request_code_t code;
-  size_t length;
-  size_t parameters;
   uint8_t* data;
 } service_request;
 
@@ -45,6 +50,8 @@ class RPC : public Stream {
 		size_t write(uint8_t c);
 		size_t write(const uint8_t*, size_t);
 		int request(service_request* s);
+		size_t write(enum endpoints_t ep, const uint8_t* buf, size_t len);
+
 		using Print::write; // pull in write(str) and write(buf, size) from Print
 		operator bool() {
 			return initialized;
