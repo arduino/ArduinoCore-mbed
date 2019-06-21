@@ -23,10 +23,16 @@
 #if defined(__cplusplus)
 #if !defined(ARDUINO_AS_MBED_LIBRARY)
 #define PinMode MbedPinMode
-#endif
+#ifdef F
+#define Arduino_F F
+#undef F
+#endif // F (mbed included after arduino.h)
+#define F Mbed_F
 #include "mbed.h"
 #undef PinMode
-#endif
+#undef F
+#endif // !ARDUINO_AS_MBED_LIBRARY
+#endif //__cplusplus
 
 #if defined(ARDUINO_AS_MBED_LIBRARY)
 #define PinMode ArduinoPinMode
