@@ -97,5 +97,6 @@ extern PinDescription g_APinDescription[];
 
 #include "RPC_internal.h"
 #include "overloads.h"
+#include "macros.h"
 
 #endif
