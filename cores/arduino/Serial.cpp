@@ -13,18 +13,15 @@ void UART::begin(unsigned long baudrate, uint16_t config) {
 
 void UART::begin(unsigned long baudrate) {
 	if (_serial == NULL) {
-		_serial = new mbed::Serial(tx, rx, baudrate);
+		_serial = new mbed::RawSerial(tx, rx, baudrate);
 	}
-	#ifdef DEVICE_SERIAL_ASYNCH
-	_serial->read(intermediate_buf, 1, mbed::callback(this, &UART::on_rx));
-	#endif
+	_serial->attach(mbed::callback(this, &UART::on_rx), mbed::SerialBase::RxIrq);
 }
 
-void UART::on_rx(int howmany) {
-	rx_buffer.store_char(intermediate_buf[0]);
-	#ifdef DEVICE_SERIAL_ASYNCH
-	_serial->read(intermediate_buf, 1, mbed::callback(this, &UART::on_rx));
-	#endif
+void UART::on_rx() {
+	while(_serial->readable()) {
+		rx_buffer.store_char(_serial->getc());
+	}
 }
 
 void UART::end() {

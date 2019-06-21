@@ -45,7 +45,6 @@ using namespace arduino;
 extern "C"{
 #endif
 
-// avr-libc defines _NOP() since 1.6.2
 #ifndef _NOP
 #define _NOP() do { __asm__ volatile ("nop"); } while (0)
 #endif
@@ -65,11 +64,24 @@ extern "C"{
 #endif // abs
 #define abs(x) ((x)>0?(x):-(x))
 
+#define interrupts()        __enable_irq()
+#define noInterrupts()      __disable_irq()
+
 #ifdef __cplusplus
 } // extern "C"
 #endif
 
 #include "pins_arduino.h"
+
+/* Types used for the table below */
+typedef struct _PinDescription
+{
+  PinName name;
+  mbed::InterruptIn* irq;
+} PinDescription ;
+
+/* Pins table to be instantiated into variant.cpp */
+extern PinDescription g_APinDescription[];
 
 #include "Serial.h"
 #if defined(SERIAL_CDC)
@@ -83,6 +95,7 @@ extern "C"{
 #define Serial2 UART3
 #endif
 
-#include "RPC.h"
+#include "RPC_internal.h"
+#include "overloads.h"
 
 #endif

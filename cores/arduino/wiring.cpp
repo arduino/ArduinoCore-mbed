@@ -33,12 +33,12 @@ unsigned long micros() {
 
 void delay(unsigned long ms)
 {
-  wait((float)ms / 1000.0f);
+  wait_ms(ms);
 }
 
-/* Delay for the given number of microseconds.  Assumes a 1, 8, 12, 16, 20 or 24 MHz clock. */
 void delayMicroseconds(unsigned int us)
 {
+  wait_us(us);
 }
 
 void init()

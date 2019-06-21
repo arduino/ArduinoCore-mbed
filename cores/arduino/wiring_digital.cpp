@@ -23,31 +23,58 @@
 #include "Arduino.h"
 #include "pins_arduino.h"
 
-void pinMode(pin_size_t pin, PinMode mode)
+void pinMode(PinName pin, PinMode mode)
 {
   switch (mode) {
     case INPUT:
-      mbed::DigitalIn((PinName)pin).mode(PullNone);
+      mbed::DigitalIn(pin).mode(PullNone);
       break;
     case OUTPUT:
-      mbed::DigitalOut((PinName)pin);
+      mbed::DigitalOut(pin, 0);
       break;
     case INPUT_PULLUP:
-      mbed::DigitalIn((PinName)pin).mode(PullUp);
+      mbed::DigitalIn(pin).mode(PullUp);
       break;
     case INPUT_PULLDOWN:
-      mbed::DigitalIn((PinName)pin).mode(PullDown);
+      mbed::DigitalIn(pin).mode(PullDown);
       break;
   }
 }
 
+void pinMode(pin_size_t pin, PinMode mode)
+{
+  switch (mode) {
+    case INPUT:
+      mbed::DigitalIn(digitalPinToPinName(pin)).mode(PullNone);
+      break;
+    case OUTPUT:
+      mbed::DigitalOut(digitalPinToPinName(pin));
+      break;
+    case INPUT_PULLUP:
+      mbed::DigitalIn(digitalPinToPinName(pin)).mode(PullUp);
+      break;
+    case INPUT_PULLDOWN:
+      mbed::DigitalIn(digitalPinToPinName(pin)).mode(PullDown);
+      break;
+  }
+}
+
+void digitalWrite(PinName pin, PinStatus val)
+{
+  mbed::DigitalOut(pin).write((int)val);
+}
 
 void digitalWrite(pin_size_t pin, PinStatus val)
 {
-	mbed::DigitalOut((PinName)pin).write((int)val);
+	mbed::DigitalOut(digitalPinToPinName(pin)).write((int)val);
+}
+
+PinStatus digitalRead(PinName pin)
+{
+  return (PinStatus)mbed::DigitalIn(pin).read();
 }
 
 PinStatus digitalRead(pin_size_t pin)
 {
-	return (PinStatus)mbed::DigitalIn((PinName)pin).read();
+	return (PinStatus)mbed::DigitalIn(digitalPinToPinName(pin)).read();
 }
