@@ -22,13 +22,15 @@
 
 #include "wiring_private.h"
 
+static mbed::Timer t;
+
 unsigned long millis()
 {
-  return us_ticker_read() / 1000L;
+  return t.read_ms();
 }
 
 unsigned long micros() {
-  return us_ticker_read();
+  return t.read_us();
 }
 
 void delay(unsigned long ms)
@@ -42,7 +44,9 @@ void delayMicroseconds(unsigned int us)
 }
 
 void init()
-{}
+{
+  t.start();
+}
 
 void yield() {
   rtos::ThisThread::yield();
