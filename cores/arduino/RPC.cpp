@@ -1,6 +1,6 @@
 #ifdef TARGET_STM32H747_CM4
 
-#include "RPC.h"
+#include "RPC_internal.h"
 
 extern int signal_rpc_available(void *data, size_t len);
 
