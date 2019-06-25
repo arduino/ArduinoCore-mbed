@@ -18,13 +18,45 @@
 
 #include "Arduino.h"
 
+#ifdef digitalPinToInterruptObj
+static mbed::InterruptIn* PinNameToInterruptObj(PinName P) {
+  // reverse search for pinName in g_APinDescription[P].name fields
+  for (int i=0; i < PINS_COUNT; i++) {
+    if (g_APinDescription[i].name == P) {
+      return g_APinDescription[i].irq;
+    }
+  }
+  return NULL;
+}
+#endif
+
+void detachInterrupt(PinName interruptNum) {
+#ifdef digitalPinToInterruptObj
+  if (PinNameToInterruptObj(interruptNum) != NULL) {
+    delete PinNameToInterruptObj(interruptNum);
+  }
+#endif
+}
+
+void detachInterrupt(pin_size_t interruptNum) {
+#ifdef digitalPinToInterruptObj
+  if (digitalPinToInterruptObj(interruptNum) != NULL) {
+    delete digitalPinToInterruptObj(interruptNum);
+  }
+#endif
+}
+
 void attachInterruptParam(PinName interruptNum, voidFuncPtrParam func, PinStatus mode, void* param) {
+  detachInterrupt(interruptNum);
   mbed::InterruptIn* irq = new mbed::InterruptIn(interruptNum);
   if (mode == FALLING) {
     irq->fall(mbed::callback(func, param));
   } else {
     irq->rise(mbed::callback(func, param));
   }
+#ifdef digitalPinToInterruptObj
+  digitalPinToInterruptObj(interruptNum) = irq;
+#endif
 }
 
 void attachInterrupt(PinName interruptNum, voidFuncPtr func, PinStatus mode) {
@@ -32,12 +64,16 @@ void attachInterrupt(PinName interruptNum, voidFuncPtr func, PinStatus mode) {
 }
 
 void attachInterruptParam(pin_size_t interruptNum, voidFuncPtrParam func, PinStatus mode, void* param) {
-  mbed::InterruptIn* irq = new mbed::InterruptIn((PinName)interruptNum);
+  detachInterrupt(interruptNum);
+  mbed::InterruptIn* irq = new mbed::InterruptIn(digitalPinToPinName(interruptNum));
   if (mode == FALLING) {
     irq->fall(mbed::callback(func, param));
   } else {
     irq->rise(mbed::callback(func, param));
   }
+#ifdef digitalPinToInterruptObj
+  digitalPinToInterruptObj(interruptNum) = irq;
+#endif
 }
 
 void attachInterrupt(pin_size_t interruptNum, voidFuncPtr func, PinStatus mode) {
