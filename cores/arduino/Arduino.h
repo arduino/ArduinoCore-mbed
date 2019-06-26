@@ -101,7 +101,6 @@ extern PinDescription g_APinDescription[];
 #define Serial2 UART3
 #endif
 
-#include "RPC_internal.h"
 #include "overloads.h"
 #include "macros.h"
 
