@@ -4,9 +4,27 @@
 #ifndef __ARDUINO_RPC_IMPLEMENTATION__
 #define __ARDUINO_RPC_IMPLEMENTATION__
 
-#include "Arduino.h"
+// msgpack overrides BIN symbol, undefine it 
+#ifdef BIN
+#define _BIN BIN
+#undef BIN
+#define BIN BIN_MSGPACK
+#endif
+#include "rpclib.h"
+#include "rpc/dispatcher.h"
+#include "RPC_client.h"
+#ifdef _BIN
+#undef BIN
+#define BIN _BIN
+#endif
 
 extern "C" {
+#ifdef ATOMIC_FLAG_INIT
+#undef ATOMIC_FLAG_INIT
+#endif
+#ifdef ATOMIC_VAR_INIT
+#undef ATOMIC_VAR_INIT
+#endif
 #define boolean   boolean_t
 #include "openamp.h"
 #undef boolean
@@ -15,18 +33,15 @@ extern "C" {
 #endif
 }
 
+#include "Arduino.h"
+
 enum endpoints_t {
-	ENDPOINT_SERVICE = 0,
+	ENDPOINT_CM7TOCM4 = 0,
+	ENDPOINT_CM4TOCM7,
 	ENDPOINT_RAW
 };
 
-enum service_request_code_t {
-  REQUEST_REBOOT = 0x7F7F7F7F,
-  CALL_FUNCTION  = 0x12345678,
-};
-
 typedef struct _service_request {
-  enum service_request_code_t code;
   uint8_t* data;
 } service_request;
 
@@ -49,7 +64,6 @@ class RPC : public Stream {
 		void flush(void) {};
 		size_t write(uint8_t c);
 		size_t write(const uint8_t*, size_t);
-		int request(service_request* s);
 		size_t write(enum endpoints_t ep, const uint8_t* buf, size_t len);
 
 		using Print::write; // pull in write(str) and write(buf, size) from Print
@@ -57,17 +71,33 @@ class RPC : public Stream {
 			return initialized;
 		}
 
+		std::shared_ptr<RPCLIB_MSGPACK::object_handle> getResult() {
+			return call_result;
+		}
+
+		rpc::detail::dispatcher server;
+		rpc::client client;
+
 	private:
 		RingBufferN<256> rx_buffer;
 		bool initialized = false;
 		struct rpmsg_endpoint rp_endpoints[4];
-		static int rpmsg_recv_service_callback(struct rpmsg_endpoint *ept, void *data,
+		static int rpmsg_recv_cm7tocm4_callback(struct rpmsg_endpoint *ept, void *data,
+                                       size_t len, uint32_t src, void *priv);
+		static int rpmsg_recv_cm4tocm7_callback(struct rpmsg_endpoint *ept, void *data,
                                        size_t len, uint32_t src, void *priv);
 		static int rpmsg_recv_raw_callback(struct rpmsg_endpoint *ept, void *data,
                                        size_t len, uint32_t src, void *priv);
+		void dispatch();
 		events::EventQueue eventQueue;
 		mbed::Ticker ticker;
 		rtos::Thread* eventThread;
+		RPCLIB_MSGPACK::unpacker pac_;
+
+		//rpc::detail::response response;
+		std::shared_ptr<RPCLIB_MSGPACK::object_handle> call_result;
+
+		osThreadId dispatcherThreadId;
 };
 }
 

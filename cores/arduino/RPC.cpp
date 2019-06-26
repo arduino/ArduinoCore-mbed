@@ -2,19 +2,37 @@
 
 #include "RPC_internal.h"
 
-extern int signal_rpc_available(void *data, size_t len);
+void client::post(RPCLIB_MSGPACK::sbuffer *buffer);
+{
+  RPC1.write(ENDPOINT_CM4TOCM7, (const uint8_t*)buffer->data(), buffer->size());
+}
 
-int RPC::rpmsg_recv_service_callback(struct rpmsg_endpoint *ept, void *data,
+RPCLIB_MSGPACK::object_handle getResult() {
+  return *(RPC1.getResult());
+}
+
+int RPC::rpmsg_recv_cm7tocm4_callback(struct rpmsg_endpoint *ept, void *data,
                                        size_t len, uint32_t src, void *priv)
 {
+  // This fuction gets called when we are the rpc server and need to execute a function
   RPC* rpc = (RPC*)priv;
-  service_request* s = ((service_request *) data);
-  if (s->code == REQUEST_REBOOT) {
-    NVIC_SystemReset();
-  }
-  if (s->code == CALL_FUNCTION) {
-    signal_rpc_available(s->data, len - sizeof(s->code));
-  }
+  memcpy(pac_.buffer(), (const void*)data, len);
+  pac_.buffer_consumed(len);
+
+  osSignalSet(dispatcherThreadId, 0x1);
+
+  return 0;
+}
+
+int RPC::rpmsg_recv_cm4tocm7_callback(struct rpmsg_endpoint *ept, void *data,
+                                       size_t len, uint32_t src, void *priv)
+{
+  // This fuction gets called when we want to retrieve the rpc response (as clients)
+  RPC* rpc = (RPC*)priv;
+  memcpy(pac_.buffer(), (const void*)data, len);
+  pac_.buffer_consumed(len);
+
+  osSignalSet(dispatcherThreadId, 0x2);
   return 0;
 }
 
@@ -48,15 +66,22 @@ int RPC::begin() {
   rp_endpoints[1].priv = this;
 
   /* create a endpoint for rmpsg communication */
-  int status = OPENAMP_create_endpoint(&rp_endpoints[0], "service", RPMSG_ADDR_ANY,
-                                   rpmsg_recv_service_callback, NULL);
+  int status = OPENAMP_create_endpoint(&rp_endpoints[ENDPOINT_CM7TOCM4], "cm7tocm4", RPMSG_ADDR_ANY,
+                                   rpmsg_recv_cm7tocm4_callback, NULL);
+  if (status < 0)
+  {
+    return 0;
+  }
+
+  int status = OPENAMP_create_endpoint(&rp_endpoints[ENDPOINT_CM4TOCM7], "cm4tocm7", RPMSG_ADDR_ANY,
+                                   rpmsg_recv_cm4tocm7_callback, NULL);
   if (status < 0)
   {
     return 0;
   }
 
   /* create a endpoint for raw rmpsg communication */
-  status = OPENAMP_create_endpoint(&rp_endpoints[1], "raw", RPMSG_ADDR_ANY,
+  status = OPENAMP_create_endpoint(&rp_endpoints[ENDPOINT_RAW], "raw", RPMSG_ADDR_ANY,
                                    rpmsg_recv_raw_callback, NULL);
   if (status < 0)
   {
@@ -67,8 +92,49 @@ int RPC::begin() {
   eventThread->start(callback(&eventQueue, &events::EventQueue::dispatch_forever));
   ticker.attach(eventQueue.event(&OPENAMP_check_for_message), 0.02f);
 
+  dispatcherThread = new rtos::Thread(osPriorityNormal);
+  dispatcherThread->start(dispatch);
+
   initialized = true;
+  pac_.reserve_buffer(1024);
+
   return 1;
+}
+
+void RPC::dispatch() {
+
+  dispatcherThreadId = osThreadGetId();
+
+  while (true) {
+    osEvent v = osSignalWait(0, 0);
+
+    if (v.status == osEventSignal) {
+       if (v.value.signals & 0x1) {
+        RPCLIB_MSGPACK::unpacked result;
+        while (pac_.next(result)) {
+          auto msg = result.get();
+          auto resp = srv.dispatch(msg, true);
+          auto data = resp.get_data();
+          if (resp.is_empty()) {
+            //printf("no response\n");
+          } else {
+            // TODO: Post data to endpoint
+            write(ENDPOINT_CM7TOCM4, data.data(), data.size());
+            // printf("result: %d\n", resp.get_result()->as<int>());
+          }
+        }
+      }
+      if (v.value.signals & 0x2) {
+        RPCLIB_MSGPACK::unpacked result;
+        while (pac_.next(result)) {
+          auto r = response(std::move(result));
+          auto id = r.get_id();
+          call_result = *r.get_result();
+          // TODO: signal callThreadId
+        }
+      }
+    }
+  }
 }
 
 size_t RPC::write(const uint8_t* buf, size_t len) {
@@ -79,10 +145,6 @@ size_t RPC::write(const uint8_t* buf, size_t len) {
 size_t RPC::write(uint8_t c) {
   OPENAMP_send(&rp_endpoints[1], &c, 1);
   return 1;
-}
-
-int RPC::request(service_request* s) {
-  return OPENAMP_send(&rp_endpoints[0], s, sizeof(*s));
 }
 
 size_t RPC::write(enum endpoints_t ep, const uint8_t* buf, size_t len) {
