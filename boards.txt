@@ -25,7 +25,7 @@ odinw2.upload.via_ssh=true
 odinw2.upload.tool=openocd
 odinw2.upload.config=-f interface/cmsis-dap.cfg -f target/stm32f4x.cfg
 odinw2.upload.protocol=sam-ba
-odinw2.upload.maximum_size=10000000
+odinw2.upload.maximum_size=1048576
 odinw2.upload.use_1200bps_touch=false
 odinw2.upload.wait_for_upload_port=false
 odinw2.upload.native_usb=false
@@ -58,7 +58,8 @@ envie_m4.upload.via_ssh=true
 envie_m4.upload.tool=openocd
 envie_m4.upload.config=-f board/envie.cfg
 envie_m4.upload.protocol=sam-ba
-envie_m4.upload.maximum_size=10000000
+envie_m4.upload.maximum_size=1048576
+envie_m4.upload.maximum_data_size=262144
 envie_m4.upload.use_1200bps_touch=false
 envie_m4.upload.wait_for_upload_port=false
 envie_m4.upload.native_usb=false
@@ -96,8 +97,8 @@ nrf52840.upload.protocol=nrfutil
 nrf52840.upload.use_1200bps_touch=true
 nrf52840.upload.wait_for_upload_port=true
 nrf52840.upload.native_usb=true
-nrf52840.upload.maximum_size=1000000
-nrf52840.upload.maximum_data_size=1000000
+nrf52840.upload.maximum_size=917504
+nrf52840.upload.maximum_data_size=262144
 
 ##############################################################
 
@@ -126,11 +127,11 @@ nrf52840_nosd.build.sd_name=s132
 nrf52840_nosd.build.sd_version=6.1.1
 nrf52840_nosd.build.sd_fwid=0xFFFE
 
-nrf52840_nosd.upload.tool=nrfutil
-nrf52840_nosd.upload.protocol=nrfutil
+nrf52840_nosd.upload.tool=dfu-util
+nrf52840_nosd.upload.protocol=
 nrf52840_nosd.upload.use_1200bps_touch=true
 nrf52840_nosd.upload.wait_for_upload_port=true
 nrf52840_nosd.upload.native_usb=true
-nrf52840_nosd.upload.maximum_size=1000000
-nrf52840_nosd.upload.maximum_data_size=1000000
+nrf52840_nosd.upload.maximum_size=983040
+nrf52840_nosd.upload.maximum_data_size=262144
 
