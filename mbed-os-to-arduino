@@ -1,7 +1,7 @@
 #!/bin/bash -ex
 
 MBED_CORE_LOCATION=$1
-BOARDNAMES=(ENVIE_M4 MBED_CONNECT_ODIN NRF52840_DK)
+BOARDNAMES=(ENVIE_M4 MBED_CONNECT_ODIN NRF52840_DK NRF52840_DK)
 
 #always work in /tmp
 cd /tmp/
@@ -28,12 +28,20 @@ mbed toolchain GCC_ARM
 echo -e "#include \"mbed.h\"\nint main() {Thread thd;}" > main.cpp
 echo -e "{\n\"macros\": [\n\"MBED_HEAP_STATS_ENABLED=1\",\n\"MBED_STACK_STATS_ENABLED=1\",\n\"MBED_MEM_TRACING_ENABLED=1\"\n],\n\"target_overrides\": {\n   \"*\": {\n\"platform.stdio-buffered-serial\": true,\n\"platform.stdio-baud-rate\": 115200,\n\"platform.default-serial-baud-rate\": 115200\n}\n}\n}\n" > mbed_app.json
 
+if [ $BOARDNAME == NRF52840_DK  ]; then
+	if [ x$NO_SD_TARGET == x"" ]; then
+		NO_SD_TARGET=true
+	else
+		echo -e "{\n\"macros\": [\n\"MBED_HEAP_STATS_ENABLED=1\",\n\"MBED_STACK_STATS_ENABLED=1\",\n\"MBED_MEM_TRACING_ENABLED=1\"\n],\n\"target_overrides\": {\n   \"*\": {\n\"platform.stdio-buffered-serial\": true,\n\"platform.stdio-baud-rate\": 115200,\n\"platform.default-serial-baud-rate\": 115200,\n\"target.features_add\": [\"BLE\"],\"target.extra_labels_add\": [\"CORDIO\", \"CORDIO_LL\", \"SOFTDEVICE_NONE\", \"NORDIC_CORDIO\"],\"target.extra_labels_remove\": [\"SOFTDEVICE_COMMON\", \"SOFTDEVICE_S140_FULL\", \"NORDIC_SOFTDEVICE\"]}\n}\n}\n" > mbed_app.json
+		ARDUINOCORE=$MBED_CORE_LOCATION/variants/NRF52840_DK_NOSD
+	fi
+fi
+
 mbed compile -v | grep "Macros:" > $BOARDNAME.macros.txt
 cat $BOARDNAME.macros.txt | cut -f2 -d":" > $ARDUINOCORE/defines.txt
 echo " -DMBED_NO_GLOBAL_USING_DIRECTIVE=1" >> $ARDUINOCORE/defines.txt
 xargs -n 1 < ./BUILD/$BOARDNAME/GCC_ARM/.include* | sed -e 's#-I./mbed-os#-iwithprefixbefore/mbed#g' | sed '/^-I./ d' | tac  > $ARDUINOCORE/includes.txt
 
-#TODO: remove -I{build.core.path}/mbed/drivers from includes.txt (name clashing with libraries)
 #TODO: remove -MDD from flags
 
 ./gron ./BUILD/$BOARDNAME/GCC_ARM/.profile-c | grep json.flags | cut -f2 -d"\"" > $ARDUINOCORE/cflags.txt
@@ -53,6 +61,7 @@ rm -rf $ARDUINOCORE/../../cores/arduino/mbed/*
 cd mbed-os && find . | grep "\.h" | xargs -I % cp --parents % $ARDUINOCORE/../../cores/arduino/mbed && cd ..
 
 #TODO: add #include "mbed_config.h" in "mbed.h"
+#TODO: rename drivers/SPI.h in drivers/SPIMaster.h and modify include in mbed.h
 
 exit 0
 
