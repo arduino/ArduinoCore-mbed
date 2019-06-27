@@ -17,6 +17,7 @@
 #define MBED_H
 
 #include "platform/mbed_version.h"
+#include "mbed_config.h"
 
 #if MBED_CONF_RTOS_PRESENT
 #include "rtos/rtos.h"

@@ -218,13 +218,6 @@ typedef enum {
     D14 = p26,
     D15 = p27,
 
-    A0 = p3,
-    A1 = p4,
-    A2 = p28,
-    A3 = p29,
-    A4 = p30,
-    A5 = p31,
-
     /**** QSPI pins ****/
     QSPI1_IO0 = P0_20,
     QSPI1_IO1 = P0_21,
