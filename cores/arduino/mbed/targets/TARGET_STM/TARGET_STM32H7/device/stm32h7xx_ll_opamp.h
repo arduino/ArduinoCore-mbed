@@ -96,7 +96,7 @@ extern "C" {
 
 
 /* Exported types ------------------------------------------------------------*/
-#if 1 //mbed
+#if defined(USE_FULL_LL_DRIVER)
 /** @defgroup OPAMP_LL_ES_INIT OPAMP Exported Init structure
   * @{
   */
@@ -782,7 +782,7 @@ __STATIC_INLINE uint32_t LL_OPAMP_IsEnabled(OPAMP_TypeDef *OPAMPx)
   * @}
   */
 
-#if 1 //mbed
+#if defined(USE_FULL_LL_DRIVER)
 /** @defgroup OPAMP_LL_EF_Init Initialization and de-initialization functions
   * @{
   */

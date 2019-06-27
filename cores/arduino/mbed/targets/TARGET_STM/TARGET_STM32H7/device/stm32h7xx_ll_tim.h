@@ -203,7 +203,7 @@ static const uint8_t SHIFT_TAB_OISx[] =
 
 
 /* Exported types ------------------------------------------------------------*/
-#if 1 //mbed
+#if defined(USE_FULL_LL_DRIVER)
 /** @defgroup TIM_LL_ES_INIT TIM Exported Init structure
   * @{
   */
@@ -522,7 +522,7 @@ typedef struct
   * @}
   */
 
-#if 1 //mbed
+#if defined(USE_FULL_LL_DRIVER)
 /** @defgroup TIM_LL_EC_BREAK_ENABLE Break Enable
   * @{
   */
@@ -661,7 +661,7 @@ typedef struct
   * @}
   */
 
-#if 1 //mbed
+#if defined(USE_FULL_LL_DRIVER)
 /** @defgroup TIM_LL_EC_OCSTATE Output Configuration State
   * @{
   */
@@ -4571,7 +4571,7 @@ __STATIC_INLINE void LL_TIM_GenerateEvent_BRK2(TIM_TypeDef *TIMx)
   * @}
   */
 
-#if 1 //mbed
+#if defined(USE_FULL_LL_DRIVER)
 /** @defgroup TIM_LL_EF_Init Initialisation and deinitialisation functions
   * @{
   */

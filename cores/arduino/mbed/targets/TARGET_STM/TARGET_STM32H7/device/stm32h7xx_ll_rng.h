@@ -44,7 +44,7 @@ extern "C" {
 /* Private macros ------------------------------------------------------------*/
 
 /* Exported types ------------------------------------------------------------*/
-#if 1 //mbed
+#if defined(USE_FULL_LL_DRIVER)
 /** @defgroup RNG_LL_ES_Init_Struct RNG Exported Init structures
   * @{
   */
@@ -365,7 +365,7 @@ __STATIC_INLINE uint32_t LL_RNG_ReadRandData32(RNG_TypeDef *RNGx)
   * @}
   */
 
-#if 1 //mbed
+#if defined(USE_FULL_LL_DRIVER)
 /** @defgroup RNG_LL_EF_Init Initialization and de-initialization functions
   * @{
   */

@@ -72,7 +72,7 @@ static const uint16_t USART_PRESCALER_TAB[] =
   */
 
 /* Private macros ------------------------------------------------------------*/
-#if 1 //mbed
+#if defined(USE_FULL_LL_DRIVER)
 /** @defgroup USART_LL_Private_Macros USART Private Macros
   * @{
   */
@@ -82,7 +82,7 @@ static const uint16_t USART_PRESCALER_TAB[] =
 #endif /*USE_FULL_LL_DRIVER*/
 
 /* Exported types ------------------------------------------------------------*/
-#if 1 //mbed
+#if defined(USE_FULL_LL_DRIVER)
 /** @defgroup USART_LL_ES_INIT USART Exported Init structures
   * @{
   */
@@ -322,7 +322,7 @@ typedef struct
   * @}
   */
 
-#if 1 //mbed
+#if defined(USE_FULL_LL_DRIVER)
 /** @defgroup USART_LL_EC_CLOCK Clock Signal
   * @{
   */
@@ -4340,7 +4340,7 @@ __STATIC_INLINE void LL_USART_RequestTxDataFlush(USART_TypeDef *USARTx)
   * @}
   */
 
-#if 1 //mbed
+#if defined(USE_FULL_LL_DRIVER)
 /** @defgroup USART_LL_EF_Init Initialization and de-initialization functions
   * @{
   */

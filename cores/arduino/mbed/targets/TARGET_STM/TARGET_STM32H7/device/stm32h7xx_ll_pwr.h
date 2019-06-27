@@ -1726,7 +1726,7 @@ __STATIC_INLINE void LL_PWR_ClearFlag_WU1(void)
   WRITE_REG(PWR->WKUPCR, PWR_WKUPCR_WKUPC1);
 }
 
-#if 1 //mbed
+#if defined(USE_FULL_LL_DRIVER)
 /** @defgroup PWR_LL_EF_Init De-initialization function
   * @{
   */

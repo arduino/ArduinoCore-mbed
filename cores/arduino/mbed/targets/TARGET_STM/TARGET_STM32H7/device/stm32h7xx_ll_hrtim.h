@@ -281,7 +281,7 @@ static const uint8_t REG_SHIFT_TAB_FLTxE[] =
 
 /* Private macros ------------------------------------------------------------*/
 /* Exported types ------------------------------------------------------------*/
-#if 1 //mbed
+#if defined(USE_FULL_LL_DRIVER)
 /** @defgroup HRTIM_LL_ES_INIT HRTIM Exported Init structure
   * @{
   */
@@ -10741,7 +10741,7 @@ __STATIC_INLINE uint32_t LL_HRTIM_IsEnabledDMAReq_DLYPRT(HRTIM_TypeDef *HRTIMx, 
   * @}
   */
 
-#if 1 //mbed
+#if defined(USE_FULL_LL_DRIVER)
 /** @defgroup HRTIM_LL_LL_EF_Init In-initialization and de-initialization functions
   * @{
   */

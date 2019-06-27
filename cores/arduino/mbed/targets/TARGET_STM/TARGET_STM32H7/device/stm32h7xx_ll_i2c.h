@@ -50,7 +50,7 @@ extern "C" {
   */
 
 /* Private macros ------------------------------------------------------------*/
-#if 1 //mbed
+#if defined(USE_FULL_LL_DRIVER)
 /** @defgroup I2C_LL_Private_Macros I2C Private Macros
   * @{
   */
@@ -60,7 +60,7 @@ extern "C" {
 #endif /*USE_FULL_LL_DRIVER*/
 
 /* Exported types ------------------------------------------------------------*/
-#if 1 //mbed
+#if defined(USE_FULL_LL_DRIVER)
 /** @defgroup I2C_LL_ES_INIT I2C Exported Init structure
   * @{
   */
@@ -2190,7 +2190,7 @@ __STATIC_INLINE void LL_I2C_TransmitData8(I2C_TypeDef *I2Cx, uint8_t Data)
   * @}
   */
 
-#if 1 //mbed
+#if defined(USE_FULL_LL_DRIVER)
 /** @defgroup I2C_LL_EF_Init Initialization and de-initialization functions
   * @{
   */
