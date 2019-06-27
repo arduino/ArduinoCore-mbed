@@ -3,9 +3,9 @@
 #ifndef __PINS_ARDUINO__
 #define __PINS_ARDUINO__
 
-#define PIN_PDM_DIN			25
-#define PIN_PDM_CLK			26
-#define PIN_PDM_PWR			20
+#define PIN_PDM_DIN			((PinName)25)
+#define PIN_PDM_CLK			((PinName)26)
+#define PIN_PDM_PWR			((PinName)20)
 
 #define SERIAL_HOWMANY		1
 #define SERIAL1_TX			((PinName)35)
