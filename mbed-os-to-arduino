@@ -30,9 +30,9 @@ echo -e "{\n\"macros\": [\n\"MBED_HEAP_STATS_ENABLED=1\",\n\"MBED_STACK_STATS_EN
 
 if [ $BOARDNAME == NRF52840_DK  ]; then
 	if [ x$NO_SD_TARGET == x"" ]; then
+		echo -e "{\n\"macros\": [\n\"MBED_HEAP_STATS_ENABLED=1\",\n\"MBED_STACK_STATS_ENABLED=1\",\n\"MBED_MEM_TRACING_ENABLED=1\"\n],\n\"target_overrides\": {\n   \"*\": {\n\"platform.stdio-buffered-serial\": true,\n\"platform.stdio-baud-rate\": 115200,\n\"platform.default-serial-baud-rate\": 115200,\n\"target.features_add\": [\"BLE\"],\"target.extra_labels_remove\": [\"CORDIO\", \"CORDIO_LL\", \"SOFTDEVICE_NONE\", \"NORDIC_CORDIO\"],\"target.extra_labels_add\": [\"SOFTDEVICE_COMMON\", \"SOFTDEVICE_S140_FULL\", \"NORDIC_SOFTDEVICE\"]}\n}\n}\n" > mbed_app.json
 		NO_SD_TARGET=true
 	else
-		echo -e "{\n\"macros\": [\n\"MBED_HEAP_STATS_ENABLED=1\",\n\"MBED_STACK_STATS_ENABLED=1\",\n\"MBED_MEM_TRACING_ENABLED=1\"\n],\n\"target_overrides\": {\n   \"*\": {\n\"platform.stdio-buffered-serial\": true,\n\"platform.stdio-baud-rate\": 115200,\n\"platform.default-serial-baud-rate\": 115200,\n\"target.features_add\": [\"BLE\"],\"target.extra_labels_add\": [\"CORDIO\", \"CORDIO_LL\", \"SOFTDEVICE_NONE\", \"NORDIC_CORDIO\"],\"target.extra_labels_remove\": [\"SOFTDEVICE_COMMON\", \"SOFTDEVICE_S140_FULL\", \"NORDIC_SOFTDEVICE\"]}\n}\n}\n" > mbed_app.json
 		ARDUINOCORE=$MBED_CORE_LOCATION/variants/NRF52840_DK_NOSD
 	fi
 fi
