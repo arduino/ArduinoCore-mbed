@@ -160,7 +160,7 @@
 #define MBED_CONF_NSAPI_DEFAULT_WIFI_SECURITY                                 NONE                                                                                             // set by library:nsapi
 #define MBED_CONF_NSAPI_DNS_CACHE_SIZE                                        3                                                                                                // set by library:nsapi
 #define MBED_CONF_NSAPI_DNS_RESPONSE_WAIT_TIME                                5000                                                                                             // set by library:nsapi
-#define MBED_CONF_NSAPI_DNS_RETRIES                                           0                                                                                                // set by library:nsapi
+#define MBED_CONF_NSAPI_DNS_RETRIES                                           2                                                                                                // set by library:nsapi
 #define MBED_CONF_NSAPI_DNS_TOTAL_ATTEMPTS                                    3                                                                                                // set by library:nsapi
 #define MBED_CONF_NSAPI_PRESENT                                               1                                                                                                // set by library:nsapi
 #define MBED_CONF_NSAPI_SOCKET_STATS_ENABLED                                  0                                                                                                // set by library:nsapi
@@ -250,6 +250,8 @@
 #define MBED_CONF_TARGET_TICKLESS_FROM_US_TICKER                              0                                                                                                // set by target:Target
 #define MBED_CONF_TELIT_HE910_BAUDRATE                                        115200                                                                                           // set by library:TELIT_HE910
 #define MBED_CONF_TELIT_HE910_PROVIDE_DEFAULT                                 0                                                                                                // set by library:TELIT_HE910
+#define MBED_CONF_TELIT_ME910_BAUDRATE                                        115200                                                                                           // set by library:TELIT_ME910
+#define MBED_CONF_TELIT_ME910_PROVIDE_DEFAULT                                 0                                                                                                // set by library:TELIT_ME910
 #define MBED_CONF_UBLOX_AT_BAUDRATE                                           115200                                                                                           // set by library:UBLOX_AT
 #define MBED_CONF_UBLOX_AT_PROVIDE_DEFAULT                                    0                                                                                                // set by library:UBLOX_AT
 #define MBED_CONF_UBLOX_N2XX_BAUDRATE                                         9600                                                                                             // set by library:UBLOX_N2XX
@@ -285,6 +287,7 @@
 #define FDS_BACKEND                                                           2                                                                                                // defined by library:softdevice
 #define MBEDTLS_CIPHER_MODE_CTR                                                                                                                                                // defined by library:SecureStore
 #define MBEDTLS_CMAC_C                                                                                                                                                         // defined by library:SecureStore
+#define MBEDTLS_PSA_HAS_ITS_IO                                                                                                                                                 // defined by library:mbed-crypto
 #define MBED_HEAP_STATS_ENABLED                                               1                                                                                                // defined by application
 #define MBED_MEM_TRACING_ENABLED                                              1                                                                                                // defined by application
 #define MBED_STACK_STATS_ENABLED                                              1                                                                                                // defined by application

@@ -2,10 +2,10 @@ STACK_SIZE = 1024;
 M_CRASH_DATA_RAM_SIZE = 0x100;
 MEMORY
 {
-  FLASH (rx) : ORIGIN = 0x08100000, LENGTH = 2048K
-  RAM (rwx) : ORIGIN = 0x10000298, LENGTH = 256K - 0x298
+  RAM (xrw) : ORIGIN = 0x10000000 + 0x298, LENGTH = 256K - 0x298
   OPENAMP_RSC_TAB (rwx) : ORIGIN = 0x38000000, LENGTH = 1K
   OPEN_AMP_SHMEM (rwx) : ORIGIN = 0x38000400, LENGTH = 63K
+  FLASH (rx) : ORIGIN = 0x08100000, LENGTH = 1024K
 }
  __OPENAMP_region_start__ = ORIGIN(OPEN_AMP_SHMEM);
  __OPENAMP_region_end__ = ORIGIN(OPEN_AMP_SHMEM) + LENGTH(OPEN_AMP_SHMEM);
@@ -98,10 +98,10 @@ SECTIONS
         . = ORIGIN(RAM) + LENGTH(RAM) - STACK_SIZE;
         __HeapLimit = .;
     } > RAM
-  .openamp_section (NOLOAD) : {
-    . = ABSOLUTE(0x38000000);
-    *(.resource_table)
-  } >OPENAMP_RSC_TAB AT > FLASH
+    .openamp_section (NOLOAD) : {
+        . = ABSOLUTE(0x38000000);
+        *(.resource_table)
+    } >OPENAMP_RSC_TAB AT > FLASH
     .stack_dummy (COPY):
     {
         *(.stack*)

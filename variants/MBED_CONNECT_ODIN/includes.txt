@@ -169,6 +169,8 @@
 -iwithprefixbefore/mbed/features/mbedtls/targets/TARGET_STM
 -iwithprefixbefore/mbed/features/mbedtls/platform/inc
 -iwithprefixbefore/mbed/features/mbedtls/platform
+-iwithprefixbefore/mbed/features/mbedtls/mbed-crypto/platform/COMPONENT_PSA_SRV_IMPL/COMPONENT_NSPE
+-iwithprefixbefore/mbed/features/mbedtls/mbed-crypto/platform/COMPONENT_PSA_SRV_IMPL
 -iwithprefixbefore/mbed/features/mbedtls/mbed-crypto/inc/psa
 -iwithprefixbefore/mbed/features/mbedtls/mbed-crypto/inc
 -iwithprefixbefore/mbed/features/mbedtls/mbed-crypto
@@ -224,6 +226,7 @@
 -iwithprefixbefore/mbed/features/cellular/framework/targets/UBLOX/N2XX
 -iwithprefixbefore/mbed/features/cellular/framework/targets/UBLOX/AT
 -iwithprefixbefore/mbed/features/cellular/framework/targets/UBLOX
+-iwithprefixbefore/mbed/features/cellular/framework/targets/TELIT/ME910
 -iwithprefixbefore/mbed/features/cellular/framework/targets/TELIT/HE910
 -iwithprefixbefore/mbed/features/cellular/framework/targets/TELIT
 -iwithprefixbefore/mbed/features/cellular/framework/targets/QUECTEL/UG96
@@ -287,6 +290,7 @@
 -iwithprefixbefore/mbed/features
 -iwithprefixbefore/mbed/events/equeue
 -iwithprefixbefore/mbed/events
+-iwithprefixbefore/mbed/drivers
 -iwithprefixbefore/mbed/components/wifi/esp8266-driver/ESP8266
 -iwithprefixbefore/mbed/components/wifi/esp8266-driver
 -iwithprefixbefore/mbed/components/wifi
