@@ -68,5 +68,7 @@ void initVariant() {
   NRF_CLOCK->TRACECONFIG = 0;
 }
 
+#ifdef SERIAL_CDC
 #include "CDC.h"
 CDC SerialUSB;
+#endif
