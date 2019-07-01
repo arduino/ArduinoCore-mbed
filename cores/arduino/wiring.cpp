@@ -22,7 +22,11 @@
 
 #include "wiring_private.h"
 
+#if DEVICE_LPTICKER
+static mbed::LowPowerTimer t;
+#else
 static mbed::Timer t;
+#endif
 
 unsigned long millis()
 {
