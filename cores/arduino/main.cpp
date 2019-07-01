@@ -30,24 +30,13 @@ void initVariant() { }
 void setupUSB() __attribute__((weak));
 void setupUSB() { }
 
-#ifdef SERIAL_CDC
-#include "USBSerial.h"
-USBSerial SerialUSB(false, BOARD_VENDORID, BOARD_PRODUCTID);
-static void usbPortChanged(int baud, int bits, int parity, int stop) {
-  if (baud == 1200) {
-    _ontouch1200bps_();
-  }
-}
-#endif
-
 int main(void)
 {
 	init();
 	initVariant();
 
 #ifdef SERIAL_CDC
-  SerialUSB.connect();
-  SerialUSB.attach(usbPortChanged);
+  SerialUSB.begin(115200);
 #endif
 
 	setup();

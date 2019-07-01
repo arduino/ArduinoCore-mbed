@@ -35,10 +35,6 @@ class UART : public HardwareSerial {
 extern arduino::UART UART1;
 extern arduino::UART UART2;
 extern arduino::UART UART3;
-#ifdef SERIAL_CDC
-#include "USBSerial.h"
-extern USBSerial SerialUSB;
-#endif
 
 #endif
 #endif

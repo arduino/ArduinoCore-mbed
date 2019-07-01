@@ -91,6 +91,7 @@ extern PinDescription g_APinDescription[];
 
 #include "Serial.h"
 #if defined(SERIAL_CDC)
+#include "CDC.h"
 #define Serial SerialUSB
 #define Serial1 UART1
 #define Serial2 UART2

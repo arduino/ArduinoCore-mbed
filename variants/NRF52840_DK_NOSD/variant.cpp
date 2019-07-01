@@ -54,3 +54,6 @@ void initVariant() {
   pinMode(LED_PWR, OUTPUT);
   digitalWrite(LED_PWR, HIGH);
 }
+
+#include "CDC.h"
+CDC SerialUSB;
