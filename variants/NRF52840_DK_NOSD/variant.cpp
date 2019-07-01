@@ -38,9 +38,17 @@ PinDescription g_APinDescription[] = {
   P0_19, NULL,     // INT APDS
 
   // PDM
-  P0_20, NULL,     // PDM PWR
+  P0_17, NULL,     // PDM PWR
   P0_26, NULL,     // PDM CLK
   P0_25, NULL,     // PDM DIN
+
+  // Internal I2C
+  P0_14, NULL,     // SDA2
+  P0_15, NULL,     // SCL2
+
+  // Internal I2C
+  P1_0,  NULL,     // I2C_PULL
+  P0_22, NULL,     // VDD_ENV_ENABLE
 };
 
 extern "C" {
@@ -53,6 +61,11 @@ void initVariant() {
   // turn power LED on
   pinMode(LED_PWR, OUTPUT);
   digitalWrite(LED_PWR, HIGH);
+
+  // Errata Nano33BLE - I2C pullup is on SWO line, need to disable TRACE
+  // was being enabled by nrfx_clock_anomaly_132
+  CoreDebug->DEMCR = 0;
+  NRF_CLOCK->TRACECONFIG = 0;
 }
 
 #include "CDC.h"

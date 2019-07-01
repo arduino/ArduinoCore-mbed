@@ -75,13 +75,16 @@ static const uint8_t SCK  = PIN_SPI_SCK;
 #define PIN_WIRE_SDA        (18u)
 #define PIN_WIRE_SCL        (19u)
 
+#define PIN_WIRE_SDA1       (30u)
+#define PIN_WIRE_SCL1       (31u)
+
 #define PIN_INT_APDS (26u)
 
 // PDM Interfaces
 // ---------------
-#define PIN_PDM_PWR	 ((PinName)20)
-#define PIN_PDM_CLK	 ((PinName)26)
-#define PIN_PDM_DIN	 ((PinName)25)
+#define PIN_PDM_PWR	 (27)
+#define PIN_PDM_CLK	 (digitalPinToPinName(28))
+#define PIN_PDM_DIN	 (digitalPinToPinName(29))
 
 // These serial port names are intended to allow libraries and architecture-neutral
 // sketches to automatically default to the correct port name for a particular type
@@ -117,6 +120,8 @@ static const uint8_t SCK  = PIN_SPI_SCK;
 
 #define I2C_SDA				(digitalPinToPinName(PIN_WIRE_SDA))
 #define I2C_SCL				(digitalPinToPinName(PIN_WIRE_SCL))
+#define I2C_SDA1			(digitalPinToPinName(PIN_WIRE_SDA1))
+#define I2C_SCL1			(digitalPinToPinName(PIN_WIRE_SCL1))
 
 #define SPI_MISO			(digitalPinToPinName(PIN_SPI_MISO))
 #define SPI_MOSI			(digitalPinToPinName(PIN_SPI_MOSI))
