@@ -1,7 +1,7 @@
 #!/bin/bash -ex
 
 MBED_CORE_LOCATION=$1
-BOARDNAMES=(ENVIE_M4 MBED_CONNECT_ODIN NRF52840_DK NRF52840_DK)
+BOARDNAMES=(ENVIE_M4 MBED_CONNECT_ODIN ARDUINO_NANO33BLE)
 
 #always work in /tmp
 cd /tmp/
@@ -28,16 +28,11 @@ mbed toolchain GCC_ARM
 echo -e "#include \"mbed.h\"\nint main() {Thread thd;}" > main.cpp
 echo -e "{\n\"macros\": [\n\"MBED_HEAP_STATS_ENABLED=1\",\n\"MBED_STACK_STATS_ENABLED=1\",\n\"MBED_MEM_TRACING_ENABLED=1\"\n],\n\"target_overrides\": {\n   \"*\": {\n\"platform.stdio-buffered-serial\": true,\n\"platform.stdio-baud-rate\": 115200,\n\"platform.default-serial-baud-rate\": 115200\n}\n}\n}\n" > mbed_app.json
 
-rm -rf BUILD
-
-if [ $BOARDNAME == NRF52840_DK  ]; then
-	if [ x$NO_SD_TARGET == x"" ]; then
-		echo -e "{\n\"macros\": [\n\"MBED_HEAP_STATS_ENABLED=1\",\n\"MBED_STACK_STATS_ENABLED=1\",\n\"MBED_MEM_TRACING_ENABLED=1\"\n],\n\"target_overrides\": {\n   \"*\": {\n\"platform.stdio-buffered-serial\": true,\n\"platform.stdio-baud-rate\": 115200,\n\"platform.default-serial-baud-rate\": 115200,\n\"target.features_add\": [\"BLE\"],\"target.extra_labels_remove\": [\"CORDIO\", \"CORDIO_LL\", \"SOFTDEVICE_NONE\", \"NORDIC_CORDIO\"],\"target.extra_labels_add\": [\"SOFTDEVICE_COMMON\", \"SOFTDEVICE_S140_FULL\", \"NORDIC_SOFTDEVICE\"]}\n}\n}\n" > mbed_app.json
-		NO_SD_TARGET=true
-	else
-		ARDUINOCORE=$MBED_CORE_LOCATION/variants/NRF52840_DK_NOSD
-	fi
+if [ $BOARDNAME == "ARDUINO_NANO33BLE" ]; then
+echo -e "{\n\"macros\": [\n\"MBED_HEAP_STATS_ENABLED=1\",\n\"MBED_STACK_STATS_ENABLED=1\",\n\"MBED_MEM_TRACING_ENABLED=1\"\n],\n\"target_overrides\": {\n   \"*\": {\n\"platform.stdio-buffered-serial\": true,\n\"platform.stdio-baud-rate\": 115200,\n\"platform.default-serial-baud-rate\": 115200,\n\"target.mbed_app_start\": \"0x10200\"}\n}\n}\n" > mbed_app.json
 fi
+
+rm -rf BUILD
 
 mbed compile -v | grep "Macros:" > $BOARDNAME.macros.txt
 cat $BOARDNAME.macros.txt | cut -f2 -d":" | sed 's# #\n#g' | sed 's#\"#\\"#g' | sort > $ARDUINOCORE/defines.txt
@@ -60,7 +55,7 @@ cd mbed-os && find . | grep "\.h" | xargs -I % cp --parents % $ARDUINOCORE/../..
 
 #TODO: add #include "mbed_config.h" in "mbed.h"
 #TODO: rename drivers/SPI.h in drivers/SPIMaster.h and modify include in mbed.h
-mv cores/arduino/mbed/drivers/SPI.h cores/arduino/mbed/drivers/SPIMaster.h
+mv $ARDUINOCORE/../../cores/arduino/mbed/drivers/SPI.h $ARDUINOCORE/../../cores/arduino/mbed/drivers/SPIMaster.h
 
 exit 0
 

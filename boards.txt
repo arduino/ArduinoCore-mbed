@@ -66,72 +66,32 @@ envie_m4.upload.native_usb=false
 
 ##############################################################
 
-nrf52840.name=Arduino Nano33BLE
-nrf52840.build.core=arduino
-nrf52840.build.crossprefix=arm-none-eabi-
-nrf52840.build.compiler_path={runtime.tools.arm-none-eabi-gcc.path}/bin/
+nano33ble.name=Arduino Nano33BLE
+nano33ble.build.core=arduino
+nano33ble.build.crossprefix=arm-none-eabi-
+nano33ble.build.compiler_path={runtime.tools.arm-none-eabi-gcc.path}/bin/
 
-nrf52840.build.variant=NRF52840_DK
-nrf52840.build.mcu=cortex-m4
-nrf52840.build.extra_flags=
-nrf52840.build.architecture=cortex-m4
-nrf52840.build.board=NRF52840_DK
-nrf52840.build.ldscript=linker_script.ld
-nrf52840.build.zip.pattern="{tools.nrfutil.cmd}" dfu genpkg --dev-type 0x0052 --sd-req {build.sd_fwid} --application "{build.path}/{build.project_name}.hex" "{build.path}/{build.project_name}.zip"
-nrf52840.compiler.mbed.defines={build.variant.path}/defines.txt
-nrf52840.compiler.mbed.ldflags={build.variant.path}/ldflags.txt
-nrf52840.compiler.mbed.cflags={build.variant.path}/cflags.txt
-nrf52840.compiler.mbed.cxxflags={build.variant.path}/cxxflags.txt
-nrf52840.compiler.mbed.includes={build.variant.path}/includes.txt
-nrf52840.compiler.mbed.extra_ldflags=-lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
-nrf52840.compiler.mbed="{build.variant.path}/libs/libmbed.a" "{build.variant.path}/libs/libcc_310_core.a" "{build.variant.path}/libs/libcc_310_ext.a" "{build.variant.path}/libs/libcc_310_trng.a"
-nrf52840.vid.0=0x2341
-nrf52840.pid.0=0x005a
+nano33ble.build.variant=ARDUINO_NANO33BLE
+nano33ble.build.mcu=cortex-m4
+nano33ble.build.extra_flags=
+nano33ble.build.architecture=cortex-m4
+nano33ble.build.board=ARDUINO_NANO33BLE
+nano33ble.build.ldscript=linker_script.ld
+nano33ble.compiler.mbed.defines={build.variant.path}/defines.txt
+nano33ble.compiler.mbed.ldflags={build.variant.path}/ldflags.txt
+nano33ble.compiler.mbed.cflags={build.variant.path}/cflags.txt
+nano33ble.compiler.mbed.cxxflags={build.variant.path}/cxxflags.txt
+nano33ble.compiler.mbed.includes={build.variant.path}/includes.txt
+nano33ble.compiler.mbed.extra_ldflags=-lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
+nano33ble.compiler.mbed="{build.variant.path}/libs/libmbed.a" "{build.variant.path}/libs/libcc_310_core.a" "{build.variant.path}/libs/libcc_310_ext.a" "{build.variant.path}/libs/libcc_310_trng.a"
+nano33ble.vid.0=0x2341
+nano33ble.pid.0=0x005a
 
-nrf52840.build.sd_name=s132
-nrf52840.build.sd_version=6.1.1
-nrf52840.build.sd_fwid=0xFFFE
-
-nrf52840.upload.tool=nrfutil
-nrf52840.upload.protocol=nrfutil
-nrf52840.upload.use_1200bps_touch=true
-nrf52840.upload.wait_for_upload_port=true
-nrf52840.upload.native_usb=true
-nrf52840.upload.maximum_size=917504
-nrf52840.upload.maximum_data_size=262144
-
-##############################################################
-
-nrf52840_nosd.name=Arduino Nano33BLE (Cordio)
-nrf52840_nosd.build.core=arduino
-nrf52840_nosd.build.crossprefix=arm-none-eabi-
-nrf52840_nosd.build.compiler_path={runtime.tools.arm-none-eabi-gcc.path}/bin/
-
-nrf52840_nosd.build.variant=NRF52840_DK_NOSD
-nrf52840_nosd.build.mcu=cortex-m4
-nrf52840_nosd.build.extra_flags=
-nrf52840_nosd.build.architecture=cortex-m4
-nrf52840_nosd.build.board=NRF52840_DK_NOSD
-nrf52840_nosd.build.ldscript=linker_script.ld
-nrf52840_nosd.compiler.mbed.defines={build.variant.path}/defines.txt
-nrf52840_nosd.compiler.mbed.ldflags={build.variant.path}/ldflags.txt
-nrf52840_nosd.compiler.mbed.cflags={build.variant.path}/cflags.txt
-nrf52840_nosd.compiler.mbed.cxxflags={build.variant.path}/cxxflags.txt
-nrf52840_nosd.compiler.mbed.includes={build.variant.path}/includes.txt
-nrf52840_nosd.compiler.mbed.extra_ldflags=-lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
-nrf52840_nosd.compiler.mbed="{build.variant.path}/libs/libmbed.a" "{build.variant.path}/libs/libcc_310_core.a" "{build.variant.path}/libs/libcc_310_ext.a" "{build.variant.path}/libs/libcc_310_trng.a"
-nrf52840_nosd.vid.0=0x2341
-nrf52840_nosd.pid.0=0x005a
-
-nrf52840_nosd.build.sd_name=s132
-nrf52840_nosd.build.sd_version=6.1.1
-nrf52840_nosd.build.sd_fwid=0xFFFE
-
-nrf52840_nosd.upload.tool=dfu-util
-nrf52840_nosd.upload.protocol=
-nrf52840_nosd.upload.use_1200bps_touch=true
-nrf52840_nosd.upload.wait_for_upload_port=true
-nrf52840_nosd.upload.native_usb=true
-nrf52840_nosd.upload.maximum_size=983040
-nrf52840_nosd.upload.maximum_data_size=262144
+nano33ble.upload.tool=dfu-util
+nano33ble.upload.protocol=
+nano33ble.upload.use_1200bps_touch=true
+nano33ble.upload.wait_for_upload_port=true
+nano33ble.upload.native_usb=true
+nano33ble.upload.maximum_size=983040
+nano33ble.upload.maximum_data_size=262144
 
