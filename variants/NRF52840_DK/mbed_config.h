@@ -159,7 +159,7 @@
 #define MBED_CONF_NSAPI_DEFAULT_STACK                                         LWIP                                                                                             // set by library:nsapi
 #define MBED_CONF_NSAPI_DEFAULT_WIFI_SECURITY                                 NONE                                                                                             // set by library:nsapi
 #define MBED_CONF_NSAPI_DNS_CACHE_SIZE                                        3                                                                                                // set by library:nsapi
-#define MBED_CONF_NSAPI_DNS_RESPONSE_WAIT_TIME                                5000                                                                                             // set by library:nsapi
+#define MBED_CONF_NSAPI_DNS_RESPONSE_WAIT_TIME                                10000                                                                                            // set by library:nsapi
 #define MBED_CONF_NSAPI_DNS_RETRIES                                           2                                                                                                // set by library:nsapi
 #define MBED_CONF_NSAPI_DNS_TOTAL_ATTEMPTS                                    3                                                                                                // set by library:nsapi
 #define MBED_CONF_NSAPI_PRESENT                                               1                                                                                                // set by library:nsapi
@@ -246,6 +246,7 @@
 #define MBED_CONF_TARGET_BOOT_STACK_SIZE                                      0x800                                                                                            // set by library:rtos[MCU_NRF52840]
 #define MBED_CONF_TARGET_CONSOLE_UART                                         1                                                                                                // set by target:Target
 #define MBED_CONF_TARGET_DEEP_SLEEP_LATENCY                                   0                                                                                                // set by target:Target
+#define MBED_CONF_TARGET_INIT_US_TICKER_AT_BOOT                               0                                                                                                // set by target:Target
 #define MBED_CONF_TARGET_MPU_ROM_END                                          0x1fffffff                                                                                       // set by target:MCU_NRF52840
 #define MBED_CONF_TARGET_TICKLESS_FROM_US_TICKER                              0                                                                                                // set by target:Target
 #define MBED_CONF_TELIT_HE910_BAUDRATE                                        115200                                                                                           // set by library:TELIT_HE910

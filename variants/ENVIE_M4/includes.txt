@@ -263,5 +263,3 @@
 -iwithprefixbefore/mbed/cmsis/TARGET_CORTEX_M
 -iwithprefixbefore/mbed/cmsis
 -iwithprefixbefore/mbed
--iwithprefixbefore/../../variants/ENVIE_M4/openamp
--iwithprefixbefore/../../variants/ENVIE_M4/rpclib/src/

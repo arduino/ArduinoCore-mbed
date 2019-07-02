@@ -12,6 +12,7 @@
 -ffunction-sections
 -fmessage-length=0
 -fno-delete-null-pointer-checks
+-fno-exceptions
 -fomit-frame-pointer
 -funsigned-char
 -g1
