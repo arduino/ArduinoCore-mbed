@@ -28,6 +28,8 @@ mbed toolchain GCC_ARM
 echo -e "#include \"mbed.h\"\nint main() {Thread thd;}" > main.cpp
 echo -e "{\n\"macros\": [\n\"MBED_HEAP_STATS_ENABLED=1\",\n\"MBED_STACK_STATS_ENABLED=1\",\n\"MBED_MEM_TRACING_ENABLED=1\"\n],\n\"target_overrides\": {\n   \"*\": {\n\"platform.stdio-buffered-serial\": true,\n\"platform.stdio-baud-rate\": 115200,\n\"platform.default-serial-baud-rate\": 115200\n}\n}\n}\n" > mbed_app.json
 
+rm -rf BUILD
+
 if [ $BOARDNAME == NRF52840_DK  ]; then
 	if [ x$NO_SD_TARGET == x"" ]; then
 		echo -e "{\n\"macros\": [\n\"MBED_HEAP_STATS_ENABLED=1\",\n\"MBED_STACK_STATS_ENABLED=1\",\n\"MBED_MEM_TRACING_ENABLED=1\"\n],\n\"target_overrides\": {\n   \"*\": {\n\"platform.stdio-buffered-serial\": true,\n\"platform.stdio-baud-rate\": 115200,\n\"platform.default-serial-baud-rate\": 115200,\n\"target.features_add\": [\"BLE\"],\"target.extra_labels_remove\": [\"CORDIO\", \"CORDIO_LL\", \"SOFTDEVICE_NONE\", \"NORDIC_CORDIO\"],\"target.extra_labels_add\": [\"SOFTDEVICE_COMMON\", \"SOFTDEVICE_S140_FULL\", \"NORDIC_SOFTDEVICE\"]}\n}\n}\n" > mbed_app.json
@@ -38,17 +40,13 @@ if [ $BOARDNAME == NRF52840_DK  ]; then
 fi
 
 mbed compile -v | grep "Macros:" > $BOARDNAME.macros.txt
-cat $BOARDNAME.macros.txt | cut -f2 -d":" > $ARDUINOCORE/defines.txt
-echo " -DMBED_NO_GLOBAL_USING_DIRECTIVE=1" >> $ARDUINOCORE/defines.txt
+cat $BOARDNAME.macros.txt | cut -f2 -d":" | sed 's# #\n#g' | sed 's#\"#\\"#g' | sort > $ARDUINOCORE/defines.txt
+echo "-DMBED_NO_GLOBAL_USING_DIRECTIVE=1" >> $ARDUINOCORE/defines.txt
 xargs -n 1 < ./BUILD/$BOARDNAME/GCC_ARM/.include* | sed -e 's#-I./mbed-os#-iwithprefixbefore/mbed#g' | sed '/^-I./ d' | tac  > $ARDUINOCORE/includes.txt
 
-#TODO: remove -MDD from flags
-
-./gron ./BUILD/$BOARDNAME/GCC_ARM/.profile-c | grep json.flags | cut -f2 -d"\"" > $ARDUINOCORE/cflags.txt
-./gron ./BUILD/$BOARDNAME/GCC_ARM/.profile-cxx | grep json.flags | cut -f2 -d"\"" > $ARDUINOCORE/cxxflags.txt
-./gron ./BUILD/$BOARDNAME/GCC_ARM/.profile-ld | grep json.flags | cut -f2 -d"\"" > $ARDUINOCORE/ldflags.txt
-
-#TODO: sanitize gron output (or move to python)
+./gron ./BUILD/$BOARDNAME/GCC_ARM/.profile-c | grep json.flags | cut -f2 -d"\"" | grep -v "json.flags" | grep -v "MMD" > $ARDUINOCORE/cflags.txt
+./gron ./BUILD/$BOARDNAME/GCC_ARM/.profile-cxx | grep json.flags | cut -f2 -d"\"" | grep -v "json.flags" | grep -v "MMD" > $ARDUINOCORE/cxxflags.txt
+./gron ./BUILD/$BOARDNAME/GCC_ARM/.profile-ld | grep json.flags | cut -f2 -d"\"" | grep -v "json.flags" | grep -v "MMD" > $ARDUINOCORE/ldflags.txt
 
 arm-none-eabi-ar rcs BUILD/mbed-core-$BOARDNAME.a `xargs -n 1 < ./BUILD/$BOARDNAME/GCC_ARM/.link_options.txt | grep "\.o" | grep -v "/main\.o"`
 cp BUILD/mbed-core-$BOARDNAME.a $ARDUINOCORE/libs/libmbed.a
@@ -62,6 +60,7 @@ cd mbed-os && find . | grep "\.h" | xargs -I % cp --parents % $ARDUINOCORE/../..
 
 #TODO: add #include "mbed_config.h" in "mbed.h"
 #TODO: rename drivers/SPI.h in drivers/SPIMaster.h and modify include in mbed.h
+mv cores/arduino/mbed/drivers/SPI.h cores/arduino/mbed/drivers/SPIMaster.h
 
 exit 0
 
