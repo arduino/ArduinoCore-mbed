@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Arduino.h"
-#include "mbed.h"
+#include "drivers/SPIMaster.h"
 
 namespace arduino {
 
