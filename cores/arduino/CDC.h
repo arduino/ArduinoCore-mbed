@@ -16,39 +16,44 @@ static void usbPortChanged(int baud, int bits, int parity, int stop) {
 
 namespace arduino {
 
-namespace internal {
-extern USBSerial _serial;
-}
-
 class CDC : public HardwareSerial {
 	public:
 		CDC() {}
 		void begin(unsigned long) {
-			internal::_serial.connect();
-			internal::_serial.attach(usbPortChanged);
+			_serial = new USBSerial(false, BOARD_VENDORID, BOARD_PRODUCTID);
+			_serial->connect();
+			_serial->attach(usbPortChanged);
 		}
 		void begin(unsigned long baudrate, uint16_t config) {
 			begin(baudrate);
 		}
-		void end() {}
+		void end() {
+			delete _serial;
+		}
 		int available(void) {
-			return internal::_serial.available();
+			return _serial->available();
 		}
 		int peek(void) {
 			return 0;
 		}
 		int read(void) {
-			return internal::_serial._getc();
+			return _serial->_getc();
 		}
 		void flush(void) {}
 		size_t write(uint8_t c) {
-			return internal::_serial._putc(c);
+			return _serial->_putc(c);
 		}
 		//size_t write(const uint8_t*, size_t);
 		using Print::write; // pull in write(str) and write(buf, size) from Print
 		operator bool() {
-			return internal::_serial.connected();
-		}		
+			return _serial->connected();
+		}
+		USBSerial& mbed() {
+			return *_serial;
+		}
+
+	private:
+		USBSerial *_serial;
 };
 }
 
