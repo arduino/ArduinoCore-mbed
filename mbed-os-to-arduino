@@ -57,6 +57,13 @@ cd mbed-os && find . | grep "\.h" | xargs -I % cp --parents % $ARDUINOCORE/../..
 #TODO: rename drivers/SPI.h in drivers/SPIMaster.h and modify include in mbed.h
 mv $ARDUINOCORE/../../cores/arduino/mbed/drivers/SPI.h $ARDUINOCORE/../../cores/arduino/mbed/drivers/SPIMaster.h
 
+# TODO
+# - Add -DUSE_ARDUINO_PINOUT to targets with a variant.cpp
+# - Add include path for rpc library to envie
+# - Remove -fno-exception from Envie cppflags
+#
+#
+
 exit 0
 
 ##################
