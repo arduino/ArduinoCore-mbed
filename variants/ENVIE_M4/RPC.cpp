@@ -5,7 +5,6 @@ void rpc::client::getResult(RPCLIB_MSGPACK::object_handle& res) {
 }
 
 void rpc::client::post(RPCLIB_MSGPACK::sbuffer *buffer) {
-  printf("osSignalSet rpc->dispatcherThreadId, 0x1);\n");
   RPC1.write(ENDPOINT_CM4TOCM7, (const uint8_t*)buffer->data(), buffer->size());
 }
 
@@ -18,7 +17,6 @@ int RPC::rpmsg_recv_cm7tocm4_callback(struct rpmsg_endpoint *ept, void *data,
   rpc->pac_.buffer_consumed(len);
 
   osSignalSet(rpc->dispatcherThreadId, 0x1);
-  printf("osSignalSet rpc->dispatcherThreadId, 0x1);\n");
 
   return 0;
 }
@@ -32,7 +30,6 @@ int RPC::rpmsg_recv_cm4tocm7_callback(struct rpmsg_endpoint *ept, void *data,
   rpc->pac_.buffer_consumed(len);
 
   osSignalSet(rpc->dispatcherThreadId, 0x2);
-  printf("osSignalSet rpc->dispatcherThreadId, 0x2\n");
 
   return 0;
 }
@@ -108,7 +105,7 @@ void RPC::dispatch() {
   dispatcherThreadId = osThreadGetId();
 
   while (true) {
-    osEvent v = osSignalWait(0, 0);
+    osEvent v = osSignalWait(0, osWaitForever);
 
     if (v.status == osEventSignal) {
        if (v.value.signals & 0x1) {
@@ -132,9 +129,8 @@ void RPC::dispatch() {
           auto r = rpc::detail::response(std::move(result));
           auto id = r.get_id();
           call_result = std::move(*r.get_result());
-          // TODO: signal callThreadId
+          // Unlock callThreadId thread
           osSignalSet(client.callThreadId, 0x1);
-          printf("osSignalSet(client.callThreadId, 0x1);\n");
         }
       }
     }

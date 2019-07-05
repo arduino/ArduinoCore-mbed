@@ -26,9 +26,7 @@ class client {
       post(buffer);
       callThreadId = osThreadGetId();
 
-      printf("osSignalWait(0, 0);\n");
-      osSignalWait(0, 0);
-      printf("osSignalWait(0, 0) unlocked\n");
+      osSignalWait(0, osWaitForever);
 
       RPCLIB_MSGPACK::object_handle result;
 
