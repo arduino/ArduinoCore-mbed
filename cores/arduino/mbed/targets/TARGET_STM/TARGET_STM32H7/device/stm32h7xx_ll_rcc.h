@@ -37,7 +37,6 @@ extern "C" {
 
 #if defined(RCC)
 
-#define USE_FULL_LL_DRIVER
 /** @defgroup RCC_LL RCC
   * @{
   */
