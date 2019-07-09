@@ -227,7 +227,7 @@
 #define MBED_CONF_TARGET_LPUART_CLOCK_SOURCE                                  USE_LPUART_CLK_LSE|USE_LPUART_CLK_PCLK1                                                          // set by target:FAMILY_STM32
 #define MBED_CONF_TARGET_LSE_AVAILABLE                                        1                                                                                                // set by target:FAMILY_STM32
 #define MBED_CONF_TARGET_MPU_ROM_END                                          0x0fffffff                                                                                       // set by target:Target
-#define MBED_CONF_TARGET_TICKLESS_FROM_US_TICKER                              1                                                                                                // set by target:FAMILY_STM32
+#define MBED_CONF_TARGET_TICKLESS_FROM_US_TICKER                              0                                                                                                // set by target:Target
 #define MBED_CONF_TELIT_HE910_BAUDRATE                                        115200                                                                                           // set by library:TELIT_HE910
 #define MBED_CONF_TELIT_HE910_PROVIDE_DEFAULT                                 0                                                                                                // set by library:TELIT_HE910
 #define MBED_CONF_TELIT_ME910_BAUDRATE                                        115200                                                                                           // set by library:TELIT_ME910

@@ -255,7 +255,7 @@
 #define MBED_CONF_TARGET_NETWORK_DEFAULT_INTERFACE_TYPE                       WIFI                                                                                             // set by target:MODULE_UBLOX_ODIN_W2
 #define MBED_CONF_TARGET_STDIO_UART_RX                                        PA_10                                                                                            // set by target:MBED_CONNECT_ODIN
 #define MBED_CONF_TARGET_STDIO_UART_TX                                        PA_9                                                                                             // set by target:MBED_CONNECT_ODIN
-#define MBED_CONF_TARGET_TICKLESS_FROM_US_TICKER                              1                                                                                                // set by target:FAMILY_STM32
+#define MBED_CONF_TARGET_TICKLESS_FROM_US_TICKER                              0                                                                                                // set by target:Target
 #define MBED_CONF_TELIT_HE910_BAUDRATE                                        115200                                                                                           // set by library:TELIT_HE910
 #define MBED_CONF_TELIT_HE910_PROVIDE_DEFAULT                                 0                                                                                                // set by library:TELIT_HE910
 #define MBED_CONF_TELIT_ME910_BAUDRATE                                        115200                                                                                           // set by library:TELIT_ME910
