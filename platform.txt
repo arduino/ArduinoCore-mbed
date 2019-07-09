@@ -105,3 +105,14 @@ tools.openocd.cmd.windows=bin/openocd.exe
 tools.openocd.upload.params.verbose=-d2
 tools.openocd.upload.params.quiet=-d0
 tools.openocd.upload.pattern="{path}/{cmd}" {upload.verbose} -s "{path}/share/openocd/scripts/" {upload.config} -c "telnet_port disabled; init; reset init; halt; adapter_khz 10000; flash write_image erase {build.path}/{build.project_name}.elf; reset run; shutdown"
+
+#
+# BOSSA
+#
+tools.bossac.path={runtime.tools.bossac-1.7.0-arduino3.path}
+tools.bossac.cmd=bossac
+tools.bossac.cmd.windows=bossac.exe
+
+tools.bossac.upload.params.verbose=-i -d
+tools.bossac.upload.params.quiet=
+tools.bossac.upload.pattern="{path}/{cmd}" {upload.verbose} --port={serial.port.file} -U {upload.native_usb} -i -e -w -v "{build.path}/{build.project_name}.bin" -R

@@ -87,7 +87,7 @@ nano33ble.compiler.mbed="{build.variant.path}/libs/libmbed.a" "{build.variant.pa
 nano33ble.vid.0=0x2341
 nano33ble.pid.0=0x005a
 
-nano33ble.upload.tool=dfu-util
+nano33ble.upload.tool=bossac
 nano33ble.upload.protocol=
 nano33ble.upload.use_1200bps_touch=true
 nano33ble.upload.wait_for_upload_port=true

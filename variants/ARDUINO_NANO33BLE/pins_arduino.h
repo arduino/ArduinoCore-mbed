@@ -116,7 +116,7 @@ static const uint8_t SCK  = PIN_SPI_SCK;
 #define BOARD_VENDORID		0x2341
 #define BOARD_PRODUCTID		0x005a
 
-#define DFU_MAGIC_SERIAL_ONLY_RESET   0x4e
+#define DFU_MAGIC_SERIAL_ONLY_RESET   0x0b
 
 #define I2C_SDA				(digitalPinToPinName(PIN_WIRE_SDA))
 #define I2C_SCL				(digitalPinToPinName(PIN_WIRE_SCL))
