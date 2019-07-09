@@ -86,6 +86,8 @@ nano33ble.compiler.mbed.extra_ldflags=-lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
 nano33ble.compiler.mbed="{build.variant.path}/libs/libmbed.a" "{build.variant.path}/libs/libcc_310_core.a" "{build.variant.path}/libs/libcc_310_ext.a" "{build.variant.path}/libs/libcc_310_trng.a"
 nano33ble.vid.0=0x2341
 nano33ble.pid.0=0x005a
+nano33ble.vid.1=0x2341
+nano33ble.pid.1=0x805a
 
 nano33ble.upload.tool=bossac
 nano33ble.upload.protocol=

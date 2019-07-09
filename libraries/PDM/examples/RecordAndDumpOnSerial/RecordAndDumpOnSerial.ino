@@ -47,7 +47,7 @@ void loop() {
 #ifdef USE_USB_AUDIO
     audio.write(buffer, DEFAULT_PDM_BUFFER_SIZE);
 #else
-    SerialUSB.send(buffer, DEFAULT_PDM_BUFFER_SIZE);
+    SerialUSB.mbed().send(buffer, DEFAULT_PDM_BUFFER_SIZE);
 #endif
     idx = 0;
   }

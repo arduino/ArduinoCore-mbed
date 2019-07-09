@@ -116,7 +116,7 @@ static const uint8_t SCK  = PIN_SPI_SCK;
 #define BOARD_VENDORID		0x2341
 #define BOARD_PRODUCTID		0x005a
 
-#define DFU_MAGIC_SERIAL_ONLY_RESET   0x0b
+#define DFU_MAGIC_SERIAL_ONLY_RESET   0xb0
 
 #define I2C_SDA				(digitalPinToPinName(PIN_WIRE_SDA))
 #define I2C_SCL				(digitalPinToPinName(PIN_WIRE_SCL))
@@ -130,6 +130,7 @@ static const uint8_t SCK  = PIN_SPI_SCK;
 #define digitalPinToPort(P)		(digitalPinToPinName(P)/32)
 
 static inline void _ontouch1200bps_() {
+	__disable_irq();
 	NRF_POWER->GPREGRET = DFU_MAGIC_SERIAL_ONLY_RESET;
 	NVIC_SystemReset();
 }

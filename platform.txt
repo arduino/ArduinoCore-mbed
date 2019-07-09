@@ -109,10 +109,11 @@ tools.openocd.upload.pattern="{path}/{cmd}" {upload.verbose} -s "{path}/share/op
 #
 # BOSSA
 #
-tools.bossac.path={runtime.tools.bossac-1.7.0-arduino3.path}
+#tools.bossac.path={runtime.tools.bossac-1.7.0-arduino3.path}
+tools.bossac.path={runtime.platform.path}/tools
 tools.bossac.cmd=bossac
 tools.bossac.cmd.windows=bossac.exe
 
-tools.bossac.upload.params.verbose=-i -d
+tools.bossac.upload.params.verbose=-d
 tools.bossac.upload.params.quiet=
-tools.bossac.upload.pattern="{path}/{cmd}" {upload.verbose} --port={serial.port.file} -U {upload.native_usb} -i -e -w -v "{build.path}/{build.project_name}.bin" -R
+tools.bossac.upload.pattern="{path}/{cmd}" {upload.verbose} --port={serial.port.file} -U{upload.native_usb} -i -e -w "{build.path}/{build.project_name}.bin" -R
