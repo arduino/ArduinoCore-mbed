@@ -23,19 +23,21 @@
 #include "Arduino.h"
 #include "pins_arduino.h"
 
-static int write_resolution = 10;
+static int write_resolution = 8;
 static int read_resolution = 10;
 
 void analogWrite(PinName pin, int val)
 {
   float percent = (float)val/(float)(1 << write_resolution);
-  mbed::PwmOut(pin).write(percent);
+  mbed::PwmOut* pwm = new mbed::PwmOut(pin);
+  pwm->write(percent);
 }
 
 void analogWrite(pin_size_t pin, int val)
 {
   float percent = (float)val/(float)(1 << write_resolution);
-  mbed::PwmOut(digitalPinToPinName(pin)).write(percent);
+  mbed::PwmOut* pwm = new mbed::PwmOut(digitalPinToPinName(pin));
+  pwm->write(percent);
 }
 
 void analogWriteResolution(int bits)
