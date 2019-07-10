@@ -78,6 +78,9 @@ static const uint8_t SCK  = PIN_SPI_SCK;
 #define PIN_WIRE_SDA1       (30u)
 #define PIN_WIRE_SCL1       (31u)
 
+#define PIN_ENABLE_SENSORS_3V3     (32u)
+#define PIN_ENABLE_I2C_PULLUP      (33u)
+
 #define PIN_INT_APDS (26u)
 
 // PDM Interfaces

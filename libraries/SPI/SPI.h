@@ -38,6 +38,7 @@ private:
 
 #if DEVICE_SPI > 0
 extern arduino::MbedSPI SPI;
-#elif DEVICE_SPI > 1
+#endif
+#if DEVICE_SPI > 1
 extern arduino::MbedSPI SPI1;
 #endif

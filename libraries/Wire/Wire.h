@@ -68,9 +68,9 @@ private:
 
 #if DEVICE_I2C > 0
 extern arduino::MbedI2C Wire;
+#endif
 #if DEVICE_I2C > 1
 extern arduino::MbedI2C Wire1;
-#endif
 #endif
 
 typedef arduino::MbedI2C TwoWire;

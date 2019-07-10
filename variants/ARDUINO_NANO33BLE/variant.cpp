@@ -66,6 +66,14 @@ void initVariant() {
   // was being enabled by nrfx_clock_anomaly_132
   CoreDebug->DEMCR = 0;
   NRF_CLOCK->TRACECONFIG = 0;
+
+  // FIXME: always enable I2C pullup and power @startup
+  // Change for maximum powersave
+  pinMode(PIN_ENABLE_SENSORS_3V3, OUTPUT);
+  pinMode(PIN_ENABLE_I2C_PULLUP, OUTPUT);
+
+  digitalWrite(PIN_ENABLE_SENSORS_3V3, HIGH);
+  digitalWrite(PIN_ENABLE_I2C_PULLUP, HIGH);
 }
 
 #ifdef SERIAL_CDC

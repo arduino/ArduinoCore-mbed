@@ -59,6 +59,7 @@ void arduino::MbedSPI::end() {
 
 #if DEVICE_SPI > 0
 arduino::MbedSPI SPI(SPI_MISO, SPI_MOSI, SPI_SCK);
-#elif DEVICE_SPI > 1
+#endif
+#if DEVICE_SPI > 1
 arduino::MbedSPI SPI1(SPI_MISO1, SPI_MOSI1, SPI_SCK1);
 #endif

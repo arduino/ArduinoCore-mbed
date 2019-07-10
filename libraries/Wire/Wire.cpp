@@ -104,6 +104,7 @@ void arduino::MbedI2C::onRequest(void(*)(void)) {}
 
 #if DEVICE_I2C > 0
 arduino::MbedI2C Wire(I2C_SDA, I2C_SCL);
-#elif DEVICE_I2C > 1
+#endif
+#if DEVICE_I2C > 1
 arduino::MbedI2C Wire1(I2C_SDA1, I2C_SCL1);;
 #endif
