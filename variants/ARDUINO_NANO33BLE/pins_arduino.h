@@ -114,7 +114,7 @@ static const uint8_t SCK  = PIN_SPI_SCK;
 
 #define SERIAL_CDC			1
 #define BOARD_VENDORID		0x2341
-#define BOARD_PRODUCTID		0x005a
+#define BOARD_PRODUCTID		0x805a
 
 #define DFU_MAGIC_SERIAL_ONLY_RESET   0xb0
 
