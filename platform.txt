@@ -109,7 +109,7 @@ tools.openocd.upload.pattern="{path}/{cmd}" {upload.verbose} -s "{path}/share/op
 #
 # BOSSA
 #
-#tools.bossac.path={runtime.tools.bossac-1.7.0-arduino3.path}
+#tools.bossac.path={runtime.tools.bossac-1.9.1-arduino1.path}
 tools.bossac.path={runtime.platform.path}/tools
 tools.bossac.cmd=bossac
 tools.bossac.cmd.windows=bossac.exe
