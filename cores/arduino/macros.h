@@ -5,6 +5,7 @@
 #define digitalPinToPinName(P)			(g_APinDescription[P].name)
 #define digitalPinToInterrupt(P)		(P)
 #define digitalPinToInterruptObj(P)		(g_APinDescription[P].irq)
+#define digitalPinToPwmObj(P)		    (g_APinDescription[P].pwm)
 
 #else
 
