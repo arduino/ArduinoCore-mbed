@@ -9,10 +9,10 @@ PinDescription g_APinDescription[] = {
   P1_15, NULL, NULL,     // D4
   P1_13, NULL, NULL,     // D5
   P1_14, NULL, NULL,     // D6
-  P0_9,  NULL, NULL,     // D7
+  P0_23,  NULL, NULL,     // D7
 
   // D8 - D13
-  P0_10, NULL, NULL,     // D8
+  P0_21, NULL, NULL,     // D8
   P0_27, NULL, NULL,     // D9
   P1_2,  NULL, NULL,     // D10
   P1_1,  NULL, NULL,     // D11/MOSI
