@@ -73,6 +73,10 @@ extern "C"{
 #define interrupts()        __enable_irq()
 #define noInterrupts()      __disable_irq()
 
+// We provide analogReadResolution and analogWriteResolution APIs
+void analogReadResolution(int bits);
+void analogWriteResolution(int bits);
+
 #ifdef __cplusplus
 } // extern "C"
 #endif
