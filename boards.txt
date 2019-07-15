@@ -97,3 +97,8 @@ nano33ble.upload.native_usb=true
 nano33ble.upload.maximum_size=983040
 nano33ble.upload.maximum_data_size=262144
 
+nano33ble.bootloader.tool=openocd
+nano33ble.bootloader.extra_action.preflash=nrf5 mass_erase
+nano33ble.bootloader.config=-f target/nrf52.cfg
+nano33ble.bootloader.programmer=-f interface/cmsis-dap.cfg
+nano33ble.bootloader.file=nano33ble/bootloader.hex
