@@ -44,7 +44,9 @@ class CDC : public HardwareSerial {
 		size_t write(uint8_t c) {
 			return internal::_serial._putc(c);
 		}
-		//size_t write(const uint8_t*, size_t);
+		size_t write(const uint8_t* buf, size_t size) {
+			return internal::_serial.send((uint8_t*)buf, size);
+		}
 		using Print::write; // pull in write(str) and write(buf, size) from Print
 		operator bool() {
 			return internal::_serial.connected();
