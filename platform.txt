@@ -5,7 +5,7 @@
 # https://github.com/arduino/Arduino/wiki/Arduino-IDE-1.5---3rd-party-Hardware-specification
 
 name=Arduino mbed Boards
-version=1.0.2
+version=1.0.4
 
 # Compile variables
 # ------------------------
