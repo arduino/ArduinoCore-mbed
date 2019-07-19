@@ -23,6 +23,10 @@ do
 
 export ARDUINOCORE=$MBED_CORE_LOCATION/variants/$BOARDNAME/
 
+if [ -d $ARDUINOCORE ]; then
+mkdir -p $ARDUINOCORE/libs
+fi
+
 mbed target $BOARDNAME
 mbed toolchain GCC_ARM
 echo -e "#include \"mbed.h\"\nint main() {Thread thd;}" > main.cpp
