@@ -26,10 +26,10 @@ export ARDUINOCORE=$MBED_CORE_LOCATION/variants/$BOARDNAME/
 mbed target $BOARDNAME
 mbed toolchain GCC_ARM
 echo -e "#include \"mbed.h\"\nint main() {Thread thd;}" > main.cpp
-echo -e "{\n\"macros\": [\n\"MBED_HEAP_STATS_ENABLED=1\",\n\"MBED_STACK_STATS_ENABLED=1\",\n\"MBED_MEM_TRACING_ENABLED=1\"\n],\n\"target_overrides\": {\n   \"*\": {\n\"platform.stdio-buffered-serial\": true,\n\"platform.stdio-baud-rate\": 115200,\n\"platform.default-serial-baud-rate\": 115200\n}\n}\n}\n" > mbed_app.json
+echo -e "{\n\"macros\": [\n\"MBED_HEAP_STATS_ENABLED=1\",\n\"MBED_STACK_STATS_ENABLED=1\",\n\"MBED_MEM_TRACING_ENABLED=1\"\n],\n\"target_overrides\": {\n   \"*\": {\n\"platform.stdio-buffered-serial\": true,\n\"rtos.main-thread-stack-size\": 32768,\n\"platform.stdio-baud-rate\": 115200,\n\"platform.default-serial-baud-rate\": 115200\n}\n}\n}\n" > mbed_app.json
 
 if [ $BOARDNAME == "ARDUINO_NANO33BLE" ]; then
-echo -e "{\n\"macros\": [\n\"MBED_HEAP_STATS_ENABLED=1\",\n\"MBED_STACK_STATS_ENABLED=1\",\n\"MBED_MEM_TRACING_ENABLED=1\"\n],\n\"target_overrides\": {\n   \"*\": {\n\"platform.stdio-buffered-serial\": true,\n\"platform.stdio-baud-rate\": 115200,\n\"platform.default-serial-baud-rate\": 115200,\n\"target.mbed_app_start\": \"0x10000\"}\n}\n}\n" > mbed_app.json
+echo -e "{\n\"macros\": [\n\"MBED_HEAP_STATS_ENABLED=1\",\n\"MBED_STACK_STATS_ENABLED=1\",\n\"MBED_MEM_TRACING_ENABLED=1\"\n],\n\"target_overrides\": {\n   \"*\": {\n\"platform.stdio-buffered-serial\": true,\n\"platform.stdio-baud-rate\": 115200,\n\"platform.default-serial-baud-rate\": 115200,\n\"rtos.main-thread-stack-size\": 32768,\n\"target.mbed_app_start\": \"0x10000\"}\n}\n}\n" > mbed_app.json
 fi
 
 rm -rf BUILD
