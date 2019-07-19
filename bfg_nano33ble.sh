@@ -21,11 +21,11 @@ rm -rf variants/MBED*
 sed  -i '/.*envie.*$/ d' boards.txt
 sed  -i '/.*odin.*$/ d' boards.txt
 rm bfg*
-git commit -am "Remove unwanted targets"
+git commit -am "Add nano33 target"
 git push nrf52 master
 cd ..
 
-java -jar bfg.jar --delete-folders "{ENVIE_M4,MBED_CONNECT_ODIN,MTB_UBLOX_ODIN_W2,DISCO_F429ZI,openamp,OpenAMP,adafruit-nrfutil}"  --delete-files=RPC* --no-blob-protection /tmp/ArduinoCore-nRF52-mbed.git
+java -jar bfg.jar --delete-folders "{ENVIE_M4,MBED_CONNECT_ODIN,MTB_UBLOX_ODIN_W2,DISCO_F429ZI,openamp,OpenAMP,adafruit-nrfutil,rpclib}"  --delete-files="{RPC.*,RPC_*,bfg*,boards.txt}" /tmp/ArduinoCore-nRF52-mbed.git
 
 cd /tmp/ArduinoCore-nRF52-mbed.git
 git filter-branch --prune-empty
