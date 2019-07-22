@@ -79,4 +79,11 @@ void initVariant() {
 #ifdef SERIAL_CDC
 #include "CDC.h"
 CDC SerialUSB;
+
+void _ontouch1200bps_() {
+  __disable_irq();
+  NRF_POWER->GPREGRET = DFU_MAGIC_SERIAL_ONLY_RESET;
+  NVIC_SystemReset();
+}
+
 #endif

@@ -8,16 +8,16 @@
 #ifdef SERIAL_CDC
 #include "USBSerial.h"
 
-static void usbPortChanged(int baud, int bits, int parity, int stop) {
-  if (baud == 1200) {
-    _ontouch1200bps_();
-  }
-}
-
 namespace arduino {
 
 namespace internal {
 extern USBSerial _serial;
+}
+
+static void usbPortChanged(int baud, int bits, int parity, int stop) {
+  if (baud == 1200 && internal::_serial.connected()) {
+    _ontouch1200bps_();
+  }
 }
 
 class CDC : public HardwareSerial {

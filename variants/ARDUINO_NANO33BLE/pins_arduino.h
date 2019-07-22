@@ -132,10 +132,6 @@ static const uint8_t SCK  = PIN_SPI_SCK;
 
 #define digitalPinToPort(P)		(digitalPinToPinName(P)/32)
 
-static inline void _ontouch1200bps_() {
-	__disable_irq();
-	NRF_POWER->GPREGRET = DFU_MAGIC_SERIAL_ONLY_RESET;
-	NVIC_SystemReset();
-}
+void _ontouch1200bps_();
 
 #endif //__PINS_ARDUINO__
