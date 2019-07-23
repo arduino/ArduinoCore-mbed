@@ -116,6 +116,7 @@ static const uint8_t SCK  = PIN_SPI_SCK;
 #define SERIAL1_RX			(digitalPinToPinName(PIN_SERIAL_RX))
 
 #define SERIAL_CDC			1
+#define HAS_UNIQUE_ISERIAL_DESCRIPTOR
 #define BOARD_VENDORID		0x2341
 #define BOARD_PRODUCTID		0x805a
 
@@ -132,6 +133,7 @@ static const uint8_t SCK  = PIN_SPI_SCK;
 
 #define digitalPinToPort(P)		(digitalPinToPinName(P)/32)
 
+uint8_t getUniqueSerialNumber(uint8_t* name);
 void _ontouch1200bps_();
 
 #endif //__PINS_ARDUINO__

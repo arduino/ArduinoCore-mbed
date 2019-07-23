@@ -26,25 +26,34 @@ class CDC : public HardwareSerial {
 		void begin(unsigned long) {
 			internal::_serial.connect();
 			internal::_serial.attach(usbPortChanged);
+			internal::_serial.attach(mbed::callback(this, &CDC::onInterrupt));
 		}
 		void begin(unsigned long baudrate, uint16_t config) {
 			begin(baudrate);
 		}
-		void end() {}
+		void end() {
+			internal::_serial.deinit();
+		}
 		int available(void) {
-			return internal::_serial.available();
+			return rx_buffer.available();
 		}
 		int peek(void) {
-			return 0;
+			return rx_buffer.peek();
 		}
 		int read(void) {
-			return internal::_serial._getc();
+			return rx_buffer.read_char();
 		}
 		void flush(void) {}
 		size_t write(uint8_t c) {
+			if (!(internal::_serial.connected())) {
+				return 0;
+			}
 			return internal::_serial._putc(c);
 		}
 		size_t write(const uint8_t* buf, size_t size) {
+			if (!(internal::_serial.connected())) {
+				return 0;
+			}
 			return internal::_serial.send((uint8_t*)buf, size);
 		}
 		using Print::write; // pull in write(str) and write(buf, size) from Print
@@ -53,6 +62,13 @@ class CDC : public HardwareSerial {
 		}
 		USBSerial& mbed() {
 			return internal::_serial;
+		}
+	private:
+		RingBufferN<256> rx_buffer;
+		void onInterrupt() {
+			while (rx_buffer.availableForStore() && internal::_serial.available()) {
+				rx_buffer.store_char(internal::_serial._getc());
+			}
 		}
 };
 }

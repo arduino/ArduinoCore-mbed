@@ -66,6 +66,7 @@
 -iwithprefixbefore/mbed/rtos/TARGET_CORTEX
 -iwithprefixbefore/mbed/rtos
 -iwithprefixbefore/mbed/platform/internal
+-iwithprefixbefore/mbed/platform/cxxsupport
 -iwithprefixbefore/mbed/platform/TARGET_CORTEX_M
 -iwithprefixbefore/mbed/platform
 -iwithprefixbefore/mbed/hal/storage_abstraction

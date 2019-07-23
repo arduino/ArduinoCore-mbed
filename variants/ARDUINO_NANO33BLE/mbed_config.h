@@ -226,6 +226,7 @@
 #define MBED_CONF_QUECTEL_M26_PROVIDE_DEFAULT                                 0                                                                                                // set by library:QUECTEL_M26
 #define MBED_CONF_QUECTEL_UG96_BAUDRATE                                       115200                                                                                           // set by library:QUECTEL_UG96
 #define MBED_CONF_QUECTEL_UG96_PROVIDE_DEFAULT                                0                                                                                                // set by library:QUECTEL_UG96
+#define MBED_CONF_RTOS_API_PRESENT                                            1                                                                                                // set by library:rtos-api
 #define MBED_CONF_RTOS_IDLE_THREAD_STACK_SIZE                                 512                                                                                              // set by library:rtos
 #define MBED_CONF_RTOS_IDLE_THREAD_STACK_SIZE_DEBUG_EXTRA                     0                                                                                                // set by library:rtos
 #define MBED_CONF_RTOS_IDLE_THREAD_STACK_SIZE_TICKLESS_EXTRA                  256                                                                                              // set by library:rtos

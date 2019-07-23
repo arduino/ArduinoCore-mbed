@@ -80,6 +80,29 @@ void initVariant() {
 #include "CDC.h"
 CDC SerialUSB;
 
+static void utox8(uint32_t val, uint8_t* s) {
+  for (int i = 0; i < 16; i=i+2) {
+    int d = val & 0XF;
+    val = (val >> 4);
+
+    s[15 - i -1] = d > 9 ? 'A' + d - 10 : '0' + d;
+    s[15 - i] = '\0';
+  }
+}
+
+uint8_t getUniqueSerialNumber(uint8_t* name) {
+  #define SERIAL_NUMBER_WORD_0  NRF_FICR->DEVICEADDR[1]
+  #define SERIAL_NUMBER_WORD_1  NRF_FICR->DEVICEADDR[0]
+
+  utox8(SERIAL_NUMBER_WORD_0, &name[0]);
+  utox8(SERIAL_NUMBER_WORD_1, &name[16]);
+
+  name[30] = '\0';
+  name[31] = '\0';
+
+  return 32;
+}
+
 void _ontouch1200bps_() {
   __disable_irq();
   NRF_POWER->GPREGRET = DFU_MAGIC_SERIAL_ONLY_RESET;

@@ -15,7 +15,7 @@
 -fno-exceptions
 -fomit-frame-pointer
 -funsigned-char
--g1
+-g
 -mcpu=cortex-m4
 -mfloat-abi=softfp
 -mfpu=fpv4-sp-d16
