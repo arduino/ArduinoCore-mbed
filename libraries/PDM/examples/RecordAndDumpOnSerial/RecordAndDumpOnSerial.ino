@@ -11,7 +11,7 @@
 USBAudio audio(true, 16000, 1, 16000, 1);
 #endif
 
-const int led = 41;
+const int led = LED_BUILTIN;
 int led_status = HIGH;
 
 uint8_t buffer[1024];
