@@ -1,7 +1,7 @@
 #!/bin/bash -ex
 
 MBED_CORE_LOCATION=$1
-BOARDNAMES=(ENVIE_M4 MBED_CONNECT_ODIN ARDUINO_NANO33BLE)
+BOARDNAMES=(ARDUINO_NANO33BLE)
 
 #always work in /tmp
 cd /tmp/
@@ -56,6 +56,7 @@ done
 
 rm -rf $ARDUINOCORE/../../cores/arduino/mbed/*
 cd mbed-os && find . | grep "\.h" | xargs -I % cp --parents % $ARDUINOCORE/../../cores/arduino/mbed && cd ..
+cp mbed-os/platform/cxxsupport/mstd_* $ARDUINOCORE/../../cores/arduino/mbed/platform/cxxsupport/
 
 #TODO: add #include "mbed_config.h" in "mbed.h"
 #TODO: rename drivers/SPI.h in drivers/SPIMaster.h and modify include in mbed.h
