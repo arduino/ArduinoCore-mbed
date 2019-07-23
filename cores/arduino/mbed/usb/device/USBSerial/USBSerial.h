@@ -177,7 +177,7 @@ public:
      *
      * @param cb Callback to attach
      */
-    void attach(mbed::Callback<void()> &cb)
+    void attach(mbed::Callback<void()> cb)
     {
         USBCDC::lock();
 

@@ -303,7 +303,7 @@ public:
     *
     * @returns pointer to the string serial descriptor
     */
-    virtual const uint8_t *string_iserial_desc();
+    virtual uint8_t *string_iserial_desc();
 
     /*
     * Get string configuration descriptor

@@ -18,7 +18,8 @@
 #define __MUTEX_H__
 
 #include <inttypes.h>
-#include "cmsis_os2.h"
+#include "mbed_rtos_types.h"
+#include "mbed_rtos1_types.h"
 
 namespace rtos {
 
