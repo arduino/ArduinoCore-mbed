@@ -38,7 +38,7 @@ fi
 
 rm -rf BUILD
 
-mbed compile -v | grep "Macros:" > $BOARDNAME.macros.txt
+mbed compile --source . --source ./mbed-os/features/unsupported/dsp/ -v | grep "Macros:" > $BOARDNAME.macros.txt
 cat $BOARDNAME.macros.txt | cut -f2 -d":" | sed 's# #\n#g' | sed 's#\"#\\"#g' | sort > $ARDUINOCORE/defines.txt
 echo "-DMBED_NO_GLOBAL_USING_DIRECTIVE=1" >> $ARDUINOCORE/defines.txt
 xargs -n 1 < ./BUILD/$BOARDNAME/GCC_ARM/.include* | sed -e 's#-I./mbed-os#-iwithprefixbefore/mbed#g' | sed '/^-I./ d' | tac  > $ARDUINOCORE/includes.txt

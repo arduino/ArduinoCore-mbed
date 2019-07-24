@@ -28,10 +28,14 @@
 -iwithprefixbefore/mbed/rtos/TARGET_CORTEX
 -iwithprefixbefore/mbed/rtos
 -iwithprefixbefore/mbed/platform/internal
+-iwithprefixbefore/mbed/platform/cxxsupport
 -iwithprefixbefore/mbed/platform/TARGET_CORTEX_M
 -iwithprefixbefore/mbed/platform
 -iwithprefixbefore/mbed/hal/storage_abstraction
 -iwithprefixbefore/mbed/hal
+-iwithprefixbefore/mbed/features/unsupported/dsp/dsp
+-iwithprefixbefore/mbed/features/unsupported/dsp/cmsis_dsp
+-iwithprefixbefore/mbed/features/unsupported/dsp/
 -iwithprefixbefore/mbed/features/storage/system_storage
 -iwithprefixbefore/mbed/features/storage/nvstore/source
 -iwithprefixbefore/mbed/features/storage/nvstore
