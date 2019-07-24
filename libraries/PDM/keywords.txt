@@ -14,8 +14,12 @@ PDM	KEYWORD1
 begin	KEYWORD2
 end	KEYWORD2
 
+available	KEYWORD2
+read	KEYWORD2
+
 onReceive	KEYWORD2
 
+setGain	KEYWORD2
 setBufferSize	KEYWORD2
 
 #######################################

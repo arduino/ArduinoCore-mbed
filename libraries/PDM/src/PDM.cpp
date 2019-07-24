@@ -1,28 +1,9 @@
+#include <hal/nrf_pdm.h>
+
 #include "PDM.h"
 
-PDMClass::PDMClass(int dinPin, int clkPin, int pwrPin) :
-  _dinPin(dinPin),
-  _clkPin(clkPin),
-  _pwrPin(pwrPin),
-  _bufferSize(DEFAULT_PDM_BUFFER_SIZE),
-  _writeBufferIndex(-1),
-  _readBufferIndex(-1),
-  _readIndex(0),
-  _onReceive(NULL)
-{
-  for (int i = 0; i < NUM_PDM_BUFFERS; i++) {
-    _buffer[i] = NULL;
-  }
-}
-
-PDMClass::~PDMClass()
-{
-  for (int i = 0; i < NUM_PDM_BUFFERS; i++) {
-    if (_buffer[i] != NULL) {
-      free(_buffer[i]);
-    }
-  }
-}
+#define DEFAULT_PDM_GAIN     20
+#define PDM_IRQ_PRIORITY     7
 
 #define NRF_PDM_FREQ_1280K  (nrf_pdm_freq_t)(0x0A000000UL)               ///< PDM_CLK= 1.280 MHz (32 MHz / 25) => Fs= 20000 Hz
 #define NRF_PDM_FREQ_2000K  (nrf_pdm_freq_t)(0x10000000UL)               ///< PDM_CLK= 2.000 MHz (32 MHz / 16) => Fs= 31250 Hz
@@ -30,102 +11,128 @@ PDMClass::~PDMClass()
 #define NRF_PDM_FREQ_3200K  (nrf_pdm_freq_t)(0x19000000UL)               ///< PDM_CLK= 3.200 MHz (32 MHz / 10) => Fs= 50000 Hz
 #define NRF_PDM_FREQ_4000K  (nrf_pdm_freq_t)(0x20000000UL)               ///< PDM_CLK= 4.000 MHz (32 MHz /  8) => Fs= 62500 Hz
 
-
-int PDMClass::begin(int channels, long sampleRate, int gain)
+PDMClass::PDMClass(int dinPin, int clkPin, int pwrPin) :
+  _dinPin(dinPin),
+  _clkPin(clkPin),
+  _pwrPin(pwrPin),
+  _onReceive(NULL)
 {
-  nrfx_pdm_config_t pdmConfig;
+}
 
+PDMClass::~PDMClass()
+{
+}
+
+int PDMClass::begin(int channels, long sampleRate)
+{
   _channels = channels;
+
+  // configure the sample rate and channels
+  switch (sampleRate) {
+    case 16000:
+      nrf_pdm_clock_set(NRF_PDM_FREQ_1032K);
+      break;
+    case 41667:
+      nrf_pdm_clock_set(NRF_PDM_FREQ_2667K);
+      break;
+    default:
+      return 0; // unsupported
+  }
 
   switch (channels) {
     case 2:
-      pdmConfig.mode = NRF_PDM_MODE_STEREO;
+      nrf_pdm_mode_set(NRF_PDM_MODE_STEREO, NRF_PDM_EDGE_LEFTFALLING);
       break;
 
     case 1:
-      pdmConfig.mode = NRF_PDM_MODE_MONO;
+      nrf_pdm_mode_set(NRF_PDM_MODE_MONO, NRF_PDM_EDGE_LEFTFALLING);
       break;
 
     default:
       return 0; // unsupported
   }
 
-  switch (sampleRate) {
-    case 16000:
-      pdmConfig.clock_freq = NRF_PDM_FREQ_1032K; // close to 16 kHz
-      break;
-    case 41667:
-      pdmConfig.clock_freq = NRF_PDM_FREQ_2667K;
-      break;
-    default:
-      return 0; // unsupported
-  }
+  setGain(DEFAULT_PDM_GAIN);  
 
-  pdmConfig.edge = NRF_PDM_EDGE_LEFTFALLING;
-  pdmConfig.pin_clk = _clkPin;
-  pdmConfig.pin_din = _dinPin;
-  pdmConfig.gain_l = gain;
-  pdmConfig.gain_r = gain;
-  pdmConfig.interrupt_priority = 7;
+  // configure the I/O and mux
+  pinMode(_clkPin, OUTPUT);
+  digitalWrite(_clkPin, LOW);
+
+  pinMode(_dinPin, INPUT);
+
+  nrf_pdm_psel_connect(digitalPinToPinName(_clkPin), digitalPinToPinName(_dinPin));
+
+  // clear events and enable PDM interrupts
+  nrf_pdm_event_clear(NRF_PDM_EVENT_STARTED);
+  nrf_pdm_event_clear(NRF_PDM_EVENT_END);
+  nrf_pdm_event_clear(NRF_PDM_EVENT_STOPPED);
+  nrf_pdm_int_enable(NRF_PDM_INT_STARTED | NRF_PDM_INT_STOPPED);
 
   if (_pwrPin > -1) {
+    // power the mic on
     pinMode(_pwrPin, OUTPUT);
     digitalWrite(_pwrPin, HIGH);
   }
 
-  for (int i = 0; i < NUM_PDM_BUFFERS; i++) {
-    _buffer[i] = (int16_t*)realloc(_buffer[i], _bufferSize);
-  }
+  // clear the buffer
+  _doubleBuffer.reset();
 
-  _writeBufferIndex = -1;
-  _readBufferIndex = -1;
+  // set the PDM IRQ priority and enable
+  NVIC_SetPriority(PDM_IRQn, PDM_IRQ_PRIORITY);
+  NVIC_ClearPendingIRQ(PDM_IRQn);
+  NVIC_EnableIRQ(PDM_IRQn);
 
-  if (nrfx_pdm_init(&pdmConfig, (nrfx_pdm_event_handler_t)PDMClass::onPdmEvent) != NRFX_SUCCESS) {
-    return 0;
-  }
-
-  if (nrfx_pdm_start() != NRFX_SUCCESS) {
-    return 0;
-  }
+  // set the buffer for transfer
+  // nrf_pdm_buffer_set((uint32_t*)_doubleBuffer.data(), _doubleBuffer.availableForWrite() / (sizeof(int16_t) * _channels));
+  // _doubleBuffer.swap();
+  
+  // enable and trigger start task
+  nrf_pdm_enable();
+  nrf_pdm_event_clear(NRF_PDM_EVENT_STARTED);
+  nrf_pdm_task_trigger(NRF_PDM_TASK_START);
 
   return 1;
 }
 
 void PDMClass::end()
 {
+  // disable PDM and IRQ
+  nrf_pdm_disable();
+
+  NVIC_DisableIRQ(PDM_IRQn);
+
   if (_pwrPin > -1) {
+    // power the mic off
     digitalWrite(_pwrPin, LOW);
     pinMode(_pwrPin, INPUT);
   }
 
-  nrfx_pdm_stop();
-  nrfx_pdm_uninit();
+  // unconfigure the I/O and un-mux
+  nrf_pdm_psel_disconnect();
+
+  pinMode(_clkPin, INPUT);
 }
 
 int PDMClass::available()
 {
-  if (_readBufferIndex != -1) {
-    return (_bufferSize - _readIndex);
-  } else {
-    return 0;
-  }
+  NVIC_DisableIRQ(PDM_IRQn);
+
+  size_t avail = _doubleBuffer.available();
+
+  NVIC_EnableIRQ(PDM_IRQn);
+
+  return avail;
 }
 
 int PDMClass::read(void* buffer, size_t size)
 {
-  int avail = available();
+  NVIC_DisableIRQ(PDM_IRQn);
 
-  if (size > (size_t)avail) {
-    size = avail;
-  }
+  int read = _doubleBuffer.read(buffer, size);
 
-  int16_t* in = &_buffer[_readBufferIndex][_readIndex];
-  int16_t* out = (int16_t*)buffer;
+  NVIC_EnableIRQ(PDM_IRQn);
 
-  memcpy(out, in, size);
-  _readIndex += (size / 2);
-
-  return size;
+  return read;
 }
 
 void PDMClass::onReceive(void(*function)(void))
@@ -133,50 +140,47 @@ void PDMClass::onReceive(void(*function)(void))
   _onReceive = function;
 }
 
-void PDMClass::onReceive(void(*function)(void* buf, size_t size))
+void PDMClass::setGain(int gain)
 {
-  _onReceiveParams = function;
+  nrf_pdm_gain_set(gain, gain);
 }
 
 void PDMClass::setBufferSize(int bufferSize)
 {
-  _bufferSize = bufferSize;
+  _doubleBuffer.setSize(bufferSize);
 }
 
-void PDMClass::onPdmEvent(nrfx_pdm_evt_t const* const evt)
+void PDMClass::IrqHandler()
 {
-  PDM.handlePdmEvent(evt);
-}
+  if (nrf_pdm_event_check(NRF_PDM_EVENT_STARTED)) {
+    nrf_pdm_event_clear(NRF_PDM_EVENT_STARTED);
 
-void PDMClass::handlePdmEvent(nrfx_pdm_evt_t const* const evt)
-{
-  if (evt->error != NRFX_PDM_NO_ERROR) {
-    return; // error -> ignore
-  }
+    if (_doubleBuffer.available() == 0) {
+      // switch to the next buffer
+      nrf_pdm_buffer_set((uint32_t*)_doubleBuffer.data(), _doubleBuffer.availableForWrite() / (sizeof(int16_t) * _channels));
 
-  if (evt->buffer_requested) {
-    // start the next transfer
-    _writeBufferIndex = (_writeBufferIndex + 1) % NUM_PDM_BUFFERS;
+      // make the current one available for reading
+      _doubleBuffer.swap(_doubleBuffer.availableForWrite());
 
-    nrfx_pdm_buffer_set(_buffer[_writeBufferIndex], _bufferSize / 2);
-  }
-
-  if (evt->buffer_released) {
-    for (int i = 0; i < NUM_PDM_BUFFERS; i++) {
-      if (evt->buffer_released == _buffer[i]) {
-        _readBufferIndex = i;
-        break;
+      // call receive callback if provided
+      if (_onReceive) {
+        _onReceive();
       }
+    } else {
+      // buffer overflow, stop
+      nrf_pdm_disable();
     }
+  } else if (nrf_pdm_event_check(NRF_PDM_EVENT_STOPPED)) {
+    nrf_pdm_event_clear(NRF_PDM_EVENT_STOPPED);
+  } else if (nrf_pdm_event_check(NRF_PDM_EVENT_END)) {
+    nrf_pdm_event_clear(NRF_PDM_EVENT_END);
+  }
+}
 
-    _readIndex = 0;
-
-    if (_onReceive) {
-      _onReceive();
-    }
-    if (_onReceiveParams) {
-      _onReceiveParams(_buffer[_readBufferIndex], _bufferSize);
-    }
+extern "C" {
+  __attribute__((__used__)) void PDM_IRQHandler_v(void)
+  {
+    PDM.IrqHandler();
   }
 }
 
