@@ -67,9 +67,10 @@
 #define DEBUG_MEMORY_CONTENTS  0
 #endif
 
-#define OUTPUT_SERIAL          1
+#define OUTPUT_SERIAL          0
 #define OUTPUT_RTT             0
 #define OUTPUT_SWO             0
+#define OUTPUT_PRINTF          1
 
 #if DEBUG_ISR_STACK_USAGE
 #include "compiler_abstraction.h"
@@ -197,6 +198,10 @@ static void nway_print_label(const char * label)
 
 #if OUTPUT_SWO
     output_swo_print_label(label);
+#endif
+
+#if OUTPUT_PRINTF
+    printf("%s", label);
 #endif
 }
 
