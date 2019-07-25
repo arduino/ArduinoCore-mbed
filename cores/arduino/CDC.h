@@ -14,10 +14,18 @@ namespace internal {
 extern USBSerial _serial;
 }
 
+static void waitForPortClose() {
+	// wait for DTR be 0 (port closed)
+	while (internal::_serial.connected()) {}
+	_ontouch1200bps_();
+}
+
+static events::EventQueue queue(1 * EVENTS_EVENT_SIZE);
+
 static void usbPortChanged(int baud, int bits, int parity, int stop) {
-  if (baud == 1200 && internal::_serial.connected()) {
-    _ontouch1200bps_();
-  }
+	if (baud == 1200) {
+		queue.call(waitForPortClose);
+	}
 }
 
 class CDC : public HardwareSerial {
@@ -27,6 +35,7 @@ class CDC : public HardwareSerial {
 			internal::_serial.connect();
 			internal::_serial.attach(usbPortChanged);
 			internal::_serial.attach(mbed::callback(this, &CDC::onInterrupt));
+			t.start(callback(&queue, &events::EventQueue::dispatch_forever));
 		}
 		void begin(unsigned long baudrate, uint16_t config) {
 			begin(baudrate);
@@ -65,6 +74,8 @@ class CDC : public HardwareSerial {
 		}
 	private:
 		RingBufferN<256> rx_buffer;
+		rtos::Thread t;
+
 		void onInterrupt() {
 			while (rx_buffer.availableForStore() && internal::_serial.available()) {
 				rx_buffer.store_char(internal::_serial._getc());
