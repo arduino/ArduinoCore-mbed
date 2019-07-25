@@ -1,0 +1,9 @@
+cores/arduino/mbed/*
+cores/arduino/api/Stream.h
+cores/arduino/api/deprecated/Stream.h
+cores/arduino/main.cpp
+variants/*mbed_config.h
+variants/E*
+variants/M*
+libraries/micro*
+libraries/WiFi*

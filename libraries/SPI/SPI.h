@@ -1,7 +1,11 @@
 #pragma once
 
 #include "Arduino.h"
+#if !defined(ARDUINO_AS_MBED_LIBRARY)
 #include "drivers/SPIMaster.h"
+#else
+#include "drivers/SPI.h"
+#endif
 
 namespace arduino {
 
@@ -36,9 +40,13 @@ private:
 
 }
 
+#if !defined(ARDUINO_AS_MBED_LIBRARY)
+
 #if DEVICE_SPI > 0
 extern arduino::MbedSPI SPI;
 #endif
 #if DEVICE_SPI > 1
 extern arduino::MbedSPI SPI1;
+#endif
+
 #endif

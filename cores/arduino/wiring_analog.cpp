@@ -47,6 +47,9 @@ void analogWrite(PinName pin, int val)
     pwm = new mbed::PwmOut(pin);
     digitalPinToPwmObj(pin) = pwm;
   }
+#else
+  // attention: this leaks badly
+  mbed::PwmOut* pwm = new mbed::PwmOut(digitalPinToPinName(pin));
 #endif
   pwm->write(percent);
 }
@@ -60,8 +63,8 @@ void analogWrite(pin_size_t pin, int val)
     pwm = new mbed::PwmOut(digitalPinToPinName(pin));
     digitalPinToPwmObj(pin) = pwm;
   }
-#endif
   pwm->write(percent);
+#endif
 }
 
 void analogWriteResolution(int bits)

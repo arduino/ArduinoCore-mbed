@@ -1,0 +1,7 @@
+{
+	"name": "arduino",
+	"macros": [
+		"ARDUINO_AS_MBED_LIBRARY",
+		"USE_ARDUINO_PINOUT"
+	]
+}

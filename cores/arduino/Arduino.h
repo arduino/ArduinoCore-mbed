@@ -28,21 +28,18 @@
 #undef F
 #endif // F (mbed included after arduino.h)
 #define F Mbed_F
+#endif // !ARDUINO_AS_MBED_LIBRARY
 #include "mbed.h"
 #undef PinMode
 #undef F
-#endif // !ARDUINO_AS_MBED_LIBRARY
 #endif //__cplusplus
 
 #if defined(ARDUINO_AS_MBED_LIBRARY)
 #define PinMode ArduinoPinMode
+#define Arduino_F F
 #endif
 
 #include "api/ArduinoAPI.h"
-
-#if defined(ARDUINO_AS_MBED_LIBRARY)
-#undef PinMode
-#endif
 
 #if defined(__cplusplus)
 #if !defined(ARDUINO_AS_MBED_LIBRARY)
