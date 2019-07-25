@@ -18,6 +18,7 @@ git remote add nrf52 /tmp/ArduinoCore-nRF52-mbed.git
 git remote remove origin
 rm -rf variants/ENVIE*
 rm -rf variants/MBED*
+rm -rf cores/arduino/mbed/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_ENVIE
 sed -i '/.*envie.*$/ d' boards.txt
 sed -i '/.*odin.*$/ d' boards.txt
 sed -i  's/ENVIE_M4//g' platform.txt
