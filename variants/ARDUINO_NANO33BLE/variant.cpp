@@ -85,7 +85,6 @@ void initVariant() {
 
 #ifdef SERIAL_CDC
 #include "CDC.h"
-arduino::CDC SerialUSB;
 
 static void utox8(uint32_t val, uint8_t* s) {
   for (int i = 0; i < 16; i=i+2) {

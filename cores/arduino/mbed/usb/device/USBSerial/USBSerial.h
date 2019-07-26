@@ -19,7 +19,7 @@
 #define USBSERIAL_H
 
 #include "USBCDC.h"
-#include "Stream.h"
+#include "platform/Stream.h"
 #include "Callback.h"
 
 /**
@@ -177,7 +177,7 @@ public:
      *
      * @param cb Callback to attach
      */
-    void attach(mbed::Callback<void()> cb)
+    void attach(mbed::Callback<void()> &cb)
     {
         USBCDC::lock();
 

@@ -18,6 +18,7 @@
 */
 
 #include <Arduino.h>
+#include <PluggableUSBDevice.h>
 
 // Declared weak in Arduino.h to allow user redefinitions.
 int atexit(void (* /*func*/ )()) { return 0; }
@@ -35,9 +36,7 @@ int main(void)
 	init();
 	initVariant();
 
-#ifdef SERIAL_CDC
-  SerialUSB.begin(115200);
-#endif
+  PluggableUSBD().begin();
 
 	setup();
 
