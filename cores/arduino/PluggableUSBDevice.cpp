@@ -161,10 +161,6 @@ void PluggableUSBDevice::callback_set_configuration(uint8_t configuration)
     bool ret = false;
     for (node = rootNode; node; node = node->next) {
         ret = node->callback_set_configuration(configuration);
-        if (ret) {
-            complete_set_configuration(ret);
-            return;
-        }
     }
     complete_set_configuration(ret);
 }
