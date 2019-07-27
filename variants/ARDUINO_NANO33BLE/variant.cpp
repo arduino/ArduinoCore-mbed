@@ -84,7 +84,6 @@ void initVariant() {
 }
 
 #ifdef SERIAL_CDC
-#include "CDC.h"
 
 static void utox8(uint32_t val, uint8_t* s) {
   for (int i = 0; i < 16; i=i+2) {
@@ -102,9 +101,6 @@ uint8_t getUniqueSerialNumber(uint8_t* name) {
 
   utox8(SERIAL_NUMBER_WORD_0, &name[0]);
   utox8(SERIAL_NUMBER_WORD_1, &name[16]);
-
-  name[30] = '\0';
-  name[31] = '\0';
 
   return 32;
 }
