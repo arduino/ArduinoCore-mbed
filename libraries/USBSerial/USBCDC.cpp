@@ -208,6 +208,10 @@ uint32_t USBCDC::callback_request(const USBDevice::setup_packet_t *setup, USBDev
     *result = USBDevice::PassThrough;
     uint32_t size = 0;
 
+    if (setup->wIndex != pluggedInterface) {
+        return size;
+    }
+
     /* Only process class-specific requests */
     if (setup->bmRequestType.Type == CLASS_TYPE) {
         switch (setup->bRequest) {
@@ -244,6 +248,10 @@ bool USBCDC::callback_request_xfer_done(const USBDevice::setup_packet_t *setup, 
     /* Called in ISR context */
 
     bool success = false;
+
+    if (setup->wIndex != pluggedInterface) {
+        return success;
+    }
 
     /* Process class-specific requests */
     if (setup->bmRequestType.Type == CLASS_TYPE) {

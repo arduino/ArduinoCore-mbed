@@ -300,6 +300,9 @@ uint32_t USBHID::callback_request(const setup_packet_t *setup, USBDevice::Reques
     uint32_t size = 0;
 
     // Process additional standard requests
+    if (setup->wIndex != pluggedInterface) {
+        return size;
+    }
 
     if ((setup->bmRequestType.Type == STANDARD_TYPE)) {
         switch (setup->bRequest) {
@@ -355,6 +358,9 @@ uint32_t USBHID::callback_request(const setup_packet_t *setup, USBDevice::Reques
 bool USBHID::callback_request_xfer_done(const setup_packet_t *setup, bool aborted)
 {
     (void)aborted;
+    if (setup->wIndex != pluggedInterface) {
+        return false;
+    }
     return true;
 }
 
@@ -367,10 +373,6 @@ bool USBHID::callback_request_xfer_done(const setup_packet_t *setup, bool aborte
 // configuration is not supported
 bool USBHID::callback_set_configuration(uint8_t configuration)
 {
-    if (configuration == DEFAULT_CONFIGURATION) {
-        return false;
-    }
-
     // Configure endpoints > 0
     PluggableUSBD().endpoint_add(_int_in, MAX_HID_REPORT_SIZE, USB_EP_TYPE_INT, mbed::callback(this, &USBHID::_send_isr));
     PluggableUSBD().endpoint_add(_int_out, MAX_HID_REPORT_SIZE, USB_EP_TYPE_INT, mbed::callback(this, &USBHID::_read_isr));
@@ -461,7 +463,7 @@ const uint8_t *USBHID::configuration_desc(uint8_t index)
 
         INTERFACE_DESCRIPTOR_LENGTH,        // bLength
         INTERFACE_DESCRIPTOR,               // bDescriptorType
-        0x00,                               // bInterfaceNumber
+        pluggedInterface,                   // bInterfaceNumber
         0x00,                               // bAlternateSetting
         0x02,                               // bNumEndpoints
         HID_CLASS,                          // bInterfaceClass

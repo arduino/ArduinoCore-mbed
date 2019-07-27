@@ -129,6 +129,10 @@ void PluggableUSBDevice::callback_request(const setup_packet_t *setup)
 
     for (node = rootNode; node; node = node->next) {
         size = node->callback_request(setup, &result, &data);
+        if (result != USBDevice::PassThrough) {
+            complete_request(result, data, size);
+            return;
+        }
     }
     complete_request(result, data, size);
 }
@@ -139,13 +143,16 @@ void PluggableUSBDevice::callback_request_xfer_done(const setup_packet_t *setup,
         complete_request_xfer_done(false);
         return;
     }
-
+    bool ret = false;
     arduino::internal::PluggableUSBModule* node;
     for (node = rootNode; node; node = node->next) {
-        node->callback_request_xfer_done(setup, aborted);
+        ret = node->callback_request_xfer_done(setup, aborted);
+        if (ret) {
+            complete_request_xfer_done(ret);
+            return;
+        }
     }
-    // FIXME!
-    complete_request_xfer_done(true);
+    complete_request_xfer_done(ret);
 }
 
 void PluggableUSBDevice::callback_set_configuration(uint8_t configuration)
@@ -154,6 +161,10 @@ void PluggableUSBDevice::callback_set_configuration(uint8_t configuration)
     bool ret = false;
     for (node = rootNode; node; node = node->next) {
         ret = node->callback_set_configuration(configuration);
+        if (ret) {
+            complete_set_configuration(ret);
+            return;
+        }
     }
     complete_set_configuration(ret);
 }
