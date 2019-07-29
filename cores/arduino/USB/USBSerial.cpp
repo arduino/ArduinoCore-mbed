@@ -23,11 +23,14 @@ using namespace arduino;
 
 static void waitForPortClose() {
     // wait for DTR be 0 (port closed)
-    while (SerialUSB.connected()) {}
+    while (SerialUSB.connected()) {
+        // the delay is needed to handle other "concurrent" IRQ events
+        delay(1);
+    }
     _ontouch1200bps_();
 }
 
-static events::EventQueue queue(1 * EVENTS_EVENT_SIZE);
+static events::EventQueue queue(2 * EVENTS_EVENT_SIZE);
 
 void usbPortChanged(int baud, int bits, int parity, int stop) {
     if (baud == 1200) {
