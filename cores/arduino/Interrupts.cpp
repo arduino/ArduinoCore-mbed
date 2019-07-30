@@ -21,7 +21,7 @@
 #ifdef digitalPinToInterruptObj
 static mbed::InterruptIn* PinNameToInterruptObj(PinName P) {
   // reverse search for pinName in g_APinDescription[P].name fields
-  for (int i=0; i < PINS_COUNT; i++) {
+  for (pin_size_t i=0; i < PINS_COUNT; i++) {
     if (g_APinDescription[i].name == P) {
       return g_APinDescription[i].irq;
     }
