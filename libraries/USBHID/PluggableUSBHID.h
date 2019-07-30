@@ -25,7 +25,7 @@
 #include "USBHID_Types.h"
 #include "OperationList.h"
 
-#include "PluggableUSBDevice.h"
+#include "USB/PluggableUSBDevice.h"
 
 
 /**

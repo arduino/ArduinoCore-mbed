@@ -37,6 +37,10 @@ void arduino::internal::PluggableUSBModule::endpoint_abort(usb_ep_t endpoint) {
     PluggableUSBD().endpoint_abort(endpoint);
 }
 
+void arduino::internal::PluggableUSBModule::endpoint_stall(usb_ep_t endpoint) {
+    PluggableUSBD().endpoint_stall(endpoint);
+}
+
 bool arduino::internal::PluggableUSBModule::read_start(usb_ep_t endpoint, uint8_t *buffer, uint32_t size) {
     return PluggableUSBD().read_start(endpoint, buffer, size);
 }

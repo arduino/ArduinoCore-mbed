@@ -40,6 +40,7 @@ public:
     void unlock();
     void assert_locked();
     void endpoint_abort(usb_ep_t endpoint);
+    void endpoint_stall(usb_ep_t endpoint);
     bool read_start(usb_ep_t endpoint, uint8_t *buffer, uint32_t size);
     uint32_t read_finish(usb_ep_t endpoint);
     bool write_start(usb_ep_t endpoint, uint8_t *buffer, uint32_t size);
@@ -198,6 +199,7 @@ private:
 
     uint8_t lastIf;
     internal::PluggableUSBModule* rootNode;
+    friend class ::arduino::internal::PluggableUSBModule;
 };
 }
 
