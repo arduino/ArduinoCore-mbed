@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 
-#ifndef ARDUINO_ARCH_NRF52840
+#if !defined(ARDUINO_ARCH_NRF52840) && !defined(ARDUINO_AS_MBED_LIBRARY)
 #error "This library targets only NRF52840 boards, not every mbed target"
 #endif
 
