@@ -355,6 +355,8 @@
 -iwithprefixbefore/mbed/components/wifi/esp8266-driver/ESP8266
 -iwithprefixbefore/mbed/components/wifi/esp8266-driver
 -iwithprefixbefore/mbed/components/wifi
+-iwithprefixbefore/mbed/components/storage/blockdevice/COMPONENT_FLASHIAP/COMMON
+-iwithprefixbefore/mbed/components/storage/blockdevice/COMPONENT_FLASHIAP
 -iwithprefixbefore/mbed/components/802.15.4_RF/stm-s2lp-rf-driver/stm-s2lp-rf-driver
 -iwithprefixbefore/mbed/components/802.15.4_RF/stm-s2lp-rf-driver/source
 -iwithprefixbefore/mbed/components/802.15.4_RF/stm-s2lp-rf-driver

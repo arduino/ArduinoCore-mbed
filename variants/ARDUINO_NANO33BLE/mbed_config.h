@@ -89,6 +89,8 @@
 #define MBED_CONF_EVENTS_SHARED_STACKSIZE                                     2048                                                                                             // set by library:events
 #define MBED_CONF_EVENTS_USE_LOWPOWER_TIMER_TICKER                            0                                                                                                // set by library:events
 #define MBED_CONF_FILESYSTEM_PRESENT                                          1                                                                                                // set by library:filesystem
+#define MBED_CONF_FLASHIAP_BLOCK_DEVICE_BASE_ADDRESS                          0xFFFFFFFF                                                                                       // set by library:flashiap-block-device
+#define MBED_CONF_FLASHIAP_BLOCK_DEVICE_SIZE                                  0                                                                                                // set by library:flashiap-block-device
 #define MBED_CONF_GEMALTO_CINTERION_BAUDRATE                                  115200                                                                                           // set by library:GEMALTO_CINTERION
 #define MBED_CONF_GEMALTO_CINTERION_PROVIDE_DEFAULT                           0                                                                                                // set by library:GEMALTO_CINTERION
 #define MBED_CONF_GENERIC_AT3GPP_BAUDRATE                                     115200                                                                                           // set by library:GENERIC_AT3GPP
