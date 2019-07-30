@@ -57,28 +57,28 @@ uint32_t arduino::internal::PluggableUSBModule::write_finish(usb_ep_t endpoint) 
     return PluggableUSBD().write_finish(endpoint);
 }
 
-PluggableUSBDevice::PluggableUSBDevice(uint16_t vendor_id, uint16_t product_id)
+arduino::PluggableUSBDevice::PluggableUSBDevice(uint16_t vendor_id, uint16_t product_id)
     : USBDevice(get_usb_phy(), vendor_id, product_id, 1 << 8)
 {
 }
 
-PluggableUSBDevice::PluggableUSBDevice(USBPhy *phy, uint16_t vendor_id, uint16_t product_id)
+arduino::PluggableUSBDevice::PluggableUSBDevice(USBPhy *phy, uint16_t vendor_id, uint16_t product_id)
     : USBDevice(phy, vendor_id, product_id, 1 << 8)
 {
 }
 
-PluggableUSBDevice::~PluggableUSBDevice()
+arduino::PluggableUSBDevice::~PluggableUSBDevice()
 {
     deinit();
 }
 
-void PluggableUSBDevice::begin()
+void arduino::PluggableUSBDevice::begin()
 {
     init();
     connect();
 }
 
-bool PluggableUSBDevice::plug(internal::PluggableUSBModule*node)
+bool arduino::PluggableUSBDevice::plug(internal::PluggableUSBModule*node)
 {
     if (!rootNode) {
         rootNode = node;
@@ -95,7 +95,7 @@ bool PluggableUSBDevice::plug(internal::PluggableUSBModule*node)
     return true;
 }
 
-void PluggableUSBDevice::init()
+void arduino::PluggableUSBDevice::init()
 {
     EndpointResolver resolver(endpoint_table());
     resolver.endpoint_ctrl(64);
@@ -107,7 +107,7 @@ void PluggableUSBDevice::init()
     }
 }
 
-void PluggableUSBDevice::callback_reset()
+void arduino::PluggableUSBDevice::callback_reset()
 {
     // calls all plugged modules callback_reset()
     arduino::internal::PluggableUSBModule* node;
@@ -116,7 +116,7 @@ void PluggableUSBDevice::callback_reset()
     }
 };
 
-void PluggableUSBDevice::callback_state_change(DeviceState new_state)
+void arduino::PluggableUSBDevice::callback_state_change(DeviceState new_state)
 {
     arduino::internal::PluggableUSBModule* node;
     for (node = rootNode; node; node = node->next) {
@@ -124,7 +124,7 @@ void PluggableUSBDevice::callback_state_change(DeviceState new_state)
     }
 }
 
-void PluggableUSBDevice::callback_request(const setup_packet_t *setup)
+void arduino::PluggableUSBDevice::callback_request(const setup_packet_t *setup)
 {
     arduino::internal::PluggableUSBModule* node;
     USBDevice::RequestResult result;
@@ -141,7 +141,7 @@ void PluggableUSBDevice::callback_request(const setup_packet_t *setup)
     complete_request(result, data, size);
 }
 
-void PluggableUSBDevice::callback_request_xfer_done(const setup_packet_t *setup, bool aborted)
+void arduino::PluggableUSBDevice::callback_request_xfer_done(const setup_packet_t *setup, bool aborted)
 {
     if (aborted) {
         complete_request_xfer_done(false);
@@ -159,7 +159,7 @@ void PluggableUSBDevice::callback_request_xfer_done(const setup_packet_t *setup,
     complete_request_xfer_done(ret);
 }
 
-void PluggableUSBDevice::callback_set_configuration(uint8_t configuration)
+void arduino::PluggableUSBDevice::callback_set_configuration(uint8_t configuration)
 {
     arduino::internal::PluggableUSBModule* node;
     bool ret = false;
@@ -169,7 +169,7 @@ void PluggableUSBDevice::callback_set_configuration(uint8_t configuration)
     complete_set_configuration(ret);
 }
 
-void PluggableUSBDevice::callback_set_interface(uint16_t interface, uint8_t alternate)
+void arduino::PluggableUSBDevice::callback_set_interface(uint16_t interface, uint8_t alternate)
 {
     arduino::internal::PluggableUSBModule* node;
     for (node = rootNode; node; node = node->next) {
@@ -178,7 +178,7 @@ void PluggableUSBDevice::callback_set_interface(uint16_t interface, uint8_t alte
     complete_set_interface(true);
 }
 
-const uint8_t *PluggableUSBDevice::device_desc()
+const uint8_t *arduino::PluggableUSBDevice::device_desc()
 {
     uint8_t ep0_size = endpoint_max_packet_size(0x00);
     uint8_t device_descriptor_temp[] = {
@@ -206,7 +206,7 @@ const uint8_t *PluggableUSBDevice::device_desc()
     return device_descriptor;
 }
 
-const uint8_t *PluggableUSBDevice::string_iinterface_desc()
+const uint8_t *arduino::PluggableUSBDevice::string_iinterface_desc()
 {
     static const uint8_t stringIinterfaceDescriptor[] = {
         0x08,
@@ -216,7 +216,7 @@ const uint8_t *PluggableUSBDevice::string_iinterface_desc()
     return stringIinterfaceDescriptor;
 }
 
-const uint8_t *PluggableUSBDevice::string_iproduct_desc()
+const uint8_t *arduino::PluggableUSBDevice::string_iproduct_desc()
 {
     static const uint8_t stringIproductDescriptor[] = {
         0x16,
@@ -226,7 +226,7 @@ const uint8_t *PluggableUSBDevice::string_iproduct_desc()
     return stringIproductDescriptor;
 }
 
-const uint8_t *PluggableUSBDevice::string_imanufacturer_desc()
+const uint8_t *arduino::PluggableUSBDevice::string_imanufacturer_desc()
 {
     static const uint8_t string_imanufacturer_descriptor[] = {
         0x12,                                            /*bLength*/
@@ -237,7 +237,7 @@ const uint8_t *PluggableUSBDevice::string_imanufacturer_desc()
 }
 
 #ifdef HAS_UNIQUE_ISERIAL_DESCRIPTOR
-const uint8_t *PluggableUSBDevice::string_iserial_desc()
+const uint8_t *arduino::PluggableUSBDevice::string_iserial_desc()
 {
     _config_iserial[0] = 2;
     _config_iserial[1] = STRING_DESCRIPTOR;
@@ -246,7 +246,7 @@ const uint8_t *PluggableUSBDevice::string_iserial_desc()
 }
 #endif
 
-const uint8_t *PluggableUSBDevice::configuration_desc(uint8_t index)
+const uint8_t *arduino::PluggableUSBDevice::configuration_desc(uint8_t index)
 {
     #define TOTAL_DESCRIPTOR_LENGTH 0xFFFF
     // Create a huge configuration descriptor using all the pluggable ones
@@ -276,7 +276,7 @@ const uint8_t *PluggableUSBDevice::configuration_desc(uint8_t index)
     return _config_descriptor;
 }
 
-PluggableUSBDevice& PluggableUSBD()
+arduino::PluggableUSBDevice& PluggableUSBD()
 {
     static arduino::PluggableUSBDevice obj(BOARD_VENDORID, BOARD_PRODUCTID);
     return obj;
