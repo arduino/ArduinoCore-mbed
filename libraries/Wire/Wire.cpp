@@ -59,7 +59,7 @@ uint8_t arduino::MbedI2C::requestFrom(uint8_t address, size_t len, bool stopBit)
 	if (ret != 0) {
 		return 0;
 	}
-	for (int i=0; i<len; i++) {
+	for (size_t i=0; i<len; i++) {
 		rxBuffer.store_char(buf[i]);
 	}
 	return len;
