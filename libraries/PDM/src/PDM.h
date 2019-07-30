@@ -3,6 +3,10 @@
 
 #include <Arduino.h>
 
+#ifndef ARDUINO_ARCH_NRF52840
+#error "This library targets only NRF52840 boards, not every mbed target"
+#endif
+
 #include "utility/PDMDoubleBuffer.h"
 
 class PDMClass

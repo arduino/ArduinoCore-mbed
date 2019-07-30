@@ -77,6 +77,7 @@ nano33ble.build.extra_flags=
 nano33ble.build.architecture=cortex-m4
 nano33ble.build.board=ARDUINO_NANO33BLE
 nano33ble.build.ldscript=linker_script.ld
+nano33ble.compiler.mbed.arch.define=-DARDUINO_ARCH_NRF52840
 nano33ble.compiler.mbed.defines={build.variant.path}/defines.txt
 nano33ble.compiler.mbed.ldflags={build.variant.path}/ldflags.txt
 nano33ble.compiler.mbed.cflags={build.variant.path}/cflags.txt
