@@ -1,6 +1,6 @@
 #include "Wire.h"
 
-arduino::MbedI2C::MbedI2C(int sda, int scl) : _sda(sda), _scl(scl) {}
+arduino::MbedI2C::MbedI2C(int sda, int scl) : _sda(sda), _scl(scl), usedTxBuffer(0) {}
 
 void arduino::MbedI2C::begin() {
 	master = new mbed::I2C((PinName)_sda, (PinName)_scl);
@@ -37,16 +37,12 @@ void arduino::MbedI2C::setClock(uint32_t freq) {
 
 void arduino::MbedI2C::beginTransmission(uint8_t address) {
 	_address = address << 1;
-	txBuffer.clear();
+	usedTxBuffer = 0;
 }
 
 uint8_t arduino::MbedI2C::endTransmission(bool stopBit) {
-	char buf[256];
-	int len = txBuffer.available();
-	for (int i=0; i<len; i++) {
-		buf[i] = txBuffer.read_char();
-	}
-	master->write(_address, buf, len, !stopBit);
+	if (master->write(_address, (const char *) txBuffer, usedTxBuffer, !stopBit) == 0) return 0;
+	return 2;
 }
 
 uint8_t arduino::MbedI2C::endTransmission(void) {
@@ -70,13 +66,16 @@ uint8_t arduino::MbedI2C::requestFrom(uint8_t address, size_t len) {
 }
 
 size_t arduino::MbedI2C::write(uint8_t data) {
-	txBuffer.store_char(data);
+	if (usedTxBuffer == 256) return 0;
+	txBuffer[usedTxBuffer++] = data;
+	return 1;
 }
 
 size_t arduino::MbedI2C::write(uint8_t* data, int len) {
-	for (int i=0; i<len; i++) {
-		write(data[i]);
-	}
+	if (usedTxBuffer + len > 256) len = 256 - usedTxBuffer;
+	memcpy(txBuffer + usedTxBuffer, data, len);
+	usedTxBuffer += len;
+	return len;
 }
 
 int arduino::MbedI2C::read() {
