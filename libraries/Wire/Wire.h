@@ -61,7 +61,8 @@ private:
     int _scl;
     int _address;
     RingBufferN<256> rxBuffer;
-    RingBufferN<256> txBuffer;
+    uint8_t txBuffer[256];
+    uint32_t usedTxBuffer;
 };
 
 }
