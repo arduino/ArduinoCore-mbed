@@ -66,7 +66,7 @@ envie_m4.upload.native_usb=false
 
 ##############################################################
 
-nano33ble.name=Arduino Nano33BLE
+nano33ble.name=Arduino Nano 33 BLE
 nano33ble.build.core=arduino
 nano33ble.build.crossprefix=arm-none-eabi-
 nano33ble.build.compiler_path={runtime.tools.arm-none-eabi-gcc.path}/bin/
