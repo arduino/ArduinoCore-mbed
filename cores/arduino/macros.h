@@ -36,3 +36,12 @@
 #define digitalPinToInterrupt(P) 		((PinName)P)
 
 #endif
+
+#define REDIRECT_STDOUT_TO(stream) 			namespace mbed {										\
+											FileHandle *mbed_override_console(int fd) { 			\
+												return &stream;										\
+											}														\
+											FileHandle *mbed_target_override_console(int fd) { 		\
+												return &stream;										\
+											}														\
+											}
