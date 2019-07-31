@@ -211,27 +211,35 @@ const uint8_t *arduino::PluggableUSBDevice::string_iinterface_desc()
     static const uint8_t stringIinterfaceDescriptor[] = {
         0x08,
         STRING_DESCRIPTOR,
-        'C', 0, 'D', 0, 'C', 0,
+        'U', 0, 'S', 0, 'B', 0,
     };
     return stringIinterfaceDescriptor;
 }
 
+static uint8_t TO_UNICODE(const char* string, uint8_t* where) {
+    for (size_t i = 0; i < strlen(string); i++) {
+        where[i*2] = string[i];
+        where[i*2 + 1] = 0;
+    }
+    return strlen(string) * 2;
+}
+
+#ifdef BOARD_NAME
 const uint8_t *arduino::PluggableUSBDevice::string_iproduct_desc()
 {
-    static const uint8_t stringIproductDescriptor[] = {
-        0x16,
-        STRING_DESCRIPTOR,
-        'C', 0, 'D', 0, 'C', 0, ' ', 0, 'D', 0, 'E', 0, 'V', 0, 'I', 0, 'C', 0, 'E', 0
-    };
-    return stringIproductDescriptor;
+    _config_iproductdescriptor[0] = 2;
+    _config_iproductdescriptor[1] = STRING_DESCRIPTOR;
+    _config_iproductdescriptor[0] += TO_UNICODE(BOARD_NAME, &_config_iproductdescriptor[2]);
+    return _config_iproductdescriptor;
 }
+#endif
 
 const uint8_t *arduino::PluggableUSBDevice::string_imanufacturer_desc()
 {
     static const uint8_t string_imanufacturer_descriptor[] = {
-        0x12,                                            /*bLength*/
+        0x10,                                            /*bLength*/
         STRING_DESCRIPTOR,                               /*bDescriptorType 0x03*/
-        'm', 0, 'b', 0, 'e', 0, 'd', 0, '.', 0, 'o', 0, 'r', 0, 'g', 0, /*bString iManufacturer - mbed.org*/
+        'A', 0, 'r', 0, 'd', 0, 'u', 0, 'i', 0, 'n', 0, 'o', 0, /*bString iManufacturer - Arduino*/
     };
     return string_imanufacturer_descriptor;
 }

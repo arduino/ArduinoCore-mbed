@@ -196,6 +196,7 @@ private:
 
     uint8_t _config_descriptor[400];
     uint8_t _config_iserial[64];
+    uint8_t _config_iproductdescriptor[64];
 
     uint8_t lastIf;
     internal::PluggableUSBModule* rootNode;
