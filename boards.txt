@@ -103,3 +103,42 @@ nano33ble.bootloader.extra_action.preflash=nrf5 mass_erase
 nano33ble.bootloader.config=-f target/nrf52.cfg
 nano33ble.bootloader.programmer=-f interface/cmsis-dap.cfg
 nano33ble.bootloader.file=nano33ble/bootloader.hex
+
+##############################################################
+
+nanowan.name=Arduino Nano WAN
+nanowan.build.core=arduino
+nanowan.build.crossprefix=arm-none-eabi-
+nanowan.build.compiler_path={runtime.tools.arm-none-eabi-gcc.path}/bin/
+
+nanowan.build.variant=MTB_MURATA_ABZ
+nanowan.build.mcu=cortex-m0
+nanowan.build.extra_flags=
+nanowan.build.architecture=cortex-m0
+nanowan.build.board=MTB_MURATA_ABZ
+nanowan.build.ldscript=linker_script.ld
+nanowan.compiler.mbed.arch.define=-DARDUINO_ARCH_STM32L0x
+nanowan.compiler.mbed.defines={build.variant.path}/defines.txt
+nanowan.compiler.mbed.ldflags={build.variant.path}/ldflags.txt
+nanowan.compiler.mbed.cflags={build.variant.path}/cflags.txt
+nanowan.compiler.mbed.cxxflags={build.variant.path}/cxxflags.txt
+nanowan.compiler.mbed.includes={build.variant.path}/includes.txt
+nanowan.compiler.mbed.extra_ldflags=-lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
+nanowan.compiler.mbed="{build.variant.path}/libs/libmbed.a"
+nanowan.vid.0=0x2341
+nanowan.pid.0=0x005a
+nanowan.vid.1=0x2341
+nanowan.pid.1=0x805a
+
+nanowan.upload.tool=stm32flash
+nanowan.upload.protocol=
+nanowan.upload.maximum_size=196608
+nanowan.upload.maximum_data_size=20480
+nanowan.upload.use_1200bps_touch=false
+nanowan.upload.wait_for_upload_port=false
+nanowan.upload.native_usb=false
+
+nanowan.bootloader.tool=openocd
+nanowan.bootloader.config=-f target/stm32.cfg
+nanowan.bootloader.programmer=-f interface/cmsis-dap.cfg
+nanowan.bootloader.file=nanowan/bootloader.hex

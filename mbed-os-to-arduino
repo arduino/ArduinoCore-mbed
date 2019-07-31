@@ -1,7 +1,7 @@
 #!/bin/bash -ex
 
 MBED_CORE_LOCATION=$1
-BOARDNAMES=(ARDUINO_NANO33BLE)
+BOARDNAMES=(MTB_MURATA_ABZ)
 
 #always work in /tmp
 cd /tmp/
@@ -27,14 +27,24 @@ if [ -d $ARDUINOCORE ]; then
 mkdir -p $ARDUINOCORE/libs
 fi
 
+rm -rf .mbedignore
+
 mbed target $BOARDNAME
 mbed toolchain GCC_ARM
-echo -e "#include \"mbed.h\"\nint main() {Thread thd;}" > main.cpp
+echo -e "#include \"mbed.h\"\nint main() {}" > main.cpp
 echo -e "{\n\"macros\": [\n\"MBED_HEAP_STATS_ENABLED=1\",\n\"MBED_STACK_STATS_ENABLED=1\",\n\"MBED_MEM_TRACING_ENABLED=1\"\n],\n\"target_overrides\": {\n   \"*\": {\n\"platform.stdio-buffered-serial\": true,\n\"rtos.main-thread-stack-size\": 32768,\n\"platform.stdio-baud-rate\": 115200,\n\"platform.default-serial-baud-rate\": 115200\n}\n}\n}\n" > mbed_app.json
 
 if [ $BOARDNAME == "ARDUINO_NANO33BLE" ]; then
 echo -e "{\n\"macros\": [\n\"MBED_HEAP_STATS_ENABLED=1\",\n\"MBED_STACK_STATS_ENABLED=1\",\n\"MBED_MEM_TRACING_ENABLED=1\"\n],\n\"target_overrides\": {\n   \"*\": {\n\"platform.stdio-buffered-serial\": true,\n\"platform.stdio-baud-rate\": 115200,\n\"platform.default-serial-baud-rate\": 115200,\n\"rtos.main-thread-stack-size\": 32768,\n\"target.mbed_app_start\": \"0x10000\"}\n}\n}\n" > mbed_app.json
 fi
+
+if [ -d $ARDUINOCORE/conf ]; then
+cp -r $ARDUINOCORE/conf/* .
+fi
+
+set +e
+mbed update
+set -e
 
 rm -rf BUILD
 

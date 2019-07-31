@@ -1,0 +1,29 @@
+{
+    "config": {
+        "MTB_MURATA_ABZ": {
+            "main_stack_size":      1024,
+            "lora-radio":          "SX1276",
+            "lora-spi-mosi":       "PA_7",
+            "lora-spi-miso":       "PA_6",
+            "lora-spi-sclk":       "PB_3",
+            "lora-cs":             "PA_15",
+            "lora-reset":          "PC_0",
+            "lora-dio0":           "PB_4",
+            "lora-dio1":           "PB_1",
+            "lora-dio2":           "PB_0",
+            "lora-dio3":           "PC_13",
+            "lora-dio4":           "NC",
+            "lora-dio5":           "NC",
+            "lora-rf-switch-ctl1": "NC",
+            "lora-rf-switch-ctl2": "NC",
+            "lora-txctl":          "PC_2",
+            "lora-rxctl":          "PA_1",
+            "lora-ant-switch":     "NC",
+            "lora-pwr-amp-ctl":    "PC_1",
+            "lora-tcxo":           "PA_12",
+	    "platform.cpu-stats-enabled": true,
+	    "events.use-lowpower-timer-ticker": true
+        }
+    }
+}
+
