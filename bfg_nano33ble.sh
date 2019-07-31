@@ -29,7 +29,7 @@ git commit -am "Add nano33 target"
 git push nrf52 master
 cd ..
 
-java -jar bfg.jar --delete-folders "{ENVIE_M4,MBED_CONNECT_ODIN,MTB_UBLOX_ODIN_W2,DISCO_F429ZI,TARGET_ENVIE,openamp,OpenAMP,adafruit-nrfutil,rpclib,WiFi*,*OnMbed}"  --delete-files="{RPC.*,RPC_*,bfg*,boards.txt}" /tmp/ArduinoCore-nRF52-mbed.git
+java -jar bfg.jar --strip-blobs-bigger-than 50M --delete-folders "{ENVIE_M4,MBED_CONNECT_ODIN,MTB_UBLOX_ODIN_W2,DISCO_F429ZI,TARGET_ENVIE,openamp,OpenAMP,adafruit-nrfutil,rpclib,WiFi*,*OnMbed}"  --delete-files="{RPC.*,RPC_*,bfg*,boards.txt}" /tmp/ArduinoCore-nRF52-mbed.git
 
 cd /tmp/ArduinoCore-nRF52-mbed.git
 git filter-branch --prune-empty
