@@ -22,8 +22,10 @@
 using namespace arduino;
 
 static void waitForPortClose() {
-    // wait for DTR be 0 (port closed)
-    while (SerialUSB.connected()) {
+    // wait for DTR be 0 (port closed) and timeout to be over
+    long start = millis();
+    static const int WAIT_TIMEOUT = 200;
+    while (SerialUSB.connected() || (millis() - start) < WAIT_TIMEOUT) {
         // the delay is needed to handle other "concurrent" IRQ events
         delay(1);
     }
