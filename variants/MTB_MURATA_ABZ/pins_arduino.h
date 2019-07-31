@@ -1,0 +1,3 @@
+#define SERIAL_HOWMANY 1
+#define SERIAL1_TX PA_2
+#define SERIAL1_RX PA_3
