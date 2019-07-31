@@ -18,6 +18,7 @@ git remote add nrf52 /tmp/ArduinoCore-nRF52-mbed.git
 git remote remove origin
 rm -rf variants/ENVIE*
 rm -rf variants/MBED*
+rm -rf examples*
 rm -rf cores/arduino/mbed/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_ENVIE
 rm -rf libraries/WiFi*
 sed -i '/.*envie.*$/ d' boards.txt
@@ -28,7 +29,7 @@ git commit -am "Add nano33 target"
 git push nrf52 master
 cd ..
 
-java -jar bfg.jar --delete-folders "{ENVIE_M4,MBED_CONNECT_ODIN,MTB_UBLOX_ODIN_W2,DISCO_F429ZI,TARGET_ENVIE,openamp,OpenAMP,adafruit-nrfutil,rpclib,WiFi*}"  --delete-files="{RPC.*,RPC_*,bfg*,boards.txt}" /tmp/ArduinoCore-nRF52-mbed.git
+java -jar bfg.jar --delete-folders "{ENVIE_M4,MBED_CONNECT_ODIN,MTB_UBLOX_ODIN_W2,DISCO_F429ZI,TARGET_ENVIE,openamp,OpenAMP,adafruit-nrfutil,rpclib,WiFi*,*OnMbed}"  --delete-files="{RPC.*,RPC_*,bfg*,boards.txt}" /tmp/ArduinoCore-nRF52-mbed.git
 
 cd /tmp/ArduinoCore-nRF52-mbed.git
 git filter-branch --prune-empty
