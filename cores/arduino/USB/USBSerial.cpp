@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+#if DEVICE_USBDEVICE
+
 #include "stdint.h"
 #include "PluggableUSBSerial.h"
 #include "usb_phy_api.h"
@@ -114,3 +116,5 @@ bool USBSerial::connected()
 }
 
 USBSerial SerialUSB(false);
+
+#endif

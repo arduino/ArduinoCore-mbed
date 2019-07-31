@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+#if DEVICE_USBDEVICE
+
 #include "stdint.h"
 #include "USBCDC.h"
 #include "EndpointResolver.h"
@@ -611,3 +613,5 @@ const uint8_t *USBCDC::configuration_desc(uint8_t index)
         return NULL;
     }
 }
+
+#endif

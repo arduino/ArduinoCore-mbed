@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+#if DEVICE_USBDEVICE
+
 #include "Arduino.h"
 #include "stdint.h"
 #include "PluggableUSBDevice.h"
@@ -289,3 +291,5 @@ arduino::PluggableUSBDevice& PluggableUSBD()
     static arduino::PluggableUSBDevice obj(BOARD_VENDORID, BOARD_PRODUCTID);
     return obj;
 }
+
+#endif
