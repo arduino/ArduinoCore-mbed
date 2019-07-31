@@ -1,8 +1,8 @@
 /*
-  wiring_private.h - Internal header file.
+  wiring_private.h
   Part of Arduino - http://www.arduino.cc/
 
-  Copyright (c) 2005-2006 David A. Mellis
+  Copyright (c) 2018-2019 Arduino SA
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public

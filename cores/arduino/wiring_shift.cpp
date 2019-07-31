@@ -1,5 +1,5 @@
 /*
-  wiring_shift.c - shiftOut() function
+  wiring_shift.cpp - shiftOut() function
   Part of Arduino - http://www.arduino.cc/
 
   Copyright (c) 2005-2006 David A. Mellis

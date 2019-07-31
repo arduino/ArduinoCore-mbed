@@ -1,5 +1,5 @@
 /*
-  wiring.c - Partial implementation of the Wiring API for the ATmega8.
+  wiring.cpp
   Part of Arduino - http://www.arduino.cc/
 
   Copyright (c) 2005-2006 David A. Mellis

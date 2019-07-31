@@ -1,8 +1,8 @@
 /*
-  wiring_analog.c - analog input and output functions
+  wiring_analog.cpp - analog input and output functions
   Part of Arduino - http://www.arduino.cc/
 
-  Copyright (c) 2018 Arduino SA
+  Copyright (c) 2018-2019 Arduino SA
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
