@@ -21,8 +21,14 @@
             "lora-ant-switch":     "NC",
             "lora-pwr-amp-ctl":    "PC_1",
             "lora-tcxo":           "PA_12",
-	    "platform.cpu-stats-enabled": true,
-	    "events.use-lowpower-timer-ticker": true
+            "platform.cpu-stats-enabled": true,
+            "events.use-lowpower-timer-ticker": true
+        }
+    },
+    "target_overrides": {
+        "MTB_MURATA_ABZ": {
+            "target.device_has_add": ["LPTICKER"],
+            "target.macros_add": ["MBED_TICKLESS"]
         }
     }
 }
