@@ -43,6 +43,7 @@ envie_m4.build.extra_flags=
 envie_m4.build.architecture=cortex-m4
 envie_m4.build.board=ENVIE_M4
 envie_m4.build.ldscript=linker_script.ld
+envie_m4.compiler.mbed.arch.define=
 envie_m4.compiler.mbed.defines={build.variant.path}/defines.txt
 envie_m4.compiler.mbed.ldflags={build.variant.path}/ldflags.txt
 envie_m4.compiler.mbed.cflags={build.variant.path}/cflags.txt
