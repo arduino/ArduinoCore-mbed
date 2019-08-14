@@ -29,6 +29,9 @@
 
 #include "USBDevice.h"
 #include "USB/PluggableUSBDevice.h"
+#include "FATFileSystem.h"
+#include "Callback.h"
+#include "rtos/Thread.h"
 
 namespace arduino {
 
@@ -116,6 +119,8 @@ public:
 
 
     void begin();
+    mbed::FATFileSystem& getFileSystem();
+
     /**
     * Perform USB processing
     */
@@ -255,12 +260,11 @@ private:
     uint32_t _bulk_out_size;
 
     // Interrupt to thread deferral
-    events::PolledQueue _queue;
-    events::Task<void()> _in_task;
-    events::Task<void()> _out_task;
-    events::Task<void()> _reset_task;
-    events::Task<void(const USBDevice::setup_packet_t *)> _control_task;
-    events::Task<void()> _configure_task;
+    mbed::Callback<void()> _in_task;
+    mbed::Callback<void()> _out_task;
+    mbed::Callback<void()> _reset_task;
+    mbed::Callback<void()> _control_task;
+    mbed::Callback<void()> _configure_task;
 
     mbed::BlockDevice *_bd;
     rtos::Mutex _mutex_init;

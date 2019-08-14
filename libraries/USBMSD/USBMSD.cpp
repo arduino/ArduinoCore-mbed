@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+#include "Arduino.h"
 #include <stdint.h>
 #include <stdlib.h>
 #include "PluggableUSBMSD.h"
@@ -68,18 +69,20 @@ enum Status {
 
 USBMSD::USBMSD(mbed::BlockDevice *bd, bool connect_blocking, uint16_t vendor_id, uint16_t product_id, uint16_t product_release)
     : arduino::internal::PluggableUSBModule(1),
-      _initialized(false), _media_removed(false), _in_task(&_queue), _out_task(&_queue), _reset_task(&_queue), _configure_task(&_queue), _bd(bd)
+      _initialized(false), _media_removed(false), _bd(bd)
 {
     PluggableUSBD().plug(this);
 }
 
 USBMSD::USBMSD(USBPhy *phy, mbed::BlockDevice *bd, uint16_t vendor_id, uint16_t product_id, uint16_t product_release)
     : arduino::internal::PluggableUSBModule(1),
-      _initialized(false), _media_removed(false), _in_task(&_queue), _out_task(&_queue), _reset_task(&_queue), _configure_task(&_queue), _bd(bd)
+      _initialized(false), _media_removed(false), _bd(bd)
 {
     PluggableUSBD().plug(this);
 }
 
+static rtos::Thread _t(osPriorityHigh, 64 * 1024);
+static events::EventQueue _queue(64*sizeof(int));
 
 void USBMSD::init(EndpointResolver& resolver)
 {
@@ -99,6 +102,8 @@ void USBMSD::init(EndpointResolver& resolver)
     memset((void *)&_csw, 0, sizeof(CSW));
     _page = NULL;
     connect();
+
+    _t.start(callback(&_queue, &events::EventQueue::dispatch_forever));
 }
 
 USBMSD::~USBMSD()
@@ -169,21 +174,6 @@ void USBMSD::disconnect()
     //USBDevice::disconnect();
     _initialized = false;
 
-    _in_task.cancel();
-    _out_task.cancel();
-    _reset_task.cancel();
-    _configure_task.cancel();
-
-    _mutex.unlock();
-
-    // object mutex must be unlocked for waiting
-    _in_task.wait();
-    _out_task.wait();
-    _reset_task.wait();
-    _configure_task.wait();
-
-    _mutex.lock();
-
     //De-allocate MSD page size:
     free(_page);
     _page = NULL;
@@ -199,11 +189,6 @@ void USBMSD::process()
 
 void USBMSD::attach(mbed::Callback<void()> cb)
 {
-    lock();
-
-    _queue.attach(cb);
-
-    unlock();
 }
 
 bool USBMSD::media_removed()
@@ -253,12 +238,12 @@ int USBMSD::disk_status()
 
 void USBMSD::_isr_out()
 {
-    _out_task.call();
+    _queue.call(_out_task);
 }
 
 void USBMSD::_isr_in()
 {
-    _in_task.call();
+    _queue.call(_in_task);
 }
 
 void USBMSD::callback_state_change(USBDevice::DeviceState new_state)
@@ -266,8 +251,7 @@ void USBMSD::callback_state_change(USBDevice::DeviceState new_state)
     // called in ISR context
 
     if (new_state != USBDevice::Configured) {
-        _reset_task.cancel();
-        _reset_task.call();
+        _queue.call(_reset_task);
     }
 }
 
@@ -301,7 +285,7 @@ bool USBMSD::callback_set_configuration(uint8_t configuration)
 {
     // called in ISR context
 
-    _configure();
+    _queue.call(_configure_task);
     return true;
 }
 
@@ -417,7 +401,7 @@ void USBMSD::_reset()
 
 uint32_t USBMSD::_control(const USBDevice::setup_packet_t *setup, USBDevice::RequestResult *result, uint8_t** data)
 {
-    _mutex.lock();
+    //_mutex.lock();
 
     static const uint8_t maxLUN[1] = {0};
 
@@ -440,7 +424,7 @@ uint32_t USBMSD::_control(const USBDevice::setup_packet_t *setup, USBDevice::Req
         }
     }
 
-    _mutex.unlock();
+    //_mutex.unlock();
     return size;
 }
 
