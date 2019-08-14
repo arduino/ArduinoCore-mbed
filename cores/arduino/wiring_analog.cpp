@@ -46,6 +46,7 @@ void analogWrite(PinName pin, int val)
   if (pwm == NULL) {
     pwm = new mbed::PwmOut(pin);
     digitalPinToPwmObj(pin) = pwm;
+    pwm->period_ms(2); //500Hz
   }
 #else
   // attention: this leaks badly
@@ -62,6 +63,7 @@ void analogWrite(pin_size_t pin, int val)
   if (pwm == NULL) {
     pwm = new mbed::PwmOut(digitalPinToPinName(pin));
     digitalPinToPwmObj(pin) = pwm;
+    pwm->period_ms(2); //500Hz
   }
   pwm->write(percent);
 #endif
