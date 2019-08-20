@@ -81,8 +81,36 @@ USBMSD::USBMSD(USBPhy *phy, mbed::BlockDevice *bd, uint16_t vendor_id, uint16_t 
     PluggableUSBD().plug(this);
 }
 
-static rtos::Thread _t(osPriorityRealtime, 64 * 1024);
-static events::EventQueue _queue(64*sizeof(int));
+static rtos::Thread _t(osPriorityHigh, 32 * 1024, NULL, "msd");
+
+struct disk_info {
+    uint64_t block;
+    uint8_t count;
+    mbed::BlockDevice *_bd;
+    uint8_t data[4096];
+};
+
+static rtos::Mail<struct disk_info, 16> mail_box;
+
+static int _writes_i = 0;
+
+static void write_chunk() {
+    while (true) {
+        osEvent evt = mail_box.get();
+        if (evt.status == osEventMail) {
+            struct disk_info *info = (struct disk_info*)evt.value.p;
+            mbed::bd_addr_t addr = info->block * info->_bd->get_erase_size();
+            mbed::bd_size_t size = info->count * info->_bd->get_erase_size();
+
+            int ret = info->_bd->erase(addr, size);
+            if (ret != 0) {
+                return;
+            }
+            ret = info->_bd->program(info->data, addr, size);
+            mail_box.free(info);
+        }
+    }
+}
 
 void USBMSD::init(EndpointResolver& resolver)
 {
@@ -103,7 +131,7 @@ void USBMSD::init(EndpointResolver& resolver)
     _page = NULL;
     connect();
 
-    _t.start(callback(&_queue, &events::EventQueue::dispatch_forever));
+    _t.start(write_chunk);
 }
 
 USBMSD::~USBMSD()
@@ -115,21 +143,21 @@ USBMSD::~USBMSD()
 
 bool USBMSD::connect()
 {
-    _mutex_init.lock();
-    _mutex.lock();
+    //_mutex_init.lock();
+    //_mutex.lock();
 
     // already initialized
     if (_initialized) {
-        _mutex.unlock();
-        _mutex_init.unlock();
+        //_mutex.unlock();
+        //_mutex_init.unlock();
         return false;
     }
 
     //disk initialization
     if (disk_status() & NO_INIT) {
         if (disk_initialize()) {
-            _mutex.unlock();
-            _mutex_init.unlock();
+            //_mutex.unlock();
+            //_mutex_init.unlock();
             return false;
         }
     }
@@ -146,14 +174,14 @@ bool USBMSD::connect()
             free(_page);
             _page = (uint8_t *)malloc(_block_size * sizeof(uint8_t));
             if (_page == NULL) {
-                _mutex.unlock();
-                _mutex_init.unlock();
+                //_mutex.unlock();
+                //_mutex_init.unlock();
                 return false;
             }
         }
     } else {
-        _mutex.unlock();
-        _mutex_init.unlock();
+        //_mutex.unlock();
+        //_mutex_init.unlock();
         return false;
     }
 
@@ -161,15 +189,15 @@ bool USBMSD::connect()
     //USBDevice::connect();
     _initialized = true;
     _media_removed = false;
-    _mutex.unlock();
-    _mutex_init.unlock();
+    //_mutex.unlock();
+    //_mutex_init.unlock();
     return true;
 }
 
 void USBMSD::disconnect()
 {
-    _mutex_init.lock();
-    _mutex.lock();
+    //_mutex_init.lock();
+    //_mutex.lock();
 
     //USBDevice::disconnect();
     _initialized = false;
@@ -178,13 +206,12 @@ void USBMSD::disconnect()
     free(_page);
     _page = NULL;
 
-    _mutex.unlock();
-    _mutex_init.unlock();
+    //_mutex.unlock();
+    //_mutex_init.unlock();
 }
 
 void USBMSD::process()
 {
-    _queue.dispatch();
 }
 
 void USBMSD::attach(mbed::Callback<void()> cb)
@@ -198,13 +225,30 @@ bool USBMSD::media_removed()
 
 int USBMSD::disk_read(uint8_t *data, uint64_t block, uint8_t count)
 {
-    mbed::bd_addr_t addr =  block * _bd->get_erase_size();
+    // this operation must be executed in another thread
+    mbed::bd_addr_t addr = block * _bd->get_erase_size();
     mbed::bd_size_t size = count * _bd->get_erase_size();
+    /*
     return _bd->read(data, addr, size);
+    */
+    memcpy(data, (void*)(addr + 0x80000), size);
+    return 0;
 }
 
 int USBMSD::disk_write(const uint8_t *data, uint64_t block, uint8_t count)
 {
+    // this operation must be executed in another thread
+    struct disk_info* info = mail_box.alloc();
+    if (info == NULL) {
+        return -1;
+    }
+    memcpy(info->data, data, _bd->get_erase_size());
+    info->block = block;
+    info->count = count;
+    info->_bd = _bd;
+    mail_box.put(info);
+    return 0;
+    /*
     mbed::bd_addr_t addr =  block * _bd->get_erase_size();
     mbed::bd_size_t size = count * _bd->get_erase_size();
     int ret = _bd->erase(addr, size);
@@ -213,6 +257,7 @@ int USBMSD::disk_write(const uint8_t *data, uint64_t block, uint8_t count)
     }
 
     return _bd->program(data, addr, size);
+    */
 }
 
 int USBMSD::disk_initialize()
@@ -238,12 +283,12 @@ int USBMSD::disk_status()
 
 void USBMSD::_isr_out()
 {
-    _queue.call(_out_task);
+    _out();
 }
 
 void USBMSD::_isr_in()
 {
-    _queue.call(_in_task);
+    _in();
 }
 
 void USBMSD::callback_state_change(USBDevice::DeviceState new_state)
@@ -251,7 +296,7 @@ void USBMSD::callback_state_change(USBDevice::DeviceState new_state)
     // called in ISR context
 
     if (new_state != USBDevice::Configured) {
-        _queue.call(_reset_task);
+        _reset();
     }
 }
 
@@ -285,7 +330,7 @@ bool USBMSD::callback_set_configuration(uint8_t configuration)
 {
     // called in ISR context
 
-    _queue.call(_configure_task);
+    _configure();
     return true;
 }
 
@@ -370,38 +415,38 @@ const uint8_t *USBMSD::configuration_desc(uint8_t index)
 
 void USBMSD::_out()
 {
-    _mutex.lock();
+    //_mutex.lock();
 
     _bulk_out_size = read_finish(_bulk_out);
     _out_ready = true;
     _process();
 
-    _mutex.unlock();
+    //_mutex.unlock();
 }
 
 void USBMSD::_in()
 {
-    _mutex.lock();
+    //_mutex.lock();
 
     write_finish(_bulk_in);
     _in_ready = true;
     _process();
 
-    _mutex.unlock();
+    //_mutex.unlock();
 }
 
 void USBMSD::_reset()
 {
-    _mutex.lock();
+    //_mutex.lock();
 
     msd_reset();
 
-    _mutex.unlock();
+    //_mutex.unlock();
 }
 
 uint32_t USBMSD::_control(const USBDevice::setup_packet_t *setup, USBDevice::RequestResult *result, uint8_t** data)
 {
-    //_mutex.lock();
+    ////_mutex.lock();
 
     static const uint8_t maxLUN[1] = {0};
 
@@ -424,13 +469,13 @@ uint32_t USBMSD::_control(const USBDevice::setup_packet_t *setup, USBDevice::Req
         }
     }
 
-    //_mutex.unlock();
+    ////_mutex.unlock();
     return size;
 }
 
 void USBMSD::_configure()
 {
-    _mutex.lock();
+    //_mutex.lock();
 
     // Configure endpoints > 0
     PluggableUSBD().endpoint_add(_bulk_in, MAX_PACKET, USB_EP_TYPE_BULK, mbed::callback(this, &USBMSD::_isr_in));
@@ -444,12 +489,12 @@ void USBMSD::_configure()
     //activate readings
     read_start(_bulk_out, _bulk_out_buf, sizeof(_bulk_out_buf));
 
-    _mutex.unlock();
+    //_mutex.unlock();
 }
 
 void USBMSD::_process()
 {
-    // Mutex must be locked by caller
+    // //_mutex must be locked by caller
 
     switch (_stage) {
         // the device has to decode the CBW received
