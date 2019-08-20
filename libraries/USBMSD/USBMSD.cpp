@@ -81,7 +81,7 @@ USBMSD::USBMSD(USBPhy *phy, mbed::BlockDevice *bd, uint16_t vendor_id, uint16_t 
     PluggableUSBD().plug(this);
 }
 
-static rtos::Thread _t(osPriorityHigh, 64 * 1024);
+static rtos::Thread _t(osPriorityRealtime, 64 * 1024);
 static events::EventQueue _queue(64*sizeof(int));
 
 void USBMSD::init(EndpointResolver& resolver)
