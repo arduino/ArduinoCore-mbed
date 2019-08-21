@@ -27,16 +27,16 @@ void pinMode(PinName pin, PinMode mode)
 {
   switch (mode) {
     case INPUT:
-      mbed::DigitalIn(pin).mode(PullNone);
+      mbed::DigitalIn(pin, PullNone);
       break;
     case OUTPUT:
       mbed::DigitalOut(pin, 0);
       break;
     case INPUT_PULLUP:
-      mbed::DigitalIn(pin).mode(PullUp);
+      mbed::DigitalIn(pin, PullUp);
       break;
     case INPUT_PULLDOWN:
-      mbed::DigitalIn(pin).mode(PullDown);
+      mbed::DigitalIn(pin, PullDown);
       break;
   }
 }
@@ -45,16 +45,16 @@ void pinMode(pin_size_t pin, PinMode mode)
 {
   switch (mode) {
     case INPUT:
-      mbed::DigitalIn(digitalPinToPinName(pin)).mode(PullNone);
+      mbed::DigitalIn(digitalPinToPinName(pin), PullNone);
       break;
     case OUTPUT:
       mbed::DigitalOut(digitalPinToPinName(pin));
       break;
     case INPUT_PULLUP:
-      mbed::DigitalIn(digitalPinToPinName(pin)).mode(PullUp);
+      mbed::DigitalIn(digitalPinToPinName(pin), PullUp);
       break;
     case INPUT_PULLDOWN:
-      mbed::DigitalIn(digitalPinToPinName(pin)).mode(PullDown);
+      mbed::DigitalIn(digitalPinToPinName(pin), PullDown);
       break;
   }
 }
