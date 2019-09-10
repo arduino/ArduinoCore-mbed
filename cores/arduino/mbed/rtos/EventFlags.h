@@ -1,5 +1,5 @@
 /* mbed Microcontroller Library
- * Copyright (c) 2006-2017 ARM Limited
+ * Copyright (c) 2006-2019 ARM Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +22,7 @@
 #ifndef EVENT_FLAG_H
 #define EVENT_FLAG_H
 
+#include <cstddef>
 #include <stdint.h>
 #include "rtos/mbed_rtos_types.h"
 #include "rtos/mbed_rtos1_types.h"
@@ -30,7 +31,8 @@
 #include "platform/NonCopyable.h"
 
 namespace rtos {
-/** \addtogroup rtos */
+/** \ingroup mbed-os-public */
+/** \addtogroup rtos-public-api */
 /** @{*/
 /**
  * \defgroup rtos_EventFlags EventFlags class
@@ -127,4 +129,3 @@ private:
 
 }
 #endif
-

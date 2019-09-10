@@ -1,12 +1,13 @@
 
-/** \addtogroup platform */
+/** \ingroup mbed-os-public */
+/** \addtogroup platform-public-api */
 /** @{*/
 /**
  * \defgroup platform_version Version macros
  * @{
  */
 /* mbed Microcontroller Library
- * Copyright (c) 2018 ARM Limited
+ * Copyright (c) 2018-2019 ARM Limited
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,21 +31,21 @@
   *
   * @note 99 is default value for development version (master branch)
   */
-#define MBED_MAJOR_VERSION  99
+#define MBED_MAJOR_VERSION 5
 
 /** MBED_MINOR_VERSION
   * Mbed OS minor version
   *
   * @note 99 is default value for development version (master branch)
   */
-#define MBED_MINOR_VERSION  99
+#define MBED_MINOR_VERSION 14
 
 /** MBED_PATCH_VERSION
   * Mbed OS patch version
   *
   * @note 99 is default value for development version (master branch)
   */
-#define MBED_PATCH_VERSION  99
+#define MBED_PATCH_VERSION 0
 
 #define MBED_ENCODE_VERSION(major, minor, patch) ((major)*10000 + (minor)*100 + (patch))
 

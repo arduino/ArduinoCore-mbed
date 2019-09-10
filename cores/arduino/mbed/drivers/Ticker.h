@@ -1,5 +1,5 @@
 /* mbed Microcontroller Library
- * Copyright (c) 2006-2013 ARM Limited
+ * Copyright (c) 2006-2019 ARM Limited
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,16 +17,19 @@
 #ifndef MBED_TICKER_H
 #define MBED_TICKER_H
 
+#include <mstd_utility>
 #include "drivers/TimerEvent.h"
 #include "platform/Callback.h"
 #include "platform/mbed_toolchain.h"
 #include "platform/NonCopyable.h"
-#include "platform/mbed_power_mgmt.h"
 #include "hal/lp_ticker_api.h"
-#include "platform/mbed_critical.h"
 
 namespace mbed {
-/** \addtogroup drivers */
+/**
+ * \addtogroup drivers_Ticker Ticker class
+ * \ingroup drivers-public-api-ticker
+ * @{
+ */
 
 /** A Ticker is used to call a function at a recurring interval
  *
@@ -62,28 +65,28 @@ namespace mbed {
  *     }
  * }
  * @endcode
- * @ingroup drivers
  */
 class Ticker : public TimerEvent, private NonCopyable<Ticker> {
 
 public:
-    Ticker() : TimerEvent(), _function(0), _lock_deepsleep(true)
-    {
-    }
+    Ticker();
 
     // When low power ticker is in use, then do not disable deep sleep.
-    Ticker(const ticker_data_t *data) : TimerEvent(data), _function(0), _lock_deepsleep(!data->interface->runs_in_deep_sleep)
-    {
-    }
+    Ticker(const ticker_data_t *data);
 
     /** Attach a function to be called by the Ticker, specifying the interval in seconds
      *
+     *  The method forwards its arguments to attach_us() rather than copying them which
+     *  may not be trivial depending on the callback copied.
+     *  The function is forcibly inlined to not use floating-point operations. This is
+     *  possible given attach_us() expects an integer value for the callback interval.
      *  @param func pointer to the function to be called
      *  @param t the time between calls in seconds
      */
-    void attach(Callback<void()> func, float t)
+    template <typename F>
+    MBED_FORCEINLINE void attach(F &&func, float t)
     {
-        attach_us(func, t * 1000000.0f);
+        attach_us(std::forward<F>(func), t * 1000000.0f);
     }
 
     /** Attach a member function to be called by the Ticker, specifying the interval in seconds
@@ -154,6 +157,8 @@ protected:
     bool          _lock_deepsleep;  /**< Flag which indicates if deep sleep should be disabled. */
 #endif
 };
+
+/** @}*/
 
 } // namespace mbed
 

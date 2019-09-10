@@ -410,6 +410,7 @@ struct protocol_interface_info_entry {
     bool mpl_treat_realm_domains_as_one: 1;
     bool mpl_auto_domain_on_group_join: 1;
 #endif
+    bool send_na : 1;
     /* RFC 4861 Router Variables */
     bool ip_forwarding : 1;
     bool ip_multicast_forwarding : 1;
@@ -499,6 +500,7 @@ extern uint8_t nwk_bootsrap_ready(protocol_interface_info_entry_t *cur);
 extern protocol_interface_info_entry_t *protocol_stack_interface_info_get(nwk_interface_id nwk_id);
 extern bool nwk_interface_compare_mac_address(protocol_interface_info_entry_t *cur, uint_fast8_t addrlen, const uint8_t addr[/*addrlen*/]);
 extern protocol_interface_info_entry_t *protocol_stack_interface_generate_ethernet(struct eth_mac_api_s *api);
+extern protocol_interface_info_entry_t *protocol_stack_interface_generate_ppp(struct eth_mac_api_s *api);
 extern protocol_interface_info_entry_t *protocol_stack_interface_generate_lowpan(struct mac_api_s *api);
 extern uint32_t protocol_stack_interface_set_reachable_time(protocol_interface_info_entry_t *cur, uint32_t base_reachable_time);
 extern void net_bootsrap_cb_run(uint8_t event);
@@ -515,5 +517,6 @@ extern void protocol_core_dhcpv6_allocated_address_remove(protocol_interface_inf
 extern void nwk_bootsrap_state_update(arm_nwk_interface_status_type_e posted_event, protocol_interface_info_entry_t *cur);
 void bootsrap_next_state_kick(icmp_state_t new_state, protocol_interface_info_entry_t *cur);
 int8_t protocol_interface_address_compare(const uint8_t *addr);
+bool protocol_address_prefix_cmp(protocol_interface_info_entry_t *cur, const uint8_t *prefix, uint8_t prefix_len);
 bool protocol_interface_any_address_match(const uint8_t *prefix, uint8_t prefix_len);
 #endif /* _NS_PROTOCOL_H */

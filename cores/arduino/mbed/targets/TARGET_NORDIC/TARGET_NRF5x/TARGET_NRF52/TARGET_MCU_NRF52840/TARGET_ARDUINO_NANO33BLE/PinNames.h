@@ -1,39 +1,17 @@
-/* 
- * Copyright (c) 2016 Nordic Semiconductor ASA
- * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
- * 
- *   1. Redistributions of source code must retain the above copyright notice, this list 
- *      of conditions and the following disclaimer.
+/*
+ * Copyright (c) 2019 Arduino SA
  *
- *   2. Redistributions in binary form, except as embedded into a Nordic Semiconductor ASA 
- *      integrated circuit in a product or a software update for such product, must reproduce 
- *      the above copyright notice, this list of conditions and the following disclaimer in 
- *      the documentation and/or other materials provided with the distribution.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *   3. Neither the name of Nordic Semiconductor ASA nor the names of its contributors may be 
- *      used to endorse or promote products derived from this software without specific prior 
- *      written permission.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *   4. This software, with or without modification, must only be used with a 
- *      Nordic Semiconductor ASA integrated circuit.
- *
- *   5. Any software provided in binary or object form under this license must not be reverse 
- *      engineered, decompiled, modified and/or disassembled. 
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
- * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
- * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 #ifndef MBED_PINNAMES_H
@@ -90,21 +68,21 @@ typedef enum {
     PinDef(0 , 31),
 
     PinDef(1 , 0), //P1_1 = 32...
-	PinDef(1 , 1),
-	PinDef(1 , 2),
-	PinDef(1 , 3),
-	PinDef(1 , 4),
-	PinDef(1 , 5),
-	PinDef(1 , 6),
-	PinDef(1 , 7),
-	PinDef(1 , 8),
-	PinDef(1 , 9),
-	PinDef(1 , 10),
-	PinDef(1 , 11),
-	PinDef(1 , 12),
-	PinDef(1 , 13),
-	PinDef(1 , 14),
-	PinDef(1 , 15),
+    PinDef(1 , 1),
+    PinDef(1 , 2),
+    PinDef(1 , 3),
+    PinDef(1 , 4),
+    PinDef(1 , 5),
+    PinDef(1 , 6),
+    PinDef(1 , 7),
+    PinDef(1 , 8),
+    PinDef(1 , 9),
+    PinDef(1 , 10),
+    PinDef(1 , 11),
+    PinDef(1 , 12),
+    PinDef(1 , 13),
+    PinDef(1 , 14),
+    PinDef(1 , 15),
 
     // Port0
     p0  = P0_0,
@@ -186,7 +164,11 @@ typedef enum {
     STDIO_UART_RTS = NC,
     STDIO_UART_CTS = NC,
     SPI_PSELSS0   = NC,
-    SPIS_PSELSS   = NC
+    SPIS_PSELSS   = NC,
+
+    LED2 = NC,
+    LED3 = NC,
+    LED4 = NC,
 } PinName;
 
 typedef enum {

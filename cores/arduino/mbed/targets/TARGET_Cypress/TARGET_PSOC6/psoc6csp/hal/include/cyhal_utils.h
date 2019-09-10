@@ -51,6 +51,9 @@ extern "C" {
 #define CYHAL_GET_PIN(pin)         ((uint8_t)(pin & 0xFFFFUL))  /**< Macro to extract the pin number */
 #define CYHAL_GET_PORT(pin)        ((uint8_t)((uint32_t)(pin >> 16) & 0xFFUL)) /**< Macro to extract the port number */
 
+#define CYHAL_IRQN_OFFSET          16 /**< Offset for implementation-defined ISR type numbers (IRQ0 = 16) */
+#define CYHAL_GET_CURRENT_IRQN()   ((IRQn_Type) (__get_IPSR() - CYHAL_IRQN_OFFSET)) /**< Macro to get the IRQn of the current ISR */
+
 /** Looks up the resource block that connects to the specified pins from the provided resource pin mapping table.
  * This is a convinience utility for cyhal_utils_get_resource() if the mappings is an array of known size.
  *
@@ -67,6 +70,17 @@ extern "C" {
 * \addtogroup group_hal_utils_functions
 * \{
 */
+
+/** Calculate the peri clock divider value that need to be set to reach frequency closest to the input frequency
+ * 
+ * @param[in] frequency The desired frequency
+ * @param[in] frac_bits The number of fractional bits that the divider has
+ * @return The calculate divider value to set, NOTE a divider value of x divide the frequency by (x+1)
+ */
+static inline uint32_t cyhal_divider_value(uint32_t frequency, uint32_t frac_bits)
+{
+    return ((cy_PeriClkFreqHz * (1 << frac_bits)) + (frequency / 2)) / frequency - 1;
+}
 
 /** Converts the provided gpio pin to a resource instance object
  *

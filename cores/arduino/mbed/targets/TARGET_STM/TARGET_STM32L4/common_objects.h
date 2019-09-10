@@ -35,11 +35,14 @@
 #include "PeripheralNames.h"
 #include "PinNames.h"
 #include "stm32l4xx_ll_usart.h"
+#include "stm32l4xx_ll_lpuart.h"
 #include "stm32l4xx_ll_tim.h"
+#include "stm32l4xx_ll_rtc.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 
 struct pwmout_s {
     PWMName pwm;
@@ -142,6 +145,23 @@ struct can_s {
     CAN_HandleTypeDef CanHandle;
     int index;
     int hz;
+};
+#endif
+
+#if DEVICE_QSPI
+struct qspi_s {
+#if defined(OCTOSPI1)
+    OSPI_HandleTypeDef handle;
+#else
+    QSPI_HandleTypeDef handle;
+#endif
+    QSPIName qspi;
+    PinName io0;
+    PinName io1;
+    PinName io2;
+    PinName io3;
+    PinName sclk;
+    PinName ssel;
 };
 #endif
 

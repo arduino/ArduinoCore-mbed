@@ -210,6 +210,12 @@ public:
      */
     bool sync(int timeout_ms);
 
+    /** Sets the delay to be applied before sending any AT command.
+     *
+     *  @param send_delay the minimum delay in ms between the end of last response and the beginning of a new command
+     */
+    void set_send_delay(uint16_t send_delay);
+
 protected:
     void event();
 #ifdef AT_HANDLER_MUTEX
@@ -410,9 +416,9 @@ public:
      */
     ssize_t read_hex_string(char *str, size_t size);
 
-    /** Reads as string and converts result to integer. Supports only positive integers.
+    /** Reads as string and converts result to integer. Supports only non-negative integers.
      *
-     *  @return the positive integer or -1 in case of error.
+     *  @return the non-negative integer or -1 in case of error.
      */
     int32_t read_int();
 

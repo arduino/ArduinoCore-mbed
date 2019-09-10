@@ -1,5 +1,5 @@
 /* mbed Microcontroller Library
- * Copyright (c) 2006-2012 ARM Limited
+ * Copyright (c) 2006-2019 ARM Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,8 @@
 #if MBED_CONF_RTOS_PRESENT || defined(DOXYGEN_ONLY)
 
 namespace rtos {
-/** \addtogroup rtos */
+/** \ingroup mbed-os-public */
+/** \addtogroup rtos-public-api */
 /** @{*/
 /**
  * \defgroup rtos_Queue Queue class
@@ -105,6 +106,17 @@ public:
     bool full() const
     {
         return osMessageQueueGetSpace(_id) == 0;
+    }
+
+    /** Get number of queued messages in the queue.
+     *
+     * @return Number of items in the queue
+     *
+     * @note You may call this function from ISR context.
+     */
+    uint32_t count() const
+    {
+        return osMessageQueueGetCount(_id);
     }
 
     /** Inserts the given element to the end of the queue.
