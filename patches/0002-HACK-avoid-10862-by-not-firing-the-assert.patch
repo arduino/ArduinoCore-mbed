@@ -1,0 +1,32 @@
+From dcbf8d94ba15c59b796886dc6772076d445b1f9a Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Wed, 31 Jul 2019 12:48:04 +0200
+Subject: [PATCH 2/3] HACK: avoid #10862 by not firing the assert
+
+---
+ drivers/source/usb/USBDevice.cpp | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/source/usb/USBDevice.cpp b/drivers/source/usb/USBDevice.cpp
+index 3ee73c8ba7..c6a088069e 100644
+--- a/drivers/source/usb/USBDevice.cpp
++++ b/drivers/source/usb/USBDevice.cpp
+@@ -952,10 +952,11 @@ void USBDevice::in(usb_ep_t endpoint)
+ 
+     endpoint_info_t *info = &_endpoint_info[EP_TO_INDEX(endpoint)];
+ 
+-    MBED_ASSERT(info->pending >= 1);
+-    info->pending -= 1;
+-    if (info->callback) {
+-        info->callback();
++    if (info->pending >= 1) {
++        info->pending -= 1;
++        if (info->callback) {
++          info->callback();
++        }
+     }
+ }
+ 
+-- 
+2.23.0
+
