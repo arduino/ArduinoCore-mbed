@@ -39,7 +39,11 @@
 #define MBED_CONF_DRIVERS_UART_SERIAL_RXBUF_SIZE                              256                                                                                              // set by library:drivers
 #define MBED_CONF_DRIVERS_UART_SERIAL_TXBUF_SIZE                              256                                                                                              // set by library:drivers
 #define MBED_CONF_ESP8266_DEBUG                                               0                                                                                                // set by library:esp8266
+#define MBED_CONF_ESP8266_POWER_OFF_TIME_MS                                   3                                                                                                // set by library:esp8266
+#define MBED_CONF_ESP8266_POWER_ON_POLARITY                                   0                                                                                                // set by library:esp8266
+#define MBED_CONF_ESP8266_POWER_ON_TIME_MS                                    3                                                                                                // set by library:esp8266
 #define MBED_CONF_ESP8266_PROVIDE_DEFAULT                                     0                                                                                                // set by library:esp8266
+#define MBED_CONF_ESP8266_SERIAL_BAUDRATE                                     115200                                                                                           // set by library:esp8266
 #define MBED_CONF_ESP8266_SOCKET_BUFSIZE                                      8192                                                                                             // set by library:esp8266
 #define MBED_CONF_EVENTS_PRESENT                                              1                                                                                                // set by library:events
 #define MBED_CONF_EVENTS_SHARED_DISPATCH_FROM_APPLICATION                     0                                                                                                // set by library:events
@@ -87,8 +91,12 @@
 #define MBED_CONF_LWIP_IP_VER_PREF                                            4                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_L3IP_ENABLED                                           0                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_MEM_SIZE                                               2310                                                                                             // set by library:lwip[STM]
+#define MBED_CONF_LWIP_PPP_ENABLED                                            0                                                                                                // set by library:lwip
+#define MBED_CONF_LWIP_PPP_IPV4_ENABLED                                       0                                                                                                // set by library:lwip
+#define MBED_CONF_LWIP_PPP_IPV6_ENABLED                                       0                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_PPP_THREAD_STACKSIZE                                   768                                                                                              // set by library:lwip
 #define MBED_CONF_LWIP_SOCKET_MAX                                             4                                                                                                // set by library:lwip
+#define MBED_CONF_LWIP_TCPIP_THREAD_PRIORITY                                  osPriorityNormal                                                                                 // set by library:lwip
 #define MBED_CONF_LWIP_TCPIP_THREAD_STACKSIZE                                 1200                                                                                             // set by library:lwip
 #define MBED_CONF_LWIP_TCP_CLOSE_TIMEOUT                                      1000                                                                                             // set by library:lwip
 #define MBED_CONF_LWIP_TCP_ENABLED                                            1                                                                                                // set by library:lwip
@@ -145,8 +153,8 @@
 #define MBED_CONF_NSAPI_DEFAULT_WIFI_SECURITY                                 NONE                                                                                             // set by library:nsapi
 #define MBED_CONF_NSAPI_DNS_CACHE_SIZE                                        3                                                                                                // set by library:nsapi
 #define MBED_CONF_NSAPI_DNS_RESPONSE_WAIT_TIME                                10000                                                                                            // set by library:nsapi
-#define MBED_CONF_NSAPI_DNS_RETRIES                                           2                                                                                                // set by library:nsapi
-#define MBED_CONF_NSAPI_DNS_TOTAL_ATTEMPTS                                    3                                                                                                // set by library:nsapi
+#define MBED_CONF_NSAPI_DNS_RETRIES                                           1                                                                                                // set by library:nsapi
+#define MBED_CONF_NSAPI_DNS_TOTAL_ATTEMPTS                                    10                                                                                               // set by library:nsapi
 #define MBED_CONF_NSAPI_PRESENT                                               1                                                                                                // set by library:nsapi
 #define MBED_CONF_NSAPI_SOCKET_STATS_ENABLED                                  0                                                                                                // set by library:nsapi
 #define MBED_CONF_NSAPI_SOCKET_STATS_MAX_COUNT                                10                                                                                               // set by library:nsapi
@@ -161,6 +169,9 @@
 #define MBED_CONF_PLATFORM_FATAL_ERROR_AUTO_REBOOT_ENABLED                    0                                                                                                // set by library:platform
 #define MBED_CONF_PLATFORM_FORCE_NON_COPYABLE_ERROR                           0                                                                                                // set by library:platform
 #define MBED_CONF_PLATFORM_MAX_ERROR_FILENAME_LEN                             16                                                                                               // set by library:platform
+#define MBED_CONF_PLATFORM_MINIMAL_PRINTF_ENABLE_64_BIT                       1                                                                                                // set by library:platform
+#define MBED_CONF_PLATFORM_MINIMAL_PRINTF_ENABLE_FLOATING_POINT               0                                                                                                // set by library:platform
+#define MBED_CONF_PLATFORM_MINIMAL_PRINTF_SET_FLOATING_POINT_MAX_DECIMALS     6                                                                                                // set by library:platform
 #define MBED_CONF_PLATFORM_POLL_USE_LOWPOWER_TIMER                            0                                                                                                // set by library:platform
 #define MBED_CONF_PLATFORM_STDIO_BAUD_RATE                                    115200                                                                                           // set by application[*]
 #define MBED_CONF_PLATFORM_STDIO_BUFFERED_SERIAL                              1                                                                                                // set by application[*]
@@ -172,6 +183,12 @@
 #define MBED_CONF_PPP_CELL_IFACE_AT_PARSER_BUFFER_SIZE                        256                                                                                              // set by library:ppp-cell-iface
 #define MBED_CONF_PPP_CELL_IFACE_AT_PARSER_TIMEOUT                            8000                                                                                             // set by library:ppp-cell-iface
 #define MBED_CONF_PPP_CELL_IFACE_BAUD_RATE                                    115200                                                                                           // set by library:ppp-cell-iface
+#define MBED_CONF_PPP_ENABLED                                                 0                                                                                                // set by library:ppp
+#define MBED_CONF_PPP_ENABLE_TRACE                                            0                                                                                                // set by library:ppp
+#define MBED_CONF_PPP_IPV4_ENABLED                                            1                                                                                                // set by library:ppp
+#define MBED_CONF_PPP_IPV6_ENABLED                                            0                                                                                                // set by library:ppp
+#define MBED_CONF_PPP_MBED_EVENT_QUEUE                                        0                                                                                                // set by library:ppp
+#define MBED_CONF_PPP_THREAD_STACKSIZE                                        816                                                                                              // set by library:ppp
 #define MBED_CONF_QUECTEL_BC95_BAUDRATE                                       9600                                                                                             // set by library:QUECTEL_BC95
 #define MBED_CONF_QUECTEL_BC95_PROVIDE_DEFAULT                                0                                                                                                // set by library:QUECTEL_BC95
 #define MBED_CONF_QUECTEL_BG96_BAUDRATE                                       115200                                                                                           // set by library:QUECTEL_BG96
@@ -182,11 +199,13 @@
 #define MBED_CONF_QUECTEL_M26_PROVIDE_DEFAULT                                 0                                                                                                // set by library:QUECTEL_M26
 #define MBED_CONF_QUECTEL_UG96_BAUDRATE                                       115200                                                                                           // set by library:QUECTEL_UG96
 #define MBED_CONF_QUECTEL_UG96_PROVIDE_DEFAULT                                0                                                                                                // set by library:QUECTEL_UG96
+#define MBED_CONF_RM1000_AT_BAUDRATE                                          230400                                                                                           // set by library:RM1000_AT
+#define MBED_CONF_RM1000_AT_PROVIDE_DEFAULT                                   0                                                                                                // set by library:RM1000_AT
 #define MBED_CONF_RTOS_API_PRESENT                                            1                                                                                                // set by library:rtos-api
 #define MBED_CONF_RTOS_IDLE_THREAD_STACK_SIZE                                 512                                                                                              // set by library:rtos
 #define MBED_CONF_RTOS_IDLE_THREAD_STACK_SIZE_DEBUG_EXTRA                     128                                                                                              // set by library:rtos[STM]
 #define MBED_CONF_RTOS_IDLE_THREAD_STACK_SIZE_TICKLESS_EXTRA                  256                                                                                              // set by library:rtos
-#define MBED_CONF_RTOS_MAIN_THREAD_STACK_SIZE                                 32768                                                                                            // set by application[*]
+#define MBED_CONF_RTOS_MAIN_THREAD_STACK_SIZE                                 4096                                                                                             // set by library:rtos
 #define MBED_CONF_RTOS_PRESENT                                                1                                                                                                // set by library:rtos
 #define MBED_CONF_RTOS_THREAD_STACK_SIZE                                      4096                                                                                             // set by library:rtos
 #define MBED_CONF_RTOS_TIMER_THREAD_STACK_SIZE                                768                                                                                              // set by library:rtos
@@ -247,11 +266,9 @@
 #define MBED_LFS_READ_SIZE                                                    64                                                                                               // set by library:littlefs
 #define MEM_ALLOC                                                             malloc                                                                                           // set by library:mbed-trace
 #define MEM_FREE                                                              free                                                                                             // set by library:mbed-trace
-#define NSAPI_PPP_AVAILABLE                                                   0                                                                                                // set by library:lwip
-#define NSAPI_PPP_IPV4_AVAILABLE                                              1                                                                                                // set by library:lwip
-#define NSAPI_PPP_IPV6_AVAILABLE                                              0                                                                                                // set by library:lwip
 #define NVSTORE_ENABLED                                                       1                                                                                                // set by library:nvstore
 #define NVSTORE_MAX_KEYS                                                      16                                                                                               // set by library:nvstore
+#define PPP_DEBUG                                                             0                                                                                                // set by library:ppp
 // Macros
 #define MBEDTLS_CIPHER_MODE_CTR                                                                                                                                                // defined by library:SecureStore
 #define MBEDTLS_CMAC_C                                                                                                                                                         // defined by library:SecureStore
@@ -259,6 +276,7 @@
 #define MBED_HEAP_STATS_ENABLED                                               1                                                                                                // defined by application
 #define MBED_MEM_TRACING_ENABLED                                              1                                                                                                // defined by application
 #define MBED_STACK_STATS_ENABLED                                              1                                                                                                // defined by application
+#define NSAPI_PPP_AVAILABLE                                                   (MBED_CONF_PPP_ENABLED || MBED_CONF_LWIP_PPP_ENABLED)                                            // defined by library:ppp
 #define NS_USE_EXTERNAL_MBED_TLS                                                                                                                                               // defined by library:nanostack
 #define UNITY_INCLUDE_CONFIG_H                                                                                                                                                 // defined by library:utest
 #define _RTE_                                                                                                                                                                  // defined by library:rtos

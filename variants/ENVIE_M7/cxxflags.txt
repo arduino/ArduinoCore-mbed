@@ -1,7 +1,7 @@
 -Wvla
 -fno-rtti
 -std=gnu++14
--DNDEBUG
+-DMBED_TRAP_ERRORS_ENABLED=1
 -Os
 -Wall
 -Wextra

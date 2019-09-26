@@ -235,6 +235,10 @@ typedef enum {
     PI_14 = 0x8E,
     PI_15 = 0x8F,
 
+    PK_5 = 0xA5,
+    PK_6 = 0xA6,
+    PK_7 = 0xA7,
+
     // ADC internal channels
     ADC_TEMP = 0xF0,
     ADC_VREF = 0xF1,

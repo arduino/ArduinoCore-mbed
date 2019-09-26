@@ -1,5 +1,5 @@
 -std=gnu11
--DNDEBUG
+-DMBED_TRAP_ERRORS_ENABLED=1
 -Os
 -Wall
 -Wextra

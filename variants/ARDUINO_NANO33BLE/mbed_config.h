@@ -192,8 +192,6 @@
 #define MBED_CONF_NORDIC_NRF_LF_CLOCK_CALIB_MODE_CONFIG                       0                                                                                                // set by target:MCU_NRF52840
 #define MBED_CONF_NORDIC_NRF_LF_CLOCK_CALIB_TIMER_INTERVAL                    16                                                                                               // set by target:MCU_NRF52840
 #define MBED_CONF_NORDIC_NRF_LF_CLOCK_SRC                                     NRF_LF_SRC_XTAL                                                                                  // set by target:MCU_NRF52840
-#define MBED_CONF_NORDIC_UART_0_FIFO_SIZE                                     32                                                                                               // set by library:nordic
-#define MBED_CONF_NORDIC_UART_1_FIFO_SIZE                                     32                                                                                               // set by library:nordic
 #define MBED_CONF_NSAPI_DEFAULT_MESH_TYPE                                     THREAD                                                                                           // set by library:nsapi
 #define MBED_CONF_NSAPI_DEFAULT_STACK                                         LWIP                                                                                             // set by library:nsapi
 #define MBED_CONF_NSAPI_DEFAULT_WIFI_SECURITY                                 NONE                                                                                             // set by library:nsapi
@@ -216,7 +214,7 @@
 #define MBED_CONF_PLATFORM_FORCE_NON_COPYABLE_ERROR                           0                                                                                                // set by library:platform
 #define MBED_CONF_PLATFORM_MAX_ERROR_FILENAME_LEN                             16                                                                                               // set by library:platform
 #define MBED_CONF_PLATFORM_MINIMAL_PRINTF_ENABLE_64_BIT                       1                                                                                                // set by library:platform
-#define MBED_CONF_PLATFORM_MINIMAL_PRINTF_ENABLE_FLOATING_POINT               1                                                                                                // set by library:platform
+#define MBED_CONF_PLATFORM_MINIMAL_PRINTF_ENABLE_FLOATING_POINT               0                                                                                                // set by library:platform
 #define MBED_CONF_PLATFORM_MINIMAL_PRINTF_SET_FLOATING_POINT_MAX_DECIMALS     6                                                                                                // set by library:platform
 #define MBED_CONF_PLATFORM_POLL_USE_LOWPOWER_TIMER                            0                                                                                                // set by library:platform
 #define MBED_CONF_PLATFORM_STDIO_BAUD_RATE                                    115200                                                                                           // set by application[*]
@@ -290,6 +288,8 @@
 #define MBED_CONF_TARGET_INIT_US_TICKER_AT_BOOT                               0                                                                                                // set by target:Target
 #define MBED_CONF_TARGET_MPU_ROM_END                                          0x1fffffff                                                                                       // set by target:MCU_NRF52840
 #define MBED_CONF_TARGET_TICKLESS_FROM_US_TICKER                              0                                                                                                // set by target:Target
+#define MBED_CONF_TARGET_UART_0_FIFO_SIZE                                     32                                                                                               // set by target:MCU_NRF52840
+#define MBED_CONF_TARGET_UART_1_FIFO_SIZE                                     32                                                                                               // set by target:MCU_NRF52840
 #define MBED_CONF_TELIT_HE910_BAUDRATE                                        115200                                                                                           // set by library:TELIT_HE910
 #define MBED_CONF_TELIT_HE910_PROVIDE_DEFAULT                                 0                                                                                                // set by library:TELIT_HE910
 #define MBED_CONF_TELIT_ME910_BAUDRATE                                        115200                                                                                           // set by library:TELIT_ME910
@@ -331,7 +331,6 @@
 #define NRFX_GPIOTE_CONFIG_NUM_OF_LOW_POWER_EVENTS                            8                                                                                                // defined by application
 #define NSAPI_PPP_AVAILABLE                                                   (MBED_CONF_PPP_ENABLED || MBED_CONF_LWIP_PPP_ENABLED)                                            // defined by library:ppp
 #define NS_USE_EXTERNAL_MBED_TLS                                                                                                                                               // defined by library:nanostack
-#define SWI_DISABLE0                                                                                                                                                           // defined by library:nordic
 #define UNITY_INCLUDE_CONFIG_H                                                                                                                                                 // defined by library:utest
 #define WSF_MS_PER_TICK                                                       1                                                                                                // defined by library:cordio
 #define _RTE_                                                                                                                                                                  // defined by library:rtos
