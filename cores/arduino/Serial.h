@@ -32,7 +32,7 @@ namespace arduino {
 
 class UART : public HardwareSerial {
 	public:
-		UART(int _tx, int _rx) : tx((PinName)_tx), rx((PinName)_rx) {};
+		UART(int _tx, int _rx, int _rts, int _cts) : tx((PinName)_tx), rx((PinName)_rx), rts((PinName)_rts), cts((PinName)_cts) {};
 		void begin(unsigned long);
 		void begin(unsigned long baudrate, uint16_t config);
 		void end();
@@ -48,7 +48,7 @@ class UART : public HardwareSerial {
 	private:
 		void on_rx();
 		mbed::RawSerial* _serial = NULL;
-		PinName tx, rx;
+		PinName tx, rx, rts, cts;
 		RingBufferN<256> rx_buffer;
 		uint8_t intermediate_buf[4];
 };

@@ -37,6 +37,9 @@ void UART::begin(unsigned long baudrate) {
 	if (_serial == NULL) {
 		_serial = new mbed::RawSerial(tx, rx, baudrate);
 	}
+	if (rts != NC) {
+		_serial->set_flow_control(mbed::SerialBase::Flow::RTSCTS, rts, cts);
+	}
 	_serial->attach(mbed::callback(this, &UART::on_rx), mbed::SerialBase::RxIrq);
 }
 
@@ -84,11 +87,29 @@ UART::operator bool() {
 }
 
 #if SERIAL_HOWMANY > 0
-UART UART1(SERIAL1_TX, SERIAL1_RX);
+
+#ifdef SERIAL1_RTS
+UART UART1(SERIAL1_TX, SERIAL1_RX, SERIAL1_RTS, SERIAL1_CTS);
+#else
+UART UART1(SERIAL1_TX, SERIAL1_RX, NC, NC);
+#endif
+
 #if SERIAL_HOWMANY > 1
-UART UART2(SERIAL2_TX, SERIAL2_RX);
+
+#ifdef SERIAL2_RTS
+UART UART2(SERIAL2_TX, SERIAL2_RX, SERIAL2_RTS, SERIAL2_CTS);
+#else
+UART UART2(SERIAL2_TX, SERIAL2_RX, NC, NC);
+#endif
+
 #if SERIAL_HOWMANY > 2
-UART UART3(SERIAL3_TX, SERIAL3_RX);
+
+#ifdef SERIAL3_RTS
+UART UART1(SERIAL3_TX, SERIAL3_RX, SERIAL3_RTS, SERIAL3_CTS);
+#else
+UART UART1(SERIAL3_TX, SERIAL3_RX, NC, NC);
+#endif
+
 #endif
 #endif
 #endif
