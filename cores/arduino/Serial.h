@@ -41,12 +41,16 @@ class UART : public HardwareSerial {
 		int read(void);
 		void flush(void);
 		size_t write(uint8_t c);
-		//size_t write(const uint8_t*, size_t);
+		size_t write(const uint8_t*, size_t);
 		using Print::write; // pull in write(str) and write(buf, size) from Print
 		operator bool();
 
 	private:
 		void on_rx();
+		void block_tx(int);
+		bool _block;
+		// See https://github.com/ARMmbed/mbed-os/blob/f5b5989fc81c36233dbefffa1d023d1942468d42/targets/TARGET_NORDIC/TARGET_NRF5x/TARGET_NRF52/serial_api.c#L76
+		const size_t WRITE_BUFF_SZ = 32;
 		mbed::RawSerial* _serial = NULL;
 		PinName tx, rx, rts, cts;
 		RingBufferN<256> rx_buffer;

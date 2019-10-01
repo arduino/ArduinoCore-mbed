@@ -73,15 +73,36 @@ void UART::flush() {
 
 size_t UART::write(uint8_t c) {
 	while (!_serial->writeable()) {}
-	return _serial->putc(c);
+	int ret = _serial->putc(c);
+	return ret == -1 ? 0 : 1;
 }
 
-/*
 size_t UART::write(const uint8_t* c, size_t len) {
-	//while (!_serial->writeable()) {}
-	return _serial->puts(c, len);
+
+	uint8_t* p = (uint8_t*)c;
+	uint8_t* end = p + len;
+
+	while (!_serial->writeable()) yield();
+
+	auto _write_block = [this](const uint8_t* c, size_t len) {
+		_block = true;
+		_serial->write(c, len, mbed::callback(this, &UART::block_tx));
+		while (_block == true) yield();
+		return len;
+	};
+
+	while ( p < end ) {
+		size_t _len = end - p < WRITE_BUFF_SZ ? len % WRITE_BUFF_SZ : WRITE_BUFF_SZ;
+		p += _write_block(p, _len);
+	}
+
+	return len;
 }
-*/
+
+void UART::block_tx(int _a) {
+	_block = false;
+}
+
 UART::operator bool() {
 	return 1;
 }
