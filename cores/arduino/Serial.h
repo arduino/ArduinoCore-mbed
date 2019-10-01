@@ -41,7 +41,9 @@ class UART : public HardwareSerial {
 		int read(void);
 		void flush(void);
 		size_t write(uint8_t c);
+		#ifdef DEVICE_SERIAL_ASYNCH
 		size_t write(const uint8_t*, size_t);
+		#endif
 		using Print::write; // pull in write(str) and write(buf, size) from Print
 		operator bool();
 

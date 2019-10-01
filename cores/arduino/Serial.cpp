@@ -77,6 +77,7 @@ size_t UART::write(uint8_t c) {
 	return ret == -1 ? 0 : 1;
 }
 
+#ifdef DEVICE_SERIAL_ASYNCH
 size_t UART::write(const uint8_t* c, size_t len) {
 
 	uint8_t* p = (uint8_t*)c;
@@ -98,6 +99,7 @@ size_t UART::write(const uint8_t* c, size_t len) {
 
 	return len;
 }
+#endif
 
 void UART::block_tx(int _a) {
 	_block = false;
