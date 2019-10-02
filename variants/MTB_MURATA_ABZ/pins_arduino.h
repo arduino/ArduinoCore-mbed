@@ -2,6 +2,15 @@
 #define SERIAL1_TX PA_2
 #define SERIAL1_RX PA_3
 
+#define SERIAL_CDC	1
+#define HAS_UNIQUE_ISERIAL_DESCRIPTOR
+#define BOARD_VENDORID		0x2341
+#define BOARD_PRODUCTID		0x805b
+#define BOARD_NAME			"Nano WAN"
+
+void _ontouch1200bps_();
+uint8_t getUniqueSerialNumber(uint8_t* name);
+
 // should we apply https://github.com/ARMmbed/lorawan-fota-demo/blob/7c8e932b2c99fdc0763e3953a9bcddbdd473d0ab/profiles/release.json#L15 ?
 
 //#define MBED_CONF_APP_LORA_RADIO			SX1276
