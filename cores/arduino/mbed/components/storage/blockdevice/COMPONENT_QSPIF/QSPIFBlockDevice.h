@@ -25,7 +25,7 @@
  */
 enum qspif_bd_error {
     QSPIF_BD_ERROR_OK                    = 0,     /*!< no error */
-    QSPIF_BD_ERROR_DEVICE_ERROR          = BD_ERROR_DEVICE_ERROR, /*!< device specific error -4001 */
+    QSPIF_BD_ERROR_DEVICE_ERROR          = mbed::BD_ERROR_DEVICE_ERROR, /*!< device specific error -4001 */
     QSPIF_BD_ERROR_PARSING_FAILED        = -4002, /* SFDP Parsing failed */
     QSPIF_BD_ERROR_READY_FAILED          = -4003, /* Wait for  Mem Ready failed */
     QSPIF_BD_ERROR_WREN_FAILED           = -4004, /* Write Enable Failed */
@@ -345,14 +345,14 @@ private:
     // Sector Regions Map
     int _regions_count; //number of regions
     int _region_size_bytes[QSPIF_MAX_REGIONS]; //regions size in bytes
-    bd_size_t _region_high_boundary[QSPIF_MAX_REGIONS]; //region high address offset boundary
+    mbed::bd_size_t _region_high_boundary[QSPIF_MAX_REGIONS]; //region high address offset boundary
     //Each Region can support a bit combination of any of the 4 Erase Types
     uint8_t _region_erase_types_bitfield[QSPIF_MAX_REGIONS];
     unsigned int _min_common_erase_size; // minimal common erase size for all regions (0 if none exists)
 
     unsigned int _page_size_bytes; // Page size - 256 Bytes default
     int _freq;
-    bd_size_t _device_size_bytes;
+    mbed::bd_size_t _device_size_bytes;
 
     // Bus speed configuration
     qspi_bus_width_t _inst_width; //Bus width for Instruction phase

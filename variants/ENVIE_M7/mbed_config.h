@@ -53,6 +53,8 @@
 #define MBED_CONF_EVENTS_SHARED_STACKSIZE                                     2048                                                                                             // set by library:events
 #define MBED_CONF_EVENTS_USE_LOWPOWER_TIMER_TICKER                            0                                                                                                // set by library:events
 #define MBED_CONF_FILESYSTEM_PRESENT                                          1                                                                                                // set by library:filesystem
+#define MBED_CONF_FLASHIAP_BLOCK_DEVICE_BASE_ADDRESS                          0xFFFFFFFF                                                                                       // set by library:flashiap-block-device
+#define MBED_CONF_FLASHIAP_BLOCK_DEVICE_SIZE                                  0                                                                                                // set by library:flashiap-block-device
 #define MBED_CONF_GEMALTO_CINTERION_BAUDRATE                                  115200                                                                                           // set by library:GEMALTO_CINTERION
 #define MBED_CONF_GEMALTO_CINTERION_PROVIDE_DEFAULT                           0                                                                                                // set by library:GEMALTO_CINTERION
 #define MBED_CONF_GENERIC_AT3GPP_BAUDRATE                                     115200                                                                                           // set by library:GENERIC_AT3GPP
@@ -189,6 +191,16 @@
 #define MBED_CONF_PPP_IPV6_ENABLED                                            0                                                                                                // set by library:ppp
 #define MBED_CONF_PPP_MBED_EVENT_QUEUE                                        0                                                                                                // set by library:ppp
 #define MBED_CONF_PPP_THREAD_STACKSIZE                                        816                                                                                              // set by library:ppp
+#define MBED_CONF_QSPIF_QSPI_CSN                                              QSPI_FLASH1_CSN                                                                                  // set by library:qspif
+#define MBED_CONF_QSPIF_QSPI_FREQ                                             40000000                                                                                         // set by library:qspif
+#define MBED_CONF_QSPIF_QSPI_IO0                                              QSPI_FLASH1_IO0                                                                                  // set by library:qspif
+#define MBED_CONF_QSPIF_QSPI_IO1                                              QSPI_FLASH1_IO1                                                                                  // set by library:qspif
+#define MBED_CONF_QSPIF_QSPI_IO2                                              QSPI_FLASH1_IO2                                                                                  // set by library:qspif
+#define MBED_CONF_QSPIF_QSPI_IO3                                              QSPI_FLASH1_IO3                                                                                  // set by library:qspif
+#define MBED_CONF_QSPIF_QSPI_MIN_PROG_SIZE                                    1                                                                                                // set by library:qspif
+#define MBED_CONF_QSPIF_QSPI_MIN_READ_SIZE                                    1                                                                                                // set by library:qspif
+#define MBED_CONF_QSPIF_QSPI_POLARITY_MODE                                    0                                                                                                // set by library:qspif
+#define MBED_CONF_QSPIF_QSPI_SCK                                              QSPI_FLASH1_SCK                                                                                  // set by library:qspif
 #define MBED_CONF_QUECTEL_BC95_BAUDRATE                                       9600                                                                                             // set by library:QUECTEL_BC95
 #define MBED_CONF_QUECTEL_BC95_PROVIDE_DEFAULT                                0                                                                                                // set by library:QUECTEL_BC95
 #define MBED_CONF_QUECTEL_BG96_BAUDRATE                                       115200                                                                                           // set by library:QUECTEL_BG96
