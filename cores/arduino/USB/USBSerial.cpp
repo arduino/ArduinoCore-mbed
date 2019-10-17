@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-#if defined(DEVICE_USBDEVICE)
+#include "Arduino.h"
+
+#if DEVICE_USBDEVICE && defined(SERIAL_CDC)
 
 #include "stdint.h"
 #include "PluggableUSBSerial.h"
 #include "usb_phy_api.h"
-
-#if defined(SERIAL_CDC)
 
 using namespace arduino;
 
@@ -119,5 +119,4 @@ bool USBSerial::connected()
 
 USBSerial SerialUSB(false);
 
-#endif
 #endif
