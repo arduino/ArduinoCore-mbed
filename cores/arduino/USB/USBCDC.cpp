@@ -15,7 +15,10 @@
  * limitations under the License.
  */
 
-#if DEVICE_USBDEVICE
+
+#include "Arduino.h"
+
+#if DEVICE_USBDEVICE && defined(SERIAL_CDC)
 
 #include "stdint.h"
 #include "USBCDC.h"
