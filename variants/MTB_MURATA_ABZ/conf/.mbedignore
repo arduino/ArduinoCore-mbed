@@ -1,4 +1,4 @@
-mbed-os/usb/* 
+mbed-os/drivers/source/usb/*
 mbed-os/rtos/* 
 mbed-os/components/*
 mbed-os/features/filesystem/* 

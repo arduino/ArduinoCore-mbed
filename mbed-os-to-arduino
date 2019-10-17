@@ -69,6 +69,7 @@ fi
 
 if [ -d $ARDUINOCORE/conf ]; then
 cp -r $ARDUINOCORE/conf/* .
+cp -r $ARDUINOCORE/conf/.m* .
 fi
 
 #set +e
