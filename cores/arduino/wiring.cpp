@@ -39,7 +39,11 @@ unsigned long micros() {
 
 void delay(unsigned long ms)
 {
+#ifndef NO_RTOS
   rtos::ThisThread::sleep_for(ms);
+#else
+  wait_us(ms * 1000);
+#endif
 }
 
 void delayMicroseconds(unsigned int us)
@@ -53,5 +57,7 @@ void init()
 }
 
 void yield() {
+#ifndef NO_RTOS
   rtos::ThisThread::yield();
+#endif
 }
