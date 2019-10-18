@@ -20,7 +20,7 @@
             "lora-rxctl":          "PA_1",
             "lora-ant-switch":     "NC",
             "lora-pwr-amp-ctl":    "PC_1",
-            "lora-tcxo":           "PA_12",
+            "lora-tcxo":           "PA_8",
             "platform.cpu-stats-enabled": true,
             "events.use-lowpower-timer-ticker": true
         }

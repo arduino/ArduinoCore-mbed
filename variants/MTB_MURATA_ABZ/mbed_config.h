@@ -236,6 +236,9 @@
 #define MBED_CONF_STORAGE_TDB_EXTERNAL_RBP_INTERNAL_SIZE                      0                                                                                                // set by library:storage_tdb_external
 #define MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_BASE_ADDRESS                  0                                                                                                // set by library:storage_tdb_internal
 #define MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE                          0                                                                                                // set by library:storage_tdb_internal
+#define MBED_CONF_SX1276_LORA_DRIVER_BUFFER_SIZE                              255                                                                                              // set by library:sx1276-lora-driver
+#define MBED_CONF_SX1276_LORA_DRIVER_RADIO_VARIANT                            SX1276UNDEFINED                                                                                  // set by library:sx1276-lora-driver
+#define MBED_CONF_SX1276_LORA_DRIVER_SPI_FREQUENCY                            8000000                                                                                          // set by library:sx1276-lora-driver
 #define MBED_CONF_TARGET_BOOT_STACK_SIZE                                      0x400                                                                                            // set by library:rtos[*]
 #define MBED_CONF_TARGET_CONSOLE_UART                                         1                                                                                                // set by target:Target
 #define MBED_CONF_TARGET_DEEP_SLEEP_LATENCY                                   3                                                                                                // set by target:FAMILY_STM32
