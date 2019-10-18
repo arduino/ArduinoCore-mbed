@@ -46,13 +46,12 @@ static void utox8(uint32_t val, uint8_t* s) {
   }
 }
 
-#define STM32_UUID ((uint32_t *)0x1FFF7A10)
+#define STM32_UUID ((uint32_t *)0x1FF80050)
 
 uint8_t getUniqueSerialNumber(uint8_t* name) {
   utox8(STM32_UUID[0], &name[0]);
   utox8(STM32_UUID[1], &name[16]);
-  utox8(STM32_UUID[2], &name[32]);
-  return 48;
+  return 32;
 }
 
 void _ontouch1200bps_() {
