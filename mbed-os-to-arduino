@@ -1,7 +1,7 @@
 #!/bin/bash -ex
 
 MBED_CORE_LOCATION=$1
-BOARDNAMES=(ENVIE_M7 ENVIE_M4)
+BOARDNAMES=(MTB_MURATA_ABZ)
 
 #always work in /tmp
 cd /tmp/
@@ -69,7 +69,10 @@ fi
 
 if [ -d $ARDUINOCORE/conf ]; then
 cp -r $ARDUINOCORE/conf/* .
-cp -r $ARDUINOCORE/conf/.m* .
+fi
+
+if [ -d $ARDUINOCORE/conf/profile/ ]; then
+PROFILE=$ARDUINOCORE/conf/profile/custom.json
 fi
 
 #set +e
@@ -78,19 +81,30 @@ fi
 
 rm -rf BUILD
 
+
+if [ $PROFILE == "" ]; then
+FOLDER=GCC_ARM
+else
+FOLDER=GCC_ARM-CUSTOM
+fi
+
+if [ $PROFILE == "" ]; then
 mbed compile --source . --source ./mbed-os/features/unsupported/dsp/ -v | grep "Macros:" > $BOARDNAME.macros.txt
+else
+mbed compile --profile $PROFILE --source . --source ./mbed-os/features/unsupported/dsp/ -v | grep "Macros:" > $BOARDNAME.macros.txt
+fi
 cat $BOARDNAME.macros.txt | cut -f2 -d":" | sed 's# #\n#g' | sed 's#\"#\\"#g' | sort > $ARDUINOCORE/defines.txt
 echo "-DMBED_NO_GLOBAL_USING_DIRECTIVE=1" >> $ARDUINOCORE/defines.txt
-xargs -n 1 < ./BUILD/$BOARDNAME/GCC_ARM/.include* | sed -e 's#-I./mbed-os#-iwithprefixbefore/mbed#g' | sed '/^-I./ d' | tac  > $ARDUINOCORE/includes.txt
+xargs -n 1 < ./BUILD/$BOARDNAME/$FOLDER/.include* | sed -e 's#-I./mbed-os#-iwithprefixbefore/mbed#g' | sed '/^-I./ d' | tac  > $ARDUINOCORE/includes.txt
 
-./gron ./BUILD/$BOARDNAME/GCC_ARM/.profile-c | grep json.flags | cut -f2 -d"\"" | grep -v "json.flags" | grep -v "MMD" > $ARDUINOCORE/cflags.txt
-./gron ./BUILD/$BOARDNAME/GCC_ARM/.profile-cxx | grep json.flags | cut -f2 -d"\"" | grep -v "json.flags" | grep -v "MMD" > $ARDUINOCORE/cxxflags.txt
-./gron ./BUILD/$BOARDNAME/GCC_ARM/.profile-ld | grep json.flags | cut -f2 -d"\"" | grep -v "json.flags" | grep -v "MMD" > $ARDUINOCORE/ldflags.txt
+./gron ./BUILD/$BOARDNAME/$FOLDER/.profile-c | grep json.flags | cut -f2 -d"\"" | grep -v "json.flags" | grep -v "MMD" > $ARDUINOCORE/cflags.txt
+./gron ./BUILD/$BOARDNAME/$FOLDER/.profile-cxx | grep json.flags | cut -f2 -d"\"" | grep -v "json.flags" | grep -v "MMD" > $ARDUINOCORE/cxxflags.txt
+./gron ./BUILD/$BOARDNAME/$FOLDER/.profile-ld | grep json.flags | cut -f2 -d"\"" | grep -v "json.flags" | grep -v "MMD" > $ARDUINOCORE/ldflags.txt
 
-arm-none-eabi-ar rcs BUILD/mbed-core-$BOARDNAME.a `xargs -n 1 < ./BUILD/$BOARDNAME/GCC_ARM/.link_options.txt | grep "\.o" | grep -v "/main\.o"`
+arm-none-eabi-ar rcs BUILD/mbed-core-$BOARDNAME.a `xargs -n 1 < ./BUILD/$BOARDNAME/$FOLDER/.link_options.txt | grep "\.o" | grep -v "/main\.o"`
 cp BUILD/mbed-core-$BOARDNAME.a $ARDUINOCORE/libs/libmbed.a
-cp ./BUILD/$BOARDNAME/GCC_ARM/.link_script.ld $ARDUINOCORE/linker_script.ld
-cp ./BUILD/$BOARDNAME/GCC_ARM/mbed_config.h $ARDUINOCORE/
+cp ./BUILD/$BOARDNAME/$FOLDER/.link_script.ld $ARDUINOCORE/linker_script.ld
+cp ./BUILD/$BOARDNAME/$FOLDER/mbed_config.h $ARDUINOCORE/
 
 done
 
