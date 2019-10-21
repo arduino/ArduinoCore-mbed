@@ -71,7 +71,7 @@ if [ -d $ARDUINOCORE/conf ]; then
 cp -r $ARDUINOCORE/conf/* .
 fi
 
-if [ -d $ARDUINOCORE/conf/profile/ ]; then
+if [ -f $ARDUINOCORE/conf/profile/custom.json ]; then
 PROFILE=$ARDUINOCORE/conf/profile/custom.json
 fi
 
@@ -82,13 +82,13 @@ fi
 rm -rf BUILD
 
 
-if [ $PROFILE == "" ]; then
+if [ x$PROFILE == "x" ]; then
 FOLDER=GCC_ARM
 else
 FOLDER=GCC_ARM-CUSTOM
 fi
 
-if [ $PROFILE == "" ]; then
+if [ x$PROFILE == "x" ]; then
 mbed compile --source . --source ./mbed-os/features/unsupported/dsp/ -v | grep "Macros:" > $BOARDNAME.macros.txt
 else
 mbed compile --profile $PROFILE --source . --source ./mbed-os/features/unsupported/dsp/ -v | grep "Macros:" > $BOARDNAME.macros.txt
