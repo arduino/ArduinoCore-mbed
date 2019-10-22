@@ -1,7 +1,6 @@
 {
     "config": {
         "MTB_MURATA_ABZ": {
-            "main_stack_size":      1024,
             "lora-radio":          "SX1276",
             "lora-spi-mosi":       "PA_7",
             "lora-spi-miso":       "PA_6",
@@ -21,15 +20,15 @@
             "lora-ant-switch":     "NC",
             "lora-pwr-amp-ctl":    "PC_1",
             "lora-tcxo":           "PA_8",
-            "platform.cpu-stats-enabled": true,
             "events.use-lowpower-timer-ticker": true
         }
     },
     "target_overrides": {
         "MTB_MURATA_ABZ": {
             "target.device_has_add": ["LPTICKER"],
-            "target.macros_add": ["MBED_TICKLESS"]
+            "rtos.main-thread-stack-size": 1024
         }
-    }
+    },
+    "macros": ["MBEDTLS_USER_CONFIG_FILE=\"mbedtls_lora_config.h\""]
 }
 

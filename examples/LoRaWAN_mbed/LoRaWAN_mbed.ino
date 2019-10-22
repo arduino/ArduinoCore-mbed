@@ -17,11 +17,22 @@
 #include <stdio.h>
 
 #include "lorawan/LoRaWANInterface.h"
+//#include "lorawan/phy/LoRaPHYEU868.h"
 #include "lorawan/system/lorawan_data_structures.h"
 #include "events/EventQueue.h"
+#include "USBSerial.h"
 
 // Application helpers
 #include "mbed-lora-radio-drv/SX1276/SX1276_LoRaRadio.h"
+#include "lorawan/lorastack/phy/LoRaPHYEU868.h"
+#include "lorawan/lorastack/phy/LoRaPHYAS923.h"
+#include "lorawan/lorastack/phy/LoRaPHYAU915.h"
+#include "lorawan/lorastack/phy/LoRaPHYCN470.h"
+#include "lorawan/lorastack/phy/LoRaPHYCN779.h"
+#include "lorawan/lorastack/phy/LoRaPHYEU433.h"
+#include "lorawan/lorastack/phy/LoRaPHYIN865.h"
+#include "lorawan/lorastack/phy/LoRaPHYKR920.h"
+#include "lorawan/lorastack/phy/LoRaPHYUS915.h"
 
 SX1276_LoRaRadio radio(MBED_CONF_APP_LORA_SPI_MOSI,
                        MBED_CONF_APP_LORA_SPI_MISO,
@@ -44,10 +55,15 @@ SX1276_LoRaRadio radio(MBED_CONF_APP_LORA_SPI_MOSI,
 
 using namespace events;
 
-#undef Serial
-mbed::Serial serial(PA_2, PA_3, 115200);
+#define MBED_CONF_LORA_DUTY_CYCLE_ON  1
 
-REDIRECT_STDOUT_TO(serial);
+//#undef Serial
+//mbed::Serial serial(PA_2, PA_3, 115200);
+
+//REDIRECT_STDOUT_TO(SerialUSB);
+
+USBSerial ser;
+#define printf ser.printf
 
 // Max payload size can be LORAMAC_PHY_MAXPAYLOAD.
 // This example only communicates with much shorter messages (<30 bytes).
@@ -77,9 +93,9 @@ uint8_t rx_buffer[30];
 */
 #define PC_9                            0
 
-#define DEV_EUI   "9784564454666554"
+#define DEV_EUI   "9784564454666555"
 #define APP_EUI   "70B3D57EF0005EBC"
-#define APP_KEY   "CC1DA29C977331812D0D81B711F0F034"
+#define APP_KEY   "321B0E2D4D4A1371146D37D658129DF0"
 
 /**
   This event queue is the global event queue for both the
@@ -101,7 +117,10 @@ static void lora_event_handler(lorawan_event_t event);
 /**
    Constructing Mbed LoRaWANInterface and passing it the radio object from lora_radio_helper.
 */
-static LoRaWANInterface lorawan(radio);
+
+static LoRaPHYEU868 phy;
+
+static LoRaWANInterface lorawan(radio, phy);
 
 /**
    Application specific callbacks
@@ -111,14 +130,16 @@ static lorawan_app_callbacks_t callbacks;
 /**
    Entry point for application
 */
-void loop() {}
+void loop() {
+  delay(1000);
+}
 
 static uint8_t* string_to_uint8_buf(const char* str) {
   uint8_t* buf = (uint8_t*)malloc(strlen(str) / 2);
   for (int i = 0; i < strlen(str); i += 2) {
     char temp[2];
     temp[0] = str[i];
-    temp[1] = str[i+1];
+    temp[1] = str[i + 1];
     buf[i / 2] = strtoul(temp, NULL, 16);
   }
   return buf;
@@ -126,8 +147,9 @@ static uint8_t* string_to_uint8_buf(const char* str) {
 
 void setup(void)
 {
+  // SerialUSB.begin(115200);
   // setup tracing
-  delay(5000);
+  //delay(5000);
   printf("\r\n Mbed LoRaWANStack initializing \r\n");
 
   lorawan_connect_t info;
@@ -165,6 +187,8 @@ void setup(void)
     printf("\r\n enable_adaptive_datarate failed! \r\n");
   }
 
+  //lorawan.set_datarate(DR_0);
+
   printf("\r\n Adaptive data  rate (ADR) - Enabled \r\n");
 
   retcode = lorawan.connect(info);
@@ -179,10 +203,6 @@ void setup(void)
 
   // make your event queue dispatching events forever
   ev_queue.dispatch_forever();
-
-  while (1) {
-    delay(1000);
-  }
 }
 
 /**
@@ -192,10 +212,11 @@ static void send_message()
 {
   uint16_t packet_len;
   int16_t retcode;
-  float sensor_value;
+  int sensor_value = analogRead(A0);
 
-  packet_len = sprintf((char *) tx_buffer, "Dummy Sensor Value is %3.1f",
+  packet_len = sprintf((char*) tx_buffer, "Dummy Sensor Value is %d",
                        sensor_value);
+
 
   retcode = lorawan.send(MBED_CONF_LORA_APP_PORT, tx_buffer, packet_len,
                          MSG_UNCONFIRMED_FLAG);

@@ -43,8 +43,8 @@ static const uint8_t A3  = PIN_A3;
 #define SERIAL2_TX PA_10
 #define SERIAL2_RX PA_11
 
-#define SERIAL_CDC	1
-#define HAS_UNIQUE_ISERIAL_DESCRIPTOR
+//#define SERIAL_CDC	1
+//#define HAS_UNIQUE_ISERIAL_DESCRIPTOR
 #define BOARD_VENDORID		0x2341
 #define BOARD_PRODUCTID		0x805b
 #define BOARD_NAME			"Nano WAN"
