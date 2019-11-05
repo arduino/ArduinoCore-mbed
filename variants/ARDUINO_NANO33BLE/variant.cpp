@@ -81,6 +81,18 @@ void initVariant() {
 
   digitalWrite(PIN_ENABLE_SENSORS_3V3, HIGH);
   digitalWrite(PIN_ENABLE_I2C_PULLUP, HIGH);
+ 
+  NRF_PWM_Type* PWM[] = {
+    NRF_PWM0, NRF_PWM1, NRF_PWM2
+#ifdef NRF_PWM3
+    ,NRF_PWM3
+#endif
+  };
+
+  for (int i = 0; i < (sizeof(PWM)/sizeof(PWM[0])); i++) {
+    PWM[i]->ENABLE = 0;
+    PWM[i]->PSEL.OUT[0] = 0xFFFFFFFFUL;
+  } 
 }
 
 #ifdef SERIAL_CDC
