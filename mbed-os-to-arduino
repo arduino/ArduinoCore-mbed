@@ -1,111 +1,257 @@
-#!/bin/bash -ex
+#!/usr/bin/env bash
 
-MBED_CORE_LOCATION=$1
-BOARDNAMES=(MTB_MURATA_ABZ)
-
-#always work in /tmp
-cd /tmp/
-
-if [ ! -d mbed-os-program ]; then
-mbed new mbed-os-program
-fi
-cd mbed-os-program
-# checkout the mbed-os version you prefer
-# cd mbed-os && git checkout --track origin/feature-hal-spec-usb-device && cd ..
-
-if [ ! -f gron ]; then
-echo "Please copy gron executable here"
-exit 1
-fi
-
-for BOARDNAME in "${BOARDNAMES[@]}"
-do
-
-export ARDUINOCORE=$MBED_CORE_LOCATION/variants/$BOARDNAME/
-
-if [ -d $ARDUINOCORE ]; then
-mkdir -p $ARDUINOCORE/libs
-fi
-
-rm -rf .mbedignore
-
-mbed target $BOARDNAME
-mbed toolchain GCC_ARM
-echo -e "#include \"mbed.h\"\nint main() {}" > main.cpp
-echo -e "{
-	\"macros\": [
-		\"MBED_HEAP_STATS_ENABLED=1\",
-		\"MBED_STACK_STATS_ENABLED=1\",
-		\"MBED_MEM_TRACING_ENABLED=1\",
-		],
-	\"target_overrides\": {
-		\"*\": {
-			\"platform.stdio-buffered-serial\": true,
-			\"platform.stdio-baud-rate\": 115200,
-			\"platform.default-serial-baud-rate\": 115200,
-		}
-	}
-}" > mbed_app.json
-
-if [ $BOARDNAME == "ARDUINO_NANO33BLE" ]; then
-echo -e "{
-	\"macros\": [
-		\"MBED_HEAP_STATS_ENABLED=1\",
-		\"MBED_STACK_STATS_ENABLED=1\",
-		\"MBED_MEM_TRACING_ENABLED=1\",
-		\"NRFX_GPIOTE_CONFIG_NUM_OF_LOW_POWER_EVENTS=8\"
-		],
-	\"target_overrides\": {
-		\"*\": {
-			\"platform.stdio-buffered-serial\": true,
-			\"platform.stdio-baud-rate\": 115200,
-			\"platform.default-serial-baud-rate\": 115200,
-			\"rtos.main-thread-stack-size\": 32768,
-			\"target.mbed_app_start\": \"0x10000\"
-		}
-	}
-}" > mbed_app.json
-fi
-
-if [ -d $ARDUINOCORE/conf ]; then
-cp -r $ARDUINOCORE/conf/* .
-fi
-
-set +e
-mbed update
 set -e
 
-rm -rf BUILD
+check_tools () {
+	if not hash jq &>/dev/null ; then
+		echo "Please, install jq."
+		exit 1
+	fi
 
-mbed compile --source . --source ./mbed-os/features/unsupported/dsp/ -v | grep "Macros:" > $BOARDNAME.macros.txt
-cat $BOARDNAME.macros.txt | cut -f2 -d":" | sed 's# #\n#g' | sed 's#\"#\\"#g' | sort > $ARDUINOCORE/defines.txt
-echo "-DMBED_NO_GLOBAL_USING_DIRECTIVE=1" >> $ARDUINOCORE/defines.txt
-xargs -n 1 < ./BUILD/$BOARDNAME/GCC_ARM/.include* | sed -e 's#-I./mbed-os#-iwithprefixbefore/mbed#g' | sed '/^-I./ d' | tac  > $ARDUINOCORE/includes.txt
+	if not hash rsync &>/dev/null ; then
+		echo "Please, install rsync."
+		exit 1
+	fi
+}
 
-./gron ./BUILD/$BOARDNAME/GCC_ARM/.profile-c | grep json.flags | cut -f2 -d"\"" | grep -v "json.flags" | grep -v "MMD" > $ARDUINOCORE/cflags.txt
-./gron ./BUILD/$BOARDNAME/GCC_ARM/.profile-cxx | grep json.flags | cut -f2 -d"\"" | grep -v "json.flags" | grep -v "MMD" > $ARDUINOCORE/cxxflags.txt
-./gron ./BUILD/$BOARDNAME/GCC_ARM/.profile-ld | grep json.flags | cut -f2 -d"\"" | grep -v "json.flags" | grep -v "MMD" > $ARDUINOCORE/ldflags.txt
+mbed_new () {
+	#always work in /tmp
+	cd /tmp/
 
-arm-none-eabi-ar rcs BUILD/mbed-core-$BOARDNAME.a `xargs -n 1 < ./BUILD/$BOARDNAME/GCC_ARM/.link_options.txt | grep "\.o" | grep -v "/main\.o"`
-cp BUILD/mbed-core-$BOARDNAME.a $ARDUINOCORE/libs/libmbed.a
-cp ./BUILD/$BOARDNAME/GCC_ARM/.link_script.ld $ARDUINOCORE/linker_script.ld
-cp ./BUILD/$BOARDNAME/GCC_ARM/mbed_config.h $ARDUINOCORE/
+	if [ ! -d mbed-os-program ]; then
+		mbed new mbed-os-program
+	fi
+	cd mbed-os-program
+}
 
+mbed_revision () {
+
+	if [ "$MBED_UPDATE" -eq 1 ]; then
+		set +e
+		mbed update
+		set -e
+	fi
+
+	if [ -n "$REMOTE_BRANCH" ]; then
+	# checkout the mbed-os version you prefer...
+		cd mbed-os
+		git checkout --track "$REMOTE_BRANCH"
+		cd ..
+	fi
+
+	if [ -n "$LOCAL_REPO" ]; then
+		# ... or link your local repo
+		if [ -d mbed-os ]; then
+			if [ ! -L mbed-os ]; then
+				rm -rf mbed-os
+				ln -s ~/Work/Devel/BCMI/Code/SDKs/mbed-os .
+			fi
+		fi
+	fi
+
+}
+
+create_mbed_program () {
+	rm -rf .mbedignore
+
+	mbed target "$BOARDNAME"
+	mbed toolchain GCC_ARM
+
+	cat > main.cpp << MAIN_C
+#include "mbed.h"
+int main() {}
+MAIN_C
+
+	if [ ! -f "$ARDUINOVARIANT"/conf/mbed_app.json ]; then
+		echo "================================================"
+		echo "Please, consider creating a 'conf/mbed_app.json'"
+		echo "to avoid mbed-cli always recompile from scratch."
+		echo "================================================"
+		cat > mbed_app.json << MBED_APP
+{
+	"macros": [
+		"MBED_HEAP_STATS_ENABLED=1",
+		"MBED_STACK_STATS_ENABLED=1",
+		"MBED_MEM_TRACING_ENABLED=1",
+		],
+	"target_overrides": {
+		"*": {
+			"platform.stdio-buffered-serial": true,
+			"platform.stdio-baud-rate": 115200,
+			"platform.default-serial-baud-rate": 115200,
+		}
+	}
+}
+MBED_APP
+	fi
+
+	if [ -d "$ARDUINOVARIANT"/conf ]; then
+		for conf in "$ARDUINOVARIANT"/conf/*; do
+			cp -p "$conf" .
+		done
+	fi
+}
+
+
+apply_patches () {
+
+	if [ -d "$MBED_CORE_LOCATION"/patches ]; then
+		for p in "$MBED_CORE_LOCATION"/patches/* ; do
+			patch -p1 -t -d mbed-os -i "$p"
+		done
+	fi
+}
+
+mbed_compile () {
+
+	if [ "$MBED_CLEAN" -eq 1 ]; then
+		rm -rf BUILD
+	fi
+
+	mbed compile --source . --source ./mbed-os/features/unsupported/dsp/ -v | tee >(cat | grep 'Compile \[' >&2) | grep "Macros:" > $BOARDNAME.macros.txt
+}
+
+generate_defines () {
+	cut -f2 -d":" < "$BOARDNAME".macros.txt | tr ' ' '\n'  | sed 's#\"#\\"#g' | sort > "$ARDUINOVARIANT"/defines.txt
+	echo "-DMBED_NO_GLOBAL_USING_DIRECTIVE=1" >> "$ARDUINOVARIANT"/defines.txt
+	if [ -f "$ARDUINOVARIANT"/variant.cpp ]; then
+		echo '-DUSE_ARDUINO_PINOUT' >> "$ARDUINOVARIANT"/defines.txt
+	fi
+}
+
+generate_includes () {
+	cat ./BUILD/"$BOARDNAME"/GCC_ARM/.include* | tr ' ' '\n' | tr -d '"' | sed -e 's#-I./mbed-os#-iwithprefixbefore/mbed#g' | sed '/^-I./d' | tac > "$ARDUINOVARIANT"/includes.txt
+}
+
+generate_flags () {
+	for fl in c cxx ld; do
+		jq -r '.flags | .[] | select(. != "-MMD")' ./BUILD/"$BOARDNAME"/GCC_ARM/.profile-${fl} > "$ARDUINOVARIANT"/${fl}flags.txt
+	done
+}
+
+generate_libs () {
+	tr ' ' '\n' < ./BUILD/"$BOARDNAME"/GCC_ARM/.link_options.txt | grep "\.o" | grep -v "/main\.o" | xargs arm-none-eabi-ar rcs ./BUILD/mbed-core-$BOARDNAME.a
+	cp ./BUILD/mbed-core-"$BOARDNAME".a "$ARDUINOVARIANT"/libs/libmbed.a
+	cp ./BUILD/"$BOARDNAME"/GCC_ARM/.link_script.ld "$ARDUINOVARIANT"/linker_script.ld
+	cp ./BUILD/"$BOARDNAME"/GCC_ARM/mbed_config.h "$ARDUINOVARIANT"/
+	find -L . -name 'libcc_310_*.a' -exec cp '{}' "$ARDUINOVARIANT"/libs/ ';'
+}
+
+copy_core_files () {
+	rsync -zar --include="*/" --include="*.h" --exclude="*" mbed-os/ "$ARDUINOCOREMBED"/
+	cp mbed-os/platform/cxxsupport/mstd_* "$ARDUINOCOREMBED"/platform/cxxsupport/
+}
+
+patch_mbed_h () {
+	ed "$ARDUINOCOREMBED"/mbed.h <<EOF
+/#include "platform\/mbed_version.h"/
+a
+#include "mbed_config.h"
+.
+wq
+EOF
+}
+
+patch_spi_h () {
+	mv "$ARDUINOCOREMBED"/drivers/SPI.h "$ARDUINOCOREMBED"/drivers/SPIMaster.h
+	for header in mbed.h features/nfc/controllers/PN512SPITransportDriver.h components/storage/blockdevice/COMPONENT_SD/SDBlockDevice.h; do
+		sed -i.bak 's#drivers/SPI\.h#drivers/SPIMaster\.h#g' "$ARDUINOCOREMBED"/$header
+		rm "$ARDUINOCOREMBED"/$header.bak
+	done
+}
+
+while getopts "cur:b:p:" opt; do
+	case $opt in
+	c ) export MBED_CLEAN=1 ;;
+	u ) export MBED_UPDATE=1 ;;
+	r ) export LOCAL_REPO="$OPTARG" ;;
+	b ) export REMOTE_BRANCH="$OPTARG" ;;
+	p )
+		MBED_CORE_LOCATION="$(cd "$OPTARG" && pwd -P)"
+		export MBED_CORE_LOCATION ;;
+	* )
+		echo "Unknown parameter."
+		exit 1
+		;;
+	esac
 done
 
-rm -rf $ARDUINOCORE/../../cores/arduino/mbed/*
-cd mbed-os && find . | grep "\.h" | xargs -I % cp --parents % $ARDUINOCORE/../../cores/arduino/mbed && cd ..
-cp mbed-os/platform/cxxsupport/mstd_* $ARDUINOCORE/../../cores/arduino/mbed/platform/cxxsupport/
+# Done with processing all the starting flags with getopts...
+shift $(( OPTIND - 1 ))
 
-#TODO: add #include "mbed_config.h" in "mbed.h"
-#TODO: rename drivers/SPI.h in drivers/SPIMaster.h and modify include in mbed.h
-mv $ARDUINOCORE/../../cores/arduino/mbed/drivers/SPI.h $ARDUINOCORE/../../cores/arduino/mbed/drivers/SPIMaster.h
+if [ $# -eq 0 ] ; then
+	echo "Usage: $(basename "$0") [-c] [-u] [-r /path/to/local/repo] [-b mbed/remote/branch] [-p /mbed/core/location] [VARIANT1:BOARD1 VARIANT2:BOARD1 VARIANT3:BOARD3 ... ]"
+	echo " -c clean Mbed application BUILD directory"
+	echo " -u Update to latest mbed-os release"
+	echo " -r specify remote mbed-os branch to checkout"
+	echo " -b specify local mbed-os directory to link"
+	echo " -p specify local mbed core directory (defaults to PWD)"
+	exit 0
+fi
+
+
+declare -A VARIANT_BOARDS
+# VARIANT_BOARDS[MTB_MURATA_ABZ]="MTB_MURATA_ABZ"
+
+TUPLES=( "$@" )
+
+for tuple in "${TUPLES[@]}"; do
+    OLD_IFS="$IFS"
+    IFS=":"
+    set -- $tuple
+    VARIANT_BOARDS[$1]="$2"
+    IFS="$OLD_IFS"
+done
+
+# VARIANT=$2
+# BOARDNAMES=( ${BOARDNAMES:=MTB_MURATA_ABZ} )
+
+export MBED_CORE_LOCATION=${MBED_CORE_LOCATION:-$PWD}
+export MBED_CLEAN=${MBED_CLEAN:-0}
+export MBED_UPDATE=${MBED_UPDATE:-0}
+export LOCAL_REPO=${LOCAL_REPO:-""}
+export REMOTE_BRANCH=${REMOTE_BRANCH:-""}
+
+echo MBED_CLEAN=$MBED_CLEAN
+echo MBED_UPDATE=$MBED_UPDATE
+echo LOCAL_REPO=$LOCAL_REPO
+echo REMOTE_BRANCH=$REMOTE_BRANCH
+echo MBED_CORE_LOCATION=$MBED_CORE_LOCATION
+
+for variant in ${!VARIANT_BOARDS[*]}; do
+    echo "VARIANT=$variant BOARD=${VARIANT_BOARDS[$variant]}"
+done
+
+check_tools
+mbed_new
+mbed_revision
+
+# for MBED_BOARD in "${BOARDNAMES[@]}"; do
+for VARIANT in ${!VARIANT_BOARDS[*]}; do
+	export BOARDNAME="${VARIANT_BOARDS[$variant]}"
+	export ARDUINOVARIANT=$MBED_CORE_LOCATION/variants/$VARIANT
+	export ARDUINOCOREMBED=$MBED_CORE_LOCATION/cores/arduino/mbed
+
+	if [ -d "$ARDUINOVARIANT" ]; then
+		mkdir -p "$ARDUINOVARIANT"/libs
+	fi
+
+	create_mbed_program
+	apply_patches
+	mbed_compile
+	generate_defines
+	generate_includes
+	generate_flags
+	generate_libs
+done	
+
+copy_core_files
+patch_mbed_h
+patch_spi_h
 
 # TODO
-# - Add -DUSE_ARDUINO_PINOUT to targets with a variant.cpp
 # - Add include path for rpc library to envie
 # - Remove -fno-exception from Envie cppflags
-#
 #
 
 exit 0
