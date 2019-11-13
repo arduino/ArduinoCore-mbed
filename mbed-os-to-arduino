@@ -119,7 +119,8 @@ mbed_compile () {
 		rm -rf BUILD
 	fi
 
-	mbed compile --source . --source ./mbed-os/features/unsupported/dsp/ -v | tee >(cat | grep 'Compile \[' >&2) | grep "Macros:" > "$BOARDNAME".macros.txt
+	mbed compile --source . --source ./mbed-os/features/unsupported/dsp/ -v \
+	| tee >(cat | grep 'Compile \[' >&2) | grep "Macros:" > "$BOARDNAME".macros.txt
 	echo " done."
 }
 
@@ -135,39 +136,52 @@ generate_defines () {
 
 generate_includes () {
 	echo -n "Generating includes..."
+
 	find ./BUILD/"$BOARDNAME"/GCC_ARM/ -type f -name '.include*' -print0 | xargs -0 cat \
-	| tr ' ' '\n' | tr -d '"' | sed -e 's#-I./mbed-os#-iwithprefixbefore/mbed#g' | sed '/^-I./d' | tac > "$ARDUINOVARIANT"/includes.txt
+	| tr ' ' '\n' | tr -d '"' | sed -e 's#-I./mbed-os#-iwithprefixbefore/mbed#g' \
+	| sed '/^-I./d' | tac \
+	> "$ARDUINOVARIANT"/includes.txt
+
+	echo -n " copying to destination... "
+
+	cut -d'/' -f3- < "$ARDUINOVARIANT"/includes.txt | grep '^targets/TARGET_' \
+	| sed -e 's#\(.*\)#+ \1#' -e '$a+ targets/' -e '$a+ *.h' -e '$a- *' \
+	| rsync -avvz --include-from=- mbed-os/ "$ARDUINOCOREMBED"/
+
 	echo " done."
 }
 
 generate_flags () {
 	echo -n "Generating flags..."
 	for fl in c cxx ld; do
-		jq -r '.flags | .[] | select(. != "-MMD")' ./BUILD/"$BOARDNAME"/GCC_ARM/.profile-${fl} > "$ARDUINOVARIANT"/${fl}flags.txt
+		jq -r '.flags | .[] | select(. != "-MMD")' ./BUILD/"$BOARDNAME"/GCC_ARM/.profile-${fl} \
+		> "$ARDUINOVARIANT"/${fl}flags.txt
 	done
 	echo " done."
 }
 
 generate_libs () {
 	echo -n "Generating libs..."
-	tr ' ' '\n' < ./BUILD/"$BOARDNAME"/GCC_ARM/.link_options.txt | grep "\.o" | grep -v "/main\.o" | xargs arm-none-eabi-ar rcs ./BUILD/mbed-core-"$BOARDNAME".a
+	tr ' ' '\n' < ./BUILD/"$BOARDNAME"/GCC_ARM/.link_options.txt | grep "\.o" | grep -v "/main\.o" \
+	| xargs arm-none-eabi-ar rcs ./BUILD/mbed-core-"$BOARDNAME".a
+
 	cp ./BUILD/mbed-core-"$BOARDNAME".a "$ARDUINOVARIANT"/libs/libmbed.a
 	cp ./BUILD/"$BOARDNAME"/GCC_ARM/.link_script.ld "$ARDUINOVARIANT"/linker_script.ld
 	cp ./BUILD/"$BOARDNAME"/GCC_ARM/mbed_config.h "$ARDUINOVARIANT"/
+
 	find -L . -name 'libcc_310_*.a' -exec cp '{}' "$ARDUINOVARIANT"/libs/ ';'
 	echo " done."
 }
 
 copy_core_files () {
 	echo -n "Copying generic MbedOS headers to core... "
-	rsync -zar --exclude="targets/" --exclude="*TEST*/" --include="*/" --include="*.h"    --exclude="*" mbed-os/ "$ARDUINOCOREMBED"/
-	rsync -zar --exclude="targets/" --exclude="*TEST*/" --include="*/" --include="mstd_*" --exclude="*" mbed-os/ "$ARDUINOCOREMBED"/
-	echo " done."
 
-	TARGET=$(find mbed-os -type d -name TARGET_"$BOARDNAME" | cut -d'/' -f2-3)
-	echo -n "Copying MbedOS headers for $TARGET ... "
-	[ -d "$ARDUINOCOREMBED"/"$TARGET"/ ] || mkdir -p "$ARDUINOCOREMBED"/"$TARGET"/ && :;
-	rsync -zar --include="*/" --include="*.h" --exclude="*" mbed-os/"$TARGET"/ "$ARDUINOCOREMBED"/"$TARGET"/
+	rsync -zar --exclude="targets/" --exclude="*TEST*/" --include="*/" --include="*.h"    --exclude="*" \
+	mbed-os/ "$ARDUINOCOREMBED"/
+
+	rsync -zar --exclude="targets/" --exclude="*TEST*/" --include="*/" --include="mstd_*" --exclude="*" \
+	mbed-os/ "$ARDUINOCOREMBED"/
+
 	echo " done."
 }
 
@@ -285,7 +299,7 @@ for VARIANT in ${!VARIANT_BOARDS[*]}; do
 	generate_includes
 	generate_flags
 	generate_libs
-done	
+done
 
 copy_core_files
 patch_mbed_h
@@ -304,7 +318,7 @@ exit 0
 
 ##################
 # Using Arduino as an mbed library
-# 
+#
 # echo -e "arduino/cores/arduino/main.cpp\n arduino/cores/arduino/mbed/\narduino/libraries/" > .mbedignore
 # #add ARDUINO_AS_MBED_LIBRARY=1 to macros section in mbed_app.json
 # echo "https://github.com/arduino/ArduinoCore-mbed#bf6e64771ebe20285b0364756dff856ebbc679dc" > arduino.lib
