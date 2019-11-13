@@ -159,9 +159,15 @@ generate_libs () {
 }
 
 copy_core_files () {
-	echo -n "Copying files to core... "
-	rsync -zar --include="*/" --include="*.h" --exclude="*" mbed-os/ "$ARDUINOCOREMBED"/
-	rsync -zar --include="*/" --include="mstd_*" --exclude="*" mbed-os/ "$ARDUINOCOREMBED"/
+	echo -n "Copying generic MbedOS headers to core... "
+	rsync -zar --exclude="targets/" --exclude="*TEST*/" --include="*/" --include="*.h"    --exclude="*" mbed-os/ "$ARDUINOCOREMBED"/
+	rsync -zar --exclude="targets/" --exclude="*TEST*/" --include="*/" --include="mstd_*" --exclude="*" mbed-os/ "$ARDUINOCOREMBED"/
+	echo " done."
+
+	TARGET=$(find mbed-os -type d -name TARGET_"$BOARDNAME" | cut -d'/' -f2-3)
+	echo -n "Copying MbedOS headers for $TARGET ... "
+	[ -d "$ARDUINOCOREMBED"/"$TARGET"/ ] || mkdir -p "$ARDUINOCOREMBED"/"$TARGET"/ && :;
+	rsync -zar --include="*/" --include="*.h" --exclude="*" mbed-os/"$TARGET"/ "$ARDUINOCOREMBED"/"$TARGET"/
 	echo " done."
 }
 
@@ -246,12 +252,14 @@ export APPLY_PATCHES=${APPLY_PATCHES:-0}
 export LOCAL_REPO=${LOCAL_REPO:-""}
 export REMOTE_BRANCH=${REMOTE_BRANCH:-""}
 
+echo
 echo MBED_CLEAN=$MBED_CLEAN
 echo MBED_UPDATE=$MBED_UPDATE
 echo APPLY_PATCHES=$APPLY_PATCHES
 echo LOCAL_REPO="$LOCAL_REPO"
 echo REMOTE_BRANCH="$REMOTE_BRANCH"
 echo MBED_CORE_LOCATION="$MBED_CORE_LOCATION"
+echo
 
 for variant in ${!VARIANT_BOARDS[*]}; do
     echo "VARIANT=$variant BOARD=${VARIANT_BOARDS[$variant]}"
