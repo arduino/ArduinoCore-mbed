@@ -81,13 +81,13 @@ MAIN_C
 	"macros": [
 		"MBED_HEAP_STATS_ENABLED=1",
 		"MBED_STACK_STATS_ENABLED=1",
-		"MBED_MEM_TRACING_ENABLED=1",
+		"MBED_MEM_TRACING_ENABLED=1"
 		],
 	"target_overrides": {
 		"*": {
 			"platform.stdio-buffered-serial": true,
 			"platform.stdio-baud-rate": 115200,
-			"platform.default-serial-baud-rate": 115200,
+			"platform.default-serial-baud-rate": 115200
 		}
 	}
 }
@@ -187,13 +187,18 @@ copy_core_files () {
 
 patch_mbed_h () {
 	echo -n "Patching 'mbed.h'..."
-	ed "$ARDUINOCOREMBED"/mbed.h >/dev/null <<EOF
+	if [ x`uname` == xLinux ]; then
+		sed -i 's?#include "platform/mbed_version.h"?#include "platform/mbed_version.h"\n#include "mbed_config.h"?g' \
+		"$ARDUINOCOREMBED"/mbed.h
+	else
+		ed "$ARDUINOCOREMBED"/mbed.h >/dev/null <<EOF
 /#include "platform\/mbed_version.h"/
 a
 #include "mbed_config.h"
 .
 wq
 EOF
+	fi
 	echo " done."
 }
 
@@ -237,8 +242,8 @@ if [ $# -eq 0 ] ; then
 	echo " -c clean Mbed application BUILD directory"
 	echo " -u update to latest mbed-os release"
 	echo " -a apply patches"
-	echo " -r specify remote mbed-os branch to checkout"
-	echo " -b specify local mbed-os directory to link"
+	echo " -b specify remote mbed-os branch to checkout"
+	echo " -r specify local mbed-os directory to link"
 	echo " -p specify local mbed core directory (defaults to PWD)"
 	echo
 	echo "Example:"
