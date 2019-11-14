@@ -1,0 +1,17 @@
+{
+  "macros": [
+    "MBED_HEAP_STATS_ENABLED=1",
+    "MBED_STACK_STATS_ENABLED=1",
+    "MBED_MEM_TRACING_ENABLED=1",
+    "NRFX_GPIOTE_CONFIG_NUM_OF_LOW_POWER_EVENTS=8"
+  ],
+  "target_overrides": {
+    "*": {
+      "platform.stdio-buffered-serial": true,
+      "platform.stdio-baud-rate": 115200,
+      "platform.default-serial-baud-rate": 115200,
+      "rtos.main-thread-stack-size": 32768,
+      "target.mbed_app_start": "0x10000"
+    }
+  }
+}
