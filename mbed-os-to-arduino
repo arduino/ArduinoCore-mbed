@@ -119,7 +119,13 @@ mbed_compile () {
 		rm -rf BUILD
 	fi
 
-	mbed compile --source . --source ./mbed-os/features/unsupported/dsp/ -v \
+	PROFILE_FLAG=""
+	if [ x"$PROFILE" != x ]; then
+		PROFILE_FLAG=--profile="$ARDUINOVARIANT"/conf/profile/$PROFILE.json
+		export PROFILE=-${PROFILE^^}
+	fi
+
+	mbed compile $PROFILE_FLAG --source . --source ./mbed-os/features/unsupported/dsp/ -v \
 	| tee >(cat | grep 'Compile \[' >&2) | grep "Macros:" > "$BOARDNAME".macros.txt
 	echo " done."
 }
@@ -137,7 +143,7 @@ generate_defines () {
 generate_includes () {
 	echo -n "Generating includes..."
 
-	find ./BUILD/"$BOARDNAME"/GCC_ARM/ -type f -name '.include*' -print0 | xargs -0 cat \
+	find ./BUILD/"$BOARDNAME"/GCC_ARM${PROFILE}/ -type f -name '.include*' -print0 | xargs -0 cat \
 	| tr ' ' '\n' | tr -d '"' | sed -e 's#-I./mbed-os#-iwithprefixbefore/mbed#g' \
 	| sed '/^-I./d' | tac \
 	> "$ARDUINOVARIANT"/includes.txt
@@ -154,7 +160,7 @@ generate_includes () {
 generate_flags () {
 	echo -n "Generating flags..."
 	for fl in c cxx ld; do
-		jq -r '.flags | .[] | select(. != "-MMD")' ./BUILD/"$BOARDNAME"/GCC_ARM/.profile-${fl} \
+		jq -r '.flags | .[] | select(. != "-MMD")' ./BUILD/"$BOARDNAME"/GCC_ARM${PROFILE}/.profile-${fl} \
 		> "$ARDUINOVARIANT"/${fl}flags.txt
 	done
 	echo " done."
@@ -162,14 +168,15 @@ generate_flags () {
 
 generate_libs () {
 	echo -n "Generating libs..."
-	tr ' ' '\n' < ./BUILD/"$BOARDNAME"/GCC_ARM/.link_options.txt | grep "\.o" | grep -v "/main\.o" \
+	tr ' ' '\n' < ./BUILD/"$BOARDNAME"/GCC_ARM${PROFILE}/.link_options.txt | grep "\.o" | grep -v "/main\.o" \
 	| xargs arm-none-eabi-ar rcs ./BUILD/mbed-core-"$BOARDNAME".a
 
 	cp ./BUILD/mbed-core-"$BOARDNAME".a "$ARDUINOVARIANT"/libs/libmbed.a
-	cp ./BUILD/"$BOARDNAME"/GCC_ARM/.link_script.ld "$ARDUINOVARIANT"/linker_script.ld
-	cp ./BUILD/"$BOARDNAME"/GCC_ARM/mbed_config.h "$ARDUINOVARIANT"/
+	cp ./BUILD/"$BOARDNAME"/GCC_ARM${PROFILE}/.link_script.ld "$ARDUINOVARIANT"/linker_script.ld
+	cp ./BUILD/"$BOARDNAME"/GCC_ARM${PROFILE}/mbed_config.h "$ARDUINOVARIANT"/
 
-	find -L . -name 'libcc_310_*.a' -exec cp '{}' "$ARDUINOVARIANT"/libs/ ';'
+	# TODO: discover needed libraries based on compile target
+	#find -L . -name 'lib*.a' -exec cp '{}' "$ARDUINOVARIANT"/libs/ ';'
 	echo " done."
 }
 
@@ -295,6 +302,10 @@ for VARIANT in ${!VARIANT_BOARDS[*]}; do
 
 	if [ -d "$ARDUINOVARIANT" ]; then
 		mkdir -p "$ARDUINOVARIANT"/libs
+	fi
+
+	if [ -d "$ARDUINOVARIANT"/conf/profile ]; then
+		export PROFILE="custom"
 	fi
 
 	create_mbed_program
