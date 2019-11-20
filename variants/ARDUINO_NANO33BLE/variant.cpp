@@ -89,7 +89,7 @@ void initVariant() {
 #endif
   };
 
-  for (int i = 0; i < (sizeof(PWM)/sizeof(PWM[0])); i++) {
+  for (unsigned int i = 0; i < (sizeof(PWM)/sizeof(PWM[0])); i++) {
     PWM[i]->ENABLE = 0;
     PWM[i]->PSEL.OUT[0] = 0xFFFFFFFFUL;
   } 
