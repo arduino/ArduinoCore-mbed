@@ -20,8 +20,8 @@
 /* If the target has no SPI support, then SD Card is not supported. */
 #if DEVICE_SPI
 
-#include "BlockDevice.h"
-#include "drivers/SPI.h"
+#include "features/storage/blockdevice/BlockDevice.h"
+#include "drivers/SPIMaster.h"
 #include "drivers/Timer.h"
 #include "drivers/MbedCRC.h"
 #include "drivers/DigitalOut.h"

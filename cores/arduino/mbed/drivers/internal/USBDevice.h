@@ -97,11 +97,6 @@ public:
      * Power down this instance
      *
      * Disable interrupts and stop sending events.
-     * This method can be used for temporary power-saving; This call can allow
-     * USB to be temporarily disabled to permit power saving.
-     * However, it is up to the user to make sure all the
-     * transfers have concluded (for example when USB power is lost).
-     * USBDevice::connect can be used to resume USB operation.
      */
     void deinit();
 
@@ -114,8 +109,6 @@ public:
 
     /**
     * Connect a device
-    * This method can also be used to resume USB operation when USB power is
-    * detected after it was suspended via USBDevice::deinit.
     */
     void connect();
 

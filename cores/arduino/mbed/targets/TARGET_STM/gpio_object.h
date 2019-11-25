@@ -35,6 +35,7 @@
 #include "PortNames.h"
 #include "PeripheralNames.h"
 #include "PinNames.h"
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {

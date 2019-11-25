@@ -23,7 +23,7 @@
 #include "platform/nfc_transport.h"
 #include "PN512TransportDriver.h"
 
-#include "drivers/SPI.h"
+#include "drivers/SPIMaster.h"
 #include "drivers/DigitalOut.h"
 #include "drivers/InterruptIn.h"
 

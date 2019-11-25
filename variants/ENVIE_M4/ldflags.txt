@@ -1,4 +1,5 @@
 -DMBED_BOOT_STACK_SIZE=1024
+-DXIP_ENABLE=0
 -Wl,--gc-sections
 -Wl,--wrap,_calloc_r
 -Wl,--wrap,_free_r

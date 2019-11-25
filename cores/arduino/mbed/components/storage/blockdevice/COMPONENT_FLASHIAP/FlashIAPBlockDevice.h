@@ -20,7 +20,7 @@
 #if DEVICE_FLASH
 
 #include "FlashIAP.h"
-#include "BlockDevice.h"
+#include "features/storage/blockdevice/BlockDevice.h"
 #include "platform/mbed_toolchain.h"
 
 /** BlockDevice using the FlashIAP API
@@ -133,7 +133,7 @@ public:
     *  @param size     Size to erase in bytes
     *  @return         True if erase is valid for underlying block device
     */
-    virtual bool is_valid_erase(bd_addr_t addr, bd_size_t size) const;
+    virtual bool is_valid_erase(mbed::bd_addr_t addr, mbed::bd_size_t size) const;
 
 
 private:
