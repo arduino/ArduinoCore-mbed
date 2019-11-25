@@ -52,9 +52,6 @@ int RPC::begin() {
   /*HW semaphore Notification enable*/
   HAL_HSEM_ActivateNotification(__HAL_HSEM_SEMID_TO_MASK(HSEM_ID_0));
 
-  /* Inilitize the mailbox use notify the other core on new message */
-  MAILBOX_Init();
-
   /* Inilitize OpenAmp and libmetal libraries */
   if (MX_OPENAMP_Init(RPMSG_REMOTE, NULL) !=  0) {
     return 0;
@@ -138,12 +135,12 @@ void RPC::dispatch() {
 }
 
 size_t RPC::write(const uint8_t* buf, size_t len) {
-  OPENAMP_send(&rp_endpoints[1], buf, len);
+  OPENAMP_send(&rp_endpoints[ENDPOINT_RAW], buf, len);
   return len;
 }
 
 size_t RPC::write(uint8_t c) {
-  OPENAMP_send(&rp_endpoints[1], &c, 1);
+  OPENAMP_send(&rp_endpoints[ENDPOINT_RAW], &c, 1);
   return 1;
 }
 
