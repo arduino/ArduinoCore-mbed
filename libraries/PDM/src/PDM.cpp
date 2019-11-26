@@ -48,6 +48,10 @@ int PDMClass::begin(int channels, long sampleRate)
 {
   _channels = channels;
 
+  NRF_CLOCK->EVENTS_HFCLKSTARTED = 0;
+  NRF_CLOCK->TASKS_HFCLKSTART    = 1;
+  while (NRF_CLOCK->EVENTS_HFCLKSTARTED == 0) { }
+
   // configure the sample rate and channels
   switch (sampleRate) {
     case 16000:
