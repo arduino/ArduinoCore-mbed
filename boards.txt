@@ -86,18 +86,19 @@ envie_m4.compiler.mbed.includes={build.variant.path}/includes.txt
 envie_m4.compiler.mbed.extra_ldflags=-lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
 envie_m4.compiler.mbed="{build.variant.path}/libs/libmbed.a"
 #envie_m4.compiler.mbed="{build.variant.path}/libs/libmbed.a" "{build.variant.path}/libs/libopenamp.a"
-envie_m4.vid.0=0x0483
-envie_m4.pid.0=0x374e
+envie_m4.vid.0=0x2341
+envie_m4.pid.0=0x005b
+envie_m4.build.vid.0=0x2341
+envie_m4.build.pid.0=0x005b
 
-envie_m4.upload.via_ssh=true
-envie_m4.upload.tool=openocd
-envie_m4.upload.config=-f board/envie.cfg
-envie_m4.upload.protocol=sam-ba
+envie_m4.upload.tool=dfu-util
+envie_m4.upload.protocol=
+envie_m4.upload.address=0x08100000
+envie_m4.upload.use_1200bps_touch=true
+envie_m4.upload.wait_for_upload_port=false
+envie_m4.upload.native_usb=true
 envie_m4.upload.maximum_size=1048576
 envie_m4.upload.maximum_data_size=262144
-envie_m4.upload.use_1200bps_touch=false
-envie_m4.upload.wait_for_upload_port=false
-envie_m4.upload.native_usb=false
 
 ##############################################################
 

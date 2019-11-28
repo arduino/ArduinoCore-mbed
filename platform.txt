@@ -143,3 +143,13 @@ tools.stm32flash.program.pattern="{path}/{cmd}" {serial.port} -e 1024 -b 2400 -w
 tools.stm32flash.erase.params.verbose=-v
 tools.stm32flash.erase.params.quiet=
 tools.stm32flash.erase.pattern="{path}/{cmd}" {serial.port} -e 1024 -b 2400
+
+#
+# DFU_UTIL
+#
+tools.dfu-util.path={runtime.tools.dfu-util.path}
+tools.dfu-util.cmd=dfu-util
+
+tools.dfu-util.upload.params.verbose=-d
+tools.dfu-util.upload.params.quiet=
+tools.dfu-util.upload.pattern="{path}/{cmd}" --device {build.vid}:{build.pid} -D "{build.path}/{build.project_name}.bin" -R --dfuse-address={upload.address}
