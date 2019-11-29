@@ -48,9 +48,11 @@ int PDMClass::begin(int channels, long sampleRate)
 {
   _channels = channels;
 
-  NRF_CLOCK->EVENTS_HFCLKSTARTED = 0;
-  NRF_CLOCK->TASKS_HFCLKSTART    = 1;
-  while (NRF_CLOCK->EVENTS_HFCLKSTARTED == 0) { }
+  // Enable high frequency oscillator if not already enabled
+  if (NRF_CLOCK->EVENTS_HFCLKSTARTED == 0) {
+    NRF_CLOCK->TASKS_HFCLKSTART    = 1;
+    while (NRF_CLOCK->EVENTS_HFCLKSTARTED == 0) { }
+  }
 
   // configure the sample rate and channels
   switch (sampleRate) {
@@ -132,6 +134,8 @@ void PDMClass::end()
     digitalWrite(_pwrPin, LOW);
     pinMode(_pwrPin, INPUT);
   }
+
+  // Don't disable high frequency oscillator since it could be in use by RADIO
 
   // unconfigure the I/O and un-mux
   nrf_pdm_psel_disconnect();
