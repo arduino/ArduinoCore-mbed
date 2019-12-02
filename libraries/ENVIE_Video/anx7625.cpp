@@ -98,25 +98,6 @@ struct MIPI_Video_Format {
 	} MIPI_inputl[2];
 };
 
-struct anx7625 {
-	struct drm_dp_aux aux;
-	struct drm_bridge bridge;
-	struct i2c_client *client;
-	struct anx7625_platform_data pdata;
-	struct mutex lock;
-	int mode_idx;
-
-	u16 chipid;
-
-	bool powered;
-	bool enabled;
-	int connected;
-	bool hpd_status;
-	u8 sys_sta_bak;
-
-	unsigned char last_read_DevAddr;
-};
-
 static void Reg_Access_Conflict_Workaround(struct anx7625 *anx7625,
 		unsigned char DevAddr)
 {
@@ -1188,15 +1169,9 @@ static int anx7625_get_mode_idx(const struct drm_display_mode *mode)
 	return mode_idx;
 }
 
-int anx7625_bridge_attach(struct drm_bridge *bridge)
+int anx7625_bridge_attach(struct anx7625 *anx7625)
 {
-	struct anx7625 *anx7625 = bridge_to_anx7625(bridge);
 	int err;
-
-	if (!bridge->encoder) {
-		DRM_ERROR("Parent encoder object not found");
-		return -ENODEV;
-	}
 
 /*
 	// Register aux channel
@@ -1215,7 +1190,7 @@ int anx7625_bridge_attach(struct drm_bridge *bridge)
 }
 
 enum drm_mode_status
-anx7625_bridge_mode_valid(struct drm_bridge *bridge,
+anx7625_bridge_mode_valid(struct anx7625 *anx7625,
 			  const struct drm_display_mode *mode)
 {
 	if (anx7625_get_mode_idx(mode) < 0) {
@@ -1226,10 +1201,8 @@ anx7625_bridge_mode_valid(struct drm_bridge *bridge,
 	return MODE_OK;
 }
 
-void anx7625_bridge_disable(struct drm_bridge *bridge)
+void anx7625_bridge_disable(struct anx7625 *anx7625)
 {
-	struct anx7625 *anx7625 = bridge_to_anx7625(bridge);
-
 	mutex_lock(&anx7625->lock);
 
 	anx7625_stop(anx7625);
@@ -1241,11 +1214,10 @@ void anx7625_bridge_disable(struct drm_bridge *bridge)
 	TRACE("anx7625 disabled\n");
 }
 
-void anx7625_bridge_mode_set(struct drm_bridge *bridge,
+void anx7625_bridge_mode_set(struct anx7625 *anx7625,
 				    struct drm_display_mode *mode,
 				    struct drm_display_mode *adjusted_mode)
 {
-	struct anx7625 *anx7625 = bridge_to_anx7625(bridge);
 	int mode_idx;
 
 	mode_idx = anx7625_get_mode_idx(adjusted_mode);
@@ -1261,9 +1233,8 @@ void anx7625_bridge_mode_set(struct drm_bridge *bridge,
 	mutex_unlock(&anx7625->lock);
 }
 
-void anx7625_bridge_enable(struct drm_bridge *bridge)
+void anx7625_bridge_enable(struct anx7625 *anx7625)
 {
-	struct anx7625 *anx7625 = bridge_to_anx7625(bridge);
 	int err;
 
 	mutex_lock(&anx7625->lock);
@@ -1404,42 +1375,21 @@ int anx7625_i2c_probe(struct anx7625 *anx7625)
 		goto err_poweroff;
 	}
 
+	/* init connected status */
+	anx7625->connected =
+		gpiod_get_value_cansleep(anx7625->pdata.gpiod_cdet);
+
 	// Request IRQ using mbed's callback
 
 	pdata->cdet_irq->rise(queue.event(mbed::callback(anx7625_cdet_threaded_handler, anx7625)));
 	pdata->intp_irq->fall(queue.event(mbed::callback(anx7625_intp_threaded_handler, anx7625)));
 
-/*
-	err = devm_request_threaded_irq(&client->dev, pdata->cdet_irq, NULL,
-					anx7625_cdet_threaded_handler,
-					IRQF_TRIGGER_RISING
-					| IRQF_TRIGGER_RISING
-					| IRQF_ONESHOT,
-					"anx7625-hpd", anx7625);
-	if (err) {
-		DRM_ERROR("Failed to request CABLE_DET threaded IRQ: %d\n",
-			  err);
-		goto err_poweroff;
-	}
-
-	err = devm_request_threaded_irq(&client->dev, pdata->intp_irq, NULL,
-					anx7625_intp_threaded_handler,
-					IRQF_TRIGGER_FALLING | IRQF_ONESHOT,
-					"anx7625-intp", anx7625);
-	if (err) {
-		DRM_ERROR("Failed to request INTP threaded IRQ: %d\n", err);
-		goto err_poweroff;
-	}
-*/
-
-	/* init connected status */
-	anx7625->connected =
-		gpiod_get_value_cansleep(anx7625->pdata.gpiod_cdet);
-
 	/* init hpd status */
 	anx7625->sys_sta_bak = ReadReg(RX_P0, SYSTEM_STSTUS);
 	anx7625->hpd_status = (anx7625->sys_sta_bak & HPD_STATUS) ?
 		true : false;
+
+	DRM_INFO("Connected: %d\nSYSTEM_STSTUS = %x\nHPD_STATUS = %x\n", anx7625->connected, anx7625->sys_sta_bak, anx7625->hpd_status);
 
 	return 0;
 

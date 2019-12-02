@@ -11,7 +11,15 @@ struct i2c_client {
     struct device dev;
 };
 
+mbed::I2C i2c(I2C_SDA , I2C_SCL); 
+
 inline int i2c_smbus_write_byte_data(struct i2c_client * client, uint8_t command, uint8_t value) {
+
+    char cmd[2];
+    cmd[0] = command;
+    cmd[1] = value;
+    return i2c.write(client->addr << 1, cmd, 2);
+
     Wire.beginTransmission(client->addr);
     Wire.write(command);
     Wire.write(value);
@@ -19,6 +27,12 @@ inline int i2c_smbus_write_byte_data(struct i2c_client * client, uint8_t command
 }
 
 inline int i2c_smbus_write_i2c_block_data(struct i2c_client * client, uint8_t command, size_t len, uint8_t* buf) {
+
+    char cmd[len +1];
+    cmd[0] = command;
+    memcpy(&cmd[1], buf, len);
+    return i2c.write(client->addr << 1, cmd, len + 1);
+
     Wire.beginTransmission(client->addr);
     Wire.write(command);
     Wire.write(buf, len);
@@ -26,6 +40,12 @@ inline int i2c_smbus_write_i2c_block_data(struct i2c_client * client, uint8_t co
 }
 
 inline int i2c_smbus_read_i2c_block_data(struct i2c_client * client, uint8_t reg_addr, size_t len, uint8_t* buf) {
+
+    char cmd[len];
+    cmd[0] = reg_addr;
+    i2c.write(client->addr << 1, cmd, 1);
+    return i2c.read(client->addr << 1, cmd, len);
+
     Wire.beginTransmission(client->addr);
     Wire.write(reg_addr);
     int ret = Wire.endTransmission(false);
@@ -42,6 +62,13 @@ inline int i2c_smbus_read_i2c_block_data(struct i2c_client * client, uint8_t reg
 }
 
 inline int i2c_smbus_read_byte_data(struct i2c_client * client, uint8_t reg_addr) {
+
+    char cmd[1];
+    cmd[0] = reg_addr;
+    i2c.write(client->addr << 1, cmd, 1);
+    i2c.read(client->addr << 1, cmd, 1);
+    return cmd[0];
+
     Wire.beginTransmission(client->addr);
     Wire.write(reg_addr);
     int ret = Wire.endTransmission(false);
@@ -133,10 +160,6 @@ struct work_struct {
     work_func_t func;
 };
 
-struct mutex {
-    rtos::Mutex mut;
-};
-
 #define IS_ERR(x)               (0)
 #define PTR_ERR(x)              (-1)
 #define PTR_ERR_OR_ZERO(x)      (0)
@@ -185,27 +208,6 @@ struct display_timing {
     struct timing_entry vsync_len;      /* ver. sync len */
 
     enum display_flags flags;       /* display flags */
-};
-
-struct drm_connector {
-    int polled;
-    struct device* dev;
-};
-
-struct drm_dp_link {
-    void* stuff;
-};
-
-struct drm_dp_aux {
-    void* stuff;
-};
-
-struct drm_dp_aux_msg {
-    unsigned int address;
-    u8 request;
-    u8 reply;
-    u8 * buffer;
-    size_t size;
 };
 
 struct notifier_block;
@@ -265,16 +267,17 @@ static __always_inline void arch_atomic_dec(atomic_t *v)
 }
 #define atomic_dec arch_atomic_dec
 
+static rtos::Mutex _mut;
+
 void mutex_lock(struct mutex* mut) {
-    mut->mut.lock();
+    _mut.lock();
 }
 
 void mutex_init(struct mutex* mut) {
-    mut = new mutex();
 }
 
 void mutex_unlock(struct mutex* mut) {
-    mut->mut.unlock();
+    _mut.unlock();
 }
 
 #define GPIOD_OUT_LOW       OUTPUT
