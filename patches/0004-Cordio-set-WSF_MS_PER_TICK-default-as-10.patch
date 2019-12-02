@@ -1,0 +1,31 @@
+From ed8c98c69e1866450591532e28c1a6421a231630 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Mon, 2 Dec 2019 10:55:07 +0100
+Subject: [PATCH] Cordio: set WSF_MS_PER_TICK default as 10
+
+---
+ features/FEATURE_BLE/targets/TARGET_CORDIO/mbed_lib.json | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/features/FEATURE_BLE/targets/TARGET_CORDIO/mbed_lib.json b/features/FEATURE_BLE/targets/TARGET_CORDIO/mbed_lib.json
+index 165b63f15e..39a3ae2643 100644
+--- a/features/FEATURE_BLE/targets/TARGET_CORDIO/mbed_lib.json
++++ b/features/FEATURE_BLE/targets/TARGET_CORDIO/mbed_lib.json
+@@ -1,6 +1,6 @@
+ {
+     "name": "cordio",
+-    "macros": [ "WSF_MS_PER_TICK=1" ],
++    "macros": [ "WSF_MS_PER_TICK=10" ],
+     "config": {
+         "max-connections": {
+             "help": "Maximum number of connections",
+@@ -65,4 +65,4 @@
+             "macro_name": "SEC_CCM_CFG"
+         }
+     }
+-}
+\ No newline at end of file
++}
+-- 
+2.24.0
+
