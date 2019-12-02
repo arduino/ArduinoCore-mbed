@@ -1313,10 +1313,6 @@ int anx7625_i2c_probe(struct anx7625 *anx7625)
 	bool found = false;
 	int err;
 
-	anx7625 = (struct anx7625*)malloc(sizeof(struct anx7625));
-	if (!anx7625)
-		return -ENOMEM;
-
 	pdata = &anx7625->pdata;
 
 	mutex_init(&anx7625->lock);
