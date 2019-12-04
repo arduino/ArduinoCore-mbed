@@ -989,8 +989,8 @@ end:
 
 #endif
 
-events::EventQueue queue(32 * EVENTS_EVENT_SIZE);
-rtos::Thread t;
+events::EventQueue queue(150 * EVENTS_EVENT_SIZE);
+rtos::Thread t(osPriorityNormal, 32 * 1024 /*32K stack size*/);
 
 int anx7625_i2c_probe(struct i2c_client *client)
 {

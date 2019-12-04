@@ -50,7 +50,6 @@ memory mounted on GAPUINO board.
 
 /* Includes ------------------------------------------------------------------*/
 #include "himax.h"
-#include "Wire.h"
 
 /** @addtogroup BSP
  * @{
