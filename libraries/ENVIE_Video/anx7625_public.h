@@ -116,6 +116,7 @@ struct drm_dp_aux_msg {
 struct mutex {
 };
 
+/*
 struct anx7625_platform_data {
 	struct gpio_desc *gpiod_intp;
 	struct gpio_desc *gpiod_cdet;
@@ -126,11 +127,22 @@ struct anx7625_platform_data {
 	mbed::InterruptIn* intp_irq;
 };
 
+*/
+
+struct device {
+    void* platform_data;
+};
+
+struct i2c_client {
+    int addr;
+    struct device dev;
+};
+
 struct anx7625 {
 	struct drm_dp_aux aux;
 	struct drm_bridge bridge;
 	struct i2c_client *client;
-	struct anx7625_platform_data pdata;
+//	struct anx7625_platform_data pdata;
 	struct mutex lock;
 	int mode_idx;
 
@@ -145,17 +157,5 @@ struct anx7625 {
 	unsigned char last_read_DevAddr;
 };
 
-int anx7625_i2c_probe(struct anx7625 *anx7625);
-int anx7625_i2c_remove(struct anx7625 *anx7625);
-void anx7625_bridge_enable(struct anx7625 *anx7625);
-
-void anx7625_bridge_mode_set(struct anx7625 *anx7625,
-				    struct drm_display_mode *mode,
-				    struct drm_display_mode *adjusted_mode);
-
-void anx7625_bridge_disable(struct anx7625 *anx7625);
-
-enum drm_mode_status
-anx7625_bridge_mode_valid(struct anx7625 *anx7625,
-			  const struct drm_display_mode *mode);
-int anx7625_bridge_attach(struct anx7625 *anx7625);
+int anx7625_i2c_probe(struct i2c_client *anx7625);
+int anx7625_i2c_remove(struct i2c_client *anx7625);

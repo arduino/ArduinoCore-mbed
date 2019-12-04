@@ -1,87 +1,24 @@
+#ifndef __ARDUINO_HAL__
+#define __ARDUINO_HAL__
+
 #include "Arduino.h"
 #include "Wire.h"
 #include "anx7625_public.h"
 
-struct device {
-    void* stuff;
-};
-
-struct i2c_client {
-    int addr;
-    struct device dev;
-};
-
-mbed::I2C i2c(I2C_SDA , I2C_SCL); 
-
-inline int i2c_smbus_write_byte_data(struct i2c_client * client, uint8_t command, uint8_t value) {
-
-    char cmd[2];
-    cmd[0] = command;
-    cmd[1] = value;
-    return i2c.write(client->addr << 1, cmd, 2);
-
-    Wire.beginTransmission(client->addr);
-    Wire.write(command);
-    Wire.write(value);
-    return Wire.endTransmission(true);
-}
-
-inline int i2c_smbus_write_i2c_block_data(struct i2c_client * client, uint8_t command, size_t len, uint8_t* buf) {
-
-    char cmd[len +1];
-    cmd[0] = command;
-    memcpy(&cmd[1], buf, len);
-    return i2c.write(client->addr << 1, cmd, len + 1);
-
-    Wire.beginTransmission(client->addr);
-    Wire.write(command);
-    Wire.write(buf, len);
-    return Wire.endTransmission(true);
-}
-
-inline int i2c_smbus_read_i2c_block_data(struct i2c_client * client, uint8_t reg_addr, size_t len, uint8_t* buf) {
-
-    char cmd[len];
-    cmd[0] = reg_addr;
-    i2c.write(client->addr << 1, cmd, 1);
-    return i2c.read(client->addr << 1, cmd, len);
-
-    Wire.beginTransmission(client->addr);
-    Wire.write(reg_addr);
-    int ret = Wire.endTransmission(false);
-    if (ret != 0) {
-        return -1;
-    }
-
-    Wire.requestFrom(client->addr, len);
-    size_t i = 0;
-    while (Wire.available() && i < len) {
-        buf[i++] = Wire.read();
-    }
-    return i;
-}
-
-inline int i2c_smbus_read_byte_data(struct i2c_client * client, uint8_t reg_addr) {
-
-    char cmd[1];
-    cmd[0] = reg_addr;
-    i2c.write(client->addr << 1, cmd, 1);
-    i2c.read(client->addr << 1, cmd, 1);
-    return cmd[0];
-
-    Wire.beginTransmission(client->addr);
-    Wire.write(reg_addr);
-    int ret = Wire.endTransmission(false);
-    if (ret != 0) {
-        return -1;
-    }
-
-    Wire.requestFrom(client->addr, 1);
-    if (Wire.available()) {
-        return Wire.read();
-    }
-    return -1;
-}
+PinName gpio_request(char* name);
+int gpio_direction_output(PinName gpio, int value);
+int gpio_direction_input(PinName gpio);
+PinName desc_to_gpio(struct gpio_desc* gpio);
+void gpio_set_value(PinName gpio, int value);
+int gpio_get_value(PinName gpio);
+void usleep_range(int low, int high);
+int i2c_smbus_write_byte_data(struct i2c_client * client, uint8_t command, uint8_t value);
+int i2c_smbus_write_i2c_block_data(struct i2c_client * client, uint8_t command, size_t len, uint8_t* buf);
+int i2c_smbus_read_i2c_block_data(struct i2c_client * client, uint8_t reg_addr, size_t len, uint8_t* buf);
+int i2c_smbus_read_byte_data(struct i2c_client * client, uint8_t reg_addr);
+void mutex_lock(struct mutex* mut);
+void mutex_init(struct mutex* mut);
+void mutex_unlock(struct mutex* mut);
 
 #define readx_poll_timeout(op, addr, val, cond, sleep_us, timeout_us)   \
 ({ \
@@ -110,39 +47,8 @@ inline int i2c_smbus_read_byte_data(struct i2c_client * client, uint8_t reg_addr
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 
-inline struct gpio_desc* devm_gpiod_get(struct device *dev, char* name, int status) {
-    if (strcmp(name, "reset_n") == 0) {
-        return new gpio_desc(PJ_3);
-    }
-    if (strcmp(name, "power_en") == 0) {
-        return new gpio_desc(PK_2);
-    }
-    if (strcmp(name, "cbl_det") == 0) {
-        return new gpio_desc(PK_3);
-    }
-    if (strcmp(name, "intp") == 0) {
-        return new gpio_desc(PK_4);
-    }
-    return NULL;
-}
-
-inline PinName desc_to_gpio(struct gpio_desc* gpio) {
-    return gpio->name;
-}
-
-inline void gpiod_set_value_cansleep(struct gpio_desc* gpio, int value) {
-    digitalWrite(gpio->name, value);
-}
-
-inline int gpiod_get_value_cansleep(struct gpio_desc* gpio) {
-    return digitalRead(gpio->name);
-}
-
-inline void usleep_range(int low, int high) {
-    delayMicroseconds(low);
-}
-
 #define u8          uint8_t
+#define s8          int8_t
 #define u16         uint16_t
 #define u32         uint32_t
 
@@ -267,19 +173,6 @@ static __always_inline void arch_atomic_dec(atomic_t *v)
 }
 #define atomic_dec arch_atomic_dec
 
-static rtos::Mutex _mut;
-
-void mutex_lock(struct mutex* mut) {
-    _mut.lock();
-}
-
-void mutex_init(struct mutex* mut) {
-}
-
-void mutex_unlock(struct mutex* mut) {
-    _mut.unlock();
-}
-
 #define GPIOD_OUT_LOW       OUTPUT
 #define GPIOD_IN            INPUT
 
@@ -289,10 +182,12 @@ struct extcon_dev {
     void* stuff;
 };
 
+/*
 int extcon_get_state(struct extcon_dev *edev, unsigned int id) {
     // TODO: changeme!!
     return EXTCON_DISP_DP;
 }
+*/
 
 #define INIT_WORK   
 
@@ -365,3 +260,5 @@ struct drm_connector_funcs {
 #define DP_AUX_I2C_REPLY_NACK       (0x1 << 2)
 #define DP_AUX_I2C_REPLY_DEFER      (0x2 << 2)
 #define DP_AUX_I2C_REPLY_MASK       (0x3 << 2)
+
+#endif //__ARDUINO_HAL__
