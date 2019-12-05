@@ -44,10 +44,8 @@ struct i2c_client *anx7625_client;
 struct anx7625_platform_data {
 	PinName gpio_p_on;
 	PinName gpio_reset;
-#ifndef DISABLE_PD
 	PinName gpio_cbl_det;
 	mbed::InterruptIn* cbl_det_irq;
-#endif
 #ifdef SUP_INT_VECTOR
 	PinName gpio_intr_comm;
 	mbed::InterruptIn* irq;
@@ -556,6 +554,7 @@ void anx7625_restart_work(int workqueu_timer)
 
 	td = the_chip_anx7625;
 	if (td != NULL) {
+		wait(workqueu_timer / 1000.0f);
 		anx7625_work_func();
 	}
 }
@@ -694,12 +693,12 @@ irqreturn_t anx7625_cbl_det_isr(void *data)
 		if (atomic_read(&anx7625_power_status) == 1)
 			return IRQ_HANDLED;
 		cable_connected = 1;
-		anx7625_restart_work(1);
+		anx7625_restart_work(10);
 	} else {
 		if (atomic_read(&anx7625_power_status) == 0)
 			return IRQ_HANDLED;
 		cable_connected = 0;
-		anx7625_restart_work(1);
+		anx7625_restart_work(10);
 	}
 
 	return IRQ_HANDLED;
@@ -715,7 +714,7 @@ irqreturn_t anx7625_intr_comm_isr(void *data)
 */
 
 	alert_arrived = 1;
-	anx7625_restart_work(1);
+	anx7625_restart_work(10);
 	return IRQ_HANDLED;
 
 }
@@ -989,8 +988,8 @@ end:
 
 #endif
 
-events::EventQueue queue(150 * EVENTS_EVENT_SIZE);
-rtos::Thread t(osPriorityNormal, 32 * 1024 /*32K stack size*/);
+events::EventQueue queue(32 * EVENTS_EVENT_SIZE);
+static rtos::Thread t(osPriorityHigh, 32 * 1024, NULL, "msd");
 
 int anx7625_i2c_probe(struct i2c_client *client)
 {
@@ -1007,6 +1006,7 @@ int anx7625_i2c_probe(struct i2c_client *client)
 	memset(platform, 0, sizeof(struct anx7625_data));
 
 	platform->pdata = (struct anx7625_platform_data *)malloc(sizeof(struct anx7625_platform_data));
+	memset(platform->pdata, 0, sizeof(struct anx7625_platform_data));
 
 	/* to access global platform data */
 	g_pdata = platform->pdata;
@@ -1030,21 +1030,13 @@ int anx7625_i2c_probe(struct i2c_client *client)
 		return ret;
 	}
 
-#ifndef DISABLE_PD
-
 	platform->pdata->cbl_det_irq = new mbed::InterruptIn(platform->pdata->gpio_cbl_det);
-	platform->pdata->cbl_det_irq->rise(queue.event(mbed::callback(anx7625_cbl_det_isr, (void*)platform)));
-
-#endif
 
 #ifdef SUP_INT_VECTOR
 
 	platform->pdata->irq = new mbed::InterruptIn(platform->pdata->gpio_intr_comm);
-	platform->pdata->irq->fall(queue.event(mbed::callback(anx7625_intr_comm_isr, (void*)platform)));
 
 #endif
-
-	t.start(callback(&queue, &events::EventQueue::dispatch_forever));
 
 #ifdef DYNAMIC_CONFIG_MIPI
 
@@ -1057,10 +1049,18 @@ int anx7625_i2c_probe(struct i2c_client *client)
 
 #endif
 
-	anx7625_cbl_det_isr(platform);
+	anx7625_work_func();
+
+	platform->pdata->cbl_det_irq->rise(queue.event(mbed::callback(anx7625_cbl_det_isr, (void*)platform)));
+
+#ifdef SUP_INT_VECTOR
+	platform->pdata->irq->fall(queue.event(mbed::callback(anx7625_intr_comm_isr, (void*)platform)));
+#endif
 
 	TRACE("anx7625_i2c_probe successfully %s %s end\n",
 		LOG_TAG, __func__);
+
+	t.start(callback(&queue, &events::EventQueue::dispatch_forever));
 
 	return ret;
 }
@@ -1177,7 +1177,7 @@ ssize_t anx7625_dump_register(const char *buf)
 	result = sscanf(buf, "%x", &val);
 
 	pr_info(" dump register (0x%x)......\n", val);
-	pr_info("	 0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F\n");
+	pr_info("      0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F\n");
 	for (i = 0; i < 256; i++) {
 		snprintf((char*)&(pLine[(i%0x10)*3]), 4, "%02X ", ReadReg(val, i));
 		if ((i & 0x0f) == 0x0f)
@@ -1276,7 +1276,7 @@ ssize_t anx7625_dpcd_write(const char *buf)
 	return 1;
 }
 
-ssize_t anx7625_dump_edid(char *buf)
+ssize_t anx7625_dump_edid()
 {
 	uint k, j;
 	unsigned char   blocks_num;
@@ -1301,7 +1301,7 @@ ssize_t anx7625_dump_edid(char *buf)
 		}
 	}
 
-	return snprintf(buf, 5, "OK!\n");
+	return 1;
 
 }
 
@@ -1422,6 +1422,8 @@ ssize_t anx7625_debug(const char *buf)
 		sp_tx_show_information();
 	} else if (strcmp(CommandName, "dumpall") == 0) {
 		anx7625_dumpall();
+	} else if (strcmp(CommandName, "edid") == 0) {
+		anx7625_dump_edid();
 	} else if (strcmp(CommandName, "mute") == 0) {
 		command_Mute_Video(param[0]);
 	} else {

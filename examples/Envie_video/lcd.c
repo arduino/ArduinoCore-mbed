@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include "image_320x240_argb8888.h"
 #include "life_augmented_argb8888.h"
+#include "lcd.h"
 #include <string.h>
 #include <stdio.h>
 
@@ -34,21 +35,18 @@ static RCC_PeriphCLKInitTypeDef  PeriphClkInitStruct;
 #define HFP                 1
 #define HACT                800
 
-#define LCD_FB_START_ADDRESS       ((uint32_t)0xD0000000)
-#define LAYER0_ADDRESS               (LCD_FB_START_ADDRESS)
-
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-static __IO int32_t  front_buffer   = 0;
-static __IO int32_t  pend_buffer   = -1;
-static uint32_t ImageIndex = 0;
-static const uint32_t * Images[] =
+volatile int32_t  front_buffer   = 0;
+volatile int32_t  pend_buffer   = -1;
+uint32_t ImageIndex = 0;
+const uint32_t * Images[] =
 {
   image_320x240_argb8888,
   life_augmented_argb8888,
 };
 
-static const uint32_t Buffers[] =
+const uint32_t Buffers[] =
 {
   LAYER0_ADDRESS,
   LAYER0_ADDRESS + (800 * 480 * 4),
@@ -57,12 +55,7 @@ static const uint32_t Buffers[] =
 /* Private function prototypes -----------------------------------------------*/
 static void SystemClock_Config(void);
 static void Error_Handler(void);
-static void CopyBuffer(uint32_t *pSrc,
-                       uint32_t *pDst,
-                       uint16_t x,
-                       uint16_t y,
-                       uint16_t xsize,
-                       uint16_t ysize);
+
 static uint8_t LCD_Init(void);
 void LTDC_Init(void);
 static void LCD_BriefDisplay(void);
@@ -147,6 +140,8 @@ int doStuff(void)
   /* Configure the MPU attributes as Write Through for SDRAM*/
   MPU_Config_Display();
 
+  printf("after MPU_Config_Display\n");
+
   /* Initialize the LCD   */
   if ( LCD_Init() != 0)
   {
@@ -154,17 +149,18 @@ int doStuff(void)
   }
 
   /* Disable DSI Wrapper in order to access and configure the LTDC */
-  __HAL_DSI_WRAPPER_DISABLE(&hdsi_eval);
+//  __HAL_DSI_WRAPPER_DISABLE(&hdsi_eval);
 
   /* Initialize LTDC layer 0 iused for Hint */
   BSP_LCD_LayerDefaultInit(0, LAYER0_ADDRESS);
 
   /* Enable DSI Wrapper so DSI IP will drive the LTDC */
-  __HAL_DSI_WRAPPER_ENABLE(&hdsi_eval);
+//  __HAL_DSI_WRAPPER_ENABLE(&hdsi_eval);
 
   /* Display example brief   */
   LCD_BriefDisplay();
 
+#if 0
   /* Copy Buffer 0 into buffer 1, so only image area to be redrawn later */
   CopyBuffer((uint32_t *)Buffers[0], (uint32_t *)Buffers[1], 0, 0, 800, 480);
 
@@ -174,28 +170,7 @@ int doStuff(void)
 
   /*Refresh the LCD display*/
   HAL_DSI_Refresh(&hdsi_eval);
-
-  /* Infinite loop */
-  while (1)
-  {
-    if (pend_buffer < 0)
-    {
-      /* Prepare back buffer */
-      CopyBuffer((uint32_t *)Images[ImageIndex++], (uint32_t *)Buffers[1 - front_buffer], 240, 160, 320, 240);
-      pend_buffer = 1 - front_buffer;
-
-      if (ImageIndex >= 2)
-      {
-        ImageIndex = 0;
-      }
-
-      /* Refresh the display */
-      HAL_DSI_Refresh(&hdsi_eval);
-
-      /* Wait some time before switching to next stage */
-      HAL_Delay(2000);
-    }
-  }
+#endif
 }
 
 /**
@@ -206,6 +181,7 @@ int doStuff(void)
 */
 void HAL_DSI_EndOfRefreshCallback(DSI_HandleTypeDef *hdsi)
 {
+#if 0
   if (pend_buffer >= 0)
   {
     /* Disable DSI Wrapper */
@@ -219,6 +195,7 @@ void HAL_DSI_EndOfRefreshCallback(DSI_HandleTypeDef *hdsi)
     front_buffer = pend_buffer;
     pend_buffer = -1;
   }
+#endif
 }
 
 /**
@@ -255,11 +232,11 @@ static uint8_t LCD_Init(void)
   /* LTDC clock frequency = PLLLCDCLK = 42 Mhz */
   PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_LTDC;
   PeriphClkInitStruct.PLL3.PLL3M = 5;
-  PeriphClkInitStruct.PLL3.PLL3N = 160;
+  PeriphClkInitStruct.PLL3.PLL3N = 163;
   PeriphClkInitStruct.PLL3.PLL3FRACN = 0;
   PeriphClkInitStruct.PLL3.PLL3P = 2;
   PeriphClkInitStruct.PLL3.PLL3Q = 2;
-  PeriphClkInitStruct.PLL3.PLL3R = 19;
+  PeriphClkInitStruct.PLL3.PLL3R = 21;
   HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct);
 
   /* Base address of DSI Host/Wrapper registers to be set before calling De-Init */
@@ -267,8 +244,8 @@ static uint8_t LCD_Init(void)
 
   HAL_DSI_DeInit(&(hdsi_eval));
 
-  dsiPllInit.PLLNDIV  = 100;
-  dsiPllInit.PLLIDF   = DSI_PLL_IN_DIV5;
+  dsiPllInit.PLLNDIV  = 36;
+  dsiPllInit.PLLIDF   = DSI_PLL_IN_DIV2;
   dsiPllInit.PLLODF  = DSI_PLL_OUT_DIV1;
 
   hdsi_eval.Init.NumberOfLanes = DSI_TWO_DATA_LANES;
@@ -403,45 +380,49 @@ static void LCD_BriefDisplay(void)
     @param  ColorMode: Input color mode
     @retval None
 */
-static void CopyBuffer(uint32_t *pSrc, uint32_t *pDst, uint16_t x, uint16_t y, uint16_t xsize, uint16_t ysize)
-{
 
-  uint32_t destination = (uint32_t)pDst + (y * 800 + x) * 4;
+const int LCD_X_Size = 800;
+
+void CopyBuffer(uint32_t *pSrc, uint32_t *pDst, uint16_t x, uint16_t y, uint16_t xsize, uint16_t ysize)
+{   
+  
+  uint32_t destination = (uint32_t)pDst + (y * LCD_X_Size + x) * 4;
   uint32_t source      = (uint32_t)pSrc;
-
-  /*##-1- Configure the DMA2D Mode, Color Mode and output offset #############*/
+  
+  /*##-1- Configure the DMA2D Mode, Color Mode and output offset #############*/ 
   hdma2d.Init.Mode         = DMA2D_M2M;
   hdma2d.Init.ColorMode    = DMA2D_OUTPUT_ARGB8888;
-  hdma2d.Init.OutputOffset = 800 - xsize;
-  hdma2d.Init.AlphaInverted = DMA2D_REGULAR_ALPHA;  /* No Output Alpha Inversion*/
-  hdma2d.Init.RedBlueSwap   = DMA2D_RB_REGULAR;     /* No Output Red & Blue swap */
-
+  hdma2d.Init.OutputOffset = LCD_X_Size - xsize; 
+  hdma2d.Init.AlphaInverted = DMA2D_REGULAR_ALPHA;  /* No Output Alpha Inversion*/  
+  hdma2d.Init.RedBlueSwap   = DMA2D_RB_REGULAR;     /* No Output Red & Blue swap */  
+  
   /*##-2- DMA2D Callbacks Configuration ######################################*/
   hdma2d.XferCpltCallback  = NULL;
-
+  
   /*##-3- Foreground Configuration ###########################################*/
   hdma2d.LayerCfg[1].AlphaMode = DMA2D_NO_MODIF_ALPHA;
   hdma2d.LayerCfg[1].InputAlpha = 0xFF;
   hdma2d.LayerCfg[1].InputColorMode = DMA2D_INPUT_ARGB8888;
   hdma2d.LayerCfg[1].InputOffset = 0;
   hdma2d.LayerCfg[1].RedBlueSwap = DMA2D_RB_REGULAR; /* No ForeGround Red/Blue swap */
-  hdma2d.LayerCfg[1].AlphaInverted = DMA2D_REGULAR_ALPHA; /* No ForeGround Alpha inversion */
+  hdma2d.LayerCfg[1].AlphaInverted = DMA2D_REGULAR_ALPHA; /* No ForeGround Alpha inversion */  
 
-  hdma2d.Instance          = DMA2D;
-
+  hdma2d.Instance          = DMA2D; 
+   
   /* DMA2D Initialization */
-  if (HAL_DMA2D_Init(&hdma2d) == HAL_OK)
+  if(HAL_DMA2D_Init(&hdma2d) == HAL_OK) 
   {
-    if (HAL_DMA2D_ConfigLayer(&hdma2d, 1) == HAL_OK)
+    if(HAL_DMA2D_ConfigLayer(&hdma2d, 1) == HAL_OK) 
     {
       if (HAL_DMA2D_Start(&hdma2d, source, destination, xsize, ysize) == HAL_OK)
       {
-        /* Polling For DMA transfer */
+        /* Polling For DMA transfer */  
         HAL_DMA2D_PollForTransfer(&hdma2d, 100);
       }
     }
-  }
+  }   
 }
+
 
 /**
     @brief  System Clock Configuration

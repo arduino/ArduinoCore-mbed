@@ -21,6 +21,7 @@ compiler.c.cmd={build.crossprefix}gcc
 compiler.c.flags=-c -I. {compiler.warning_flags} -Os -g -nostdlib "@{compiler.mbed.defines}" "@{compiler.mbed.cflags}" {compiler.mbed.arch.define} -MMD -mcpu={build.mcu}
 compiler.c.elf.cmd={build.crossprefix}g++
 compiler.c.elf.flags=-Wl,--gc-sections {compiler.warning_flags} -Wl,--as-needed
+compiler.S.cmd={build.crossprefix}g++
 compiler.S.flags=-c -g -x assembler-with-cpp -Os -mcpu={build.mcu}
 compiler.cpp.cmd={build.crossprefix}g++
 compiler.cpp.flags=-c -I. {compiler.warning_flags} -g -Os -nostdlib "@{compiler.mbed.defines}" "@{compiler.mbed.cxxflags}" {compiler.mbed.arch.define} -MMD -mcpu={build.mcu}
@@ -70,6 +71,9 @@ recipe.c.o.pattern="{compiler.path}{compiler.c.cmd}" {compiler.c.flags} -DARDUIN
 
 ## Compile c++ files
 recipe.cpp.o.pattern="{compiler.path}{compiler.cpp.cmd}" {compiler.cpp.flags} -DARDUINO={runtime.ide.version} -DARDUINO_{build.board} -DARDUINO_ARCH_{build.arch} {includes} {build.extra_flags} {compiler.cpp.extra_flags} "-I{build.core.path}/api/deprecated" "-iprefix{build.core.path}" "@{compiler.mbed.includes}" "{source_file}" -o "{object_file}"
+
+## Compile asm files
+recipe.S.o.pattern="{compiler.path}{compiler.S.cmd}" {compiler.S.flags} -DARDUINO={runtime.ide.version} -DARDUINO_{build.board} -DARDUINO_ARCH_{build.arch} {includes} {build.extra_flags} {compiler.cpp.extra_flags} "-I{build.core.path}/api/deprecated" "-iprefix{build.core.path}" "@{compiler.mbed.includes}" "{source_file}" -o "{object_file}"
 
 ## Create archives
 recipe.ar.pattern="{compiler.path}{compiler.ar.cmd}" {compiler.ar.flags} {compiler.ar.extra_flags} "{archive_file_path}" "{object_file}"

@@ -147,31 +147,9 @@ static inline bool schedule_work(struct work_struct *work) {
 #define NOTIFY_STOP_MASK    0x8000      /* Don't call further */
 #define NOTIFY_BAD      (NOTIFY_STOP_MASK|0x0002)
 
-#define LOCK_PREFIX
-
 #define atomic_read(x)  (*(x.counter))
 
 #define atomic_set(x, y) (*(x.counter) = y)
-
-static __always_inline void arch_atomic_inc(atomic_t *v)
-{
-    asm volatile(LOCK_PREFIX "incl %0"
-             : "+m" (v->counter) :: "memory");
-}
-#define atomic_inc arch_atomic_inc
-
-/**
- * arch_atomic_dec - decrement atomic variable
- * @v: pointer of type atomic_t
- *
- * Atomically decrements @v by 1.
- */
-static __always_inline void arch_atomic_dec(atomic_t *v)
-{
-    asm volatile(LOCK_PREFIX "decl %0"
-             : "+m" (v->counter) :: "memory");
-}
-#define atomic_dec arch_atomic_dec
 
 #define GPIOD_OUT_LOW       OUTPUT
 #define GPIOD_IN            INPUT

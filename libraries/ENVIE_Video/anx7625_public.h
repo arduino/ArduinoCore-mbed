@@ -159,3 +159,5 @@ struct anx7625 {
 
 int anx7625_i2c_probe(struct i2c_client *anx7625);
 int anx7625_i2c_remove(struct i2c_client *anx7625);
+ssize_t anx7625_debug(const char *buf);
+void anx7625_start_dp(void);
