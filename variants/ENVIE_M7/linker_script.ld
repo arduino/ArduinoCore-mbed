@@ -8,7 +8,7 @@ MEMORY
   RAM_D2 (xrw) : ORIGIN = 0x30000000, LENGTH = 288K
   OPENAMP_RSC_TAB (rwx) : ORIGIN = 0x38000000, LENGTH = 1K
   OPEN_AMP_SHMEM (rwx) : ORIGIN = 0x38000400, LENGTH = 63K
-  FLASH (rx) : ORIGIN = 0x08000000, LENGTH = 1024K
+  FLASH (rx) : ORIGIN = 0x08040000, LENGTH = 1024K
 }
  __OPENAMP_region_start__ = ORIGIN(OPEN_AMP_SHMEM);
  __OPENAMP_region_end__ = ORIGIN(OPEN_AMP_SHMEM) + LENGTH(OPEN_AMP_SHMEM);
@@ -114,4 +114,14 @@ SECTIONS
     __StackLimit = __StackTop - STACK_SIZE;
     PROVIDE(__stack = __StackTop);
     ASSERT(__StackLimit >= __HeapLimit, "region RAM overflowed with stack")
+    .lwip_sec (NOLOAD) : {
+        . = ABSOLUTE(0x30040000);
+        *(.RxDecripSection)
+        . = ABSOLUTE(0x30040100);
+        *(.TxDecripSection)
+        . = ABSOLUTE(0x30040400);
+        *(.RxArraySection)
+        . = ABSOLUTE(0x30044000);
+        *(.ethusbram)
+    } >RAM_D2 AT> FLASH
 }
