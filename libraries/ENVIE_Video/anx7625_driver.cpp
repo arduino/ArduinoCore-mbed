@@ -554,7 +554,7 @@ void anx7625_restart_work(int workqueu_timer)
 
 	td = the_chip_anx7625;
 	if (td != NULL) {
-		wait(workqueu_timer / 1000.0f);
+		//wait(workqueu_timer / 1000.0f);
 		anx7625_work_func();
 	}
 }
