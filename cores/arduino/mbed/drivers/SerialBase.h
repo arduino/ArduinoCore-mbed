@@ -200,6 +200,13 @@ public:
      *  @param flow2 the second flow control pin (CTS for RTSCTS)
      */
     void set_flow_control(Flow type, PinName flow1 = NC, PinName flow2 = NC);
+
+    /** Set the flow control type on the serial port
+     *
+     *  @param type the flow control type (Disabled, RTS, CTS, RTSCTS)
+     *  @param pinmap reference to structure which holds static pinmap
+     */
+    void set_flow_control(Flow type, const serial_fc_pinmap_t &static_pinmap);
 #endif
 
     static void _irq_handler(uint32_t id, SerialIrq irq_type);
@@ -313,6 +320,7 @@ protected:
 #if !defined(DOXYGEN_ONLY)
 protected:
     SerialBase(PinName tx, PinName rx, int baud);
+    SerialBase(const serial_pinmap_t &static_pinmap, int baud);
     virtual ~SerialBase();
 
     int _base_getc();
@@ -329,26 +337,26 @@ protected:
 
 #if DEVICE_SERIAL_ASYNCH
     CThunk<SerialBase> _thunk_irq;
-    DMAUsage _tx_usage;
-    DMAUsage _rx_usage;
+    DMAUsage _tx_usage = DMA_USAGE_NEVER;
+    DMAUsage _rx_usage = DMA_USAGE_NEVER;
     event_callback_t _tx_callback;
     event_callback_t _rx_callback;
-    bool _tx_asynch_set;
-    bool _rx_asynch_set;
+    bool _tx_asynch_set = false;
+    bool _rx_asynch_set = false;
 #endif
 
-    serial_t         _serial;
+    serial_t         _serial {};
     Callback<void()> _irq[IrqCnt];
     int              _baud;
-    bool             _rx_enabled;
-    bool             _tx_enabled;
+    bool             _rx_enabled = true;
+    bool             _tx_enabled = true;
     const PinName    _tx_pin;
     const PinName    _rx_pin;
 
 #if DEVICE_SERIAL_FC
-    Flow             _flow_type;
-    PinName          _flow1;
-    PinName          _flow2;
+    Flow             _flow_type = Disabled;
+    PinName          _flow1 = NC;
+    PinName          _flow2 = NC;
 #endif
 
 #endif
