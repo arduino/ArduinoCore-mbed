@@ -54,15 +54,15 @@ envie_m7.compiler.mbed="{build.variant.path}/libs/libmbed.a"
 envie_m7.vid.0=0x0483
 envie_m7.pid.0=0x374e
 
-envie_m7.upload.via_ssh=true
-envie_m7.upload.tool=openocd
-envie_m7.upload.config=-f board/envie.cfg
-envie_m7.upload.protocol=sam-ba
-envie_m7.upload.maximum_size=1048576
-envie_m7.upload.maximum_data_size=262144
-envie_m7.upload.use_1200bps_touch=false
+envie_m7.upload.tool=dfu-util
+envie_m7.upload.protocol=
+envie_m7.upload.address=0x08040000
+envie_m7.upload.use_1200bps_touch=true
 envie_m7.upload.wait_for_upload_port=false
-envie_m7.upload.native_usb=false
+envie_m7.upload.native_usb=true
+envie_m7.upload.maximum_size=786432
+envie_m7.upload.maximum_data_size=262144
+
 
 ##############################################################
 
