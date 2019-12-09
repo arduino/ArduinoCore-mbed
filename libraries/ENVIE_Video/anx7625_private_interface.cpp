@@ -583,6 +583,7 @@ void chip_register_init(void)
 #define STS_VBUS_CHANGE \
 (((sys_status&VBUS_STATUS) != (sys_sta_bak&VBUS_STATUS)) ? VBUS_CHANGE:0)
 static unsigned char sys_sta_bak;
+
 void handle_intr_vector(void)
 {
 	unsigned char sys_status;

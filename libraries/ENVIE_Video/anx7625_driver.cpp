@@ -664,18 +664,13 @@ void anx7625_start_dp(void)
 
 irqreturn_t anx7625_cbl_det_isr(void *data)
 {
-#ifndef DISABLE_PD
 	struct anx7625_data *platform = (struct anx7625_data *)data;
-#endif
 
 #ifdef DYNAMIC_CONFIG_MIPI
 	if (DBA_init_done == 0)
 		return IRQ_NONE;
 #endif
-	
-#ifdef DISABLE_PD
-	cable_connected = DONGLE_CABLE_INSERT;
-#else
+
 #ifdef CABLE_DET_PIN_HAS_GLITCH
 	cable_connected = confirmed_cable_det((void *)platform);
 #else
@@ -683,11 +678,8 @@ irqreturn_t anx7625_cbl_det_isr(void *data)
 		gpio_cbl_det);
 #endif
 
-#endif
-
 	TRACE("%s %s : cable plug pin status %d\n", LOG_TAG,
 		__func__, cable_connected);
-
 
 	if (cable_connected == DONGLE_CABLE_INSERT) {
 		if (atomic_read(&anx7625_power_status) == 1)

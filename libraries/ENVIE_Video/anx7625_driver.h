@@ -36,14 +36,14 @@
 // #define DYNAMIC_CONFIG_MIPI
 
 /*Disable Power Delivery Function.*/
-// #define DISABLE_PD
+#define DISABLE_PD
 
 
 /*Loading OCM re-trying times*/
 #define OCM_LOADING_TIME 10
 
 /*S/W do deglitch on cable-detect pin.*/
-#define CABLE_DET_PIN_HAS_GLITCH
+// #define CABLE_DET_PIN_HAS_GLITCH
 
 /*Debug log output enabled.*/
 #define DEBUG_LOG_OUTPUT

@@ -130,25 +130,62 @@ uint8_t BSP_SDRAM_Init(void)
   /* SDRAM device configuration */
   sdramHandle.Instance = FMC_SDRAM_DEVICE;
 
-  /* Timing configuration for 100Mhz as SDRAM clock frequency (System clock is up to 200Mhz) */
-  Timing.LoadToActiveDelay    = 2;
-  Timing.ExitSelfRefreshDelay = 7;
-  Timing.SelfRefreshTime      = 4;
-  Timing.RowCycleDelay        = 7;
-  Timing.WriteRecoveryTime    = 2;
-  Timing.RPDelay              = 2;
-  Timing.RCDDelay             = 2;
+#define MICROPY_HW_SDRAM_SIZE       (64 / 8 * 1024 * 1024)  // 64 Mbit
+#define MICROPY_HW_SDRAM_STARTUP_TEST   (1)
+//#define MICROPY_HEAP_START              sdram_start()
+//#define MICROPY_HEAP_END                sdram_end()
 
-  sdramHandle.Init.SDBank             = FMC_SDRAM_BANK2;
-  sdramHandle.Init.ColumnBitsNumber   = FMC_SDRAM_COLUMN_BITS_NUM_9;
-  sdramHandle.Init.RowBitsNumber      = FMC_SDRAM_ROW_BITS_NUM_12;
-  sdramHandle.Init.MemoryDataWidth    = SDRAM_MEMORY_WIDTH;
-  sdramHandle.Init.InternalBankNumber = FMC_SDRAM_INTERN_BANKS_NUM_4;
-  sdramHandle.Init.CASLatency         = FMC_SDRAM_CAS_LATENCY_3;
-  sdramHandle.Init.WriteProtection    = FMC_SDRAM_WRITE_PROTECTION_DISABLE;
-  sdramHandle.Init.SDClockPeriod      = SDCLOCK_PERIOD;
-  sdramHandle.Init.ReadBurst          = FMC_SDRAM_RBURST_ENABLE;
-  sdramHandle.Init.ReadPipeDelay      = FMC_SDRAM_RPIPE_DELAY_0;
+// Timing configuration for 90 Mhz (11.90ns) of SD clock frequency (180Mhz/2)
+#define MICROPY_HW_SDRAM_TIMING_TMRD        (2)
+#define MICROPY_HW_SDRAM_TIMING_TXSR        (7)
+#define MICROPY_HW_SDRAM_TIMING_TRAS        (4)
+#define MICROPY_HW_SDRAM_TIMING_TRC         (7)
+#define MICROPY_HW_SDRAM_TIMING_TWR         (2)
+#define MICROPY_HW_SDRAM_TIMING_TRP         (2)
+#define MICROPY_HW_SDRAM_TIMING_TRCD        (2)
+#define MICROPY_HW_SDRAM_REFRESH_RATE       (64) // ms
+
+#define MICROPY_HW_SDRAM_BURST_LENGTH       2
+#define MICROPY_HW_SDRAM_CAS_LATENCY        3
+#define MICROPY_HW_SDRAM_COLUMN_BITS_NUM    8
+#define MICROPY_HW_SDRAM_ROW_BITS_NUM       12
+#define MICROPY_HW_SDRAM_MEM_BUS_WIDTH      16
+#define MICROPY_HW_SDRAM_INTERN_BANKS_NUM   4
+#define MICROPY_HW_SDRAM_CLOCK_PERIOD       2
+#define MICROPY_HW_SDRAM_RPIPE_DELAY        1
+#define MICROPY_HW_SDRAM_RBURST             (0)
+#define MICROPY_HW_SDRAM_WRITE_PROTECTION   (0)
+#define MICROPY_HW_SDRAM_AUTOREFRESH_NUM    (4)
+
+  /* Timing configuration for 90 Mhz of SD clock frequency (180Mhz/2) */
+  /* TMRD: 2 Clock cycles */
+  Timing.LoadToActiveDelay    = MICROPY_HW_SDRAM_TIMING_TMRD;
+  /* TXSR: min=70ns (6x11.90ns) */
+  Timing.ExitSelfRefreshDelay = MICROPY_HW_SDRAM_TIMING_TXSR;
+  /* TRAS */
+  Timing.SelfRefreshTime      = MICROPY_HW_SDRAM_TIMING_TRAS;
+  /* TRC */
+  Timing.RowCycleDelay        = MICROPY_HW_SDRAM_TIMING_TRC;
+  /* TWR */
+  Timing.WriteRecoveryTime    = MICROPY_HW_SDRAM_TIMING_TWR;
+  /* TRP */
+  Timing.RPDelay              = MICROPY_HW_SDRAM_TIMING_TRP;
+  /* TRCD */
+  Timing.RCDDelay             = MICROPY_HW_SDRAM_TIMING_TRCD;
+
+  #define _FMC_INIT(x, n) x ## _ ## n
+  #define FMC_INIT(x, n) _FMC_INIT(x,  n)
+
+  sdramHandle.Init.SDBank             = FMC_SDRAM_BANK1;
+  sdramHandle.Init.ColumnBitsNumber   = FMC_INIT(FMC_SDRAM_COLUMN_BITS_NUM, MICROPY_HW_SDRAM_COLUMN_BITS_NUM);
+  sdramHandle.Init.RowBitsNumber      = FMC_INIT(FMC_SDRAM_ROW_BITS_NUM, MICROPY_HW_SDRAM_ROW_BITS_NUM);
+  sdramHandle.Init.MemoryDataWidth    = FMC_INIT(FMC_SDRAM_MEM_BUS_WIDTH, MICROPY_HW_SDRAM_MEM_BUS_WIDTH);
+  sdramHandle.Init.InternalBankNumber = FMC_INIT(FMC_SDRAM_INTERN_BANKS_NUM, MICROPY_HW_SDRAM_INTERN_BANKS_NUM);
+  sdramHandle.Init.CASLatency         = FMC_INIT(FMC_SDRAM_CAS_LATENCY, MICROPY_HW_SDRAM_CAS_LATENCY);
+  sdramHandle.Init.SDClockPeriod      = FMC_INIT(FMC_SDRAM_CLOCK_PERIOD, MICROPY_HW_SDRAM_CLOCK_PERIOD);
+  sdramHandle.Init.ReadPipeDelay      = FMC_INIT(FMC_SDRAM_RPIPE_DELAY, MICROPY_HW_SDRAM_RPIPE_DELAY);
+  sdramHandle.Init.ReadBurst          = (MICROPY_HW_SDRAM_RBURST) ? FMC_SDRAM_RBURST_ENABLE : FMC_SDRAM_RBURST_DISABLE;
+  sdramHandle.Init.WriteProtection    = (MICROPY_HW_SDRAM_WRITE_PROTECTION) ? FMC_SDRAM_WRITE_PROTECTION_ENABLE : FMC_SDRAM_WRITE_PROTECTION_DISABLE;
 
   /* SDRAM controller initialization */
 
@@ -202,7 +239,7 @@ void BSP_SDRAM_Initialization_sequence(uint32_t RefreshCount)
 
   /* Step 1: Configure a clock configuration enable command */
   Command.CommandMode            = FMC_SDRAM_CMD_CLK_ENABLE;
-  Command.CommandTarget          = FMC_SDRAM_CMD_TARGET_BANK2;
+  Command.CommandTarget          = FMC_SDRAM_CMD_TARGET_BANK1;
   Command.AutoRefreshNumber      = 1;
   Command.ModeRegisterDefinition = 0;
 
@@ -215,7 +252,7 @@ void BSP_SDRAM_Initialization_sequence(uint32_t RefreshCount)
 
   /* Step 3: Configure a PALL (precharge all) command */
   Command.CommandMode            = FMC_SDRAM_CMD_PALL;
-  Command.CommandTarget          = FMC_SDRAM_CMD_TARGET_BANK2;
+  Command.CommandTarget          = FMC_SDRAM_CMD_TARGET_BANK1;
   Command.AutoRefreshNumber      = 1;
   Command.ModeRegisterDefinition = 0;
 
@@ -224,7 +261,7 @@ void BSP_SDRAM_Initialization_sequence(uint32_t RefreshCount)
 
   /* Step 4: Configure an Auto Refresh command */
   Command.CommandMode            = FMC_SDRAM_CMD_AUTOREFRESH_MODE;
-  Command.CommandTarget          = FMC_SDRAM_CMD_TARGET_BANK2;
+  Command.CommandTarget          = FMC_SDRAM_CMD_TARGET_BANK1;
   Command.AutoRefreshNumber      = 8;
   Command.ModeRegisterDefinition = 0;
 
@@ -239,7 +276,7 @@ void BSP_SDRAM_Initialization_sequence(uint32_t RefreshCount)
                      SDRAM_MODEREG_WRITEBURST_MODE_SINGLE;
 
   Command.CommandMode            = FMC_SDRAM_CMD_LOAD_MODE;
-  Command.CommandTarget          = FMC_SDRAM_CMD_TARGET_BANK2;
+  Command.CommandTarget          = FMC_SDRAM_CMD_TARGET_BANK1;
   Command.AutoRefreshNumber      = 1;
   Command.ModeRegisterDefinition = tmpmrd;
 
