@@ -21,7 +21,7 @@ Revision History:
 ******************************************************************************/
 
 #include "config.h"
-#include "private_interface.h"
+#include "common/private_interface.h"
 #ifdef USE_PD30
 #include "pd_ext_message.h"
 #endif

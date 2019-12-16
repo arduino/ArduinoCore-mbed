@@ -22,13 +22,13 @@ Revision History:
 
 #include "config.h"
 #include "debug.h"
-#include "EFM8UB2_helper.h"
+#include "EFM8UB2/EFM8UB2_helper.h"
 #include "MI2.h"
 #include "Flash.h"
 #include "MI2_REG.h"
 #include "REG_DRV.h"
-#include "REG_DRV1.h"
-#include "private_interface.h"
+#include "I2C_SW/REG_DRV1.h"
+#include "common/private_interface.h"
 #ifdef USE_PD30
 #include "pd_ext_message.h"
 #endif 

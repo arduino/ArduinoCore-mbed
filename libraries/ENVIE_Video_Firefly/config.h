@@ -24,7 +24,7 @@ Revision History:
 #define __CONFIG_H__
 
 #include "defs.h"
-#include "SI_EFM8UB2_Defs.h"
+#include "EFM8UB2/SI_EFM8UB2_Defs.h"
 
 /* ========================================================================== */
 // EFM8UB20F64G MCU pin configuration, which is board dependent

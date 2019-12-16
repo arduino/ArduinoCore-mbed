@@ -22,10 +22,10 @@ Revision History:
 
 #include "config.h"
 #include "debug.h"
-#include "cmd.h"
+#include "debug/cmd.h"
 #include "MCUInit.h"
-#include "serial.h"
-#include "EFM8UB2_helper.h"
+#include "debug/serial.h"
+#include "EFM8UB2/EFM8UB2_helper.h"
 #include "MI2.h"
 #include "ENVIE_Video_Firefly.h"
 

@@ -21,7 +21,7 @@ Revision History:
 ******************************************************************************/
 
 #include "config.h"
-#include "EFM8UB2_SMBus.h"
+#include "EFM8UB2/EFM8UB2_SMBus.h"
 void patch_for_read_reg(unsigned char DevAddr);
 char ReadReg(unsigned char DevAddr, unsigned char RegAddr, unsigned char data *pData)
 {
