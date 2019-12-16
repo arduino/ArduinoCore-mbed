@@ -25,6 +25,7 @@ Revision History:
 
 #include <stdio.h>
 
+#define DEBUG
 #ifdef DEBUG
 // Debug mode - debug functions cause printf output
 

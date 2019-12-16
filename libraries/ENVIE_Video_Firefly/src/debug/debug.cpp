@@ -22,6 +22,8 @@ Revision History:
 
 #include "debug.h"
 
+#define DEBUG
+
 #ifdef DEBUG
 /**
  * Trace an array output for debugging

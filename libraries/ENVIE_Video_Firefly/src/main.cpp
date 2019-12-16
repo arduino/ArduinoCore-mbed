@@ -25,6 +25,7 @@ Revision History:
 #include "debug/cmd.h"
 #include "debug/serial.h"
 #include "MI2.h"
+#include "Wire.h"
 #include "ENVIE_Video_Firefly.h"
 
 #define FW_MAJOR_VERSION 1 
@@ -53,8 +54,10 @@ void anx7625_setup(void)
     ANX7625_POWER_DOWN(); // power down chip before port initialization
     ANX7625_RESET(); // reset chip before port initialization
 
-    TRACE2("\nMI-2 EVB FW v%bd.%bd\n", (unsigned char)FW_MAJOR_VERSION, (unsigned char)FW_MINOR_VERSION);
+    TRACE2("\nMI-2 EVB FW v%d.%d\n", (unsigned char)FW_MAJOR_VERSION, (unsigned char)FW_MINOR_VERSION);
     TRACE2("Build at: %s, %s\n\n", __DATE__, __TIME__);
+
+    Wire.begin();
 
   delay_ms(500);
 
