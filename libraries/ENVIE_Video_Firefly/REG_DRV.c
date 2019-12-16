@@ -20,7 +20,7 @@ Revision History:
 
 ******************************************************************************/
 
-#include "Arduino.h"
+#include <Wire.h>
 
 void patch_for_read_reg(unsigned char DevAddr);
 

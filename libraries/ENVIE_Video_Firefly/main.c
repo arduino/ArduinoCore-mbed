@@ -23,9 +23,7 @@ Revision History:
 #include "config.h"
 #include "debug.h"
 #include "debug/cmd.h"
-#include "MCUInit.h"
 #include "debug/serial.h"
-#include "EFM8UB2/EFM8UB2_helper.h"
 #include "MI2.h"
 #include "ENVIE_Video_Firefly.h"
 
@@ -48,19 +46,6 @@ void anx7625_setup(void)
     // will be High at system startup, thus add this firmware patch. Refer to JIRA issue MIS-161.
     ANX7625_POWER_DOWN(); // power down chip before port initialization
     ANX7625_RESET(); // reset chip before port initialization
-
-    /* ========== MCU init ========== */
-    Monitor_Init();
-    SYSCLKInit();   // <===== further study from here!
-    SMBusRecover();
-    PortInit();
-    TimerInit();
-    SMBusInit();
-    PCAInit();
-    UARTInit();
-    SerialInit();
-
-    IE_EA = 1;
 
     TRACE2("\nMI-2 EVB FW v%bd.%bd\n", (unsigned char)FW_MAJOR_VERSION, (unsigned char)FW_MINOR_VERSION);
     TRACE2("Build at: %s, %s\n\n", __DATE__, __TIME__);
