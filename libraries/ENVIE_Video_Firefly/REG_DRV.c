@@ -20,152 +20,93 @@ Revision History:
 
 ******************************************************************************/
 
-#include "config.h"
-#include "EFM8UB2/EFM8UB2_SMBus.h"
+#include "Arduino.h"
+
 void patch_for_read_reg(unsigned char DevAddr);
+
 char ReadReg(unsigned char DevAddr, unsigned char RegAddr, unsigned char data *pData)
 {
-		patch_for_read_reg(DevAddr);
-    I2C_Start();
-    if(I2C_WriteByte(DevAddr | I2C_WRITE) == I2C_ACK)
-    {// ACK
-        if(I2C_WriteByte(RegAddr) == I2C_ACK)
-        {// ACK
-            I2C_Restart();
-            if(I2C_WriteByte(DevAddr | I2C_READ) == I2C_ACK)
-            {// ACK
-                *pData = I2C_ReadByte(I2C_NACK);
-                I2C_Stop();
-                return 0;
-            }
-        }
+    patch_for_read_reg(DevAddr);
+
+    Wire.beginTransmission(DevAddr);
+    Wire.write(RegAddr);
+    Wire.endTransmission();
+    Wire.requestFrom(DevAddr, 1);
+
+    if(Wire.available()) {
+        *pData = Wire.read();
+        return 0;
+    } else {
+        *pData = -1;
+        return -1;
     }
-    // NAK
-    I2C_Stop();
-    *pData = -1;
-    return -1;
 }
 
 char ReadWordReg(unsigned char DevAddr, unsigned char RegAddr, unsigned int data *pData)
 {
-		patch_for_read_reg(DevAddr);
-    I2C_Start();
-    if(I2C_WriteByte(DevAddr | I2C_WRITE) == I2C_ACK)
-    {// ACK
-        if(I2C_WriteByte(RegAddr) == I2C_ACK)
-        {// ACK
-            I2C_Restart();
-            if(I2C_WriteByte(DevAddr | I2C_READ) == I2C_ACK)
-            {// ACK
-                DBYTE1(*pData) = I2C_ReadByte(I2C_ACK); // low byte
-                DBYTE0(*pData) = I2C_ReadByte(I2C_NACK); // high byte
-                I2C_Stop();
-                return 0;
-            }
-        }
+    patch_for_read_reg(DevAddr);
+
+    Wire.beginTransmission(DevAddr);
+    Wire.write(RegAddr);
+    Wire.endTransmission();
+    Wire.requestFrom(DevAddr, 2);
+
+    if(Wire.available() >= 2) {
+        DBYTE1(*pData) = Wire.read();
+        DBYTE0(*pData) = Wire.read();
+        return 0;
+    } else {
+        *pData = -1;
+        return -1;
     }
-    // NAK
-    I2C_Stop();
-    *pData = -1;
-    return -1;
 }
 
 char ReadBlockReg(unsigned char DevAddr, unsigned char RegAddr, unsigned char n, unsigned char *pBuf)
 {
-		patch_for_read_reg(DevAddr);
-    I2C_Start();
-    if(I2C_WriteByte(DevAddr | I2C_WRITE) == I2C_ACK)
-    {// ACK
-        if(I2C_WriteByte(RegAddr) == I2C_ACK)
-        {// ACK
-            I2C_Restart();
-            if(I2C_WriteByte(DevAddr | I2C_READ) == I2C_ACK)
-            {// ACK
-                while(n != 1)
-                {
-                    *pBuf = I2C_ReadByte(I2C_ACK);
-                    pBuf++;
-                    n--;
-                }
-                *pBuf = I2C_ReadByte(I2C_NACK);
-                I2C_Stop();
-                return 0;
-            }
+    patch_for_read_reg(DevAddr);
+    
+    Wire.beginTransmission(DevAddr);
+    Wire.write(RegAddr);
+    Wire.endTransmission();
+    Wire.requestFrom(DevAddr, n);
+
+    if(Wire.available() >= n) {
+        for(unsigned char i = 0; i < n; i++) {
+            pBuf[n] = Wire.read();
         }
+        return 0;
     }
-    // NAK
-    I2C_Stop();
-    do
-    {
-        *pBuf = -1;
-        pBuf++;
-    }while(--n);
     return -1;
 }
 
 char WriteReg(unsigned char DevAddr, unsigned char RegAddr, unsigned char RegVal)
 {
-    I2C_Start();
-    if(I2C_WriteByte(DevAddr | I2C_WRITE) == I2C_ACK)
-    {// ACK
-        if(I2C_WriteByte(RegAddr) == I2C_ACK)
-        {// ACK
-            if(I2C_WriteByte(RegVal) == I2C_ACK)
-            {// ACK
-                I2C_Stop();
-                return 0;
-            }
-        }
-    }
-    // NAK
-    I2C_Stop();
-    return -1;
+    Wire.beginTransmission(DevAddr);
+    Wire.write(RegAddr);
+    Wire.write(RegVal);
+    Wire.endTransmission();
+    return 0;
 }
 
 char WriteWordReg(unsigned char DevAddr, unsigned char RegAddr, unsigned int RegVal)
 {
-    I2C_Start();
-    if(I2C_WriteByte(DevAddr | I2C_WRITE) == I2C_ACK)
-    {// ACK
-        if(I2C_WriteByte(RegAddr) == I2C_ACK)
-        {// ACK
-            if(I2C_WriteByte(LOBYTE(RegVal)) == I2C_ACK) // low byte
-            {// ACK
-                if(I2C_WriteByte(HIBYTE(RegVal)) == I2C_ACK) // high byte
-                {
-                    I2C_Stop();
-                    return 0;
-                }
-            }
-        }
-    }
-    // NAK
-    I2C_Stop();
-    return -1;
+    Wire.beginTransmission(DevAddr);
+    Wire.write(RegAddr);
+    Wire.write(LOBYTE(RegVal));
+    Wire.write(HIBYTE(RegVal));
+    Wire.endTransmission();
+    return 0;
 }
 
 char WriteBlockReg(unsigned char DevAddr, unsigned char RegAddr, unsigned char n, unsigned char *pBuf)
 {
-    I2C_Start();
-    if(I2C_WriteByte(DevAddr | I2C_WRITE) == I2C_ACK)
-    {// ACK
-        if(I2C_WriteByte(RegAddr) == I2C_ACK)
-        {// ACK
-            do
-            {
-                if(I2C_WriteByte(*pBuf) == I2C_NACK)
-                {// NAK
-                    break;
-                }
-                pBuf++;
-            }while(--n);
-            I2C_Stop();
-            return 0;
-        }
+    Wire.beginTransmission(DevAddr);
+    Wire.write(RegAddr);
+    for(unsigned char i = 0; i < n; i++) {
+        Wire.write(pBuf[i]);
     }
-    // NAK
-    I2C_Stop();
-    return -1;
+    Wire.endTransmission();
+    return 0;
 }
 
 void patch_for_read_reg(unsigned char DevAddr)
