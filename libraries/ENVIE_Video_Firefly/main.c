@@ -27,6 +27,7 @@ Revision History:
 #include "serial.h"
 #include "EFM8UB2_helper.h"
 #include "MI2.h"
+#include "ENVIE_Video_Firefly.h"
 
 #define FW_MAJOR_VERSION 1 
 #define FW_MINOR_VERSION 1
@@ -40,7 +41,7 @@ bit g_bDebug;
 
 char WriteReg(unsigned char DevAddr, unsigned char RegAddr, unsigned char RegVal);
 
-void main(void)
+void anx7625_setup(void)
 {
     // The default state of POWER_EN should be Low at system startup.
     // However, due to pull-up resistor in the level shifter circuit, POWER_EN
