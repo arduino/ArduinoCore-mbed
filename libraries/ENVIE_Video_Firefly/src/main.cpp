@@ -94,14 +94,13 @@ void anx7625_setup(void)
 #endif
     g_poweron = 0;
     g_bDebug = 0;
-		
-    while (1)
-    {
-        if (!g_bDebug)
-        {
-            PROC_Main();
-        }
-        cmd();
-    }
 }
 
+void anx7625_main()
+{
+  if (!g_bDebug)
+  {
+    PROC_Main();
+  }
+  cmd();
+}

@@ -5,5 +5,5 @@ void setup() {
 }
 
 void loop() {
-
+  anx7625_main();
 }
