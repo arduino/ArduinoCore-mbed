@@ -26,7 +26,7 @@ Revision History:
 #include "MI2_REG.h"
 #include "REG_DRV.h"
 #include "debug.h"
-#include "CmdHandler.h"
+#include "debug/CmdHandler.h"
 
 unsigned char xdata tmp_190b[155 + 3 + 32];
 
@@ -43,7 +43,7 @@ static void drm_SendCommand(unsigned int command)
 	WriteWordReg(RX_P1, DRM_COMMAND, cmd);
 
 	/** Set INTR */
-	WriteReg(RX_P1, Interrupt, INTR);	
+	WriteReg(RX_P1, DRM_Interrupt, INTR);	
 }
 
 static void drm_ClearCommand(unsigned int command)
@@ -121,7 +121,7 @@ static void drm_GetAuthStatus(void)
 		TRACE("@>. There is at least one repeaters in the chain. \n");
 	}
 	
-	val = (status & Lock) >> 8;
+	val = (status & Status_Lock) >> 8;
 	if (val == 0x00) {
 		TRACE("@>. All I2C COMMAND are permitted. \n");
 	} else if (val == 0x01) {

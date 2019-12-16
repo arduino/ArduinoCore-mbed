@@ -27,11 +27,8 @@ Revision History:
 #ifdef USE_PD30
 #include "pd_ext_message.h"
 #endif
-#include "I2C_SW.h"
 #include "REG_DRV.h"
-#include <STRING.H>
 #include "debug.h"
-#include "EFM8UB2_helper.h"
 
 #define Interface_Base_Addr 0x7E
 #define InterfaceSendBuf_Addr 0xC0
@@ -274,7 +271,7 @@ unsigned char recv_pd_source_caps_default_callback(void *para, unsigned char par
 	unsigned char pd_rdo[4];
 	if ( para_len %4 != 0)
 		return 0;
-    build_rdo_from_source_caps(para_len/4, para);
+    build_rdo_from_source_caps(para_len/4, (unsigned char  *)para);
 	//((unsigned char *)&global_ulong0)[0] = ((unsigned char*)para)[3];
 	//TRACE1("sel_pdo = %lu\n", sel_pdo);
 
@@ -1159,7 +1156,7 @@ unsigned char send_snk_cap( unsigned char *snk_caps, unsigned char snk_caps_size
 unsigned char send_dp_snk_cfg(const unsigned char *dp_snk_caps, unsigned char dp_snk_caps_size){
 	//unsigned char i;
 	//unsigned char configure_DP_caps[PD_ONE_DATA_OBJECT_SIZE];
-	unsigned char code DP_caps[PD_ONE_DATA_OBJECT_SIZE] = {0, 0, 0, 0};
+	unsigned char DP_caps[PD_ONE_DATA_OBJECT_SIZE] = {0, 0, 0, 0};
 
 	if ( NULL == dp_snk_caps )
 		return CMD_FAIL;
@@ -1500,13 +1497,14 @@ unsigned char send_get_dp_snk_cap()
 	interface_send_get_dp_snk_cap();
 }
 
+#ifdef USE_PD30
 unsigned char send_frswap_signal()
 {
 	interface_send_frswap_signal();
 }
+#endif
 
-
-char *interface_to_str(unsigned char header_type)
+const char *interface_to_str(unsigned char header_type)
 {
 return  (header_type == TYPE_PWR_SRC_CAP) ? "PWR_SRC_CAP" :
         (header_type == TYPE_PWR_SNK_CAP) ? "PWR_SNK_CAP" :
@@ -1553,7 +1551,7 @@ return  (header_type == TYPE_PWR_SRC_CAP) ? "PWR_SRC_CAP" :
         "Unknown";
 }
 
-char *result_to_str(unsigned result_type)
+const char *result_to_str(unsigned result_type)
 {
 	return  (result_type == CMD_SUCCESS) ? "Accept" :
         (result_type == CMD_FAIL) ? "Fail" :
@@ -1572,7 +1570,7 @@ char *result_to_str(unsigned result_type)
  */
 void send_initialized_setting(bit src_flag)
 {
-	unsigned long code init_src_caps[1] = { 
+	unsigned long init_src_caps[1] = { 
 	   	/*5V, 0.9A, Fixed*/
 	   	//PDO_FIXED(PD_VOLTAGE_5V, PD_CURRENT_900MA, PDO_FIXED_FLAGS),
 	   	/*5V, 1.5A, Fixed*/
@@ -1584,7 +1582,7 @@ void send_initialized_setting(bit src_flag)
 	    	PDO_VAR(PD_VOLTAGE_5V, PD_MAX_VOLTAGE_20V, PD_CURRENT_3A)
 	    #endif
 	};
-	unsigned long code init_src_caps_100mA[1] =  {
+	unsigned long init_src_caps_100mA[1] =  {
 		PDO_FIXED(PD_VOLTAGE_5V, PD_CURRENT_100MA, PDO_FIXED_FLAGS)
 		};
 #ifndef DEL_UNUSE_FEATURE
@@ -1599,7 +1597,7 @@ void send_initialized_setting(bit src_flag)
 	};
 #else
 	//In order to optimal the RAM size, fill the known sink capability data directly.
-	unsigned long code init_snk_cap[3] = { 
+	unsigned long init_snk_cap[3] = { 
 	   	/*5V, 0.9A, Fixed*/
 	   	0x5A90012A,//PDO_FIXED(PD_VOLTAGE_5V, PD_CURRENT_900MA, PDO_FIXED_FLAGS ),
 	 	/*min 5V, max 21V, power 15W, battery*/
@@ -1611,15 +1609,15 @@ void send_initialized_setting(bit src_flag)
 	//init setting for TYPE_DP_SNK_CFG
 	//unsigned char init_dp_snk_cfg[PD_ONE_DATA_OBJECT_SIZE] = { 0x06, 0x08,0x08, 0x00 };
 	//init setting for TYPE_SVID
-	unsigned char code init_svid[PD_ONE_DATA_OBJECT_SIZE]= {0x00, 0x00, 0x01, 0xff};
+	unsigned char init_svid[PD_ONE_DATA_OBJECT_SIZE]= {0x00, 0x00, 0x01, 0xff};
 
 #ifndef DEL_UNUSE_FEATURE
 	//init setting for TYPE_DP_SNK_IDENDTITY
 	unsigned char init_dp_snk_identity[12];// = {0};   //MIS2-286 TD.PD.VDMU.E1 
-	unsigned char code init_sink_id_header[PD_ONE_DATA_OBJECT_SIZE] = {0x00,0x00, 0x00, 0x90}; //{0x00,0x00, 0x00, 0x10};
-	unsigned char code init_sink_cert_stat_vdo[PD_ONE_DATA_OBJECT_SIZE] = {0x00, 0x00, 0x00, 0x00};
-	unsigned char code init_sink_prd_vdo[PD_ONE_DATA_OBJECT_SIZE] = {0x00, 0x00, 0x00, 0x00};
-	unsigned char code init_sink_ama_vdo[PD_ONE_DATA_OBJECT_SIZE] = {0x00, 0x00, 0x00, 0x00};//{0x39, 0x00, 0x00, 0x51};	
+	unsigned char init_sink_id_header[PD_ONE_DATA_OBJECT_SIZE] = {0x00,0x00, 0x00, 0x90}; //{0x00,0x00, 0x00, 0x10};
+	unsigned char init_sink_cert_stat_vdo[PD_ONE_DATA_OBJECT_SIZE] = {0x00, 0x00, 0x00, 0x00};
+	unsigned char init_sink_prd_vdo[PD_ONE_DATA_OBJECT_SIZE] = {0x00, 0x00, 0x00, 0x00};
+	unsigned char init_sink_ama_vdo[PD_ONE_DATA_OBJECT_SIZE] = {0x00, 0x00, 0x00, 0x00};//{0x39, 0x00, 0x00, 0x51};	
 
 	memcpy(init_dp_snk_identity, init_sink_id_header, 4);
 	memcpy(init_dp_snk_identity + 4, init_sink_cert_stat_vdo, 4);
@@ -1627,7 +1625,7 @@ void send_initialized_setting(bit src_flag)
 	//memcpy(init_dp_snk_identity + 12, init_sink_ama_vdo, 4);	
 #else
 	//In order to optimal the RAM size, fill the known sink identity data directly.
-	unsigned char code init_dp_snk_identity[16] = 
+	unsigned char init_dp_snk_identity[16] = 
 	{
 		0x00, 0x00, 0x00, 0x2c,
 		0x00, 0x00, 0x00, 0x00,

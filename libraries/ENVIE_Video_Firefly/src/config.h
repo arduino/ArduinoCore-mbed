@@ -25,11 +25,40 @@ Revision History:
 
 #include "Arduino.h"
 
-PinName RESET_N = PJ_3;
-PinName POWER_EN = PK_2;
+extern mbed::DigitalOut RESET_N;
+extern mbed::DigitalOut POWER_EN;
 
-PinName ALERT_N   = PK_4;
-PinName CABLE_DET = PK_3;
+extern mbed::DigitalIn ALERT_N;
+extern mbed::DigitalIn CABLE_DET;
+
+typedef uint8_t bit;
+
+#define _BIT0	(1 << 0)
+#define _BIT1	(1 << 1)
+#define _BIT2	(1 << 2)
+#define _BIT3	(1 << 3)
+#define _BIT4	(1 << 4)
+#define _BIT5	(1 << 5)
+#define _BIT6	(1 << 6)
+#define _BIT7	(1 << 7)
+
+#define SW5_1	0			// no idea what it means
+#define SW5_2	0			// no idea what it means
+#define SW5_3	0			// no idea what it means
+#define SW5_4	0			// no idea what it means
+
+#define xdata 
+#define idata 
+
+#define delay_ms 	delay
+#define mdelay	 	delay
+
+// From the other driver
+#define CMD_LINE_SIZE 44
+#define CMD_NAME_SIZE 44
+#define MAX_BYTE_COUNT_PER_RECORD_FLASH    16
+#define SERIAL_RECV_BUF_SIZE	64
+#define SERIAL_SEND_BUF_SIZE	64
 
 #define IS_ALERT()  (!ALERT_N)
 
@@ -45,12 +74,11 @@ PinName CABLE_DET = PK_3;
 #define ANX7625_RESET()          RESET_N = 1
 #define ANX7625_RESET_RELEASE()  RESET_N = 0
 
-#define ENABLE_5V_VBUS_OUT()      AP_VBUS_CTRL = 0
-#define DISABLE_5V_VBUS_OUT()     AP_VBUS_CTRL = 1
+#define ENABLE_5V_VBUS_OUT()
+#define DISABLE_5V_VBUS_OUT()
 
-#define ENABLE_5to20V_VBUS_IN()   AP_VBUS_CTRL = 1
-#define DISABLE_5to20V_VBUS_IN()  AP_VBUS_CTRL = 0
-
+#define ENABLE_5to20V_VBUS_IN()
+#define DISABLE_5to20V_VBUS_IN()
 
 /* ========================================================================== */
 // I2C addresses of Analogix's chip modules, which is chip dependent

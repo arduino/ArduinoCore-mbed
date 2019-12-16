@@ -23,7 +23,7 @@ Revision History:
 #include  <stdio.h>
 #include  "HexFile.h"
 
-char GetLineData(unsigned char *pLine, unsigned char data *pByteCount, unsigned int data *pAddress, unsigned char data *pRecordType, unsigned char *pData)
+char GetLineData(unsigned char *pLine, unsigned char *pByteCount, unsigned int *pAddress, unsigned char *pRecordType, unsigned char *pData)
 {
     char  start_code;
     unsigned char checksum;

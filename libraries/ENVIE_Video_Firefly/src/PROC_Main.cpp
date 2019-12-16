@@ -23,7 +23,7 @@ Revision History:
 #include "config.h"
 #include "debug.h"
 #include "MI2.h"
-#include "Flash.h"
+#include "Flash/Flash.h"
 #include "MI2_REG.h"
 #include "REG_DRV.h"
 #include "common/private_interface.h"

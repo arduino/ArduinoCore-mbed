@@ -24,8 +24,7 @@ Revision History:
 #include "debug.h"
 #include <string.h>
 #include "REG_DRV.h"
-#include "Flash.h"
-#include "EFM8UB2_helper.h"
+#include "Flash/Flash.h"
  #include "MI2_REG.h"
 #include  "anx7625_display.h"
 #ifdef USE_PD30
@@ -63,7 +62,6 @@ static void dump(void);
 static void poweron(void);
 static void poweroff(void);
 static void poweronsp(void); //for anx3625
-static void reset_MI2(void);
 static void vbuson(void);
 static void vbusoff(void);
 void edid_dump(void);
@@ -151,8 +149,8 @@ void MakeLower(unsigned char *p)
     }
 }
 #if TEST_IF_SEND_CMD
-#include "private_interface.h"
-#include "public_interface.h"
+#include "common/private_interface.h"
+#include "common/public_interface.h"
 #define PD_VOLTAGE_5V 5000
 #define PD_VOLTAGE_6V 6000
 #define PD_VOLTAGE_9V 9000
@@ -201,7 +199,7 @@ unsigned char update_pwr_src_caps(void)
 
 	TRACE("update_pwr_src_caps\n");
 	/* send source capability from AP to ohio. */
-	return send_pd_msg(TYPE_PWR_SRC_CAP, (const char *)new_src_cap, sizeof(new_src_cap));
+	return send_pd_msg(TYPE_PWR_SRC_CAP, (const unsigned char *)new_src_cap, sizeof(new_src_cap));
 }
 
 /*
@@ -228,7 +226,7 @@ unsigned char update_pwr_sink_caps(void){
 
 	TRACE("update_pwr_sink_caps\n");
 	/* send source capability from AP to ohio. */
-	return send_pd_msg(TYPE_PWR_SNK_CAP, (const char *)new_snk_cap, sizeof(new_snk_cap));
+	return send_pd_msg(TYPE_PWR_SNK_CAP, (const unsigned char *)new_snk_cap, sizeof(new_snk_cap));
 }
 
 unsigned char update_dp_snk_identity(void){
@@ -244,11 +242,11 @@ unsigned char update_dp_snk_identity(void){
    	memcpy(new_dp_snk_identity + 4, new_sink_cert_stat_vdo, 4);
    	memcpy(new_dp_snk_identity+ 8, new_sink_prd_vdo, 4);
    	memcpy(new_dp_snk_identity + 12, new_sink_ama_vdo, 4);
-	return send_pd_msg(TYPE_DP_SNK_IDENDTITY, new_dp_snk_identity, sizeof(new_dp_snk_identity));
+	return send_pd_msg(TYPE_DP_SNK_IDENDTITY, (const unsigned char *)new_dp_snk_identity, sizeof(new_dp_snk_identity));
 }
 unsigned char update_svid()
 {
-	unsigned char IF_RAM init_svid[PD_ONE_DATA_OBJECT_SIZE]= {0x00, 0xff, 0x01, 0xff};//{0x00, 0x00, 0x01, 0xff};
+	const unsigned char IF_RAM init_svid[PD_ONE_DATA_OBJECT_SIZE]= {0x00, 0xff, 0x01, 0xff};//{0x00, 0x00, 0x01, 0xff};
 
 
 		//send TYPE_SVID init setting
@@ -268,12 +266,12 @@ unsigned char update_VDM(void)
 
 	TRACE("update_vdm\n");
 	/* send sink capability from AP to ohio. */
-	return send_pd_msg(TYPE_VDM, (const char *)vdm, sizeof(vdm));
+	return send_pd_msg(TYPE_VDM, (const unsigned char *)vdm, sizeof(vdm));
 }
 
 unsigned char update_sop_prime()
 {
-	unsigned char IF_RAM sop_prime[] = {
+	const unsigned char IF_RAM sop_prime[] = {
 	   	0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,
 		0x09,0x10,0x11,0x12, 0x13, 0x14,0x15,0x16,
 		0x17,0x18,0x19,0x20, 0x21, 0x22,0x23,0x24,
@@ -281,12 +279,12 @@ unsigned char update_sop_prime()
 	};
 
 	TRACE("update sop prime\n");
-	return send_pd_msg(TYPE_SOP_PRIME,sop_prime, sizeof(sop_prime));
+	return send_pd_msg(TYPE_SOP_PRIME, sop_prime, sizeof(sop_prime));
 }
 
 unsigned char update_sop_double_prime()
 {
-	unsigned char IF_RAM sop_double_prime[] = {
+	const unsigned char IF_RAM sop_double_prime[] = {
 	   	0x0AA,0x02,0x03,0x04,0x05,0x06,0x07,0x08,
 		0x09,0x10,0x11,0x12, 0x13, 0x14,0x15,0x16,
 		0x17,0x18,0x19,0x20, 0x21, 0x22,0x23,0x24,
@@ -299,16 +297,16 @@ unsigned char update_sop_double_prime()
 
 unsigned char update_dp_sink_cfg()
 {
-	unsigned char IF_RAM dcap[] = { 0x06, 0x08,0x08, 0x00 };
+	const unsigned char IF_RAM dcap[] = { 0x06, 0x08,0x08, 0x00 };
 	TRACE("update_dp_sink_cfg\n");
-	return send_pd_msg(TYPE_DP_SNK_CFG, (const char *)dcap, sizeof(dcap));
+	return send_pd_msg(TYPE_DP_SNK_CFG, dcap, sizeof(dcap));
 }
 
 unsigned char update_pwr_obj_req()
 {
-	unsigned char IF_RAM rdo[] = { 0x0A,0x78,0x00,0x10 };
+	const unsigned char IF_RAM rdo[] = { 0x0A,0x78,0x00,0x10 };
 	TRACE("update_pwr_obj_req\n");
-	return send_pd_msg(TYPE_PWR_OBJ_REQ, (const char *)rdo, sizeof(rdo));
+	return send_pd_msg(TYPE_PWR_OBJ_REQ, rdo, sizeof(rdo));
 
 }
 
@@ -317,7 +315,7 @@ unsigned char send_process()
 	unsigned char type;
 	unsigned char rst = CMD_FAIL;
 
-	if(sscanf(g_CmdLineBuf, "\\%*s %bx", &type) == 1)
+	if(sscanf((const char*)g_CmdLineBuf, "\\%*s %bx", &type) == 1)
        {
 
 	TRACE1("type %2BX\n", type);
@@ -450,7 +448,7 @@ unsigned char send_process()
 			 unsigned int addr;
 			 unsigned char mem_type;
 			 unsigned char len;
-			 if(sscanf(g_CmdLineBuf, "\\%*s %*bx %bx %x %bx", &mem_type, &addr, &len) == 3)
+			 if(sscanf((const char*)g_CmdLineBuf, "\\%*s %*bx %bx %x %bx", &mem_type, &addr, &len) == 3)
 			 	{
 				 if((mem_type >= IF_VAR_fw_var_reg && mem_type <= IF_VAR_sink_identity)) // REG_FW_VAR...
 				 {
@@ -466,10 +464,10 @@ unsigned char send_process()
 			 unsigned char len;
 			 unsigned char buf[4];
 
-			 len = sscanf(g_CmdLineBuf, "\\%*s %*bx %bx %x", &mem_type, &addr);
+			 len = sscanf((const char*)g_CmdLineBuf, "\\%*s %*bx %bx %x", &mem_type, &addr);
 			 if(len < 2)
 			 	break;
-			 len = sscanf(g_CmdLineBuf, "\\%*s %*bx %*bx %*x %bx %bx %bx %bx", &buf[0], &buf[1], &buf[2], &buf[3]);
+			 len = sscanf((const char*)g_CmdLineBuf, "\\%*s %*bx %*bx %*x %bx %bx %bx %bx", &buf[0], &buf[1], &buf[2], &buf[3]);
 			 TRACE1("len = %bd\n",len);
 			 if(len)
 				{
@@ -527,27 +525,27 @@ void CmdHandler(void)
     }
     else
     {
-        if (sscanf(g_CmdLineBuf, "\\%15s", CommandName) == 1)
+        if (sscanf((const char*)g_CmdLineBuf, "\\%15s", CommandName) == 1)
         {
             MakeLower(CommandName);
-            if (strcmp(CommandName, "rd") == 0)
+            if (strcmp((const char*)CommandName, "rd") == 0)
             {
                 rd();
             }
-            else if (strcmp(CommandName, "wr") == 0)
+            else if (strcmp((const char*)CommandName, "wr") == 0)
             {
                 wr();
             }
-            else if (strcmp(CommandName, "dpcdw") == 0)
+            else if (strcmp((const char*)CommandName, "dpcdw") == 0)
             {
-                if (sscanf(g_CmdLineBuf,"\\%*s %bx %bx %bx %bx", &addrh, &addrm, &addrl, &c)==4)
+                if (sscanf((const char*)g_CmdLineBuf,"\\%*s %bx %bx %bx %bx", &addrh, &addrm, &addrl, &c)==4)
                 {
                     sp_tx_aux_dpcdwrite_bytes(addrh, addrm, addrl, 1, &c);
                 }
             }
-            else if (strcmp(CommandName, "dpcdr") == 0)
+            else if (strcmp((const char*)CommandName, "dpcdr") == 0)
             {
-                if (sscanf(g_CmdLineBuf,"\\%*s %bx %bx %bx %bx", &addrh, &addrm, &addrl, &c)==4)
+                if (sscanf((const char*)g_CmdLineBuf,"\\%*s %bx %bx %bx %bx", &addrh, &addrm, &addrl, &c)==4)
                 {
                 	unsigned char xdata buff[16];
                     if (c >16)
@@ -555,73 +553,73 @@ void CmdHandler(void)
                     sp_tx_aux_dpcdread_bytes(addrh, addrm, addrl, c, buff);
                 }
             }
-			else if (strcmp(CommandName, "errchk") == 0)
+			else if (strcmp((const char*)CommandName, "errchk") == 0)
             {
                 errchk();
             }
-			else if (strcmp(CommandName, "show") == 0)
+			else if (strcmp((const char*)CommandName, "show") == 0)
             {
                 sp_tx_show_infomation();
             }
-            else if (strcmp(CommandName, "dump") == 0)
+            else if (strcmp((const char*)CommandName, "dump") == 0)
             {
                 dump();
             }
-            else if (strcmp(CommandName, "poweron") == 0)
+            else if (strcmp((const char*)CommandName, "poweron") == 0)
             {
                 poweron();
             }
-            else if (strcmp(CommandName, "poweroff") == 0)
+            else if (strcmp((const char*)CommandName, "poweroff") == 0)
             {
                 poweroff();
             }
 	#ifdef ANX3625_Support
-		else if (strcmp(CommandName, "sp") == 0)
+		else if (strcmp((const char*)CommandName, "sp") == 0)
             {
                 poweronsp();
             }
 	#endif
-           else if (strcmp(CommandName, "reset") == 0)
+           else if (strcmp((const char*)CommandName, "reset") == 0)
             {
                 reset_MI2();
             } 
-            else if (strcmp(CommandName, "vbuson") == 0)
+            else if (strcmp((const char*)CommandName, "vbuson") == 0)
             {
                 vbuson();
             }
-            else if (strcmp(CommandName, "vbusoff") == 0)
+            else if (strcmp((const char*)CommandName, "vbusoff") == 0)
             {
                 vbusoff();
             } 
-            else if (strcmp(CommandName, "debugon") == 0)
+            else if (strcmp((const char*)CommandName, "debugon") == 0)
             {
                 g_bDebug = 1;
                 TRACE("debug ON mode\n");
             }
-            else if (strcmp(CommandName, "debugoff") == 0)
+            else if (strcmp((const char*)CommandName, "debugoff") == 0)
             { 
                 g_bDebug = 0;
                 TRACE("debug OFF mode\n");
             }
-            else if (strcmp(CommandName, "fl_se") == 0)
+            else if (strcmp((const char*)CommandName, "fl_se") == 0)
             {
                 command_flash_SE();
             }
-            else if (strcmp(CommandName, "fl_ce") == 0)
+            else if (strcmp((const char*)CommandName, "fl_ce") == 0)
             {
                 command_flash_CE();
             }
-            else if (strcmp(CommandName, "erase") == 0)
+            else if (strcmp((const char*)CommandName, "erase") == 0)
             {
                 poweron();
                 command_erase_FW(MAIN_OCM);
             }
-            else if (strcmp(CommandName, "burnhex") == 0)
+            else if (strcmp((const char*)CommandName, "burnhex") == 0)
             {
                 poweron();
                 burn_hex_prepare();
             }
-            else if (strcmp(CommandName, "readhex") == 0)
+            else if (strcmp((const char*)CommandName, "readhex") == 0)
             {
                 poweron();
                 command_flash_read();
@@ -699,19 +697,19 @@ void CmdHandler(void)
                 }
             }
 	#endif
-	  else if (strcmp(CommandName, "sleep") == 0)
+	  else if (strcmp((const char*)CommandName, "sleep") == 0)
             {
                  sp_write_reg_or(RX_P0, AP_AV_STATUS, AP_DISABLE_DISPLAY);  //disable
             }
-	    else if (strcmp(CommandName, "wake") == 0)
+	    else if (strcmp((const char*)CommandName, "wake") == 0)
             {
                  sp_write_reg_and(RX_P0, AP_AV_STATUS, ~AP_DISABLE_DISPLAY);  //clear 
             }
-            else if (strcmp(CommandName, "audio") == 0)
+            else if (strcmp((const char*)CommandName, "audio") == 0)
             {
                 unsigned char xdata table_id;
 
-                if (sscanf(g_CmdLineBuf, "\\%*s %bx", &table_id) == 1)
+                if (sscanf((const char*)g_CmdLineBuf, "\\%*s %bx", &table_id) == 1)
                 {
                     TRACE1("Audio input configure table id %d\n", (uint)table_id);
 			audio_table_id = table_id;
@@ -723,11 +721,11 @@ void CmdHandler(void)
                     TRACE("audio <table_id>\n\n");
                 }
             }
-	  else if (strcmp(CommandName, "mute") == 0)
+	  else if (strcmp((const char*)CommandName, "mute") == 0)
             {
             	 unsigned char xdata status;
 
-            	if (sscanf(g_CmdLineBuf, "\\%*s %bx", &status) == 1)
+            	if (sscanf((const char*)g_CmdLineBuf, "\\%*s %bx", &status) == 1)
                 {
                     TRACE1("mute status %d\n", (uint)status);
                     API_Video_Mute_Control(status);
@@ -737,10 +735,10 @@ void CmdHandler(void)
                     TRACE("Bad parameter! Usage:\n");
                 }
             }
-	   else if (strcmp(CommandName, "vc") == 0)
+	   else if (strcmp((const char*)CommandName, "vc") == 0)
             {
               TRACE("video changed\n");
-		 if (sscanf(g_CmdLineBuf, "\\%*s %bx %bx", &mipi_output_mode, &video_table_id) == 2)
+		 if (sscanf((const char*)g_CmdLineBuf, "\\%*s %bx %bx", &mipi_output_mode, &video_table_id) == 2)
                 {
                     TRACE2("video mode =  %d, video table id =  %d\n", (uint)mipi_output_mode, (uint)video_table_id);
 			 //clear mipi RX en
@@ -757,7 +755,7 @@ void CmdHandler(void)
                     TRACE("Bad parameter! Usage:\n");
                 }
             }
-	    else if (strcmp(CommandName, "dumpedid") == 0)
+	    else if (strcmp((const char*)CommandName, "dumpedid") == 0)
             {
                  edid_dump();
             }
@@ -827,11 +825,11 @@ void CmdHandler(void)
 				TRACE("Fuse data write done\n");
 			}
 		}*/
-		 else if(strcmp(CommandName, "usepd2") == 0)
+		 else if(strcmp((const char*)CommandName, "usepd2") == 0)
 		{
 			unsigned char xdata flag;
 			flag = force_pd_rev20;
-			sscanf(g_CmdLineBuf, "\\%*s %bx", &flag);
+			sscanf((const char*)g_CmdLineBuf, "\\%*s %bx", &flag);
 			force_pd_rev20 = flag;
 			if(force_pd_rev20)
 				TRACE(" USE PD2.0 when next time chip power on.\n");
@@ -839,24 +837,24 @@ void CmdHandler(void)
 				TRACE(" USE default PD version.\n");
 		}
 #if TEST_IF_SEND_CMD
-		 else if(strcmp(CommandName, "send") == 0)
+		 else if(strcmp((const char*)CommandName, "send") == 0)
 		{
 			TRACE1(" send result : %2BX \n", send_process());
 		}
-	    else if (strcmp(CommandName, "iftest") == 0)
+	    else if (strcmp((const char*)CommandName, "iftest") == 0)
             {
 			unsigned char interface_send_msg_test(void);
 	        interface_send_msg_test();
 			TRACE("interface_send_msg_test()\n");
             }
 #ifdef USE_PD30
-		else if(strcmp(CommandName, "pd3test") == 0)
+		else if(strcmp((const char*)CommandName, "pd3test") == 0)
 		{
 			unsigned char xdata flag;
 			unsigned char xdata type;
 			char xdata res;
 
-			res = sscanf(g_CmdLineBuf, "\\%*s %bx %bx", &flag, &type);
+			res = sscanf((const char*)g_CmdLineBuf, "\\%*s %bx %bx", &flag, &type);
 
 			if(res <= 0)
 				flag = 0xFF;
@@ -905,7 +903,7 @@ void CmdHandler(void)
 		#if USE_PDFU
 				extern unsigned int PDFU_RAM FwImageSizeMax;
 				unsigned int size;
-				sscanf(g_CmdLineBuf, "\\%*s %*bx %d", &size);
+				sscanf((const char*)g_CmdLineBuf, "\\%*s %*bx %d", &size);
 				if(size)
 				{
 					FwImageSizeMax = size;
@@ -1000,7 +998,7 @@ static void rd(void)
     unsigned char RegData;
     char RetVal;
 
-    if (sscanf(g_CmdLineBuf, "\\%*s %bx %bx", &DevAddr, &RegAddr) == 2)
+    if (sscanf((const char*)g_CmdLineBuf, "\\%*s %bx %bx", &DevAddr, &RegAddr) == 2)
     {
         RetVal = ReadReg(DevAddr, RegAddr, &RegData);
         if (RetVal == 0)
@@ -1029,7 +1027,7 @@ static void wr(void)
     unsigned char RegData;
     char RetVal;
 
-    if (sscanf(g_CmdLineBuf, "\\%*s %bx %bx %bx", &DevAddr, &RegAddr, &RegData) == 3)
+    if (sscanf((const char*)g_CmdLineBuf, "\\%*s %bx %bx %bx", &DevAddr, &RegAddr, &RegData) == 3)
     {
         RetVal = WriteReg(DevAddr, RegAddr, RegData);
         if (RetVal == 0)
@@ -1065,7 +1063,7 @@ static void dump(void)
     unsigned char buf[16];
     char RetVal;
 
-    if (sscanf(g_CmdLineBuf, "\\%*s %bx", &DevAddr) == 1)
+    if (sscanf((const char*)g_CmdLineBuf, "\\%*s %bx", &DevAddr) == 1)
     {
         TRACE("     0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F\n");
         i = 0;

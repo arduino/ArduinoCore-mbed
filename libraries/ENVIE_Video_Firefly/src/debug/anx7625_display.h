@@ -136,9 +136,9 @@ struct RegisterValueConfig {
 	unsigned char val;
 };
 
-extern  code struct MIPI_Video_Format mipi_video_timing_table[];
-extern code struct AudioFormat audio_format_table[];
-extern code unsigned char PPS_4K[];
+extern const struct MIPI_Video_Format mipi_video_timing_table[];
+extern const struct AudioFormat audio_format_table[];
+extern const unsigned char PPS_4K[];
 
 void sp_tx_show_infomation(void);
 void sp_tx_pclk_calc(SP_LINK_BW hbr_rbr, unsigned long  *pclk, unsigned long  *M_val, unsigned long  *N_val);

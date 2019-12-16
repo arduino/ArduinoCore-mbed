@@ -28,6 +28,7 @@ extern const unsigned char xdata * const g_pSerialSendTail;
 extern const bit g_bSerialBusy;
 extern const bit g_bPutcharEnable;
 
+#if 0
 void putc(char c)
 {
     unsigned char xdata *pNext; /**< point to the next free space */
@@ -66,3 +67,4 @@ char putchar(char c)
     return c;
 }
 
+#endif

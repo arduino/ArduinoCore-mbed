@@ -26,7 +26,6 @@ Revision History:
 #include  "REG_DRV.h"
 #include  "debug.h"
 #include  "anx7625_display.h"
-#include "EFM8UB2_helper.h"
 #include  "CmdHandler.h"
 
 typedef unsigned char unchar;

@@ -26,8 +26,8 @@ Revision History:
 ////////////////////////////////////////////////////////////////////////////////
 // register operations
 // read operations
-char ReadReg(unsigned char DevAddr, unsigned char RegAddr, unsigned char data *pData);
-char ReadWordReg(unsigned char DevAddr, unsigned char RegAddr, unsigned int data *pData);
+char ReadReg(unsigned char DevAddr, unsigned char RegAddr, unsigned char *pData);
+char ReadWordReg(unsigned char DevAddr, unsigned char RegAddr, unsigned int *pData);
 char ReadBlockReg(unsigned char DevAddr, unsigned char RegAddr, unsigned char n, unsigned char *pBuf);
 // write operations
 char WriteReg(unsigned char DevAddr, unsigned char RegAddr, unsigned char RegVal);

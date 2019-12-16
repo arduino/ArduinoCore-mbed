@@ -7,11 +7,10 @@
 #include  "config.h"
 #include  "MI2_REG.h"
 #include  "REG_DRV.h"
-#include  "HexFile.h"
+#include  "EEPROM/HexFile.h"
 #include  "Flash.h"
 #include  "debug.h"
-#include  "EFM8UB2_helper.h"
-#include  "CmdHandler.h"
+#include  "debug/CmdHandler.h"
 
 /* for early tests before MI-2 chip is back */
 //#define  DRY_RUN
@@ -223,7 +222,7 @@ void command_flash_SE(void)
 {
     unsigned int Flash_Addr;  /* Flash address, any address inside the sector is a valid address for the Sector Erase (SE) command*/
 
-    if(sscanf(g_CmdLineBuf, "\\%*s %x", &Flash_Addr) == 1)
+    if(sscanf((const char*)g_CmdLineBuf, "\\%*s %x", &Flash_Addr) == 1)
     {
         flash_write_protection_disable();
         flash_sector_erase(Flash_Addr);
@@ -512,7 +511,7 @@ void command_flash_read(void)
     unsigned char  RegBak1, RegBak2;  // register values back up
     unsigned char  RegVal;  // register value
 
-    if (sscanf(g_CmdLineBuf, "\\%*s %x %lx", &Address, &size_to_be_read) == 2)
+    if (sscanf((const char*)g_CmdLineBuf, "\\%*s %x %lx", &Address, &size_to_be_read) == 2)
     {
         if (Address%MAX_BYTE_COUNT_PER_RECORD_FLASH != 0)
         {

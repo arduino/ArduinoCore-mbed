@@ -26,8 +26,14 @@ Revision History:
 #define  HEX_RECORD_TYPE_DATA   0
 #define  HEX_RECORD_TYPE_EOF    1
 
-char GetLineData(unsigned char *pLine, unsigned char data *pByteCount, unsigned int data *pAddress, unsigned char data *pRecordType, unsigned char *pData);
+#ifdef __cplusplus
+extern "C" {
+#endif
+char GetLineData(unsigned char *pLine, unsigned char *pByteCount, unsigned int *pAddress, unsigned char *pRecordType, unsigned char *pData);
 void SetLineData(unsigned char *pLine, unsigned char ByteCount, unsigned int Address, unsigned char RecordType, unsigned char *pData);
+#ifdef __cplusplus
+}
+#endif
 
 #endif  /* __HEXFILE_H__ */
 

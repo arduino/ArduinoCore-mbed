@@ -20,12 +20,12 @@ Revision History:
 
 ******************************************************************************/
 
+#include "config.h"
 #include "private_interface.h"
 #include "public_interface.h"
 #ifdef USE_PD30
 #include "pd_ext_message.h"
 #endif
-#include <STRING.H>
 #include "debug.h"
 
 //extern bit need_notice_pd_cmd;
@@ -74,7 +74,7 @@ extern unsigned char xdata auto_pd_support_flag;
  *           		
  * @return:  0: success Error value 1: reject 2: fail, 3, busy
  */ 
-unsigned char send_pd_msg(PD_MSG_TYPE type, const char *buf, unsigned char size)
+unsigned char send_pd_msg(PD_MSG_TYPE type, const unsigned char *buf, unsigned char size)
 {
 	//unsigned char rst = 0;
 	
@@ -87,11 +87,11 @@ unsigned char send_pd_msg(PD_MSG_TYPE type, const char *buf, unsigned char size)
 			break;
 
 		case TYPE_PWR_SNK_CAP:
-			return send_snk_cap(buf, size);//send 1
+			return send_snk_cap((unsigned char*)buf, size);//send 1
 			
 			break;
 		case TYPE_DP_SNK_IDENDTITY:
-			return  send_dp_snk_identity(buf, size);//send 2
+			return  send_dp_snk_identity((unsigned char*)buf, size);//send 2
 			break;
 		case TYPE_SVID:
 			return send_svid(buf, size); 
@@ -135,7 +135,7 @@ unsigned char send_pd_msg(PD_MSG_TYPE type, const char *buf, unsigned char size)
 				return CMD_FAIL;
 			break;
 		case TYPE_VDM://send 14
-			return send_vdm(buf, size);
+			return send_vdm((const unsigned char *)buf, size);
 			break;
 		case TYPE_SOP_PRIME://send 1c
 			return send_sop_prime(buf, size);
@@ -379,7 +379,7 @@ unsigned char dispatch_rcvd_pd_msg(PD_MSG_TYPE type, void *para, unsigned char p
 	        break;
 #if 1 // debug
 		case TYPE_GET_VAR://0xfc
-			return recv_debug_callback(type, para, para_len);	  
+			return recv_debug_callback(type, (unsigned char *)para, para_len);	  
 			break;
 #endif
 		default:

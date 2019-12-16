@@ -30,6 +30,12 @@ Revision History:
 #define FW_MAJOR_VERSION 1 
 #define FW_MINOR_VERSION 1
 
+mbed::DigitalOut RESET_N(PJ_3);
+mbed::DigitalOut POWER_EN(PK_2);
+
+mbed::DigitalIn ALERT_N(PK_4);
+mbed::DigitalIn CABLE_DET(PK_3);
+
 unsigned char is_Cable_Detected(void);
 void ANX7625_DRP_Enable(void);
 void PROC_Main(void);

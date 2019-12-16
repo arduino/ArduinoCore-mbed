@@ -22,14 +22,13 @@ Revision History:
 
 #include "config.h"
 #include "debug.h"
-#include "EFM8UB2_helper.h"
 #include "MI2.h"
-#include  "Flash.h"
+#include "Flash/Flash.h"
 #include "MI2_REG.h"
-#include " REG_DRV.h"
+#include "REG_DRV.h"
 #include <string.h>
-#include "private_interface.h"
-#include "public_interface.h"
+#include "common/private_interface.h"
+#include "common/public_interface.h"
 
 extern unsigned char xdata auto_pd_support_flag;
 extern void AP_TX_process(void);
@@ -137,7 +136,7 @@ void interface_recvd_msg_handler(void)
 {
 	if(recv_msg_success)
 	{
-		dispatch_rcvd_pd_msg(InterfaceRecvBuf[1], &InterfaceRecvBuf[2], InterfaceRecvBuf[0]-1);
+		dispatch_rcvd_pd_msg((PD_MSG_TYPE)InterfaceRecvBuf[1], &InterfaceRecvBuf[2], InterfaceRecvBuf[0]-1);
 		recv_msg_success = 0;
 	}
 }

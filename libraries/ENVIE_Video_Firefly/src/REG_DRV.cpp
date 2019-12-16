@@ -24,7 +24,7 @@ Revision History:
 
 void patch_for_read_reg(unsigned char DevAddr);
 
-char ReadReg(unsigned char DevAddr, unsigned char RegAddr, unsigned char data *pData)
+char ReadReg(unsigned char DevAddr, unsigned char RegAddr, unsigned char *pData)
 {
     patch_for_read_reg(DevAddr);
 
@@ -42,7 +42,7 @@ char ReadReg(unsigned char DevAddr, unsigned char RegAddr, unsigned char data *p
     }
 }
 
-char ReadWordReg(unsigned char DevAddr, unsigned char RegAddr, unsigned int data *pData)
+char ReadWordReg(unsigned char DevAddr, unsigned char RegAddr, unsigned int *pData)
 {
     patch_for_read_reg(DevAddr);
 
@@ -51,9 +51,11 @@ char ReadWordReg(unsigned char DevAddr, unsigned char RegAddr, unsigned int data
     Wire.endTransmission();
     Wire.requestFrom(DevAddr, 2);
 
+    uint8_t* data = (uint8_t*)pData;
+
     if(Wire.available() >= 2) {
-        DBYTE1(*pData) = Wire.read();
-        DBYTE0(*pData) = Wire.read();
+        data[0] = Wire.read();
+        data[1] = Wire.read();
         return 0;
     } else {
         *pData = -1;
@@ -92,8 +94,8 @@ char WriteWordReg(unsigned char DevAddr, unsigned char RegAddr, unsigned int Reg
 {
     Wire.beginTransmission(DevAddr);
     Wire.write(RegAddr);
-    Wire.write(LOBYTE(RegVal));
-    Wire.write(HIBYTE(RegVal));
+    Wire.write(RegVal & 0xFF);
+    Wire.write((RegVal >> 8) & 0xFF);
     Wire.endTransmission();
     return 0;
 }

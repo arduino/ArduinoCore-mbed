@@ -207,7 +207,7 @@ PDO_TYPE_BATTERY)
 			RDO_BATT_MAX_POWER(max_mw))
 
 
-unsigned char send_pd_msg( PD_MSG_TYPE type, const char *buf, unsigned char size);
+unsigned char send_pd_msg( PD_MSG_TYPE type, const unsigned char *buf, unsigned char size);
 
 unsigned char dispatch_rcvd_pd_msg(PD_MSG_TYPE type, void *para, unsigned char para_len);
 

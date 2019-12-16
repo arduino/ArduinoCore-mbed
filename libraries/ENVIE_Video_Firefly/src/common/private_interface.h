@@ -134,8 +134,8 @@ unsigned char recv_ext_msg_callback(unsigned char type, unsigned char *para, uns
 unsigned char recv_debug_callback(unsigned char type, unsigned char *para, unsigned char para_len);
 #endif
 
-char *interface_to_str(unsigned char header_type);
-char *result_to_str(unsigned result_type);
+const char *interface_to_str(unsigned char header_type);
+const char *result_to_str(unsigned result_type);
 void interface_init(void);
 void interface_recvd_msg(void);
 unsigned char send_msg_process(void);
