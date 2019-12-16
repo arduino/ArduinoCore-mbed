@@ -23,8 +23,8 @@ Revision History:
 #ifndef __SI_TOOLCHAIN_H__
 #define __SI_TOOLCHAIN_H__
 
-#include "stdint.h"
-#include "stdbool.h"
+#include <stdint.h>
+#include <stdbool.h>
 
 /**************************************************************************//**
  *
