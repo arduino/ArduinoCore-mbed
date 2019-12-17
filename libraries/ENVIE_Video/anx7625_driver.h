@@ -36,7 +36,7 @@
 // #define DYNAMIC_CONFIG_MIPI
 
 /*Disable Power Delivery Function.*/
-#define DISABLE_PD
+// #define DISABLE_PD
 
 
 /*Loading OCM re-trying times*/

@@ -77,6 +77,7 @@ void flash_wait_until_flash_SM_done(void)
 
 	do {
 		ReadReg(RX_P0, R_RAM_CTRL, &tmp);
+		printf("tmp: %x\n", tmp);
 	} while (((tmp >> FLASH_DONE) & 1) == 0);
 }
 

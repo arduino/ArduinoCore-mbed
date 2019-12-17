@@ -469,7 +469,7 @@ void anx7625_main_process(void)
 		burnhexauto();
 #endif
 
-#ifndef DISABLE_PD
+#if 0 // #ifndef DISABLE_PD
 		MI2_power_on();
 		ANX7625_DRP_Enable();
 		usleep_range(1000, 1100);

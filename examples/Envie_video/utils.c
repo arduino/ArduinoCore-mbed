@@ -1,5 +1,5 @@
 //#include "bsp/stm32h7xx_hal.h"
-#include "bsp/stm32h747i_eval_lcd.h"
+#include "stm32h747i_eval_lcd.h"
 #include "defs.h"
 
 static DMA2D_HandleTypeDef           hdma2d;

@@ -74,7 +74,7 @@ int i2c_smbus_read_i2c_block_data(struct i2c_client * client, uint8_t reg_addr, 
     char cmd[len];
     cmd[0] = reg_addr;
     i2c.write(client->addr << 1, cmd, 1);
-    return i2c.read(client->addr << 1, cmd, len);
+    return i2c.read(client->addr << 1, (char*)buf, len);
 
     Wire.beginTransmission(client->addr);
     Wire.write(reg_addr);
