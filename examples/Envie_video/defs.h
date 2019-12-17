@@ -9,6 +9,7 @@ void CopyBuffer(uint32_t *pSrc,
                            uint16_t xsize, 
                            uint16_t ysize);
 void LCD_BriefDisplay(void);
+void MPU_Config_Video();
 #ifdef __cplusplus
 }
 #endif

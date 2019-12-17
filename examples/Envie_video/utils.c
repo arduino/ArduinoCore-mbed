@@ -64,7 +64,7 @@ void CopyBuffer(uint32_t *pSrc, uint32_t *pDst, uint16_t x, uint16_t y, uint16_t
   }
 }
 
-static void MPU_Config(void)
+void MPU_Config_Video(void)
 {
   MPU_Region_InitTypeDef MPU_InitStruct;
 

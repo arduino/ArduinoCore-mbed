@@ -17,40 +17,33 @@ void setup() {
   Serial.begin(115200);
   printf("starting\n");
 
+  MPU_Config_Video();
+
   /* Initialize the LCD   */
   if (BSP_LCD_Init() != LCD_OK)
   {
     Error_Handler();
   }
 
-  printf("after BSP_LCD_Init\n");
-
   BSP_LCD_LayerDefaultInit(0, LAYER0_ADDRESS);
   BSP_LCD_SelectLayer(0);
-
-  printf("before LCD_BriefDisplay\n");
 
   /* Display example brief   */
   // LCD_BriefDisplay();
 
-  printf("after LCD_BriefDisplay\n");
-
   anx7625_i2c_probe(&anx7625);
 
-  delay(1000);
-
+/*
   anx7625_debug("dumpall");
-  anx7625_debug("dpi 0");
-  anx7625_debug("dsi 0");
+  anx7625_debug("dpi 7");
+  anx7625_debug("dsi 7");
   anx7625_start_dp();
   anx7625_debug("edid");
-
+*/
 
   /* Infinite loop */
   while (1)
   {
-    //anx7625_main();
-    printf("CopyBuffer\n");
     CopyBuffer((uint32_t *)Images[ImageIndex ++], (uint32_t *)LAYER0_ADDRESS, (BSP_LCD_GetXSize() - 320) / 2, 160, 320, 240);
 
     if (ImageIndex >= 1)
@@ -58,7 +51,6 @@ void setup() {
       ImageIndex = 0;
     }
 
-    printf("LOOPING\n");
     /* Wait some time before switching to next stage */
     HAL_Delay(2000);
   }
