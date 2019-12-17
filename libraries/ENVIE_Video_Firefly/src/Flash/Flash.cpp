@@ -50,6 +50,11 @@ void flash_wait_until_flash_SM_done(void)
 void flash_basic_config(void)
 {
     WriteReg(RX_P0, XTAL_FRQ_SEL, (XTAL_FRQ == 27000000UL) ? XTAL_FRQ_27M : ((XTAL_FRQ == 26000000UL) ? XTAL_FRQ_26M : XTAL_FRQ_19M2));
+    unsigned char  tmp;
+    ReadReg(RX_P0, XTAL_FRQ_SEL, &tmp);
+    printf("XTAL_FRQ_SEL: %x %x\n", XTAL_FRQ_SEL, tmp);
+    return;
+
     flash_wait_until_flash_SM_done();
     flash_write_disable();
 #ifndef  DRY_RUN

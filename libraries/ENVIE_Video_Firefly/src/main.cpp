@@ -27,6 +27,8 @@ Revision History:
 #include "MI2.h"
 #include "Wire.h"
 #include "ENVIE_Video_Firefly.h"
+#include "MI2_REG.h"
+#include "REG_DRV.h"
 
 #define FW_MAJOR_VERSION 1 
 #define FW_MINOR_VERSION 1
@@ -46,6 +48,9 @@ bit g_bDebug;
 
 char WriteReg(unsigned char DevAddr, unsigned char RegAddr, unsigned char RegVal);
 
+#define PRODUCT_ID_L 0x02
+#define PRODUCT_ID_H 0x03
+
 void anx7625_setup(void)
 {
     // The default state of POWER_EN should be Low at system startup.
@@ -57,7 +62,22 @@ void anx7625_setup(void)
     TRACE2("\nMI-2 EVB FW v%d.%d\n", (unsigned char)FW_MAJOR_VERSION, (unsigned char)FW_MINOR_VERSION);
     TRACE2("Build at: %s, %s\n\n", __DATE__, __TIME__);
 
-    Wire.begin();
+    uint8_t c1, c2;
+    ReadReg(TCPC_INTERFACE, PRODUCT_ID_L, &c1);
+    ReadReg(TCPC_INTERFACE, PRODUCT_ID_H, &c2);
+    if ((c1 == 0x25) && (c2 == 0x76)) {
+        TRACE("ANX7625 is detected!\n");
+    }
+
+#define OCM_FW_VERSION 0x31
+#define OCM_FW_REVERSION 0x32
+
+    
+    
+    ReadReg(RX_P0, OCM_FW_VERSION, &c1);
+    ReadReg(RX_P0, OCM_FW_REVERSION, &c2);
+    TRACE2("Firmware version %02x%02x\n", c1, c2);
+
 
   delay_ms(500);
 
@@ -73,7 +93,7 @@ void anx7625_setup(void)
     // TODO: configures the PD role if ANX7625 needs to support DRP or DFP mode
     ANX7625_DRP_Enable();
     TRACE("ANX7625 powers on and DRP enable .\n");
-    
+
 
 		WriteReg(0x58, 0xA1, 0xA0);
 		WriteReg(0x58, 0xA1, 0xE0);
@@ -84,6 +104,7 @@ void anx7625_setup(void)
 		delay_ms(10);
 		
 	}
+
 #else
     ANX7625_POWER_ON();
     delay_ms(10);

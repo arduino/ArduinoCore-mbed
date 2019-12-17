@@ -31,6 +31,8 @@ extern mbed::DigitalOut POWER_EN;
 extern mbed::DigitalIn ALERT_N;
 extern mbed::DigitalIn CABLE_DET;
 
+#define DEBUG
+
 typedef uint8_t bit;
 
 #define _BIT0	(1 << 0)

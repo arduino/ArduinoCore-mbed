@@ -40,8 +40,8 @@ extern unsigned char xdata g_CmdLineBuf[CMD_LINE_SIZE];
 
 extern unsigned char xdata force_pd_rev20;
 
-bit g_bBurnHex;
-bit g_bFlashWrite;
+bit g_bBurnHex = 0;
+bit g_bFlashWrite = 0;
 
 tagFlashRWinfo g_FlashRWinfo;
 

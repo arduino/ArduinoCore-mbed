@@ -24,100 +24,79 @@ Revision History:
 
 void patch_for_read_reg(unsigned char DevAddr);
 
-char ReadReg(unsigned char DevAddr, unsigned char RegAddr, unsigned char *pData)
-{
-    patch_for_read_reg(DevAddr);
+mbed::I2C i2c(I2C_SDA , I2C_SCL); 
 
-    Wire.beginTransmission(DevAddr);
-    Wire.write(RegAddr);
-    Wire.endTransmission();
-    Wire.requestFrom(DevAddr, 1);
+char WriteReg(unsigned char DevAddr, unsigned char RegAddr, unsigned char RegVal) {
 
-    if(Wire.available()) {
-        *pData = Wire.read();
-        return 0;
-    } else {
-        *pData = -1;
-        return -1;
-    }
+    char cmd[2];
+    cmd[0] = RegAddr;
+    cmd[1] = RegVal;
+    return i2c.write(DevAddr, cmd, 2);
 }
 
-char ReadWordReg(unsigned char DevAddr, unsigned char RegAddr, unsigned int *pData)
-{
-    patch_for_read_reg(DevAddr);
+char WriteBlockReg(unsigned char DevAddr, unsigned char RegAddr, unsigned char n, unsigned char *pBuf) {
 
-    Wire.beginTransmission(DevAddr);
-    Wire.write(RegAddr);
-    Wire.endTransmission();
-    Wire.requestFrom(DevAddr, 2);
-
-    uint8_t* data = (uint8_t*)pData;
-
-    if(Wire.available() >= 2) {
-        data[0] = Wire.read();
-        data[1] = Wire.read();
-        return 0;
-    } else {
-        *pData = -1;
-        return -1;
-    }
+    char cmd[n +1];
+    cmd[0] = RegAddr;
+    memcpy(&cmd[1], pBuf, n);
+    return i2c.write(DevAddr, cmd, n + 1);
 }
 
-char ReadBlockReg(unsigned char DevAddr, unsigned char RegAddr, unsigned char n, unsigned char *pBuf)
-{
-    patch_for_read_reg(DevAddr);
-    
-    Wire.beginTransmission(DevAddr);
-    Wire.write(RegAddr);
-    Wire.endTransmission();
-    Wire.requestFrom(DevAddr, n);
+char ReadBlockReg(unsigned char DevAddr, unsigned char RegAddr, unsigned char n, unsigned char *pBuf) {
 
-    if(Wire.available() >= n) {
-        for(unsigned char i = 0; i < n; i++) {
-            pBuf[n] = Wire.read();
-        }
-        return 0;
-    }
-    return -1;
+    patch_for_read_reg(DevAddr);
+
+    i2c.write(DevAddr, (char*)&RegAddr, 1);
+    return i2c.read(DevAddr, (char*)pBuf, n);
 }
 
-char WriteReg(unsigned char DevAddr, unsigned char RegAddr, unsigned char RegVal)
-{
-    Wire.beginTransmission(DevAddr);
-    Wire.write(RegAddr);
-    Wire.write(RegVal);
-    Wire.endTransmission();
+char ReadReg(unsigned char DevAddr, unsigned char RegAddr, unsigned char *pData) {
+
+    patch_for_read_reg(DevAddr);
+
+    *pData = 0xFF;
+
+    i2c.write(DevAddr, (char*)&RegAddr, 1);
+    i2c.read(DevAddr, (char*)pData, 1);
     return 0;
 }
 
-char WriteWordReg(unsigned char DevAddr, unsigned char RegAddr, unsigned int RegVal)
-{
-    Wire.beginTransmission(DevAddr);
-    Wire.write(RegAddr);
-    Wire.write(RegVal & 0xFF);
-    Wire.write((RegVal >> 8) & 0xFF);
-    Wire.endTransmission();
-    return 0;
-}
-
-char WriteBlockReg(unsigned char DevAddr, unsigned char RegAddr, unsigned char n, unsigned char *pBuf)
-{
-    Wire.beginTransmission(DevAddr);
-    Wire.write(RegAddr);
-    for(unsigned char i = 0; i < n; i++) {
-        Wire.write(pBuf[i]);
-    }
-    Wire.endTransmission();
-    return 0;
-}
+static unsigned char  last_read_DevAddr = 0xff;
 
 void patch_for_read_reg(unsigned char DevAddr)
 {
-	if(DevAddr == 0x70) WriteReg(0x70, 0xd1, 0x00);
-	else if(DevAddr == 0x72)	WriteReg(0x72, 0x00, 0x00);
-	else if(DevAddr == 0x7a)	WriteReg(0x7a, 0x60, 0x00);
-	else if(DevAddr == 0x7e)	WriteReg(0x7E, 0x39, 0x00);
-	else if(DevAddr == 0x54)	WriteReg(0x54, 0x00, 0x00);
-	else if(DevAddr == 0x58)	WriteReg(0x58, 0x00, 0x00);
-	else if(DevAddr == 0x84)	WriteReg(0x84, 0x7f, 0x00);
+    unsigned char RegAddr;
+    int ret = 0;
+
+    if (DevAddr != last_read_DevAddr) {
+        switch (DevAddr) {
+        case  0x54:
+        case  0x72:
+        default:
+            RegAddr = 0x00;
+            break;
+
+        case  0x58:
+            RegAddr = 0x00;
+            break;
+
+        case  0x70:
+            RegAddr = 0xD1;
+            break;
+
+        case  0x7A:
+            RegAddr = 0x60;
+            break;
+
+        case  0x7E:
+            RegAddr = 0x39;
+            break;
+
+        case  0x84:
+            RegAddr = 0x7F;
+            break;
+        }
+    }
+    WriteReg(DevAddr, RegAddr, 0x00);
+    last_read_DevAddr = DevAddr;
 }

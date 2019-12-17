@@ -98,14 +98,14 @@ unsigned char wait_ocm_ready(void)
 {
    unsigned int count = 3200;
    unsigned char val;
-   
+
    do{
    	if(!count)
    		{
    		TRACE("ocm not ready!\n");
 		break;
    		}
-   	ReadReg(0x7E, 0x05, &val);
+	ReadReg(0x7E, 0x05, &val);
    	} while(!(val & _BIT7));
    return((val & _BIT7) ? 1:0);
 }
@@ -357,9 +357,10 @@ void PROC_Main(void)
             ANX7625_RESET_RELEASE();
             TRACE("ANX7625 reset release\n");
             ANX7625_config();
+            TRACE("After ANX7625_config\n");
 			auto_pd_support_flag = (unsigned char)Is_Auto_PD_Supported();
 				//	auto_pd_support_flag = 1;
-			TRACE1("auto_pd = %bd\n",auto_pd_support_flag);
+			TRACE1("auto_pd = %d\n",auto_pd_support_flag);
 			wait_ocm_ready();
 			#ifdef XTAL_26M
 			WriteReg(RX_P0, XTAL_FRQ_SEL, 0x60);
