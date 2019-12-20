@@ -81,10 +81,10 @@ void arduino::MbedSPI::end() {
 
 #if !defined(ARDUINO_AS_MBED_LIBRARY)
 
-#if DEVICE_SPI > 0
+#if SPI_HOWMANY > 0
 arduino::MbedSPI SPI(SPI_MISO, SPI_MOSI, SPI_SCK);
 #endif
-#if DEVICE_SPI > 1
+#if SPI_HOWMANY > 1
 arduino::MbedSPI SPI1(SPI_MISO1, SPI_MOSI1, SPI_SCK1);
 #endif
 

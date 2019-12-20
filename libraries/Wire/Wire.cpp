@@ -123,9 +123,9 @@ void arduino::MbedI2C::onReceive(void(*)(int)) {}
 void arduino::MbedI2C::onRequest(void(*)(void)) {}
 
 
-#if DEVICE_I2C > 0
+#if WIRE_HOWMANY > 0
 arduino::MbedI2C Wire(I2C_SDA, I2C_SCL);
 #endif
-#if DEVICE_I2C > 1
+#if WIRE_HOWMANY > 1
 arduino::MbedI2C Wire1(I2C_SDA1, I2C_SCL1);;
 #endif

@@ -60,10 +60,10 @@ private:
 
 #if !defined(ARDUINO_AS_MBED_LIBRARY)
 
-#if DEVICE_SPI > 0
+#if SPI_HOWMANY > 0
 extern arduino::MbedSPI SPI;
 #endif
-#if DEVICE_SPI > 1
+#if SPI_HOWMANY > 1
 extern arduino::MbedSPI SPI1;
 #endif
 

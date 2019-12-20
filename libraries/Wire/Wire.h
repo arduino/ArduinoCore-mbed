@@ -67,10 +67,10 @@ private:
 
 }
 
-#if DEVICE_I2C > 0
+#if WIRE_HOWMANY > 0
 extern arduino::MbedI2C Wire;
 #endif
-#if DEVICE_I2C > 1
+#if WIRE_HOWMANY > 1
 extern arduino::MbedI2C Wire1;
 #endif
 

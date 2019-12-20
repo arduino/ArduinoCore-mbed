@@ -123,10 +123,14 @@ static const uint8_t SCK  = PIN_SPI_SCK;
 
 #define DFU_MAGIC_SERIAL_ONLY_RESET   0xb0
 
+#define WIRE_HOWMANY		2
+
 #define I2C_SDA				(digitalPinToPinName(PIN_WIRE_SDA))
 #define I2C_SCL				(digitalPinToPinName(PIN_WIRE_SCL))
 #define I2C_SDA1			(digitalPinToPinName(PIN_WIRE_SDA1))
 #define I2C_SCL1			(digitalPinToPinName(PIN_WIRE_SCL1))
+
+#define SPI_HOWMANY			1
 
 #define SPI_MISO			(digitalPinToPinName(PIN_SPI_MISO))
 #define SPI_MOSI			(digitalPinToPinName(PIN_SPI_MOSI))
