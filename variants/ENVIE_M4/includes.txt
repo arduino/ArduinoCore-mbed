@@ -76,10 +76,6 @@
 -iwithprefixbefore/mbed/features/netsocket/ppp/include/polarssl
 -iwithprefixbefore/mbed/features/netsocket/ppp/include
 -iwithprefixbefore/mbed/features/netsocket/ppp
--iwithprefixbefore/mbed/features/netsocket/emac-drivers/TARGET_WHD/utils
--iwithprefixbefore/mbed/features/netsocket/emac-drivers/TARGET_WHD/network
--iwithprefixbefore/mbed/features/netsocket/emac-drivers/TARGET_WHD/interface
--iwithprefixbefore/mbed/features/netsocket/emac-drivers/TARGET_WHD
 -iwithprefixbefore/mbed/features/netsocket/emac-drivers/TARGET_STM/TARGET_STM32H7/lan8742
 -iwithprefixbefore/mbed/features/netsocket/emac-drivers/TARGET_STM/TARGET_STM32H7
 -iwithprefixbefore/mbed/features/netsocket/emac-drivers/TARGET_STM
@@ -305,6 +301,8 @@
 -iwithprefixbefore/mbed/components/wifi/esp8266-driver
 -iwithprefixbefore/mbed/components/wifi
 -iwithprefixbefore/mbed/components/storage/blockdevice/COMPONENT_QSPIF
+-iwithprefixbefore/mbed/components/storage/blockdevice/COMPONENT_FLASHIAP/COMMON
+-iwithprefixbefore/mbed/components/storage/blockdevice/COMPONENT_FLASHIAP
 -iwithprefixbefore/mbed/components/802.15.4_RF/stm-s2lp-rf-driver/stm-s2lp-rf-driver
 -iwithprefixbefore/mbed/components/802.15.4_RF/stm-s2lp-rf-driver/source
 -iwithprefixbefore/mbed/components/802.15.4_RF/stm-s2lp-rf-driver
@@ -321,3 +319,4 @@
 -iwithprefixbefore/mbed
 -iwithprefixbefore/../../variants/ENVIE_M4/openamp
 -iwithprefixbefore/../../variants/ENVIE_M4/rpclib/src/
+

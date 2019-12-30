@@ -10,3 +10,7 @@
 #define SERIAL2_CTS			PF_9
 
 #define SerialHCI			UART2
+
+#define WIRE_HOWMANY		2
+#define I2C_SDA1			PH_8
+#define I2C_SCL1			PH_7
