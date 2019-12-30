@@ -423,27 +423,34 @@ int CameraClass::begin(void)
   /* Initialize the Camera in QVGA mode */
   if(BSP_CAMERA_Init(CAMERA_R320x240) != 1)
   {
-    while (1) {}
+    printf("BSP_CAMERA_Init failed\n");
+    return 0;
   }
 
 }
 
 int CameraClass::snapshot(void)
 {
+  printf("Start snapshot\n");
   HIMAX_Mode(HIMAX_Streaming);
 
   /* Start the Camera Snapshot Capture */
-  BSP_CAMERA_SnapshotStart((uint8_t *)CAMERA_FRAME_BUFFER);
+  //BSP_CAMERA_SnapshotStart((uint8_t *)CAMERA_FRAME_BUFFER);
+  BSP_CAMERA_ContinuousStart((uint8_t *)CAMERA_FRAME_BUFFER);
 
   /* Wait until camera frame is ready : DCMI Frame event */
   while(camera_frame_ready == 0)
   {
   }
+
+  printf("Snapshot done\n");
   
   /* Stop the camera to avoid having the DMA2D work in parallel of Display */
   /* which cause perturbation of LTDC                                      */
   BSP_CAMERA_Stop();
 }
+
+extern "C" {
 
 /**
   * @brief  Line Event callback.
@@ -505,6 +512,8 @@ void HAL_DCMI_FrameEventCallback(DCMI_HandleTypeDef *hdcmi)
 void HAL_DCMI_ErrorCallback(DCMI_HandleTypeDef *hdcmi)
 {        
   BSP_CAMERA_ErrorCallback();
+}
+
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

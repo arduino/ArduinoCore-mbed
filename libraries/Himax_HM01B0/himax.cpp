@@ -196,19 +196,26 @@ static void           HIMAX_FrameRate         (void);
   * @{
   */
 
+mbed::I2C i2c(I2C_SDA , I2C_SCL);
 /**
  * @brief  Initializes the I2C interface.
  * @retval HIMAX status
  */
 uint8_t HIMAX_Open(void)
 {
+    printf("HIMAX_Open\n");
     /* I2C1  Pin connected */
-    Wire.begin();
+
+    printf("Model: %x:%x\n", HIMAX_RegRead(MODEL_ID_H), HIMAX_RegRead(MODEL_ID_L));
+
+    printf("After WIRE.begin\n");
 
     HIMAX_Reset();
+    printf("After HIMAX_Reset\n");
     HIMAX_Boot();
+    printf("After HIMAX_Boot\n");
     //For debugging camera Configuration
-    //HIMAX_PrintReg();
+    HIMAX_PrintReg();
 
     return 0;
 }
@@ -234,9 +241,7 @@ static int HIMAX_RegWrite(uint16_t addr, uint8_t value)
     reg.reg_num = (addr_low << 8) | addr_high;
     reg.value = value;
 
-    Wire.beginTransmission(HIMAX_I2C_ADDR);
-    Wire.write((uint8_t *)&reg, 3);
-    return Wire.endTransmission();
+    return i2c.write(HIMAX_I2C_ADDR, (const char *)&reg, 3);
 }
 
 /**
@@ -250,25 +255,16 @@ static uint8_t HIMAX_RegRead(uint16_t addr)
 
     reg.reg_num = (addr_low << 8) | addr_high;
 
-    /* Send read register address - 2 bytes, without stop */
-    Wire.beginTransmission(HIMAX_I2C_ADDR);
-    Wire.write((uint8_t *)&reg.reg_num, 2);
-    Wire.endTransmission(false);
-
-    Wire.requestFrom(HIMAX_I2C_ADDR, 1);
-
-    if (Wire.available()) {
-        reg.value = Wire.read();
-    }
-
-    return  reg.value;
+    i2c.write(HIMAX_I2C_ADDR, (const char *)&reg.reg_num, 2);
+    i2c.read(HIMAX_I2C_ADDR, (char*)&(reg.value), 1);
+    return reg.value;
 }
 
 static uint8_t HIMAX_Reset()
 {
     do {
         HIMAX_RegWrite(SW_RESET, HIMAX_RESET);
-        //wait_us(50);
+        wait_us(50);
     } while (HIMAX_RegRead(MODE_SELECT) != HIMAX_Standby);
 
     return 0;
