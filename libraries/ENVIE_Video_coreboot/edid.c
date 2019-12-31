@@ -1090,6 +1090,11 @@ static struct edid_mode known_modes[NUM_KNOWN_MODES] = {
 		.ha = 720, .hbl = 138, .hso = 16, .hspw = 62,
 		.va = 480, .vbl = 45, .vso = 9, .vspw = 6,
 		.phsync = '-', .pvsync = '-' },
+	[EDID_MODE_720x400_70Hz] = {
+		.name = "720x400@70Hz", .pixel_clock = 27000, .refresh = 70,
+		.ha = 720, .hbl = 138, .hso = 16, .hspw = 62,
+		.va = 400, .vbl = 45, .vso = 9, .vspw = 6,
+		.phsync = '-', .pvsync = '-' },
 	[EDID_MODE_1280x720_60Hz] = {
 		.name = "1280x720@60Hz", .pixel_clock = 74250, .refresh = 60,
 		.ha = 1280, .hbl = 370, .hso = 110, .hspw = 40,
