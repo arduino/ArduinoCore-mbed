@@ -491,6 +491,12 @@ detailed_block(struct edid *result_edid, unsigned char *x, int in_extension,
 	if (c->seen_non_detailed_descriptor && !in_extension)
 		c->has_valid_descriptor_ordering = 0;
 
+	if ((x[0] + (x[1] << 8)) * 10 > 62500) {
+		printk(BIOS_SPEW,
+			"Not supported on stm32\n");
+		return 0;
+	}
+
 	/* Edid contains pixel clock in terms of 10KHz */
 	out->mode.pixel_clock = (x[0] + (x[1] << 8)) * 10;
 	/*
@@ -529,7 +535,7 @@ detailed_block(struct edid *result_edid, unsigned char *x, int in_extension,
 	if (CONFIG(ARCH_X86))
 		edid_set_framebuffer_bits_per_pixel(out, 32, 64);
 	else
-		edid_set_framebuffer_bits_per_pixel(out, 32, 0);
+		edid_set_framebuffer_bits_per_pixel(out, 16, 0);
 
 	switch ((x[17] & 0x18) >> 3) {
 	case 0x00:
@@ -1089,11 +1095,6 @@ static struct edid_mode known_modes[NUM_KNOWN_MODES] = {
 		.name = "720x480@60Hz", .pixel_clock = 27000, .refresh = 60,
 		.ha = 720, .hbl = 138, .hso = 16, .hspw = 62,
 		.va = 480, .vbl = 45, .vso = 9, .vspw = 6,
-		.phsync = '-', .pvsync = '-' },
-	[EDID_MODE_720x400_70Hz] = {
-		.name = "720x400@70Hz", .pixel_clock = 27000, .refresh = 70,
-		.ha = 720, .hbl = 138, .hso = 16, .hspw = 62,
-		.va = 400, .vbl = 45, .vso = 9, .vspw = 6,
 		.phsync = '-', .pvsync = '-' },
 	[EDID_MODE_1280x720_60Hz] = {
 		.name = "1280x720@60Hz", .pixel_clock = 74250, .refresh = 60,

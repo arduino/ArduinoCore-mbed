@@ -856,13 +856,25 @@ int anx7625_dp_start(uint8_t bus, const struct edid *edid)
 
 	anx7625_parse_edid(edid, &dt);
 
+	dt.pixelclock = 27000;
+
+	dt.hactive = 720;
+	dt.hsync_len = 62;
+	dt.hback_porch = 60;
+	dt.hfront_porch = 16;
+
+	dt.vactive = 480;
+	dt.vsync_len = 6;
+	dt.vfront_porch = 9;
+	dt.vback_porch = 30;
+
+	stm32_dsi_config(bus, (struct edid *)edid, &dt);
+
 	ret = anx7625_dsi_config(bus, &dt);
 	if (ret < 0)
 		ANXERROR("MIPI phy setup error.\n");
 	else
 		ANXINFO("MIPI phy setup OK.\n");
-
-	stm32_dsi_config(bus, (struct edid *)edid, &dt);
 
 	return ret;
 }
@@ -907,21 +919,23 @@ int stm32_dsi_config(uint8_t bus, struct edid *edid, struct display_timing *dt) 
 	static const uint32_t LTDC_PLLODF = 1;
 	static const uint32_t LTDC_TXEXCAPECLOCKDIV = 4;
 
+/*
 	static const uint32_t LTDC_PLL3M = 27;
 	static const uint32_t LTDC_PLL3N = 336;
 	static const uint32_t LTDC_PLL3P = 2;
 	static const uint32_t LTDC_PLL3Q = 7;
-	static const uint32_t LTDC_PLL3R = 336000 / dt->pixelclock;
+	static const uint32_t LTDC_PLL3R = 336000 / dt->pixelclock; // expected pixel clock
+*/
+	//dt->pixelclock = 336000 / LTDC_PLL3R; 	// real pixel clock
 
 	static const uint32_t LANE_BYTE_CLOCK =	62435;
 
-/*
+
 	static const uint32_t LTDC_PLL3M = 4;
 	static const uint32_t LTDC_PLL3N = 100;
 	static const uint32_t LTDC_PLL3P = 2;
 	static const uint32_t LTDC_PLL3Q = 14;
 	static const uint32_t LTDC_PLL3R = 25;
-*/
 
 	lcd_x_size = dt->hactive;
 	lcd_y_size = dt->vactive;
@@ -1004,8 +1018,8 @@ int stm32_dsi_config(uint8_t bus, struct edid *edid, struct display_timing *dt) 
 	hdsivideo_handle.VSPolarity           = DSI_VSYNC_ACTIVE_LOW;
 	hdsivideo_handle.HSPolarity           = DSI_HSYNC_ACTIVE_LOW;
 	hdsivideo_handle.DEPolarity           = DSI_DATA_ENABLE_ACTIVE_HIGH;
-	hdsivideo_handle.Mode                 = DSI_VID_MODE_NB_PULSES;
-	hdsivideo_handle.NullPacketSize       = 0;
+	hdsivideo_handle.Mode                 = DSI_VID_MODE_BURST;
+	hdsivideo_handle.NullPacketSize       = 0xFFF;
 	hdsivideo_handle.NumberOfChunks       = 1;
 	hdsivideo_handle.PacketSize           = lcd_x_size;
 	hdsivideo_handle.HorizontalSyncActive = dt->hsync_len*LANE_BYTE_CLOCK/dt->pixelclock;
@@ -1017,33 +1031,37 @@ int stm32_dsi_config(uint8_t bus, struct edid *edid, struct display_timing *dt) 
 	hdsivideo_handle.VerticalActive       = dt->vactive;
 
 	/* Enable or disable sending LP command while streaming is active in video mode */
-	hdsivideo_handle.LPCommandEnable      = DSI_LP_COMMAND_DISABLE; /* Enable sending commands in mode LP (Low Power) */
+	hdsivideo_handle.LPCommandEnable      = DSI_LP_COMMAND_ENABLE; /* Enable sending commands in mode LP (Low Power) */
 
 	/* Largest packet size possible to transmit in LP mode in VSA, VBP, VFP regions */
 	/* Only useful when sending LP packets is allowed while streaming is active in video mode */
-	hdsivideo_handle.LPLargestPacketSize          = 4;
+	hdsivideo_handle.LPLargestPacketSize          = 16;
 
 	/* Largest packet size possible to transmit in LP mode in HFP region during VACT period */
 	/* Only useful when sending LP packets is allowed while streaming is active in video mode */
-	hdsivideo_handle.LPVACTLargestPacketSize      = 4;
+	hdsivideo_handle.LPVACTLargestPacketSize      = 0;
 
 	/* Specify for each region, if the going in LP mode is allowed */
 	/* while streaming is active in video mode                     */
-	hdsivideo_handle.LPHorizontalFrontPorchEnable = DSI_LP_HFP_DISABLE;
-	hdsivideo_handle.LPHorizontalBackPorchEnable  = DSI_LP_HBP_DISABLE;
-	hdsivideo_handle.LPVerticalActiveEnable       = DSI_LP_VACT_DISABLE;
-	hdsivideo_handle.LPVerticalFrontPorchEnable   = DSI_LP_VFP_DISABLE;
-	hdsivideo_handle.LPVerticalBackPorchEnable    = DSI_LP_VBP_DISABLE;
-	hdsivideo_handle.LPVerticalSyncActiveEnable   = DSI_LP_VSYNC_DISABLE;
-
-	/* No acknoledge at the end of a frame */
-	hdsivideo_handle.FrameBTAAcknowledgeEnable    = DSI_FBTAA_DISABLE;
+	hdsivideo_handle.LPHorizontalFrontPorchEnable = DSI_LP_HFP_ENABLE;   /* Allow sending LP commands during HFP period */
+	hdsivideo_handle.LPHorizontalBackPorchEnable  = DSI_LP_HBP_ENABLE;   /* Allow sending LP commands during HBP period */
+	hdsivideo_handle.LPVerticalActiveEnable = DSI_LP_VACT_ENABLE;  /* Allow sending LP commands during VACT period */
+	hdsivideo_handle.LPVerticalFrontPorchEnable = DSI_LP_VFP_ENABLE;   /* Allow sending LP commands during VFP period */
+	hdsivideo_handle.LPVerticalBackPorchEnable = DSI_LP_VBP_ENABLE;   /* Allow sending LP commands during VBP period */
+	hdsivideo_handle.LPVerticalSyncActiveEnable = DSI_LP_VSYNC_ENABLE; /* Allow sending LP commands during VSync = VSA period */
 
 	/* Configure DSI Video mode timings with settings set above */
 	HAL_DSI_ConfigVideoMode(&dsi, &hdsivideo_handle);
 
-	/* Enable the DSI host and wrapper : but LTDC is not started yet at this stage */
-	HAL_DSI_Start(&dsi);
+  /* Configure DSI PHY HS2LP and LP2HS timings */
+  dsiPhyInit.ClockLaneHS2LPTime = 35;
+  dsiPhyInit.ClockLaneLP2HSTime = 35;
+  dsiPhyInit.DataLaneHS2LPTime = 35;
+  dsiPhyInit.DataLaneLP2HSTime = 35;
+  dsiPhyInit.DataLaneMaxReadTime = 0;
+  dsiPhyInit.StopWaitTime = 10;
+  HAL_DSI_ConfigPhyTimer(&dsi, &dsiPhyInit);
+
 
 	/*************************End DSI Initialization*******************************/
 
@@ -1096,7 +1114,12 @@ int stm32_dsi_config(uint8_t bus, struct edid *edid, struct display_timing *dt) 
 	/* Initialize & Start the LTDC */
 	HAL_LTDC_Init(&ltdc);
 
+	/* Enable the DSI host and wrapper : but LTDC is not started yet at this stage */
+	HAL_DSI_Start(&dsi);
+
 	stm32_LayerInit(0, (uint32_t)0xC0000000);
+
+	HAL_DSI_PatternGeneratorStart(&dsi, 0, 1);
 }
 
 static void LL_FillBuffer(uint32_t LayerIndex, void *pDst, uint32_t xSize, uint32_t ySize, uint32_t OffLine, uint32_t ColorIndex)
