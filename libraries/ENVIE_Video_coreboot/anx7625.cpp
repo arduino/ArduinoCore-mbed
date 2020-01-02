@@ -295,7 +295,7 @@ static int anx7625_calculate_m_n(u32 pixelclock,
 		return 1;
 	}
 
-	*m = (unsigned long long)pixelclock * 599 / 600;
+	*m = (unsigned long long)pixelclock; // * 599 / 600;
 	*n = XTAL_FRQ / post_divider;
 	*pd = post_divider;
 
@@ -472,7 +472,7 @@ static int anx7625_api_dsi_config(uint8_t bus, struct display_timing *dt)
 	 *     b) Moving Pixel DSI source (PG3A pattern generator +
 	 *        P332 D-PHY Probe) default D-PHY tg 5ns/step
 	 */
-	ret |= anx7625_reg_write(bus, RX_P1_ADDR, MIPI_TIME_HS_PRPR, 0x10);
+	//ret |= anx7625_reg_write(bus, RX_P1_ADDR, MIPI_TIME_HS_PRPR, 0x10);
 
 	/* enable DSI mode */
 	ret |= anx7625_write_or(bus, RX_P1_ADDR, MIPI_DIGITAL_PLL_18,
@@ -928,7 +928,7 @@ int stm32_dsi_config(uint8_t bus, struct edid *edid, struct display_timing *dt) 
 */
 	//dt->pixelclock = 336000 / LTDC_PLL3R; 	// real pixel clock
 
-	static const uint32_t LANE_BYTE_CLOCK =	62435;
+	static const uint32_t LANE_BYTE_CLOCK =	62437;
 
 
 	static const uint32_t LTDC_PLL3M = 4;
@@ -1000,6 +1000,7 @@ int stm32_dsi_config(uint8_t bus, struct edid *edid, struct display_timing *dt) 
 	/* Init the DSI */
 	HAL_DSI_Init(&dsi, &dsiPllInit);
 
+#if 0
 	/* Configure the D-PHY Timings */
 	dsiPhyInit.ClockLaneHS2LPTime = 0x14;
 	dsiPhyInit.ClockLaneLP2HSTime = 0x14;
@@ -1008,6 +1009,7 @@ int stm32_dsi_config(uint8_t bus, struct edid *edid, struct display_timing *dt) 
 	dsiPhyInit.DataLaneMaxReadTime = 0x00;
 	dsiPhyInit.StopWaitTime = 0x0;
 	HAL_DSI_ConfigPhyTimer(&dsi, &dsiPhyInit);
+#endif
 
 	hdsivideo_handle.VirtualChannelID     = 0;
 
@@ -1053,15 +1055,14 @@ int stm32_dsi_config(uint8_t bus, struct edid *edid, struct display_timing *dt) 
 	/* Configure DSI Video mode timings with settings set above */
 	HAL_DSI_ConfigVideoMode(&dsi, &hdsivideo_handle);
 
-  /* Configure DSI PHY HS2LP and LP2HS timings */
-  dsiPhyInit.ClockLaneHS2LPTime = 35;
-  dsiPhyInit.ClockLaneLP2HSTime = 35;
-  dsiPhyInit.DataLaneHS2LPTime = 35;
-  dsiPhyInit.DataLaneLP2HSTime = 35;
-  dsiPhyInit.DataLaneMaxReadTime = 0;
-  dsiPhyInit.StopWaitTime = 10;
-  HAL_DSI_ConfigPhyTimer(&dsi, &dsiPhyInit);
-
+	/* Configure DSI PHY HS2LP and LP2HS timings */
+	dsiPhyInit.ClockLaneHS2LPTime = 35;
+	dsiPhyInit.ClockLaneLP2HSTime = 35;
+	dsiPhyInit.DataLaneHS2LPTime = 35;
+	dsiPhyInit.DataLaneLP2HSTime = 35;
+	dsiPhyInit.DataLaneMaxReadTime = 0;
+	dsiPhyInit.StopWaitTime = 10;
+	HAL_DSI_ConfigPhyTimer(&dsi, &dsiPhyInit);
 
 	/*************************End DSI Initialization*******************************/
 
@@ -1088,14 +1089,14 @@ int stm32_dsi_config(uint8_t bus, struct edid *edid, struct display_timing *dt) 
 	HAL_LTDC_DeInit(&(ltdc));
 
 	/* Timing Configuration */
-	ltdc.Init.HorizontalSync = (dt->hsync_len - 1);
-	ltdc.Init.AccumulatedHBP = (dt->hsync_len + dt->hback_porch - 1);
-	ltdc.Init.AccumulatedActiveW = (dt->hactive + dt->hsync_len + dt->hback_porch - 1);
-	ltdc.Init.TotalWidth = (dt->hactive + dt->hsync_len + dt->hback_porch + dt->hfront_porch - 1);
-	ltdc.Init.VerticalSync = (dt->vsync_len - 1);
-	ltdc.Init.AccumulatedVBP = (dt->vsync_len + dt->vback_porch - 1);
-	ltdc.Init.AccumulatedActiveH = (dt->vactive + dt->vsync_len + dt->vback_porch - 1);
-	ltdc.Init.TotalHeigh = (dt->vactive + dt->vsync_len + dt->vback_porch + dt->vfront_porch - 1);
+	ltdc.Init.HorizontalSync = (dt->hsync_len -1);
+	ltdc.Init.AccumulatedHBP = (dt->hsync_len + dt->hback_porch -1);
+	ltdc.Init.AccumulatedActiveW = (dt->hactive + dt->hsync_len + dt->hback_porch -1);
+	ltdc.Init.TotalWidth = (dt->hactive + dt->hsync_len + dt->hback_porch + dt->hfront_porch -1 + 7);
+	ltdc.Init.VerticalSync = (dt->vsync_len -1);
+	ltdc.Init.AccumulatedVBP = (dt->vsync_len + dt->vback_porch-1);
+	ltdc.Init.AccumulatedActiveH = (dt->vactive + dt->vsync_len + dt->vback_porch-1);
+	ltdc.Init.TotalHeigh = (dt->vactive + dt->vsync_len + dt->vback_porch + dt->vfront_porch-1);
 
 	/* background value */
 	ltdc.Init.Backcolor.Blue = 0x00;
@@ -1120,6 +1121,7 @@ int stm32_dsi_config(uint8_t bus, struct edid *edid, struct display_timing *dt) 
 	stm32_LayerInit(0, (uint32_t)0xC0000000);
 
 	HAL_DSI_PatternGeneratorStart(&dsi, 0, 1);
+	HAL_DSI_PatternGeneratorStop(&dsi);
 }
 
 static void LL_FillBuffer(uint32_t LayerIndex, void *pDst, uint32_t xSize, uint32_t ySize, uint32_t OffLine, uint32_t ColorIndex)
@@ -1158,7 +1160,7 @@ void stm32_LCD_DrawImage(void *pSrc, void *pDst, uint32_t xSize, uint32_t ySize,
 	/* Configure the DMA2D Mode, Color Mode and output offset */
 	dma2d.Init.Mode         = DMA2D_M2M_PFC;
 	dma2d.Init.ColorMode    = DMA2D_OUTPUT_RGB565;
-	dma2d.Init.OutputOffset = 0;
+	dma2d.Init.OutputOffset = lcd_x_size - xSize;
 
 	if (pDst == NULL) {
 		pDst = (uint32_t *)(ltdc.LayerCfg[ActiveLayer].FBStartAdress);
