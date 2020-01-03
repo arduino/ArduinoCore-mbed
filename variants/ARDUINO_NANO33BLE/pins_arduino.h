@@ -53,6 +53,23 @@ static const uint8_t A6  = PIN_A6;
 static const uint8_t A7  = PIN_A7;
 #define ADC_RESOLUTION 12
 
+// Digital pins
+// -----------
+#define D0   0
+#define D1   1
+#define D2   2
+#define D3   3
+#define D4   4
+#define D5   5
+#define D6   6
+#define D7   7
+#define D8   8
+#define D9   9
+#define D10  10
+#define D11  11
+#define D12  12
+#define D13  13
+
 /*
  * Serial interfaces
  */
