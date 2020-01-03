@@ -849,24 +849,27 @@ static void anx7625_parse_edid(const struct edid *edid,
 		dt->vactive, dt->vsync_len, dt->vfront_porch, dt->vback_porch);
 }
 
-int anx7625_dp_start(uint8_t bus, const struct edid *edid)
+extern struct edid_mode known_modes[];
+
+int anx7625_dp_start(uint8_t bus, const struct edid *edid, enum edid_modes mode)
 {
 	int ret;
 	struct display_timing dt;
 
 	anx7625_parse_edid(edid, &dt);
 
-	dt.pixelclock = 27000;
+	dt.pixelclock = known_modes[mode].pixel_clock;
 
-	dt.hactive = 720;
-	dt.hsync_len = 62;
-	dt.hback_porch = 60;
-	dt.hfront_porch = 16;
+	dt.hactive = known_modes[mode].ha;
+	dt.hsync_len = known_modes[mode].hspw;
+	dt.hback_porch = known_modes[mode].hbl;
+	dt.hfront_porch = known_modes[mode].hso;
 
-	dt.vactive = 480;
-	dt.vsync_len = 6;
-	dt.vfront_porch = 9;
-	dt.vback_porch = 30;
+	dt.vactive = known_modes[mode].va;
+	dt.vsync_len = known_modes[mode].vspw;;
+	dt.vback_porch = known_modes[mode].vbl;
+	dt.vfront_porch = known_modes[mode].vso;
+	dt.voffset = known_modes[mode].voffset; //1;
 
 	stm32_dsi_config(bus, (struct edid *)edid, &dt);
 
@@ -912,30 +915,73 @@ static void stm32_LayerInit(uint16_t LayerIndex, uint32_t FB_Address)
 	HAL_LTDC_ConfigLayer(&ltdc, &Layercfg, LayerIndex);
 }
 
+#define BYTES_PER_PIXEL		2
+#define FB_BASE_ADDRESS 	((uint32_t)0xC0000000)
+#define FB_ADDRESS_0 		(FB_BASE_ADDRESS)
+#define FB_ADDRESS_1 		(FB_BASE_ADDRESS + (lcd_x_size * lcd_y_size * BYTES_PER_PIXEL))
+
+extern "C" {
+static uint32_t pend_buffer = 0;
+
+/*
+void HAL_LTDC_LineEventCallback(LTDC_HandleTypeDef *ltdc)
+{
+	LTDC_LAYER(ltdc, 0)->CFBAR = (pend_buffer++ % 2) ? FB_ADDRESS_0 : FB_ADDRESS_1;
+	__HAL_LTDC_RELOAD_CONFIG(ltdc); 
+
+	HAL_LTDC_ProgramLineEvent(ltdc, 0);
+}
+
+void LTDC_IRQHandler(void)
+{
+	HAL_LTDC_IRQHandler(&ltdc);
+}
+*/
+
+}
+
+uint32_t getNextFrameBuffer() {
+
+	int fb = pend_buffer++ % 2;
+
+	__HAL_LTDC_LAYER_ENABLE(&(ltdc), fb);
+  	__HAL_LTDC_LAYER_DISABLE(&(ltdc), !fb);
+  	__HAL_LTDC_VERTICAL_BLANKING_RELOAD_CONFIG(&(ltdc));
+
+	return fb ? FB_ADDRESS_0 : FB_ADDRESS_1;
+}
+
+uint32_t stm32_getXSize() {
+	return lcd_x_size;
+}
+
+uint32_t stm32_getYSize() {
+	return lcd_y_size;
+}
+
 int stm32_dsi_config(uint8_t bus, struct edid *edid, struct display_timing *dt) {
 
 	static const uint32_t LTDC_PLLNDIV = 37;
-	static const uint32_t LTDC_PLLIDF = 2;
-	static const uint32_t LTDC_PLLODF = 1;
+	static const uint32_t LTDC_PLLIDF = DSI_PLL_IN_DIV2;
+	static const uint32_t LTDC_PLLODF = DSI_PLL_OUT_DIV1;
 	static const uint32_t LTDC_TXEXCAPECLOCKDIV = 4;
 
-/*
 	static const uint32_t LTDC_PLL3M = 27;
 	static const uint32_t LTDC_PLL3N = 336;
 	static const uint32_t LTDC_PLL3P = 2;
 	static const uint32_t LTDC_PLL3Q = 7;
 	static const uint32_t LTDC_PLL3R = 336000 / dt->pixelclock; // expected pixel clock
-*/
-	//dt->pixelclock = 336000 / LTDC_PLL3R; 	// real pixel clock
+	dt->pixelclock = 336000 / LTDC_PLL3R; 	// real pixel clock
 
 	static const uint32_t LANE_BYTE_CLOCK =	62437;
 
-
+/*
 	static const uint32_t LTDC_PLL3M = 4;
 	static const uint32_t LTDC_PLL3N = 100;
 	static const uint32_t LTDC_PLL3P = 2;
 	static const uint32_t LTDC_PLL3Q = 14;
 	static const uint32_t LTDC_PLL3R = 25;
+*/
 
 	lcd_x_size = dt->hactive;
 	lcd_y_size = dt->vactive;
@@ -1092,7 +1138,7 @@ int stm32_dsi_config(uint8_t bus, struct edid *edid, struct display_timing *dt) 
 	ltdc.Init.HorizontalSync = (dt->hsync_len -1);
 	ltdc.Init.AccumulatedHBP = (dt->hsync_len + dt->hback_porch -1);
 	ltdc.Init.AccumulatedActiveW = (dt->hactive + dt->hsync_len + dt->hback_porch -1);
-	ltdc.Init.TotalWidth = (dt->hactive + dt->hsync_len + dt->hback_porch + dt->hfront_porch -1 + 7);
+	ltdc.Init.TotalWidth = (dt->hactive + dt->hsync_len + dt->hback_porch + dt->hfront_porch -1 + dt->voffset);
 	ltdc.Init.VerticalSync = (dt->vsync_len -1);
 	ltdc.Init.AccumulatedVBP = (dt->vsync_len + dt->vback_porch-1);
 	ltdc.Init.AccumulatedActiveH = (dt->vactive + dt->vsync_len + dt->vback_porch-1);
@@ -1118,7 +1164,10 @@ int stm32_dsi_config(uint8_t bus, struct edid *edid, struct display_timing *dt) 
 	/* Enable the DSI host and wrapper : but LTDC is not started yet at this stage */
 	HAL_DSI_Start(&dsi);
 
-	stm32_LayerInit(0, (uint32_t)0xC0000000);
+	stm32_LayerInit(0, FB_ADDRESS_0);
+	stm32_LayerInit(1, FB_ADDRESS_1);
+
+	//HAL_LTDC_ProgramLineEvent(&ltdc, 0);
 
 	HAL_DSI_PatternGeneratorStart(&dsi, 0, 1);
 	HAL_DSI_PatternGeneratorStop(&dsi);

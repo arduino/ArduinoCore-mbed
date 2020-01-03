@@ -356,14 +356,18 @@ struct display_timing {
 	unsigned int vfront_porch;
 	unsigned int vback_porch;
 	unsigned int vsync_len;
+	unsigned int voffset;
 };
 
-int anx7625_dp_start(uint8_t bus, const struct edid *edid);
+int anx7625_dp_start(uint8_t bus, const struct edid *edid, enum edid_modes mode = EDID_MODE_720x480_60Hz);
 int anx7625_dp_get_edid(uint8_t bus, struct edid *out);
 int anx7625_init(uint8_t bus);
 int stm32_dsi_config(uint8_t bus, struct edid *edid, struct display_timing *dt);
 void stm32_BriefDisplay(void);
 void stm32_LCD_Clear(uint32_t color);
 void stm32_LCD_DrawImage(void *pSrc, void *pDst, uint32_t xSize, uint32_t ySize, uint32_t ColorMode);
+uint32_t getNextFrameBuffer();
+uint32_t stm32_getXSize();
+uint32_t stm32_getYSize();
 
 #endif  /* __ANX7625_H__ */

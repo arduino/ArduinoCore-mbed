@@ -36,7 +36,7 @@
 enum edid_modes {
 	EDID_MODE_640x480_60Hz,
 	EDID_MODE_720x480_60Hz,
-	EDID_MODE_720x400_70Hz,
+	EDID_MODE_1280x720_59Hz,
 	EDID_MODE_1280x720_60Hz,
 	EDID_MODE_1920x1080_60Hz,
 	NUM_KNOWN_MODES,
@@ -59,6 +59,7 @@ struct edid_mode {
 	unsigned int vso;
 	unsigned int vspw;
 	unsigned int vborder;
+	unsigned int voffset;
 	unsigned char phsync;
 	unsigned char pvsync;
 	unsigned int x_mm;

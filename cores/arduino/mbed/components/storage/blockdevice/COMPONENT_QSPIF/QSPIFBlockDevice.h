@@ -261,7 +261,7 @@ private:
     qspi_status_t _qspi_set_frequency(int freq);
 
     // Update the 4-byte addressing extension register with the MSB of the address if it is in use
-    qspi_status_t _qspi_update_4byte_ext_addr_reg(bd_addr_t addr);
+    qspi_status_t _qspi_update_4byte_ext_addr_reg(mbed::bd_addr_t addr);
 
     /*********************************/
     /* Flash Configuration Functions */
