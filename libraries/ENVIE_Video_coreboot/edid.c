@@ -1092,7 +1092,7 @@ struct edid_mode known_modes[NUM_KNOWN_MODES] = {
 		.phsync = '-', .pvsync = '-' },
 	[EDID_MODE_720x480_60Hz] = {
 		.name = "720x480@60Hz", .pixel_clock = 27000, .refresh = 60,
-		.ha = 852, .hbl = 60, .hso = 16, .hspw = 62, .voffset = 1,
+		.ha = 720, .hbl = 60, .hso = 16, .hspw = 62, .voffset = 1,
 		.va = 480, .vbl = 6, .vso = 30, .vspw = 9,
 		.phsync = '-', .pvsync = '-' },
 	[EDID_MODE_1280x720_59Hz] = {
