@@ -137,6 +137,7 @@ void HAL_JPEG_DataReadyCallback (JPEG_HandleTypeDef *hjpeg, uint8_t *pDataOut, u
 */
 void HAL_JPEG_ErrorCallback(JPEG_HandleTypeDef *hjpeg)
 {
+  printf("HAL_JPEG_ErrorCallback\n");
   Jpeg_HWDecodingEnd = 1;
 }
 

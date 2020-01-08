@@ -245,6 +245,7 @@ AVISTATUS __AVI_Init( AVI_CONTEXT * pavi, uint8_t *buf, uint32_t size)
 
     if (strhheader->StreamType != AVI_VIDS_STREAM)
     {
+      printf("Got %d %x strhheader->StreamType\n", strhheader->StreamType, strhheader->StreamType);
       return AVI_FORMAT_ERR;
     }
 

@@ -12,11 +12,11 @@
 #define MDMA_INSTANCE MDMA_Channel0
 
 #define LCD_FRAME_BUFFER            0xC0000000
-#define JPEG_OUTPUT_DATA_BUFFER0    0xC0400000
-#define JPEG_OUTPUT_DATA_BUFFER1    0xC0600000
+#define JPEG_OUTPUT_DATA_BUFFER0    0xC0200000
+#define JPEG_OUTPUT_DATA_BUFFER1    0xC0500000
 
 /*uncomment this line to regulate the decoding frame rate to the native video frame rate */
-//#define USE_FRAMERATE_REGULATION
+#define USE_FRAMERATE_REGULATION
 
 #endif /* __MAIN_H */
 
