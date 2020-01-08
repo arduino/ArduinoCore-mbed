@@ -156,4 +156,4 @@ tools.dfu-util.cmd=dfu-util
 
 tools.dfu-util.upload.params.verbose=-d
 tools.dfu-util.upload.params.quiet=
-tools.dfu-util.upload.pattern="{path}/{cmd}" --device {build.vid}:{build.pid} -D "{build.path}/{build.project_name}.bin" -R --dfuse-address={upload.address}:leave
+tools.dfu-util.upload.pattern="{path}/{cmd}" --device {upload.vid}:{upload.pid} -D "{build.path}/{build.project_name}.bin" -a{upload.interface} --dfuse-address={upload.address}:leave
