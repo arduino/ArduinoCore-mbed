@@ -773,7 +773,6 @@ static int anx7625_power_on_init(uint8_t bus)
 		}
 		ANXINFO("Init interface.\n");
 
-
 		//anx7625_disable_pd_protocol(bus);
 		anx7625_reg_read(bus, RX_P0_ADDR, OCM_FW_VERSION, &version);
 		anx7625_reg_read(bus, RX_P0_ADDR, OCM_FW_REVERSION, &revision);
@@ -1146,8 +1145,8 @@ int stm32_dsi_config(uint8_t bus, struct edid *edid, struct display_timing *dt) 
 
 	/* background value */
 	ltdc.Init.Backcolor.Blue = 0x00;
-	ltdc.Init.Backcolor.Green = 0xFF;
-	ltdc.Init.Backcolor.Red = 0xFF;
+	ltdc.Init.Backcolor.Green = 0x00;
+	ltdc.Init.Backcolor.Red = 0x00;
 
 	ltdc.LayerCfg->ImageWidth  = lcd_x_size;
 	ltdc.LayerCfg->ImageHeight = lcd_y_size;
@@ -1169,8 +1168,10 @@ int stm32_dsi_config(uint8_t bus, struct edid *edid, struct display_timing *dt) 
 
 	//HAL_LTDC_ProgramLineEvent(&ltdc, 0);
 
-	HAL_DSI_PatternGeneratorStart(&dsi, 0, 1);
+	//HAL_DSI_PatternGeneratorStart(&dsi, 0, 1);
 	HAL_DSI_PatternGeneratorStop(&dsi);
+	stm32_LCD_Clear(0);
+	stm32_LCD_Clear(0);
 }
 
 static void LL_FillBuffer(uint32_t LayerIndex, void *pDst, uint32_t xSize, uint32_t ySize, uint32_t OffLine, uint32_t ColorIndex)
@@ -1196,12 +1197,11 @@ static void LL_FillBuffer(uint32_t LayerIndex, void *pDst, uint32_t xSize, uint3
 	}
 }
 
-static uint32_t  ActiveLayer = 0;
-
 void stm32_LCD_Clear(uint32_t Color)
 {
 	/* Clear the LCD */
-	LL_FillBuffer(ActiveLayer, (uint32_t *)(ltdc.LayerCfg[ActiveLayer].FBStartAdress), lcd_x_size, lcd_y_size, 0, Color);
+	LL_FillBuffer(pend_buffer%2, (uint32_t *)(ltdc.LayerCfg[pend_buffer%2].FBStartAdress), lcd_x_size, lcd_y_size, 0, Color);
+	getNextFrameBuffer();
 }
 
 void stm32_LCD_DrawImage(void *pSrc, void *pDst, uint32_t xSize, uint32_t ySize, uint32_t ColorMode)
@@ -1212,7 +1212,7 @@ void stm32_LCD_DrawImage(void *pSrc, void *pDst, uint32_t xSize, uint32_t ySize,
 	dma2d.Init.OutputOffset = lcd_x_size - xSize;
 
 	if (pDst == NULL) {
-		pDst = (uint32_t *)(ltdc.LayerCfg[ActiveLayer].FBStartAdress);
+		pDst = (uint32_t *)(ltdc.LayerCfg[pend_buffer%2].FBStartAdress);
 	}
 
 	/* Foreground Configuration */

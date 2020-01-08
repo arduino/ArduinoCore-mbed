@@ -114,7 +114,7 @@ static void DMA2D_Init(uint16_t xsize, uint16_t ysize)
   DMA2D_Handle.LayerCfg[1].InputAlpha = 0xFF;
   DMA2D_Handle.LayerCfg[1].InputColorMode = DMA2D_OUTPUT_RGB565;
   //DMA2D_Handle.LayerCfg[1].ChromaSubSampling = cssMode;
-  DMA2D_Handle.LayerCfg[1].InputOffset = 0;
+  DMA2D_Handle.LayerCfg[1].InputOffset = 0; //LCD_Y_Size - ysize;
   DMA2D_Handle.LayerCfg[1].RedBlueSwap = DMA2D_RB_REGULAR; /* No ForeGround Red/Blue swap */
   DMA2D_Handle.LayerCfg[1].AlphaInverted = DMA2D_REGULAR_ALPHA; /* No ForeGround Alpha inversion */
 
@@ -204,7 +204,6 @@ static void DMA2D_CopyBuffer(uint32_t *pSrc, uint32_t *pDst)
 
 void DG_DrawFrame()
 {
-  printf("calling DG_DrawFrame\n");
   DMA2D_CopyBuffer((uint32_t *)DG_ScreenBuffer, (uint32_t *)getNextFrameBuffer());
   //handleKeyInput();
 }

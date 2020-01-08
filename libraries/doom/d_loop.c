@@ -715,14 +715,11 @@ void TryRunTics (void)
 
     // get real tics
     entertic = I_GetTime() / ticdup;
-    printf("entertic: %d\n", entertic);
     realtics = entertic - oldentertics;
     oldentertics = entertic;
 
     // in singletics mode, run a single tic every time this function
     // is called.
-
-    printf("singletics: %d\n", singletics);
 
     if (singletics)
     {
@@ -734,7 +731,6 @@ void TryRunTics (void)
     }
 
     lowtic = GetLowTic();
-    printf("lowtic: %d\n", lowtic);
 
     availabletics = lowtic - gametic/ticdup;
 
@@ -767,8 +763,6 @@ void TryRunTics (void)
 	counts = 1;
 
     // wait for new tics if needed
-
-    printf("gametic/ticdup + counts: %d\n", gametic/ticdup + counts);
 
     while (!PlayersInGame() || lowtic < gametic/ticdup + counts)
     {
