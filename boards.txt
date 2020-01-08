@@ -100,7 +100,7 @@ envie_m4.upload.use_1200bps_touch=true
 envie_m4.upload.wait_for_upload_port=false
 envie_m4.upload.native_usb=true
 envie_m4.upload.maximum_size=1048576
-envie_m4.upload.maximum_data_size=262144
+envie_m4.upload.maximum_data_size=294248
 
 ##############################################################
 
