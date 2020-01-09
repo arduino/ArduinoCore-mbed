@@ -22,6 +22,7 @@
 #include <string.h>
 
 #include "anx7625.h"
+#include "video_modes.h"
 
 #define ANXERROR(format, ...) \
 		printk(BIOS_ERR, "ERROR: %s: " format, __func__, ##__VA_ARGS__)
@@ -848,7 +849,7 @@ static void anx7625_parse_edid(const struct edid *edid,
 		dt->vactive, dt->vsync_len, dt->vfront_porch, dt->vback_porch);
 }
 
-extern struct edid_mode known_modes[];
+extern struct envie_edid_mode envie_known_modes[];
 
 int anx7625_dp_start(uint8_t bus, const struct edid *edid, enum edid_modes mode)
 {
@@ -857,18 +858,18 @@ int anx7625_dp_start(uint8_t bus, const struct edid *edid, enum edid_modes mode)
 
 	anx7625_parse_edid(edid, &dt);
 
-	dt.pixelclock = known_modes[mode].pixel_clock;
+	dt.pixelclock = envie_known_modes[mode].pixel_clock;
 
-	dt.hactive = known_modes[mode].ha;
-	dt.hsync_len = known_modes[mode].hspw;
-	dt.hback_porch = known_modes[mode].hbl;
-	dt.hfront_porch = known_modes[mode].hso;
+	dt.hactive = envie_known_modes[mode].hactive;
+	dt.hsync_len = envie_known_modes[mode].hsync_len;
+	dt.hback_porch = envie_known_modes[mode].hback_porch;
+	dt.hfront_porch = envie_known_modes[mode].hfront_porch;
 
-	dt.vactive = known_modes[mode].va;
-	dt.vsync_len = known_modes[mode].vspw;;
-	dt.vback_porch = known_modes[mode].vbl;
-	dt.vfront_porch = known_modes[mode].vso;
-	dt.voffset = known_modes[mode].voffset; //1;
+	dt.vactive = envie_known_modes[mode].vactive;
+	dt.vsync_len = envie_known_modes[mode].vsync_len;;
+	dt.vback_porch = envie_known_modes[mode].vback_porch;
+	dt.vfront_porch = envie_known_modes[mode].vfront_porch;
+	dt.voffset = envie_known_modes[mode].voffset; //1;
 
 	stm32_dsi_config(bus, (struct edid *)edid, &dt);
 
@@ -887,8 +888,8 @@ static DMA2D_HandleTypeDef dma2d;
 static LTDC_HandleTypeDef  ltdc;
 static DSI_HandleTypeDef   dsi;
 
-static uint32_t lcd_x_size = 640;
-static uint32_t lcd_y_size = 480;
+static uint32_t lcd_x_size = 1280;
+static uint32_t lcd_y_size = 1024;
 
 static void stm32_LayerInit(uint16_t LayerIndex, uint32_t FB_Address)
 {

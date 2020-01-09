@@ -1084,12 +1084,7 @@ static void dump_breakdown(unsigned char *edid)
  * hso = hsync_start - hdsiplay;	vso = vsync_start - vdisplay;
  * hspw = hsync_end - hsync_start;	vspw = vsync_end - vsync_start;
  */
-struct edid_mode known_modes[NUM_KNOWN_MODES] = {
-	[EDID_MODE_320x240_60Hz] = {
-		.name = "320x240@60Hz", .pixel_clock = 25200, .refresh = 60,
-		.ha = 320, .hbl = 80, .hso = 48, .hspw = 32,
-		.va = 200, .vbl = 16, .vso = 6, .vspw = 3,
-		.phsync = '-', .pvsync = '-' },
+static struct edid_mode known_modes[NUM_KNOWN_MODES] = {
 	[EDID_MODE_640x480_60Hz] = {
 		.name = "640x480@60Hz", .pixel_clock = 25200, .refresh = 60,
 		.ha = 640, .hbl = 160, .hso = 16, .hspw = 96,
@@ -1097,14 +1092,9 @@ struct edid_mode known_modes[NUM_KNOWN_MODES] = {
 		.phsync = '-', .pvsync = '-' },
 	[EDID_MODE_720x480_60Hz] = {
 		.name = "720x480@60Hz", .pixel_clock = 27000, .refresh = 60,
-		.ha = 720, .hbl = 60, .hso = 16, .hspw = 62, .voffset = 1,
-		.va = 480, .vbl = 6, .vso = 30, .vspw = 9,
+		.ha = 720, .hbl = 138, .hso = 16, .hspw = 62,
+		.va = 480, .vbl = 45, .vso = 9, .vspw = 6,
 		.phsync = '-', .pvsync = '-' },
-	[EDID_MODE_1280x720_59Hz] = {
-		.name = "1280x720@59Hz", .pixel_clock = 74250, .refresh = 60,
-		.ha = 1280, .hbl = 60, .hso = 16, .hspw = 62, .voffset = 6,
-		.va = 720, .vbl = 6, .vso = 30, .vspw = 9,
-		.phsync = '+', .pvsync = '+' },
 	[EDID_MODE_1280x720_60Hz] = {
 		.name = "1280x720@60Hz", .pixel_clock = 74250, .refresh = 60,
 		.ha = 1280, .hbl = 370, .hso = 110, .hspw = 40,
