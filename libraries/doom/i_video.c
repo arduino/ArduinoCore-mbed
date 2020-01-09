@@ -82,7 +82,7 @@ struct color {
     uint32_t a:8;
 };
 
-static struct color colors[256];
+struct color colors[256];
 
 void I_GetEvent(void);
 
@@ -143,6 +143,7 @@ void cmap_to_rgb565(uint16_t * out, uint8_t * in, int in_pixels)
 
         in++;
         for (j = 0; j < fb_scaling; j++) {
+            *out = (r | g | b);
             out++;
         }
     }
@@ -254,6 +255,9 @@ void I_UpdateNoBlit (void)
 
 void I_FinishUpdate (void)
 {
+
+
+#if 0
     int y;
     int x_offset, y_offset, x_offset_end;
     unsigned char *line_in, *line_out;
@@ -292,9 +296,10 @@ void I_FinishUpdate (void)
         }
         line_in += SCREENWIDTH;
     }
+#endif
 
 	//memcpy(DG_ScreenBuffer, I_VideoBuffer_FB, (SCREENHEIGHT * fb_scaling * (s_Fb.bits_per_pixel / 8)) * s_Fb.xres);
-    DG_ScreenBuffer = I_VideoBuffer_FB;
+    DG_ScreenBuffer = I_VideoBuffer;
 
 	DG_DrawFrame();
 }
@@ -341,6 +346,7 @@ void I_SetPalette (byte* palette)
         colors[i].g = gammatable[usegamma][*palette++];
         colors[i].b = gammatable[usegamma][*palette++];
     }
+    DG_OnPaletteReload();
 }
 
 // Given an RGB value, find the closest matching palette index.

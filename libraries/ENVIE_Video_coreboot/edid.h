@@ -34,6 +34,7 @@
 #include "api/Common.h"
 
 enum edid_modes {
+	EDID_MODE_320x240_60Hz,
 	EDID_MODE_640x480_60Hz,
 	EDID_MODE_720x480_60Hz,
 	EDID_MODE_1280x720_59Hz,

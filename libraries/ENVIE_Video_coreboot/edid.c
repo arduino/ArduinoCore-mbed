@@ -1085,6 +1085,11 @@ static void dump_breakdown(unsigned char *edid)
  * hspw = hsync_end - hsync_start;	vspw = vsync_end - vsync_start;
  */
 struct edid_mode known_modes[NUM_KNOWN_MODES] = {
+	[EDID_MODE_320x240_60Hz] = {
+		.name = "320x240@60Hz", .pixel_clock = 25750, .refresh = 60,
+		.ha = 320, .hbl = 80, .hso = 48, .hspw = 32,
+		.va = 200, .vbl = 16, .vso = 6, .vspw = 3,
+		.phsync = '-', .pvsync = '-' },
 	[EDID_MODE_640x480_60Hz] = {
 		.name = "640x480@60Hz", .pixel_clock = 25200, .refresh = 60,
 		.ha = 640, .hbl = 160, .hso = 16, .hspw = 96,

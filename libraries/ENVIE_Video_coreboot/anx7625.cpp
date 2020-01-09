@@ -908,8 +908,8 @@ static void stm32_LayerInit(uint16_t LayerIndex, uint32_t FB_Address)
 	Layercfg.Backcolor.Red = 0;
 	Layercfg.BlendingFactor1 = LTDC_BLENDING_FACTOR1_PAxCA;
 	Layercfg.BlendingFactor2 = LTDC_BLENDING_FACTOR2_PAxCA;
-	Layercfg.ImageWidth = lcd_x_size;
-	Layercfg.ImageHeight = lcd_y_size;
+	Layercfg.ImageWidth = 320;
+	Layercfg.ImageHeight = 200;
 
 	HAL_LTDC_ConfigLayer(&ltdc, &Layercfg, LayerIndex);
 }
