@@ -30,7 +30,7 @@
 class PDMClass
 {
 public:
-  PDMClass(int pwrPin, int clkPin, int dinPin);
+  PDMClass(int dinPin, int clkPin, int pwrPin);
   virtual ~PDMClass();
 
   int begin(int channels, long sampleRate);
