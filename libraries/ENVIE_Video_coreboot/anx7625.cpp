@@ -908,8 +908,8 @@ static void stm32_LayerInit(uint16_t LayerIndex, uint32_t FB_Address)
 	Layercfg.Backcolor.Red = 0;
 	Layercfg.BlendingFactor1 = LTDC_BLENDING_FACTOR1_PAxCA;
 	Layercfg.BlendingFactor2 = LTDC_BLENDING_FACTOR2_PAxCA;
-	Layercfg.ImageWidth = 320;
-	Layercfg.ImageHeight = 200;
+	Layercfg.ImageWidth = lcd_x_size;
+	Layercfg.ImageHeight = lcd_y_size;
 
 	HAL_LTDC_ConfigLayer(&ltdc, &Layercfg, LayerIndex);
 }
@@ -1168,7 +1168,7 @@ int stm32_dsi_config(uint8_t bus, struct edid *edid, struct display_timing *dt) 
 
 	//HAL_LTDC_ProgramLineEvent(&ltdc, 0);
 
-	//HAL_DSI_PatternGeneratorStart(&dsi, 0, 1);
+	HAL_DSI_PatternGeneratorStart(&dsi, 0, 1);
 	HAL_DSI_PatternGeneratorStop(&dsi);
 	stm32_LCD_Clear(0);
 	stm32_LCD_Clear(0);
