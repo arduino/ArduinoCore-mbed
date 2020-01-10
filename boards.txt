@@ -51,8 +51,8 @@ envie_m7.compiler.mbed.cxxflags={build.variant.path}/cxxflags.txt
 envie_m7.compiler.mbed.includes={build.variant.path}/includes.txt
 envie_m7.compiler.mbed.extra_ldflags=-lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
 envie_m7.compiler.mbed="{build.variant.path}/libs/libmbed.a"
-envie_m7.vid.0=0x0483
-envie_m7.pid.0=0x374e
+envie_m7.vid.0=0x2341
+envie_m7.pid.0=0x025b
 
 envie_m7.upload.tool=dfu-util
 envie_m7.upload.protocol=
