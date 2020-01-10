@@ -1,4 +1,21 @@
 {
+    "requires": [
+        "bare-metal",
+        "rtos-api",
+        "storage",
+        "storage_filesystem",
+        "mbed-bootloader",
+        "system-storage",
+        "qspif",
+        "filesystem",
+        "filesystemstore",
+        "littlefs",
+        "fat_chan",
+        "qspif-block-device",
+        "mbed-trace",
+        "flashiap-block-device",
+        "drivers-usb"
+    ],
     "config": {
         "MTB_MURATA_ABZ": {
             "lora-radio":          "SX1276",
@@ -26,7 +43,9 @@
     "target_overrides": {
         "MTB_MURATA_ABZ": {
             "target.device_has_add": ["LPTICKER"],
-            "rtos.main-thread-stack-size": 1024
+            "platform.stdio-buffered-serial": true,
+            "platform.stdio-baud-rate": 115200,
+            "platform.default-serial-baud-rate": 115200
         }
     },
     "macros": ["MBEDTLS_USER_CONFIG_FILE=\"mbedtls_lora_config.h\""]
