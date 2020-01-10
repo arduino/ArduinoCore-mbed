@@ -56,6 +56,8 @@ envie_m7.pid.0=0x025b
 
 envie_m7.upload.tool=dfu-util
 envie_m7.upload.protocol=
+envie_m7.upload.vid=0x2341
+envie_m7.upload.pid=0x035b
 envie_m7.upload.address=0x08040000
 envie_m7.upload.interface=0
 envie_m7.upload.use_1200bps_touch=true
@@ -93,6 +95,8 @@ envie_m4.build.vid=0x2341
 envie_m4.build.pid=0x005b
 
 envie_m4.upload.tool=dfu-util
+envie_m4.upload.vid=0x2341
+envie_m4.upload.pid=0x035b
 envie_m4.upload.protocol=
 envie_m4.upload.address=0x08100000
 envie_m4.upload.interface=0
