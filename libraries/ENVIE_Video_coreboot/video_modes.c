@@ -3,14 +3,14 @@
 
 struct envie_edid_mode envie_known_modes[NUM_KNOWN_MODES] = {
 	[EDID_MODE_640x480_60Hz] = {
-		.name = "640x480@75Hz", .pixel_clock = 26892, .refresh = 75,
-		.hactive = 640, .hback_porch = 40, .hfront_porch = 8, .hsync_len = 32,
-		.vactive = 480, .vback_porch = 6, .vfront_porch = 4, .vsync_len = 8,
+		.name = "640x480@75Hz", .pixel_clock = 25200, .refresh = 60,
+		.hactive = 640, .hback_porch = 160, .hfront_porch = 16, .hsync_len = 96,
+		.vactive = 480, .vback_porch = 45, .vfront_porch = 10, .vsync_len = 2,
 	},
 	[EDID_MODE_720x480_60Hz] = {
-		.name = "720x480@60Hz", .pixel_clock = 26750, .refresh = 60,
-		.hactive = 720, .hback_porch = 88, .hfront_porch = 24, .hsync_len = 64, .voffset = 0,
-		.vactive = 480, .vback_porch = 7, .vfront_porch = 3, .vsync_len = 10,
+		.name = "720x480@60Hz", .pixel_clock = 27000, .refresh = 60,
+		.hactive = 720, .hback_porch = 60, .hfront_porch = 16, .hsync_len = 62, .voffset = 1,
+		.vactive = 480, .vback_porch = 45, .vfront_porch = 9, .vsync_len = 6,
 	},
 	[EDID_MODE_800x600_59Hz] = {
 		.name = "800x600@60Hz", .pixel_clock = 37000, .refresh = 59,
