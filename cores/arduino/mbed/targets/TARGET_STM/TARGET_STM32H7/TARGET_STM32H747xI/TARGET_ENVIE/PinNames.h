@@ -326,29 +326,6 @@ typedef enum {
     ADC_TEMP = 0xF0,
     ADC_VREF = 0xF1,
     ADC_VBAT = 0xF2,
-    // Arduino connector namings
-    A0          = PA_3,
-    A1          = PC_0,
-    A2          = PC_3,
-    A3          = PF_3,
-    A4          = PF_5,
-    A5          = PF_10,
-    D0          = PG_9,
-    D1          = PG_14,
-    D2          = PF_15,
-    D3          = PE_13,
-    D4          = PF_14,
-    D5          = PE_11,
-    D6          = PE_9,
-    D7          = PF_13,
-    D8          = PF_12,
-    D9          = PD_15,
-    D10         = PD_14,
-    D11         = PB_9,
-    D12         = PA_6,
-    D13         = PA_5,
-    D14         = PB_9,
-    D15         = PB_8,
 
     // STDIO for console print
 #ifdef MBED_CONF_TARGET_STDIO_UART_TX
@@ -363,10 +340,10 @@ typedef enum {
 #endif
 
     // Generic signals namings
-    LED1        = PK_5,  // LD1 = GREEN
-    LED2        = PI_13,  // Blue
-    LED3        = PI_14,  // Red
-    LED4        = PI_15,
+    LED1        = PK_5,  // Red
+    LED2        = PK_6,  // Green
+    LED3        = PK_7,  // Blue
+
     USER_BUTTON = PC_13,
     // Standardized button names
     BUTTON1 = USER_BUTTON,
@@ -376,11 +353,7 @@ typedef enum {
     USBRX       = STDIO_UART_RX, // Virtual Com Port
     I2C_SCL     = PB_6,
     I2C_SDA     = PB_7,
-    SPI_MOSI    = D11,
-    SPI_MISO    = D12,
-    SPI_SCK     = D13,
-    SPI_CS      = D10,
-    PWM_OUT     = D9,
+    PWM_OUT     = PD_15,
 
     /**** QSPI FLASH pins ****/
     QSPI_FLASH1_IO0 = PD_11,

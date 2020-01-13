@@ -162,7 +162,8 @@ public:
      *  @param ip_address SocketAddress object containing the local IP address
      *  @param netmask    SocketAddress object containing the local network mask
      *  @param gateway    SocketAddress object containing the local gateway
-     *  @return           NSAPI_ERROR_OK on success, negative error code on failure
+     *  @retval           NSAPI_ERROR_OK on success
+     *  @retval           NSAPI_ERROR_UNSUPPORTED if this function is unsupported
      */
     virtual nsapi_error_t set_network(const SocketAddress &ip_address, const SocketAddress &netmask, const SocketAddress &gateway);
 
@@ -175,7 +176,8 @@ public:
      *  that the network is disconnected.
      *
      *  @param dhcp     True to enable DHCP.
-     *  @return         NSAPI_ERROR_OK on success, negative error code on failure.
+     *  @retval         NSAPI_ERROR_OK on success.
+     *  @retval         NSAPI_ERROR_UNSUPPORTED if operation is not supported.
      */
     virtual nsapi_error_t set_dhcp(bool dhcp);
 
@@ -228,10 +230,28 @@ public:
      *  @param version  IP version of address to resolve, NSAPI_UNSPEC indicates
      *                  version is chosen by the stack (defaults to NSAPI_UNSPEC).
      *  @param interface_name  Network interface name
-     *  @return         NSAPI_ERROR_OK on success, negative error code on failure.
+     *  @retval         NSAPI_ERROR_OK on success
+     *  @retval         int Negative error code on failure.
+     *                  See @ref NetworkStack::gethostbyname
      */
     virtual nsapi_error_t gethostbyname(const char *host,
                                         SocketAddress *address, nsapi_version_t version = NSAPI_UNSPEC, const char *interface_name = NULL);
+
+    /** Translate a hostname to the multiple IP addresses with specific version using network interface name.
+     *
+     *  The hostname may be either a domain name or an IP address. If the
+     *  hostname is an IP address, no network transactions will be performed.
+     *
+     *  If no stack-specific DNS resolution is provided, the hostname
+     *  will be resolve using a UDP socket on the stack.
+     *
+     *  @param hostname     Hostname to resolve.
+     *  @param hints  Pointer to a SocketAddress with  query parameters.
+     *  @param res    Pointer to a SocketAddress array  to store the result..
+     *  @param interface_name  Network interface name
+     *  @return         number of results on success, negative error code on failure.
+     */
+    virtual nsapi_value_or_error_t getaddrinfo(const char *hostname, SocketAddress *hints, SocketAddress **res, const char *interface_name = NULL);
 
     /** Hostname translation callback (for use with gethostbyname_async()).
      *
@@ -243,10 +263,11 @@ public:
      *  The callback should not perform expensive operations such as socket recv/send
      *  calls or blocking operations.
      *
-     *  @param result  NSAPI_ERROR_OK on success, negative error code on failure.
+     *  @param result  Negative error code on failure or
+     *                 value that represents the number of DNS records
      *  @param address On success, destination for the host SocketAddress.
      */
-    typedef mbed::Callback<void (nsapi_error_t result, SocketAddress *address)> hostbyname_cb_t;
+    typedef mbed::Callback<void (nsapi_value_or_error_t result, SocketAddress *address)> hostbyname_cb_t;
 
     /** Translate a hostname to an IP address (asynchronous) using network interface name.
      *
@@ -273,6 +294,30 @@ public:
      */
     virtual nsapi_value_or_error_t gethostbyname_async(const char *host, hostbyname_cb_t callback, nsapi_version_t version = NSAPI_UNSPEC,
                                                        const char *interface_name = NULL);
+
+    /** Translate a hostname to the multiple IP addresses (asynchronous) using network interface name.
+     *
+     *  The hostname may be either a domain name or a dotted IP address. If the
+     *  hostname is an IP address, no network transactions will be performed.
+     *
+     *  If no stack-specific DNS resolution is provided, the hostname
+     *  will be resolve using a UDP socket on the stack.
+     *
+     *  Call is non-blocking. Result of the DNS operation is returned by the callback.
+     *  If this function returns failure, callback will not be called. In case result
+     *  is success (IP address was found from DNS cache), callback will be called
+     *  before function returns.
+     *
+     *  @param hostname     Hostname to resolve.
+     *  @param hints  Pointer to a SocketAddress with  query parameters.
+     *  @param callback Callback that is called for result.
+     *  @param interface_name  Network interface name
+     *  @return         0 on immediate success,
+     *                  negative error code on immediate failure or
+     *                  a positive unique id that represents the hostname translation operation
+     *                  and can be passed to cancel.
+     */
+    virtual nsapi_value_or_error_t getaddrinfo_async(const char *hostname, SocketAddress *hints, hostbyname_cb_t callback, const char *interface_name = NULL);
 
     /** Cancel asynchronous hostname translation.
      *
@@ -369,20 +414,18 @@ public:
         return 0;
     }
 
-    /** Return pointer to a CellularInterface.
-     * @return Pointer to requested interface type or NULL if this class doesn't implement the interface.
-     * @deprecated CellularBase migrated to CellularInterface - use cellularInterface()
-     */
-    MBED_DEPRECATED_SINCE("mbed-os-5.12", "CellularBase migrated to CellularInterface - use cellularInterface()")
-    virtual CellularInterface *cellularBase() // virtual retained for binary compatibility
-    {
-        return 0;
-    }
-
     /** Return pointer to an EMACInterface.
      * @return Pointer to requested interface type or NULL if this class doesn't implement the interface.
      */
     virtual EMACInterface *emacInterface()
+    {
+        return 0;
+    }
+
+    /** Return pointer to a CellularInterface.
+     * @return Pointer to requested interface type or NULL if this class doesn't implement the interface.
+     */
+    virtual CellularInterface *cellularInterface()
     {
         return 0;
     }
@@ -447,14 +490,6 @@ public:
      * configuration).
      */
     virtual void set_default_parameters();
-
-    /** Return pointer to a CellularInterface.
-     * @return Pointer to requested interface type or NULL if this class doesn't implement the interface.
-     */
-    virtual CellularInterface *cellularInterface()
-    {
-        return 0;
-    }
 };
 
 #endif

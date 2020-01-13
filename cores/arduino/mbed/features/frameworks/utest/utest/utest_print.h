@@ -2,7 +2,7 @@
 /** \addtogroup frameworks */
 /** @{*/
 /****************************************************************************
- * Copyright (c) 2015, ARM Limited, All Rights Reserved
+ * Copyright (c) 2016, ARM Limited, All Rights Reserved
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -19,15 +19,11 @@
  ****************************************************************************
  */
 
-#ifndef UTEST_H
-#define UTEST_H
+#ifndef UTEST_PRINT_H
+#define UTEST_PRINT_H
 
-#include "utest/utest_types.h"
-#include "utest/utest_case.h"
-#include "utest/utest_default_handlers.h"
-#include "utest/utest_harness.h"
-#include "utest/utest_print.h"
+extern "C" int utest_printf(const char *format, ...);
 
-#endif // UTEST_H
+#endif // UTEST_PRINT_H
 
 /** @}*/
