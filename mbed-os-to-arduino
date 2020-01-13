@@ -126,7 +126,7 @@ mbed_compile () {
 		export PROFILE=-${PROFILE^^}
 	fi
 
-	mbed compile $PROFILE_FLAG --source . --source ./mbed-os/features/unsupported/dsp/ -v \
+	mbed compile $PROFILE_FLAG --source . -v \
 	| tee >(cat | grep 'Compile \[' >&2) | grep "Macros:" > "$BOARDNAME".macros.txt
 	echo " done."
 }
