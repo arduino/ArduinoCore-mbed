@@ -777,6 +777,11 @@ static int anx7625_power_on_init(uint8_t bus)
 		//anx7625_disable_pd_protocol(bus);
 		anx7625_reg_read(bus, RX_P0_ADDR, OCM_FW_VERSION, &version);
 		anx7625_reg_read(bus, RX_P0_ADDR, OCM_FW_REVERSION, &revision);
+
+		if (version == 0 && revision == 0) {
+			continue;
+		}
+
 		ANXINFO("Firmware: ver %#02x, rev %#02x.\n", version, revision);
 		return 0;
 	}
