@@ -23,14 +23,13 @@ PinDescription g_APinDescription[] = {
   PA_9, NULL, NULL,     // D14
 
   // A0 - A7
-  PA_0_ALT0,  NULL, NULL,     // A0
-  PA_1_ALT0,  NULL, NULL,     // A1
-  PC_2_ALT0, NULL, NULL,     // A2
-  //PC_3_ALT0, NULL, NULL,     // A3
-  PC_3, NULL, NULL,     // A3       // FIXME: this is wrong
-  PC_2, NULL, NULL,     // A4
-  PC_3,  NULL, NULL,     // A5
-  PA_4, NULL, NULL,     // A6
+  PA_0_C_ALT2,  NULL, NULL,    // A0       ADC2_INP0
+  PA_1_C_ALT0,  NULL, NULL,    // A1       ADC2_INP1
+  PC_2_C_ALT0, NULL, NULL,     // A2       ADC3_INP0
+  PC_3_C, NULL, NULL,       // A3            ADC3_INP1        
+  PC_2_ALT0, NULL, NULL,          // A4    ADC1_INP12
+  PC_3_ALT2,  NULL, NULL,         // A5         ADC2_INP13
+  PA_4, NULL, NULL,          // A6         ADC1_INP18
 };
 
 extern "C" {
@@ -41,8 +40,14 @@ extern "C" {
 
 void initVariant() {
 	RTCHandle.Instance = RTC;
-	// Turn off LED red from bootloader
+	// Turn off LED from bootloader
 	digitalWrite(PK_6, HIGH);
+
+  // configure analog mux to split Pxy and Pxy_C
+  HAL_SYSCFG_AnalogSwitchConfig(SYSCFG_SWITCH_PA0, SYSCFG_SWITCH_PA0_OPEN);
+  HAL_SYSCFG_AnalogSwitchConfig(SYSCFG_SWITCH_PA1, SYSCFG_SWITCH_PA1_OPEN);
+  HAL_SYSCFG_AnalogSwitchConfig(SYSCFG_SWITCH_PC2, SYSCFG_SWITCH_PC2_OPEN);
+  HAL_SYSCFG_AnalogSwitchConfig(SYSCFG_SWITCH_PC3, SYSCFG_SWITCH_PC3_OPEN);
 }
 
 #ifdef SERIAL_CDC
