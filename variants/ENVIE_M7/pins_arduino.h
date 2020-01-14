@@ -55,8 +55,8 @@ static const uint8_t MISO = PIN_SPI_MISO;
 static const uint8_t SCK  = PIN_SPI_SCK;
 
 // Wire
-#define PIN_WIRE_SDA        (18u)
-#define PIN_WIRE_SCL        (19u)
+#define PIN_WIRE_SDA        (11u)
+#define PIN_WIRE_SCL        (12u)
 
 #define SERIAL_HOWMANY		1
 #define SERIAL1_TX			(digitalPinToPinName(PIN_SERIAL_TX))
@@ -78,6 +78,9 @@ void _ontouch1200bps_();
 
 #define I2C_SDA				(digitalPinToPinName(PIN_WIRE_SDA))
 #define I2C_SCL				(digitalPinToPinName(PIN_WIRE_SCL))
+
+#define I2C_SDA_INTERNAL	(PB_7)
+#define I2C_SCL_INTERNAL	(PB_6)
 
 #define SPI_HOWMANY			1
 
