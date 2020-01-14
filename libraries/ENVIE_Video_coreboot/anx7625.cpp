@@ -32,7 +32,7 @@
 		printk(BIOS_DEBUG, "%s: " format, __func__, ##__VA_ARGS__)
 
 
-mbed::I2C i2cx(I2C_SDA , I2C_SCL); 
+mbed::I2C i2cx(I2C_SDA_INTERNAL , I2C_SCL_INTERNAL);
 
 int i2c_writeb(uint8_t bus, uint8_t saddr, uint8_t offset, uint8_t val) {
 	char cmd[2];
