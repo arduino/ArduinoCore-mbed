@@ -2,10 +2,12 @@
 #define DOOM_GENERIC
 
 #include <stdint.h>
+#include <SDRAM.h>
 
 #define DOOMGENERIC_RESX 640
 #define DOOMGENERIC_RESY 400
 
+//#define DEBUG_CM7_VIDEO
 
 extern uint32_t* DG_ScreenBuffer;
 

@@ -925,6 +925,10 @@ static void stm32_LayerInit(uint16_t LayerIndex, uint32_t FB_Address)
 #define FB_ADDRESS_0 		(FB_BASE_ADDRESS)
 #define FB_ADDRESS_1 		(FB_BASE_ADDRESS + (lcd_x_size * lcd_y_size * BYTES_PER_PIXEL))
 
+uint32_t getFramebufferEnd() {
+	return (FB_BASE_ADDRESS + 2 * (lcd_x_size * lcd_y_size * BYTES_PER_PIXEL));
+}
+
 extern "C" {
 static uint32_t pend_buffer = 0;
 

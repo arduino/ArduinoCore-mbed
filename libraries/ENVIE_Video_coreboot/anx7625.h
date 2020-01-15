@@ -369,5 +369,6 @@ void stm32_LCD_DrawImage(void *pSrc, void *pDst, uint32_t xSize, uint32_t ySize,
 uint32_t getNextFrameBuffer();
 uint32_t stm32_getXSize();
 uint32_t stm32_getYSize();
+uint32_t getFramebufferEnd();
 
 #endif  /* __ANX7625_H__ */

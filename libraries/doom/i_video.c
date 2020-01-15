@@ -253,6 +253,13 @@ void I_UpdateNoBlit (void)
 // I_FinishUpdate
 //
 
+void __attribute__((optimize("O0"))) readBuffer(uint32_t* buf, size_t len) {
+    uint32_t val;
+    for (int i=0; i<len/4; i++) {
+        val = buf[i];
+    }
+}
+
 void I_FinishUpdate (void)
 {
 
@@ -270,7 +277,11 @@ void I_FinishUpdate (void)
         outbuf += SCREENWIDTH * 2;
     }
 
+    #ifdef DEBUG_CM7_VIDEO
+    memcpy (DG_ScreenBuffer, I_VideoBuffer_FB, SCREENWIDTH * SCREENHEIGHT * 4);
+    #else
     DG_ScreenBuffer = I_VideoBuffer_FB;
+    #endif
 
 	DG_DrawFrame();
 }

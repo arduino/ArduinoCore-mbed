@@ -4,7 +4,7 @@
  */
 
 #include <ll.h>
-#include <malloc.h>
+#include <ea_malloc.h>
 #include <memory.h>
 #include <stdint.h>
 

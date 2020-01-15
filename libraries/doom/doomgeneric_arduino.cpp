@@ -4,7 +4,6 @@
 #include "Envie_video_coreboot.h"
 
 #define sleep _sleep
-#include "malloc.h"
 
 #include "doomkeys.h"
 #include "m_argv.h"
@@ -120,7 +119,8 @@ static void InitCLUT(uint32_t * clut)
   }
 }
 
-uint32_t L8_CLUT[256];
+uint32_t __ALIGNED(32) L8_CLUT[256];
+static DMA2D_CLUTCfgTypeDef clut;
 
 static void DMA2D_Init(uint16_t xsize, uint16_t ysize)
 {
@@ -149,10 +149,14 @@ static void DMA2D_Init(uint16_t xsize, uint16_t ysize)
   HAL_DMA2D_Init(&DMA2D_Handle);
   HAL_DMA2D_ConfigLayer(&DMA2D_Handle, 1);
 
-  DMA2D_CLUTCfgTypeDef clut;
-  clut.pCLUT = (uint32_t *)colors;
+  memcpy(L8_CLUT, colors, 256 * 4);
+  clut.pCLUT = (uint32_t *)L8_CLUT; //(uint32_t *)colors;
   clut.CLUTColorMode = DMA2D_CCM_ARGB8888;
   clut.Size = 0xFF;
+
+#ifdef CORE_CM7
+  SCB_InvalidateDCache_by_Addr(clut.pCLUT, clut.Size);
+#endif
 
   HAL_DMA2D_CLUTLoad(&DMA2D_Handle, clut, 1);
   HAL_DMA2D_PollForTransfer(&DMA2D_Handle, 100);
@@ -160,9 +164,6 @@ static void DMA2D_Init(uint16_t xsize, uint16_t ysize)
 
 void DG_Init()
 {
-
-  malloc_addblock((void*)0xC0200000, 0x600000);
-
   int ret = -1;
 
   while (ret < 0) {
@@ -191,7 +192,7 @@ void DG_Init()
   LCD_X_Size = stm32_getXSize();
   LCD_Y_Size = stm32_getYSize();
 
-  DMA2D_Init(DOOMGENERIC_RESX, DOOMGENERIC_RESY);
+  SDRAM.begin(getFramebufferEnd());
 }
 
 void DG_OnPaletteReload() {
@@ -223,6 +224,7 @@ static void handleKeyInput()
 #endif
 }
 
+
 static void DMA2D_CopyBuffer(uint32_t *pSrc, uint32_t *pDst)
 {
   uint32_t xPos, yPos, destination;
@@ -236,18 +238,25 @@ static void DMA2D_CopyBuffer(uint32_t *pSrc, uint32_t *pDst)
   HAL_DMA2D_PollForTransfer(&DMA2D_Handle, 25);  /* wait for the previous DMA2D transfer to ends */
   /* copy the new decoded frame to the LCD Frame buffer*/
   HAL_DMA2D_Start(&DMA2D_Handle, (uint32_t)pSrc, destination, DOOMGENERIC_RESX, DOOMGENERIC_RESY);
-
+#if defined(CORE_CM7) && !defined(DEBUG_CM7_VIDEO) 
+  HAL_DMA2D_PollForTransfer(&DMA2D_Handle, 200);  /* wait for the previous DMA2D transfer to ends */
+#endif
 }
 
 void DG_DrawFrame()
 {
-  DMA2D_CopyBuffer((uint32_t *)DG_ScreenBuffer, (uint32_t *)getNextFrameBuffer());
+  uint32_t fb = getNextFrameBuffer();
+#ifdef CORE_CM7
+  SCB_InvalidateDCache_by_Addr((uint32_t *)fb, DOOMGENERIC_RESX * DOOMGENERIC_RESY * 4);
+#endif
+
+  DMA2D_CopyBuffer((uint32_t *)DG_ScreenBuffer, (uint32_t *)fb);
   //handleKeyInput();
 }
 
 void DG_SleepMs(uint32_t ms)
 {
-    delay(ms);
+  delay(ms);
 }
 
 uint32_t DG_GetTicksMs()
