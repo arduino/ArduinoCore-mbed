@@ -64,7 +64,7 @@ envie_m7.upload.use_1200bps_touch=true
 envie_m7.upload.wait_for_upload_port=false
 envie_m7.upload.native_usb=true
 envie_m7.upload.maximum_size=786432
-envie_m7.upload.maximum_data_size=262144
+envie_m7.upload.maximum_data_size=523624
 
 
 ##############################################################
