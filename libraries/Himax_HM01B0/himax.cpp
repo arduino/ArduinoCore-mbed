@@ -154,13 +154,13 @@ static regval_list_t himax_default_regs[] = {
     {0x0341, 0x16},
     {0x0342, 0x01},
     {0x0343, 0x78},
-    {0x3010, 0x01},
+    {0x3010, 0x01}, // 324 x 244 pixel
     {0x0383, 0x01},
     {0x0387, 0x01},
     {0x0390, 0x00},
     {0x3011, 0x70},
     {0x3059, 0x02},
-    {0x3060, 0x01},
+    {0x3060, 0x00},
     {IMG_ORIENTATION, 0x01}, // change the orientation
     {0x0104, 0x01}
 };
@@ -196,7 +196,7 @@ static void           HIMAX_FrameRate         (void);
   * @{
   */
 
-mbed::I2C i2c(I2C_SDA , I2C_SCL);
+mbed::I2C i2c(I2C_SDA_INTERNAL , I2C_SCL_INTERNAL);
 /**
  * @brief  Initializes the I2C interface.
  * @retval HIMAX status
@@ -207,6 +207,7 @@ uint8_t HIMAX_Open(void)
     /* I2C1  Pin connected */
 
     printf("Model: %x:%x\n", HIMAX_RegRead(MODEL_ID_H), HIMAX_RegRead(MODEL_ID_L));
+    Serial.printf("Model: %x:%x\n", HIMAX_RegRead(MODEL_ID_H), HIMAX_RegRead(MODEL_ID_L));
 
     printf("After WIRE.begin\n");
 

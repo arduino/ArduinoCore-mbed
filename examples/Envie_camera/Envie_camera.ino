@@ -2,10 +2,11 @@
 
 CameraClass cam;
 
-mbed::DigitalOut pin(PD_2);
+mbed::DigitalOut pin(PD_4);
 
 void setup() {
 
+  Serial.begin(115200);
   pin = 1;
   delay(1000);
 

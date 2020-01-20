@@ -2,6 +2,7 @@
 #include "himax.h"
 #include "camera.h"
 #include "stm32h7xx_hal_dcmi.h"
+#include "SDRAM.h"
 
 #define LCD_FRAME_BUFFER                  0xC0000000 /* LCD Frame buffer of size 800x480 in ARGB8888 */
 #define CAMERA_FRAME_BUFFER               0xC0200000
@@ -34,10 +35,114 @@ __IO uint32_t lcd_frame_ready = 0;
 #define CAMERA_R480x272                 0x02   /* 480x272 Resolution                   */
 #define CAMERA_R640x480                 0x03   /* VGA Resolution                       */  
 
+extern "C" {
 
 DCMI_HandleTypeDef  hdcmi_discovery;
 
 static uint32_t CameraCurrentResolution;
+
+/**
+  * @brief  Initializes the DCMI MSP.
+  * @param  hdcmi: HDMI handle
+  * @param  Params : pointer on additional configuration parameters, can be NULL. 
+  * @retval None
+  */
+void BSP_CAMERA_MspInit(DCMI_HandleTypeDef *hdcmi, void *Params)
+{
+  static DMA_HandleTypeDef hdma_handler;
+  GPIO_InitTypeDef gpio_init_structure;
+
+  /*** Enable peripherals and GPIO clocks ***/
+  /* Enable DCMI clock */
+  __HAL_RCC_DCMI_CLK_ENABLE();
+
+  /* Enable DMA clock */
+  CAMERA_DCMI_DMAx_CLK_ENABLE();
+
+  /* Enable GPIO clocks */
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOH_CLK_ENABLE();
+  __HAL_RCC_GPIOI_CLK_ENABLE();
+
+  /*** Configure the GPIO ***/
+  /* Configure DCMI GPIO as alternate function */
+  gpio_init_structure.Pin       = GPIO_PIN_4 | GPIO_PIN_6;
+  gpio_init_structure.Mode      = GPIO_MODE_AF_PP;
+  gpio_init_structure.Pull      = GPIO_PULLUP;
+  gpio_init_structure.Speed     = GPIO_SPEED_FREQ_VERY_HIGH;
+  gpio_init_structure.Alternate = GPIO_AF13_DCMI;
+  HAL_GPIO_Init(GPIOA, &gpio_init_structure);
+
+  gpio_init_structure.Pin       = GPIO_PIN_9 | GPIO_PIN_10 | GPIO_PIN_11 | GPIO_PIN_12 | GPIO_PIN_14;
+  gpio_init_structure.Mode      = GPIO_MODE_AF_PP;
+  gpio_init_structure.Pull      = GPIO_PULLUP;
+  gpio_init_structure.Speed     = GPIO_SPEED_FREQ_VERY_HIGH;
+  gpio_init_structure.Alternate = GPIO_AF13_DCMI;
+  HAL_GPIO_Init(GPIOH, &gpio_init_structure);
+
+  gpio_init_structure.Pin       = GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7;
+  gpio_init_structure.Mode      = GPIO_MODE_AF_PP;
+  gpio_init_structure.Pull      = GPIO_PULLUP;
+  gpio_init_structure.Speed     = GPIO_SPEED_FREQ_VERY_HIGH;
+  gpio_init_structure.Alternate = GPIO_AF13_DCMI;
+  HAL_GPIO_Init(GPIOI, &gpio_init_structure);
+
+  /*** Configure the DMA ***/
+  /* Set the parameters to be configured */
+  hdma_handler.Init.Request             = DMA_REQUEST_DCMI;
+  hdma_handler.Init.Direction           = DMA_PERIPH_TO_MEMORY;
+  hdma_handler.Init.PeriphInc           = DMA_PINC_DISABLE;
+  hdma_handler.Init.MemInc              = DMA_MINC_ENABLE;
+  hdma_handler.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
+  hdma_handler.Init.MemDataAlignment    = DMA_MDATAALIGN_WORD;
+  hdma_handler.Init.Mode                = DMA_CIRCULAR;
+  hdma_handler.Init.Priority            = DMA_PRIORITY_HIGH;
+  hdma_handler.Init.FIFOMode            = DMA_FIFOMODE_DISABLE;
+  hdma_handler.Init.FIFOThreshold       = DMA_FIFO_THRESHOLD_FULL;
+  hdma_handler.Init.MemBurst            = DMA_MBURST_SINGLE;
+  hdma_handler.Init.PeriphBurst         = DMA_PBURST_SINGLE; 
+
+  hdma_handler.Instance = CAMERA_DCMI_DMAx_STREAM;
+
+  /* Associate the initialized DMA handle to the DCMI handle */
+  __HAL_LINKDMA(hdcmi, DMA_Handle, hdma_handler);
+  
+  /*** Configure the NVIC for DCMI and DMA ***/
+  /* NVIC configuration for DCMI transfer complete interrupt */
+  HAL_NVIC_SetPriority(DCMI_IRQn, 0x0F, 0);
+  HAL_NVIC_EnableIRQ(DCMI_IRQn);
+
+  /* NVIC configuration for DMA transfer complete interrupt */
+  HAL_NVIC_SetPriority(CAMERA_DCMI_DMAx_IRQ, 0x0F, 0);
+  HAL_NVIC_EnableIRQ(CAMERA_DCMI_DMAx_IRQ);
+
+  /* Configure the DMA stream */
+  HAL_DMA_Init(hdcmi->DMA_Handle);
+}
+
+/**
+  * @brief  DeInitializes the DCMI MSP.
+  * @param  hdcmi: HDMI handle
+  * @param  Params : pointer on additional configuration parameters, can be NULL.
+  * @retval None
+  */
+void BSP_CAMERA_MspDeInit(DCMI_HandleTypeDef *hdcmi, void *Params)
+{
+  /* Disable NVIC  for DCMI transfer complete interrupt */
+  HAL_NVIC_DisableIRQ(DCMI_IRQn);  
+  
+  /* Disable NVIC for DMA2 transfer complete interrupt */
+  HAL_NVIC_DisableIRQ(CAMERA_DCMI_DMAx_IRQ);
+  
+  /* Configure the DMA stream */
+  HAL_DMA_DeInit(hdcmi->DMA_Handle);  
+
+  /* Disable DCMI clock */
+  __HAL_RCC_DCMI_CLK_DISABLE();
+
+  /* GPIO pins clock and DMA clock can be shut down in the application
+     by surcharging this __weak function */
+}
 
 /** @defgroup STM32H747I_DISCOVERY_CAMERA_Private_FunctionPrototypes Private FunctionPrototypes
   * @{
@@ -88,7 +193,7 @@ uint8_t BSP_CAMERA_Init(uint32_t Resolution)
   phdcmi->Init.CaptureRate      = DCMI_CR_ALL_FRAME;
   phdcmi->Init.HSPolarity       = DCMI_HSPOLARITY_LOW;
   phdcmi->Init.SynchroMode      = DCMI_SYNCHRO_HARDWARE;
-  phdcmi->Init.VSPolarity       = DCMI_VSPOLARITY_HIGH;
+  phdcmi->Init.VSPolarity       = DCMI_VSPOLARITY_LOW;
   phdcmi->Init.ExtendedDataMode = DCMI_EXTEND_DATA_8B;
   phdcmi->Init.PCKPolarity      = DCMI_PCKPOLARITY_RISING;
   phdcmi->Instance              = DCMI;
@@ -262,7 +367,7 @@ static uint32_t GetSize(uint32_t Resolution)
     break;
   case CAMERA_R320x240:
     {
-      size =  0x9600;
+      size =  324 * 244;
     }
     break;
   case CAMERA_R480x272:
@@ -285,117 +390,11 @@ static uint32_t GetSize(uint32_t Resolution)
 }
 
 /**
-  * @brief  Initializes the DCMI MSP.
-  * @param  hdcmi: HDMI handle
-  * @param  Params : pointer on additional configuration parameters, can be NULL. 
-  * @retval None
-  */
-__weak void BSP_CAMERA_MspInit(DCMI_HandleTypeDef *hdcmi, void *Params)
-{
-  static DMA_HandleTypeDef hdma_handler;
-  GPIO_InitTypeDef gpio_init_structure;
-
-  /*** Enable peripherals and GPIO clocks ***/
-  /* Enable DCMI clock */
-  __HAL_RCC_DCMI_CLK_ENABLE();
-
-  /* Enable DMA clock */
-  CAMERA_DCMI_DMAx_CLK_ENABLE();
-
-  /* Enable GPIO clocks */
-  __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOH_CLK_ENABLE();
-  __HAL_RCC_GPIOI_CLK_ENABLE();
-
-  /*** Configure the GPIO ***/
-  /* Configure DCMI GPIO as alternate function */
-  gpio_init_structure.Pin       = GPIO_PIN_4 | GPIO_PIN_6;
-  gpio_init_structure.Mode      = GPIO_MODE_AF_PP;
-  gpio_init_structure.Pull      = GPIO_PULLUP;
-  gpio_init_structure.Speed     = GPIO_SPEED_FREQ_VERY_HIGH;
-  gpio_init_structure.Alternate = GPIO_AF13_DCMI;
-  HAL_GPIO_Init(GPIOA, &gpio_init_structure);
-
-  gpio_init_structure.Pin       = GPIO_PIN_9 | GPIO_PIN_10 | GPIO_PIN_11 | GPIO_PIN_12 | GPIO_PIN_14;
-  gpio_init_structure.Mode      = GPIO_MODE_AF_PP;
-  gpio_init_structure.Pull      = GPIO_PULLUP;
-  gpio_init_structure.Speed     = GPIO_SPEED_FREQ_VERY_HIGH;
-  gpio_init_structure.Alternate = GPIO_AF13_DCMI;
-  HAL_GPIO_Init(GPIOH, &gpio_init_structure);
-
-  gpio_init_structure.Pin       = GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7;
-  gpio_init_structure.Mode      = GPIO_MODE_AF_PP;
-  gpio_init_structure.Pull      = GPIO_PULLUP;
-  gpio_init_structure.Speed     = GPIO_SPEED_FREQ_VERY_HIGH;
-  gpio_init_structure.Alternate = GPIO_AF13_DCMI;
-  HAL_GPIO_Init(GPIOI, &gpio_init_structure);
-
-  /*** Configure the DMA ***/
-  /* Set the parameters to be configured */
-  hdma_handler.Init.Request             = DMA_REQUEST_DCMI;
-  hdma_handler.Init.Direction           = DMA_PERIPH_TO_MEMORY;
-  hdma_handler.Init.PeriphInc           = DMA_PINC_DISABLE;
-  hdma_handler.Init.MemInc              = DMA_MINC_ENABLE;
-  hdma_handler.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
-  hdma_handler.Init.MemDataAlignment    = DMA_MDATAALIGN_WORD;
-  hdma_handler.Init.Mode                = DMA_CIRCULAR;
-  hdma_handler.Init.Priority            = DMA_PRIORITY_HIGH;
-  hdma_handler.Init.FIFOMode            = DMA_FIFOMODE_DISABLE;
-  hdma_handler.Init.FIFOThreshold       = DMA_FIFO_THRESHOLD_FULL;
-  hdma_handler.Init.MemBurst            = DMA_MBURST_SINGLE;
-  hdma_handler.Init.PeriphBurst         = DMA_PBURST_SINGLE; 
-
-  hdma_handler.Instance = CAMERA_DCMI_DMAx_STREAM;
-
-  /* Associate the initialized DMA handle to the DCMI handle */
-  __HAL_LINKDMA(hdcmi, DMA_Handle, hdma_handler);
-  
-  /*** Configure the NVIC for DCMI and DMA ***/
-  /* NVIC configuration for DCMI transfer complete interrupt */
-  HAL_NVIC_SetPriority(DCMI_IRQn, 0x0F, 0);
-  HAL_NVIC_EnableIRQ(DCMI_IRQn);
-
-  /* NVIC configuration for DMA transfer complete interrupt */
-  HAL_NVIC_SetPriority(CAMERA_DCMI_DMAx_IRQ, 0x0F, 0);
-  HAL_NVIC_EnableIRQ(CAMERA_DCMI_DMAx_IRQ);
-
-  /* Configure the DMA stream */
-  HAL_DMA_Init(hdcmi->DMA_Handle);
-}
-
-/**
-  * @brief  DeInitializes the DCMI MSP.
-  * @param  hdcmi: HDMI handle
-  * @param  Params : pointer on additional configuration parameters, can be NULL.
-  * @retval None
-  */
-__weak void BSP_CAMERA_MspDeInit(DCMI_HandleTypeDef *hdcmi, void *Params)
-{
-  /* Disable NVIC  for DCMI transfer complete interrupt */
-  HAL_NVIC_DisableIRQ(DCMI_IRQn);  
-  
-  /* Disable NVIC for DMA2 transfer complete interrupt */
-  HAL_NVIC_DisableIRQ(CAMERA_DCMI_DMAx_IRQ);
-  
-  /* Configure the DMA stream */
-  HAL_DMA_DeInit(hdcmi->DMA_Handle);  
-
-  /* Disable DCMI clock */
-  __HAL_RCC_DCMI_CLK_DISABLE();
-
-  /* GPIO pins clock and DMA clock can be shut down in the application
-     by surcharging this __weak function */
-}
-
-/**
   * @brief  Error callback.
   * @retval None
   */
-__weak void BSP_CAMERA_ErrorCallback(void)
+void BSP_CAMERA_ErrorCallback(void)
 {
-  /* NOTE : This function Should not be modified, when the callback is needed,
-            the HAL_DCMI_ErrorCallback could be implemented in the user file
-   */
 }
 
 void BSP_CAMERA_FrameEventCallback(void)
@@ -414,53 +413,12 @@ void DCMI_IRQHandler(void)
   HAL_DCMI_IRQHandler(&hdcmi_discovery);
 }
 
-int CameraClass::begin(void)
-{  
-  CameraResX = QVGA_RES_X;
-  CameraResY = QVGA_RES_Y;
-
-  /*## Camera Initialization and capture start ############################*/
-  /* Initialize the Camera in QVGA mode */
-  if(BSP_CAMERA_Init(CAMERA_R320x240) != 1)
-  {
-    printf("BSP_CAMERA_Init failed\n");
-    return 0;
-  }
-
-}
-
-int CameraClass::snapshot(void)
-{
-  printf("Start snapshot\n");
-  HIMAX_Mode(HIMAX_Streaming);
-
-  /* Start the Camera Snapshot Capture */
-  //BSP_CAMERA_SnapshotStart((uint8_t *)CAMERA_FRAME_BUFFER);
-  BSP_CAMERA_ContinuousStart((uint8_t *)CAMERA_FRAME_BUFFER);
-
-  /* Wait until camera frame is ready : DCMI Frame event */
-  while(camera_frame_ready == 0)
-  {
-  }
-
-  printf("Snapshot done\n");
-  
-  /* Stop the camera to avoid having the DMA2D work in parallel of Display */
-  /* which cause perturbation of LTDC                                      */
-  BSP_CAMERA_Stop();
-}
-
-extern "C" {
-
 /**
   * @brief  Line Event callback.
   * @retval None
   */
-__weak void BSP_CAMERA_LineEventCallback(void)
+void BSP_CAMERA_LineEventCallback(void)
 {
-  /* NOTE : This function Should not be modified, when the callback is needed,
-            the HAL_DCMI_LineEventCallback could be implemented in the user file
-   */
 }
 
 /**
@@ -477,11 +435,8 @@ void HAL_DCMI_LineEventCallback(DCMI_HandleTypeDef *hdcmi)
   * @brief  VSYNC Event callback.
   * @retval None
   */
-__weak void BSP_CAMERA_VsyncEventCallback(void)
+void BSP_CAMERA_VsyncEventCallback(void)
 {
-  /* NOTE : This function Should not be modified, when the callback is needed,
-            the HAL_DCMI_VsyncEventCallback could be implemented in the user file
-   */
 }
 
 /**
@@ -515,5 +470,68 @@ void HAL_DCMI_ErrorCallback(DCMI_HandleTypeDef *hdcmi)
 }
 
 }
+
+
+int CameraClass::begin(void)
+{  
+  CameraResX = QVGA_RES_X;
+  CameraResY = QVGA_RES_Y;
+
+  SDRAM.begin(LCD_FRAME_BUFFER);
+
+  for (int i=0; i<1000; i++) {
+    *((uint8_t*)LCD_FRAME_BUFFER + i) = 0x55;
+  }
+
+    printf("Clean ram\n");
+
+  for (int i=0; i<1000; i++) {
+    printf("%02x ", *((uint8_t*)LCD_FRAME_BUFFER + i));
+    if (i % 16 == 0) {
+      printf("\n");
+    }
+  }
+
+  /*## Camera Initialization and capture start ############################*/
+  /* Initialize the Camera in QVGA mode */
+  if(BSP_CAMERA_Init(CAMERA_R320x240) != 1)
+  {
+    printf("BSP_CAMERA_Init failed\n");
+    return 0;
+  }
+
+}
+
+int CameraClass::snapshot(void)
+{
+  printf("Start snapshot\n");
+  HIMAX_Mode(HIMAX_Streaming);
+
+  /* Start the Camera Snapshot Capture */
+  BSP_CAMERA_SnapshotStart((uint8_t *)LCD_FRAME_BUFFER);
+  //BSP_CAMERA_ContinuousStart((uint8_t *)CAMERA_FRAME_BUFFER);
+
+  /* Wait until camera frame is ready : DCMI Frame event */
+  while(camera_frame_ready == 0)
+  {
+  }
+
+  delay(100);
+
+  printf("Snapshot done\n");
+  
+      printf("Print ram\n");
+
+  for (int i=0; i<1000; i++) {
+    printf("%02x ", *((uint8_t*)LCD_FRAME_BUFFER + i));
+    if (i % 16 == 0) {
+      printf("\n");
+    }
+  }
+  /* Stop the camera to avoid having the DMA2D work in parallel of Display */
+  /* which cause perturbation of LTDC                                      */
+  BSP_CAMERA_Stop();
+}
+
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
