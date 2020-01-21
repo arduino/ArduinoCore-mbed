@@ -307,7 +307,7 @@ __weak void BSP_SD_MspInit(SD_HandleTypeDef *hsd, void *Params)
   HAL_GPIO_Init(GPIOG, &gpio_init_structure);
 
   /* Set the camera POWER_DOWN pin (active high) */
-  HAL_GPIO_WritePin(GPIOG, GPIO_PIN_3, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOG, GPIO_PIN_3, GPIO_PIN_RESET);
 
   /* Enable SDIO clock */
   __HAL_RCC_SDMMC2_CLK_ENABLE();
