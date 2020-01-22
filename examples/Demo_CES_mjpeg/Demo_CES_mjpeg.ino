@@ -6,6 +6,7 @@
 #include "config.h"
 #include "AVI_parser.h"
 #include "image.h"
+#include "SDRAM.h"
 
 struct edid recognized_edid;
 
@@ -60,45 +61,47 @@ void setup() {
   //anx7625_dp_start(0, &recognized_edid, EDID_MODE_1280x720_60Hz);
   anx7625_dp_start(0, &recognized_edid);
 
+  SDRAM.begin(getFramebufferEnd());
+
   delay(1000);
 
-/*
-  QSPIFBlockDevice* block_device = new QSPIFBlockDevice(PD_11, PD_12, PF_7, PD_13,
-      PF_10, PG_6, QSPIF_POLARITY_MODE_0, MBED_CONF_QSPIF_QSPI_FREQ);
-  block_device->init();
+  /*
+    QSPIFBlockDevice* block_device = new QSPIFBlockDevice(PD_11, PD_12, PF_7, PD_13,
+        PF_10, PG_6, QSPIF_POLARITY_MODE_0, MBED_CONF_QSPIF_QSPI_FREQ);
+    block_device->init();
 
-  mbed::bd_size_t sector_size_at_address_0 = block_device->get_erase_size(0);
+    mbed::bd_size_t sector_size_at_address_0 = block_device->get_erase_size(0);
 
-  printf("QSPIF BD size: %llu\n",         block_device->size());
-  printf("QSPIF BD read size: %llu\n",    block_device->get_read_size());
-  printf("QSPIF BD program size: %llu\n", block_device->get_program_size());
+    printf("QSPIF BD size: %llu\n",         block_device->size());
+    printf("QSPIF BD read size: %llu\n",    block_device->get_read_size());
+    printf("QSPIF BD program size: %llu\n", block_device->get_program_size());
 
-  printf("QSPIF BD erase size (at address 0): %llu\n", sector_size_at_address_0);
+    printf("QSPIF BD erase size (at address 0): %llu\n", sector_size_at_address_0);
 
-    char avi_header[] = {0x52, 0x49, 0x46, 0x46};
-    char *buffer = (char *) malloc(sector_size_at_address_0);
-    int i = 0;
-    int res = 0;
-    while (sector_size_at_address_0 * i < block_device->size()) {
-      block_device->read(buffer, i, sector_size_at_address_0);
-      res = KMP(avi_header, 4, buffer, sector_size_at_address_0);
-      if (res != -1) {
-        break;
+      char avi_header[] = {0x52, 0x49, 0x46, 0x46};
+      char *buffer = (char *) malloc(sector_size_at_address_0);
+      int i = 0;
+      int res = 0;
+      while (sector_size_at_address_0 * i < block_device->size()) {
+        block_device->read(buffer, i, sector_size_at_address_0);
+        res = KMP(avi_header, 4, buffer, sector_size_at_address_0);
+        if (res != -1) {
+          break;
+        }
+        i++;
       }
-      i++;
-    }
 
-  char *buffer = (char *) malloc(sector_size_at_address_0);
-  block_device->read(buffer, 0, sector_size_at_address_0);
-*/
+    char *buffer = (char *) malloc(sector_size_at_address_0);
+    block_device->read(buffer, 0, sector_size_at_address_0);
+  */
 
   //AVI_FILE_ADDRESS = (((uint32_t)(ardulogo_avi)));
- //  DumpHex((void*)buffer, 40);
+  //  DumpHex((void*)buffer, 40);
 
-  AVI_FILE_ADDRESS = ((uint32_t)(0x90000000));
-  //AVI_FILE_ADDRESS = (((uint32_t)(video_envie_avi)));
+  //AVI_FILE_ADDRESS = ((uint32_t)(0x90000000));
+  AVI_FILE_ADDRESS = (((uint32_t)(video_envie_avi)));
 
-  DumpHex((void*)AVI_FILE_ADDRESS + 0x3210, 40);
+  //DumpHex((void*)AVI_FILE_ADDRESS + 0x3210, 40);
 
   printf("Address: %x\n",  AVI_FILE_ADDRESS);
 
@@ -108,9 +111,10 @@ void setup() {
   LCD_X_Size = stm32_getXSize();
   LCD_Y_Size = stm32_getYSize();
 
-  //stm32_LCD_DrawImage((void*)texture_raw, (void *)getNextFrameBuffer(), 300, 300, DMA2D_INPUT_RGB565);
-  //stm32_LCD_DrawImage((void*)texture_raw, (void *)getNextFrameBuffer(), 300, 300, DMA2D_INPUT_RGB565);
-
+/*
+  stm32_LCD_DrawImage((void*)texture_raw, (void *)getNextFrameBuffer(), 300, 300, DMA2D_INPUT_RGB565);
+  stm32_LCD_DrawImage((void*)texture_raw, (void *)getNextFrameBuffer(), 300, 300, DMA2D_INPUT_RGB565);
+*/
   JPEG_Handle.Instance = JPEG;
   HAL_JPEG_Init(&JPEG_Handle);
 }
