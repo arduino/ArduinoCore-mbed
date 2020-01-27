@@ -48,6 +48,12 @@ extern "C" {
 #define I2CAPI_I2C3_CLKSRC RCC_I2C3CLKSOURCE_D2PCLK1
 #define I2CAPI_I2C4_CLKSRC RCC_I2C4CLKSOURCE_D3PCLK1
 
+#if (APB1CLK)
+#define APB1CLK_MULTIPLIER  (APB1CLK / 54000000)
+#else
+#define APB1CLK_MULTIPLIER  (1)
+#endif
+
 /*  Provide the suitable timing depending on requested frequencie */
 static inline uint32_t get_i2c_timing(int hz)
 {
@@ -64,13 +70,13 @@ static inline uint32_t get_i2c_timing(int hz)
     */
     switch (hz) {
         case 100000:
-            tim = 0x10916998; // Standard mode with Rise time = 120ns, Fall time = 120ns
+            tim = 0x10916998 * APB1CLK_MULTIPLIER; // Standard mode with Rise time = 120ns, Fall time = 120ns
             break;
         case 400000:
-            tim = 0x00B11B54; // Fast Mode with Rise time = 120ns, Fall time = 120ns
+            tim = 0x00B11B54 * APB1CLK_MULTIPLIER; // Fast Mode with Rise time = 120ns, Fall time = 120ns
             break;
         case 1000000:
-            tim = 0x0090091B; // Fast Mode Plus with Rise time = 120ns, Fall time = 10ns
+            tim = 0x0090091B * APB1CLK_MULTIPLIER; // Fast Mode Plus with Rise time = 120ns, Fall time = 10ns
             break;
         default:
             break;

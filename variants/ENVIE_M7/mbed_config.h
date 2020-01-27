@@ -22,6 +22,7 @@
 #define __MBED_CONFIG_DATA__
 
 // Configuration parameters
+#define APB1CLK                                                               112500000                                                                                        // set by target:ENVIE
 #define ATT_NUM_SIMUL_NTF                                                     1                                                                                                // set by library:cordio
 #define ATT_NUM_SIMUL_WRITE_CMD                                               1                                                                                                // set by library:cordio
 #define BLE_FEATURE_EXTENDED_ADVERTISING                                      1                                                                                                // set by library:ble
@@ -38,7 +39,7 @@
 #define BLE_ROLE_CENTRAL                                                      1                                                                                                // set by library:ble
 #define BLE_ROLE_OBSERVER                                                     1                                                                                                // set by library:ble
 #define BLE_ROLE_PERIPHERAL                                                   1                                                                                                // set by library:ble
-#define CLOCK_SOURCE                                                          USE_PLL_HSE_XTAL                                                                                 // set by target:ENVIE
+#define CLOCK_SOURCE                                                          USE_PLL_HSE_EXTC                                                                                 // set by target:ENVIE
 #define DM_CONN_MAX                                                           3                                                                                                // set by library:cordio
 #define DM_NUM_ADV_SETS                                                       3                                                                                                // set by library:cordio
 #define DM_NUM_PHYS                                                           3                                                                                                // set by library:cordio

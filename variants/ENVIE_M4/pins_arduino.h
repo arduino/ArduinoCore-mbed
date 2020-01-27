@@ -83,13 +83,15 @@ static const uint8_t SCK  = PIN_SPI_SCK;
 uint8_t getUniqueSerialNumber(uint8_t* name);
 void _ontouch1200bps_();
 
-#define WIRE_HOWMANY		1
+#define WIRE_HOWMANY		2
 
 #define I2C_SDA				(digitalPinToPinName(PIN_WIRE_SDA))
 #define I2C_SCL				(digitalPinToPinName(PIN_WIRE_SCL))
 
 #define I2C_SDA_INTERNAL	(PB_7)
 #define I2C_SCL_INTERNAL	(PB_6)
+#define I2C_SDA1			I2C_SDA_INTERNAL
+#define I2C_SCL1			I2C_SCL_INTERNAL
 
 #define SPI_HOWMANY			1
 
