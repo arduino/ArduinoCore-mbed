@@ -359,44 +359,44 @@ mriClearFaultStatusBitsAndReturn:
     bx      lr
 
 
-    .global HardFault_Handler
-    .type HardFault_Handler, function
-    .thumb_func
+//    .global HardFault_Handler
+//    .type HardFault_Handler, function
+//    .thumb_func
     /* extern "C" void HardFault_Handler(void);
        Override Hard Faults and send to MriExceptionHandler.
     */
-HardFault_Handler:
-    b       mriFaultHandler
+//HardFault_Handler:
+//    b       mriFaultHandler
     
  
-    .global MemManage_Handler
-    .type MemManage_Handler, function
-    .thumb_func
+//    .global MemManage_Handler
+//    .type MemManage_Handler, function
+//    .thumb_func
     /* extern "C" void MemManage_Handler(void);
        Override MPU Memory Faults and send to MriExceptionHandler.
     */
-MemManage_Handler:
-    b       mriFaultHandler
+//MemManage_Handler:
+//    b       mriFaultHandler
     
 
-    .global BusFault_Handler
-    .type BusFault_Handler, function
-    .thumb_func
+//    .global BusFault_Handler
+//    .type BusFault_Handler, function
+//    .thumb_func
     /* extern "C" void BusFault_Handler(void);
        Override Bus Faults and send to MriExceptionHandler.
     */
-BusFault_Handler:
-    b       mriFaultHandler
+//BusFault_Handler:
+//    b       mriFaultHandler
     
 
-    .global UsageFault_Handler
-    .type UsageFault_Handler, function
-    .thumb_func
+//    .global UsageFault_Handler
+//    .type UsageFault_Handler, function
+//    .thumb_func
     /* extern "C" void UsageFault_Handler(void);
        Override Instruction Usage Faults and send to MriExceptionHandler.
     */
-UsageFault_Handler:
-    b       __mriExceptionHandler
+//UsageFault_Handler:
+//    b       __mriExceptionHandler
     
 
     .global DebugMon_Handler

@@ -20,7 +20,7 @@
 #include "../../architectures/armv7-m/armv7-m.h"
 #include "../../architectures/armv7-m/debug_cm3.h"
 
-
+/* Attention - This memory map is still from STM32F429 and NOT FROM STM32H747XI */
 static const char g_memoryMapXml[] = "<?xml version=\"1.0\"?>"
                                      "<!DOCTYPE memory-map PUBLIC \"+//IDN gnu.org//DTD GDB Memory Map V1.0//EN\" \"http://sourceware.org/gdb/gdb-memory-map.dtd\">"
                                      "<memory-map>"
@@ -34,20 +34,11 @@ static const char g_memoryMapXml[] = "<?xml version=\"1.0\"?>"
                                      "<memory type=\"ram\" start=\"0x2001C000\" length=\"0x4000\"> </memory>"
                                      "<memory type=\"ram\" start=\"0x20020000\" length=\"0x10000\"> </memory>"
                                      "</memory-map>";
-//Stm32f429xxState __mriStm32f429xxState;
-
-
-/* Reference this handler in the ASM module to make sure that it gets linked in. */
-void USART1_IRQHandler(void);
 
 
 static void defaultExternalInterruptsToPriority1(void);
 void __mriStm32f429xx_Init(Token* pParameterTokens)
 {
-    /* Reference handler in ASM module to make sure that is gets linked in. */
-    void (* volatile dummyReference)(void) = USART1_IRQHandler;
-    (void)dummyReference;
-
     __try
         __mriCortexMInit(pParameterTokens);
     __catch

@@ -17,7 +17,6 @@
 #define MBED_H
 
 #include "platform/mbed_version.h"
-#include "mbed_config.h"
 
 #if MBED_CONF_RTOS_API_PRESENT
 #include "rtos/rtos.h"
@@ -64,7 +63,7 @@
 #include "drivers/AnalogOut.h"
 #include "drivers/PwmOut.h"
 #include "drivers/Serial.h"
-#include "drivers/SPIMaster.h"
+#include "drivers/SPI.h"
 #include "drivers/SPISlave.h"
 #include "drivers/I2C.h"
 #include "drivers/I2CSlave.h"

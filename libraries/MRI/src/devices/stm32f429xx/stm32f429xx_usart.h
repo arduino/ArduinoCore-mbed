@@ -18,16 +18,7 @@
 #define _STM32F429XX_USART_H_
 
 #include <stdint.h>
-//#include "stm32f4xx.h"
 #include "core/token.h"
-
-// typedef struct 
-// {
-//     USART_TypeDef*     pUartRegisters;
-//     uint32_t    txFunction;
-//     uint32_t    rxFunction;
-// } UartConfiguration;
-
 
 void __mriStm32f429xxUart_Init(Token* pParameterTokens);
 
