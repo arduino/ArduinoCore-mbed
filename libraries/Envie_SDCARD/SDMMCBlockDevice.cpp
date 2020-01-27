@@ -27,7 +27,7 @@
 #warning "mbed-os version 5.5.0 or above required"
 #endif
 
-#define SD_DBG 1 /*!< 1 - Enable debugging */
+#define SD_DBG 0 /*!< 1 - Enable debugging */
 
 /** Enum of standard error codes
  *
