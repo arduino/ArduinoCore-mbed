@@ -22,6 +22,7 @@
 #define __MBED_CONFIG_DATA__
 
 // Configuration parameters
+#define APB1CLK                                                               112500000                                                                                        // set by target:ENVIE
 #define ATT_NUM_SIMUL_NTF                                                     1                                                                                                // set by library:cordio
 #define ATT_NUM_SIMUL_WRITE_CMD                                               1                                                                                                // set by library:cordio
 #define BLE_FEATURE_EXTENDED_ADVERTISING                                      1                                                                                                // set by library:ble
@@ -38,7 +39,7 @@
 #define BLE_ROLE_CENTRAL                                                      1                                                                                                // set by library:ble
 #define BLE_ROLE_OBSERVER                                                     1                                                                                                // set by library:ble
 #define BLE_ROLE_PERIPHERAL                                                   1                                                                                                // set by library:ble
-#define CLOCK_SOURCE                                                          USE_PLL_HSE_EXTC|USE_PLL_HSI                                                                     // set by target:ENVIE
+#define CLOCK_SOURCE                                                          USE_PLL_HSE_EXTC                                                                                 // set by target:ENVIE
 #define DM_CONN_MAX                                                           3                                                                                                // set by library:cordio
 #define DM_NUM_ADV_SETS                                                       3                                                                                                // set by library:cordio
 #define DM_NUM_PHYS                                                           3                                                                                                // set by library:cordio
@@ -72,6 +73,7 @@
 #define MBED_CONF_DRIVERS_QSPI_SCK                                            QSPI_FLASH1_SCK                                                                                  // set by library:drivers
 #define MBED_CONF_DRIVERS_UART_SERIAL_RXBUF_SIZE                              256                                                                                              // set by library:drivers
 #define MBED_CONF_DRIVERS_UART_SERIAL_TXBUF_SIZE                              256                                                                                              // set by library:drivers
+#define MBED_CONF_ESP8266_BUILT_IN_DNS                                        0                                                                                                // set by library:esp8266
 #define MBED_CONF_ESP8266_DEBUG                                               0                                                                                                // set by library:esp8266
 #define MBED_CONF_ESP8266_POWER_OFF_TIME_MS                                   3                                                                                                // set by library:esp8266
 #define MBED_CONF_ESP8266_POWER_ON_POLARITY                                   0                                                                                                // set by library:esp8266
@@ -348,7 +350,7 @@
 #define MBED_CONF_TARGET_LPUART_CLOCK_SOURCE                                  USE_LPUART_CLK_LSE|USE_LPUART_CLK_PCLK1                                                          // set by target:FAMILY_STM32
 #define MBED_CONF_TARGET_LSE_AVAILABLE                                        1                                                                                                // set by target:FAMILY_STM32
 #define MBED_CONF_TARGET_MPU_ROM_END                                          0x0fffffff                                                                                       // set by target:Target
-#define MBED_CONF_TARGET_NETWORK_DEFAULT_INTERFACE_TYPE                       ETHERNET                                                                                         // set by target:ENVIE
+#define MBED_CONF_TARGET_NETWORK_DEFAULT_INTERFACE_TYPE                       WIFI                                                                                             // set by target:ENVIE
 #define MBED_CONF_TARGET_TICKLESS_FROM_US_TICKER                              0                                                                                                // set by target:Target
 #define MBED_CONF_TARGET_USB_SPEED                                            USE_USB_OTG_HS                                                                                   // set by target:ENVIE
 #define MBED_CONF_TARGET_XIP_ENABLE                                           0                                                                                                // set by target:Target

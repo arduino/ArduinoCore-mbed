@@ -20,7 +20,7 @@
 #if DEVICE_SERIAL && DEVICE_INTERRUPTIN && defined(MBED_CONF_EVENTS_PRESENT) && defined(MBED_CONF_NSAPI_PRESENT) && defined(MBED_CONF_RTOS_API_PRESENT)
 #include <stdint.h>
 
-#include "drivers/UARTSerial.h"
+#include "drivers/BufferedSerial.h"
 #include "features/netsocket/nsapi_types.h"
 #include "features/netsocket/WiFiAccessPoint.h"
 #include "PinNames.h"
@@ -42,6 +42,9 @@
 #endif
 #ifndef ESP8266_MISC_TIMEOUT
 #define ESP8266_MISC_TIMEOUT    2000
+#endif
+#ifndef ESP8266_DNS_TIMEOUT
+#define ESP8266_DNS_TIMEOUT     15000
 #endif
 
 #define ESP8266_SCAN_TIME_MIN 0     // [ms]
@@ -255,10 +258,10 @@ public:
     *
     * @param id id of socket to send to
     * @param data data to be sent
-    * @param amount amount of data to be sent - max 1024
-    * @return NSAPI_ERROR_OK in success, negative error code in failure
+    * @param amount amount of data to be sent - max 2048
+    * @return number of bytes on success, negative error code in failure
     */
-    nsapi_error_t send(int id, const void *data, uint32_t amount);
+    nsapi_size_or_error_t send(int id, const void *data, uint32_t amount);
 
     /**
     * Receives datagram from an open UDP socket
@@ -424,7 +427,7 @@ private:
     mbed::Callback<void()> _callback;
 
     // UART settings
-    mbed::UARTSerial _serial;
+    mbed::BufferedSerial _serial;
     PinName _serial_rts;
     PinName _serial_cts;
     rtos::Mutex _smutex; // Protect serial port access
@@ -444,6 +447,7 @@ private:
         // data follows
     } *_packets, * *_packets_end;
     void _clear_socket_packets(int id);
+    void _clear_socket_sending(int id);
     int _sock_active_id;
 
     // Memory statistics
@@ -469,7 +473,8 @@ private:
     void _oob_tcp_data_hdlr();
     void _oob_ready();
     void _oob_scan_results();
-    void _oob_ok_received();
+    void _oob_send_ok_received();
+    void _oob_send_fail_received();
 
     // OOB state variables
     int _connect_error;
@@ -480,7 +485,7 @@ private:
     bool _error;
     bool _busy;
     bool _reset_done;
-    bool _ok_received;
+    int _sock_sending_id;
 
     // Modem's address info
     char _ip_buffer[16];
@@ -495,6 +500,7 @@ private:
         char *tcp_data;
         int32_t tcp_data_avbl; // Data waiting on modem
         int32_t tcp_data_rcvd;
+        bool send_fail;     // Received 'SEND FAIL'. Expect user will close the socket.
     };
     struct _sock_info _sock_i[SOCKET_COUNT];
 

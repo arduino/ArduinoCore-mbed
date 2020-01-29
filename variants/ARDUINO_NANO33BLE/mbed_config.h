@@ -57,9 +57,10 @@
 #define MBED_CONF_BLE_PRESENT                                                 1                                                                                                // set by library:ble
 #define MBED_CONF_CELLULAR_CONTROL_PLANE_OPT                                  0                                                                                                // set by library:cellular
 #define MBED_CONF_CELLULAR_DEBUG_AT                                           0                                                                                                // set by library:cellular
+#define MBED_CONF_CELLULAR_MAX_CP_DATA_RECV_LEN                               1358                                                                                             // set by library:cellular
 #define MBED_CONF_CELLULAR_RANDOM_MAX_START_DELAY                             0                                                                                                // set by library:cellular
-#define MBED_CONF_CELLULAR_USE_APN_LOOKUP                                     1                                                                                                // set by library:cellular
-#define MBED_CONF_CELLULAR_USE_SMS                                            1                                                                                                // set by library:cellular
+#define MBED_CONF_CELLULAR_USE_APN_LOOKUP                                     0                                                                                                // set by library:cellular
+#define MBED_CONF_CELLULAR_USE_SMS                                            0                                                                                                // set by library:cellular
 #define MBED_CONF_CORDIO_DESIRED_ATT_MTU                                      23                                                                                               // set by library:cordio
 #define MBED_CONF_CORDIO_LL_DEFAULT_EXTENDED_ADVERTISING_FRAGMENTATION_SIZE   64                                                                                               // set by library:cordio-ll
 #define MBED_CONF_CORDIO_LL_EXTENDED_ADVERTISING_SIZE                         251                                                                                              // set by library:cordio-ll
@@ -86,6 +87,7 @@
 #define MBED_CONF_DRIVERS_QSPI_SCK                                            QSPI_FLASH1_SCK                                                                                  // set by library:drivers
 #define MBED_CONF_DRIVERS_UART_SERIAL_RXBUF_SIZE                              256                                                                                              // set by library:drivers
 #define MBED_CONF_DRIVERS_UART_SERIAL_TXBUF_SIZE                              256                                                                                              // set by library:drivers
+#define MBED_CONF_ESP8266_BUILT_IN_DNS                                        0                                                                                                // set by library:esp8266
 #define MBED_CONF_ESP8266_DEBUG                                               0                                                                                                // set by library:esp8266
 #define MBED_CONF_ESP8266_POWER_OFF_TIME_MS                                   3                                                                                                // set by library:esp8266
 #define MBED_CONF_ESP8266_POWER_ON_POLARITY                                   0                                                                                                // set by library:esp8266
@@ -173,7 +175,6 @@
 #define MBED_CONF_LWIP_ADDR_TIMEOUT                                           5                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_ADDR_TIMEOUT_MODE                                      1                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_DEBUG_ENABLED                                          0                                                                                                // set by library:lwip
-#define MBED_CONF_LWIP_DEFAULT_TCP_RECVMBOX_SIZE                              8                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_DEFAULT_THREAD_STACKSIZE                               512                                                                                              // set by library:lwip
 #define MBED_CONF_LWIP_DHCP_TIMEOUT                                           60                                                                                               // set by library:lwip
 #define MBED_CONF_LWIP_ENABLE_PPP_TRACE                                       0                                                                                                // set by library:lwip
@@ -196,7 +197,6 @@
 #define MBED_CONF_LWIP_PRESENT                                                1                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_RAW_SOCKET_ENABLED                                     0                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_SOCKET_MAX                                             4                                                                                                // set by library:lwip
-#define MBED_CONF_LWIP_TCPIP_MBOX_SIZE                                        8                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_TCPIP_THREAD_PRIORITY                                  osPriorityNormal                                                                                 // set by library:lwip
 #define MBED_CONF_LWIP_TCPIP_THREAD_STACKSIZE                                 1200                                                                                             // set by library:lwip
 #define MBED_CONF_LWIP_TCP_CLOSE_TIMEOUT                                      1000                                                                                             // set by library:lwip
@@ -259,6 +259,7 @@
 #define MBED_CONF_NSAPI_DEFAULT_MESH_TYPE                                     THREAD                                                                                           // set by library:nsapi
 #define MBED_CONF_NSAPI_DEFAULT_STACK                                         LWIP                                                                                             // set by library:nsapi
 #define MBED_CONF_NSAPI_DEFAULT_WIFI_SECURITY                                 NONE                                                                                             // set by library:nsapi
+#define MBED_CONF_NSAPI_DNS_ADDRESSES_LIMIT                                   10                                                                                               // set by library:nsapi
 #define MBED_CONF_NSAPI_DNS_CACHE_SIZE                                        3                                                                                                // set by library:nsapi
 #define MBED_CONF_NSAPI_DNS_RESPONSE_WAIT_TIME                                10000                                                                                            // set by library:nsapi
 #define MBED_CONF_NSAPI_DNS_RETRIES                                           1                                                                                                // set by library:nsapi
@@ -288,10 +289,6 @@
 #define MBED_CONF_PLATFORM_STDIO_FLUSH_AT_EXIT                                1                                                                                                // set by library:platform
 #define MBED_CONF_PLATFORM_STDIO_MINIMAL_CONSOLE_ONLY                         0                                                                                                // set by library:platform
 #define MBED_CONF_PLATFORM_USE_MPU                                            1                                                                                                // set by library:platform
-#define MBED_CONF_PPP_CELL_IFACE_APN_LOOKUP                                   1                                                                                                // set by library:ppp-cell-iface
-#define MBED_CONF_PPP_CELL_IFACE_AT_PARSER_BUFFER_SIZE                        256                                                                                              // set by library:ppp-cell-iface
-#define MBED_CONF_PPP_CELL_IFACE_AT_PARSER_TIMEOUT                            8000                                                                                             // set by library:ppp-cell-iface
-#define MBED_CONF_PPP_CELL_IFACE_BAUD_RATE                                    115200                                                                                           // set by library:ppp-cell-iface
 #define MBED_CONF_PPP_ENABLED                                                 0                                                                                                // set by library:ppp
 #define MBED_CONF_PPP_ENABLE_TRACE                                            0                                                                                                // set by library:ppp
 #define MBED_CONF_PPP_IPV4_ENABLED                                            1                                                                                                // set by library:ppp
@@ -366,6 +363,7 @@
 #define MBED_CONF_UBLOX_N2XX_PROVIDE_DEFAULT                                  0                                                                                                // set by library:UBLOX_N2XX
 #define MBED_CONF_UBLOX_PPP_BAUDRATE                                          115200                                                                                           // set by library:UBLOX_PPP
 #define MBED_CONF_UBLOX_PPP_PROVIDE_DEFAULT                                   0                                                                                                // set by library:UBLOX_PPP
+#define MBED_CRC_TABLE_SIZE                                                   16                                                                                               // set by library:drivers
 #define MBED_LFS_BLOCK_SIZE                                                   512                                                                                              // set by library:littlefs
 #define MBED_LFS_ENABLE_INFO                                                  0                                                                                                // set by library:littlefs
 #define MBED_LFS_INTRINSICS                                                   1                                                                                                // set by library:littlefs
@@ -375,8 +373,6 @@
 #define MBED_STACK_DUMP_ENABLED                                               0                                                                                                // set by library:platform
 #define MEM_ALLOC                                                             malloc                                                                                           // set by library:mbed-trace
 #define MEM_FREE                                                              free                                                                                             // set by library:mbed-trace
-#define NVSTORE_ENABLED                                                       1                                                                                                // set by library:nvstore
-#define NVSTORE_MAX_KEYS                                                      16                                                                                               // set by library:nvstore
 #define PPP_DEBUG                                                             0                                                                                                // set by library:ppp
 #define SEC_CCM_CFG                                                           1                                                                                                // set by library:cordio
 #define SMP_DB_MAX_DEVICES                                                    3                                                                                                // set by library:cordio

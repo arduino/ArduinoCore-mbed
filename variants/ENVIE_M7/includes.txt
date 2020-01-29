@@ -32,7 +32,6 @@
 -iwithprefixbefore/mbed/platform/cxxsupport
 -iwithprefixbefore/mbed/platform
 -iwithprefixbefore/mbed/hal/usb
--iwithprefixbefore/mbed/hal/storage_abstraction
 -iwithprefixbefore/mbed/hal
 -iwithprefixbefore/mbed/features/storage/kvstore/tdbstore
 -iwithprefixbefore/mbed/features/storage/kvstore/securestore

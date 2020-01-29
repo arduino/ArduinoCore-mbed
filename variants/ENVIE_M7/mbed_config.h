@@ -73,6 +73,7 @@
 #define MBED_CONF_DRIVERS_QSPI_SCK                                            QSPI_FLASH1_SCK                                                                                  // set by library:drivers
 #define MBED_CONF_DRIVERS_UART_SERIAL_RXBUF_SIZE                              256                                                                                              // set by library:drivers
 #define MBED_CONF_DRIVERS_UART_SERIAL_TXBUF_SIZE                              256                                                                                              // set by library:drivers
+#define MBED_CONF_ESP8266_BUILT_IN_DNS                                        0                                                                                                // set by library:esp8266
 #define MBED_CONF_ESP8266_DEBUG                                               0                                                                                                // set by library:esp8266
 #define MBED_CONF_ESP8266_POWER_OFF_TIME_MS                                   3                                                                                                // set by library:esp8266
 #define MBED_CONF_ESP8266_POWER_ON_POLARITY                                   0                                                                                                // set by library:esp8266
