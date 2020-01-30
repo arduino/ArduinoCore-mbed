@@ -59,7 +59,7 @@ void setup() {
   //edid_set_framebuffer_bits_per_pixel(&recognized_edid, 16, 0);
   //set_display_mode(&recognized_edid, EDID_MODE_720x480_60Hz);
   //anx7625_dp_start(0, &recognized_edid, EDID_MODE_1280x720_60Hz);
-  anx7625_dp_start(0, &recognized_edid);
+  anx7625_dp_start(0, &recognized_edid, EDID_MODE_800x600_59Hz);
 
   SDRAM.begin(getFramebufferEnd());
 
@@ -111,10 +111,11 @@ void setup() {
   LCD_X_Size = stm32_getXSize();
   LCD_Y_Size = stm32_getYSize();
 
-/*
+  while (1) {
   stm32_LCD_DrawImage((void*)texture_raw, (void *)getNextFrameBuffer(), 300, 300, DMA2D_INPUT_RGB565);
   stm32_LCD_DrawImage((void*)texture_raw, (void *)getNextFrameBuffer(), 300, 300, DMA2D_INPUT_RGB565);
-*/
+  }
+
   JPEG_Handle.Instance = JPEG;
   HAL_JPEG_Init(&JPEG_Handle);
 }

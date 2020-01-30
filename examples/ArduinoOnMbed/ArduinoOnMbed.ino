@@ -1,7 +1,7 @@
 #include "WiFi.h"
 #include "WiFiSSLClient.h"
 //#include "WiFiESP8266.h"
-#include "WiFiODINW2.h"
+//#include "WiFiODINW2.h"
 #include "TLSSocket.h"
 #include <MQTTClient.h>
 
@@ -36,7 +36,7 @@ const char CA_CERTIFICATES[] = "-----BEGIN CERTIFICATE-----\n"
 "-----END CERTIFICATE-----\n";
 
 
-#define TEST_SSL
+//#define TEST_SSL
 
 #ifndef TEST_SSL
 WiFiClient net;
@@ -44,6 +44,8 @@ WiFiClient net;
 WiFiSSLClient net;
 #endif
 MQTTClient client;
+
+#define Serial Serial1
 
 unsigned long lastMillis = 0;
 
@@ -58,17 +60,16 @@ void setup() {
   String b = a + 12;
   String c = a + "18";
   Serial.begin(115200);
+  while (!Serial) {}
   delay(100);
   Serial.println(a);
   Serial.println(b);
   Serial.println(c);
   a += "68";
   Serial.println(a);
-  //delay(2000);
-  Serial.println(USBRX);
-  Serial.println(USBTX);
+  delay(2000);
   printf("now\n\r");
-  int ret = WiFi.begin("BCMI", "ArduinoccRulez");
+  int ret = WiFi.begin("AndroidCulo", "Sesamo1.");
   Serial.println("Wifibegin " + String(ret));
 
 #ifndef TEST_SSL

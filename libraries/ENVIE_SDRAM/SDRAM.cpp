@@ -5,6 +5,7 @@ extern "C" {
 
 int SDRAMClass::begin(uint32_t start_address) {
 
+	printf("FMC_SDRAM_DEVICE->SDCMR: %x\n", FMC_SDRAM_DEVICE->SDCMR);
 	if (FMC_SDRAM_DEVICE->SDCMR == 0x00000000U) {
 		printf("initializing external ram\n");
 		bool ret = sdram_init();

@@ -7,11 +7,11 @@
 #define LCD_FRAME_BUFFER                  0xC0000000 /* LCD Frame buffer of size 800x480 in ARGB8888 */
 #define CAMERA_FRAME_BUFFER               0xC0200000
 
-#define QVGA_RES_X	320
-#define QVGA_RES_Y	240
+#define QVGA_RES_X	96
+#define QVGA_RES_Y	96
 
-#define CAM_W_RES       324
-#define CAM_H_RES       244
+#define CAM_W_RES       96
+#define CAM_H_RES       96
 #define CAM_PIXEL_IMAGE_SIZE (CAM_H_RES * CAM_W_RES)
 #define SKIP_FRAMES 10
 
@@ -206,12 +206,17 @@ uint8_t BSP_CAMERA_Init(uint32_t Resolution)
   BSP_CAMERA_MspInit(&hdcmi_discovery, NULL);
   HAL_DCMI_Init(phdcmi);
 
+  /*
+  * @param  YSize DCMI Line number
+  * @param  XSize DCMI Pixel per line
+  * @param  X0    DCMI window X offset
+  * @param  Y0    DCMI window Y offset
+  * @retval HAL status
+  */
+//HAL_StatusTypeDef HAL_DCMI_ConfigCrop(DCMI_HandleTypeDef *hdcmi, uint32_t X0, uint32_t Y0, uint32_t XSize, uint32_t YSize)
+
 /*
-      HAL_DCMI_ConfigCROP(phdcmi,           // Crop in the middle of the VGA picture
-                         (CAMERA_VGA_RES_X - CAMERA_480x272_RES_X)/2,
-                         (CAMERA_VGA_RES_Y - CAMERA_480x272_RES_Y)/2,
-                         (CAMERA_480x272_RES_X * 2) - 1,
-                          CAMERA_480x272_RES_Y - 1);
+      HAL_DCMI_ConfigCROP(phdcmi, (324 - 96) / 2, (244 - 96 / 2), 96, 96);
       HAL_DCMI_EnableCROP(phdcmi);
 */
 
@@ -367,7 +372,7 @@ static uint32_t GetSize(uint32_t Resolution)
     break;
   case CAMERA_R320x240:
     {
-      size =  324 * 244;
+      size =  96 * 96;
     }
     break;
   case CAMERA_R480x272:
@@ -399,7 +404,7 @@ void BSP_CAMERA_ErrorCallback(void)
 
 void BSP_CAMERA_FrameEventCallback(void)
 {
-  camera_frame_ready = 1;
+  camera_frame_ready++;
 }
 
 
@@ -472,65 +477,68 @@ void HAL_DCMI_ErrorCallback(DCMI_HandleTypeDef *hdcmi)
 }
 
 
-int CameraClass::begin(void)
+int CameraClass::begin(int horizontalResolution, int verticalResolution)
 {  
   CameraResX = QVGA_RES_X;
   CameraResY = QVGA_RES_Y;
 
   SDRAM.begin(LCD_FRAME_BUFFER);
 
-  for (int i=0; i<1000; i++) {
-    *((uint8_t*)LCD_FRAME_BUFFER + i) = 0x55;
-  }
-
-    printf("Clean ram\n");
-
-  for (int i=0; i<1000; i++) {
-    printf("%02x ", *((uint8_t*)LCD_FRAME_BUFFER + i));
-    if (i % 16 == 0) {
-      printf("\n");
-    }
-  }
-
   /*## Camera Initialization and capture start ############################*/
   /* Initialize the Camera in QVGA mode */
   if(BSP_CAMERA_Init(CAMERA_R320x240) != 1)
   {
-    printf("BSP_CAMERA_Init failed\n");
     return 0;
   }
 
 }
 
-int CameraClass::snapshot(void)
+int CameraClass::start(void)
+{
+  HIMAX_Mode(HIMAX_Streaming);
+
+  /* Start the Camera Snapshot Capture */
+  BSP_CAMERA_ContinuousStart((uint8_t *)LCD_FRAME_BUFFER);
+
+  /* Wait until camera frame is ready : DCMI Frame event */
+  while(camera_frame_ready == 0)
+  {
+  }
+}
+
+uint8_t* CameraClass::grab(void)
+{
+  HIMAX_Mode(HIMAX_Streaming);
+
+  /* Start the Camera Snapshot Capture */
+  BSP_CAMERA_ContinuousStart((uint8_t *)LCD_FRAME_BUFFER);
+
+  /* Wait until camera frame is ready : DCMI Frame event */
+  while(camera_frame_ready == 0)
+  {
+  }
+}
+
+uint8_t* CameraClass::snapshot(void)
 {
   printf("Start snapshot\n");
   HIMAX_Mode(HIMAX_Streaming);
 
   /* Start the Camera Snapshot Capture */
   BSP_CAMERA_SnapshotStart((uint8_t *)LCD_FRAME_BUFFER);
-  //BSP_CAMERA_ContinuousStart((uint8_t *)CAMERA_FRAME_BUFFER);
 
   /* Wait until camera frame is ready : DCMI Frame event */
   while(camera_frame_ready == 0)
   {
   }
 
-  delay(100);
+  HIMAX_Mode(HIMAX_Standby);
 
-  printf("Snapshot done\n");
-  
-      printf("Print ram\n");
-
-  for (int i=0; i<1000; i++) {
-    printf("%02x ", *((uint8_t*)LCD_FRAME_BUFFER + i));
-    if (i % 16 == 0) {
-      printf("\n");
-    }
-  }
   /* Stop the camera to avoid having the DMA2D work in parallel of Display */
   /* which cause perturbation of LTDC                                      */
-  BSP_CAMERA_Stop();
+  BSP_CAMERA_Suspend();
+
+  return (uint8_t *)LCD_FRAME_BUFFER;
 }
 
 

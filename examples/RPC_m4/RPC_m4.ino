@@ -17,6 +17,6 @@ void loop() {
   digitalWrite(LED_BUILTIN, LOW);
   delay(1000);
   RPC1.println("test");
-  auto res = RPC1.client.call("add", 12, 45).as<int>();;
-  RPC1.println(res);
+  //auto res = RPC1.client.call("add", 12, 45).as<int>();;
+  //RPC1.println(res);
 }

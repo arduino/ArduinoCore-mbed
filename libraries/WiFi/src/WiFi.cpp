@@ -57,6 +57,10 @@ NetworkInterface *arduino::WiFiClass::getNetwork() {
     return wifi_if;
 }
 
+#if defined(ARDUINO_ENVIE_M7) || defined(ARDUINO_ENVIE_M4)
+arduino::WiFiClass WiFi(WiFiInterface::get_default_instance());
+#endif
+
 // every specialization library should declare its own WiFI object: eg
 //
 // static ESP8266Interface wifi_if(PD_8, PD_9);
