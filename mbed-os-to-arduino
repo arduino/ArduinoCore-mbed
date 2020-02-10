@@ -51,7 +51,7 @@ mbed_revision () {
 		if [ -d mbed-os ]; then
 			if [ ! -L mbed-os ]; then
 				rm -rf mbed-os
-				ln -s "$LOCAL_REPO" .
+				ln -s "$LOCAL_REPO" mbed-os
 			fi
 		fi
 	fi
