@@ -27,6 +27,8 @@ Open Arduino IDE; you should now see three new targets under `MBED boards` label
 Adding a target is a mostly automatic procedure that involves running https://github.com/bcmi-labs/ArduinoCore-mbed/blob/master/mbed-os-to-arduino after setting `BOARDNAME` and `ARDUINOCORE` env variables.
 Actions marked as TODO must be executed manually.
 
+**Minimum Example**: `./mbed-os-to-arduino -r /home/alex/projects/arduino/cores/mbed-os-h747 ENVIE_M7:ENVIE_M7`
+
 ### How to build a debug version of the Arduino mbed libraries
 * Modify `mbed-os-to-arduino `
 ```diff
