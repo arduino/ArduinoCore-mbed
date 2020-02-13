@@ -1,5 +1,15 @@
 #include "WiFi.h"
 
+bool arduino::WiFiClass::isVisible(char* ssid) {
+    for (int i=0; i<10; i++) {
+        if (strncmp(ap_list[i].get_ssid(), ssid, 32) == 0) {
+            connected_ap = i;
+            return true;
+        }
+    }
+    return false;
+}
+
 int arduino::WiFiClass::begin(char* ssid, const char *passphrase) {
     if (_ssid) free(_ssid);
 
@@ -17,23 +27,75 @@ int arduino::WiFiClass::begin(char* ssid, const char *passphrase) {
     if (strlen(ssid) > 32) ssid[32] = 0;
     memcpy(_ssid, ssid, 33);
 
-    Serial.println("Connecting to " + String(_ssid));
-    nsapi_error_t ret = wifi_if->connect(ssid, passphrase, NSAPI_SECURITY_WPA2);
+    scanNetworks();
+    // use scan result to populate security field
+    if (!isVisible(ssid)) {
+        return WL_CONNECT_FAILED;
+    }
 
-    if (ret == NSAPI_ERROR_OK) {
-        Serial.println("Connected to WiFi");
-        Serial.println("IP address: " +  String(wifi_if->get_ip_address()));
-        Serial.println("MAC address: " + String(wifi_if->get_mac_address()));
-    }
-    else {
-        Serial.println("Failed to connect to WiFi " + String(ret));
-    }
+    nsapi_error_t ret = wifi_if->connect(ssid, passphrase, ap_list[connected_ap].get_security());
 
     return ret == NSAPI_ERROR_OK ? WL_CONNECTED : WL_CONNECT_FAILED;
 }
 
 char* arduino::WiFiClass::SSID() {
     return _ssid;
+}
+
+static const char *sec2str(nsapi_security_t sec)
+{
+    switch (sec) {
+        case NSAPI_SECURITY_NONE:
+            return "None";
+        case NSAPI_SECURITY_WEP:
+            return "WEP";
+        case NSAPI_SECURITY_WPA:
+            return "WPA";
+        case NSAPI_SECURITY_WPA2:
+            return "WPA2";
+        case NSAPI_SECURITY_WPA_WPA2:
+            return "WPA/WPA2";
+        case NSAPI_SECURITY_UNKNOWN:
+        default:
+            return "Unknown";
+    }
+}
+
+static uint8_t sec2enum(nsapi_security_t sec)
+{
+    switch (sec) {
+        case NSAPI_SECURITY_NONE:
+            return ENC_TYPE_NONE;
+        case NSAPI_SECURITY_WEP:
+            return ENC_TYPE_WEP;
+        case NSAPI_SECURITY_WPA:
+            return ENC_TYPE_TKIP;
+        case NSAPI_SECURITY_WPA2:
+            return ENC_TYPE_CCMP;
+        case NSAPI_SECURITY_WPA_WPA2:
+            return ENC_TYPE_CCMP;
+        case NSAPI_SECURITY_UNKNOWN:
+        default:
+            return ENC_TYPE_AUTO;
+    }
+}
+
+int8_t arduino::WiFiClass::scanNetworks() {
+    uint8_t count = 10;
+    ap_list = new WiFiAccessPoint[count];
+    return wifi_if->scan(ap_list, count);
+}
+
+char* arduino::WiFiClass::SSID(uint8_t networkItem) {
+    return (char*)ap_list[networkItem].get_ssid();
+}
+
+int32_t arduino::WiFiClass::RSSI(uint8_t networkItem) {
+    return ap_list[networkItem].get_rssi();
+}
+
+uint8_t arduino::WiFiClass::encryptionType(uint8_t networkItem) {
+    return sec2enum(ap_list[networkItem].get_security());
 }
 
 int32_t arduino::WiFiClass::RSSI() {
@@ -43,6 +105,30 @@ int32_t arduino::WiFiClass::RSSI() {
 uint8_t arduino::WiFiClass::status() {
     // @todo: fix
     return WL_CONNECTED;
+}
+
+uint8_t arduino::WiFiClass::encryptionType() {
+    return sec2enum(ap_list[connected_ap].get_security());
+}
+
+uint8_t* arduino::WiFiClass::BSSID(unsigned char* bssid) {
+    const uint8_t* reverse_bssid = ap_list[connected_ap].get_bssid();
+    for( int b = 0; b < 6; b++ ) {
+        bssid[b] = reverse_bssid[5-b];
+    }
+    return bssid;
+}
+
+uint8_t* arduino::WiFiClass::macAddress(uint8_t* mac) {
+    const char *mac_str = wifi_if->get_mac_address();
+    for( int b = 0; b < 6; b++ )
+    {
+        uint32_t tmp;
+        sscanf( &mac_str[b * 2 + (b)], "%02x", &tmp) ;
+        mac[5-b] = (uint8_t)tmp ;
+    }
+    //sscanf(mac_str, "%02hhx:%02hhx:%02hhx:%02hhx:%02hhx:%02hhx", &mac[5], &mac[4], &mac[3], &mac[2], &mac[1], &mac[0]);
+    return mac;
 }
 
 arduino::IPAddress arduino::WiFiClass::localIP() {

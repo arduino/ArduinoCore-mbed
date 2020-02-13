@@ -279,9 +279,12 @@ public:
     NetworkInterface *getNetwork();
 
 private:
+    bool isVisible(char* ssid);
     char* _ssid;
     WiFiInterface* wifi_if;
     voidPrtFuncPtr cb;
+    WiFiAccessPoint* ap_list;
+    uint8_t connected_ap;
 };
 
 }
