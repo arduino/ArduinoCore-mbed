@@ -1,0 +1,15 @@
+{
+  "macros": [
+    "MBED_HEAP_STATS_ENABLED=1",
+    "MBED_STACK_STATS_ENABLED=1",
+    "MBED_MEM_TRACING_ENABLED=1"
+  ],
+  "target_overrides": {
+    "*": {
+      "target.usb_speed": "USE_USB_OTG_FS",
+      "platform.stdio-baud-rate": 115200,
+      "platform.default-serial-baud-rate": 115200,
+      "rtos.main-thread-stack-size": 32768
+    }
+  }
+}

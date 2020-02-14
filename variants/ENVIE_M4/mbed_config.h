@@ -226,15 +226,15 @@
 #define MBED_CONF_MBED_MESH_API_USE_MALLOC_FOR_HEAP                           0                                                                                                // set by library:mbed-mesh-api
 #define MBED_CONF_MBED_MESH_API_WISUN_BC_CHANNEL_FUNCTION                     255                                                                                              // set by library:mbed-mesh-api
 #define MBED_CONF_MBED_MESH_API_WISUN_BC_DWELL_INTERVAL                       0                                                                                                // set by library:mbed-mesh-api
-#define MBED_CONF_MBED_MESH_API_WISUN_BC_FIXED_CHANNEL                        0xffff                                                                                           // set by library:mbed-mesh-api
+#define MBED_CONF_MBED_MESH_API_WISUN_BC_FIXED_CHANNEL                        65535                                                                                            // set by library:mbed-mesh-api
 #define MBED_CONF_MBED_MESH_API_WISUN_BC_INTERVAL                             0                                                                                                // set by library:mbed-mesh-api
 #define MBED_CONF_MBED_MESH_API_WISUN_NETWORK_NAME                            "Wi-SUN Network"                                                                                 // set by library:mbed-mesh-api
 #define MBED_CONF_MBED_MESH_API_WISUN_OPERATING_CLASS                         255                                                                                              // set by library:mbed-mesh-api
 #define MBED_CONF_MBED_MESH_API_WISUN_OPERATING_MODE                          255                                                                                              // set by library:mbed-mesh-api
 #define MBED_CONF_MBED_MESH_API_WISUN_REGULATORY_DOMAIN                       3                                                                                                // set by library:mbed-mesh-api
 #define MBED_CONF_MBED_MESH_API_WISUN_UC_CHANNEL_FUNCTION                     255                                                                                              // set by library:mbed-mesh-api
-#define MBED_CONF_MBED_MESH_API_WISUN_UC_DWELL_INTERVAL                       0                                                                                                // set by library:mbed-mesh-api
-#define MBED_CONF_MBED_MESH_API_WISUN_UC_FIXED_CHANNEL                        0xffff                                                                                           // set by library:mbed-mesh-api
+#define MBED_CONF_MBED_MESH_API_WISUN_UC_DWELL_INTERVAL                       255                                                                                              // set by library:mbed-mesh-api
+#define MBED_CONF_MBED_MESH_API_WISUN_UC_FIXED_CHANNEL                        65535                                                                                            // set by library:mbed-mesh-api
 #define MBED_CONF_MCR20A_PROVIDE_DEFAULT                                      0                                                                                                // set by library:mcr20a
 #define MBED_CONF_NANOSTACK_CONFIGURATION                                     nanostack_full                                                                                   // set by library:nanostack
 #define MBED_CONF_NANOSTACK_HAL_CRITICAL_SECTION_USABLE_FROM_INTERRUPT        0                                                                                                // set by library:nanostack-hal
@@ -268,7 +268,7 @@
 #define MBED_CONF_PLATFORM_MINIMAL_PRINTF_SET_FLOATING_POINT_MAX_DECIMALS     6                                                                                                // set by library:platform
 #define MBED_CONF_PLATFORM_POLL_USE_LOWPOWER_TIMER                            0                                                                                                // set by library:platform
 #define MBED_CONF_PLATFORM_STDIO_BAUD_RATE                                    115200                                                                                           // set by application[*]
-#define MBED_CONF_PLATFORM_STDIO_BUFFERED_SERIAL                              1                                                                                                // set by application[*]
+#define MBED_CONF_PLATFORM_STDIO_BUFFERED_SERIAL                              0                                                                                                // set by library:platform
 #define MBED_CONF_PLATFORM_STDIO_CONVERT_NEWLINES                             0                                                                                                // set by library:platform
 #define MBED_CONF_PLATFORM_STDIO_CONVERT_TTY_NEWLINES                         0                                                                                                // set by library:platform
 #define MBED_CONF_PLATFORM_STDIO_FLUSH_AT_EXIT                                1                                                                                                // set by library:platform
@@ -352,7 +352,7 @@
 #define MBED_CONF_TARGET_MPU_ROM_END                                          0x0fffffff                                                                                       // set by target:Target
 #define MBED_CONF_TARGET_NETWORK_DEFAULT_INTERFACE_TYPE                       WIFI                                                                                             // set by target:ENVIE
 #define MBED_CONF_TARGET_TICKLESS_FROM_US_TICKER                              0                                                                                                // set by target:Target
-#define MBED_CONF_TARGET_USB_SPEED                                            USE_USB_OTG_HS                                                                                   // set by target:ENVIE
+#define MBED_CONF_TARGET_USB_SPEED                                            USE_USB_OTG_FS                                                                                   // set by application[*]
 #define MBED_CONF_TARGET_XIP_ENABLE                                           0                                                                                                // set by target:Target
 #define MBED_CONF_TELIT_HE910_BAUDRATE                                        115200                                                                                           // set by library:TELIT_HE910
 #define MBED_CONF_TELIT_HE910_PROVIDE_DEFAULT                                 0                                                                                                // set by library:TELIT_HE910

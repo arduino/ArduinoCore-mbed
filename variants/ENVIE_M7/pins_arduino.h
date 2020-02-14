@@ -95,4 +95,9 @@ void _ontouch1200bps_();
 
 #define digitalPinToPort(P)		(digitalPinToPinName(P)/32)
 
+#define SERIAL_PORT_USBVIRTUAL      SerialUSB
+#define SERIAL_PORT_MONITOR         SerialUSB
+#define SERIAL_PORT_HARDWARE        Serial1
+#define SERIAL_PORT_HARDWARE_OPEN   Serial2
+
 #endif //__PINS_ARDUINO__
