@@ -17,6 +17,7 @@
 */
 
 #include <api/itoa.h>
+#include <api/deprecated-avr-comp/avr/dtostrf.c.impl>
 #include <string.h>
 
 #ifdef __cplusplus
