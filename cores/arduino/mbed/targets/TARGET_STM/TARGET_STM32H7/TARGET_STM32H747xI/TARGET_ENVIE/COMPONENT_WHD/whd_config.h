@@ -6,10 +6,10 @@
 #include "stm32h7xx_hal.h"
 #include <stdint.h>
 
-#define WHD_COUNTRY     WHD_COUNTRY_ITALY
+#define WHD_COUNTRY     WHD_COUNTRY_AUSTRALIA
 
 /* Internal thread config    */
-#define WHD_THREAD_STACK_SIZE   5120*2
+#define WHD_THREAD_STACK_SIZE   5120
 #define WHD_THREAD_PRIORITY     osPriorityHigh
 
 /* please define your configuration , either SDIO or SPI */
