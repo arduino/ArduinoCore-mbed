@@ -283,7 +283,7 @@ private:
     char* _ssid;
     WiFiInterface* wifi_if;
     voidPrtFuncPtr cb;
-    WiFiAccessPoint* ap_list;
+    WiFiAccessPoint* ap_list = NULL;
     uint8_t connected_ap;
 };
 
