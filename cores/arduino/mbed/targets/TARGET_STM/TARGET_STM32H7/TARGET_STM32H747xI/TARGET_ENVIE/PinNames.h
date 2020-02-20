@@ -351,10 +351,15 @@ typedef enum {
     STDIO_UART_RX = PA_10,
 #endif
 
-    // Generic signals namings
-    LED1        = PK_5,  // Red
-    LED2        = PK_6,  // Green
-    LED3        = PK_7,  // Blue
+    //Led mappings
+    LED_RED = PK_5,  //Red
+    LED_GREEN = PK_6,  //Green
+    LED_BLUE = PK_7,  //Blue
+
+    //mbed original LED naming
+    LED1 = LED_RED,
+    LED2 = LED_GREEN,
+    LED3 = LED_BLUE,
 
     USER_BUTTON = PC_13,
     // Standardized button names
