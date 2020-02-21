@@ -1,4 +1,4 @@
-/* Copyright 2017 Adam Green (http://mbed.org/users/AdamGreen/)
+/* Copyright 2017 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 #include <errno.h>
 #include <string.h>
 #include <signal.h>
-#include "core/platforms.h"
-#include "core/gdb_console.h"
+#include <core/platforms.h>
+#include <core/gdb_console.h>
 #include "debug_cm3.h"
 #include "armv7-m.h"
 
@@ -60,7 +60,7 @@ CortexMState    __mriCortexMState;
   <reg name="xpsr" bitsize="32" regnum="25"/>
 </feature>
 */
-static const char g_targetXml[] = 
+static const char g_targetXml[] =
     "<?xml version=\"1.0\"?>\n"
     "<!DOCTYPE feature SYSTEM \"gdb-target.dtd\">\n"
     "<target>\n"
@@ -201,7 +201,7 @@ void Platform_EnableSingleStep(void)
         enableSingleStep();
         return;
     }
-    
+
     __try
     {
         __throwing_func( setHardwareBreakpointOnSvcHandler() );
@@ -223,7 +223,7 @@ static int doesPCPointToSVCInstruction(void)
     static const uint16_t svcMachineCodeMask = 0xff00;
     static const uint16_t svcMachineCode = 0xdf00;
     uint16_t              instructionWord;
-    
+
     __try
     {
         instructionWord = getFirstHalfWordOfCurrentInstruction();
@@ -233,7 +233,7 @@ static int doesPCPointToSVCInstruction(void)
         clearExceptionCode();
         return 0;
     }
-    
+
     return ((instructionWord & svcMachineCodeMask) == svcMachineCode);
 }
 
@@ -270,7 +270,7 @@ static int doesPCPointToBASEPRIUpdateInstruction(void)
 {
     uint16_t firstWord = 0;
     uint16_t secondWord = 0;
-    
+
     __try
     {
         __throwing_func( firstWord = getFirstHalfWordOfCurrentInstruction() );
@@ -281,7 +281,7 @@ static int doesPCPointToBASEPRIUpdateInstruction(void)
         clearExceptionCode();
         return 0;
     }
-    
+
     return isFirstHalfWordOfMSR(firstWord) && isSecondHalfWordOfMSRModifyingBASEPRI(secondWord);
 }
 
@@ -371,7 +371,7 @@ static uint8_t  determineCauseOfDebugEvent(void);
 uint8_t Platform_DetermineCauseOfException(void)
 {
     uint32_t exceptionNumber = getCurrentlyExecutingExceptionNumber();
-    
+
     switch(exceptionNumber)
     {
     case 2:
@@ -419,7 +419,7 @@ static uint8_t determineCauseOfDebugEvent(void)
     };
     uint32_t debugFaultStatus = SCB->DFSR;
     size_t   i;
-    
+
     for (i = 0 ; i < sizeof(debugEventToSignalMap)/sizeof(debugEventToSignalMap[0]) ; i++)
     {
         if (debugFaultStatus & debugEventToSignalMap[i].statusBit)
@@ -428,7 +428,7 @@ static uint8_t determineCauseOfDebugEvent(void)
             return debugEventToSignalMap[i].signalToReturn;
         }
     }
-    
+
     /* NOTE: Default catch all signal is SIGSTOP. */
     return SIGSTOP;
 }
@@ -470,11 +470,11 @@ static void displayHardFaultCauseToGdbConsole(void)
     static const uint32_t forcedBit = 1 << 30;
     static const uint32_t vectorTableReadBit = 1 << 1;
     uint32_t              hardFaultStatusRegister = SCB->HFSR;
-    
+
     WriteStringToGdbConsole("\n**Hard Fault**");
     WriteStringToGdbConsole("\n  Status Register: ");
     WriteHexValueToGdbConsole(hardFaultStatusRegister);
-    
+
     if (hardFaultStatusRegister & debugEventBit)
         WriteStringToGdbConsole("\n    Debug Event");
 
@@ -499,15 +499,15 @@ static void displayMemFaultCauseToGdbConsole(void)
     static const uint32_t dataAccess = 1 << 1;
     static const uint32_t instructionFetch = 1;
     uint32_t              memManageFaultStatusRegister = SCB->CFSR & 0xFF;
-    
+
     /* Check to make sure that there is a memory fault to display. */
     if (memManageFaultStatusRegister == 0)
         return;
-    
+
     WriteStringToGdbConsole("\n**MPU Fault**");
     WriteStringToGdbConsole("\n  Status Register: ");
     WriteHexValueToGdbConsole(memManageFaultStatusRegister);
-    
+
     if (memManageFaultStatusRegister & MMARValidBit)
     {
         WriteStringToGdbConsole("\n    Fault Address: ");
@@ -543,15 +543,15 @@ static void displayBusFaultCauseToGdbConsole(void)
     static const uint32_t preciseDataAccessBit = 1 << 1;
     static const uint32_t instructionPrefetch = 1;
     uint32_t              busFaultStatusRegister = (SCB->CFSR >> 8) & 0xFF;
-    
+
     /* Check to make sure that there is a bus fault to display. */
     if (busFaultStatusRegister == 0)
         return;
-    
+
     WriteStringToGdbConsole("\n**Bus Fault**");
     WriteStringToGdbConsole("\n  Status Register: ");
     WriteHexValueToGdbConsole(busFaultStatusRegister);
-    
+
     if (busFaultStatusRegister & BFARValidBit)
     {
         WriteStringToGdbConsole("\n    Fault Address: ");
@@ -589,15 +589,15 @@ static void displayUsageFaultCauseToGdbConsole(void)
     static const uint32_t invalidStateBit = 1 << 1;
     static const uint32_t undefinedInstructionBit = 1;
     uint32_t              usageFaultStatusRegister = SCB->CFSR >> 16;
-    
+
     /* Make sure that there is a usage fault to display. */
     if (usageFaultStatusRegister == 0)
         return;
-    
+
     WriteStringToGdbConsole("\n**Usage Fault**");
     WriteStringToGdbConsole("\n  Status Register: ");
     WriteHexValueToGdbConsole(usageFaultStatusRegister);
-    
+
     if (usageFaultStatusRegister & divideByZeroBit)
         WriteStringToGdbConsole("\n    Divide by Zero");
 
@@ -647,7 +647,7 @@ static void configureMpuToAccessAllMemoryWithNoCaching(void)
 {
     saveOriginalMpuConfiguration();
     disableMPU();
-    configureHighestMpuRegionToAccessAllMemoryWithNoCaching();    
+    configureHighestMpuRegionToAccessAllMemoryWithNoCaching();
     enableMPUWithHardAndNMIFaults();
 }
 
@@ -667,7 +667,7 @@ static void configureHighestMpuRegionToAccessAllMemoryWithNoCaching(void)
     static const uint32_t regionSizeAt4GB = 31 << MPU_RASR_SIZE_SHIFT; /* 4GB = 2^(31+1) */
     static const uint32_t regionEnable    = MPU_RASR_ENABLE;
     static const uint32_t regionSizeAndAttributes = regionReadWrite | regionSizeAt4GB | regionEnable;
-    
+
     prepareToAccessMPURegion(getHighestMPUDataRegionIndex());
     setMPURegionAddress(regionToStartAtAddress0);
     setMPURegionAttributeAndSize(regionSizeAndAttributes);
@@ -749,7 +749,7 @@ static void checkStack(void)
     uint32_t* pCurr = (uint32_t*)__mriCortexMState.debuggerStack;
     uint8_t*  pEnd = (uint8_t*)__mriCortexMState.debuggerStack + sizeof(__mriCortexMState.debuggerStack);
     int       spaceUsed;
-    
+
     while ((uint8_t*)pCurr < pEnd && *pCurr == CORTEXM_DEBUGGER_STACK_FILL)
         pCurr++;
 
@@ -775,7 +775,7 @@ static int isInstruction32Bit(uint16_t firstWordOfInstruction);
 void Platform_AdvanceProgramCounterToNextInstruction(void)
 {
     uint16_t  firstWordOfCurrentInstruction;
-    
+
     __try
     {
         firstWordOfCurrentInstruction = getFirstHalfWordOfCurrentInstruction();
@@ -786,7 +786,7 @@ void Platform_AdvanceProgramCounterToNextInstruction(void)
         clearExceptionCode();
         return;
     }
-    
+
     if (isInstruction32Bit(firstWordOfCurrentInstruction))
     {
         /* 32-bit Instruction. */
@@ -802,8 +802,8 @@ void Platform_AdvanceProgramCounterToNextInstruction(void)
 static int isInstruction32Bit(uint16_t firstWordOfInstruction)
 {
     uint16_t maskedOffUpper5BitsOfWord = firstWordOfInstruction & 0xF800;
-    
-    /* 32-bit instructions start with 0b11101, 0b11110, 0b11111 according to page A5-152 of the 
+
+    /* 32-bit instructions start with 0b11101, 0b11110, 0b11111 according to page A5-152 of the
        ARMv7-M Architecture Manual. */
     return  (maskedOffUpper5BitsOfWord == 0xE800 ||
              maskedOffUpper5BitsOfWord == 0xF000 ||
@@ -823,7 +823,7 @@ static int isInstructionHardcodedBreakpoint(uint16_t instruction);
 PlatformInstructionType Platform_TypeOfCurrentInstruction(void)
 {
     uint16_t currentInstruction;
-    
+
     __try
     {
         currentInstruction = getFirstHalfWordOfCurrentInstruction();
@@ -834,7 +834,7 @@ PlatformInstructionType Platform_TypeOfCurrentInstruction(void)
         clearExceptionCode();
         return MRI_PLATFORM_INSTRUCTION_OTHER;
     }
-    
+
     if (isInstructionMbedSemihostBreakpoint(currentInstruction))
         return MRI_PLATFORM_INSTRUCTION_MBED_SEMIHOST_CALL;
     else if (isInstructionNewlibSemihostBreakpoint(currentInstruction))
@@ -870,12 +870,12 @@ static int isInstructionHardcodedBreakpoint(uint16_t instruction)
 PlatformSemihostParameters Platform_GetSemihostCallParameters(void)
 {
     PlatformSemihostParameters parameters;
-    
+
     parameters.parameter1 = __mriCortexMState.context.R0;
     parameters.parameter2 = __mriCortexMState.context.R1;
     parameters.parameter3 = __mriCortexMState.context.R2;
     parameters.parameter4 = __mriCortexMState.context.R3;
-    
+
     return parameters;
 }
 
@@ -891,12 +891,12 @@ void Platform_SetSemihostCallReturnAndErrnoValues(int returnValue, int err)
 int Platform_WasMemoryFaultEncountered(void)
 {
     int wasFaultEncountered;
-    
+
     __DSB();
     wasFaultEncountered = __mriCortexMState.flags & CORTEXM_FLAGS_FAULT_DURING_DEBUG;
     clearMemoryFaultFlag();
-    
-    return wasFaultEncountered;    
+
+    return wasFaultEncountered;
 }
 
 
@@ -922,7 +922,7 @@ static void writeBytesToBufferAsHex(Buffer* pBuffer, void* pBytes, size_t byteCo
 {
     uint8_t* pByte = (uint8_t*)pBytes;
     size_t   i;
-    
+
     for (i = 0 ; i < byteCount ; i++)
         Buffer_WriteByteAsHex(pBuffer, *pByte++);
 }
@@ -944,7 +944,7 @@ static void readBytesFromBufferAsHex(Buffer* pBuffer, void* pBytes, size_t byteC
 {
     uint8_t* pByte = (uint8_t*)pBytes;
     size_t   i;
-    
+
     for (i = 0 ; i < byteCount; i++)
         *pByte++ = Buffer_ReadByteAsHex(pBuffer);
 }
@@ -955,12 +955,12 @@ void Platform_SetHardwareBreakpoint(uint32_t address, uint32_t kind)
 {
     uint32_t* pFPBBreakpointComparator;
     int       is32BitInstruction;
-    
+
     __try
         is32BitInstruction = doesKindIndicate32BitInstruction(kind);
     __catch
         __rethrow;
-        
+
     pFPBBreakpointComparator = enableFPBBreakpoint(address, is32BitInstruction);
     if (!pFPBBreakpointComparator)
         __throw(exceededHardwareResourcesException);
@@ -984,12 +984,12 @@ static int doesKindIndicate32BitInstruction(uint32_t kind)
 void Platform_ClearHardwareBreakpoint(uint32_t address, uint32_t kind)
 {
     int       is32BitInstruction;
-    
+
     __try
         is32BitInstruction = doesKindIndicate32BitInstruction(kind);
     __catch
         __rethrow;
-        
+
     disableFPBBreakpointComparator(address, is32BitInstruction);
 }
 
@@ -999,10 +999,10 @@ void Platform_SetHardwareWatchpoint(uint32_t address, uint32_t size, PlatformWat
 {
     uint32_t       nativeType = convertWatchpointTypeToCortexMType(type);
     DWT_COMP_Type* pComparator;
-    
+
     if (!isValidDWTComparatorSetting(address, size, nativeType))
         __throw(invalidArgumentException);
-    
+
     pComparator = enableDWTWatchpoint(address, size, nativeType);
     if (!pComparator)
         __throw(exceededHardwareResourcesException);
@@ -1027,10 +1027,10 @@ static uint32_t convertWatchpointTypeToCortexMType(PlatformWatchpointType type)
 void Platform_ClearHardwareWatchpoint(uint32_t address, uint32_t size, PlatformWatchpointType type)
 {
     uint32_t nativeType = convertWatchpointTypeToCortexMType(type);
-    
+
     if (!isValidDWTComparatorSetting(address, size, nativeType))
         __throw(invalidArgumentException);
-    
+
     disableDWTWatchpoint(address, size, nativeType);
 }
 

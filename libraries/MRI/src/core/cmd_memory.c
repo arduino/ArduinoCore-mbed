@@ -1,4 +1,4 @@
-/* Copyright 2017 Adam Green (http://mbed.org/users/AdamGreen/)
+/* Copyright 2017 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -13,19 +13,19 @@
    limitations under the License.
 */
 /* Handlers for memory related gdb commands. */
-#include "buffer.h"
-#include "core.h"
-#include "mri.h"
-#include "memory.h"
-#include "cmd_common.h"
-#include "cmd_memory.h"
+#include <core/buffer.h>
+#include <core/core.h>
+#include <core/mri.h>
+#include <core/memory.h>
+#include <core/cmd_common.h>
+#include <core/cmd_memory.h>
 
 
 /* Handle the 'm' command which is to read the specified address range from memory.
 
     Command Format:     mAAAAAAAA,LLLLLLLL
     Response Format:    xx...
-    
+
     Where AAAAAAAA is the hexadecimal representation of the address where the read is to start.
           LLLLLLLL is the hexadecimal representation of the length (in bytes) of the read to be conducted.
           xx is the hexadecimal representation of the first byte read from the specified location.
@@ -60,7 +60,7 @@ uint32_t HandleMemoryReadCommand(void)
 
     Command Format:     MAAAAAAAA,LLLLLLLL:xx...
     Response Format:    OK
-    
+
     Where AAAAAAAA is the hexadecimal representation of the address where the write is to start.
           LLLLLLLL is the hexadecimal representation of the length (in bytes) of the write to be conducted.
           xx is the hexadecimal representation of the first byte to be written to the specified location.
@@ -80,7 +80,7 @@ uint32_t HandleMemoryWriteCommand(void)
         PrepareStringResponse(MRI_ERROR_INVALID_ARGUMENT);
         return 0;
     }
-    
+
     if (WriteHexBufferToMemory(pBuffer, ADDR32_TO_POINTER(addressLength.address), addressLength.length))
     {
         PrepareStringResponse("OK");
@@ -101,7 +101,7 @@ uint32_t HandleMemoryWriteCommand(void)
 
     Command Format:     XAAAAAAAA,LLLLLLLL:xx...
     Response Format:    OK
-    
+
     Where AAAAAAAA is the hexadecimal representation of the address where the write is to start.
           LLLLLLLL is the hexadecimal representation of the length (in bytes) of the write to be conducted.
           xx is the hexadecimal representation of the first byte to be written to the specified location.
@@ -121,7 +121,7 @@ uint32_t HandleBinaryMemoryWriteCommand(void)
         PrepareStringResponse(MRI_ERROR_INVALID_ARGUMENT);
         return 0;
     }
-    
+
     if (WriteBinaryBufferToMemory(pBuffer, ADDR32_TO_POINTER(addressLength.address), addressLength.length))
     {
         PrepareStringResponse("OK");

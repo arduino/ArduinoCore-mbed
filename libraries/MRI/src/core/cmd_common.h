@@ -1,4 +1,4 @@
-/* Copyright 2012 Adam Green (http://mbed.org/users/AdamGreen/)
+/* Copyright 2012 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 #define _CMD_COMMON_H_
 
 #include <stdint.h>
-#include "buffer.h"
-#include "try_catch.h"
+#include <core/buffer.h>
+#include <core/try_catch.h>
 
 /* The bits that can be set in the return value from a command handler to indicate if the caller should return
    immediately or send the prepared response back to gdb.  It also indicates whether program execution should be

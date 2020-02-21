@@ -1,4 +1,4 @@
-/* Copyright 2014 Adam Green (http://mbed.org/users/AdamGreen/)
+/* Copyright 2014 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -13,11 +13,11 @@
    limitations under the License.
 */
 /* Handlers for gdb breakpoint and watchpoint commands. */
-#include "platforms.h"
-#include "core.h"
-#include "mri.h"
-#include "cmd_common.h"
-#include "cmd_break_watch.h"
+#include <core/platforms.h>
+#include <core/core.h>
+#include <core/mri.h>
+#include <core/cmd_common.h>
+#include <core/cmd_break_watch.h>
 
 typedef struct
 {
@@ -47,7 +47,7 @@ static void handleWatchpointSetCommand(PlatformWatchpointType type, BreakpointWa
 uint32_t HandleBreakpointWatchpointSetCommand(void)
 {
     BreakpointWatchpointArguments  arguments;
-    
+
     __try
     {
         parseBreakpointWatchpointCommandArguments(&arguments);
@@ -57,7 +57,7 @@ uint32_t HandleBreakpointWatchpointSetCommand(void)
         PrepareStringResponse(MRI_ERROR_INVALID_ARGUMENT);
         return 0;
     }
-    
+
     switch(arguments.type)
     {
     case '1':
@@ -76,14 +76,14 @@ uint32_t HandleBreakpointWatchpointSetCommand(void)
         PrepareEmptyResponseForUnknownCommand();
         break;
     }
-    
+
     return 0;
 }
 
 static void parseBreakpointWatchpointCommandArguments(BreakpointWatchpointArguments* pArguments)
 {
     Buffer*    pBuffer = GetBuffer();
-    
+
     __try
     {
         __throwing_func( pArguments->type = Buffer_ReadChar(pBuffer) );
@@ -124,7 +124,7 @@ static void handleBreakpointWatchpointException(void)
         PrepareStringResponse(MRI_ERROR_NO_FREE_BREAKPOINT);
         break;
     }
-    
+
     return;
 }
 
@@ -165,7 +165,7 @@ static void handleWatchpointRemoveCommand(PlatformWatchpointType type, Breakpoin
 uint32_t HandleBreakpointWatchpointRemoveCommand(void)
 {
     BreakpointWatchpointArguments  arguments;
-    
+
     __try
     {
         parseBreakpointWatchpointCommandArguments(&arguments);
@@ -175,7 +175,7 @@ uint32_t HandleBreakpointWatchpointRemoveCommand(void)
         PrepareStringResponse(MRI_ERROR_INVALID_ARGUMENT);
         return 0;
     }
-    
+
     switch(arguments.type)
     {
     case '1':
@@ -194,7 +194,7 @@ uint32_t HandleBreakpointWatchpointRemoveCommand(void)
         PrepareEmptyResponseForUnknownCommand();
         break;
     }
-    
+
     return 0;
 }
 

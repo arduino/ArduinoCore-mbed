@@ -1,4 +1,4 @@
-/* Copyright 2012 Adam Green (http://mbed.org/users/AdamGreen/)
+/* Copyright 2012 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
    limitations under the License.
 */
 /* Common functionality shared between gdb command handlers in mri. */
-#include "cmd_common.h"
+#include <core/cmd_common.h>
 
 
 void ReadAddressAndLengthArguments(Buffer* pBuffer, AddressLength* pArguments)
@@ -48,7 +48,7 @@ void ReadAddressAndLengthArgumentsWithColon(Buffer* pBuffer, AddressLength* pArg
 uint32_t ReadUIntegerArgument(Buffer* pBuffer)
 {
     uint32_t value;
-    
+
     __try
         value = Buffer_ReadUIntegerAsHex(pBuffer);
     __catch

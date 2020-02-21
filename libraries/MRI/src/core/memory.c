@@ -1,4 +1,4 @@
-/* Copyright 2017 Adam Green (http://mbed.org/users/AdamGreen/)
+/* Copyright 2017 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
    limitations under the License.
 */
 /* Routines to read/write memory and detect any faults that might occur while attempting to do so. */
-#include "platforms.h"
-#include "memory.h"
+#include <core/platforms.h>
+#include <core/memory.h>
 
 
 static uint32_t readMemoryBytesIntoHexBuffer(Buffer* pBuffer, const void*  pvMemory, uint32_t readByteCount);
@@ -40,11 +40,11 @@ static uint32_t readMemoryBytesIntoHexBuffer(Buffer* pBuffer, const void*  pvMem
 {
     uint32_t byteCount = 0;
     uint8_t* p = (uint8_t*) pvMemory;
-    
+
     while (readByteCount-- > 0)
     {
         uint8_t byte;
-        
+
         byte = Platform_MemRead8(p++);
         if (Platform_WasMemoryFaultEncountered())
             break;
@@ -59,10 +59,10 @@ static uint32_t readMemoryBytesIntoHexBuffer(Buffer* pBuffer, const void*  pvMem
 static uint32_t readMemoryHalfWordIntoHexBuffer(Buffer* pBuffer, const void* pvMemory)
 {
     uint16_t value;
-    
+
     if (isNotHalfWordAligned(pvMemory))
         return readMemoryBytesIntoHexBuffer(pBuffer, pvMemory, 2);
-        
+
     value = Platform_MemRead16(pvMemory);
     if (Platform_WasMemoryFaultEncountered())
         return 0;
@@ -86,7 +86,7 @@ static void writeBytesToBufferAsHex(Buffer* pBuffer, const void* pv, size_t leng
 static uint32_t readMemoryWordIntoHexBuffer(Buffer* pBuffer, const void* pvMemory)
 {
     uint32_t value;
-    
+
     if (isNotWordAligned(pvMemory))
         return readMemoryBytesIntoHexBuffer(pBuffer, pvMemory, 4);
 
@@ -128,7 +128,7 @@ static int writeHexBufferToByteMemory(Buffer* pBuffer, void* pvMemory, uint32_t 
     while (writeByteCount-- > 0)
     {
         uint8_t byte;
-        
+
         __try
             byte = Buffer_ReadByteAsHex(pBuffer);
         __catch
@@ -148,7 +148,7 @@ static int writeHexBufferToHalfWordMemory(Buffer* pBuffer, void* pvMemory)
 
     if (isNotHalfWordAligned(pvMemory))
         return writeHexBufferToByteMemory(pBuffer, pvMemory, 2);
-    
+
     if (!readBytesFromHexBuffer(pBuffer, &value, sizeof(value)))
         return 0;
 
@@ -175,7 +175,7 @@ static int readBytesFromHexBuffer(Buffer* pBuffer, void* pv, size_t length)
 static int writeHexBufferToWordMemory(Buffer* pBuffer, void* pvMemory)
 {
     uint32_t value;
-    
+
     if (isNotWordAligned(pvMemory))
         return writeHexBufferToByteMemory(pBuffer, pvMemory, 4);
 
@@ -218,7 +218,7 @@ static int writeBinaryBufferToByteMemory(Buffer*  pBuffer, void* pvMemory, uint3
     while (writeByteCount-- > 0)
     {
         char currChar;
-    
+
         __try
         {
             __throwing_func( currChar = Buffer_ReadChar(pBuffer) );
@@ -241,7 +241,7 @@ static char unescapeCharIfNecessary(Buffer* pBuffer, char currentChar)
 {
     if (isEscapePrefixChar(currentChar))
         return readNextCharAndUnescape(pBuffer);
-    
+
     return currentChar;
 }
 
@@ -253,7 +253,7 @@ static int isEscapePrefixChar(char charToCheck)
 static char readNextCharAndUnescape(Buffer* pBuffer)
 {
     char nextChar;
-    
+
     __try
         nextChar = Buffer_ReadChar(pBuffer);
     __catch
@@ -267,13 +267,13 @@ static char unescapeByte(char charToUnescape)
     return charToUnescape ^ 0x20;
 }
 
-static int writeBinaryBufferToHalfWordMemory(Buffer* pBuffer, void* pvMemory) 
+static int writeBinaryBufferToHalfWordMemory(Buffer* pBuffer, void* pvMemory)
 {
     uint16_t value;
 
     if (isNotHalfWordAligned(pvMemory))
         return writeBinaryBufferToByteMemory(pBuffer, pvMemory, 2);
-        
+
     if (!readBytesFromBinaryBuffer(pBuffer, &value, sizeof(value)))
         return 0;
 
@@ -306,7 +306,7 @@ static int readBytesFromBinaryBuffer(Buffer*  pBuffer, void* pvMemory, uint32_t 
     return 1;
 }
 
-static int writeBinaryBufferToWordMemory(Buffer* pBuffer, void* pvMemory) 
+static int writeBinaryBufferToWordMemory(Buffer* pBuffer, void* pvMemory)
 {
     uint32_t value;
 

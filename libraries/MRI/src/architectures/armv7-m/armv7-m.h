@@ -1,4 +1,4 @@
-/* Copyright 2017 Adam Green (http://mbed.org/users/AdamGreen/)
+/* Copyright 2017 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@
 #endif
 
 #include <stdint.h>
-#include "core/token.h"
+#include <core/token.h>
 
 /* NOTE: The MriExceptionHandler function definition in mriasm.S is dependent on the layout of this structure.  It
          is also dictated by the version of gdb which supports the ARM processors.  It should only be changed if the
@@ -118,7 +118,7 @@ typedef struct
 #endif
 } Context;
 
-/* NOTE: The largest buffer is required for receiving the 'G' command which receives the contents of the registers from 
+/* NOTE: The largest buffer is required for receiving the 'G' command which receives the contents of the registers from
    the debugger as two hex digits per byte.  Also need a character for the 'G' command itself. */
 #define CORTEXM_PACKET_BUFFER_SIZE (1 + 2 * sizeof(Context))
 

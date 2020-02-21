@@ -1,4 +1,4 @@
-/* Copyright 2012 Adam Green (http://mbed.org/users/AdamGreen/)
+/* Copyright 2012 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 #define _TOKEN_H_
 
 #include <stddef.h>
-#include "try_catch.h"
+#include <core/try_catch.h>
 
 /* Maximum number of tokens that a string can be separated into. */
 #define TOKEN_MAX_TOKENS 10

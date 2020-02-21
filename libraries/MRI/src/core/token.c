@@ -1,4 +1,4 @@
-/* Copyright 2014 Adam Green (http://mbed.org/users/AdamGreen/)
+/* Copyright 2014 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 */
 /* 'Class' used to parse and tokenize a string based on provided list of separators. */
 #include <string.h>
-#include "token.h"
+#include <core/token.h>
 
 #define ARRAY_SIZE(X) (sizeof(X)/sizeof(X[0]))
 
@@ -65,14 +65,14 @@ static void copyStringIntoToken(Token* pToken, const char* pStringToCopy)
     size_t      bytesLeft = sizeof(pToken->copyOfString);
     const char* pSource = pStringToCopy;
     char*       pDest = pToken->copyOfString;
-    
+
     while (bytesLeft > 1 && *pSource)
     {
         *pDest++ = *pSource++;
         bytesLeft--;
     }
     *pDest = '\0';
-    
+
     if (*pSource)
         __throw(bufferOverrunException);
 }
@@ -97,7 +97,7 @@ static char* findFirstNonSeparator(Token* pToken, char* p)
 {
     while (*p && charIsSeparator(pToken, *p))
         p++;
-    
+
     return p;
 }
 
@@ -105,21 +105,21 @@ static char* findFirstSeparator(Token* pToken, char* p)
 {
     while (*p && !charIsSeparator(pToken, *p))
         p++;
-    
+
     return p;
 }
 
 static int charIsSeparator(Token* pToken, char c)
 {
     const char* pSeparator = pToken->pTokenSeparators;
-    
+
     while (*pSeparator)
     {
         if (c == *pSeparator)
             return 1;
         pSeparator++;
     }
-    
+
     return 0;
 }
 
@@ -127,10 +127,10 @@ static void addToken(Token* pToken, const char* p)
 {
     if ('\0' == *p)
         return;
-        
+
     if (pToken->tokenCount >= ARRAY_SIZE(pToken->tokenPointers))
         __throw(bufferOverrunException);
-        
+
     pToken->tokenPointers[pToken->tokenCount++] = p;
 }
 
@@ -153,7 +153,7 @@ const char* Token_GetToken(Token* pToken, size_t tokenIndex)
 const char* Token_MatchingString(Token* pToken, const char* pTokenToSearchFor)
 {
     size_t i;
-    
+
     for (i = 0 ; i < pToken->tokenCount ; i++)
     {
         if (0 == strcmp(pToken->tokenPointers[i], pTokenToSearchFor))
@@ -166,7 +166,7 @@ const char* Token_MatchingString(Token* pToken, const char* pTokenToSearchFor)
 const char* Token_MatchingStringPrefix(Token* pToken, const char* pTokenPrefixToSearchFor)
 {
     size_t i;
-    
+
     for (i = 0 ; i < pToken->tokenCount ; i++)
     {
         if (pToken->tokenPointers[i] == strstr(pToken->tokenPointers[i], pTokenPrefixToSearchFor))
@@ -180,18 +180,18 @@ static void adjustTokenPointers(Token* pToken, const char* pOriginalStringCopyBa
 void Token_Copy(Token* pTokenCopy, Token* pTokenOriginal)
 {
     *pTokenCopy = *pTokenOriginal;
-    
+
     adjustTokenPointers(pTokenCopy, pTokenOriginal->copyOfString);
 }
 
 static void adjustTokenPointers(Token* pToken, const char* pOriginalStringCopyBaseAddress)
 {
     size_t i;
-    
+
     for (i = 0 ; i < pToken->tokenCount ; i++)
     {
         int tokenOffset = pToken->tokenPointers[i] - pOriginalStringCopyBaseAddress;
-        
+
         pToken->tokenPointers[i] = pToken->copyOfString + tokenOffset;
     }
 }

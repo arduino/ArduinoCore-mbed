@@ -1,4 +1,4 @@
-/* Copyright 2014 Adam Green (http://mbed.org/users/AdamGreen/)
+/* Copyright 2014 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
 /* 'Class' to manage the sending and receiving of packets to/from gdb.  Takes care of crc and ack/nak handling too. */
 #include <string.h>
 #include <stdint.h>
-#include "hex_convert.h"
-#include "platforms.h"
-#include "packet.h"
+#include <core/hex_convert.h>
+#include <core/platforms.h>
+#include <core/packet.h>
 
 
 static void initPacketStructure(Packet* pPacket, Buffer* pBuffer);
@@ -40,7 +40,7 @@ void Packet_GetFromGDB(Packet* pPacket, Buffer* pBuffer)
     {
         getMostRecentPacket(pPacket);
     } while(!isChecksumValid(pPacket));
-    
+
     resetBufferToEnableFutureReadingOfValidPacketData(pPacket);
 }
 
@@ -56,7 +56,7 @@ static void getMostRecentPacket(Packet* pPacket)
     {
         getPacketDataAndExpectedChecksum(pPacket);
     } while (Platform_CommHasReceiveData());
-    
+
     if (!isChecksumValid(pPacket))
     {
         sendNAKToGDB();
@@ -69,20 +69,20 @@ static void getMostRecentPacket(Packet* pPacket)
 static void getPacketDataAndExpectedChecksum(Packet* pPacket)
 {
     int completePacket;
-    
+
     do
     {
         waitForStartOfNextPacket(pPacket);
         completePacket = getPacketData(pPacket);
     } while (!completePacket);
-    
+
     extractExpectedChecksum(pPacket);
 }
 
 static void waitForStartOfNextPacket(Packet* pPacket)
 {
     char nextChar = pPacket->lastChar;
-    
+
     /* Wait for the packet start character, '$', and ignore all other characters. */
     while (nextChar != '$')
         nextChar = getNextCharFromGdb(pPacket);
@@ -98,7 +98,7 @@ static char getNextCharFromGdb(Packet* pPacket)
 static int getPacketData(Packet* pPacket)
 {
     char nextChar;
-    
+
     Buffer_Reset(pPacket->pBuffer);
     clearChecksum(pPacket);
     nextChar = getNextCharFromGdb(pPacket);
@@ -108,7 +108,7 @@ static int getPacketData(Packet* pPacket)
         Buffer_WriteChar(pPacket->pBuffer, nextChar);
         nextChar = getNextCharFromGdb(pPacket);
     }
-    
+
     /* Return success if the expected end of packet character, '#', was received. */
     return (nextChar == '#');
 }
@@ -131,7 +131,7 @@ static void extractExpectedChecksum(Packet* pPacket)
         char char2 = getNextCharFromGdb(pPacket);
         unsigned char expectedChecksumHiNibble;
         unsigned char expectedChecksumLoNibble;
-        
+
         __throwing_func( expectedChecksumHiNibble = HexCharToNibble(char1) );
         __throwing_func( expectedChecksumLoNibble = HexCharToNibble(char2) );
         pPacket->expectedChecksum = (expectedChecksumHiNibble << 4) | expectedChecksumLoNibble;
@@ -174,7 +174,7 @@ static int  receiveCharAfterSkippingControlC(Packet* pPacket);
 void Packet_SendToGDB(Packet* pPacket, Buffer* pBuffer)
 {
     char  charFromGdb;
-    
+
     /* Keeps looping until GDB sends back the '+' packet acknowledge character.  If GDB sends a '$' then it is trying
        to send a packet so cancel this send attempt. */
     initPacketStructure(pPacket, pBuffer);
@@ -227,12 +227,12 @@ static int receiveCharAfterSkippingControlC(Packet* pPacket)
 {
     static const int controlC = 0x03;
     int              nextChar;
-    
+
     do
     {
         nextChar = getNextCharFromGdb(pPacket);
     }
     while (nextChar == controlC);
-    
+
     return nextChar;
 }

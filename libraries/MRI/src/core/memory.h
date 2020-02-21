@@ -1,4 +1,4 @@
-/* Copyright 2017 Adam Green (http://mbed.org/users/AdamGreen/)
+/* Copyright 2017 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 #define _MEMORY_H_
 
 #include <stdint.h>
-#include "buffer.h"
+#include <core/buffer.h>
 
 /* Real name of functions are in __mri namespace. */
 uint32_t __mriMem_ReadMemoryIntoHexBuffer(Buffer* pBuffer, const void* pvMemory, uint32_t readByteCount);

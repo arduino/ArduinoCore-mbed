@@ -1,4 +1,4 @@
-/* Copyright 2012 Adam Green (http://mbed.org/users/AdamGreen/)
+/* Copyright 2012 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ __mriNewLib_SemihostOpen:
     bkpt    0xff
     bx      lr
 
-    
+
     .global __mriNewLib_SemihostRename
     .type __mriNewLib_SemihostRename, function
     /* extern "C" int __mriNewLib_SemihostRename(const char *pOldFilename, const char *pNewFilename);
@@ -56,7 +56,7 @@ __mriNewLib_SemihostOpen:
 __mriNewLib_SemihostRename:
     bkpt    0xff
     bx      lr
-    
+
     .global __mriNewLib_SemihostUnlink
     .type __mriNewLib_SemihostUnlink, function
     /* extern "C" int __mriNewLib_SemihostUnlink(const char *pFilename);
@@ -65,8 +65,8 @@ __mriNewLib_SemihostRename:
 __mriNewLib_SemihostUnlink:
     bkpt    0xff
     bx      lr
-    
-    
+
+
     .global __mriNewLib_SemihostStat
     .type __mriNewLib_SemihostStat, function
     /* extern "C" int __mriNewLib_SemihostStat(const char *pFilename, struct stat *pStat);
@@ -75,8 +75,8 @@ __mriNewLib_SemihostUnlink:
 __mriNewLib_SemihostStat:
     bkpt    0xff
     bx      lr
-    
-    
+
+
     .global __mriNewlib_SemihostLSeek
     .type __mriNewlib_SemihostLSeek, function
     /* extern "C" int __mriNewlib_SemihostLSeek(int file, int offset, int whence);
@@ -85,8 +85,8 @@ __mriNewLib_SemihostStat:
 __mriNewlib_SemihostLSeek:
     bkpt    0xff
     bx      lr
-    
-    
+
+
     .global __mriNewlib_SemihostClose
     .type __mriNewlib_SemihostClose, function
     /* extern "C" int __mriNewlib_SemihostClose(int file);
@@ -95,12 +95,12 @@ __mriNewlib_SemihostLSeek:
 __mriNewlib_SemihostClose:
     bkpt    0xff
     bx      lr
-    
-    
+
+
     .global __mriNewlib_SemihostFStat
     .type __mriNewlib_SemihostFStat, function
     /* extern "C" int __mriNewlib_SemihostFStat(int file, struct stat *pStat);
-       Issues stat call to PC via GDB. 
+       Issues stat call to PC via GDB.
     */
 __mriNewlib_SemihostFStat:
     bkpt    0xff

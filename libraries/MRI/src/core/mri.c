@@ -1,4 +1,4 @@
-/* Copyright 2017 Adam Green (http://mbed.org/users/AdamGreen/)
+/* Copyright 2017 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,25 +17,25 @@
 #include <string.h>
 #include <signal.h>
 #include <errno.h>
-#include "mri.h"
-#include "buffer.h"
-#include "hex_convert.h"
-#include "try_catch.h"
-#include "packet.h"
-#include "token.h"
-#include "core.h"
-#include "platforms.h"
-#include "posix4win.h"
-#include "semihost.h"
-#include "cmd_common.h"
-#include "cmd_file.h"
-#include "cmd_registers.h"
-#include "cmd_memory.h"
-#include "cmd_continue.h"
-#include "cmd_query.h"
-#include "cmd_break_watch.h"
-#include "cmd_step.h"
-#include "memory.h"
+#include <core/mri.h>
+#include <core/buffer.h>
+#include <core/hex_convert.h>
+#include <core/try_catch.h>
+#include <core/packet.h>
+#include <core/token.h>
+#include <core/core.h>
+#include <core/platforms.h>
+#include <core/posix4win.h>
+#include <core/semihost.h>
+#include <core/cmd_common.h>
+#include <core/cmd_file.h>
+#include <core/cmd_registers.h>
+#include <core/cmd_memory.h>
+#include <core/cmd_continue.h>
+#include <core/cmd_query.h>
+#include <core/cmd_break_watch.h>
+#include <core/cmd_step.h>
+#include <core/memory.h>
 
 
 typedef struct
@@ -72,7 +72,7 @@ static void setSuccessfulInitFlag(void);
 void __mriInit(const char* pDebuggerParameters)
 {
     clearCoreStructure();
-    
+
     __try
         initializePlatformSpecificModulesWithDebuggerParameters(pDebuggerParameters);
     __catch
@@ -124,7 +124,7 @@ void __mriDebugException(void)
 {
     int wasWaitingForGdbToConnect = IsWaitingForGdbToConnect();
     int justSingleStepped = Platform_IsSingleStepping();
-    
+
     if (Platform_CommCausedInterrupt() && !Platform_CommHasReceiveData())
     {
         Platform_CommClearInterrupt();
@@ -135,22 +135,22 @@ void __mriDebugException(void)
     blockIfGdbHasNotConnected();
     Platform_EnteringDebugger();
     determineSignalValue();
-    
-    if (isDebugTrap() && 
-        Semihost_IsDebuggeeMakingSemihostCall() && 
+
+    if (isDebugTrap() &&
+        Semihost_IsDebuggeeMakingSemihostCall() &&
         Semihost_HandleSemihostRequest() &&
         !justSingleStepped )
     {
         prepareForDebuggerExit();
         return;
     }
-    
+
     if (!wasWaitingForGdbToConnect)
     {
         Platform_DisplayFaultCauseToGdbConsole();
         Send_T_StopResponse();
     }
-    
+
     GdbCommandHandlingLoop();
 
     prepareForDebuggerExit();
@@ -184,7 +184,7 @@ static void waitForFirstCharFromHost(void)
 static int didHostSendGdbAckChar(void)
 {
     return ('+' == Platform_CommReceiveChar());
-    
+
 }
 
 static void determineSignalValue(void)
@@ -218,7 +218,7 @@ static void getPacketFromGDB(void);
 void GdbCommandHandlingLoop(void)
 {
     int startDebuggeeUpAgain;
-    
+
     do
     {
         startDebuggeeUpAgain = handleGDBCommand();
@@ -252,9 +252,9 @@ static int handleGDBCommand(void)
         {HandleBreakpointWatchpointRemoveCommand,   'z'},
         {HandleBreakpointWatchpointSetCommand,      'Z'}
     };
-    
+
     getPacketFromGDB();
-    
+
     commandChar = Buffer_ReadChar(pBuffer);
     for (i = 0 ; i < ARRAY_SIZE(commandTable) ; i++)
     {

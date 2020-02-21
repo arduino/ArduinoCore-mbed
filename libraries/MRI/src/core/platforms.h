@@ -1,4 +1,4 @@
-/* Copyright 2014 Adam Green (http://mbed.org/users/AdamGreen/)
+/* Copyright 2014 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@
 #define _PLATFORMS_H_
 
 #include <stdint.h>
-#include "token.h"
-#include "buffer.h"
-#include "try_catch.h"
+#include <core/token.h>
+#include <core/buffer.h>
+#include <core/try_catch.h>
 
 void      __mriPlatform_Init(Token* pParameterTokens);
 char*     __mriPlatform_GetPacketBuffer(void);

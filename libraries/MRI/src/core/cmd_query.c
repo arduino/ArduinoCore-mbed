@@ -1,4 +1,4 @@
-/* Copyright 2014 Adam Green (http://mbed.org/users/AdamGreen/)
+/* Copyright 2014 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
 */
 /* Handler for gdb query commands. */
 #include <string.h>
-#include "buffer.h"
-#include "core.h"
-#include "platforms.h"
-#include "mri.h"
-#include "cmd_common.h"
-#include "cmd_query.h"
+#include <core/buffer.h>
+#include <core/core.h>
+#include <core/platforms.h>
+#include <core/mri.h>
+#include <core/cmd_common.h>
+#include <core/cmd_query.h>
 
 
 typedef struct
@@ -50,7 +50,7 @@ uint32_t HandleQueryCommand(void)
     Buffer*             pBuffer = GetBuffer();
     static const char   qSupportedCommand[] = "Supported";
     static const char   qXferCommand[] = "Xfer";
-    
+
     if (Buffer_MatchesString(pBuffer, qSupportedCommand, sizeof(qSupportedCommand)-1))
     {
         return handleQuerySupportedCommand();
@@ -79,7 +79,7 @@ static uint32_t handleQuerySupportedCommand(void)
 
     Buffer_WriteString(pBuffer, querySupportResponse);
     Buffer_WriteUIntegerAsHex(pBuffer, PacketSize);
-    
+
     return 0;
 }
 
@@ -94,13 +94,13 @@ static uint32_t handleQueryTransferCommand(void)
     Buffer*             pBuffer =GetBuffer();
     static const char   memoryMapObject[] = "memory-map";
     static const char   featureObject[] = "features";
-    
+
     if (!Buffer_IsNextCharEqualTo(pBuffer, ':'))
     {
         PrepareStringResponse(MRI_ERROR_INVALID_ARGUMENT);
         return 0;
     }
-    
+
     if (Buffer_MatchesString(pBuffer, memoryMapObject, sizeof(memoryMapObject)-1))
     {
         return handleQueryTransferMemoryMapCommand();
@@ -124,7 +124,7 @@ static uint32_t handleQueryTransferMemoryMapCommand(void)
 {
     Buffer*             pBuffer = GetBuffer();
     AnnexOffsetLength   arguments;
-    
+
     __try
     {
         __throwing_func( readQueryTransferReadArguments(pBuffer, &arguments) );
@@ -139,7 +139,7 @@ static uint32_t handleQueryTransferMemoryMapCommand(void)
     arguments.pAnnex = Platform_GetDeviceMemoryMapXml();
     arguments.annexSize = Platform_GetDeviceMemoryMapXmlSize();
     handleQueryTransferReadCommand(&arguments);
-    
+
     return 0;
 }
 
@@ -154,7 +154,7 @@ static void readQueryTransferReadArguments(Buffer* pBuffer, AnnexOffsetLength* p
     {
         __throw(invalidArgumentException);
     }
-    
+
     __try
     {
         __throwing_func( pAnnexOffsetLength->pAnnex = readQueryTransferAnnexArgument(pBuffer) );
@@ -170,7 +170,7 @@ static const char* readQueryTransferAnnexArgument(Buffer* pBuffer)
 {
     static const char   targetXmlAnnex[] = "target.xml";
     const char*         pReturn = NULL;
-    
+
     if (Buffer_MatchesString(pBuffer, targetXmlAnnex, sizeof(targetXmlAnnex)-1))
         pReturn = targetXmlAnnex;
 
@@ -207,7 +207,7 @@ static void handleQueryTransferReadCommand(AnnexOffsetLength* pArguments)
     uint32_t length = pArguments->length;
     uint32_t outputBufferSize;
     uint32_t validMemoryMapBytes;
-    
+
     if (offset >= pArguments->annexSize)
     {
         /* Attempt to read past end of XML content so flag with a l only packet. */
@@ -219,7 +219,7 @@ static void handleQueryTransferReadCommand(AnnexOffsetLength* pArguments)
     {
         validMemoryMapBytes = pArguments->annexSize - offset;
     }
-    
+
     InitBuffer();
     outputBufferSize = Buffer_BytesLeft(pBuffer);
 
@@ -231,7 +231,7 @@ static void handleQueryTransferReadCommand(AnnexOffsetLength* pArguments)
         dataPrefixChar = 'l';
         length = validMemoryMapBytes;
     }
-    
+
     Buffer_WriteChar(pBuffer, dataPrefixChar);
     Buffer_WriteSizedString(pBuffer, pArguments->pAnnex + offset, length);
 }
@@ -244,7 +244,7 @@ static uint32_t handleQueryTransferFeaturesCommand(void)
 {
     Buffer*             pBuffer = GetBuffer();
     AnnexOffsetLength   arguments;
-    
+
     __try
     {
         __throwing_func( readQueryTransferReadArguments(pBuffer, &arguments) );
@@ -259,7 +259,7 @@ static uint32_t handleQueryTransferFeaturesCommand(void)
     arguments.pAnnex = Platform_GetTargetXml();
     arguments.annexSize = Platform_GetTargetXmlSize();
     handleQueryTransferReadCommand(&arguments);
-    
+
     return 0;
 }
 

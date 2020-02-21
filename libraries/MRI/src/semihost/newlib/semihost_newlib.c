@@ -1,4 +1,4 @@
-/* Copyright 2014 Adam Green (http://mbed.org/users/AdamGreen/)
+/* Copyright 2014 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
 */
 /* Semihost functionality for redirecting stdin/stdout/stderr I/O to the GNU console. */
 #include <string.h>
-#include "core/mri.h"
-#include "core/semihost.h"
-#include "core/cmd_file.h"
+#include <core/mri.h>
+#include <core/semihost.h>
+#include <core/cmd_file.h>
 
 
 static int handleNewlibSemihostWriteRequest(PlatformSemihostParameters* pSemihostParameters);
@@ -62,7 +62,7 @@ static int handleNewlibSemihostWriteRequest(PlatformSemihostParameters* pSemihos
     parameters.fileDescriptor = pSemihostParameters->parameter1;
     parameters.bufferAddress = pSemihostParameters->parameter2;
     parameters.bufferSize = pSemihostParameters->parameter3;
-    
+
     return IssueGdbFileWriteRequest(&parameters);
 }
 
@@ -73,7 +73,7 @@ static int handleNewlibSemihostReadRequest(PlatformSemihostParameters* pSemihost
     parameters.fileDescriptor = pSemihostParameters->parameter1;
     parameters.bufferAddress = pSemihostParameters->parameter2;
     parameters.bufferSize = pSemihostParameters->parameter3;
-    
+
     return IssueGdbFileReadRequest(&parameters);
 }
 
@@ -85,7 +85,7 @@ static int handleNewlibSemihostOpenRequest(PlatformSemihostParameters* pSemihost
     parameters.filenameLength = strlen((const char*)parameters.filenameAddress) + 1;
     parameters.flags = pSemihostParameters->parameter2;
     parameters.mode = pSemihostParameters->parameter3;
-    
+
     return IssueGdbFileOpenRequest(&parameters);
 }
 
@@ -93,9 +93,9 @@ static int handleNewlibSemihostUnlinkRequest(PlatformSemihostParameters* pSemiho
 {
     RemoveParameters parameters;
 
-    parameters.filenameAddress = pSemihostParameters->parameter1;    
+    parameters.filenameAddress = pSemihostParameters->parameter1;
     parameters.filenameLength = strlen((const char*)parameters.filenameAddress) + 1;
-    
+
     return IssueGdbFileUnlinkRequest(&parameters);
 }
 
@@ -103,10 +103,10 @@ static int handleNewlibSemihostLSeekRequest(PlatformSemihostParameters* pSemihos
 {
     SeekParameters parameters;
 
-    parameters.fileDescriptor = pSemihostParameters->parameter1;    
+    parameters.fileDescriptor = pSemihostParameters->parameter1;
     parameters.offset = pSemihostParameters->parameter2;
     parameters.whence = pSemihostParameters->parameter3;
-    
+
     return IssueGdbFileSeekRequest(&parameters);
 }
 

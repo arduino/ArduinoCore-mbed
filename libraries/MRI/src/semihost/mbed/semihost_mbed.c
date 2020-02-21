@@ -1,4 +1,4 @@
-/* Copyright 2014 Adam Green (http://mbed.org/users/AdamGreen/)
+/* Copyright 2014 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
 /* Semihost functionality for redirecting mbed LocalFileSystem operations to the GNU host. */
 #include <stdint.h>
 #include <string.h>
-#include "core/core.h"
-#include "core/semihost.h"
-#include "core/cmd_file.h"
-#include "core/fileio.h"
-#include "core/mbedsys.h"
+#include <core/core.h>
+#include <core/semihost.h>
+#include <core/cmd_file.h>
+#include <core/fileio.h>
+#include <core/mbedsys.h>
 
 
 static int      handleMbedSemihostUidRequest(PlatformSemihostParameters* pParameters);
@@ -37,7 +37,7 @@ static int      handleMbedSemihostRemoveRequest(PlatformSemihostParameters* pSem
 int Semihost_HandleMbedSemihostRequest(PlatformSemihostParameters* pParameters)
 {
     uint32_t opCode;
-    
+
     opCode = pParameters->parameter1;
     switch (opCode)
     {
@@ -74,7 +74,7 @@ static int handleMbedSemihostUidRequest(PlatformSemihostParameters* pParameters)
     uint32_t              uidSize = Platform_GetUidSize();
     const SUidParameters* pUidParameters;
     uint32_t              copySize;
-    
+
     pUidParameters = (const SUidParameters*)pParameters->parameter2;
     copySize = pUidParameters->bufferSize;
     if (copySize > uidSize)
@@ -93,17 +93,17 @@ static int handleMbedSemihostOpenRequest(PlatformSemihostParameters* pSemihostPa
     {
         uint32_t filenameAddress;
         uint32_t openMode;
-        uint32_t filenameLength;    
+        uint32_t filenameLength;
     } MbedOpenParameters;
     const MbedOpenParameters*  pParameters = (const MbedOpenParameters*)pSemihostParameters->parameter2;
     OpenParameters             parameters;
-    
+
     parameters.filenameAddress = pParameters->filenameAddress;
     parameters.flags = convertRealViewOpenModeToPosixOpenFlags(pParameters->openMode);
     parameters.mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
     parameters.filenameLength = pParameters->filenameLength + 1;
-    
-    return IssueGdbFileOpenRequest(&parameters); 
+
+    return IssueGdbFileOpenRequest(&parameters);
 }
 
 static uint32_t convertRealViewOpenModeToPosixOpenFlags(uint32_t openMode)
@@ -130,7 +130,7 @@ static uint32_t convertRealViewOpenModeToPosixOpenFlags(uint32_t openMode)
     {
         posixOpenMode = O_RDWR;
     }
-    
+
     return posixOpenMode | posixOpenDisposition;
 }
 
@@ -141,7 +141,7 @@ static int handleMbedSemihostIsTtyRequest(PlatformSemihostParameters* pSemihostP
         uint32_t        fileDescriptor;
     } IsTtyParameters;
     const IsTtyParameters* pParameters;
-    
+
     pParameters = (const IsTtyParameters*)pSemihostParameters->parameter2;
     (void)pParameters;
 
@@ -158,10 +158,10 @@ static int handleMbedSemihostWriteRequest(PlatformSemihostParameters* pSemihostP
     const TransferParameters*  pParameters = (const TransferParameters*)pSemihostParameters->parameter2;
     int returnValue;
 
-    returnValue = IssueGdbFileWriteRequest(pParameters); 
+    returnValue = IssueGdbFileWriteRequest(pParameters);
     if (returnValue)
         convertBytesTransferredToBytesNotTransferred(pParameters->bufferSize);
-    
+
     return returnValue;
 }
 
@@ -169,18 +169,18 @@ static int handleMbedSemihostReadRequest(PlatformSemihostParameters* pSemihostPa
 {
     const TransferParameters*  pParameters = (const TransferParameters*)pSemihostParameters->parameter2;
     int   returnValue;
-    
-    returnValue = IssueGdbFileReadRequest(pParameters); 
+
+    returnValue = IssueGdbFileReadRequest(pParameters);
     if (returnValue)
         convertBytesTransferredToBytesNotTransferred(pParameters->bufferSize);
-    
+
     return returnValue;
 }
 
 static void convertBytesTransferredToBytesNotTransferred(int bytesThatWereToBeTransferred)
 {
     int bytesTransferred = GetSemihostReturnCode();
-    
+
     /* The mbed version of the read/write function need bytes not transferred instead of bytes transferred. */
     if (bytesTransferred >= 0)
         Platform_SetSemihostCallReturnAndErrnoValues(bytesThatWereToBeTransferred - bytesTransferred, 0);
@@ -196,7 +196,7 @@ static int handleMbedSemihostCloseRequest(PlatformSemihostParameters* pSemihostP
         uint32_t        fileDescriptor;
     } CloseParameters;
     const CloseParameters* pParameters = (const CloseParameters*)pSemihostParameters->parameter2;
-    
+
     return IssueGdbFileCloseRequest(pParameters->fileDescriptor);
 }
 
@@ -209,7 +209,7 @@ static int handleMbedSemihostSeekRequest(PlatformSemihostParameters* pSemihostPa
     } MbedSeekParameters;
     const MbedSeekParameters* pParameters = (const MbedSeekParameters*)pSemihostParameters->parameter2;
     SeekParameters parameters;
-    
+
     parameters.fileDescriptor = pParameters->fileDescriptor;
     parameters.offset = pParameters->offsetFromStart;
     parameters.whence = SEEK_SET;
@@ -244,7 +244,7 @@ static int handleMbedSemihostFileLengthRequest(PlatformSemihostParameters* pSemi
     const FileLengthParameters*  pParameters = (const FileLengthParameters*)pSemihostParameters->parameter2;
     GdbStats                     gdbFileStats;
     int                          returnValue;
-    
+
     returnValue = IssueGdbFileFStatRequest(pParameters->fileDescriptor, (uint32_t)&gdbFileStats);
     if (returnValue && GetSemihostReturnCode() == 0)
     {

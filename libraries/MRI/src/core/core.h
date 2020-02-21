@@ -1,4 +1,4 @@
-/* Copyright 2014 Adam Green (http://mbed.org/users/AdamGreen/)
+/* Copyright 2014 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 #define _CORE_H_
 
 #include <stdint.h>
-#include "buffer.h"
+#include <core/buffer.h>
 
 /* Real name of functions are in __mri namespace. */
 void    __mriCore_InitBuffer(void);

@@ -1,4 +1,4 @@
-/* Copyright 2012 Adam Green (http://mbed.org/users/AdamGreen/)
+/* Copyright 2012 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -13,6 +13,6 @@
    limitations under the License.
 */
 /* Very rough exception handling like macros for C. */
-#include "try_catch.h"
+#include <core/try_catch.h>
 
 int __mriExceptionCode;
