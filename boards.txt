@@ -66,6 +66,11 @@ envie_m7.upload.native_usb=true
 envie_m7.upload.maximum_size=786432
 envie_m7.upload.maximum_data_size=523624
 
+envie_m7.bootloader.tool=openocd
+envie_m7.bootloader.config=-f target/stm32h7x_dual_bank.cfg
+envie_m7.bootloader.programmer=-f interface/stlink.cfg
+envie_m7.bootloader.extra_action.preflash=stm32h7x option_write 0 0x01c 0xb86aaf0
+envie_m7.bootloader.file=ENVIE/envie_bootloader_mbed_hs.elf
 
 ##############################################################
 

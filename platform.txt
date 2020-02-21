@@ -102,7 +102,7 @@ recipe.output.save_file={build.project_name}.{build.variant}.bin
 # Uploader tools
 # ---------------------
 
-tools.openocd.path={runtime.tools.openocd-0.10.0-arduino9.path}
+tools.openocd.path={runtime.tools.openocd-0.10.0-arduino12.path}
 tools.openocd.cmd=bin/openocd
 tools.openocd.cmd.windows=bin/openocd.exe
 

@@ -4,3 +4,10 @@ cmsis-dap.protocol=
 cmsis-dap.program.protocol=
 cmsis-dap.program.tool=openocd
 cmsis-dap.program.extra_params=
+
+stlink.name=STMicroelectronics STLINK
+stlink.communication=USB
+stlink.protocol=
+stlink.program.protocol=
+stlink.program.tool=openocd
+stlink.program.extra_params=
