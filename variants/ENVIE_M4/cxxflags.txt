@@ -23,7 +23,7 @@
 -fmessage-length=0
 -fomit-frame-pointer
 -funsigned-char
--g
+-g1
 -mcpu=cortex-m4
 -mfloat-abi=softfp
 -mfpu=fpv4-sp-d16

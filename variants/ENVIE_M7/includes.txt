@@ -312,3 +312,5 @@
 -iwithprefixbefore/mbed/cmsis/TARGET_CORTEX_M
 -iwithprefixbefore/mbed/cmsis
 -iwithprefixbefore/mbed
+-iwithprefixbefore/../../libraries/RPC/openamp
+-iwithprefixbefore/../../libraries/RPC/rpclib/src/
