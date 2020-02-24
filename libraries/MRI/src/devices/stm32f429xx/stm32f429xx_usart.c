@@ -24,6 +24,7 @@
 UART_HandleTypeDef huart;
 
 void __mriExceptionHandler(void); /* armv7-m_asm.S */
+void __mriFaultHandler(void); /* armv7-m_asm.S */
 
 void __mriStm32f429xxUart_Init(Token *pParameterTokens)
 {
@@ -35,23 +36,19 @@ void __mriStm32f429xxUart_Init(Token *pParameterTokens)
     __HAL_UART_DISABLE_IT(&huart, UART_IT_RXNE);
 
     NVIC_SetVector(USART1_IRQn,           (uint32_t)&__mriExceptionHandler);
-    /* HardFault, MemoryManagement, BusFault and UsageFauls ISRs are all
-     * handled defined within the mbed library. Therefore redefining of
-     * the HardFault ISR symbol and branch to __mriExceptionHandler will
+    /* HardFault, MemoryManagement, BusFault and UsageFault ISRs are all
+     * defined within the mbed library. Therefore redefining of
+     * the HardFault ISR symbol and branch to __mriFault/ExceptionHandler will
      * not work, however, we can set the target of a interrupt exception
      * via NVIC_SetVector(...);
      */
-    //NVIC_SetVector(HardFault_IRQn,        (uint32_t)&__mriExceptionHandler);
-    //NVIC_SetVector(MemoryManagement_IRQn, (uint32_t)&__mriExceptionHandler);
-    //NVIC_SetVector(BusFault_IRQn,         (uint32_t)&__mriExceptionHandler);
-    //NVIC_SetVector(UsageFault_IRQn,       (uint32_t)&__mriExceptionHandler);
+    NVIC_SetVector(HardFault_IRQn,        (uint32_t)&__mriFaultHandler);
+    NVIC_SetVector(MemoryManagement_IRQn, (uint32_t)&__mriFaultHandler);
+    NVIC_SetVector(BusFault_IRQn,         (uint32_t)&__mriFaultHandler);
+    NVIC_SetVector(UsageFault_IRQn,       (uint32_t)&__mriExceptionHandler);
 
     /* USART1 has the top priority in the system */
     NVIC_SetPriority(USART1_IRQn,           0);
-    //NVIC_SetPriority(HardFault_IRQn,        1);
-    //NVIC_SetPriority(MemoryManagement_IRQn, 1);
-    //NVIC_SetPriority(BusFault_IRQn,         1);
-    //NVIC_SetPriority(UsageFault_IRQn,       1);
 
     __HAL_UART_ENABLE_IT(&huart, UART_IT_RXNE);
     NVIC_EnableIRQ(USART1_IRQn);
@@ -59,6 +56,8 @@ void __mriStm32f429xxUart_Init(Token *pParameterTokens)
 
 uint32_t Platform_CommHasReceiveData(void)
 {
+    // Just ignore overrun for now as there is no FIFO configured by mbed-os. Packet checksum will catch missing bytes.
+    huart.Instance->ICR |= USART_ICR_ORECF;
     return (huart.Instance->ISR & USART_ISR_RXNE_RXFNE);
 }
 

@@ -1,4 +1,4 @@
-/* Copyright 2017 Adam Green (http://mbed.org/users/AdamGreen/)
+/* Copyright 2020 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -39,14 +39,17 @@
 __mriExceptionHandler:
     ldr     r0, =mriSaveRestoreContext
     b       mriGetSPAndCallHandler
-    
 
+
+    .global __mriFaultHandler
+    .type __mriFaultHandler, function
+    .thumb_func
     /* Like MriExceptionHandler above but it also checks and handles stacking/unstacking faults. */
-mriFaultHandler:
+__mriFaultHandler:
     ldr     r0, =checkForStackError
     b       mriGetSPAndCallHandler
-    
-    
+
+
     /* Determines whether task context was saved in PSP or MSP and places the correct stack pointer address into
        the R1 register before calling the caller provided fault handler pointed to by the r0 register.
     */
@@ -61,8 +64,8 @@ mriGetSPAndCallHandler:
     str     r1, [r2]
     /* Call specified handler exception handler routine */
     mov     pc, r0
-    
-    
+
+
     .type checkForStackError, function
     .thumb_func
     /* Handles hard/memory/bus fault exceptions by checking for stacking/unstacking errors before calling the main
@@ -85,7 +88,7 @@ checkForStackError:
     /* Handles exception invokations for MRI.  Its main job is to store the interrupted task's context, call into
        the C based __mriDebugException, and then restore the task's context (which may have been modified by the
        debugger.
-       
+
        Layout of the registers which are pushed on the stack automatically by Cortex-M3 curing exception execution:
             SP      Value in MSP or PSP task was interrupted.
         PSR SP - 4
@@ -96,7 +99,7 @@ checkForStackError:
         R2  SP - 24
         R1  SP - 28
         R0  SP - 32  Value in MSP or PSP when handler is started.
-        
+
        Layout of the SContext record used by gdb for 'g' and 'G' commands.
         typedef struct
         {
@@ -132,7 +135,7 @@ mriSaveRestoreContext:
     /* Set the debugger active flag so that subsequent exceptions will be caught. */
     orr     r2, #CORTEXM_FLAGS_ACTIVE_DEBUG
     str     r2, [r0]
-    
+
     /* Fill the debugger stack with 0xDEADBEEF. */
     movs    r0, #CORTEXM_DEBUGGER_STACK_SIZE
     ldr     r12, =(__mriCortexMState + CORTEXM_STATE_DEBUGGER_STACK_OFFSET + CORTEXM_DEBUGGER_STACK_SIZE_IN_BYTES)
@@ -149,7 +152,7 @@ mriSaveRestoreContext:
     str     r2, [r0]
     ldr     r0, =(__mriCortexMState + CORTEXM_STATE_DEBUGGER_STACK_OFFSET + CORTEXM_DEBUGGER_STACK_SIZE_IN_BYTES)
     msr     msp, r0
-    
+
     /**** Copy R0-R3, R12, LR, PC, and PSR from running task's stack and place in MRI context structure. */
     ldr     r0, =(__mriCortexMState + CORTEXM_STATE_CONTEXT_OFFSET)
     /* Now that R1 contains the SP, we can push away the current LR (and R12 to just keep 8-byte alignment.) */
@@ -223,7 +226,7 @@ mriSaveRestoreContext:
     tst     r5, #PSR_STACK_ALIGN
     it      ne
     addne   r1, r1, #4
-    /* Jump back past the CONTROL, FAULTMASK, BASEPRI, PRIMASK, PSP, MSP, PSR, PC and LR that were placed in context 
+    /* Jump back past the CONTROL, FAULTMASK, BASEPRI, PRIMASK, PSP, MSP, PSR, PC and LR that were placed in context
        to store the potentially updated SP. */
     str     r1, [r0, #-40]
 
@@ -309,7 +312,7 @@ mriSaveRestoreContext:
     /**** Make sure that any modifications to the instruction stream by data writes are seen. */
     dsb
     isb
-    
+
     /**** Return to task after clearing fault status bits. */
     b       mriClearFaultStatusBitsAndReturn
 
@@ -367,8 +370,8 @@ mriClearFaultStatusBitsAndReturn:
     */
 //HardFault_Handler:
 //    b       mriFaultHandler
-    
- 
+
+
 //    .global MemManage_Handler
 //    .type MemManage_Handler, function
 //    .thumb_func
@@ -377,7 +380,7 @@ mriClearFaultStatusBitsAndReturn:
     */
 //MemManage_Handler:
 //    b       mriFaultHandler
-    
+
 
 //    .global BusFault_Handler
 //    .type BusFault_Handler, function
@@ -387,7 +390,7 @@ mriClearFaultStatusBitsAndReturn:
     */
 //BusFault_Handler:
 //    b       mriFaultHandler
-    
+
 
 //    .global UsageFault_Handler
 //    .type UsageFault_Handler, function
@@ -397,7 +400,7 @@ mriClearFaultStatusBitsAndReturn:
     */
 //UsageFault_Handler:
 //    b       __mriExceptionHandler
-    
+
 
     .global DebugMon_Handler
     .type DebugMon_Handler, function

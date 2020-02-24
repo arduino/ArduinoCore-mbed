@@ -7,7 +7,7 @@
 
 void setup() {
   Serial1.begin(115200); /* Initialize Serial1 via mbed ... should actually be done within MRI library to have the configuration we need */
-  __mriInit(0);
+  __mriInit("");
 }
 
 void loop() {

@@ -1,4 +1,4 @@
-/* Copyright 2015 Adam Green (http://mbed.org/users/AdamGreen/)
+/* Copyright 2020 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 
 #include <cmsis.h>
 #include <stdio.h>
-#include "core/try_catch.h"
+#include <core/try_catch.h>
 
 /* Data Watchpoint and Trace Registers */
 typedef struct
@@ -86,7 +86,7 @@ static __INLINE void waitForDebuggerToDetach(uint32_t timeOut)
     while (timeOut-- > 0 && isDebuggerAttached())
     {
     }
-    
+
     if (isDebuggerAttached())
         __throw(timeoutException);
 }
@@ -162,7 +162,7 @@ static __INLINE void clearDWTComparator(DWT_COMP_Type* pComparatorStruct)
 {
     pComparatorStruct->COMP = 0;
     pComparatorStruct->MASK = 0;
-    pComparatorStruct->FUNCTION &= ~(DWT_COMP_FUNCTION_DATAVMATCH | 
+    pComparatorStruct->FUNCTION &= ~(DWT_COMP_FUNCTION_DATAVMATCH |
                                      DWT_COMP_FUNCTION_CYCMATCH |
                                      DWT_COMP_FUNCTION_EMITRANGE |
                                      DWT_COMP_FUNCTION_FUNCTION_MASK);
@@ -173,7 +173,7 @@ static __INLINE void clearDWTComparators(void)
     DWT_COMP_Type*  pComparatorStruct = DWT_COMP_ARRAY;
     uint32_t        comparatorCount;
     uint32_t        i;
-    
+
     comparatorCount = getDWTComparatorCount();
     for (i = 0 ; i < comparatorCount ; i++)
     {
@@ -196,7 +196,7 @@ static __INLINE uint32_t maskOffDWTFunctionBits(uint32_t functionValue)
                             DWT_COMP_FUNCTION_CYCMATCH |
                             DWT_COMP_FUNCTION_EMITRANGE |
                             DWT_COMP_FUNCTION_FUNCTION_MASK);
-                            
+
 }
 
 static __INLINE int doesDWTComparatorAddressMatch(DWT_COMP_Type* pComparator, uint32_t address)
@@ -207,13 +207,13 @@ static __INLINE int doesDWTComparatorAddressMatch(DWT_COMP_Type* pComparator, ui
 static __INLINE uint32_t calculateLog2(uint32_t value)
 {
     uint32_t log2 = 0;
-    
+
     while (value > 1)
     {
         value >>= 1;
         log2++;
     }
-    
+
     return log2;
 }
 
@@ -230,9 +230,9 @@ static __INLINE int doesDWTComparatorFunctionMatch(DWT_COMP_Type* pComparator, u
 }
 
 
-static __INLINE int doesDWTComparatorMatch(DWT_COMP_Type* pComparator, 
-                                           uint32_t       address, 
-                                           uint32_t       size, 
+static __INLINE int doesDWTComparatorMatch(DWT_COMP_Type* pComparator,
+                                           uint32_t       address,
+                                           uint32_t       size,
                                            uint32_t       function)
 {
     return doesDWTComparatorFunctionMatch(pComparator, function) &&
@@ -240,14 +240,14 @@ static __INLINE int doesDWTComparatorMatch(DWT_COMP_Type* pComparator,
            doesDWTComparatorMaskMatch(pComparator, size);
 }
 
-static __INLINE DWT_COMP_Type* findDWTComparator(uint32_t watchpointAddress, 
-                                                 uint32_t watchpointSize, 
+static __INLINE DWT_COMP_Type* findDWTComparator(uint32_t watchpointAddress,
+                                                 uint32_t watchpointSize,
                                                  uint32_t watchpointType)
 {
     DWT_COMP_Type* pCurrentComparator = DWT_COMP_ARRAY;
     uint32_t       comparatorCount;
     uint32_t       i;
-    
+
     comparatorCount = getDWTComparatorCount();
     for (i = 0 ; i < comparatorCount ; i++)
     {
@@ -256,7 +256,7 @@ static __INLINE DWT_COMP_Type* findDWTComparator(uint32_t watchpointAddress,
 
         pCurrentComparator++;
     }
-    
+
     /* Return NULL if no DWT comparator is already enabled for this watchpoint. */
     return NULL;
 }
@@ -271,7 +271,7 @@ static __INLINE DWT_COMP_Type* findFreeDWTComparator(void)
     DWT_COMP_Type* pCurrentComparator = DWT_COMP_ARRAY;
     uint32_t       comparatorCount;
     uint32_t       i;
-    
+
     comparatorCount = getDWTComparatorCount();
     for (i = 0 ; i < comparatorCount ; i++)
     {
@@ -281,7 +281,7 @@ static __INLINE DWT_COMP_Type* findFreeDWTComparator(void)
         }
         pCurrentComparator++;
     }
-    
+
     /* Return NULL if there are no free DWT comparators. */
     return NULL;
 }
@@ -314,8 +314,8 @@ static __INLINE int isValidDWTComparatorType(uint32_t watchpointType)
            (watchpointType == DWT_COMP_FUNCTION_FUNCTION_DATA_READWRITE);
 }
 
-static __INLINE int isValidDWTComparatorSetting(uint32_t watchpointAddress, 
-                                                uint32_t watchpointSize, 
+static __INLINE int isValidDWTComparatorSetting(uint32_t watchpointAddress,
+                                                uint32_t watchpointSize,
                                                 uint32_t watchpointType)
 {
     return isValidDWTComparatorSize(watchpointSize) &&
@@ -326,7 +326,7 @@ static __INLINE int isValidDWTComparatorSetting(uint32_t watchpointAddress,
 static __INLINE int attemptToSetDWTComparatorMask(DWT_COMP_Type* pComparator, uint32_t watchpointSize)
 {
     uint32_t maskBitCount;
-    
+
     maskBitCount = calculateLog2(watchpointSize);
     pComparator->MASK = maskBitCount;
 
@@ -341,61 +341,65 @@ static __INLINE int attemptToSetDWTComparator(DWT_COMP_Type* pComparator,
 {
     if (!attemptToSetDWTComparatorMask(pComparator, watchpointSize))
         return 0;
-    
+
     pComparator->COMP = watchpointAddress;
     pComparator->FUNCTION = watchpointType;
     return 1;
 }
 
-static __INLINE DWT_COMP_Type* enableDWTWatchpoint(uint32_t watchpointAddress, 
-                                                   uint32_t watchpointSize, 
+static __INLINE DWT_COMP_Type* enableDWTWatchpoint(uint32_t watchpointAddress,
+                                                   uint32_t watchpointSize,
                                                    uint32_t watchpointType)
 {
     DWT_COMP_Type* pComparator = NULL;
-    
+
     pComparator = findDWTComparator(watchpointAddress, watchpointSize, watchpointType);
     if (pComparator)
     {
         /* This watchpoint has already been set so return a pointer to it. */
         return pComparator;
     }
-    
+
     pComparator = findFreeDWTComparator();
     if (!pComparator)
     {
         /* There are no free comparators left. */
         return NULL;
     }
-    
+
     if (!attemptToSetDWTComparator(pComparator, watchpointAddress, watchpointSize, watchpointType))
     {
         /* Failed set due to the size being larger than supported by CPU. */
         return NULL;
     }
-    
+
     /* Successfully configured a free comparator for this watchpoint. */
     return pComparator;
 }
 
-static __INLINE DWT_COMP_Type* disableDWTWatchpoint(uint32_t watchpointAddress, 
-                                                    uint32_t watchpointSize, 
+static __INLINE DWT_COMP_Type* disableDWTWatchpoint(uint32_t watchpointAddress,
+                                                    uint32_t watchpointSize,
                                                     uint32_t watchpointType)
 {
     DWT_COMP_Type* pComparator = NULL;
-    
+
     pComparator = findDWTComparator(watchpointAddress, watchpointSize, watchpointType);
     if (!pComparator)
     {
         /* This watchpoint not set so return NULL. */
         return NULL;
     }
-    
+
     clearDWTComparator(pComparator);
     return pComparator;
 }
 
 
 /* FlashPatch Control Register Bits. */
+/* Flash Patch breakpoint architecture revision. 0 for revision 1 and 1 for revision 2. */
+#define FP_CTRL_REV_SHIFT           28
+#define FP_CTRL_REV_MASK            (0xF << FP_CTRL_REV_SHIFT)
+#define FP_CTRL_REVISION2           0x1
 /*  Most significant bits of number of instruction address comparators.  Read-only */
 #define FP_CTRL_NUM_CODE_MSB_SHIFT  12
 #define FP_CTRL_NUM_CODE_MSB_MASK   (0x7 << FP_CTRL_NUM_CODE_MSB_SHIFT)
@@ -410,7 +414,7 @@ static __INLINE DWT_COMP_Type* disableDWTWatchpoint(uint32_t watchpointAddress,
 /*  Enable bit for the FPB.  Set to 1 to enable FPB. */
 #define FP_CTRL_ENABLE              1
 
-/* FlashPatch Comparator Register Bits. */
+/* FlashPatch Comparator Register Bits for revision 1. */
 /*  Defines the behaviour for code address comparators. */
 #define FP_COMP_REPLACE_SHIFT       30
 #define FP_COMP_REPLACE_MASK        (0x3U << FP_COMP_REPLACE_SHIFT)
@@ -428,7 +432,19 @@ static __INLINE DWT_COMP_Type* disableDWTWatchpoint(uint32_t watchpointAddress,
 /*  Enables this comparator.  Set to 1 to enable. */
 #define FP_COMP_ENABLE              1
 
+/* FlashPatch Comparator Register Bits for revision 2. */
+/*  Enables this comparator for flash patching when FP_COMP_BE is 0. Set to 1 to enable. */
+#define FP_COMP_FE                  (1 << 31)
+/*  Enables this comparator as a breakpoint.  Set to 1 to enable. */
+#define FP_COMP_BE                  1
+
 /* FPB - Flash Patch Breakpoint Routines. */
+static __INLINE uint32_t getFPBRevision(void)
+{
+    uint32_t controlValue = FPB->CTRL;
+    return ((controlValue & FP_CTRL_REV_MASK) >> FP_CTRL_REV_SHIFT);
+}
+
 static __INLINE uint32_t getFPBCodeComparatorCount(void)
 {
     uint32_t    controlValue = FPB->CTRL;
@@ -447,7 +463,7 @@ static __INLINE void clearFPBComparator(uint32_t* pComparator)
     *pComparator = 0;
 }
 
-static __INLINE int isAddressInUpperHalfGig(uint32_t address)
+static __INLINE int isAddressAboveLowestHalfGig(uint32_t address)
 {
     return (int)(address & 0xE0000000);
 }
@@ -459,7 +475,17 @@ static __INLINE int isAddressOdd(uint32_t address)
 
 static __INLINE int isBreakpointAddressInvalid(uint32_t breakpointAddress)
 {
-     return (isAddressInUpperHalfGig(breakpointAddress) || isAddressOdd(breakpointAddress));
+    if (getFPBRevision() == FP_CTRL_REVISION2)
+    {
+        /* On revision 2, can set breakpoint at any address in the 4GB range, except for at an odd addresses. */
+        return isAddressOdd(breakpointAddress);
+    }
+    else
+    {
+        /* On revision 1, can only set a breakpoint on addresses where the upper 3-bits are all 0 (upper 3.5GB is off
+           limits) and the address is half-word aligned */
+        return (isAddressAboveLowestHalfGig(breakpointAddress) || isAddressOdd(breakpointAddress));
+    }
 }
 
 static __INLINE int isAddressInUpperHalfword(uint32_t address)
@@ -477,32 +503,56 @@ static __INLINE uint32_t calculateFPBComparatorReplaceValue(uint32_t breakpointA
         return FP_COMP_REPLACE_BREAK_LOWER;
 }
 
-static __INLINE uint32_t calculateFPBComparatorValue(uint32_t breakpointAddress, int32_t is32BitInstruction)
+static __INLINE uint32_t calculateFPBComparatorValueRevision1(uint32_t breakpointAddress, int32_t is32BitInstruction)
 {
     uint32_t    comparatorValue;
-    
-    if (isBreakpointAddressInvalid(breakpointAddress))
-    {
-        /* Can only set a breakpoint on addresses where the upper 3-bits are all 0 (upper 0.5GB is off limits) and 
-           the address is half-word aligned */
-        return (uint32_t)~0U;
-    }
-    
+
     comparatorValue = (breakpointAddress & FP_COMP_COMP_MASK);
     comparatorValue |= FP_COMP_ENABLE;
     comparatorValue |= calculateFPBComparatorReplaceValue(breakpointAddress, is32BitInstruction);
-    
+
     return comparatorValue;
+}
+
+static __INLINE uint32_t calculateFPBComparatorValueRevision2(uint32_t breakpointAddress)
+{
+    return breakpointAddress | FP_COMP_BE;
+}
+
+static __INLINE uint32_t calculateFPBComparatorValue(uint32_t breakpointAddress, int32_t is32BitInstruction)
+{
+    if (isBreakpointAddressInvalid(breakpointAddress))
+        return (uint32_t)~0U;
+    if (getFPBRevision() == FP_CTRL_REVISION2)
+        return calculateFPBComparatorValueRevision2(breakpointAddress);
+    else
+        return calculateFPBComparatorValueRevision1(breakpointAddress, is32BitInstruction);
 }
 
 static __INLINE uint32_t maskOffFPBComparatorReservedBits(uint32_t comparatorValue)
 {
-    return (comparatorValue & (FP_COMP_REPLACE_MASK | FP_COMP_COMP_MASK | FP_COMP_ENABLE));
+    if (getFPBRevision() == FP_CTRL_REVISION2)
+        return comparatorValue;
+    else
+        return (comparatorValue & (FP_COMP_REPLACE_MASK | FP_COMP_COMP_MASK | FP_COMP_ENABLE));
+}
+
+static __INLINE int isFPBComparatorEnabledRevision1(uint32_t comparator)
+{
+    return (int)(comparator & FP_COMP_ENABLE);
+}
+
+static __INLINE int isFPBComparatorEnabledRevision2(uint32_t comparator)
+{
+    return (int)((comparator & FP_COMP_BE) || (comparator & FP_COMP_FE));
 }
 
 static __INLINE int isFPBComparatorEnabled(uint32_t comparator)
 {
-    return (int)(comparator & FP_COMP_ENABLE);
+    if (getFPBRevision() == FP_CTRL_REVISION2)
+        return isFPBComparatorEnabledRevision2(comparator);
+    else
+        return isFPBComparatorEnabledRevision1(comparator);
 }
 
 static __INLINE uint32_t* findFPBBreakpointComparator(uint32_t breakpointAddress, int32_t is32BitInstruction)
@@ -511,21 +561,21 @@ static __INLINE uint32_t* findFPBBreakpointComparator(uint32_t breakpointAddress
     uint32_t     comparatorValueForThisBreakpoint;
     uint32_t     codeComparatorCount;
     uint32_t     i;
-    
+
     comparatorValueForThisBreakpoint = calculateFPBComparatorValue(breakpointAddress, is32BitInstruction);
     codeComparatorCount = getFPBCodeComparatorCount();
-    
+
     for (i = 0 ; i < codeComparatorCount ; i++)
     {
         uint32_t maskOffReservedBits;
-        
+
         maskOffReservedBits = maskOffFPBComparatorReservedBits(*pCurrentComparator);
         if (comparatorValueForThisBreakpoint == maskOffReservedBits)
             return pCurrentComparator;
 
         pCurrentComparator++;
     }
-    
+
     /* Return NULL if no FPB comparator is already enabled for this breakpoint. */
     return NULL;
 }
@@ -535,7 +585,7 @@ static __INLINE uint32_t* findFreeFPBBreakpointComparator(void)
     uint32_t* pCurrentComparator = FPB_COMP_ARRAY;
     uint32_t  codeComparatorCount;
     uint32_t  i;
-    
+
     codeComparatorCount = getFPBCodeComparatorCount();
     for (i = 0 ; i < codeComparatorCount ; i++)
     {
@@ -544,7 +594,7 @@ static __INLINE uint32_t* findFreeFPBBreakpointComparator(void)
 
         pCurrentComparator++;
     }
-    
+
     /* Return NULL if no FPB breakpoint comparators are free. */
     return NULL;
 }
@@ -553,22 +603,22 @@ static __INLINE uint32_t* enableFPBBreakpoint(uint32_t breakpointAddress, int32_
 {
     uint32_t* pExistingFPBBreakpoint;
     uint32_t* pFreeFPBBreakpointComparator;
-    
+
     pExistingFPBBreakpoint = findFPBBreakpointComparator(breakpointAddress, is32BitInstruction);
     if (pExistingFPBBreakpoint)
     {
         /* This breakpoint is already set to just return pointer to existing comparator. */
         return pExistingFPBBreakpoint;
     }
-    
+
     pFreeFPBBreakpointComparator = findFreeFPBBreakpointComparator();
     if (!pFreeFPBBreakpointComparator)
     {
         /* All FPB breakpoint comparator slots are used so return NULL as error indicator. */
         return NULL;
     }
-    
-    
+
+
     *pFreeFPBBreakpointComparator = calculateFPBComparatorValue(breakpointAddress, is32BitInstruction);
     return pFreeFPBBreakpointComparator;
 }
@@ -576,11 +626,11 @@ static __INLINE uint32_t* enableFPBBreakpoint(uint32_t breakpointAddress, int32_
 static __INLINE uint32_t* disableFPBBreakpointComparator(uint32_t breakpointAddress, int32_t is32BitInstruction)
 {
     uint32_t* pExistingFPBBreakpoint;
-    
+
     pExistingFPBBreakpoint = findFPBBreakpointComparator(breakpointAddress, is32BitInstruction);
     if (pExistingFPBBreakpoint)
         clearFPBComparator(pExistingFPBBreakpoint);
- 
+
     return pExistingFPBBreakpoint;
 }
 
@@ -591,7 +641,7 @@ static __INLINE void clearFPBComparators(void)
     uint32_t  literalComparatorCount;
     uint32_t  totalComparatorCount;
     uint32_t  i;
-    
+
     codeComparatorCount = getFPBCodeComparatorCount();
     literalComparatorCount = getFPBLiteralComparatorCount();
     totalComparatorCount = codeComparatorCount + literalComparatorCount;
@@ -700,7 +750,7 @@ static __INLINE void setMPUControlValue(uint32_t newControlValue)
 {
     if (isMPUNotPresent())
         return;
-    
+
     MPU->CTRL = newControlValue;
     __DSB();
     __ISB();
@@ -710,7 +760,7 @@ static __INLINE void disableMPU(void)
 {
     if (isMPUNotPresent())
         return;
-    
+
     MPU->CTRL &= ~MPU_CTRL_ENABLE;
     __DSB();
     __ISB();
@@ -720,7 +770,7 @@ static __INLINE void enableMPU(void)
 {
     if (isMPUNotPresent())
         return;
-    
+
     MPU->CTRL |= MPU_CTRL_ENABLE;
     __DSB();
     __ISB();
@@ -730,7 +780,7 @@ static __INLINE void enableMPUWithHardAndNMIFaults(void)
 {
     if (isMPUNotPresent())
         return;
-    
+
     MPU->CTRL |= MPU_CTRL_ENABLE | MPU_CTRL_HFNMIENA;
     __DSB();
     __ISB();
@@ -755,7 +805,7 @@ static __INLINE void setMPURegionAddress(uint32_t address)
     if (isMPUNotPresent())
         return;
 
-    MPU->RBAR = address << MPU_RBAR_ADDR_SHIFT;
+    MPU->RBAR = address & MPU_RBAR_ADDR_MASK;
 }
 
 static __INLINE uint32_t getMPURegionAddress(void)
@@ -763,7 +813,7 @@ static __INLINE uint32_t getMPURegionAddress(void)
     if (isMPUNotPresent())
         return 0;
 
-    return MPU->RBAR >> MPU_RBAR_ADDR_SHIFT;
+    return MPU->RBAR & MPU_RBAR_ADDR_MASK;
 }
 
 static __INLINE void setMPURegionAttributeAndSize(uint32_t attributeAndSize)
@@ -828,7 +878,7 @@ static __INLINE void start10MillisecondSysTick(void)
 {
     if (getSysTick10MillisecondInterval() == 0)
         return;
-        
+
      disableSysTick();
      setSysTickReloadValue(getSysTick10MillisecondInterval());
      enableSysTickWithCClkNoInterrupt();

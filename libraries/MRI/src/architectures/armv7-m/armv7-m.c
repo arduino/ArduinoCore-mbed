@@ -1,4 +1,4 @@
-/* Copyright 2017 Adam Green (https://github.com/adamgreen/)
+/* Copyright 2020 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -619,9 +619,6 @@ static void displayUsageFaultCauseToGdbConsole(void)
 
 
 static void     clearMemoryFaultFlag(void);
-static void     configureMpuToAccessAllMemoryWithNoCaching(void);
-static void     saveOriginalMpuConfiguration(void);
-static void     configureHighestMpuRegionToAccessAllMemoryWithNoCaching(void);
 static void     cleanupIfSingleStepping(void);
 static void     restoreBasePriorityIfNeeded(void);
 static uint32_t shouldRestoreBasePriority(void);
@@ -634,43 +631,12 @@ void Platform_EnteringDebugger(void)
 {
     clearMemoryFaultFlag();
     __mriCortexMState.originalPC = __mriCortexMState.context.PC;
-    configureMpuToAccessAllMemoryWithNoCaching();
     cleanupIfSingleStepping();
 }
 
 static void clearMemoryFaultFlag(void)
 {
     __mriCortexMState.flags &= ~CORTEXM_FLAGS_FAULT_DURING_DEBUG;
-}
-
-static void configureMpuToAccessAllMemoryWithNoCaching(void)
-{
-    saveOriginalMpuConfiguration();
-    disableMPU();
-    configureHighestMpuRegionToAccessAllMemoryWithNoCaching();
-    enableMPUWithHardAndNMIFaults();
-}
-
-static void saveOriginalMpuConfiguration(void)
-{
-    __mriCortexMState.originalMPUControlValue = getMPUControlValue();
-    __mriCortexMState.originalMPURegionNumber = getCurrentMPURegionNumber();
-    prepareToAccessMPURegion(getHighestMPUDataRegionIndex());
-    __mriCortexMState.originalMPURegionAddress = getMPURegionAddress();
-    __mriCortexMState.originalMPURegionAttributesAndSize = getMPURegionAttributeAndSize();
-}
-
-static void configureHighestMpuRegionToAccessAllMemoryWithNoCaching(void)
-{
-    static const uint32_t regionToStartAtAddress0 = 0U;
-    static const uint32_t regionReadWrite = 1  << MPU_RASR_AP_SHIFT;
-    static const uint32_t regionSizeAt4GB = 31 << MPU_RASR_SIZE_SHIFT; /* 4GB = 2^(31+1) */
-    static const uint32_t regionEnable    = MPU_RASR_ENABLE;
-    static const uint32_t regionSizeAndAttributes = regionReadWrite | regionSizeAt4GB | regionEnable;
-
-    prepareToAccessMPURegion(getHighestMPUDataRegionIndex());
-    setMPURegionAddress(regionToStartAtAddress0);
-    setMPURegionAttributeAndSize(regionSizeAndAttributes);
 }
 
 static void cleanupIfSingleStepping(void)
@@ -725,23 +691,11 @@ static void clearHardwareBreakpointOnSvcHandler(void)
 }
 
 
-static void restoreMPUConfiguration(void);
 static void checkStack(void);
 void Platform_LeavingDebugger(void)
 {
-    restoreMPUConfiguration();
     checkStack();
     clearMonitorPending();
-}
-
-static void restoreMPUConfiguration(void)
-{
-    disableMPU();
-    prepareToAccessMPURegion(getHighestMPUDataRegionIndex());
-    setMPURegionAddress(__mriCortexMState.originalMPURegionAddress);
-    setMPURegionAttributeAndSize(__mriCortexMState.originalMPURegionAttributesAndSize);
-    prepareToAccessMPURegion(__mriCortexMState.originalMPURegionNumber);
-    setMPUControlValue(__mriCortexMState.originalMPUControlValue);
 }
 
 static void checkStack(void)
