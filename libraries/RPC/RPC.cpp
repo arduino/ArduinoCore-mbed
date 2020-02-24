@@ -45,6 +45,7 @@ int RPC::rpmsg_recv_raw_callback(struct rpmsg_endpoint *ept, void *data,
   return 0;
 }
 
+#ifdef CORE_CM4
 int RPC::begin() {
 
   /*HW semaphore Clock enable*/
@@ -96,6 +97,32 @@ int RPC::begin() {
 
   return 1;
 }
+#endif
+
+#ifdef CORE_CM7
+
+extern "C" {
+	int openamp_enable();
+	void OpenAMP_MPU_Config(void);
+}
+
+int RPC::begin() {
+
+	OpenAMP_MPU_Config();
+	openamp_enable();
+
+	eventThread = new rtos::Thread(osPriorityNormal);
+	eventThread->start(callback(&eventQueue, &events::EventQueue::dispatch_forever));
+	ticker.attach(eventQueue.event(&OPENAMP_check_for_message), 0.005f);
+
+	dispatcherThread = new rtos::Thread(osPriorityNormal);
+	dispatcherThread->start(mbed::callback(this, &RPC::dispatch));
+
+	initialized = true;
+	pac_.reserve_buffer(1024);
+	return 1;
+}
+#endif
 
 void RPC::dispatch() {
 

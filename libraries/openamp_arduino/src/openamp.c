@@ -169,8 +169,12 @@ void OPENAMP_check_for_message(void)
 
 void OPENAMP_Wait_EndPointready(struct rpmsg_endpoint *rp_ept, size_t timeout)
 {
-  while(!is_rpmsg_ept_ready(rp_ept) && millis() < timeout)
-  MAILBOX_Poll(rvdev.vdev);
+  while(!is_rpmsg_ept_ready(rp_ept) && (HAL_GetTick() < timeout)) {
+    MAILBOX_Poll(rvdev.vdev);
+  }
+  if (HAL_GetTick() >= timeout) {
+    printf("OPENAMP_Wait_EndPointready %X timed out\n\r", (unsigned int)rp_ept);
+  }
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
