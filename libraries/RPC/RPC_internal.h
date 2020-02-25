@@ -81,13 +81,14 @@ class RPC : public Stream {
 	private:
 		RingBufferN<256> rx_buffer;
 		bool initialized = false;
-		struct rpmsg_endpoint rp_endpoints[4];
 		static int rpmsg_recv_cm7tocm4_callback(struct rpmsg_endpoint *ept, void *data,
                                        size_t len, uint32_t src, void *priv);
 		static int rpmsg_recv_cm4tocm7_callback(struct rpmsg_endpoint *ept, void *data,
                                        size_t len, uint32_t src, void *priv);
 		static int rpmsg_recv_raw_callback(struct rpmsg_endpoint *ept, void *data,
                                        size_t len, uint32_t src, void *priv);
+		static void new_service_cb(struct rpmsg_device *rdev, const char *name, uint32_t dest);
+
 		void dispatch();
 		events::EventQueue eventQueue;
 		mbed::Ticker ticker;
