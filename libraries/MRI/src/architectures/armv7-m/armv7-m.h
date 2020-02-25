@@ -1,4 +1,4 @@
-/* Copyright 2017 Adam Green (https://github.com/adamgreen/)
+/* Copyright 2020 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -39,14 +39,18 @@
 #define CORTEXM_STATE_CONTEXT_OFFSET        (CORTEXM_STATE_TASK_SP_OFFSET + 4)
 #define CORTEXM_STATE_SAVED_MSP_OFFSET      (CORTEXM_STATE_CONTEXT_OFFSET + 17 * 4)
 
+// In some other build systems, MRI_DEVICE_HAS_FPU won't be passed in on compiler's command line so use the
+// target Cortex-M type to determine if it has a FPU or not.
+#ifndef MRI_DEVICE_HAS_FPU
+    #ifdef __ARM_ARCH_7EM__
+        #define MRI_DEVICE_HAS_FPU 1
+    #else
+        #define MRI_DEVICE_HAS_FPU 0
+    #endif
+#endif
 
 /* Definitions only required from C code. */
 #if !__ASSEMBLER__
-
-#define MRI_DEVICE_HAS_FPU (1)
-#ifndef MRI_DEVICE_HAS_FPU
-    #error "MRI_DEVICE_HAS_FPU must be defined with a value of 0 or 1."
-#endif
 
 #include <stdint.h>
 #include <core/token.h>
