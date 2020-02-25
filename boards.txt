@@ -39,6 +39,7 @@ envie_m7.build.compiler_path={runtime.tools.arm-none-eabi-gcc.path}/bin/
 
 envie_m7.build.variant=ENVIE_M7
 envie_m7.build.mcu=cortex-m7
+envie_m7.build.fpu=fpv5-d16
 envie_m7.build.extra_flags=
 envie_m7.build.architecture=cortex-m7
 envie_m7.build.board=ENVIE_M4
@@ -76,6 +77,7 @@ envie_m4.build.compiler_path={runtime.tools.arm-none-eabi-gcc.path}/bin/
 
 envie_m4.build.variant=ENVIE_M4
 envie_m4.build.mcu=cortex-m4
+envie_m4.build.fpu=fpv4-sp-d16
 envie_m4.build.extra_flags=
 envie_m4.build.architecture=cortex-m4
 envie_m4.build.board=ENVIE_M4

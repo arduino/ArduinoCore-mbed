@@ -22,7 +22,7 @@ compiler.c.flags=-c -I. {compiler.warning_flags} -Os -g -nostdlib "@{compiler.mb
 compiler.c.elf.cmd={build.crossprefix}g++
 compiler.c.elf.flags=-Wl,--gc-sections {compiler.warning_flags} -Wl,--as-needed
 compiler.S.cmd={build.crossprefix}g++
-compiler.S.flags=-c -g -x assembler-with-cpp -Os -mcpu={build.mcu}
+compiler.S.flags=-c -g -x assembler-with-cpp -Os -mcpu={build.mcu} -mfpu={build.fpu}
 compiler.cpp.cmd={build.crossprefix}g++
 compiler.cpp.flags=-c -I. {compiler.warning_flags} -g -Os -nostdlib "@{compiler.mbed.defines}" "@{compiler.mbed.cxxflags}" {compiler.mbed.arch.define} -MMD -mcpu={build.mcu}
 compiler.ar.cmd={build.crossprefix}ar
