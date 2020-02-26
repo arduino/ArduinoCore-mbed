@@ -180,7 +180,7 @@ static uint32_t getNvicVector(IRQn_Type irq);
 static void     setSvcStepFlag(void);
 static void     setSingleSteppingFlag(void);
 static void     setSingleSteppingFlag(void);
-static void     recordCurrentBasePriorityAndSwitchToPriority1(void);
+static void     recordCurrentBasePriorityAndRaisePriorityToDisableNonDebugInterrupts(void);
 static int      doesPCPointToBASEPRIUpdateInstruction(void);
 static uint16_t getFirstHalfWordOfCurrentInstruction(void);
 static uint16_t getSecondHalfWordOfCurrentInstruction(void);
@@ -197,7 +197,7 @@ void Platform_EnableSingleStep(void)
     if (!doesPCPointToSVCInstruction())
     {
         setSingleSteppingFlag();
-        recordCurrentBasePriorityAndSwitchToPriority1();
+        recordCurrentBasePriorityAndRaisePriorityToDisableNonDebugInterrupts();
         enableSingleStep();
         return;
     }
@@ -259,11 +259,11 @@ static void setSingleSteppingFlag(void)
     __mriCortexMState.flags |= CORTEXM_FLAGS_SINGLE_STEPPING;
 }
 
-static void recordCurrentBasePriorityAndSwitchToPriority1(void)
+static void recordCurrentBasePriorityAndRaisePriorityToDisableNonDebugInterrupts(void)
 {
     if (!doesPCPointToBASEPRIUpdateInstruction())
         recordCurrentBasePriority();
-    __set_BASEPRI(calculateBasePriorityForThisCPU(1));
+    __set_BASEPRI(calculateBasePriorityForThisCPU(NVIC_GetPriority(DebugMonitor_IRQn) + 1));
 }
 
 static int doesPCPointToBASEPRIUpdateInstruction(void)

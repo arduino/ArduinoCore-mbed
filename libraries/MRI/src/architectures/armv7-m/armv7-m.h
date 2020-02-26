@@ -133,10 +133,6 @@ typedef struct
     volatile uint32_t   taskSP;
     Context             context;
     uint32_t            originalPC;
-    uint32_t            originalMPUControlValue;
-    uint32_t            originalMPURegionNumber;
-    uint32_t            originalMPURegionAddress;
-    uint32_t            originalMPURegionAttributesAndSize;
     uint32_t            originalBasePriority;
     int                 maxStackUsed;
     char                packetBuffer[CORTEXM_PACKET_BUFFER_SIZE];

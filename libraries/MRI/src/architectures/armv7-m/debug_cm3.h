@@ -62,7 +62,7 @@ typedef struct
 /* Monitor Pending.  Set to 1 to pend a monitor exception. */
 #define CoreDebug_DEMCR_MON_PEND    (1 << 17)
 /* Monitor Enable.  Set to 1 to enable the debug monitor exception. */
-#define CoreDebug_DEMCR_MON_END     (1 << 16)
+#define CoreDebug_DEMCR_MON_EN      (1 << 16)
 
 /* Debug Fault Status Register Bits.  Clear a bit by writing a 1 to it. */
 /* Indicates that EDBGRQ was asserted. */
@@ -94,7 +94,7 @@ static __INLINE void waitForDebuggerToDetach(uint32_t timeOut)
 static __INLINE void enableDebugMonitorAtPriority0(void)
 {
     NVIC_SetPriority(DebugMonitor_IRQn, 0);
-    CoreDebug->DEMCR |=  CoreDebug_DEMCR_MON_END;
+    CoreDebug->DEMCR |=  CoreDebug_DEMCR_MON_EN;
 }
 
 static __INLINE void enableDWTandITM(void)
@@ -117,6 +117,10 @@ static __INLINE void clearMonitorPending(void)
     CoreDebug->DEMCR &= ~CoreDebug_DEMCR_MON_PEND;
 }
 
+static __INLINE void setMonitorPending(void)
+{
+    CoreDebug->DEMCR |= CoreDebug_DEMCR_MON_PEND;
+}
 
 /* Data Watchpoint and Trace Comparator Function Bits. */
 /*  Matched.  Read-only.  Set to 1 to indicate that this comparator has been matched.  Cleared on read. */
