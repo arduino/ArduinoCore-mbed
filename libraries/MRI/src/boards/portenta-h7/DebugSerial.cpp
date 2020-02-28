@@ -22,19 +22,25 @@ extern "C" {
     #include <architectures/armv7-m/debug_cm3.h>
 }
 
-// UNDONE: Update for STM32H747XI.
 static const char g_memoryMapXml[] = "<?xml version=\"1.0\"?>"
                                      "<!DOCTYPE memory-map PUBLIC \"+//IDN gnu.org//DTD GDB Memory Map V1.0//EN\" \"http://sourceware.org/gdb/gdb-memory-map.dtd\">"
                                      "<memory-map>"
-                                     "<memory type=\"flash\" start=\"0x08000000\" length=\"0x10000\"> <property name=\"blocksize\">0x4000</property></memory>"
-                                     "<memory type=\"flash\" start=\"0x08010000\" length=\"0x10000\"> <property name=\"blocksize\">0x10000</property></memory>"
-                                     "<memory type=\"flash\" start=\"0x08020000\" length=\"0xE0000\"> <property name=\"blocksize\">0x20000</property></memory>"
-                                     "<memory type=\"flash\" start=\"0x08100000\" length=\"0x10000\"> <property name=\"blocksize\">0x4000</property></memory>"
-                                     "<memory type=\"flash\" start=\"0x08110000\" length=\"0x10000\"> <property name=\"blocksize\">0x10000</property></memory>"
-                                     "<memory type=\"flash\" start=\"0x08120000\" length=\"0xE0000\"> <property name=\"blocksize\">0x20000</property></memory>"
-                                     "<memory type=\"ram\" start=\"0x20000000\" length=\"0x1C000\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x2001C000\" length=\"0x4000\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x20020000\" length=\"0x10000\"> </memory>"
+                                     "<memory type=\"ram\" start=\"0x00000000\" length=\"0x10000\"> </memory>"
+                                     "<memory type=\"flash\" start=\"0x08000000\" length=\"0x200000\"> <property name=\"blocksize\">0x20000</property></memory>"
+                                     "<memory type=\"ram\" start=\"0x10000000\" length=\"0x48000\"> </memory>"
+                                     "<memory type=\"ram\" start=\"0x1ff00000\" length=\"0x20000\"> </memory>"
+                                     "<memory type=\"ram\" start=\"0x20000000\" length=\"0x20000\"> </memory>"
+                                     "<memory type=\"ram\" start=\"0x24000000\" length=\"0x80000\"> </memory>"
+                                     "<memory type=\"ram\" start=\"0x30000000\" length=\"0x48000\"> </memory>"
+                                     "<memory type=\"ram\" start=\"0x38000000\" length=\"0x10000\"> </memory>"
+                                     "<memory type=\"ram\" start=\"0x38800000\" length=\"0x1000\"> </memory>"
+                                     "<memory type=\"ram\" start=\"0x58020000\" length=\"0x2c00\"> </memory>"
+                                     "<memory type=\"ram\" start=\"0x58024400\" length=\"0xc00\"> </memory>"
+                                     "<memory type=\"ram\" start=\"0x58025400\" length=\"0x800\"> </memory>"
+                                     "<memory type=\"ram\" start=\"0x58026000\" length=\"0x800\"> </memory>"
+                                     "<memory type=\"ram\" start=\"0x58027000\" length=\"0x400\"> </memory>"
+                                     "<memory type=\"flash\" start=\"0x90000000\" length=\"0x10000000\"> <property name=\"blocksize\">0x200</property></memory>"
+                                     "<memory type=\"ram\" start=\"0xc0000000\" length=\"0x800000\"> </memory>"
                                      "</memory-map>";
 
 
