@@ -18,6 +18,7 @@ extern "C" {
     #include <core/mri.h>
     #include <core/core.h>
     #include <core/platforms.h>
+    #include <core/semihost.h>
     #include <architectures/armv7-m/armv7-m.h>
     #include <architectures/armv7-m/debug_cm3.h>
 }
@@ -358,5 +359,15 @@ extern "C" const uint8_t* Platform_GetUid(void) {
 }
 
 extern "C" uint32_t Platform_GetUidSize(void) {
+    return 0;
+}
+
+extern "C" int Semihost_IsDebuggeeMakingSemihostCall(void)
+{
+    return 0;
+}
+
+int Semihost_HandleSemihostRequest(void)
+{
     return 0;
 }
