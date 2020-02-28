@@ -1,4 +1,4 @@
-/* Copyright 2012 Adam Green (http://mbed.org/users/AdamGreen/)
+/* Copyright 2012 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 #ifndef _HEX_CONVERT_H_
 #define _HEX_CONVERT_H_
 
-#include "try_catch.h"
+#include <core/try_catch.h>
 
 #define EXTRACT_HI_NIBBLE(X) (((X) >> 4) & 0xF)
 #define EXTRACT_LO_NIBBLE(X) ((X) & 0xF)
@@ -38,7 +38,7 @@ static inline int HexCharToNibble(unsigned char HexChar)
     {
         return HexChar - '0';
     }
-    
+
     __throw_and_return(invalidHexDigitException, -1);
 }
 

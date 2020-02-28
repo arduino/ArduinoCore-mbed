@@ -1,4 +1,4 @@
-/* Copyright 2014 Adam Green (http://mbed.org/users/AdamGreen/)
+/* Copyright 2014 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ extern int __mriExceptionCode;
 #define __throw(EXCEPTION) return ((void)setExceptionCode(EXCEPTION))
 
 #define __throw_and_return(EXCEPTION, RETURN) return (setExceptionCode(EXCEPTION), (RETURN))
-        
+
 #define __rethrow return
 
 #define __rethrow_and_return(RETURN) return RETURN

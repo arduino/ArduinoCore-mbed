@@ -1,4 +1,4 @@
-/* Copyright 2017 Adam Green (http://mbed.org/users/AdamGreen/)
+/* Copyright 2017 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -13,12 +13,12 @@
    limitations under the License.
 */
 /* Handler for continue gdb command. */
-#include "buffer.h"
-#include "core.h"
-#include "platforms.h"
-#include "mri.h"
-#include "cmd_common.h"
-#include "cmd_continue.h"
+#include <core/buffer.h>
+#include <core/core.h>
+#include <core/platforms.h>
+#include <core/mri.h>
+#include <core/cmd_common.h>
+#include <core/cmd_continue.h>
 
 
 static uint32_t skipHardcodedBreakpoint(void);
@@ -26,7 +26,7 @@ static int shouldSkipHardcodedBreakpoint(void);
 static int isCurrentInstructionHardcodedBreakpoint(void);
 /* Handle the 'c' command which is sent from gdb to tell the debugger to continue execution of the currently halted
    program.
-   
+
     Command Format:     cAAAAAAAA
     Response Format:    Blank until the next exception, at which time a 'T' stop response packet will be sent.
 
@@ -49,7 +49,7 @@ uint32_t HandleContinueCommand(void)
     {
         clearExceptionCode();
     }
-    
+
     return (returnValue | HANDLER_RETURN_RESUME_PROGRAM | HANDLER_RETURN_RETURN_IMMEDIATELY);
 }
 
@@ -77,7 +77,7 @@ static int isCurrentInstructionHardcodedBreakpoint(void)
 
 /* Handle the 'C' command which is sent from gdb to tell the debugger to continue execution of the currently halted
    program. It is similar to the 'c' command but it also provides a signal level, which MRI ignores.
-   
+
     Command Format:     cAA;BBBBBBBB
     Response Format:    Blank until the next exception, at which time a 'T' stop response packet will be sent.
 

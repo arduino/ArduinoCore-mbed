@@ -1,4 +1,4 @@
-/* Copyright 2014 Adam Green (http://mbed.org/users/AdamGreen/)
+/* Copyright 2014 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 #define _CMD_FILE_H_
 
 #include <stdint.h>
-#include "buffer.h"
+#include <core/buffer.h>
 
 typedef struct
 {
@@ -27,7 +27,7 @@ typedef struct
     uint32_t        mode;
 } OpenParameters;
 
-typedef struct 
+typedef struct
 {
     uint32_t        fileDescriptor;
     uint32_t        bufferAddress;

@@ -1,4 +1,4 @@
-/* Copyright 2017 Adam Green (http://mbed.org/users/AdamGreen/)
+/* Copyright 2020 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -39,17 +39,21 @@
 #define CORTEXM_STATE_CONTEXT_OFFSET        (CORTEXM_STATE_TASK_SP_OFFSET + 4)
 #define CORTEXM_STATE_SAVED_MSP_OFFSET      (CORTEXM_STATE_CONTEXT_OFFSET + 17 * 4)
 
+// In some other build systems, MRI_DEVICE_HAS_FPU won't be passed in on compiler's command line so use the
+// target Cortex-M type to determine if it has a FPU or not.
+#ifndef MRI_DEVICE_HAS_FPU
+    #ifdef __ARM_ARCH_7EM__
+        #define MRI_DEVICE_HAS_FPU 1
+    #else
+        #define MRI_DEVICE_HAS_FPU 0
+    #endif
+#endif
 
 /* Definitions only required from C code. */
 #if !__ASSEMBLER__
 
-#define MRI_DEVICE_HAS_FPU (1)
-#ifndef MRI_DEVICE_HAS_FPU
-    #error "MRI_DEVICE_HAS_FPU must be defined with a value of 0 or 1."
-#endif
-
 #include <stdint.h>
-#include "core/token.h"
+#include <core/token.h>
 
 /* NOTE: The MriExceptionHandler function definition in mriasm.S is dependent on the layout of this structure.  It
          is also dictated by the version of gdb which supports the ARM processors.  It should only be changed if the
@@ -118,7 +122,7 @@ typedef struct
 #endif
 } Context;
 
-/* NOTE: The largest buffer is required for receiving the 'G' command which receives the contents of the registers from 
+/* NOTE: The largest buffer is required for receiving the 'G' command which receives the contents of the registers from
    the debugger as two hex digits per byte.  Also need a character for the 'G' command itself. */
 #define CORTEXM_PACKET_BUFFER_SIZE (1 + 2 * sizeof(Context))
 
@@ -129,10 +133,6 @@ typedef struct
     volatile uint32_t   taskSP;
     Context             context;
     uint32_t            originalPC;
-    uint32_t            originalMPUControlValue;
-    uint32_t            originalMPURegionNumber;
-    uint32_t            originalMPURegionAddress;
-    uint32_t            originalMPURegionAttributesAndSize;
     uint32_t            originalBasePriority;
     int                 maxStackUsed;
     char                packetBuffer[CORTEXM_PACKET_BUFFER_SIZE];

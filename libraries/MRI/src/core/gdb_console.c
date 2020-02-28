@@ -1,4 +1,4 @@
-/* Copyright 2014 Adam Green (http://mbed.org/users/AdamGreen/)
+/* Copyright 2014 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
 */
 /* Routines to output text to stdout on the gdb console. */
 #include <string.h>
-#include "buffer.h"
-#include "platforms.h"
-#include "core.h"
-#include "memory.h"
-#include "gdb_console.h"
+#include <core/buffer.h>
+#include <core/platforms.h>
+#include <core/core.h>
+#include <core/memory.h>
+#include <core/gdb_console.h>
 
 
 static void writeStringToSharedCommChannel(const char* pString);
@@ -58,11 +58,11 @@ void WriteHexValueToGdbConsole(uint32_t Value)
 {
     Buffer BufferObject;
     char   StringBuffer[11];
-    
+
     Buffer_Init(&BufferObject, StringBuffer, sizeof(StringBuffer));
     Buffer_WriteString(&BufferObject, "0x");
     Buffer_WriteUIntegerAsHex(&BufferObject, Value);
     Buffer_WriteChar(&BufferObject, '\0');
-    
+
     WriteStringToGdbConsole(StringBuffer);
 }

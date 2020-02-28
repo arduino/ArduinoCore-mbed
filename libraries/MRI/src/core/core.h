@@ -1,4 +1,4 @@
-/* Copyright 2014 Adam Green (http://mbed.org/users/AdamGreen/)
+/* Copyright 2020 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 #define _CORE_H_
 
 #include <stdint.h>
-#include "buffer.h"
+#include <core/buffer.h>
 
 /* Real name of functions are in __mri namespace. */
 void    __mriCore_InitBuffer(void);
@@ -44,6 +44,10 @@ int     __mriCore_GetSemihostErrno(void);
 void    __mriCore_SendPacketToGdb(void);
 void    __mriCore_GdbCommandHandlingLoop(void);
 
+typedef int (*TempBreakpointCallbackPtr)(void*);
+int     __mriCore_SetTempBreakpoint(uint32_t breakpointAddress, TempBreakpointCallbackPtr pCallback, void* pvContext);
+
+
 /* Macroes which allow code to drop the __mri namespace prefix. */
 #define InitBuffer                      __mriCore_InitBuffer
 #define GetBuffer                       __mriCore_GetBuffer
@@ -63,6 +67,7 @@ void    __mriCore_GdbCommandHandlingLoop(void);
 #define GetSemihostErrno                __mriCore_GetSemihostErrno
 #define SendPacketToGdb                 __mriCore_SendPacketToGdb
 #define GdbCommandHandlingLoop          __mriCore_GdbCommandHandlingLoop
+#define SetTempBreakpoint               __mriCore_SetTempBreakpoint
 
 /* Macro to convert 32-bit addresses sent from GDB to pointer. */
 #if _LP64

@@ -1,4 +1,4 @@
-/* Copyright 2017 Adam Green (http://mbed.org/users/AdamGreen/)
+/* Copyright 2017 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ extern "C"
 
 /* pDebuggerParameters string passed into __mriInit contains a space separated list of configuration parameters to be
    used to initialize the debug monitor.  The supported options include:
-   
+
    One of these options to indicate which UART to be used for the debugger connection:
         Valid options for LPC1768:
             MRI_UART_MBED_USB
@@ -97,11 +97,11 @@ extern "C"
             MRI_UART_2
             MRI_UART_3
 
-    By default the debug monitor expects to take full control of the UART to configure baud rate, etc.  However 
+    By default the debug monitor expects to take full control of the UART to configure baud rate, etc.  However
     including the following option will tell the monitor to assume that the user's firmware will configure and use the
     serial port until the first exception occurs:
         MRI_UART_SHARE
-        
+
     When not sharing the UART, MRI will typically try to use the auto-baud functionality of the device so that the user
     can select the desired baud rate when they start GDB.  However it is possible to override this in the init string.
     For example the following option would set the baud rate to 230400 (note that spaces aren't allowed before or after
