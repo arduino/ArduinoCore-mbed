@@ -1,4 +1,4 @@
-/* Copyright 2014 Adam Green (https://github.com/adamgreen/)
+/* Copyright 2020 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -74,8 +74,10 @@ typedef enum
     MRI_PLATFORM_READWRITE_WATCHPOINT
 }  PlatformWatchpointType;
 
-__throws void  __mriPlatform_SetHardwareBreakpoint(uint32_t address, uint32_t kind);
-__throws void  __mriPlatform_ClearHardwareBreakpoint(uint32_t address, uint32_t kind);
+__throws void  __mriPlatform_SetHardwareBreakpointOfGdbKind(uint32_t address, uint32_t kind);
+__throws void  __mriPlatform_SetHardwareBreakpoint(uint32_t address);
+__throws void  __mriPlatform_ClearHardwareBreakpointOfGdbKind(uint32_t address, uint32_t kind);
+__throws void  __mriPlatform_ClearHardwareBreakpoint(uint32_t address);
 __throws void  __mriPlatform_SetHardwareWatchpoint(uint32_t address, uint32_t size,  PlatformWatchpointType type);
 __throws void  __mriPlatform_ClearHardwareWatchpoint(uint32_t address, uint32_t size,  PlatformWatchpointType type);
 
@@ -143,7 +145,9 @@ uint32_t       __mriPlatform_GetUidSize(void);
 #define Platform_GetTargetXmlSize                           __mriPlatform_GetTargetXmlSize
 #define Platform_GetTargetXml                               __mriPlatform_GetTargetXml
 #define Platform_GetDeviceMemoryMapXml                      __mriPlatform_GetDeviceMemoryMapXml
+#define Platform_SetHardwareBreakpointOfGdbKind             __mriPlatform_SetHardwareBreakpointOfGdbKind
 #define Platform_SetHardwareBreakpoint                      __mriPlatform_SetHardwareBreakpoint
+#define Platform_ClearHardwareBreakpointOfGdbKind           __mriPlatform_ClearHardwareBreakpointOfGdbKind
 #define Platform_ClearHardwareBreakpoint                    __mriPlatform_ClearHardwareBreakpoint
 #define Platform_SetHardwareWatchpoint                      __mriPlatform_SetHardwareWatchpoint
 #define Platform_ClearHardwareWatchpoint                    __mriPlatform_ClearHardwareWatchpoint

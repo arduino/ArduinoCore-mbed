@@ -102,7 +102,7 @@ static void handleHardwareBreakpointSetCommand(BreakpointWatchpointArguments* pA
 {
     __try
     {
-        Platform_SetHardwareBreakpoint(pArguments->address, pArguments->kind);
+        Platform_SetHardwareBreakpointOfGdbKind(pArguments->address, pArguments->kind);
     }
     __catch
     {
@@ -202,7 +202,7 @@ static void handleHardwareBreakpointRemoveCommand(BreakpointWatchpointArguments*
 {
     __try
     {
-        Platform_ClearHardwareBreakpoint(pArguments->address, pArguments->kind);
+        Platform_ClearHardwareBreakpointOfGdbKind(pArguments->address, pArguments->kind);
     }
     __catch
     {

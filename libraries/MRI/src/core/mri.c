@@ -1,4 +1,4 @@
-/* Copyright 2017 Adam Green (https://github.com/adamgreen/)
+/* Copyright 2020 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -40,12 +40,15 @@
 
 typedef struct
 {
-    Packet      packet;
-    Buffer      buffer;
-    uint32_t    flags;
-    int         semihostReturnCode;
-    int         semihostErrno;
-    uint8_t     signalValue;
+    TempBreakpointCallbackPtr   pTempBreakpointCallback;
+    void*                       pvTempBreakpointContext;
+    Packet                      packet;
+    Buffer                      buffer;
+    uint32_t                    tempBreakpointAddress;
+    uint32_t                    flags;
+    int                         semihostReturnCode;
+    int                         semihostErrno;
+    uint8_t                     signalValue;
 } MriCore;
 
 static MriCore g_mri;
@@ -54,6 +57,7 @@ static MriCore g_mri;
 #define MRI_FLAGS_SUCCESSFUL_INIT   1
 #define MRI_FLAGS_FIRST_EXCEPTION   2
 #define MRI_FLAGS_SEMIHOST_CTRL_C   4
+#define MRI_FLAGS_TEMP_BREAKPOINT   8
 
 /* Calculates the number of items in a static array at compile time. */
 #define ARRAY_SIZE(X) (sizeof(X)/sizeof(X[0]))
@@ -112,6 +116,48 @@ static void setSuccessfulInitFlag(void)
 }
 
 
+static int isTempBreakpointSet(void);
+static uint32_t clearThumbBitOfAddress(uint32_t address);
+static void setTempBreakpointFlag(void);
+int SetTempBreakpoint(uint32_t breakpointAddress, TempBreakpointCallbackPtr pCallback, void* pvContext)
+{
+    if (isTempBreakpointSet())
+        return 0;
+
+    breakpointAddress = clearThumbBitOfAddress(breakpointAddress);
+    __try
+        Platform_SetHardwareBreakpoint(breakpointAddress);
+    __catch
+    {
+        clearExceptionCode();
+        return 0;
+    }
+    g_mri.tempBreakpointAddress = breakpointAddress;
+    g_mri.pTempBreakpointCallback = pCallback;
+    g_mri.pvTempBreakpointContext = pvContext;
+    setTempBreakpointFlag();
+    return 1;
+}
+
+static int isTempBreakpointSet(void)
+{
+    return g_mri.flags & MRI_FLAGS_TEMP_BREAKPOINT;
+}
+
+static uint32_t clearThumbBitOfAddress(uint32_t address)
+{
+    return address & ~1;
+}
+
+static void setTempBreakpointFlag(void)
+{
+    g_mri.flags |= MRI_FLAGS_TEMP_BREAKPOINT;
+}
+
+
+static int wasTempBreakpointHit(void);
+static void clearTempBreakpoint(void);
+static void clearTempBreakpointFlag(void);
 static void blockIfGdbHasNotConnected(void);
 static void waitForGdbToConnect(void);
 static void waitForFirstCharFromHost(void);
@@ -129,6 +175,18 @@ void __mriDebugException(void)
     {
         Platform_CommClearInterrupt();
         return;
+    }
+
+    if (wasTempBreakpointHit())
+    {
+        TempBreakpointCallbackPtr pTempBreakpointCallback = g_mri.pTempBreakpointCallback;
+        void* pvTempBreakpointContext = g_mri.pvTempBreakpointContext;
+        int resumeExecution;
+
+        clearTempBreakpoint();
+        resumeExecution = pTempBreakpointCallback(pvTempBreakpointContext);
+        if (resumeExecution)
+            return;
     }
 
     Platform_EnteringDebuggerHook();
@@ -154,6 +212,29 @@ void __mriDebugException(void)
     GdbCommandHandlingLoop();
 
     prepareForDebuggerExit();
+}
+
+static int wasTempBreakpointHit(void)
+{
+    return (isTempBreakpointSet() &&
+            clearThumbBitOfAddress(Platform_GetProgramCounter()) == g_mri.tempBreakpointAddress);
+}
+
+static void clearTempBreakpoint(void)
+{
+    __try
+        Platform_ClearHardwareBreakpoint(g_mri.tempBreakpointAddress);
+    __catch
+        clearExceptionCode();
+    g_mri.tempBreakpointAddress = 0;
+    g_mri.pTempBreakpointCallback = NULL;
+    g_mri.pvTempBreakpointContext = NULL;
+    clearTempBreakpointFlag();
+}
+
+static void clearTempBreakpointFlag(void)
+{
+    g_mri.flags &= ~MRI_FLAGS_TEMP_BREAKPOINT;
 }
 
 static void blockIfGdbHasNotConnected(void)

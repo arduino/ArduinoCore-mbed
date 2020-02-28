@@ -25,13 +25,14 @@
 /* Maximum size of string that can be split into tokens. */
 #define TOKEN_MAX_STRING 64
 
-typedef struct
+struct Token
 {
     const char* tokenPointers[TOKEN_MAX_TOKENS];
     const char* pTokenSeparators;
     size_t      tokenCount;
     char        copyOfString[TOKEN_MAX_STRING + 1];
-} Token;
+};
+typedef struct Token Token;
 
 
 /* Real name of functions are in __mri namespace. */
