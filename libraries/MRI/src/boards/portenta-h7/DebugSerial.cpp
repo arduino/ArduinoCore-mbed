@@ -16,6 +16,7 @@
 #include "DebugSerial.h"
 extern "C" {
     #include <core/mri.h>
+    #include <core/core.h>
     #include <core/platforms.h>
     #include <architectures/armv7-m/armv7-m.h>
     #include <architectures/armv7-m/debug_cm3.h>
@@ -40,16 +41,112 @@ static const char g_memoryMapXml[] = "<?xml version=\"1.0\"?>"
 // The singleton through which all of the Platform* APIs redirect their calls.
 static DebugSerial* g_pDebugSerial = NULL;
 
+// Will be setting initial breakpoint on setup() routine.
+void setup();
+
+// Forward Function Declarations
+static uint32_t readRegisterFromContextBuffer(Buffer* pBuffer, uint32_t regIndex);
+static void writeRegisterToContextBuffer(Buffer* pBuffer, uint32_t regIndex, uint32_t regValue);
 
 
-DebugSerial::DebugSerial(HardwareSerial& serial, IRQn_Type irq) : _serial(serial), _irq(irq), _commIsr(NULL) {
+DebugSerial::DebugSerial(HardwareSerial& serial, IRQn_Type irq, uint32_t baudRate, bool breakInSetup) :
+    _pContextBuffer(NULL), _commIsr(NULL), _serial(serial), _contextBufferSize(0), _baudRate(baudRate),
+    _irq(irq), _breakInSetup(breakInSetup)
+{
+    construct();
+}
+
+DebugSerial::DebugSerial(HardwareSerial& serial, IRQn_Type irq) :
+    _pContextBuffer(NULL), _commIsr(NULL), _serial(serial), _contextBufferSize(0), _baudRate(0),
+    _irq(irq), _breakInSetup(false)
+{
+    construct();
+}
+
+void DebugSerial::construct() {
     // Just return without doing anything if the singleton has already been initialized.
     // This ends up using the first initialized DebugSerial object.
     if (g_pDebugSerial != NULL) {
         return;
     }
     g_pDebugSerial = this;
+
     __mriInit("");
+
+    if (_baudRate != 0) {
+        callSerialBeginFromSetup();
+    }
+}
+
+void DebugSerial::callSerialBeginFromSetup() {
+    _contextBufferSize = Platform_GetPacketBufferSize();
+    _pContextBuffer = new char[_contextBufferSize];
+    __mriCore_SetTempBreakpoint((uint32_t)setup, justEnteredSetupCallback, NULL);
+}
+
+int DebugSerial::justEnteredSetupCallback(void* pv){
+    return g_pDebugSerial->justEnteredSetup();
+}
+
+int DebugSerial::justEnteredSetup() {
+    Buffer buffer;
+
+    // Get current register context. Save away the contents of the registers in the context that we want to modify to
+    // setup for a call to g_pDebugSerial->initSerial().
+    Buffer_Init(&buffer, _pContextBuffer, _contextBufferSize);
+    Platform_CopyContextToBuffer(&buffer);
+    _lrOrig = readRegisterFromContextBuffer(&buffer, 14);
+    _pcOrig = readRegisterFromContextBuffer(&buffer, 15);
+
+    uint32_t lr = (uint32_t)setup;
+    uint32_t pc = (uint32_t)_initSerial;
+    writeRegisterToContextBuffer(&buffer, 14, lr);
+    writeRegisterToContextBuffer(&buffer, 15, pc);
+    Buffer_Reset(&buffer);
+    Platform_CopyContextFromBuffer(&buffer);
+
+    __mriCore_SetTempBreakpoint((uint32_t)setup, justReturnedFromInitSerialCallback, NULL);
+
+    // Return 1 to indicate that we want to resume execution.
+    return 1;
+}
+
+static uint32_t readRegisterFromContextBuffer(Buffer* pBuffer, uint32_t regIndex) {
+    uint32_t regValue = 0;
+    uint8_t* pCurr = (uint8_t*)&regValue;
+
+    pBuffer->pCurrent = pBuffer->pStart + 8 * regIndex;
+    for (size_t i = 0 ; i < sizeof(regValue) ; i++) {
+        *pCurr++ = Buffer_ReadByteAsHex(pBuffer);
+    }
+    return regValue;
+}
+
+static void writeRegisterToContextBuffer(Buffer* pBuffer, uint32_t regIndex, uint32_t regValue) {
+    uint8_t* pCurr = (uint8_t*)&regValue;
+
+    pBuffer->pCurrent = pBuffer->pStart + 8 * regIndex;
+    for (size_t i = 0 ; i < sizeof(regValue) ; i++) {
+        Buffer_WriteByteAsHex(pBuffer, *pCurr++);
+    }
+}
+
+int DebugSerial::justReturnedFromInitSerialCallback(void* pv) {
+    return g_pDebugSerial->justReturnedFromInitSerial();
+}
+
+int DebugSerial::justReturnedFromInitSerial() {
+    Buffer buffer;
+
+    // Restore the registers to the way that they were before we called g_pDebugSerial->initSerial().
+    Buffer_Init(&buffer, _pContextBuffer, _contextBufferSize);
+    writeRegisterToContextBuffer(&buffer, 14, _lrOrig);
+    writeRegisterToContextBuffer(&buffer, 15, _pcOrig);
+    Buffer_Reset(&buffer);
+    Platform_CopyContextFromBuffer(&buffer);
+
+    // Return 0 to indicate that we want to halt execution at the beginning of setup() or 1 to not force a halt.
+    return _breakInSetup ? 0 : 1;
 }
 
 DebugSerial::~DebugSerial() {
@@ -64,7 +161,13 @@ void DebugSerial::setSerialPriority(uint32_t priority) {
     NVIC_SetPriority(_irq, priority);
 }
 
+void DebugSerial::_initSerial() {
+    g_pDebugSerial->initSerial();
+}
+
 void DebugSerial::initSerial() {
+    _serial.begin(_baudRate);
+
     // Hook communication port ISR to allow debug monitor to be awakened when GDB sends a command.
     _commIsr = (IsrFunctionPtr) NVIC_GetVector(_irq);
     NVIC_SetVector(_irq, (uint32_t)commInterruptHook);
@@ -132,7 +235,7 @@ extern "C" void Platform_Init(Token* pParameterTokens) {
     SystemHandlerPriorities origPriorities = getSystemHandlerPrioritiesBeforeMriModifiesThem();
 
     __try
-        __mriCortexMInit(pParameterTokens);
+        __mriCortexMInit((Token*)pParameterTokens);
     __catch
         __rethrow;
 
@@ -145,9 +248,6 @@ extern "C" void Platform_Init(Token* pParameterTokens) {
     NVIC_SetPriority(DebugMonitor_IRQn, 1);
 
     switchFaultHandlersToDebugger();
-
-    // UNDONE: I want to finish initializing the serial port later, at a breakpoint in setup().
-    g_pDebugSerial->initSerial();
 }
 
 static SystemHandlerPriorities getSystemHandlerPrioritiesBeforeMriModifiesThem() {

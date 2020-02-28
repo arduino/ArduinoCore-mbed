@@ -184,9 +184,12 @@ void __mriDebugException(void)
         int resumeExecution;
 
         clearTempBreakpoint();
-        resumeExecution = pTempBreakpointCallback(pvTempBreakpointContext);
-        if (resumeExecution)
-            return;
+        if (pTempBreakpointCallback)
+        {
+            resumeExecution = pTempBreakpointCallback(pvTempBreakpointContext);
+            if (resumeExecution)
+                return;
+        }
     }
 
     Platform_EnteringDebuggerHook();

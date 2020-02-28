@@ -5,10 +5,9 @@
 
 #include <MRI.h>
 
+DebugSerial debugSerial(Serial1, USART1_IRQn, 115200);
+
 void setup() {
-  Serial1.begin(115200);
-  static DebugSerial debug(Serial1, USART1_IRQn);
-  __debugbreak();
 }
 
 void loop() {

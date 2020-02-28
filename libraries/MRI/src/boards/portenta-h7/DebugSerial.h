@@ -18,7 +18,11 @@
 #include <Arduino.h>
 
 extern "C" {
-    #include "core/platforms.h"
+    typedef struct Token Token;
+    void     __mriPlatform_Init(Token* pParameterTokens);
+    uint32_t __mriPlatform_CommHasReceiveData(void);
+    int      __mriPlatform_CommReceiveChar(void);
+    void     __mriPlatform_CommSendChar(int character);
 }
 
 
@@ -26,6 +30,27 @@ namespace arduino {
 
 class DebugSerial {
 public:
+    // You must declare your DebugSerial object as a global or function scoped static so that it doesn't get
+    // destroyed. Which constructor you use, depends on where you declare it.
+
+    // Use this constructor when declaring DebugSerial object as a global outside of any functions.
+    // You must specify the baudrate so that DebugSerial can call begin() on the specified serial object.
+    //  breakInSetup - should it break at beginning of setup().
+    //
+    // Global Example:
+    //      DebugSerial debugSerial(Serial1, USART1_IRQn, 115200);
+    DebugSerial(HardwareSerial& serial, IRQn_Type IRQn, uint32_t baudRate, bool breakInSetup=true);
+
+    // Use this constructor when declaring DebugSerial object as a function scoped static. You must call begin() on
+    // the serial object before constructing the DebugSerial object.
+    //
+    // Function Scoped Static Example:
+    //      #include <MRI.h>
+    //      void setup() {
+    //          Serial1.begin(115200);
+    //          static DebugSerial debugSerial(Serial1, USART1_IRQn);
+    //          __debugbreak();
+    //      }
     DebugSerial(HardwareSerial& serial, IRQn_Type IRQn);
 
     // You should never let your DebugSerial object go out of scope. Make it global or static. To warn you if you do
@@ -33,27 +58,43 @@ public:
     ~DebugSerial();
 
 protected:
+    void        construct();
+    void        callSerialBeginFromSetup();
+
     // These protected methods are called from global Platform* routines via singleton.
     void        setSerialPriority(uint32_t priority);
-    void        initSerial();
     uint32_t    hasReceiveData(void);
     int         receiveChar(void);
     void        sendChar(int character);
+
+    static void _initSerial();
+    void        initSerial();
 
     static void commInterruptHook(void);
     void        pendDebugMonAndRunCommIsr();
     void        handleAnyPendingCommInterrupts();
 
+    static int  justEnteredSetupCallback(void* pvContext);
+    int         justEnteredSetup();
+    static int  justReturnedFromInitSerialCallback(void* pvContext);
+    int         justReturnedFromInitSerial();
+
     typedef void(*IsrFunctionPtr)(void);
 
+    char*           _pContextBuffer;
     IsrFunctionPtr  _commIsr;
     HardwareSerial& _serial;
+    uint32_t        _contextBufferSize;
+    uint32_t        _baudRate;
+    uint32_t        _lrOrig;
+    uint32_t        _pcOrig;
     IRQn_Type       _irq;
+    bool            _breakInSetup;
 
-    friend void     ::Platform_Init(Token* pParameterTokens);
-    friend uint32_t ::Platform_CommHasReceiveData(void);
-    friend int      ::Platform_CommReceiveChar(void);
-    friend void     ::Platform_CommSendChar(int character);
+    friend void     ::__mriPlatform_Init(Token* pParameterTokens);
+    friend uint32_t ::__mriPlatform_CommHasReceiveData(void);
+    friend int      ::__mriPlatform_CommReceiveChar(void);
+    friend void     ::__mriPlatform_CommSendChar(int character);
 };
 
 } // namespace arduino
