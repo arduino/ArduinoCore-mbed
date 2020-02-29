@@ -23,6 +23,10 @@ extern "C" {
     #include <architectures/armv7-m/debug_cm3.h>
 }
 
+
+// The number of milliseconds to pause at the beginning of setup() to give time for host to enumerate USB device.
+#define STARTUP_DELAY_MSEC 250
+
 static const char g_memoryMapXml[] = "<?xml version=\"1.0\"?>"
                                      "<!DOCTYPE memory-map PUBLIC \"+//IDN gnu.org//DTD GDB Memory Map V1.0//EN\" \"http://sourceware.org/gdb/gdb-memory-map.dtd\">"
                                      "<memory-map>"
@@ -170,6 +174,7 @@ void DebugSerial::setSerialPriority(uint32_t priority) {
 
 void DebugSerial::_initSerial() {
     g_pDebugSerial->initSerial();
+    delay(STARTUP_DELAY_MSEC);
 }
 
 void DebugSerial::initSerial() {
