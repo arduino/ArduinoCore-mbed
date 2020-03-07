@@ -19,14 +19,14 @@
 #include <stdint.h>
 #include <core/buffer.h>
 
-/* Real name of functions are in __mri namespace. */
-uint32_t __mriMem_ReadMemoryIntoHexBuffer(Buffer* pBuffer, const void* pvMemory, uint32_t readByteCount);
-int      __mriMem_WriteHexBufferToMemory(Buffer* pBuffer, void* pvMemory, uint32_t writeByteCount);
-int      __mriMem_WriteBinaryBufferToMemory(Buffer* pBuffer, void* pvMemory, uint32_t writeByteCount);
+/* Real name of functions are in mri namespace. */
+uint32_t mriMem_ReadMemoryIntoHexBuffer(Buffer* pBuffer, const void* pvMemory, uint32_t readByteCount);
+int      mriMem_WriteHexBufferToMemory(Buffer* pBuffer, void* pvMemory, uint32_t writeByteCount);
+int      mriMem_WriteBinaryBufferToMemory(Buffer* pBuffer, void* pvMemory, uint32_t writeByteCount);
 
-/* Macroes which allow code to drop the __mri namespace prefix. */
-#define ReadMemoryIntoHexBuffer     __mriMem_ReadMemoryIntoHexBuffer
-#define WriteHexBufferToMemory      __mriMem_WriteHexBufferToMemory
-#define WriteBinaryBufferToMemory   __mriMem_WriteBinaryBufferToMemory
+/* Macroes which allow code to drop the mri namespace prefix. */
+#define ReadMemoryIntoHexBuffer     mriMem_ReadMemoryIntoHexBuffer
+#define WriteHexBufferToMemory      mriMem_WriteHexBufferToMemory
+#define WriteBinaryBufferToMemory   mriMem_WriteBinaryBufferToMemory
 
 #endif /* _MEMORY_H_ */

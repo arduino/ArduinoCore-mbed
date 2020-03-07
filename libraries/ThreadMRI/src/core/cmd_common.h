@@ -33,16 +33,16 @@ typedef struct
     uint32_t length;
 } AddressLength;
 
-/* Real name of functions are in __mri namespace. */
-__throws void     __mriCmd_ReadAddressAndLengthArguments(Buffer* pBuffer, AddressLength* pArguments);
-__throws void     __mriCmd_ReadAddressAndLengthArgumentsWithColon(Buffer* pBuffer, AddressLength* pArguments);
-__throws uint32_t __mriCmd_ReadUIntegerArgument(Buffer* pBuffer);
-__throws void     __mriCmd_ThrowIfNextCharIsNotEqualTo(Buffer* pBuffer, char thisChar);
+/* Real name of functions are in mri namespace. */
+__throws void     mriCmd_ReadAddressAndLengthArguments(Buffer* pBuffer, AddressLength* pArguments);
+__throws void     mriCmd_ReadAddressAndLengthArgumentsWithColon(Buffer* pBuffer, AddressLength* pArguments);
+__throws uint32_t mriCmd_ReadUIntegerArgument(Buffer* pBuffer);
+__throws void     mriCmd_ThrowIfNextCharIsNotEqualTo(Buffer* pBuffer, char thisChar);
 
-/* Macroes which allow code to drop the __mri namespace prefix. */
-#define ReadAddressAndLengthArguments           __mriCmd_ReadAddressAndLengthArguments
-#define ReadAddressAndLengthArgumentsWithColon  __mriCmd_ReadAddressAndLengthArgumentsWithColon
-#define ReadUIntegerArgument                    __mriCmd_ReadUIntegerArgument
-#define ThrowIfNextCharIsNotEqualTo             __mriCmd_ThrowIfNextCharIsNotEqualTo
+/* Macroes which allow code to drop the mri namespace prefix. */
+#define ReadAddressAndLengthArguments           mriCmd_ReadAddressAndLengthArguments
+#define ReadAddressAndLengthArgumentsWithColon  mriCmd_ReadAddressAndLengthArgumentsWithColon
+#define ReadUIntegerArgument                    mriCmd_ReadUIntegerArgument
+#define ThrowIfNextCharIsNotEqualTo             mriCmd_ThrowIfNextCharIsNotEqualTo
 
 #endif /* _CMD_COMMON_H_ */

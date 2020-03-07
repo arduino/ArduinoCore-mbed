@@ -64,16 +64,16 @@ static MriCore g_mri;
 
 /* These two routines can be provided by the debuggee to get notified on debugger entry/exit.  Can be used to safely
    turn off some external hardware so that it doesn't keep running while sitting at a breakpoint. */
-void __mriPlatform_EnteringDebuggerHook(void) __attribute__((weak));
-void __mriPlatform_LeavingDebuggerHook(void) __attribute__((weak));
-#define Platform_EnteringDebuggerHook __mriPlatform_EnteringDebuggerHook
-#define Platform_LeavingDebuggerHook  __mriPlatform_LeavingDebuggerHook
+void mriPlatform_EnteringDebuggerHook(void) __attribute__((weak));
+void mriPlatform_LeavingDebuggerHook(void) __attribute__((weak));
+#define Platform_EnteringDebuggerHook mriPlatform_EnteringDebuggerHook
+#define Platform_LeavingDebuggerHook  mriPlatform_LeavingDebuggerHook
 
 static void clearCoreStructure(void);
 static void initializePlatformSpecificModulesWithDebuggerParameters(const char* pDebuggerParameters);
 static void setFirstExceptionFlag(void);
 static void setSuccessfulInitFlag(void);
-void __mriInit(const char* pDebuggerParameters)
+void mriInit(const char* pDebuggerParameters)
 {
     clearCoreStructure();
 
@@ -162,7 +162,7 @@ static void determineSignalValue(void);
 static int  isDebugTrap(void);
 static void prepareForDebuggerExit(void);
 static void clearFirstExceptionFlag(void);
-void __mriDebugException(void)
+void mriDebugException(void)
 {
     int justSingleStepped = Platform_IsSingleStepping();
 

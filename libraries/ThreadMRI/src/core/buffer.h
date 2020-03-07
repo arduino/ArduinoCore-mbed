@@ -27,46 +27,46 @@ typedef struct
     char*   pCurrent;
 } Buffer;
 
-/* Real name of functions are in __mri namespace. */
-void     __mriBuffer_Init(Buffer* pBuffer, char* pBufferStart, size_t bufferSize);
-void     __mriBuffer_Reset(Buffer* pBuffer);
-void     __mriBuffer_SetEndOfBuffer(Buffer* pBuffer);
-size_t   __mriBuffer_BytesLeft(Buffer* pBuffer);
-int      __mriBuffer_OverrunDetected(Buffer* pBuffer);
-size_t   __mriBuffer_GetLength(Buffer* pBuffer);
-char*    __mriBuffer_GetArray(Buffer* pBuffer);
-void     __mriBuffer_WriteChar(Buffer* pBuffer, char character);
-char     __mriBuffer_ReadChar(Buffer* pBuffer);
-void     __mriBuffer_WriteByteAsHex(Buffer* pBuffer, uint8_t byte);
-uint8_t  __mriBuffer_ReadByteAsHex(Buffer* pBuffer);
-void     __mriBuffer_WriteString(Buffer* pBuffer, const char* pString);
-void     __mriBuffer_WriteSizedString(Buffer* pBuffer, const char* pString, size_t length);
-uint32_t __mriBuffer_ReadUIntegerAsHex(Buffer* pBuffer);
-void     __mriBuffer_WriteUIntegerAsHex(Buffer* pBuffer, uint32_t value);
-int32_t  __mriBuffer_ReadIntegerAsHex(Buffer* pBuffer);
-void     __mriBuffer_WriteIntegerAsHex(Buffer* pBuffer, int32_t value);
-int      __mriBuffer_IsNextCharEqualTo(Buffer* pBuffer, char thisChar);
-int      __mriBuffer_MatchesString(Buffer* pBuffer, const char* pString, size_t stringLength);
+/* Real name of functions are in mri namespace. */
+void     mriBuffer_Init(Buffer* pBuffer, char* pBufferStart, size_t bufferSize);
+void     mriBuffer_Reset(Buffer* pBuffer);
+void     mriBuffer_SetEndOfBuffer(Buffer* pBuffer);
+size_t   mriBuffer_BytesLeft(Buffer* pBuffer);
+int      mriBuffer_OverrunDetected(Buffer* pBuffer);
+size_t   mriBuffer_GetLength(Buffer* pBuffer);
+char*    mriBuffer_GetArray(Buffer* pBuffer);
+void     mriBuffer_WriteChar(Buffer* pBuffer, char character);
+char     mriBuffer_ReadChar(Buffer* pBuffer);
+void     mriBuffer_WriteByteAsHex(Buffer* pBuffer, uint8_t byte);
+uint8_t  mriBuffer_ReadByteAsHex(Buffer* pBuffer);
+void     mriBuffer_WriteString(Buffer* pBuffer, const char* pString);
+void     mriBuffer_WriteSizedString(Buffer* pBuffer, const char* pString, size_t length);
+uint32_t mriBuffer_ReadUIntegerAsHex(Buffer* pBuffer);
+void     mriBuffer_WriteUIntegerAsHex(Buffer* pBuffer, uint32_t value);
+int32_t  mriBuffer_ReadIntegerAsHex(Buffer* pBuffer);
+void     mriBuffer_WriteIntegerAsHex(Buffer* pBuffer, int32_t value);
+int      mriBuffer_IsNextCharEqualTo(Buffer* pBuffer, char thisChar);
+int      mriBuffer_MatchesString(Buffer* pBuffer, const char* pString, size_t stringLength);
 
-/* Macroes which allow code to drop the __mri namespace prefix. */
-#define Buffer_Init                 __mriBuffer_Init
-#define Buffer_Reset                __mriBuffer_Reset
-#define Buffer_SetEndOfBuffer       __mriBuffer_SetEndOfBuffer
-#define Buffer_BytesLeft            __mriBuffer_BytesLeft
-#define Buffer_OverrunDetected      __mriBuffer_OverrunDetected
-#define Buffer_GetLength            __mriBuffer_GetLength
-#define Buffer_GetArray             __mriBuffer_GetArray
-#define Buffer_WriteChar            __mriBuffer_WriteChar
-#define Buffer_ReadChar             __mriBuffer_ReadChar
-#define Buffer_WriteByteAsHex       __mriBuffer_WriteByteAsHex
-#define Buffer_ReadByteAsHex        __mriBuffer_ReadByteAsHex
-#define Buffer_WriteString          __mriBuffer_WriteString
-#define Buffer_WriteSizedString     __mriBuffer_WriteSizedString
-#define Buffer_ReadUIntegerAsHex    __mriBuffer_ReadUIntegerAsHex
-#define Buffer_WriteUIntegerAsHex   __mriBuffer_WriteUIntegerAsHex
-#define Buffer_ReadIntegerAsHex     __mriBuffer_ReadIntegerAsHex
-#define Buffer_WriteIntegerAsHex    __mriBuffer_WriteIntegerAsHex
-#define Buffer_IsNextCharEqualTo    __mriBuffer_IsNextCharEqualTo
-#define Buffer_MatchesString        __mriBuffer_MatchesString
+/* Macroes which allow code to drop the mri namespace prefix. */
+#define Buffer_Init                 mriBuffer_Init
+#define Buffer_Reset                mriBuffer_Reset
+#define Buffer_SetEndOfBuffer       mriBuffer_SetEndOfBuffer
+#define Buffer_BytesLeft            mriBuffer_BytesLeft
+#define Buffer_OverrunDetected      mriBuffer_OverrunDetected
+#define Buffer_GetLength            mriBuffer_GetLength
+#define Buffer_GetArray             mriBuffer_GetArray
+#define Buffer_WriteChar            mriBuffer_WriteChar
+#define Buffer_ReadChar             mriBuffer_ReadChar
+#define Buffer_WriteByteAsHex       mriBuffer_WriteByteAsHex
+#define Buffer_ReadByteAsHex        mriBuffer_ReadByteAsHex
+#define Buffer_WriteString          mriBuffer_WriteString
+#define Buffer_WriteSizedString     mriBuffer_WriteSizedString
+#define Buffer_ReadUIntegerAsHex    mriBuffer_ReadUIntegerAsHex
+#define Buffer_WriteUIntegerAsHex   mriBuffer_WriteUIntegerAsHex
+#define Buffer_ReadIntegerAsHex     mriBuffer_ReadIntegerAsHex
+#define Buffer_WriteIntegerAsHex    mriBuffer_WriteIntegerAsHex
+#define Buffer_IsNextCharEqualTo    mriBuffer_IsNextCharEqualTo
+#define Buffer_MatchesString        mriBuffer_MatchesString
 
 #endif /* _BUFFER_H_ */

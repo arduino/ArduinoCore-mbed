@@ -18,16 +18,16 @@
 
 #include <core/platforms.h>
 
-/* Real name of functions are in __mri namespace. */
-int __mriSemihost_IsDebuggeeMakingSemihostCall(void);
-int __mriSemihost_HandleSemihostRequest(void);
-int __mriSemihost_HandleNewlibSemihostRequest(PlatformSemihostParameters* pSemihostParameters);
-int __mriSemihost_HandleMbedSemihostRequest(PlatformSemihostParameters* pParameters);
+/* Real name of functions are in mri namespace. */
+int mriSemihost_IsDebuggeeMakingSemihostCall(void);
+int mriSemihost_HandleSemihostRequest(void);
+int mriSemihost_HandleNewlibSemihostRequest(PlatformSemihostParameters* pSemihostParameters);
+int mriSemihost_HandleMbedSemihostRequest(PlatformSemihostParameters* pParameters);
 
-/* Macroes which allow code to drop the __mri namespace prefix. */
-#define Semihost_IsDebuggeeMakingSemihostCall   __mriSemihost_IsDebuggeeMakingSemihostCall
-#define Semihost_HandleSemihostRequest          __mriSemihost_HandleSemihostRequest
-#define Semihost_HandleNewlibSemihostRequest    __mriSemihost_HandleNewlibSemihostRequest
-#define Semihost_HandleMbedSemihostRequest      __mriSemihost_HandleMbedSemihostRequest
+/* Macroes which allow code to drop the mri namespace prefix. */
+#define Semihost_IsDebuggeeMakingSemihostCall   mriSemihost_IsDebuggeeMakingSemihostCall
+#define Semihost_HandleSemihostRequest          mriSemihost_HandleSemihostRequest
+#define Semihost_HandleNewlibSemihostRequest    mriSemihost_HandleNewlibSemihostRequest
+#define Semihost_HandleMbedSemihostRequest      mriSemihost_HandleMbedSemihostRequest
 
 #endif /* _SEMIHOST_H_ */

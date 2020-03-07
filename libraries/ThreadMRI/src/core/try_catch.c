@@ -15,4 +15,4 @@
 /* Very rough exception handling like macros for C. */
 #include <core/try_catch.h>
 
-int __mriExceptionCode;
+int mriExceptionCode;

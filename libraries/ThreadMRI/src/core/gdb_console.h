@@ -18,12 +18,12 @@
 
 #include <stdint.h>
 
-/* Real name of functions are in __mri namespace. */
-void __mriGdbConsole_WriteString(const char* pString);
-void __mriGdbConsole_WriteHexValue(uint32_t value);
+/* Real name of functions are in mri namespace. */
+void mriGdbConsole_WriteString(const char* pString);
+void mriGdbConsole_WriteHexValue(uint32_t value);
 
-/* Macroes which allow code to drop the __mri namespace prefix. */
-#define WriteStringToGdbConsole     __mriGdbConsole_WriteString
-#define WriteHexValueToGdbConsole   __mriGdbConsole_WriteHexValue
+/* Macroes which allow code to drop the mri namespace prefix. */
+#define WriteStringToGdbConsole     mriGdbConsole_WriteString
+#define WriteHexValueToGdbConsole   mriGdbConsole_WriteHexValue
 
 #endif /* _GDB_CONSOLE_H_ */

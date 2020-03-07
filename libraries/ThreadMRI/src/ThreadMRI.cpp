@@ -56,15 +56,15 @@ static const char g_memoryMapXml[] = "<?xml version=\"1.0\"?>"
 
 ThreadMRI::ThreadMRI()
 {
-    __mriInit("");
+    mriInit("");
 }
 
 // UNDONE: This is just for initial bringup.
-extern "C" void __mriDebugException(void);
+extern "C" void mriDebugException(void);
 
 void ThreadMRI::debugException()
 {
-    __mriDebugException();
+    mriDebugException();
 }
 
 
@@ -76,8 +76,8 @@ void ThreadMRI::debugException()
 // ---------------------------------------------------------------------------------------------------------------------
 #ifdef UNDONE
 // The debugger uses these handlers to catch faults, debug events, etc.
-void __mriExceptionHandler(void);
-void __mriFaultHandler(void);
+void mriExceptionHandler(void);
+void mriFaultHandler(void);
 
 struct SystemHandlerPriorities {
     uint32_t svcallPriority;
@@ -99,7 +99,7 @@ void Platform_Init(Token* pParameterTokens)
     SystemHandlerPriorities origPriorities = getSystemHandlerPrioritiesBeforeMriModifiesThem();
 
     __try
-        __mriCortexMInit((Token*)pParameterTokens);
+        mriCortexMInit((Token*)pParameterTokens);
     __catch
         __rethrow;
 
@@ -157,10 +157,10 @@ static void setHandlerPriorityLowerThanDebugger(IRQn_Type irq, uint32_t priority
 }
 
 static void switchFaultHandlersToDebugger(void) {
-    NVIC_SetVector(HardFault_IRQn,        (uint32_t)&__mriFaultHandler);
-    NVIC_SetVector(MemoryManagement_IRQn, (uint32_t)&__mriFaultHandler);
-    NVIC_SetVector(BusFault_IRQn,         (uint32_t)&__mriFaultHandler);
-    NVIC_SetVector(UsageFault_IRQn,       (uint32_t)&__mriExceptionHandler);
+    NVIC_SetVector(HardFault_IRQn,        (uint32_t)&mriFaultHandler);
+    NVIC_SetVector(MemoryManagement_IRQn, (uint32_t)&mriFaultHandler);
+    NVIC_SetVector(BusFault_IRQn,         (uint32_t)&mriFaultHandler);
+    NVIC_SetVector(UsageFault_IRQn,       (uint32_t)&mriExceptionHandler);
 }
 #endif // UNDONE
 
@@ -373,7 +373,7 @@ the debugger as two hex digits per byte.  Also need a character for the 'G' comm
 
 static char g_packetBuffer[CORTEXM_PACKET_BUFFER_SIZE];
 
-void __mriCortexMInit(Token* pParameterTokens)
+void mriCortexMInit(Token* pParameterTokens)
 {
 }
 

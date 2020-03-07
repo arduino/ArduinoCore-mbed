@@ -35,24 +35,24 @@ struct Token
 typedef struct Token Token;
 
 
-/* Real name of functions are in __mri namespace. */
-         void        __mriToken_Init(Token* pToken);
-         void        __mriToken_InitWith(Token* pToken, const char* pTheseTokenSeparators);
-__throws void        __mriToken_SplitString(Token* pToken, const char* pStringToSplit);
-         size_t      __mriToken_GetTokenCount(Token* pToken);
-__throws const char* __mriToken_GetToken(Token* pToken, size_t tokenIndex);
-         const char* __mriToken_MatchingString(Token* pToken, const char* pTokenToSearchFor);
-         const char* __mriToken_MatchingStringPrefix(Token* pToken, const char* pTokenPrefixToSearchFor);
-         void        __mriToken_Copy(Token* pTokenCopy, Token* pTokenOriginal);
+/* Real name of functions are in mri namespace. */
+         void        mriToken_Init(Token* pToken);
+         void        mriToken_InitWith(Token* pToken, const char* pTheseTokenSeparators);
+__throws void        mriToken_SplitString(Token* pToken, const char* pStringToSplit);
+         size_t      mriToken_GetTokenCount(Token* pToken);
+__throws const char* mriToken_GetToken(Token* pToken, size_t tokenIndex);
+         const char* mriToken_MatchingString(Token* pToken, const char* pTokenToSearchFor);
+         const char* mriToken_MatchingStringPrefix(Token* pToken, const char* pTokenPrefixToSearchFor);
+         void        mriToken_Copy(Token* pTokenCopy, Token* pTokenOriginal);
 
-/* Macroes which allow code to drop the __mri namespace prefix. */
-#define Token_Init                  __mriToken_Init
-#define Token_InitWith              __mriToken_InitWith
-#define Token_SplitString           __mriToken_SplitString
-#define Token_GetTokenCount         __mriToken_GetTokenCount
-#define Token_GetToken              __mriToken_GetToken
-#define Token_MatchingString        __mriToken_MatchingString
-#define Token_MatchingStringPrefix  __mriToken_MatchingStringPrefix
-#define Token_Copy                  __mriToken_Copy
+/* Macroes which allow code to drop the mri namespace prefix. */
+#define Token_Init                  mriToken_Init
+#define Token_InitWith              mriToken_InitWith
+#define Token_SplitString           mriToken_SplitString
+#define Token_GetTokenCount         mriToken_GetTokenCount
+#define Token_GetToken              mriToken_GetToken
+#define Token_MatchingString        mriToken_MatchingString
+#define Token_MatchingStringPrefix  mriToken_MatchingStringPrefix
+#define Token_Copy                  mriToken_Copy
 
 #endif /* _TOKEN_H_ */

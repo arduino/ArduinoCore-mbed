@@ -18,12 +18,12 @@
 
 #include <stdint.h>
 
-/* Real name of functions are in __mri namespace. */
-uint32_t __mriCmd_HandleBreakpointWatchpointSetCommand(void);
-uint32_t __mriCmd_HandleBreakpointWatchpointRemoveCommand(void);
+/* Real name of functions are in mri namespace. */
+uint32_t mriCmd_HandleBreakpointWatchpointSetCommand(void);
+uint32_t mriCmd_HandleBreakpointWatchpointRemoveCommand(void);
 
-/* Macroes which allow code to drop the __mri namespace prefix. */
-#define HandleBreakpointWatchpointSetCommand    __mriCmd_HandleBreakpointWatchpointSetCommand
-#define HandleBreakpointWatchpointRemoveCommand __mriCmd_HandleBreakpointWatchpointRemoveCommand
+/* Macroes which allow code to drop the mri namespace prefix. */
+#define HandleBreakpointWatchpointSetCommand    mriCmd_HandleBreakpointWatchpointSetCommand
+#define HandleBreakpointWatchpointRemoveCommand mriCmd_HandleBreakpointWatchpointRemoveCommand
 
 #endif /* _CMD_BREAK_WATCH_H_ */

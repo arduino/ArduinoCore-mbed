@@ -18,14 +18,14 @@
 
 #include <stdint.h>
 
-/* Real name of functions are in __mri namespace. */
-uint32_t __mriCmd_HandleMemoryReadCommand(void);
-uint32_t __mriCmd_HandleMemoryWriteCommand(void);
-uint32_t __mriCmd_HandleBinaryMemoryWriteCommand(void);
+/* Real name of functions are in mri namespace. */
+uint32_t mriCmd_HandleMemoryReadCommand(void);
+uint32_t mriCmd_HandleMemoryWriteCommand(void);
+uint32_t mriCmd_HandleBinaryMemoryWriteCommand(void);
 
-/* Macroes which allow code to drop the __mri namespace prefix. */
-#define HandleMemoryReadCommand         __mriCmd_HandleMemoryReadCommand
-#define HandleMemoryWriteCommand        __mriCmd_HandleMemoryWriteCommand
-#define HandleBinaryMemoryWriteCommand  __mriCmd_HandleBinaryMemoryWriteCommand
+/* Macroes which allow code to drop the mri namespace prefix. */
+#define HandleMemoryReadCommand         mriCmd_HandleMemoryReadCommand
+#define HandleMemoryWriteCommand        mriCmd_HandleMemoryWriteCommand
+#define HandleBinaryMemoryWriteCommand  mriCmd_HandleBinaryMemoryWriteCommand
 
 #endif /* _CMD_MEMORY_H_ */

@@ -29,7 +29,7 @@
 #define memFaultException                   10
 #define mriMaxException                     15
 
-extern int __mriExceptionCode;
+extern int mriExceptionCode;
 
 
 /* Allow an application including MRI to extend with their own exception codes and replace the below declarations. */
@@ -48,12 +48,12 @@ extern int __mriExceptionCode;
 
 #define __throwing_func(X) \
             X; \
-            if (__mriExceptionCode) \
+            if (mriExceptionCode) \
                 break;
 
 #define __catch \
         } while (0); \
-        if (__mriExceptionCode)
+        if (mriExceptionCode)
 
 #define __throw(EXCEPTION) return ((void)setExceptionCode(EXCEPTION))
 
@@ -65,17 +65,17 @@ extern int __mriExceptionCode;
 
 static inline int getExceptionCode(void)
 {
-    return __mriExceptionCode;
+    return mriExceptionCode;
 }
 
 static inline void setExceptionCode(int exceptionCode)
 {
-    __mriExceptionCode = exceptionCode > __mriExceptionCode ? exceptionCode : __mriExceptionCode;
+    mriExceptionCode = exceptionCode > mriExceptionCode ? exceptionCode : mriExceptionCode;
 }
 
 static inline void clearExceptionCode(void)
 {
-    __mriExceptionCode = noException;
+    mriExceptionCode = noException;
 }
 
 #endif /* MRI_SKIP_TRY_CATCH_MACRO_DEFINES */

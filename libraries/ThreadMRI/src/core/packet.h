@@ -27,14 +27,14 @@ typedef struct
     unsigned char  expectedChecksum;
 } Packet;
 
-/* Real name of functions are in __mri namespace. */
-void    __mriPacket_GetFromGDB(Packet* pPacket, Buffer* pBuffer);
-void    __mriPacket_SendToGDB(Packet* pPacket, Buffer* pBuffer);
+/* Real name of functions are in mri namespace. */
+void    mriPacket_GetFromGDB(Packet* pPacket, Buffer* pBuffer);
+void    mriPacket_SendToGDB(Packet* pPacket, Buffer* pBuffer);
 
-/* Macroes which allow code to drop the __mri namespace prefix. */
-#define Packet_Init         __mriPacket_Init
-#define Packet_GetFromGDB   __mriPacket_GetFromGDB
-#define Packet_SendToGDB    __mriPacket_SendToGDB
+/* Macroes which allow code to drop the mri namespace prefix. */
+#define Packet_Init         mriPacket_Init
+#define Packet_GetFromGDB   mriPacket_GetFromGDB
+#define Packet_SendToGDB    mriPacket_SendToGDB
 
 
 #endif /* _PACKET_H_ */
