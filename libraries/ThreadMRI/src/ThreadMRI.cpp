@@ -26,6 +26,9 @@ extern "C"
 #include <signal.h>
 #include <string.h>
 
+#include <cmsis_os2.h>
+#include <rtx_os.h>
+
 // UNDONE: Switch back to the USB/CDC based serial port.
 #undef Serial
 #define Serial Serial1
@@ -50,173 +53,6 @@ static const char g_memoryMapXml[] = "<?xml version=\"1.0\"?>"
                                      "<memory type=\"flash\" start=\"0x90000000\" length=\"0x10000000\"> <property name=\"blocksize\">0x200</property></memory>"
                                      "<memory type=\"ram\" start=\"0xc0000000\" length=\"0x800000\"> </memory>"
                                      "</memory-map>";
-
-
-
-
-ThreadMRI::ThreadMRI()
-{
-    mriInit("");
-}
-
-// UNDONE: This is just for initial bringup.
-extern "C" void mriDebugException(void);
-
-void ThreadMRI::debugException()
-{
-    mriDebugException();
-}
-
-
-
-
-// ---------------------------------------------------------------------------------------------------------------------
-// Global Platform_* functions needed by MRI to initialize and communicate with MRI.
-// These functions will perform most of their work through the DebugSerial singleton.
-// ---------------------------------------------------------------------------------------------------------------------
-#ifdef UNDONE
-// The debugger uses these handlers to catch faults, debug events, etc.
-void mriExceptionHandler(void);
-void mriFaultHandler(void);
-
-struct SystemHandlerPriorities {
-    uint32_t svcallPriority;
-    uint32_t pendsvPriority;
-    uint32_t systickPriority;
-};
-
-// Forward Function Declarations
-static SystemHandlerPriorities getSystemHandlerPrioritiesBeforeMriModifiesThem();
-static void lowerPriorityOfNonDebugHandlers(const SystemHandlerPriorities* pPriorities);
-static void setHandlerPriorityLowerThanDebugger(IRQn_Type irq, uint32_t origPriority);
-static void switchFaultHandlersToDebugger();
-#endif // UNDONE
-
-
-void Platform_Init(Token* pParameterTokens)
-{
-#ifdef UNDONE
-    SystemHandlerPriorities origPriorities = getSystemHandlerPrioritiesBeforeMriModifiesThem();
-
-    __try
-        mriCortexMInit((Token*)pParameterTokens);
-    __catch
-        __rethrow;
-
-    // UNDONE: Might want to always keep the USB handler at elevated priority.
-    // Set interrupt used by serial comms (UART or USB) at highest priority.
-    // Set DebugMonitor interrupt at next highest priority.
-    // Set all other external interrupts lower than both serial comms and DebugMonitor.
-    lowerPriorityOfNonDebugHandlers(&origPriorities);
-    g_pDebugSerial->setSerialPriority(0);
-    NVIC_SetPriority(DebugMonitor_IRQn, 1);
-
-    switchFaultHandlersToDebugger();
-#endif // UNDONE
-}
-
-#ifdef UNDONE
-static SystemHandlerPriorities getSystemHandlerPrioritiesBeforeMriModifiesThem() {
-    SystemHandlerPriorities priorities;
-
-    priorities.svcallPriority = NVIC_GetPriority(SVCall_IRQn);
-    priorities.pendsvPriority = NVIC_GetPriority(PendSV_IRQn);
-    priorities.systickPriority = NVIC_GetPriority(SysTick_IRQn);
-    return priorities;
-}
-
-static void lowerPriorityOfNonDebugHandlers(const SystemHandlerPriorities* pPriorities) {
-    // Set priority of system handlers that aren't directly related to debugging lower than those that are.
-    setHandlerPriorityLowerThanDebugger(SVCall_IRQn, pPriorities->svcallPriority);
-    setHandlerPriorityLowerThanDebugger(PendSV_IRQn, pPriorities->pendsvPriority);
-    setHandlerPriorityLowerThanDebugger(SysTick_IRQn, pPriorities->systickPriority);
-
-    // Do the same for external interrupts.
-    for (int irq = WWDG_IRQn ; irq <= WAKEUP_PIN_IRQn ; irq++) {
-        setHandlerPriorityLowerThanDebugger((IRQn_Type)irq, NVIC_GetPriority((IRQn_Type)irq));
-    }
-}
-
-static void setHandlerPriorityLowerThanDebugger(IRQn_Type irq, uint32_t priority)
-{
-    // There are a total of 16 priority levels on the STM32H747XI,
-    // 4 of them reserved:
-    // 0 - Highest - Communication Peripheral ISR
-    // 1           - DebugMon
-    // 14          - SVCall
-    // 15 - Lowest - PendSV & SysTick for switching context
-    //
-    // Everything not listed above will be lowered in priority by 2 to make room for the debugger priorities
-    // except that ISRs that are already at priorities 12 & 13 will not be altered or they would conflict
-    // with the 2 lowest reserved priorities.
-    uint32_t highestPriority = (1 << __NVIC_PRIO_BITS) - 1;
-    if (priority <= highestPriority-4) {
-        priority += 2;
-    }
-    NVIC_SetPriority(irq, priority);
-}
-
-static void switchFaultHandlersToDebugger(void) {
-    NVIC_SetVector(HardFault_IRQn,        (uint32_t)&mriFaultHandler);
-    NVIC_SetVector(MemoryManagement_IRQn, (uint32_t)&mriFaultHandler);
-    NVIC_SetVector(BusFault_IRQn,         (uint32_t)&mriFaultHandler);
-    NVIC_SetVector(UsageFault_IRQn,       (uint32_t)&mriExceptionHandler);
-}
-#endif // UNDONE
-
-uint32_t Platform_CommHasReceiveData(void)
-{
-    return Serial.available();
-}
-
-int Platform_CommReceiveChar(void) {
-    while (!Serial.available())
-    {
-        // Busy wait.
-    }
-    return Serial.read();
-}
-
-void Platform_CommSendChar(int character) {
-    Serial.write(character);
-}
-
-int Platform_CommCausedInterrupt(void) {
-    return 0;
-}
-
-void Platform_CommClearInterrupt(void) {
-}
-
-uint32_t Platform_GetDeviceMemoryMapXmlSize(void) {
-    return sizeof(g_memoryMapXml) - 1;
-}
-
-const char* Platform_GetDeviceMemoryMapXml(void) {
-    return g_memoryMapXml;
-}
-
-
-const uint8_t* Platform_GetUid(void) {
-    return NULL;
-}
-
-uint32_t Platform_GetUidSize(void) {
-    return 0;
-}
-
-int Semihost_IsDebuggeeMakingSemihostCall(void)
-{
-    return 0;
-}
-
-int Semihost_HandleSemihostRequest(void)
-{
-    return 0;
-}
-
-
-
 
 // UNDONE: Just setting manually for now.
 #define MRI_DEVICE_HAS_FPU 1
@@ -372,6 +208,349 @@ the debugger as two hex digits per byte.  Also need a character for the 'G' comm
 #define CORTEXM_PACKET_BUFFER_SIZE  (1 + 2 * sizeof(Context))
 
 static char g_packetBuffer[CORTEXM_PACKET_BUFFER_SIZE];
+
+// Bit location in PSR which indicates if the stack needed to be 8-byte aligned or not.
+#define PSR_STACK_ALIGN_SHIFT   9
+
+// Bit in LR set to 0 when automatic stacking of floating point registers occurs during exception handling.
+#define LR_FLOAT_STACK          (1 << 4)
+
+osThreadId_t g_mriThreadId;
+
+
+
+
+
+ThreadMRI::ThreadMRI()
+{
+    mriInit("");
+}
+
+// UNDONE: This is just for initial bringup.
+extern "C" void mriDebugException(void);
+
+// UNDONE: Could push into debugException() API.
+static __NO_RETURN void mriMain(void *pv);
+
+static uint64_t      g_stack[64];
+static osRtxThread_t g_threadTcb;
+static const osThreadAttr_t g_threadAttr =
+{
+    .name = "mriMain",
+    .attr_bits = osThreadDetached,
+    .cb_mem  = &g_threadTcb,
+    .cb_size = sizeof(g_threadTcb),
+    .stack_mem = g_stack,
+    .stack_size = sizeof(g_stack),
+    .priority = osPriorityNormal
+};
+
+
+void ThreadMRI::debugException()
+{
+    g_mriThreadId = osThreadNew(mriMain, NULL, &g_threadAttr);
+}
+
+static const char* threadStateName(uint8_t threadState) {
+    switch (threadState) {
+        case osRtxThreadInactive:
+            return "osRtxThreadInactive";
+        case osRtxThreadReady:
+            return "osRtxThreadReady";
+        case osRtxThreadRunning:
+            return "osRtxThreadRunning";
+        case osRtxThreadBlocked:
+            return "osRtxThreadBlocked";
+        case osRtxThreadTerminated:
+            return "osRtxThreadTerminated";
+        case osRtxThreadWaitingDelay:
+            return "osRtxThreadWaitingDelay";
+        case osRtxThreadWaitingJoin:
+            return "osRtxThreadWaitingJoin";
+        case osRtxThreadWaitingThreadFlags:
+            return "osRtxThreadWaitingThreadFlags";
+        case osRtxThreadWaitingEventFlags:
+            return "osRtxThreadWaitingEventFlags";
+        case osRtxThreadWaitingMutex:
+            return "osRtxThreadWaitingMutex";
+        case osRtxThreadWaitingSemaphore:
+            return "osRtxThreadWaitingSemaphore";
+        case osRtxThreadWaitingMemoryPool:
+            return "osRtxThreadWaitingMemoryPool";
+        case osRtxThreadWaitingMessageGet:
+            return "osRtxThreadWaitingMessageGet";
+        case osRtxThreadWaitingMessagePut:
+            return "osRtxThreadWaitingMessagePut";
+        default:
+            return "Unknown";
+    }
+}
+
+static osThreadId_t suspendAllApplicationThreads() {
+    osThreadId_t mainThread = 0;
+    osThreadId_t threads[64];
+    // UNDONE: Handle the case where threadCount is larger than threads[] array.
+    uint32_t threadCount = osThreadGetCount();
+    threadCount = osThreadEnumerate(threads, sizeof(threads)/sizeof(threads[0]));
+
+    for (uint32_t i = 0 ; i < threadCount ; i++) {
+        osThreadId_t thread = threads[i];
+        osRtxThread_t* pThread = (osRtxThread_t*)thread;
+        const char*  pThreadName = osThreadGetName(thread);
+        osPriority_t threadPriority = osThreadGetPriority(thread);
+
+        // UNDONE: Remove debug code.
+        Serial.print("Thread: 0x");
+            Serial.println((uint32_t)thread, HEX);
+        Serial.print("        Name: ");
+            Serial.println(pThreadName);
+        Serial.print("    Priority: ");
+            Serial.println((int32_t)threadPriority);
+        Serial.print("       State: ");
+            Serial.println(threadStateName(pThread->state));
+        Serial.print("          sp: ");
+            Serial.println(pThread->sp);
+
+        if (thread != g_mriThreadId) {
+            osThreadSuspend(thread);
+        }
+        if (strcmp(pThreadName, "main") == 0) {
+            mainThread = thread;
+        }
+    }
+
+    return mainThread;
+}
+
+static void readThreadContext(osThreadId_t thread) {
+    osRtxThread_t* pThread = (osRtxThread_t*)thread;
+
+    uint32_t offset;
+    uint32_t stackedCount;
+    if (MRI_DEVICE_HAS_FPU && (pThread->stack_frame & LR_FLOAT_STACK) == 0) {
+        offset = 16;
+        stackedCount = 16 + 34;
+    } else {
+        offset = 0;
+        stackedCount = 16;
+    }
+
+    uint32_t* pThreadContext = (uint32_t*)pThread->sp;
+    g_context.R4 = pThreadContext[offset + 0];
+    g_context.R5 = pThreadContext[offset + 1];
+    g_context.R6 = pThreadContext[offset + 2];
+    g_context.R7 = pThreadContext[offset + 3];
+    g_context.R8 = pThreadContext[offset + 4];
+    g_context.R9 = pThreadContext[offset + 5];
+    g_context.R10 = pThreadContext[offset + 6];
+    g_context.R11 = pThreadContext[offset + 7];
+    g_context.R0 = pThreadContext[offset + 8];
+    g_context.R1 = pThreadContext[offset + 9];
+    g_context.R2 = pThreadContext[offset + 10];
+    g_context.R3 = pThreadContext[offset + 11];
+    g_context.R12 = pThreadContext[offset + 12];
+    g_context.LR = pThreadContext[offset + 13];
+    g_context.PC = pThreadContext[offset + 14];
+    g_context.CPSR = pThreadContext[offset + 15];
+    g_context.SP = pThread->sp + sizeof(uint32_t) * (stackedCount + ((g_context.CPSR >> PSR_STACK_ALIGN_SHIFT) & 1));
+    if (offset != 0) {
+        g_context.S16 = pThreadContext[0];
+        g_context.S17 = pThreadContext[1];
+        g_context.S18 = pThreadContext[2];
+        g_context.S19 = pThreadContext[3];
+        g_context.S20 = pThreadContext[4];
+        g_context.S21 = pThreadContext[5];
+        g_context.S22 = pThreadContext[6];
+        g_context.S23 = pThreadContext[7];
+        g_context.S24 = pThreadContext[8];
+        g_context.S25 = pThreadContext[9];
+        g_context.S26 = pThreadContext[10];
+        g_context.S27 = pThreadContext[11];
+        g_context.S28 = pThreadContext[12];
+        g_context.S29 = pThreadContext[13];
+        g_context.S30 = pThreadContext[14];
+        g_context.S31 = pThreadContext[15];
+        g_context.S0 = pThreadContext[32];
+        g_context.S1 = pThreadContext[33];
+        g_context.S2 = pThreadContext[34];
+        g_context.S3 = pThreadContext[35];
+        g_context.S4 = pThreadContext[36];
+        g_context.S5 = pThreadContext[37];
+        g_context.S6 = pThreadContext[38];
+        g_context.S7 = pThreadContext[39];
+        g_context.S8 = pThreadContext[40];
+        g_context.S9 = pThreadContext[41];
+        g_context.S10 = pThreadContext[42];
+        g_context.S11 = pThreadContext[43];
+        g_context.S12 = pThreadContext[44];
+        g_context.S13 = pThreadContext[45];
+        g_context.S14 = pThreadContext[46];
+        g_context.S15 = pThreadContext[47];
+        g_context.FPSCR = pThreadContext[48];
+        // When CPU auto stacks registers during exception, it reserves pThreadContxt[49] to keep stacked amount
+        // 8-byte aligned.
+    }
+}
+
+static __NO_RETURN void mriMain(void *pv)
+{
+    osThreadId_t mainThread = suspendAllApplicationThreads();
+    readThreadContext(mainThread);
+
+    while (1) {
+        mriDebugException();
+    }
+}
+
+
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Global Platform_* functions needed by MRI to initialize and communicate with MRI.
+// These functions will perform most of their work through the DebugSerial singleton.
+// ---------------------------------------------------------------------------------------------------------------------
+#ifdef UNDONE
+// The debugger uses these handlers to catch faults, debug events, etc.
+void mriExceptionHandler(void);
+void mriFaultHandler(void);
+
+struct SystemHandlerPriorities {
+    uint32_t svcallPriority;
+    uint32_t pendsvPriority;
+    uint32_t systickPriority;
+};
+
+// Forward Function Declarations
+static SystemHandlerPriorities getSystemHandlerPrioritiesBeforeMriModifiesThem();
+static void lowerPriorityOfNonDebugHandlers(const SystemHandlerPriorities* pPriorities);
+static void setHandlerPriorityLowerThanDebugger(IRQn_Type irq, uint32_t origPriority);
+static void switchFaultHandlersToDebugger();
+#endif // UNDONE
+
+
+void Platform_Init(Token* pParameterTokens)
+{
+#ifdef UNDONE
+    SystemHandlerPriorities origPriorities = getSystemHandlerPrioritiesBeforeMriModifiesThem();
+
+    __try
+        mriCortexMInit((Token*)pParameterTokens);
+    __catch
+        __rethrow;
+
+    // UNDONE: Might want to always keep the USB handler at elevated priority.
+    // Set interrupt used by serial comms (UART or USB) at highest priority.
+    // Set DebugMonitor interrupt at next highest priority.
+    // Set all other external interrupts lower than both serial comms and DebugMonitor.
+    lowerPriorityOfNonDebugHandlers(&origPriorities);
+    g_pDebugSerial->setSerialPriority(0);
+    NVIC_SetPriority(DebugMonitor_IRQn, 1);
+
+    switchFaultHandlersToDebugger();
+#endif // UNDONE
+}
+
+#ifdef UNDONE
+static SystemHandlerPriorities getSystemHandlerPrioritiesBeforeMriModifiesThem() {
+    SystemHandlerPriorities priorities;
+
+    priorities.svcallPriority = NVIC_GetPriority(SVCall_IRQn);
+    priorities.pendsvPriority = NVIC_GetPriority(PendSV_IRQn);
+    priorities.systickPriority = NVIC_GetPriority(SysTick_IRQn);
+    return priorities;
+}
+
+static void lowerPriorityOfNonDebugHandlers(const SystemHandlerPriorities* pPriorities) {
+    // Set priority of system handlers that aren't directly related to debugging lower than those that are.
+    setHandlerPriorityLowerThanDebugger(SVCall_IRQn, pPriorities->svcallPriority);
+    setHandlerPriorityLowerThanDebugger(PendSV_IRQn, pPriorities->pendsvPriority);
+    setHandlerPriorityLowerThanDebugger(SysTick_IRQn, pPriorities->systickPriority);
+
+    // Do the same for external interrupts.
+    for (int irq = WWDG_IRQn ; irq <= WAKEUP_PIN_IRQn ; irq++) {
+        setHandlerPriorityLowerThanDebugger((IRQn_Type)irq, NVIC_GetPriority((IRQn_Type)irq));
+    }
+}
+
+static void setHandlerPriorityLowerThanDebugger(IRQn_Type irq, uint32_t priority)
+{
+    // There are a total of 16 priority levels on the STM32H747XI,
+    // 4 of them reserved:
+    // 0 - Highest - Communication Peripheral ISR
+    // 1           - DebugMon
+    // 14          - SVCall
+    // 15 - Lowest - PendSV & SysTick for switching context
+    //
+    // Everything not listed above will be lowered in priority by 2 to make room for the debugger priorities
+    // except that ISRs that are already at priorities 12 & 13 will not be altered or they would conflict
+    // with the 2 lowest reserved priorities.
+    uint32_t highestPriority = (1 << __NVIC_PRIO_BITS) - 1;
+    if (priority <= highestPriority-4) {
+        priority += 2;
+    }
+    NVIC_SetPriority(irq, priority);
+}
+
+static void switchFaultHandlersToDebugger(void) {
+    NVIC_SetVector(HardFault_IRQn,        (uint32_t)&mriFaultHandler);
+    NVIC_SetVector(MemoryManagement_IRQn, (uint32_t)&mriFaultHandler);
+    NVIC_SetVector(BusFault_IRQn,         (uint32_t)&mriFaultHandler);
+    NVIC_SetVector(UsageFault_IRQn,       (uint32_t)&mriExceptionHandler);
+}
+#endif // UNDONE
+
+uint32_t Platform_CommHasReceiveData(void)
+{
+    return Serial.available();
+}
+
+int Platform_CommReceiveChar(void) {
+    while (!Serial.available())
+    {
+        // Busy wait.
+    }
+    return Serial.read();
+}
+
+void Platform_CommSendChar(int character) {
+    Serial.write(character);
+}
+
+int Platform_CommCausedInterrupt(void) {
+    return 0;
+}
+
+void Platform_CommClearInterrupt(void) {
+}
+
+uint32_t Platform_GetDeviceMemoryMapXmlSize(void) {
+    return sizeof(g_memoryMapXml) - 1;
+}
+
+const char* Platform_GetDeviceMemoryMapXml(void) {
+    return g_memoryMapXml;
+}
+
+
+const uint8_t* Platform_GetUid(void) {
+    return NULL;
+}
+
+uint32_t Platform_GetUidSize(void) {
+    return 0;
+}
+
+int Semihost_IsDebuggeeMakingSemihostCall(void)
+{
+    return 0;
+}
+
+int Semihost_HandleSemihostRequest(void)
+{
+    return 0;
+}
+
+
+
 
 void mriCortexMInit(Token* pParameterTokens)
 {
