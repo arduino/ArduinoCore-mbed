@@ -110,14 +110,6 @@ static const char g_targetXml[] =
     "<reg name=\"pc\" bitsize=\"32\" type=\"code_ptr\"/>\n"
     "<reg name=\"xpsr\" bitsize=\"32\" regnum=\"25\"/>\n"
     "</feature>\n"
-    "<feature name=\"org.gnu.gdb.arm.m-system\">\n"
-    "<reg name=\"msp\" bitsize=\"32\" regnum=\"26\"/>\n"
-    "<reg name=\"psp\" bitsize=\"32\" regnum=\"27\"/>\n"
-    "<reg name=\"primask\" bitsize=\"32\" regnum=\"28\"/>\n"
-    "<reg name=\"basepri\" bitsize=\"32\" regnum=\"29\"/>\n"
-    "<reg name=\"faultmask\" bitsize=\"32\" regnum=\"30\"/>\n"
-    "<reg name=\"control\" bitsize=\"32\" regnum=\"31\"/>\n"
-    "</feature>\n"
 #if MRI_DEVICE_HAS_FPU
     "<feature name=\"org.gnu.gdb.arm.vfp\">\n"
     "<reg name=\"d0\" bitsize=\"64\" type=\"ieee_double\"/>\n"
@@ -160,12 +152,6 @@ static struct Context
     uint32_t    LR;
     uint32_t    PC;
     uint32_t    CPSR;
-    uint32_t    MSP;
-    uint32_t    PSP;
-    uint32_t    PRIMASK;
-    uint32_t    BASEPRI;
-    uint32_t    FAULTMASK;
-    uint32_t    CONTROL;
 #if MRI_DEVICE_HAS_FPU
     uint32_t    S0;
     uint32_t    S1;
