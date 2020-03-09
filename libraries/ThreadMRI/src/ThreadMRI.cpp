@@ -21,6 +21,7 @@ extern "C"
     #include "core/mri.h"
     #include "core/platforms.h"
     #include "core/semihost.h"
+    #include "core/scatter_gather.h"
 }
 // UNDONE: Might not need this.
 #include <signal.h>
@@ -133,65 +134,32 @@ static const char g_targetXml[] =
 #endif
     "</target>\n";
 
-static struct Context
-{
-    uint32_t    R0;
-    uint32_t    R1;
-    uint32_t    R2;
-    uint32_t    R3;
-    uint32_t    R4;
-    uint32_t    R5;
-    uint32_t    R6;
-    uint32_t    R7;
-    uint32_t    R8;
-    uint32_t    R9;
-    uint32_t    R10;
-    uint32_t    R11;
-    uint32_t    R12;
-    uint32_t    SP;
-    uint32_t    LR;
-    uint32_t    PC;
-    uint32_t    CPSR;
+
+#define R7      7
+#define SP      13
+#define LR      14
+#define PC      15
+#define CPSR    16
+
 #if MRI_DEVICE_HAS_FPU
-    uint32_t    S0;
-    uint32_t    S1;
-    uint32_t    S2;
-    uint32_t    S3;
-    uint32_t    S4;
-    uint32_t    S5;
-    uint32_t    S6;
-    uint32_t    S7;
-    uint32_t    S8;
-    uint32_t    S9;
-    uint32_t    S10;
-    uint32_t    S11;
-    uint32_t    S12;
-    uint32_t    S13;
-    uint32_t    S14;
-    uint32_t    S15;
-    uint32_t    S16;
-    uint32_t    S17;
-    uint32_t    S18;
-    uint32_t    S19;
-    uint32_t    S20;
-    uint32_t    S21;
-    uint32_t    S22;
-    uint32_t    S23;
-    uint32_t    S24;
-    uint32_t    S25;
-    uint32_t    S26;
-    uint32_t    S27;
-    uint32_t    S28;
-    uint32_t    S29;
-    uint32_t    S30;
-    uint32_t    S31;
-    uint32_t    FPSCR;
+    #define CONTEXT_ENTRIES (5 + 3)
+    #define CONTEXT_SIZE    (17 + 33)
+#else
+    #define CONTEXT_ENTRIES 5
+    #define CONTEXT_SIZE    17
 #endif
-} g_context;
+
+static ScatterGatherEntry g_contextEntries[CONTEXT_ENTRIES];
+static ScatterGather      g_context =
+{
+    .pEntries = g_contextEntries,
+    .entryCount = CONTEXT_ENTRIES
+};
+static uint32_t          g_sp;
 
 /* NOTE: The largest buffer is required for receiving the 'G' command which receives the contents of the registers from
 the debugger as two hex digits per byte.  Also need a character for the 'G' command itself. */
-#define CORTEXM_PACKET_BUFFER_SIZE  (1 + 2 * sizeof(Context))
+#define CORTEXM_PACKET_BUFFER_SIZE  (1 + 2 * sizeof(uint32_t) * CONTEXT_SIZE)
 
 static char g_packetBuffer[CORTEXM_PACKET_BUFFER_SIZE];
 
@@ -322,59 +290,34 @@ static void readThreadContext(osThreadId_t thread) {
     }
 
     uint32_t* pThreadContext = (uint32_t*)pThread->sp;
-    g_context.R4 = pThreadContext[offset + 0];
-    g_context.R5 = pThreadContext[offset + 1];
-    g_context.R6 = pThreadContext[offset + 2];
-    g_context.R7 = pThreadContext[offset + 3];
-    g_context.R8 = pThreadContext[offset + 4];
-    g_context.R9 = pThreadContext[offset + 5];
-    g_context.R10 = pThreadContext[offset + 6];
-    g_context.R11 = pThreadContext[offset + 7];
-    g_context.R0 = pThreadContext[offset + 8];
-    g_context.R1 = pThreadContext[offset + 9];
-    g_context.R2 = pThreadContext[offset + 10];
-    g_context.R3 = pThreadContext[offset + 11];
-    g_context.R12 = pThreadContext[offset + 12];
-    g_context.LR = pThreadContext[offset + 13];
-    g_context.PC = pThreadContext[offset + 14];
-    g_context.CPSR = pThreadContext[offset + 15];
-    g_context.SP = pThread->sp + sizeof(uint32_t) * (stackedCount + ((g_context.CPSR >> PSR_STACK_ALIGN_SHIFT) & 1));
+    // R0 - R3
+    g_contextEntries[0].pValues = pThreadContext + offset + 8;
+    g_contextEntries[0].count = 4;
+    // R4 - R11
+    g_contextEntries[1].pValues = pThreadContext + offset + 0;
+    g_contextEntries[1].count = 8;
+    // R12
+    g_contextEntries[2].pValues = pThreadContext + offset + 12;
+    g_contextEntries[2].count = 1;
+    // LR, PC, CPSR
+    g_contextEntries[4].pValues = pThreadContext + offset + 13;
+    g_contextEntries[4].count = 3;
+    // SP
+    uint32_t cpsr = ScatterGather_Get(&g_context, CPSR);
+    g_sp = pThread->sp + sizeof(uint32_t) * (stackedCount + ((cpsr >> PSR_STACK_ALIGN_SHIFT) & 1));
+    g_contextEntries[3].pValues = &g_sp;
+    g_contextEntries[3].count = 1;
+
     if (offset != 0) {
-        g_context.S16 = pThreadContext[0];
-        g_context.S17 = pThreadContext[1];
-        g_context.S18 = pThreadContext[2];
-        g_context.S19 = pThreadContext[3];
-        g_context.S20 = pThreadContext[4];
-        g_context.S21 = pThreadContext[5];
-        g_context.S22 = pThreadContext[6];
-        g_context.S23 = pThreadContext[7];
-        g_context.S24 = pThreadContext[8];
-        g_context.S25 = pThreadContext[9];
-        g_context.S26 = pThreadContext[10];
-        g_context.S27 = pThreadContext[11];
-        g_context.S28 = pThreadContext[12];
-        g_context.S29 = pThreadContext[13];
-        g_context.S30 = pThreadContext[14];
-        g_context.S31 = pThreadContext[15];
-        g_context.S0 = pThreadContext[32];
-        g_context.S1 = pThreadContext[33];
-        g_context.S2 = pThreadContext[34];
-        g_context.S3 = pThreadContext[35];
-        g_context.S4 = pThreadContext[36];
-        g_context.S5 = pThreadContext[37];
-        g_context.S6 = pThreadContext[38];
-        g_context.S7 = pThreadContext[39];
-        g_context.S8 = pThreadContext[40];
-        g_context.S9 = pThreadContext[41];
-        g_context.S10 = pThreadContext[42];
-        g_context.S11 = pThreadContext[43];
-        g_context.S12 = pThreadContext[44];
-        g_context.S13 = pThreadContext[45];
-        g_context.S14 = pThreadContext[46];
-        g_context.S15 = pThreadContext[47];
-        g_context.FPSCR = pThreadContext[48];
-        // When CPU auto stacks registers during exception, it reserves pThreadContxt[49] to keep stacked amount
-        // 8-byte aligned.
+        // S0 - S15
+        g_contextEntries[5].pValues = pThreadContext + 32;
+        g_contextEntries[5].count = 16;
+        // S16 - S31
+        g_contextEntries[6].pValues = pThreadContext + 0;
+        g_contextEntries[6].count = 16;
+        // FPSCR
+        g_contextEntries[7].pValues = pThreadContext + 48;
+        g_contextEntries[7].count = 1;
     }
 }
 
@@ -587,13 +530,13 @@ void Platform_LeavingDebugger(void)
 
 uint32_t Platform_GetProgramCounter(void)
 {
-    return g_context.PC;
+    return ScatterGather_Get(&g_context, PC);
 }
 
 
 void Platform_SetProgramCounter(uint32_t newPC)
 {
-    g_context.PC = newPC;
+    ScatterGather_Set(&g_context, PC, newPC);
 }
 
 void Platform_AdvanceProgramCounterToNextInstruction(void)
@@ -631,18 +574,14 @@ int Platform_WasMemoryFaultEncountered(void)
 }
 
 
-/* Macro to provide index for specified register in the SContext structure. */
-#define CONTEXT_MEMBER_INDEX(MEMBER) (offsetof(Context, MEMBER)/sizeof(uint32_t))
-
-
 static void sendRegisterForTResponse(Buffer* pBuffer, uint8_t registerOffset, uint32_t registerValue);
 static void writeBytesToBufferAsHex(Buffer* pBuffer, void* pBytes, size_t byteCount);
 void Platform_WriteTResponseRegistersToBuffer(Buffer* pBuffer)
 {
-    sendRegisterForTResponse(pBuffer, CONTEXT_MEMBER_INDEX(R7), g_context.R7);
-    sendRegisterForTResponse(pBuffer, CONTEXT_MEMBER_INDEX(SP), g_context.SP);
-    sendRegisterForTResponse(pBuffer, CONTEXT_MEMBER_INDEX(LR), g_context.LR);
-    sendRegisterForTResponse(pBuffer, CONTEXT_MEMBER_INDEX(PC), g_context.PC);
+    sendRegisterForTResponse(pBuffer, R7, ScatterGather_Get(&g_context, R7));
+    sendRegisterForTResponse(pBuffer, SP, ScatterGather_Get(&g_context, SP));
+    sendRegisterForTResponse(pBuffer, LR, ScatterGather_Get(&g_context, LR));
+    sendRegisterForTResponse(pBuffer, PC, ScatterGather_Get(&g_context, PC));
 }
 
 static void sendRegisterForTResponse(Buffer* pBuffer, uint8_t registerOffset, uint32_t registerValue)
@@ -665,14 +604,27 @@ static void writeBytesToBufferAsHex(Buffer* pBuffer, void* pBytes, size_t byteCo
 
 void Platform_CopyContextToBuffer(Buffer* pBuffer)
 {
-    writeBytesToBufferAsHex(pBuffer, &g_context, sizeof(g_context));
+    uint32_t count = ScatterGather_Count(&g_context);
+    uint32_t i;
+
+    for (i = 0 ; i < count ; i++) {
+        uint32_t reg = ScatterGather_Get(&g_context, i);
+        writeBytesToBufferAsHex(pBuffer, &reg, sizeof(reg));
+    }
 }
 
 
 static void readBytesFromBufferAsHex(Buffer* pBuffer, void* pBytes, size_t byteCount);
 void Platform_CopyContextFromBuffer(Buffer* pBuffer)
 {
-    readBytesFromBufferAsHex(pBuffer, &g_context, sizeof(g_context));
+    uint32_t count = ScatterGather_Count(&g_context);
+    uint32_t i;
+
+    for (i = 0 ; i < count ; i++) {
+        uint32_t reg;
+        readBytesFromBufferAsHex(pBuffer, &reg, sizeof(reg));
+        ScatterGather_Set(&g_context, i, reg);
+    }
 }
 
 static void readBytesFromBufferAsHex(Buffer* pBuffer, void* pBytes, size_t byteCount)
