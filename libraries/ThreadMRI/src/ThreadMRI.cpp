@@ -22,7 +22,7 @@ extern "C"
     #include "core/platforms.h"
     #include "core/semihost.h"
     #include "core/scatter_gather.h"
-    // UNDONE: Remove
+    #include "architectures/armv7-m/armv7-m.h"
     #include "architectures/armv7-m/debug_cm3.h"
 }
 // UNDONE: Might not need this.
@@ -56,114 +56,6 @@ static const char g_memoryMapXml[] = "<?xml version=\"1.0\"?>"
                                      "<memory type=\"flash\" start=\"0x90000000\" length=\"0x10000000\"> <property name=\"blocksize\">0x200</property></memory>"
                                      "<memory type=\"ram\" start=\"0xc0000000\" length=\"0x800000\"> </memory>"
                                      "</memory-map>";
-
-// UNDONE: Just setting manually for now.
-#define MRI_DEVICE_HAS_FPU 1
-
-/* NOTE: This is the original version of the following XML which has had things stripped to reduce the amount of
-         FLASH consumed by the debug monitor.  This includes the removal of the copyright comment.
-<?xml version="1.0"?>
-<!-- Copyright (C) 2010, 2011 Free Software Foundation, Inc.
-
-     Copying and distribution of this file, with or without modification,
-     are permitted in any medium without royalty provided the copyright
-     notice and this notice are preserved.  -->
-
-<!DOCTYPE feature SYSTEM "gdb-target.dtd">
-<feature name="org.gnu.gdb.arm.m-profile">
-  <reg name="r0" bitsize="32"/>
-  <reg name="r1" bitsize="32"/>
-  <reg name="r2" bitsize="32"/>
-  <reg name="r3" bitsize="32"/>
-  <reg name="r4" bitsize="32"/>
-  <reg name="r5" bitsize="32"/>
-  <reg name="r6" bitsize="32"/>
-  <reg name="r7" bitsize="32"/>
-  <reg name="r8" bitsize="32"/>
-  <reg name="r9" bitsize="32"/>
-  <reg name="r10" bitsize="32"/>
-  <reg name="r11" bitsize="32"/>
-  <reg name="r12" bitsize="32"/>
-  <reg name="sp" bitsize="32" type="data_ptr"/>
-  <reg name="lr" bitsize="32"/>
-  <reg name="pc" bitsize="32" type="code_ptr"/>
-  <reg name="xpsr" bitsize="32" regnum="25"/>
-</feature>
-*/
-static const char g_targetXml[] =
-    "<?xml version=\"1.0\"?>\n"
-    "<!DOCTYPE feature SYSTEM \"gdb-target.dtd\">\n"
-    "<target>\n"
-    "<feature name=\"org.gnu.gdb.arm.m-profile\">\n"
-    "<reg name=\"r0\" bitsize=\"32\"/>\n"
-    "<reg name=\"r1\" bitsize=\"32\"/>\n"
-    "<reg name=\"r2\" bitsize=\"32\"/>\n"
-    "<reg name=\"r3\" bitsize=\"32\"/>\n"
-    "<reg name=\"r4\" bitsize=\"32\"/>\n"
-    "<reg name=\"r5\" bitsize=\"32\"/>\n"
-    "<reg name=\"r6\" bitsize=\"32\"/>\n"
-    "<reg name=\"r7\" bitsize=\"32\"/>\n"
-    "<reg name=\"r8\" bitsize=\"32\"/>\n"
-    "<reg name=\"r9\" bitsize=\"32\"/>\n"
-    "<reg name=\"r10\" bitsize=\"32\"/>\n"
-    "<reg name=\"r11\" bitsize=\"32\"/>\n"
-    "<reg name=\"r12\" bitsize=\"32\"/>\n"
-    "<reg name=\"sp\" bitsize=\"32\" type=\"data_ptr\"/>\n"
-    "<reg name=\"lr\" bitsize=\"32\"/>\n"
-    "<reg name=\"pc\" bitsize=\"32\" type=\"code_ptr\"/>\n"
-    "<reg name=\"xpsr\" bitsize=\"32\" regnum=\"25\"/>\n"
-    "</feature>\n"
-#if MRI_DEVICE_HAS_FPU
-    "<feature name=\"org.gnu.gdb.arm.vfp\">\n"
-    "<reg name=\"d0\" bitsize=\"64\" type=\"ieee_double\"/>\n"
-    "<reg name=\"d1\" bitsize=\"64\" type=\"ieee_double\"/>\n"
-    "<reg name=\"d2\" bitsize=\"64\" type=\"ieee_double\"/>\n"
-    "<reg name=\"d3\" bitsize=\"64\" type=\"ieee_double\"/>\n"
-    "<reg name=\"d4\" bitsize=\"64\" type=\"ieee_double\"/>\n"
-    "<reg name=\"d5\" bitsize=\"64\" type=\"ieee_double\"/>\n"
-    "<reg name=\"d6\" bitsize=\"64\" type=\"ieee_double\"/>\n"
-    "<reg name=\"d7\" bitsize=\"64\" type=\"ieee_double\"/>\n"
-    "<reg name=\"d8\" bitsize=\"64\" type=\"ieee_double\"/>\n"
-    "<reg name=\"d9\" bitsize=\"64\" type=\"ieee_double\"/>\n"
-    "<reg name=\"d10\" bitsize=\"64\" type=\"ieee_double\"/>\n"
-    "<reg name=\"d11\" bitsize=\"64\" type=\"ieee_double\"/>\n"
-    "<reg name=\"d12\" bitsize=\"64\" type=\"ieee_double\"/>\n"
-    "<reg name=\"d13\" bitsize=\"64\" type=\"ieee_double\"/>\n"
-    "<reg name=\"d14\" bitsize=\"64\" type=\"ieee_double\"/>\n"
-    "<reg name=\"d15\" bitsize=\"64\" type=\"ieee_double\"/>\n"
-    "<reg name=\"fpscr\" bitsize=\"32\" type=\"int\" group=\"float\"/>\n"
-    "</feature>\n"
-#endif
-    "</target>\n";
-
-
-#define R7      7
-#define SP      13
-#define LR      14
-#define PC      15
-#define CPSR    16
-
-#if MRI_DEVICE_HAS_FPU
-    #define CONTEXT_ENTRIES (5 + 3)
-    #define CONTEXT_SIZE    (17 + 33)
-#else
-    #define CONTEXT_ENTRIES 5
-    #define CONTEXT_SIZE    17
-#endif
-
-static ScatterGatherEntry g_contextEntries[CONTEXT_ENTRIES];
-static ScatterGather      g_context =
-{
-    .pEntries = g_contextEntries,
-    .entryCount = CONTEXT_ENTRIES
-};
-static uint32_t          g_sp;
-
-/* NOTE: The largest buffer is required for receiving the 'G' command which receives the contents of the registers from
-the debugger as two hex digits per byte.  Also need a character for the 'G' command itself. */
-#define CORTEXM_PACKET_BUFFER_SIZE  (1 + 2 * sizeof(uint32_t) * CONTEXT_SIZE)
-
-static char g_packetBuffer[CORTEXM_PACKET_BUFFER_SIZE];
 
 // Bit location in PSR which indicates if the stack needed to be 8-byte aligned or not.
 #define PSR_STACK_ALIGN_SHIFT   9
@@ -250,33 +142,35 @@ static void readThreadContext(osThreadId_t thread) {
 
     uint32_t* pThreadContext = (uint32_t*)pThread->sp;
     // R0 - R3
-    g_contextEntries[0].pValues = pThreadContext + offset + 8;
-    g_contextEntries[0].count = 4;
+    mriCortexMState.contextEntries[0].pValues = pThreadContext + offset + 8;
+    mriCortexMState.contextEntries[0].count = 4;
     // R4 - R11
-    g_contextEntries[1].pValues = pThreadContext + offset + 0;
-    g_contextEntries[1].count = 8;
+    mriCortexMState.contextEntries[1].pValues = pThreadContext + offset + 0;
+    mriCortexMState.contextEntries[1].count = 8;
     // R12
-    g_contextEntries[2].pValues = pThreadContext + offset + 12;
-    g_contextEntries[2].count = 1;
+    mriCortexMState.contextEntries[2].pValues = pThreadContext + offset + 12;
+    mriCortexMState.contextEntries[2].count = 1;
+    // SP - Point scatter gather context to correct location for SP but set it to correct value once CPSR is more easily
+    // fetched.
+    mriCortexMState.contextEntries[3].pValues = &mriCortexMState.sp;
+    mriCortexMState.contextEntries[3].count = 1;
     // LR, PC, CPSR
-    g_contextEntries[4].pValues = pThreadContext + offset + 13;
-    g_contextEntries[4].count = 3;
-    // SP
-    uint32_t cpsr = ScatterGather_Get(&g_context, CPSR);
-    g_sp = pThread->sp + sizeof(uint32_t) * (stackedCount + ((cpsr >> PSR_STACK_ALIGN_SHIFT) & 1));
-    g_contextEntries[3].pValues = &g_sp;
-    g_contextEntries[3].count = 1;
+    mriCortexMState.contextEntries[4].pValues = pThreadContext + offset + 13;
+    mriCortexMState.contextEntries[4].count = 3;
+    // Set SP to correct value using alignment bit in CPSR. Memory for SP is already tracked by context.
+    uint32_t cpsr = ScatterGather_Get(&mriCortexMState.context, CPSR);
+    mriCortexMState.sp = pThread->sp + sizeof(uint32_t) * (stackedCount + ((cpsr >> PSR_STACK_ALIGN_SHIFT) & 1));
 
     if (offset != 0) {
         // S0 - S15
-        g_contextEntries[5].pValues = pThreadContext + 32;
-        g_contextEntries[5].count = 16;
+        mriCortexMState.contextEntries[5].pValues = pThreadContext + 32;
+        mriCortexMState.contextEntries[5].count = 16;
         // S16 - S31
-        g_contextEntries[6].pValues = pThreadContext + 0;
-        g_contextEntries[6].count = 16;
+        mriCortexMState.contextEntries[6].pValues = pThreadContext + 0;
+        mriCortexMState.contextEntries[6].count = 16;
         // FPSCR
-        g_contextEntries[7].pValues = pThreadContext + 48;
-        g_contextEntries[7].count = 1;
+        mriCortexMState.contextEntries[7].pValues = pThreadContext + 48;
+        mriCortexMState.contextEntries[7].count = 1;
     }
 }
 
@@ -306,110 +200,45 @@ static __NO_RETURN void mriMain(void *pv)
 // Global Platform_* functions needed by MRI to initialize and communicate with MRI.
 // These functions will perform most of their work through the DebugSerial singleton.
 // ---------------------------------------------------------------------------------------------------------------------
-#ifdef UNDONE
-// The debugger uses these handlers to catch faults, debug events, etc.
-void mriExceptionHandler(void);
-void mriFaultHandler(void);
-
-struct SystemHandlerPriorities {
-    uint32_t svcallPriority;
-    uint32_t pendsvPriority;
-    uint32_t systickPriority;
-};
-
-// Forward Function Declarations
-static SystemHandlerPriorities getSystemHandlerPrioritiesBeforeMriModifiesThem();
-static void lowerPriorityOfNonDebugHandlers(const SystemHandlerPriorities* pPriorities);
-static void setHandlerPriorityLowerThanDebugger(IRQn_Type irq, uint32_t origPriority);
-static void switchFaultHandlersToDebugger();
-#endif // UNDONE
-
 // Forward Function Declarations
 static void switchFaultHandlersToDebugger();
-
 
 static void mriDebugMonitorHandler(void)
 {
+    // Record information about cause of exception/debug event.
+    mriCortexMState.exceptionNumber = getCurrentlyExecutingExceptionNumber();
+    mriCortexMState.dfsr = SCB->DFSR;
+    mriCortexMState.hfsr = SCB->HFSR;
+    mriCortexMState.cfsr = SCB->CFSR;
+    mriCortexMState.mmfar = SCB->MMFAR;
+    mriCortexMState.bfar = SCB->BFAR;
+
+    // Clear the debug event bits as they are already recorded.
+    if (mriCortexMState.exceptionNumber == 12) {
+        SCB->DFSR = mriCortexMState.dfsr;
+    }
+
     g_haltingThreadId = osThreadGetId();
     osThreadFlagsSet(g_mriThreadId, MRI_THREAD_DEBUG_EVENT_FLAG);
 }
 
 static void mriFaultHandler(void)
 {
-    g_haltingThreadId = osThreadGetId();
-    osThreadFlagsSet(g_mriThreadId, MRI_THREAD_DEBUG_EVENT_FLAG);
+    // UNDONE: Differentiate.
+    mriDebugMonitorHandler();
 }
 
 
 void Platform_Init(Token* pParameterTokens)
 {
-#ifdef UNDONE
-    SystemHandlerPriorities origPriorities = getSystemHandlerPrioritiesBeforeMriModifiesThem();
-
     __try
         mriCortexMInit((Token*)pParameterTokens);
     __catch
         __rethrow;
 
-    // UNDONE: Might want to always keep the USB handler at elevated priority.
-    // Set interrupt used by serial comms (UART or USB) at highest priority.
-    // Set DebugMonitor interrupt at next highest priority.
-    // Set all other external interrupts lower than both serial comms and DebugMonitor.
-    lowerPriorityOfNonDebugHandlers(&origPriorities);
-    g_pDebugSerial->setSerialPriority(0);
-    NVIC_SetPriority(DebugMonitor_IRQn, 1);
-
-#endif // UNDONE
     switchFaultHandlersToDebugger();
     NVIC_SetVector(DebugMonitor_IRQn, (uint32_t)mriDebugMonitorHandler);
-    enableDWTandITM();
-    initDWT();
-    initFPB();
-    clearMonitorPending();
-    enableDebugMonitorAtSpecifiedPriority(255);
 }
-
-#ifdef UNDONE
-static SystemHandlerPriorities getSystemHandlerPrioritiesBeforeMriModifiesThem() {
-    SystemHandlerPriorities priorities;
-
-    priorities.svcallPriority = NVIC_GetPriority(SVCall_IRQn);
-    priorities.pendsvPriority = NVIC_GetPriority(PendSV_IRQn);
-    priorities.systickPriority = NVIC_GetPriority(SysTick_IRQn);
-    return priorities;
-}
-
-static void lowerPriorityOfNonDebugHandlers(const SystemHandlerPriorities* pPriorities) {
-    // Set priority of system handlers that aren't directly related to debugging lower than those that are.
-    setHandlerPriorityLowerThanDebugger(SVCall_IRQn, pPriorities->svcallPriority);
-    setHandlerPriorityLowerThanDebugger(PendSV_IRQn, pPriorities->pendsvPriority);
-    setHandlerPriorityLowerThanDebugger(SysTick_IRQn, pPriorities->systickPriority);
-
-    // Do the same for external interrupts.
-    for (int irq = WWDG_IRQn ; irq <= WAKEUP_PIN_IRQn ; irq++) {
-        setHandlerPriorityLowerThanDebugger((IRQn_Type)irq, NVIC_GetPriority((IRQn_Type)irq));
-    }
-}
-
-static void setHandlerPriorityLowerThanDebugger(IRQn_Type irq, uint32_t priority)
-{
-    // There are a total of 16 priority levels on the STM32H747XI,
-    // 4 of them reserved:
-    // 0 - Highest - Communication Peripheral ISR
-    // 1           - DebugMon
-    // 14          - SVCall
-    // 15 - Lowest - PendSV & SysTick for switching context
-    //
-    // Everything not listed above will be lowered in priority by 2 to make room for the debugger priorities
-    // except that ISRs that are already at priorities 12 & 13 will not be altered or they would conflict
-    // with the 2 lowest reserved priorities.
-    uint32_t highestPriority = (1 << __NVIC_PRIO_BITS) - 1;
-    if (priority <= highestPriority-4) {
-        priority += 2;
-    }
-    NVIC_SetPriority(irq, priority);
-}
-#endif // UNDONE
 
 static void switchFaultHandlersToDebugger(void) {
     NVIC_SetVector(HardFault_IRQn,        (uint32_t)mriFaultHandler);
@@ -417,6 +246,7 @@ static void switchFaultHandlersToDebugger(void) {
     NVIC_SetVector(BusFault_IRQn,         (uint32_t)mriFaultHandler);
     NVIC_SetVector(UsageFault_IRQn,       (uint32_t)mriFaultHandler);
 }
+
 
 uint32_t Platform_CommHasReceiveData(void)
 {
@@ -467,198 +297,4 @@ int Semihost_IsDebuggeeMakingSemihostCall(void)
 int Semihost_HandleSemihostRequest(void)
 {
     return 0;
-}
-
-
-
-
-void mriCortexMInit(Token* pParameterTokens)
-{
-}
-
-void Platform_DisableSingleStep(void)
-{
-}
-
-void Platform_EnableSingleStep(void)
-{
-}
-
-int Platform_IsSingleStepping(void)
-{
-    return 0;
-}
-
-
-char* Platform_GetPacketBuffer(void)
-{
-    return g_packetBuffer;
-}
-
-
-uint32_t Platform_GetPacketBufferSize(void)
-{
-    return sizeof(g_packetBuffer);
-}
-
-
-uint8_t Platform_DetermineCauseOfException(void)
-{
-    return SIGSTOP;
-}
-
-void Platform_DisplayFaultCauseToGdbConsole(void)
-{
-}
-
-void Platform_EnteringDebugger(void)
-{
-}
-
-void Platform_LeavingDebugger(void)
-{
-}
-
-uint32_t Platform_GetProgramCounter(void)
-{
-    return ScatterGather_Get(&g_context, PC);
-}
-
-
-void Platform_SetProgramCounter(uint32_t newPC)
-{
-    ScatterGather_Set(&g_context, PC, newPC);
-}
-
-void Platform_AdvanceProgramCounterToNextInstruction(void)
-{
-}
-
-int Platform_WasProgramCounterModifiedByUser(void)
-{
-    return 0;
-}
-
-
-PlatformInstructionType Platform_TypeOfCurrentInstruction(void)
-{
-    return MRI_PLATFORM_INSTRUCTION_OTHER;
-}
-
-PlatformSemihostParameters Platform_GetSemihostCallParameters(void)
-{
-    PlatformSemihostParameters parameters;
-
-    memset(&parameters, 0, sizeof(parameters));
-    return parameters;
-}
-
-
-void Platform_SetSemihostCallReturnAndErrnoValues(int returnValue, int err)
-{
-}
-
-
-int Platform_WasMemoryFaultEncountered(void)
-{
-    return 0;
-}
-
-
-static void sendRegisterForTResponse(Buffer* pBuffer, uint8_t registerOffset, uint32_t registerValue);
-static void writeBytesToBufferAsHex(Buffer* pBuffer, void* pBytes, size_t byteCount);
-void Platform_WriteTResponseRegistersToBuffer(Buffer* pBuffer)
-{
-    sendRegisterForTResponse(pBuffer, R7, ScatterGather_Get(&g_context, R7));
-    sendRegisterForTResponse(pBuffer, SP, ScatterGather_Get(&g_context, SP));
-    sendRegisterForTResponse(pBuffer, LR, ScatterGather_Get(&g_context, LR));
-    sendRegisterForTResponse(pBuffer, PC, ScatterGather_Get(&g_context, PC));
-}
-
-static void sendRegisterForTResponse(Buffer* pBuffer, uint8_t registerOffset, uint32_t registerValue)
-{
-    Buffer_WriteByteAsHex(pBuffer, registerOffset);
-    Buffer_WriteChar(pBuffer, ':');
-    writeBytesToBufferAsHex(pBuffer, &registerValue, sizeof(registerValue));
-    Buffer_WriteChar(pBuffer, ';');
-}
-
-static void writeBytesToBufferAsHex(Buffer* pBuffer, void* pBytes, size_t byteCount)
-{
-    uint8_t* pByte = (uint8_t*)pBytes;
-    size_t   i;
-
-    for (i = 0 ; i < byteCount ; i++)
-        Buffer_WriteByteAsHex(pBuffer, *pByte++);
-}
-
-
-void Platform_CopyContextToBuffer(Buffer* pBuffer)
-{
-    uint32_t count = ScatterGather_Count(&g_context);
-    uint32_t i;
-
-    for (i = 0 ; i < count ; i++) {
-        uint32_t reg = ScatterGather_Get(&g_context, i);
-        writeBytesToBufferAsHex(pBuffer, &reg, sizeof(reg));
-    }
-}
-
-
-static void readBytesFromBufferAsHex(Buffer* pBuffer, void* pBytes, size_t byteCount);
-void Platform_CopyContextFromBuffer(Buffer* pBuffer)
-{
-    uint32_t count = ScatterGather_Count(&g_context);
-    uint32_t i;
-
-    for (i = 0 ; i < count ; i++) {
-        uint32_t reg;
-        readBytesFromBufferAsHex(pBuffer, &reg, sizeof(reg));
-        ScatterGather_Set(&g_context, i, reg);
-    }
-}
-
-static void readBytesFromBufferAsHex(Buffer* pBuffer, void* pBytes, size_t byteCount)
-{
-    uint8_t* pByte = (uint8_t*)pBytes;
-    size_t   i;
-
-    for (i = 0 ; i < byteCount; i++)
-        *pByte++ = Buffer_ReadByteAsHex(pBuffer);
-}
-
-void Platform_SetHardwareBreakpointOfGdbKind(uint32_t address, uint32_t kind)
-{
-}
-
-void Platform_SetHardwareBreakpoint(uint32_t address)
-{
-}
-
-
-void Platform_ClearHardwareBreakpointOfGdbKind(uint32_t address, uint32_t kind)
-{
-}
-
-void Platform_ClearHardwareBreakpoint(uint32_t address)
-{
-}
-
-void Platform_SetHardwareWatchpoint(uint32_t address, uint32_t size, PlatformWatchpointType type)
-{
-}
-
-void Platform_ClearHardwareWatchpoint(uint32_t address, uint32_t size, PlatformWatchpointType type)
-{
-}
-
-uint32_t Platform_GetTargetXmlSize(void)
-{
-    return sizeof(g_targetXml) - 1;
-}
-
-
-const char* Platform_GetTargetXml(void)
-{
-    return g_targetXml;
 }

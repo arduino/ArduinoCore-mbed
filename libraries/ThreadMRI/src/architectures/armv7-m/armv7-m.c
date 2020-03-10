@@ -1,4 +1,3 @@
-#ifdef UNDONE
 /* Copyright 2020 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,9 +26,9 @@
 extern int errno;
 
 /* Fake stack used when task encounters stacking/unstacking fault. */
-const uint32_t  __mriCortexMFakeStack[8] = { 0xDEADDEAD, 0xDEADDEAD, 0xDEADDEAD, 0xDEADDEAD,
+const uint32_t  mriCortexMFakeStack[8] = { 0xDEADDEAD, 0xDEADDEAD, 0xDEADDEAD, 0xDEADDEAD,
                                              0xDEADDEAD, 0xDEADDEAD, 0xDEADDEAD, 0xDEADDEAD };
-CortexMState    __mriCortexMState;
+CortexMState    mriCortexMState;
 
 /* NOTE: This is the original version of the following XML which has had things stripped to reduce the amount of
          FLASH consumed by the debug monitor.  This includes the removal of the copyright comment.
@@ -84,6 +83,7 @@ static const char g_targetXml[] =
     "<reg name=\"pc\" bitsize=\"32\" type=\"code_ptr\"/>\n"
     "<reg name=\"xpsr\" bitsize=\"32\" regnum=\"25\"/>\n"
     "</feature>\n"
+#if !MRI_THREAD_MRI
     "<feature name=\"org.gnu.gdb.arm.m-system\">\n"
     "<reg name=\"msp\" bitsize=\"32\" regnum=\"26\"/>\n"
     "<reg name=\"psp\" bitsize=\"32\" regnum=\"27\"/>\n"
@@ -92,6 +92,7 @@ static const char g_targetXml[] =
     "<reg name=\"faultmask\" bitsize=\"32\" regnum=\"30\"/>\n"
     "<reg name=\"control\" bitsize=\"32\" regnum=\"31\"/>\n"
     "</feature>\n"
+#endif
 #if MRI_DEVICE_HAS_FPU
     "<feature name=\"org.gnu.gdb.arm.vfp\">\n"
     "<reg name=\"d0\" bitsize=\"64\" type=\"ieee_double\"/>\n"
@@ -115,36 +116,41 @@ static const char g_targetXml[] =
 #endif
     "</target>\n";
 
-/* Macro to provide index for specified register in the SContext structure. */
-#define CONTEXT_MEMBER_INDEX(MEMBER) (offsetof(Context, MEMBER)/sizeof(uint32_t))
-
-
 /* Reference this handler in the ASM module to make sure that it gets linked in. */
-void __mriExceptionHandler(void);
+void mriExceptionHandler(void);
 
 
 static void clearState(void);
 static void configureDWTandFPB(void);
 static void defaultSvcAndSysTickInterruptsToPriority1(void);
-void __mriCortexMInit(Token* pParameterTokens)
+void mriCortexMInit(Token* pParameterTokens)
 {
-
-    /* Reference routine in ASM module to make sure that is gets linked in. */
-    void (* volatile dummyReference)(void) = __mriExceptionHandler;
-    (void)dummyReference;
+    if (!MRI_THREAD_MRI)
+    {
+        /* Reference routine in ASM module to make sure that is gets linked in. */
+        void (* volatile dummyReference)(void) = mriExceptionHandler;
+        (void)dummyReference;
+    }
     (void)pParameterTokens;
 
     clearState();
+    ScatterGather_Init(&mriCortexMState.context,
+                       mriCortexMState.contextEntries,
+                       sizeof(mriCortexMState.contextEntries)/sizeof(mriCortexMState.contextEntries[0]));
     configureDWTandFPB();
-    defaultSvcAndSysTickInterruptsToPriority1();
+    if (!MRI_THREAD_MRI)
+        defaultSvcAndSysTickInterruptsToPriority1();
     Platform_DisableSingleStep();
     clearMonitorPending();
-    enableDebugMonitorAtPriority0();
+    if (MRI_THREAD_MRI)
+        enableDebugMonitorAtSpecifiedPriority(255);
+    else
+        enableDebugMonitorAtSpecifiedPriority(0);
 }
 
 static void clearState(void)
 {
-    memset(&__mriCortexMState, 0, sizeof(__mriCortexMState));
+    memset(&mriCortexMState, 0, sizeof(mriCortexMState));
 }
 
 static void configureDWTandFPB(void)
@@ -171,7 +177,7 @@ void Platform_DisableSingleStep(void)
 
 static void clearSingleSteppingFlag(void)
 {
-    __mriCortexMState.flags &= ~CORTEXM_FLAGS_SINGLE_STEPPING;
+    mriCortexMState.flags &= ~CORTEXM_FLAGS_SINGLE_STEPPING;
 }
 
 
@@ -195,6 +201,10 @@ static void     setRestoreBasePriorityFlag(void);
 static uint32_t calculateBasePriorityForThisCPU(uint32_t basePriority);
 void Platform_EnableSingleStep(void)
 {
+    // UNDONE: What to do here?
+    if (MRI_THREAD_MRI)
+        return;
+
     if (!doesPCPointToSVCInstruction())
     {
         setSingleSteppingFlag();
@@ -252,12 +262,12 @@ static uint32_t getNvicVector(IRQn_Type irq)
 
 static void setSvcStepFlag(void)
 {
-    __mriCortexMState.flags |= CORTEXM_FLAGS_SVC_STEP;
+    mriCortexMState.flags |= CORTEXM_FLAGS_SVC_STEP;
 }
 
 static void setSingleSteppingFlag(void)
 {
-    __mriCortexMState.flags |= CORTEXM_FLAGS_SINGLE_STEPPING;
+    mriCortexMState.flags |= CORTEXM_FLAGS_SINGLE_STEPPING;
 }
 
 static void recordCurrentBasePriorityAndRaisePriorityToDisableNonDebugInterrupts(void)
@@ -288,12 +298,12 @@ static int doesPCPointToBASEPRIUpdateInstruction(void)
 
 static uint16_t getFirstHalfWordOfCurrentInstruction(void)
 {
-    return throwingMemRead16(__mriCortexMState.context.PC);
+    return throwingMemRead16(Platform_GetProgramCounter());
 }
 
 static uint16_t getSecondHalfWordOfCurrentInstruction(void)
 {
-    return throwingMemRead16(__mriCortexMState.context.PC + sizeof(uint16_t));
+    return throwingMemRead16(Platform_GetProgramCounter() + sizeof(uint16_t));
 }
 
 static uint16_t throwingMemRead16(uint32_t address)
@@ -334,13 +344,13 @@ static int isSecondHalfWordOfMSR_BASEPRI_MAX(uint16_t instructionHalfWord1)
 
 static void recordCurrentBasePriority(void)
 {
-    __mriCortexMState.originalBasePriority = __get_BASEPRI();
+    mriCortexMState.originalBasePriority = __get_BASEPRI();
     setRestoreBasePriorityFlag();
 }
 
 static void setRestoreBasePriorityFlag(void)
 {
-    __mriCortexMState.flags |= CORTEXM_FLAGS_RESTORE_BASEPRI;
+    mriCortexMState.flags |= CORTEXM_FLAGS_RESTORE_BASEPRI;
 }
 
 static uint32_t calculateBasePriorityForThisCPU(uint32_t basePriority)
@@ -352,26 +362,26 @@ static uint32_t calculateBasePriorityForThisCPU(uint32_t basePriority)
 
 int Platform_IsSingleStepping(void)
 {
-    return __mriCortexMState.flags & CORTEXM_FLAGS_SINGLE_STEPPING;
+    return mriCortexMState.flags & CORTEXM_FLAGS_SINGLE_STEPPING;
 }
 
 
 char* Platform_GetPacketBuffer(void)
 {
-    return __mriCortexMState.packetBuffer;
+    return mriCortexMState.packetBuffer;
 }
 
 
 uint32_t Platform_GetPacketBufferSize(void)
 {
-    return sizeof(__mriCortexMState.packetBuffer);
+    return sizeof(mriCortexMState.packetBuffer);
 }
 
 
 static uint8_t  determineCauseOfDebugEvent(void);
 uint8_t Platform_DetermineCauseOfException(void)
 {
-    uint32_t exceptionNumber = getCurrentlyExecutingExceptionNumber();
+    uint32_t exceptionNumber = mriCortexMState.exceptionNumber;
 
     switch(exceptionNumber)
     {
@@ -418,14 +428,13 @@ static uint8_t determineCauseOfDebugEvent(void)
         {SCB_DFSR_BKPT, SIGTRAP},
         {SCB_DFSR_HALTED, SIGTRAP}
     };
-    uint32_t debugFaultStatus = SCB->DFSR;
+    uint32_t debugFaultStatus = mriCortexMState.dfsr;
     size_t   i;
 
     for (i = 0 ; i < sizeof(debugEventToSignalMap)/sizeof(debugEventToSignalMap[0]) ; i++)
     {
         if (debugFaultStatus & debugEventToSignalMap[i].statusBit)
         {
-            SCB->DFSR = debugEventToSignalMap[i].statusBit;
             return debugEventToSignalMap[i].signalToReturn;
         }
     }
@@ -441,7 +450,7 @@ static void displayBusFaultCauseToGdbConsole(void);
 static void displayUsageFaultCauseToGdbConsole(void);
 void Platform_DisplayFaultCauseToGdbConsole(void)
 {
-    switch (getCurrentlyExecutingExceptionNumber())
+    switch (mriCortexMState.exceptionNumber)
     {
     case 3:
         /* HardFault */
@@ -470,7 +479,7 @@ static void displayHardFaultCauseToGdbConsole(void)
     static const uint32_t debugEventBit = 1 << 31;
     static const uint32_t forcedBit = 1 << 30;
     static const uint32_t vectorTableReadBit = 1 << 1;
-    uint32_t              hardFaultStatusRegister = SCB->HFSR;
+    uint32_t              hardFaultStatusRegister = mriCortexMState.hfsr;
 
     WriteStringToGdbConsole("\n**Hard Fault**");
     WriteStringToGdbConsole("\n  Status Register: ");
@@ -499,7 +508,7 @@ static void displayMemFaultCauseToGdbConsole(void)
     static const uint32_t unstackingErrorBit = 1 << 3;
     static const uint32_t dataAccess = 1 << 1;
     static const uint32_t instructionFetch = 1;
-    uint32_t              memManageFaultStatusRegister = SCB->CFSR & 0xFF;
+    uint32_t              memManageFaultStatusRegister = mriCortexMState.cfsr & 0xFF;
 
     /* Check to make sure that there is a memory fault to display. */
     if (memManageFaultStatusRegister == 0)
@@ -512,7 +521,7 @@ static void displayMemFaultCauseToGdbConsole(void)
     if (memManageFaultStatusRegister & MMARValidBit)
     {
         WriteStringToGdbConsole("\n    Fault Address: ");
-        WriteHexValueToGdbConsole(SCB->MMFAR);
+        WriteHexValueToGdbConsole(mriCortexMState.mmfar);
     }
     if (memManageFaultStatusRegister & FPLazyStatePreservationBit)
         WriteStringToGdbConsole("\n    FP Lazy Preservation");
@@ -520,12 +529,12 @@ static void displayMemFaultCauseToGdbConsole(void)
     if (memManageFaultStatusRegister & stackingErrorBit)
     {
         WriteStringToGdbConsole("\n    Stacking Error w/ SP = ");
-        WriteHexValueToGdbConsole(__mriCortexMState.taskSP);
+        WriteHexValueToGdbConsole(mriCortexMState.taskSP);
     }
     if (memManageFaultStatusRegister & unstackingErrorBit)
     {
         WriteStringToGdbConsole("\n    Unstacking Error w/ SP = ");
-        WriteHexValueToGdbConsole(__mriCortexMState.taskSP);
+        WriteHexValueToGdbConsole(mriCortexMState.taskSP);
     }
     if (memManageFaultStatusRegister & dataAccess)
         WriteStringToGdbConsole("\n    Data Access");
@@ -543,7 +552,7 @@ static void displayBusFaultCauseToGdbConsole(void)
     static const uint32_t impreciseDataAccessBit = 1 << 2;
     static const uint32_t preciseDataAccessBit = 1 << 1;
     static const uint32_t instructionPrefetch = 1;
-    uint32_t              busFaultStatusRegister = (SCB->CFSR >> 8) & 0xFF;
+    uint32_t              busFaultStatusRegister = (mriCortexMState.cfsr >> 8) & 0xFF;
 
     /* Check to make sure that there is a bus fault to display. */
     if (busFaultStatusRegister == 0)
@@ -556,7 +565,7 @@ static void displayBusFaultCauseToGdbConsole(void)
     if (busFaultStatusRegister & BFARValidBit)
     {
         WriteStringToGdbConsole("\n    Fault Address: ");
-        WriteHexValueToGdbConsole(SCB->BFAR);
+        WriteHexValueToGdbConsole(mriCortexMState.bfar);
     }
     if (busFaultStatusRegister & FPLazyStatePreservationBit)
         WriteStringToGdbConsole("\n    FP Lazy Preservation");
@@ -564,12 +573,12 @@ static void displayBusFaultCauseToGdbConsole(void)
     if (busFaultStatusRegister & stackingErrorBit)
     {
         WriteStringToGdbConsole("\n    Stacking Error w/ SP = ");
-        WriteHexValueToGdbConsole(__mriCortexMState.taskSP);
+        WriteHexValueToGdbConsole(mriCortexMState.taskSP);
     }
     if (busFaultStatusRegister & unstackingErrorBit)
     {
         WriteStringToGdbConsole("\n    Unstacking Error w/ SP = ");
-        WriteHexValueToGdbConsole(__mriCortexMState.taskSP);
+        WriteHexValueToGdbConsole(mriCortexMState.taskSP);
     }
     if (busFaultStatusRegister & impreciseDataAccessBit)
         WriteStringToGdbConsole("\n    Imprecise Data Access");
@@ -589,7 +598,7 @@ static void displayUsageFaultCauseToGdbConsole(void)
     static const uint32_t invalidPCBit = 1 << 2;
     static const uint32_t invalidStateBit = 1 << 1;
     static const uint32_t undefinedInstructionBit = 1;
-    uint32_t              usageFaultStatusRegister = SCB->CFSR >> 16;
+    uint32_t              usageFaultStatusRegister = mriCortexMState.cfsr >> 16;
 
     /* Make sure that there is a usage fault to display. */
     if (usageFaultStatusRegister == 0)
@@ -631,13 +640,13 @@ static void     clearHardwareBreakpointOnSvcHandler(void);
 void Platform_EnteringDebugger(void)
 {
     clearMemoryFaultFlag();
-    __mriCortexMState.originalPC = __mriCortexMState.context.PC;
+    mriCortexMState.originalPC = Platform_GetProgramCounter();
     cleanupIfSingleStepping();
 }
 
 static void clearMemoryFaultFlag(void)
 {
-    __mriCortexMState.flags &= ~CORTEXM_FLAGS_FAULT_DURING_DEBUG;
+    mriCortexMState.flags &= ~CORTEXM_FLAGS_FAULT_DURING_DEBUG;
 }
 
 static void cleanupIfSingleStepping(void)
@@ -652,19 +661,19 @@ static void restoreBasePriorityIfNeeded(void)
     if (shouldRestoreBasePriority())
     {
         clearRestoreBasePriorityFlag();
-        __set_BASEPRI(__mriCortexMState.originalBasePriority);
-        __mriCortexMState.originalBasePriority = 0;
+        __set_BASEPRI(mriCortexMState.originalBasePriority);
+        mriCortexMState.originalBasePriority = 0;
     }
 }
 
 static uint32_t shouldRestoreBasePriority(void)
 {
-    return __mriCortexMState.flags & CORTEXM_FLAGS_RESTORE_BASEPRI;
+    return mriCortexMState.flags & CORTEXM_FLAGS_RESTORE_BASEPRI;
 }
 
 static void clearRestoreBasePriorityFlag(void)
 {
-    __mriCortexMState.flags &= ~CORTEXM_FLAGS_RESTORE_BASEPRI;
+    mriCortexMState.flags &= ~CORTEXM_FLAGS_RESTORE_BASEPRI;
 }
 
 static void removeHardwareBreakpointOnSvcHandlerIfNeeded(void)
@@ -678,12 +687,12 @@ static void removeHardwareBreakpointOnSvcHandlerIfNeeded(void)
 
 static int shouldRemoveHardwareBreakpointOnSvcHandler(void)
 {
-    return __mriCortexMState.flags & CORTEXM_FLAGS_SVC_STEP;
+    return mriCortexMState.flags & CORTEXM_FLAGS_SVC_STEP;
 }
 
 static void clearSvcStepFlag(void)
 {
-    __mriCortexMState.flags &= ~CORTEXM_FLAGS_SVC_STEP;
+    mriCortexMState.flags &= ~CORTEXM_FLAGS_SVC_STEP;
 }
 
 static void clearHardwareBreakpointOnSvcHandler(void)
@@ -701,28 +710,28 @@ void Platform_LeavingDebugger(void)
 
 static void checkStack(void)
 {
-    uint32_t* pCurr = (uint32_t*)__mriCortexMState.debuggerStack;
-    uint8_t*  pEnd = (uint8_t*)__mriCortexMState.debuggerStack + sizeof(__mriCortexMState.debuggerStack);
+    uint32_t* pCurr = (uint32_t*)mriCortexMState.debuggerStack;
+    uint8_t*  pEnd = (uint8_t*)mriCortexMState.debuggerStack + sizeof(mriCortexMState.debuggerStack);
     int       spaceUsed;
 
     while ((uint8_t*)pCurr < pEnd && *pCurr == CORTEXM_DEBUGGER_STACK_FILL)
         pCurr++;
 
     spaceUsed = pEnd - (uint8_t*)pCurr;
-    if (spaceUsed > __mriCortexMState.maxStackUsed)
-        __mriCortexMState.maxStackUsed = spaceUsed;
+    if (spaceUsed > mriCortexMState.maxStackUsed)
+        mriCortexMState.maxStackUsed = spaceUsed;
 }
 
 
 uint32_t Platform_GetProgramCounter(void)
 {
-    return __mriCortexMState.context.PC;
+    return ScatterGather_Get(&mriCortexMState.context, PC);
 }
 
 
 void Platform_SetProgramCounter(uint32_t newPC)
 {
-    __mriCortexMState.context.PC = newPC;
+    ScatterGather_Set(&mriCortexMState.context, PC, newPC);
 }
 
 
@@ -745,12 +754,12 @@ void Platform_AdvanceProgramCounterToNextInstruction(void)
     if (isInstruction32Bit(firstWordOfCurrentInstruction))
     {
         /* 32-bit Instruction. */
-        __mriCortexMState.context.PC += 4;
+        Platform_SetProgramCounter(Platform_GetProgramCounter() + sizeof(uint32_t));
     }
     else
     {
         /* 16-bit Instruction. */
-        __mriCortexMState.context.PC += 2;
+        Platform_SetProgramCounter(Platform_GetProgramCounter() + sizeof(uint16_t));
     }
 }
 
@@ -768,7 +777,7 @@ static int isInstruction32Bit(uint16_t firstWordOfInstruction)
 
 int Platform_WasProgramCounterModifiedByUser(void)
 {
-    return __mriCortexMState.context.PC != __mriCortexMState.originalPC;
+    return Platform_GetProgramCounter() != mriCortexMState.originalPC;
 }
 
 
@@ -826,10 +835,10 @@ PlatformSemihostParameters Platform_GetSemihostCallParameters(void)
 {
     PlatformSemihostParameters parameters;
 
-    parameters.parameter1 = __mriCortexMState.context.R0;
-    parameters.parameter2 = __mriCortexMState.context.R1;
-    parameters.parameter3 = __mriCortexMState.context.R2;
-    parameters.parameter4 = __mriCortexMState.context.R3;
+    parameters.parameter1 = ScatterGather_Get(&mriCortexMState.context, R0);
+    parameters.parameter2 = ScatterGather_Get(&mriCortexMState.context, R1);
+    parameters.parameter3 = ScatterGather_Get(&mriCortexMState.context, R2);
+    parameters.parameter4 = ScatterGather_Get(&mriCortexMState.context, R3);
 
     return parameters;
 }
@@ -837,7 +846,7 @@ PlatformSemihostParameters Platform_GetSemihostCallParameters(void)
 
 void Platform_SetSemihostCallReturnAndErrnoValues(int returnValue, int err)
 {
-    __mriCortexMState.context.R0 = returnValue;
+    ScatterGather_Set(&mriCortexMState.context, R0, returnValue);
     if (returnValue < 0)
         errno = err;
 }
@@ -848,7 +857,7 @@ int Platform_WasMemoryFaultEncountered(void)
     int wasFaultEncountered;
 
     __DSB();
-    wasFaultEncountered = __mriCortexMState.flags & CORTEXM_FLAGS_FAULT_DURING_DEBUG;
+    wasFaultEncountered = mriCortexMState.flags & CORTEXM_FLAGS_FAULT_DURING_DEBUG;
     clearMemoryFaultFlag();
 
     return wasFaultEncountered;
@@ -859,10 +868,10 @@ static void sendRegisterForTResponse(Buffer* pBuffer, uint8_t registerOffset, ui
 static void writeBytesToBufferAsHex(Buffer* pBuffer, void* pBytes, size_t byteCount);
 void Platform_WriteTResponseRegistersToBuffer(Buffer* pBuffer)
 {
-    sendRegisterForTResponse(pBuffer, CONTEXT_MEMBER_INDEX(R7), __mriCortexMState.context.R7);
-    sendRegisterForTResponse(pBuffer, CONTEXT_MEMBER_INDEX(SP), __mriCortexMState.context.SP);
-    sendRegisterForTResponse(pBuffer, CONTEXT_MEMBER_INDEX(LR), __mriCortexMState.context.LR);
-    sendRegisterForTResponse(pBuffer, CONTEXT_MEMBER_INDEX(PC), __mriCortexMState.context.PC);
+    sendRegisterForTResponse(pBuffer, R7, ScatterGather_Get(&mriCortexMState.context, R7));
+    sendRegisterForTResponse(pBuffer, SP, ScatterGather_Get(&mriCortexMState.context, SP));
+    sendRegisterForTResponse(pBuffer, LR, ScatterGather_Get(&mriCortexMState.context, LR));
+    sendRegisterForTResponse(pBuffer, PC, ScatterGather_Get(&mriCortexMState.context, PC));
 }
 
 static void sendRegisterForTResponse(Buffer* pBuffer, uint8_t registerOffset, uint32_t registerValue)
@@ -885,14 +894,27 @@ static void writeBytesToBufferAsHex(Buffer* pBuffer, void* pBytes, size_t byteCo
 
 void Platform_CopyContextToBuffer(Buffer* pBuffer)
 {
-    writeBytesToBufferAsHex(pBuffer, &__mriCortexMState.context, sizeof(__mriCortexMState.context));
+    uint32_t count = ScatterGather_Count(&mriCortexMState.context);
+    uint32_t i;
+
+    for (i = 0 ; i < count ; i++) {
+        uint32_t reg = ScatterGather_Get(&mriCortexMState.context, i);
+        writeBytesToBufferAsHex(pBuffer, &reg, sizeof(reg));
+    }
 }
 
 
 static void readBytesFromBufferAsHex(Buffer* pBuffer, void* pBytes, size_t byteCount);
 void Platform_CopyContextFromBuffer(Buffer* pBuffer)
 {
-    readBytesFromBufferAsHex(pBuffer, &__mriCortexMState.context, sizeof(__mriCortexMState.context));
+    uint32_t count = ScatterGather_Count(&mriCortexMState.context);
+    uint32_t i;
+
+    for (i = 0 ; i < count ; i++) {
+        uint32_t reg;
+        readBytesFromBufferAsHex(pBuffer, &reg, sizeof(reg));
+        ScatterGather_Set(&mriCortexMState.context, i, reg);
+    }
 }
 
 static void readBytesFromBufferAsHex(Buffer* pBuffer, void* pBytes, size_t byteCount)
@@ -1032,4 +1054,3 @@ const char* Platform_GetTargetXml(void)
 {
     return g_targetXml;
 }
-#endif // UNDONE
