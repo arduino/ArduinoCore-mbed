@@ -72,6 +72,9 @@ testContext:
     mov     r10, #10
     mov     r11, #11
     mov     r12, #12
+    // Crash on read from invalid memory.
+    ldr     r0, =0xFFFFFFF0
+    ldr     r0, [r0]
     // Hardcoded breakpoint.
     bkpt    #0
     // Infinite loop.

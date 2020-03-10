@@ -324,12 +324,22 @@ static void setHandlerPriorityLowerThanDebugger(IRQn_Type irq, uint32_t origPrio
 static void switchFaultHandlersToDebugger();
 #endif // UNDONE
 
+// Forward Function Declarations
+static void switchFaultHandlersToDebugger();
+
 
 static void mriDebugMonitorHandler(void)
 {
     g_haltingThreadId = osThreadGetId();
     osThreadFlagsSet(g_mriThreadId, MRI_THREAD_DEBUG_EVENT_FLAG);
 }
+
+static void mriFaultHandler(void)
+{
+    g_haltingThreadId = osThreadGetId();
+    osThreadFlagsSet(g_mriThreadId, MRI_THREAD_DEBUG_EVENT_FLAG);
+}
+
 
 void Platform_Init(Token* pParameterTokens)
 {
@@ -349,8 +359,8 @@ void Platform_Init(Token* pParameterTokens)
     g_pDebugSerial->setSerialPriority(0);
     NVIC_SetPriority(DebugMonitor_IRQn, 1);
 
-    switchFaultHandlersToDebugger();
 #endif // UNDONE
+    switchFaultHandlersToDebugger();
     NVIC_SetVector(DebugMonitor_IRQn, (uint32_t)mriDebugMonitorHandler);
     enableDWTandITM();
     initDWT();
@@ -399,14 +409,14 @@ static void setHandlerPriorityLowerThanDebugger(IRQn_Type irq, uint32_t priority
     }
     NVIC_SetPriority(irq, priority);
 }
+#endif // UNDONE
 
 static void switchFaultHandlersToDebugger(void) {
-    NVIC_SetVector(HardFault_IRQn,        (uint32_t)&mriFaultHandler);
-    NVIC_SetVector(MemoryManagement_IRQn, (uint32_t)&mriFaultHandler);
-    NVIC_SetVector(BusFault_IRQn,         (uint32_t)&mriFaultHandler);
-    NVIC_SetVector(UsageFault_IRQn,       (uint32_t)&mriExceptionHandler);
+    NVIC_SetVector(HardFault_IRQn,        (uint32_t)mriFaultHandler);
+    NVIC_SetVector(MemoryManagement_IRQn, (uint32_t)mriFaultHandler);
+    NVIC_SetVector(BusFault_IRQn,         (uint32_t)mriFaultHandler);
+    NVIC_SetVector(UsageFault_IRQn,       (uint32_t)mriFaultHandler);
 }
-#endif // UNDONE
 
 uint32_t Platform_CommHasReceiveData(void)
 {
