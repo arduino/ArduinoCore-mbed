@@ -174,10 +174,12 @@ static char g_packetBuffer[CORTEXM_PACKET_BUFFER_SIZE];
 // Thread flag used to indicate that a debug event has occured.
 #define MRI_THREAD_DEBUG_EVENT_FLAG (1 << 0)
 
-osThreadId_t g_mriThreadId;
+osThreadId_t            g_mriThreadId;
 
-volatile osThreadId_t g_haltingThreadId;
+volatile osThreadId_t   g_haltingThreadId;
 
+osThreadId_t            g_threads[64];
+uint32_t                g_threadCount;
 
 
 ThreadMRI::ThreadMRI()
@@ -210,75 +212,27 @@ void ThreadMRI::debugException()
     g_mriThreadId = osThreadNew(mriMain, NULL, &g_threadAttr);
 }
 
-static const char* threadStateName(uint8_t threadState) {
-    switch (threadState) {
-        case osRtxThreadInactive:
-            return "osRtxThreadInactive";
-        case osRtxThreadReady:
-            return "osRtxThreadReady";
-        case osRtxThreadRunning:
-            return "osRtxThreadRunning";
-        case osRtxThreadBlocked:
-            return "osRtxThreadBlocked";
-        case osRtxThreadTerminated:
-            return "osRtxThreadTerminated";
-        case osRtxThreadWaitingDelay:
-            return "osRtxThreadWaitingDelay";
-        case osRtxThreadWaitingJoin:
-            return "osRtxThreadWaitingJoin";
-        case osRtxThreadWaitingThreadFlags:
-            return "osRtxThreadWaitingThreadFlags";
-        case osRtxThreadWaitingEventFlags:
-            return "osRtxThreadWaitingEventFlags";
-        case osRtxThreadWaitingMutex:
-            return "osRtxThreadWaitingMutex";
-        case osRtxThreadWaitingSemaphore:
-            return "osRtxThreadWaitingSemaphore";
-        case osRtxThreadWaitingMemoryPool:
-            return "osRtxThreadWaitingMemoryPool";
-        case osRtxThreadWaitingMessageGet:
-            return "osRtxThreadWaitingMessageGet";
-        case osRtxThreadWaitingMessagePut:
-            return "osRtxThreadWaitingMessagePut";
-        default:
-            return "Unknown";
-    }
-}
-
-static osThreadId_t suspendAllApplicationThreads() {
-    osThreadId_t mainThread = 0;
-    osThreadId_t threads[64];
+static void suspendAllApplicationThreads() {
     // UNDONE: Handle the case where threadCount is larger than threads[] array.
-    uint32_t threadCount = osThreadGetCount();
-    threadCount = osThreadEnumerate(threads, sizeof(threads)/sizeof(threads[0]));
-
-    for (uint32_t i = 0 ; i < threadCount ; i++) {
-        osThreadId_t thread = threads[i];
-        osRtxThread_t* pThread = (osRtxThread_t*)thread;
-        const char*  pThreadName = osThreadGetName(thread);
-        osPriority_t threadPriority = osThreadGetPriority(thread);
-
-        // UNDONE: Remove debug code.
-        Serial.print("Thread: 0x");
-            Serial.println((uint32_t)thread, HEX);
-        Serial.print("        Name: ");
-            Serial.println(pThreadName);
-        Serial.print("    Priority: ");
-            Serial.println((int32_t)threadPriority);
-        Serial.print("       State: ");
-            Serial.println(threadStateName(pThread->state));
-        Serial.print("          sp: ");
-            Serial.println(pThread->sp);
+    g_threadCount = osThreadEnumerate(g_threads, sizeof(g_threads)/sizeof(g_threads[0]));
+    for (uint32_t i = 0 ; i < g_threadCount ; i++) {
+        osThreadId_t thread = g_threads[i];
 
         if (thread != g_mriThreadId) {
             osThreadSuspend(thread);
-        }
-        if (strcmp(pThreadName, "main") == 0) {
-            mainThread = thread;
+        } else {
+            g_threads[i] = 0;
         }
     }
+}
 
-    return mainThread;
+static void resumeApplicationThreads() {
+    for (uint32_t i = 0 ; i < g_threadCount ; i++) {
+        osThreadId_t thread = g_threads[i];
+        if (thread != 0) {
+            osThreadResume(thread);
+        }
+    }
 }
 
 static void readThreadContext(osThreadId_t thread) {
@@ -341,7 +295,7 @@ static __NO_RETURN void mriMain(void *pv)
         }
         readThreadContext(g_haltingThreadId);
         mriDebugException();
-        // UNDONE: Need to resume threads.
+        resumeApplicationThreads();
         g_haltingThreadId = 0;
     }
 }
