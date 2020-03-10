@@ -200,7 +200,8 @@ void mriDebugException(void)
         return;
     }
 
-    Platform_DisplayFaultCauseToGdbConsole();
+    if (!IsFirstException())
+        Platform_DisplayFaultCauseToGdbConsole();
     Send_T_StopResponse();
 
     GdbCommandHandlingLoop();
