@@ -72,6 +72,8 @@ testContext:
     mov     r10, #10
     mov     r11, #11
     mov     r12, #12
+    // Hardcoded breakpoint.
+    bkpt    #0
     // Infinite loop.
     b       .
     // Let assembler know that we have hit the end of the function.

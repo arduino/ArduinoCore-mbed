@@ -22,6 +22,8 @@ extern "C"
     #include "core/platforms.h"
     #include "core/semihost.h"
     #include "core/scatter_gather.h"
+    // UNDONE: Remove
+    #include "architectures/armv7-m/debug_cm3.h"
 }
 // UNDONE: Might not need this.
 #include <signal.h>
@@ -169,9 +171,12 @@ static char g_packetBuffer[CORTEXM_PACKET_BUFFER_SIZE];
 // Bit in LR set to 0 when automatic stacking of floating point registers occurs during exception handling.
 #define LR_FLOAT_STACK          (1 << 4)
 
+// Thread flag used to indicate that a debug event has occured.
+#define MRI_THREAD_DEBUG_EVENT_FLAG (1 << 0)
+
 osThreadId_t g_mriThreadId;
 
-
+volatile osThreadId_t g_haltingThreadId;
 
 
 
@@ -323,11 +328,21 @@ static void readThreadContext(osThreadId_t thread) {
 
 static __NO_RETURN void mriMain(void *pv)
 {
-    osThreadId_t mainThread = suspendAllApplicationThreads();
-    readThreadContext(mainThread);
-
     while (1) {
+        // Wait for next debug event to occur. Set priority to highest level before blocking so that it can safely
+        // put all of the other application threads to sleep upon wakeup.
+        osThreadSetPriority(osThreadGetId(), osPriorityRealtime7);
+            osThreadFlagsWait(MRI_THREAD_DEBUG_EVENT_FLAG, osFlagsWaitAny, osWaitForever);
+            suspendAllApplicationThreads();
+        osThreadSetPriority(osThreadGetId(), osPriorityNormal);
+
+        if (g_haltingThreadId == 0) {
+            continue;
+        }
+        readThreadContext(g_haltingThreadId);
         mriDebugException();
+        // UNDONE: Need to resume threads.
+        g_haltingThreadId = 0;
     }
 }
 
@@ -356,6 +371,12 @@ static void switchFaultHandlersToDebugger();
 #endif // UNDONE
 
 
+static void mriDebugMonitorHandler(void)
+{
+    g_haltingThreadId = osThreadGetId();
+    osThreadFlagsSet(g_mriThreadId, MRI_THREAD_DEBUG_EVENT_FLAG);
+}
+
 void Platform_Init(Token* pParameterTokens)
 {
 #ifdef UNDONE
@@ -376,6 +397,12 @@ void Platform_Init(Token* pParameterTokens)
 
     switchFaultHandlersToDebugger();
 #endif // UNDONE
+    NVIC_SetVector(DebugMonitor_IRQn, (uint32_t)mriDebugMonitorHandler);
+    enableDWTandITM();
+    initDWT();
+    initFPB();
+    clearMonitorPending();
+    enableDebugMonitorAtSpecifiedPriority(255);
 }
 
 #ifdef UNDONE
