@@ -53,12 +53,14 @@ int arduino::WiFiUDP::endPacket() {
 // Write a single byte into the packet
 size_t arduino::WiFiUDP::write(uint8_t byte) {
     uint8_t buffer[1] = { byte };
-    return _socket.sendto(_host, _port, buffer, 1);
+    SocketAddress addr(_host, _port);
+    return _socket.sendto(addr, buffer, 1);
 }
 
 // Write size bytes from buffer into the packet
 size_t arduino::WiFiUDP::write(const uint8_t *buffer, size_t size) {
-    return _socket.sendto(_host, _port, buffer, size);
+    SocketAddress addr(_host, _port);
+    return _socket.sendto(addr, buffer, size);
 }
 
 int arduino::WiFiUDP::parsePacket() {

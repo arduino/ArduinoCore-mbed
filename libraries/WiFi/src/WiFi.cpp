@@ -38,6 +38,32 @@ int arduino::WiFiClass::begin(char* ssid, const char *passphrase) {
     return ret == NSAPI_ERROR_OK ? WL_CONNECTED : WL_CONNECT_FAILED;
 }
 
+int arduino::WiFiClass::beginAP(const char* ssid, const char *passphrase, uint8_t channel) {
+
+#if defined(ARDUINO_ENVIE_M7) || defined(ARDUINO_ENVIE_M4)
+    softap = WhdSoftAPInterface::get_default_instance();
+#endif
+
+    if (softap == NULL) {
+        return WL_CONNECT_FAILED;
+    }
+
+    //Set ap ssid, password and channel
+    SocketAddress ip("192.168.3.1");
+    SocketAddress gw("192.168.3.1");
+    SocketAddress netmask("255.255.255.0");
+    ((WhdSoftAPInterface*)softap)->set_network(ip, gw, netmask);
+    nsapi_error_t ret = ((WhdSoftAPInterface*)softap)->start(ssid, passphrase, NSAPI_SECURITY_WPA2, channel, true /* dhcp server */, NULL, true /* cohexistance */);
+
+    return ret == NSAPI_ERROR_OK ? WL_AP_LISTENING : WL_CONNECT_FAILED;
+}
+
+void arduino::WiFiClass::end() {
+    if (softap != NULL) {
+        ((WhdSoftAPInterface*)softap)->stop();
+    }
+}
+
 char* arduino::WiFiClass::SSID() {
     return _ssid;
 }
@@ -136,13 +162,22 @@ uint8_t* arduino::WiFiClass::macAddress(uint8_t* mac) {
 arduino::IPAddress arduino::WiFiClass::localIP() {
     arduino::IPAddress addr;
 
-    const char *ip = wifi_if->get_ip_address();
-    addr.fromString(ip); // @todo: the IP we get from Mbed is correct, but is parsed incorrectly by Arduino
+    SocketAddress ip;
+    if (softap != NULL) {
+        softap->get_ip_address(&ip);
+    } else {
+        wifi_if->get_ip_address(&ip);
+    }
+    addr.fromString(ip.get_ip_address()); // @todo: the IP we get from Mbed is correct, but is parsed incorrectly by Arduino
     return addr;
 }
 
 NetworkInterface *arduino::WiFiClass::getNetwork() {
-    return wifi_if;
+    if (softap != NULL) {
+        return softap;
+    } else {
+        return wifi_if;
+    }
 }
 
 #if defined(ARDUINO_ENVIE_M7) || defined(ARDUINO_ENVIE_M4)

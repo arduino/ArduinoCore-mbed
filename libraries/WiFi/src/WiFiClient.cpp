@@ -35,7 +35,8 @@ int arduino::WiFiClient::connect(const char *host, uint16_t port) {
 	//sock->sigio(mbed::callback(this, &WiFiClient::getStatus));
 	//sock->set_blocking(false);
 	sock->set_timeout(1000);
-	int ret = ((TCPSocket*)sock)->connect(host, port);
+	SocketAddress addr(host, port);
+	int ret = ((TCPSocket*)sock)->connect(addr);
 	if (ret == 0) {
 		return 1;
 	} else {
@@ -55,7 +56,8 @@ int arduino::WiFiClient::connectSSL(const char *host, uint16_t port) {
 		beforeConnect();
 	}
 	sock->set_timeout(1000);
-	int ret = ((TLSSocket*)sock)->connect(host, port);
+	SocketAddress addr(host, port);
+	int ret = ((TLSSocket*)sock)->connect(addr);
 	if (ret == 0) {
 		return 1;
 	} else {

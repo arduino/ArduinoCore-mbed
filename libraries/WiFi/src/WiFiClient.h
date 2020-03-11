@@ -52,6 +52,10 @@ public:
     return sock != NULL;
   }
 
+  void setSocket(Socket* _sock) {
+    sock = _sock;
+  }
+
   IPAddress remoteIP();
   uint16_t remotePort();
 

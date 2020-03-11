@@ -33,6 +33,10 @@ extern "C" {
 
 #include "netsocket/NetworkInterface.h"
 
+#if defined(ARDUINO_ENVIE_M7) || defined(ARDUINO_ENVIE_M4)
+#include "WhdSoftAPInterface.h"
+#endif
+
 namespace arduino {
 
 typedef void* (*voidPrtFuncPtr)(void);
@@ -86,10 +90,7 @@ public:
      */
     int begin(char* ssid, const char *passphrase);
 
-    uint8_t beginAP(const char *ssid);
-    uint8_t beginAP(const char *ssid, uint8_t channel);
-    uint8_t beginAP(const char *ssid, const char* passphrase);
-    uint8_t beginAP(const char *ssid, const char* passphrase, uint8_t channel);
+    int beginAP(const char *ssid, const char* passphrase, uint8_t channel = 6);
 
     /* Change Ip configuration settings disabling the dhcp client
         *
@@ -279,6 +280,9 @@ public:
     NetworkInterface *getNetwork();
 
 private:
+
+    EMACInterface* softap;
+
     bool isVisible(char* ssid);
     char* _ssid;
     WiFiInterface* wifi_if;
