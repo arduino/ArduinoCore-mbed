@@ -22,7 +22,9 @@ public:
 
     void start(void) {
         ticker.attach(mbed::callback(this, &Tone::toggle), 0.5f / float(frequency));
-        start_timeout();
+        if (duration != 0) {
+            start_timeout();
+        }
     }
 
     void toggle() {
