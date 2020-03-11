@@ -313,8 +313,17 @@
 #define MBED_CONF_S2LP_PROVIDE_DEFAULT                                        0                                                                                                // set by library:s2lp
 #define MBED_CONF_SARA4_PPP_BAUDRATE                                          115200                                                                                           // set by library:SARA4_PPP
 #define MBED_CONF_SARA4_PPP_PROVIDE_DEFAULT                                   0                                                                                                // set by library:SARA4_PPP
+#define MBED_CONF_STM32_EMAC_ETH_PHY_ADDRESS                                  0                                                                                                // set by library:stm32-emac
+#define MBED_CONF_STM32_EMAC_ETH_PHY_AUTONEGOTIATION                          ETH_AUTONEGOTIATION_ENABLE                                                                       // set by library:stm32-emac
+#define MBED_CONF_STM32_EMAC_ETH_PHY_DUPLEXMODE                               ETH_MODE_FULLDUPLEX                                                                              // set by library:stm32-emac
+#define MBED_CONF_STM32_EMAC_ETH_PHY_DUPLEX_STATUS                            0x0010                                                                                           // set by library:stm32-emac
+#define MBED_CONF_STM32_EMAC_ETH_PHY_RESET_DELAY                              500                                                                                              // set by library:stm32-emac
+#define MBED_CONF_STM32_EMAC_ETH_PHY_SPEED                                    ETH_SPEED_100M                                                                                   // set by library:stm32-emac
+#define MBED_CONF_STM32_EMAC_ETH_PHY_SPEED_STATUS                             0x0004                                                                                           // set by library:stm32-emac
+#define MBED_CONF_STM32_EMAC_ETH_PHY_STATUS_REGISTER                          31                                                                                               // set by library:stm32-emac
 #define MBED_CONF_STM32_EMAC_ETH_RXBUFNB                                      4                                                                                                // set by library:stm32-emac
 #define MBED_CONF_STM32_EMAC_ETH_TXBUFNB                                      4                                                                                                // set by library:stm32-emac
+#define MBED_CONF_STM32_EMAC_THREAD_STACKSIZE                                 512                                                                                              // set by library:stm32-emac
 #define MBED_CONF_STORAGE_DEFAULT_KV                                          kv                                                                                               // set by library:storage
 #define MBED_CONF_STORAGE_FILESYSTEM_BLOCKDEVICE                              default                                                                                          // set by library:storage_filesystem
 #define MBED_CONF_STORAGE_FILESYSTEM_EXTERNAL_BASE_ADDRESS                    0                                                                                                // set by library:storage_filesystem
