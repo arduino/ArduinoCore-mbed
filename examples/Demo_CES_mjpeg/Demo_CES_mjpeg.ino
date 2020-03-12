@@ -1,6 +1,4 @@
-#include "Envie_video_coreboot.h"
-//#include "stm32h747i_eval_lcd.h"
-//#include "defs.h"
+#include "Portenta_Video.h"
 #include "video.h"
 #include "QSPIFBlockDevice.h"
 #include "config.h"
@@ -110,11 +108,6 @@ void setup() {
 
   LCD_X_Size = stm32_getXSize();
   LCD_Y_Size = stm32_getYSize();
-
-  while (1) {
-  stm32_LCD_DrawImage((void*)texture_raw, (void *)getNextFrameBuffer(), 300, 300, DMA2D_INPUT_RGB565);
-  stm32_LCD_DrawImage((void*)texture_raw, (void *)getNextFrameBuffer(), 300, 300, DMA2D_INPUT_RGB565);
-  }
 
   JPEG_Handle.Instance = JPEG;
   HAL_JPEG_Init(&JPEG_Handle);
