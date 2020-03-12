@@ -93,7 +93,7 @@ size_t arduino::MbedI2C::write(uint8_t data) {
 	return 1;
 }
 
-size_t arduino::MbedI2C::write(uint8_t* data, int len) {
+size_t arduino::MbedI2C::write(const uint8_t* data, int len) {
 	if (usedTxBuffer + len > 256) len = 256 - usedTxBuffer;
 	memcpy(txBuffer + usedTxBuffer, data, len);
 	usedTxBuffer += len;
