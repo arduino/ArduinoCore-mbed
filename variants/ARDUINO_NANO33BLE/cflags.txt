@@ -1,6 +1,8 @@
+-c
 -std=gnu11
 -DAPPLICATION_ADDR=0x10000
 -DAPPLICATION_SIZE=0xf0000
+-DMBED_MINIMAL_PRINTF
 -DMBED_RAM_SIZE=0x40000
 -DMBED_RAM_START=0x20000000
 -DMBED_ROM_SIZE=0x100000
@@ -11,7 +13,6 @@
 -Wextra
 -Wno-missing-field-initializers
 -Wno-unused-parameter
--c
 -fdata-sections
 -ffunction-sections
 -fmessage-length=0

@@ -79,6 +79,7 @@
 #define MBED_CONF_CORDIO_LL_TX_BUFFERS                                        4                                                                                                // set by library:cordio-ll
 #define MBED_CONF_CORDIO_MAX_PREPARED_WRITES                                  4                                                                                                // set by library:cordio
 #define MBED_CONF_CORDIO_RX_ACL_BUFFER_SIZE                                   70                                                                                               // set by library:cordio
+#define MBED_CONF_CRYPTOCELL310_PRESENT                                       1                                                                                                // set by library:cryptocell310
 #define MBED_CONF_DRIVERS_QSPI_CSN                                            QSPI_FLASH1_CSN                                                                                  // set by library:drivers
 #define MBED_CONF_DRIVERS_QSPI_IO0                                            QSPI_FLASH1_IO0                                                                                  // set by library:drivers
 #define MBED_CONF_DRIVERS_QSPI_IO1                                            QSPI_FLASH1_IO1                                                                                  // set by library:drivers
@@ -238,15 +239,15 @@
 #define MBED_CONF_MBED_MESH_API_USE_MALLOC_FOR_HEAP                           0                                                                                                // set by library:mbed-mesh-api
 #define MBED_CONF_MBED_MESH_API_WISUN_BC_CHANNEL_FUNCTION                     255                                                                                              // set by library:mbed-mesh-api
 #define MBED_CONF_MBED_MESH_API_WISUN_BC_DWELL_INTERVAL                       0                                                                                                // set by library:mbed-mesh-api
-#define MBED_CONF_MBED_MESH_API_WISUN_BC_FIXED_CHANNEL                        0xffff                                                                                           // set by library:mbed-mesh-api
+#define MBED_CONF_MBED_MESH_API_WISUN_BC_FIXED_CHANNEL                        65535                                                                                            // set by library:mbed-mesh-api
 #define MBED_CONF_MBED_MESH_API_WISUN_BC_INTERVAL                             0                                                                                                // set by library:mbed-mesh-api
 #define MBED_CONF_MBED_MESH_API_WISUN_NETWORK_NAME                            "Wi-SUN Network"                                                                                 // set by library:mbed-mesh-api
 #define MBED_CONF_MBED_MESH_API_WISUN_OPERATING_CLASS                         255                                                                                              // set by library:mbed-mesh-api
 #define MBED_CONF_MBED_MESH_API_WISUN_OPERATING_MODE                          255                                                                                              // set by library:mbed-mesh-api
 #define MBED_CONF_MBED_MESH_API_WISUN_REGULATORY_DOMAIN                       3                                                                                                // set by library:mbed-mesh-api
 #define MBED_CONF_MBED_MESH_API_WISUN_UC_CHANNEL_FUNCTION                     255                                                                                              // set by library:mbed-mesh-api
-#define MBED_CONF_MBED_MESH_API_WISUN_UC_DWELL_INTERVAL                       0                                                                                                // set by library:mbed-mesh-api
-#define MBED_CONF_MBED_MESH_API_WISUN_UC_FIXED_CHANNEL                        0xffff                                                                                           // set by library:mbed-mesh-api
+#define MBED_CONF_MBED_MESH_API_WISUN_UC_DWELL_INTERVAL                       255                                                                                              // set by library:mbed-mesh-api
+#define MBED_CONF_MBED_MESH_API_WISUN_UC_FIXED_CHANNEL                        65535                                                                                            // set by library:mbed-mesh-api
 #define MBED_CONF_MCR20A_PROVIDE_DEFAULT                                      0                                                                                                // set by library:mcr20a
 #define MBED_CONF_NANOSTACK_CONFIGURATION                                     nanostack_full                                                                                   // set by library:nanostack
 #define MBED_CONF_NANOSTACK_HAL_CRITICAL_SECTION_USABLE_FROM_INTERRUPT        0                                                                                                // set by library:nanostack-hal
