@@ -33,7 +33,7 @@ extern "C" {
 
 #include "netsocket/NetworkInterface.h"
 
-#if defined(ARDUINO_ENVIE_M7) || defined(ARDUINO_ENVIE_M4)
+#if defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_PORTENTA_H7_M4)
 #include "WhdSoftAPInterface.h"
 #endif
 

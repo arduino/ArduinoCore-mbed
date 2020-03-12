@@ -40,7 +40,7 @@ int arduino::WiFiClass::begin(char* ssid, const char *passphrase) {
 
 int arduino::WiFiClass::beginAP(const char* ssid, const char *passphrase, uint8_t channel) {
 
-#if defined(ARDUINO_ENVIE_M7) || defined(ARDUINO_ENVIE_M4)
+#if defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_PORTENTA_H7_M4)
     softap = WhdSoftAPInterface::get_default_instance();
 #endif
 
@@ -180,7 +180,7 @@ NetworkInterface *arduino::WiFiClass::getNetwork() {
     }
 }
 
-#if defined(ARDUINO_ENVIE_M7) || defined(ARDUINO_ENVIE_M4)
+#if defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_PORTENTA_H7_M4)
 arduino::WiFiClass WiFi(WiFiInterface::get_default_instance());
 #endif
 
