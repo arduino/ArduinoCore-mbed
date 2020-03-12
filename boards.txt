@@ -1,6 +1,6 @@
 ##############################################################
 
-envie_m7.name=Arduino Portenta H7
+envie_m7.name=Arduino Portenta H7 (M7 core)
 envie_m7.build.core=arduino
 envie_m7.build.crossprefix=arm-none-eabi-
 envie_m7.build.compiler_path={runtime.tools.arm-none-eabi-gcc.path}/bin/
