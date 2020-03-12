@@ -845,6 +845,7 @@ static void anx7625_parse_edid(const struct edid *edid,
 	dt->vfront_porch = edid->mode.vso - edid->mode.vborder;
 	dt->vback_porch = (edid->mode.vbl - edid->mode.vso -
 			   edid->mode.vspw - edid->mode.vborder);
+	dt->voffset = 0;
 
 	ANXINFO("pixelclock(%d).\n"
 		" hactive(%d), hsync(%d), hfp(%d), hbp(%d)\n"
@@ -863,6 +864,7 @@ int anx7625_dp_start(uint8_t bus, const struct edid *edid, enum edid_modes mode)
 
 	anx7625_parse_edid(edid, &dt);
 
+/*
 	dt.pixelclock = envie_known_modes[mode].pixel_clock;
 
 	dt.hactive = envie_known_modes[mode].hactive;
@@ -875,6 +877,7 @@ int anx7625_dp_start(uint8_t bus, const struct edid *edid, enum edid_modes mode)
 	dt.vback_porch = envie_known_modes[mode].vback_porch;
 	dt.vfront_porch = envie_known_modes[mode].vfront_porch;
 	dt.voffset = envie_known_modes[mode].voffset; //1;
+*/
 
 	stm32_dsi_config(bus, (struct edid *)edid, &dt);
 
@@ -983,6 +986,9 @@ int stm32_dsi_config(uint8_t bus, struct edid *edid, struct display_timing *dt) 
 	dt->pixelclock = 336000 / LTDC_PLL3R; 	// real pixel clock
 
 	static const uint32_t LANE_BYTE_CLOCK =	62437;
+
+
+	// TODO: switch USB to use HSI48
 
 /*
 	static const uint32_t LTDC_PLL3M = 4;

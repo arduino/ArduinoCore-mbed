@@ -491,7 +491,9 @@ detailed_block(struct edid *result_edid, unsigned char *x, int in_extension,
 	if (c->seen_non_detailed_descriptor && !in_extension)
 		c->has_valid_descriptor_ordering = 0;
 
+	bool supported = true;
 	if ((x[0] + (x[1] << 8)) * 10 > 62500) {
+		supported = false;
 		printk(BIOS_SPEW,
 			"Not supported on stm32\n");
 	}
@@ -594,7 +596,7 @@ detailed_block(struct edid *result_edid, unsigned char *x, int in_extension,
 	       extra_info.syncmethod, x[17] & 0x80 ? " interlaced" : "",
 	       extra_info.stereo);
 
-	if (!c->did_detailed_timing) {
+	if (!c->did_detailed_timing && supported) {
 		printk(BIOS_SPEW, "Did detailed timing\n");
 		c->did_detailed_timing = 1;
 		*result_edid = *out;
