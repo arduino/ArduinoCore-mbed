@@ -1220,6 +1220,12 @@ void stm32_LCD_Clear(uint32_t Color)
 	getNextFrameBuffer();
 }
 
+
+void stm32_LCD_FillArea(void *pDst, uint32_t xSize, uint32_t ySize, uint32_t ColorMode)
+{
+	LL_FillBuffer(pend_buffer%2, pDst, xSize, ySize, lcd_x_size - xSize, ColorMode);
+}
+
 void stm32_LCD_DrawImage(void *pSrc, void *pDst, uint32_t xSize, uint32_t ySize, uint32_t ColorMode)
 {
 	/* Configure the DMA2D Mode, Color Mode and output offset */
