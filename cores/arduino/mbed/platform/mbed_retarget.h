@@ -502,7 +502,7 @@ typedef struct Dir DIR;
 #define     S_IWOTH 0000002 ///< write permission, other
 #define     S_IXOTH 0000001 ///< execute/search permission, other
 
-#ifndef HAVE_SYS_STAT_H 
+#ifndef HAVE_SYS_STAT_H
 
 /* Refer to sys/stat standard
  * Note: Not all fields may be supported by the underlying filesystem
