@@ -151,9 +151,11 @@ generate_includes () {
 
 	echo -n " copying to destination... "
 
-	cut -d'/' -f3- < "$ARDUINOVARIANT"/includes.txt | grep '^targets/TARGET_' \
-	| sed -e 's#\(.*\)#+ \1#' -e '$a+ targets/' -e '$a+ *.h' -e '$a- *' \
-	| rsync -avvz --include-from=- mbed-os/ "$ARDUINOCOREMBED"/
+	cd mbed-os
+	cut -d'/' -f3- < "$ARDUINOVARIANT"/includes.txt | grep 'targets' \
+	| xargs -I{} find {} -maxdepth 1 -name '*.h' \
+	| xargs -I{} cp --parent {} "$ARDUINOCOREMBED"/
+	cd -
 
 	echo " done."
 }
