@@ -16,6 +16,8 @@
 // the USB serial connection.
 #include <Arduino.h>
 #include "ThreadMRI.h"
+#include <cmsis_os2.h>
+#include <rtx_os.h>
 extern "C"
 {
     #include "core/mri.h"
@@ -25,12 +27,6 @@ extern "C"
     #include "architectures/armv7-m/armv7-m.h"
     #include "architectures/armv7-m/debug_cm3.h"
 }
-// UNDONE: Might not need this.
-#include <signal.h>
-#include <string.h>
-
-#include <cmsis_os2.h>
-#include <rtx_os.h>
 
 // UNDONE: Switch back to the USB/CDC based serial port.
 #undef Serial
@@ -63,15 +59,22 @@ static const char g_memoryMapXml[] = "<?xml version=\"1.0\"?>"
 // Bit in LR set to 0 when automatic stacking of floating point registers occurs during exception handling.
 #define LR_FLOAT_STACK          (1 << 4)
 
-// Thread flag used to indicate that a debug event has occured.
+// Thread syncronization flag used to indicate that a debug event has occured.
 #define MRI_THREAD_DEBUG_EVENT_FLAG (1 << 0)
 
 osThreadId_t            g_mriThreadId;
 
 volatile osThreadId_t   g_haltingThreadId;
 
+// UNDONE: Get rid of.
+volatile osThreadId_t   g_test;
+
 osThreadId_t            g_threads[64];
 uint32_t                g_threadCount;
+
+volatile osThreadId_t   mriThreadSingleStepThreadId;
+
+volatile uint32_t       mriThreadEnableDWTandFPB;
 
 
 ThreadMRI::ThreadMRI()
@@ -79,7 +82,7 @@ ThreadMRI::ThreadMRI()
     mriInit("");
 }
 
-// UNDONE: This is just for initial bringup.
+// Main entry point into MRI debugger core.
 extern "C" void mriDebugException(void);
 
 // UNDONE: Could push into debugException() API.
@@ -109,10 +112,12 @@ static void suspendAllApplicationThreads() {
     g_threadCount = osThreadEnumerate(g_threads, sizeof(g_threads)/sizeof(g_threads[0]));
     for (uint32_t i = 0 ; i < g_threadCount ; i++) {
         osThreadId_t thread = g_threads[i];
+        const char*  pThreadName = osThreadGetName(thread);
 
-        if (thread != g_mriThreadId) {
+        if (thread != g_mriThreadId && strcmp(pThreadName, "rtx_idle") != 0) {
             osThreadSuspend(thread);
-        } else {
+        }
+        else {
             g_threads[i] = 0;
         }
     }
@@ -176,20 +181,32 @@ static void readThreadContext(osThreadId_t thread) {
 
 static __NO_RETURN void mriMain(void *pv)
 {
-    while (1) {
-        // Wait for next debug event to occur. Set priority to highest level before blocking so that it can safely
-        // put all of the other application threads to sleep upon wakeup.
-        osThreadSetPriority(osThreadGetId(), osPriorityRealtime7);
-            osThreadFlagsWait(MRI_THREAD_DEBUG_EVENT_FLAG, osFlagsWaitAny, osWaitForever);
-            suspendAllApplicationThreads();
-        osThreadSetPriority(osThreadGetId(), osPriorityNormal);
+    // Run the code which suspends, resumes, etc the other threads at highest priority so that it doesn't context
+    // switch to one of the other threads. Switch to normal priority when running mriDebugException() though.
+    osThreadSetPriority(osThreadGetId(), osPriorityRealtime7);
 
-        if (g_haltingThreadId == 0) {
-            continue;
+    while (1) {
+        int waitResult = osThreadFlagsWait(MRI_THREAD_DEBUG_EVENT_FLAG, osFlagsWaitAny, osWaitForever);
+        while (waitResult < 0) {
+            // Something bad has happened if we hang here.
+        }
+        suspendAllApplicationThreads();
+
+        while (g_haltingThreadId == 0) {
+            // Something bad has happened if we hang here.
         }
         readThreadContext(g_haltingThreadId);
+
+        osThreadSetPriority(osThreadGetId(), osPriorityNormal);
         mriDebugException();
-        resumeApplicationThreads();
+        osThreadSetPriority(osThreadGetId(), osPriorityRealtime7);
+
+        if (Platform_IsSingleStepping()) {
+            mriThreadSingleStepThreadId = g_haltingThreadId;
+            osThreadResume(mriThreadSingleStepThreadId);
+        } else {
+            resumeApplicationThreads();
+        }
         g_haltingThreadId = 0;
     }
 }
@@ -200,12 +217,91 @@ static __NO_RETURN void mriMain(void *pv)
 // Global Platform_* functions needed by MRI to initialize and communicate with MRI.
 // These functions will perform most of their work through the DebugSerial singleton.
 // ---------------------------------------------------------------------------------------------------------------------
-// Forward Function Declarations
-static void switchFaultHandlersToDebugger();
+// Assembly Language fault handling stubs. They do some preprocessing and then call the C handler below if appropriate.
+extern "C" void mriDebugMonitorHandlerStub(void);
+extern "C" void mriFaultHandlerStub(void);
+// Assembly Language stubs for RTX context switching routines. They check to see if DebugMon should be pended before
+// calling the actual RTX handlers.
+extern "C" void mriSVCHandlerStub(void);
+extern "C" void mriPendSVHandlerStub(void);
+extern "C" void mriSysTickHandlerStub(void);
 
-static void mriDebugMonitorHandler(void)
+
+
+// Forward Function Declarations
+static bool hasEncounteredDebugEvent();
+static void recordAndClearFaultStatusBits();
+static void wakeMriMainToDebugCurrentThread();
+static void stopSingleStepping();
+static void switchFaultHandlersToDebugger();
+static void switchRtxHandlersToDebugStubs();
+
+
+extern "C" void mriDebugMonitorHandler(uint32_t excReturn)
 {
-    // Record information about cause of exception/debug event.
+    excReturn &= 0xF;
+    bool isThreadMode = (excReturn == 0xD || excReturn == 0x9);
+    while (!isThreadMode) {
+        // DebugMon is running at such low priority that we should be getting ready to return to thread mode.
+    }
+
+    if (!hasEncounteredDebugEvent()) {
+        if (mriThreadEnableDWTandFPB) {
+            enableDWTandITM();
+            enableFPB();
+            mriThreadEnableDWTandFPB = 0;
+        }
+        if (mriThreadSingleStepThreadId) {
+            // Code is written to handle case where single stepping gets enabled because current thread was the one
+            // to be single stepped but then a higher priority interrupt comes in and makes another thread the
+            // current thread so single stepping should be disabled again.
+            if (mriThreadSingleStepThreadId == osThreadGetId()) {
+                enableSingleStep();
+            } else {
+                disableSingleStep();
+            }
+        }
+
+        return;
+    }
+
+    // Get here when a debug event of interest has occurred in a thread.
+    recordAndClearFaultStatusBits();
+    stopSingleStepping();
+    wakeMriMainToDebugCurrentThread();
+}
+
+// This function is called if a fault (hard, mem, bus, usage) has occurred while running code in thread mode.
+// It is also called when a debug event has forced a hard fault while running code in handler mode.
+extern "C" void mriFaultHandler(uint32_t excReturn)
+{
+    excReturn &= 0xF;
+    bool isThreadMode = (excReturn == 0xD || excReturn == 0x9);
+    if (isThreadMode) {
+        recordAndClearFaultStatusBits();
+        stopSingleStepping();
+        wakeMriMainToDebugCurrentThread();
+        return;
+    }
+
+    // The asm stub calling this function has already verified that a debug event during handler mode caused
+    // this fault.
+    mriThreadEnableDWTandFPB = 1;
+    SCB->DFSR = SCB->DFSR;
+    SCB->HFSR = SCB_HFSR_DEBUGEVT_Msk;
+    disableDWTandITM();
+    disableFPB();
+    setMonitorPending();
+}
+
+static bool hasEncounteredDebugEvent()
+{
+    return SCB->DFSR != 0;
+
+}
+
+static void recordAndClearFaultStatusBits()
+{
     mriCortexMState.exceptionNumber = getCurrentlyExecutingExceptionNumber();
     mriCortexMState.dfsr = SCB->DFSR;
     mriCortexMState.hfsr = SCB->HFSR;
@@ -213,21 +309,25 @@ static void mriDebugMonitorHandler(void)
     mriCortexMState.mmfar = SCB->MMFAR;
     mriCortexMState.bfar = SCB->BFAR;
 
-    // Clear the debug event bits as they are already recorded.
-    if (mriCortexMState.exceptionNumber == 12) {
-        SCB->DFSR = mriCortexMState.dfsr;
-    }
+    // Clear fault status bits by writing 1s to bits that are already set.
+    SCB->DFSR = mriCortexMState.dfsr;
+    SCB->HFSR = mriCortexMState.hfsr;
+    SCB->CFSR = mriCortexMState.cfsr;
+}
 
-    g_haltingThreadId = osThreadGetId();
+static void wakeMriMainToDebugCurrentThread()
+{
+    disableSingleStep();
+    g_test = osThreadGetId();
+    g_haltingThreadId = g_test; // UNDONE: osThreadGetId();
     osThreadFlagsSet(g_mriThreadId, MRI_THREAD_DEBUG_EVENT_FLAG);
 }
 
-static void mriFaultHandler(void)
+static void stopSingleStepping()
 {
-    // UNDONE: Differentiate.
-    mriDebugMonitorHandler();
+    disableSingleStep();
+    mriThreadSingleStepThreadId = NULL;
 }
-
 
 void Platform_Init(Token* pParameterTokens)
 {
@@ -236,15 +336,24 @@ void Platform_Init(Token* pParameterTokens)
     __catch
         __rethrow;
 
+    mriThreadEnableDWTandFPB = 0;
+    mriThreadSingleStepThreadId = NULL;
     switchFaultHandlersToDebugger();
-    NVIC_SetVector(DebugMonitor_IRQn, (uint32_t)mriDebugMonitorHandler);
+    switchRtxHandlersToDebugStubs();
 }
 
 static void switchFaultHandlersToDebugger(void) {
-    NVIC_SetVector(HardFault_IRQn,        (uint32_t)mriFaultHandler);
-    NVIC_SetVector(MemoryManagement_IRQn, (uint32_t)mriFaultHandler);
-    NVIC_SetVector(BusFault_IRQn,         (uint32_t)mriFaultHandler);
-    NVIC_SetVector(UsageFault_IRQn,       (uint32_t)mriFaultHandler);
+    NVIC_SetVector(HardFault_IRQn,        (uint32_t)mriFaultHandlerStub);
+    NVIC_SetVector(MemoryManagement_IRQn, (uint32_t)mriFaultHandlerStub);
+    NVIC_SetVector(BusFault_IRQn,         (uint32_t)mriFaultHandlerStub);
+    NVIC_SetVector(UsageFault_IRQn,       (uint32_t)mriFaultHandlerStub);
+    NVIC_SetVector(DebugMonitor_IRQn,     (uint32_t)mriDebugMonitorHandlerStub);
+}
+
+static void switchRtxHandlersToDebugStubs(void) {
+    NVIC_SetVector(SVCall_IRQn,        (uint32_t)mriSVCHandlerStub);
+    NVIC_SetVector(PendSV_IRQn, (uint32_t)mriPendSVHandlerStub);
+    NVIC_SetVector(SysTick_IRQn,         (uint32_t)mriSysTickHandlerStub);
 }
 
 

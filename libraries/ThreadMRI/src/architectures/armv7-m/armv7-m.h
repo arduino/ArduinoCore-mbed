@@ -25,10 +25,13 @@
 #define CORTEXM_FLAGS_RESTORE_BASEPRI       (1 << 3)
 #define CORTEXM_FLAGS_SVC_STEP              (1 << 4)
 
-// UNDONE: Stack size can be 0 for ThreadMRI.
 /* Constants related to special memory area used by the debugger for its stack so that it doesn't interfere with
    the task's stack contents. */
-#define CORTEXM_DEBUGGER_STACK_SIZE            39
+#if THREAD_MRI
+    #define CORTEXM_DEBUGGER_STACK_SIZE            0
+#else
+    #define CORTEXM_DEBUGGER_STACK_SIZE            39
+#endif
 #define CORTEXM_DEBUGGER_STACK_SIZE_IN_BYTES   (CORTEXM_DEBUGGER_STACK_SIZE * 8)
 #define CORTEXM_DEBUGGER_STACK_FILL            0xDEADBEEF
 
@@ -37,9 +40,6 @@
 #define CORTEXM_STATE_DEBUGGER_STACK_OFFSET 0
 #define CORTEXM_STATE_FLAGS_OFFSET          (CORTEXM_STATE_DEBUGGER_STACK_OFFSET + CORTEXM_DEBUGGER_STACK_SIZE_IN_BYTES)
 #define CORTEXM_STATE_TASK_SP_OFFSET        (CORTEXM_STATE_FLAGS_OFFSET + 4)
-// UNDONE: These were moved.
-//#define CORTEXM_STATE_CONTEXT_OFFSET        (CORTEXM_STATE_TASK_SP_OFFSET + 4)
-//#define CORTEXM_STATE_SAVED_MSP_OFFSET      (CORTEXM_STATE_CONTEXT_OFFSET + 17 * 4)
 
 // In some other build systems, MRI_DEVICE_HAS_FPU won't be passed in on compiler's command line so use the
 // target Cortex-M type to determine if it has a FPU or not.
@@ -73,75 +73,6 @@
 #include <core/token.h>
 #include <core/scatter_gather.h>
 
-// UNDONE: Need to get ASM code working with new scatter gather context format.
-#ifdef UNDONE
-/* NOTE: The MriExceptionHandler function definition in mriasm.S is dependent on the layout of this structure.  It
-         is also dictated by the version of gdb which supports the ARM processors.  It should only be changed if the
-         gdb ARM support code is modified and then the context saving and restoring code will need to be modified to
-         use the correct offsets as well.
-*/
-typedef struct
-{
-    uint32_t    R0;
-    uint32_t    R1;
-    uint32_t    R2;
-    uint32_t    R3;
-    uint32_t    R4;
-    uint32_t    R5;
-    uint32_t    R6;
-    uint32_t    R7;
-    uint32_t    R8;
-    uint32_t    R9;
-    uint32_t    R10;
-    uint32_t    R11;
-    uint32_t    R12;
-    uint32_t    SP;
-    uint32_t    LR;
-    uint32_t    PC;
-    uint32_t    CPSR;
-    uint32_t    MSP;
-    uint32_t    PSP;
-    uint32_t    PRIMASK;
-    uint32_t    BASEPRI;
-    uint32_t    FAULTMASK;
-    uint32_t    CONTROL;
-#if MRI_DEVICE_HAS_FPU
-    uint32_t    S0;
-    uint32_t    S1;
-    uint32_t    S2;
-    uint32_t    S3;
-    uint32_t    S4;
-    uint32_t    S5;
-    uint32_t    S6;
-    uint32_t    S7;
-    uint32_t    S8;
-    uint32_t    S9;
-    uint32_t    S10;
-    uint32_t    S11;
-    uint32_t    S12;
-    uint32_t    S13;
-    uint32_t    S14;
-    uint32_t    S15;
-    uint32_t    S16;
-    uint32_t    S17;
-    uint32_t    S18;
-    uint32_t    S19;
-    uint32_t    S20;
-    uint32_t    S21;
-    uint32_t    S22;
-    uint32_t    S23;
-    uint32_t    S24;
-    uint32_t    S25;
-    uint32_t    S26;
-    uint32_t    S27;
-    uint32_t    S28;
-    uint32_t    S29;
-    uint32_t    S30;
-    uint32_t    S31;
-    uint32_t    FPSCR;
-#endif
-} Context;
-#endif // UNDONE
 
 // UNDONE: In ThreadMRI, the context entry count would be dependent on the RTOS.
 // UNDONE: Might make more sense to pass the scatter gather context into mriDebugException.

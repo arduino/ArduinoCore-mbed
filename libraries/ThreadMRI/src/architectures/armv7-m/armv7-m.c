@@ -201,9 +201,11 @@ static void     setRestoreBasePriorityFlag(void);
 static uint32_t calculateBasePriorityForThisCPU(uint32_t basePriority);
 void Platform_EnableSingleStep(void)
 {
-    // UNDONE: What to do here?
     if (MRI_THREAD_MRI)
+    {
+        setSingleSteppingFlag();
         return;
+    }
 
     if (!doesPCPointToSVCInstruction())
     {

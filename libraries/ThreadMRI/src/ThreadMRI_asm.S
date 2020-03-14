@@ -1,0 +1,152 @@
+/* Copyright 2020 Adam Green (https://github.com/adamgreen/)
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
+/* Implementation of Cortex-M architecture assembly language routines to be used by ThreadMRI debug monitor. */
+    .text
+    .code 16
+    .syntax unified
+
+
+    /* Lower nibble of EXC_RETURN in LR will have this value if interrupted was running in thread mode. */
+    .equ EXC_RETURN_THREADMODE_PROCESSSTACK, 0xD
+    .equ EXC_RETURN_THREADMODE_MAINSTACK, 0x9
+
+    /* Hard Fault Status Register */
+    .equ HFSR, 0xE000ED2C
+    .equ HFSR_DEBUG_EVENT_BIT,  (1 << 31)
+
+    /* Flag set in mriThreadDebugMonFlags to let DebugMon handler know it was pended for a reason. */
+    .equ DEBUGMON_FLAG_PENDED,  (1 << 0)
+
+    /* System register and bits for pending DebugMon interrupt. */
+    .equ DEMCR, 0xE000EDFC
+    .equ DEMCR_MON_PEND_BIT, (1 << 17)
+
+    .global mriDebugMonitorHandlerStub
+    .type mriDebugMonitorHandlerStub, function
+    .thumb_func
+    /* extern "C" void mriDebugMonitorHandlerStub(void);
+       This stub is called whenever a DebugMon interrupt fires. It passes the EXC_RETURN value from LR into the real
+       mriDebugMonitorHandler() so that it can be queried to determine if thread or handler mode code caused the
+       interrupt.
+    */
+mriDebugMonitorHandlerStub:
+    mov     r0, lr
+    b.w     mriDebugMonitorHandler
+    .pool
+    .size   mriDebugMonitorHandlerStub, .-mriDebugMonitorHandlerStub
+
+
+    // UNDONE: Have a separate stub for each fault handler (hard, memmanage, bus, usage)
+    .global mriFaultHandlerStub
+    .type mriFaultHandlerStub, function
+    .thumb_func
+    /* extern "C" void mriFaultHandlerStub(void);
+       This stub is called whenever a fault fires. It checks the EXC_RETURN value to determine if thread or handler
+       mode caused fault:
+        Thread: Pass control to mriFaultHandler() so that it can be debugged.
+        Handler: If caused by debug event, pass control to mriFaultHandler() so that break/watchpoints can be disabled.
+                 Otherwise pass control to the standard mbed-os HardFault_Handler so that crash can be dumped.
+    */
+mriFaultHandlerStub:
+    mov     r0, lr
+    /* Jump to mriFaultHandler if interrupted code was running in thread mode. */
+    and     r1, r0, #0xF
+    cmp     r1, #EXC_RETURN_THREADMODE_PROCESSSTACK
+    beq.w   mriFaultHandler
+    cmp     r1, #EXC_RETURN_THREADMODE_MAINSTACK
+    beq.w   mriFaultHandler
+    /* Get here if interrupted code was running in handler mode. */
+    /* Check HardFaultStatusRegister to see if this is a debug event. */
+    ldr     r1, =HFSR
+    ldr     r1, [r1]
+    tst     r1, #HFSR_DEBUG_EVENT_BIT
+    /* If not a debug event then fall through to default hard fault handler as something bad has happened. */
+    beq.w   HardFault_Handler
+    /* If forced into hard fault due to debug event then breakpoint/watchpoint occurred and needs to be ignored. */
+    b.w     mriFaultHandler
+    .pool
+    .size   mriFaultHandlerStub, .-mriFaultHandlerStub
+
+
+    .global mriSVCHandlerStub
+    .type mriSVCHandlerStub, function
+    .thumb_func
+    /* extern "C" void mriSVCHandlerStub(void);
+       This stub pends a DebugMon interrupt whenever a SVCall interrupt occurs that could perform a context switch so
+       that it has a chance to enable single stepping if switching to the thread to be single stepped.
+    */
+mriSVCHandlerStub:
+    /* Need to queue DebugMon on potential context switch when single stepping is enabled. */
+    ldr     r0, =mriThreadSingleStepThreadId
+    ldr     r1, [r0]
+    cbz     r1, 1$
+    /* Need to queue up a DebugMon interrupt. */
+    ldr     r0, =DEMCR
+    ldr     r1, [r0]
+    orr     r1, #DEMCR_MON_PEND_BIT
+    str     r1, [r0]
+    /* Run actual handler. */
+    // UNDONE: Use function pointer instead as it could have been changed dynamically.
+1$: b.w     SVC_Handler
+    .pool
+    .size   mriSVCHandlerStub, .-mriSVCHandlerStub
+
+
+    .global mriPendSVHandlerStub
+    .type mriPendSVHandlerStub, function
+    .thumb_func
+    /* extern "C" void mriPendSVHandlerStub(void);
+       This stub pends a DebugMon interrupt whenever a PendSV interrupt occurs that could perform a context switch so
+       that it has a chance to enable single stepping if switching to the thread to be single stepped.
+    */
+mriPendSVHandlerStub:
+    /* Need to queue DebugMon on potential context switch when single stepping is enabled. */
+    ldr     r0, =mriThreadSingleStepThreadId
+    ldr     r1, [r0]
+    cbz     r1, 1$
+    /* Need to queue up a DebugMon interrupt. */
+    ldr     r0, =DEMCR
+    ldr     r1, [r0]
+    orr     r1, #DEMCR_MON_PEND_BIT
+    str     r1, [r0]
+    /* Run actual handler. */
+1$: b.w     PendSV_Handler
+    .pool
+    .size   mriPendSVHandlerStub, .-mriPendSVHandlerStub
+
+
+    .global mriSysTickHandlerStub
+    .type mriSysTickHandlerStub, function
+    .thumb_func
+    /* extern "C" void mriSysTickHandlerStub(void);
+       This stub pends a DebugMon interrupt whenever a SysTick interrupt occurs that could perform a context switch so
+       that it has a chance to enable single stepping if switching to the thread to be single stepped.
+    */
+mriSysTickHandlerStub:
+    /* Need to queue DebugMon on potential context switch when single stepping is enabled. */
+    ldr     r0, =mriThreadSingleStepThreadId
+    ldr     r1, [r0]
+    cbz     r1, 1$
+    /* Need to queue up a DebugMon interrupt. */
+    ldr     r0, =DEMCR
+    ldr     r1, [r0]
+    orr     r1, #DEMCR_MON_PEND_BIT
+    str     r1, [r0]
+    /* Run actual handler. */
+1$: b.w     SysTick_Handler
+    .pool
+    .size   mriSysTickHandlerStub, .-mriSysTickHandlerStub
+
+    .end
