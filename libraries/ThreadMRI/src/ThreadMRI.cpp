@@ -21,6 +21,7 @@
 extern "C"
 {
     #include "core/mri.h"
+    #include "core/core.h"
     #include "core/platforms.h"
     #include "core/semihost.h"
     #include "core/scatter_gather.h"
@@ -32,26 +33,15 @@ extern "C"
 #undef Serial
 #define Serial Serial1
 
-static const char g_memoryMapXml[] = "<?xml version=\"1.0\"?>"
-                                     "<!DOCTYPE memory-map PUBLIC \"+//IDN gnu.org//DTD GDB Memory Map V1.0//EN\" \"http://sourceware.org/gdb/gdb-memory-map.dtd\">"
-                                     "<memory-map>"
-                                     "<memory type=\"ram\" start=\"0x00000000\" length=\"0x10000\"> </memory>"
-                                     "<memory type=\"flash\" start=\"0x08000000\" length=\"0x200000\"> <property name=\"blocksize\">0x20000</property></memory>"
-                                     "<memory type=\"ram\" start=\"0x10000000\" length=\"0x48000\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x1ff00000\" length=\"0x20000\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x20000000\" length=\"0x20000\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x24000000\" length=\"0x80000\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x30000000\" length=\"0x48000\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x38000000\" length=\"0x10000\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x38800000\" length=\"0x1000\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x58020000\" length=\"0x2c00\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x58024400\" length=\"0xc00\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x58025400\" length=\"0x800\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x58026000\" length=\"0x800\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x58027000\" length=\"0x400\"> </memory>"
-                                     "<memory type=\"flash\" start=\"0x90000000\" length=\"0x10000000\"> <property name=\"blocksize\">0x200</property></memory>"
-                                     "<memory type=\"ram\" start=\"0xc0000000\" length=\"0x800000\"> </memory>"
-                                     "</memory-map>";
+
+// Configuration Parameters
+// The size of the mriThread() stack in uint64_t objects.
+#define MRI_THREAD_STACK_SIZE   64
+// The maximum number of active threads that can be handled by the debugger.
+#define MAXIMUM_ACTIVE_THREADS  64
+
+
+
 
 // Bit location in PSR which indicates if the stack needed to be 8-byte aligned or not.
 #define PSR_STACK_ALIGN_SHIFT   9
@@ -62,19 +52,78 @@ static const char g_memoryMapXml[] = "<?xml version=\"1.0\"?>"
 // Thread syncronization flag used to indicate that a debug event has occured.
 #define MRI_THREAD_DEBUG_EVENT_FLAG (1 << 0)
 
-osThreadId_t            g_mriThreadId;
 
-volatile osThreadId_t   g_haltingThreadId;
+// Assert routine that will dump error text to GDB connection before entering infinite loop. If user is logging MRI
+// remote communications then they will see the error text in the log before debug stub becomes unresponseive.
+#define ASSERT(X) \
+    if (!(X)) { \
+        Serial.print("Assertion Failed: "); \
+        Serial.print(__FILE__); \
+        Serial.print(":"); \
+        Serial.print(__LINE__); \
+        Serial.print("  \""); \
+        Serial.print(#X); \
+        Serial.println("\""); \
+        for (;;); \
+    }
 
-// UNDONE: Get rid of.
-volatile osThreadId_t   g_test;
 
-osThreadId_t            g_threads[64];
-uint32_t                g_threadCount;
 
-volatile osThreadId_t   mriThreadSingleStepThreadId;
 
-volatile uint32_t       mriThreadEnableDWTandFPB;
+// Flag to verify that only one ThreadMRI object has been initialized.
+static bool                     g_alreadyInitialized;
+
+// The ID of the mriMain() thread.
+static osThreadId_t             g_mriThreadId;
+
+// The ID of the halted thread being debugged.
+static volatile osThreadId_t    g_haltedThreadId;
+
+// The list of threads which were suspended upon entry into the debugger. These are the threads that will be resumed
+// upon exit from the debugger.
+static osThreadId_t             g_suspendedThreads[MAXIMUM_ACTIVE_THREADS];
+// The number of active threads that were placed in g_suspendedThreads. Some of those entries may be NULL if they were important
+// enough to not be suspended.
+static uint32_t                 g_threadCount;
+
+// This flag is set to a non-zero value if the DebugMon handler is to re-enable DWT watchpoints and FPB breakpoints
+// after being disabled by the HardFault handler when a debug event is encounted in handler mode.
+static volatile uint32_t       g_enableDWTandFPB;
+
+// If non-NULL, this is the thread that we want to single step.
+// If NULL, single stepping is not enabled.
+// Accessed by this module and the assembly language handlers in ThreadMRI_asm.S.
+volatile osThreadId_t           mriThreadSingleStepThreadId;
+
+// UNDONE: For debugging. If different than g_haltedThreadId then the mriMain() thread was signalled when the previous
+//         instance was still running.
+static volatile osThreadId_t   g_debugThreadId;
+
+
+
+
+// Assembly Language fault handling stubs. They do some preprocessing and then call the C handlers below if appropriate.
+extern "C" void mriDebugMonitorHandlerStub(void);
+extern "C" void mriFaultHandlerStub(void);
+// Assembly Language stubs for RTX context switching routines. They check to see if DebugMon should be pended before
+// calling the actual RTX handlers.
+extern "C" void mriSVCHandlerStub(void);
+extern "C" void mriPendSVHandlerStub(void);
+extern "C" void mriSysTickHandlerStub(void);
+
+// Forward Function Declarations
+static __NO_RETURN void mriMain(void *pv);
+static void suspendAllApplicationThreads();
+static void resumeApplicationThreads();
+static void readThreadContext(osThreadId_t thread);
+static bool hasEncounteredDebugEvent();
+static void recordAndClearFaultStatusBits();
+static void wakeMriMainToDebugCurrentThread();
+static void stopSingleStepping();
+static void switchFaultHandlersToDebugger();
+static void switchRtxHandlersToDebugStubs();
+
+
 
 
 ThreadMRI::ThreadMRI()
@@ -82,57 +131,91 @@ ThreadMRI::ThreadMRI()
     mriInit("");
 }
 
-// Main entry point into MRI debugger core.
-extern "C" void mriDebugException(void);
 
-// UNDONE: Could push into debugException() API.
-static __NO_RETURN void mriMain(void *pv);
-
-static uint64_t      g_stack[64];
-static osRtxThread_t g_threadTcb;
-static const osThreadAttr_t g_threadAttr =
+bool ThreadMRI::begin()
 {
-    .name = "mriMain",
-    .attr_bits = osThreadDetached,
-    .cb_mem  = &g_threadTcb,
-    .cb_size = sizeof(g_threadTcb),
-    .stack_mem = g_stack,
-    .stack_size = sizeof(g_stack),
-    .priority = osPriorityNormal
-};
+    if (g_alreadyInitialized) {
+        // Only allow 1 ThreadMRI object to be initialized.
+        return false;
+    }
 
-
-void ThreadMRI::debugException()
-{
-    g_mriThreadId = osThreadNew(mriMain, NULL, &g_threadAttr);
+    static uint64_t             stack[MRI_THREAD_STACK_SIZE];
+    static osRtxThread_t        threadTcb;
+    static const osThreadAttr_t threadAttr =
+    {
+        .name = "mriMain",
+        .attr_bits = osThreadDetached,
+        .cb_mem  = &threadTcb,
+        .cb_size = sizeof(threadTcb),
+        .stack_mem = stack,
+        .stack_size = sizeof(stack),
+        .priority = osPriorityNormal
+    };
+    g_mriThreadId = osThreadNew(mriMain, NULL, &threadAttr);
+    if (g_mriThreadId == NULL) {
+        return false;
+    }
+    g_alreadyInitialized = true;
+    return true;
 }
 
-static void suspendAllApplicationThreads() {
-    // UNDONE: Handle the case where threadCount is larger than threads[] array.
-    g_threadCount = osThreadEnumerate(g_threads, sizeof(g_threads)/sizeof(g_threads[0]));
+static __NO_RETURN void mriMain(void *pv)
+{
+    // Run the code which suspends, resumes, etc the other threads at highest priority so that it doesn't context
+    // switch to one of the other threads. Switch to normal priority when running mriDebugException() though.
+    osThreadSetPriority(osThreadGetId(), osPriorityRealtime7);
+
+    while (1) {
+        int waitResult = osThreadFlagsWait(MRI_THREAD_DEBUG_EVENT_FLAG, osFlagsWaitAny, osWaitForever);
+        ASSERT ( waitResult > 0 );
+        ASSERT ( g_haltedThreadId != 0 );
+        suspendAllApplicationThreads();
+        readThreadContext(g_haltedThreadId);
+
+        osThreadSetPriority(osThreadGetId(), osPriorityNormal);
+        mriDebugException();
+        osThreadSetPriority(osThreadGetId(), osPriorityRealtime7);
+
+        if (Platform_IsSingleStepping()) {
+            mriThreadSingleStepThreadId = g_haltedThreadId;
+            osThreadResume(mriThreadSingleStepThreadId);
+        } else {
+            resumeApplicationThreads();
+        }
+        g_haltedThreadId = 0;
+    }
+}
+
+static void suspendAllApplicationThreads()
+{
+    g_threadCount = osThreadGetCount();
+    ASSERT ( g_threadCount <= sizeof(g_suspendedThreads)/sizeof(g_suspendedThreads[0]) );
+    osThreadEnumerate(g_suspendedThreads, sizeof(g_suspendedThreads)/sizeof(g_suspendedThreads[0]));
     for (uint32_t i = 0 ; i < g_threadCount ; i++) {
-        osThreadId_t thread = g_threads[i];
+        osThreadId_t thread = g_suspendedThreads[i];
         const char*  pThreadName = osThreadGetName(thread);
 
         if (thread != g_mriThreadId && strcmp(pThreadName, "rtx_idle") != 0) {
             osThreadSuspend(thread);
         }
         else {
-            g_threads[i] = 0;
+            g_suspendedThreads[i] = 0;
         }
     }
 }
 
-static void resumeApplicationThreads() {
+static void resumeApplicationThreads()
+{
     for (uint32_t i = 0 ; i < g_threadCount ; i++) {
-        osThreadId_t thread = g_threads[i];
+        osThreadId_t thread = g_suspendedThreads[i];
         if (thread != 0) {
             osThreadResume(thread);
         }
     }
 }
 
-static void readThreadContext(osThreadId_t thread) {
+static void readThreadContext(osThreadId_t thread)
+{
     osRtxThread_t* pThread = (osRtxThread_t*)thread;
 
     uint32_t offset;
@@ -179,64 +262,135 @@ static void readThreadContext(osThreadId_t thread) {
     }
 }
 
-static __NO_RETURN void mriMain(void *pv)
-{
-    // Run the code which suspends, resumes, etc the other threads at highest priority so that it doesn't context
-    // switch to one of the other threads. Switch to normal priority when running mriDebugException() though.
-    osThreadSetPriority(osThreadGetId(), osPriorityRealtime7);
-
-    while (1) {
-        int waitResult = osThreadFlagsWait(MRI_THREAD_DEBUG_EVENT_FLAG, osFlagsWaitAny, osWaitForever);
-        while (waitResult < 0) {
-            // Something bad has happened if we hang here.
-        }
-        suspendAllApplicationThreads();
-
-        while (g_haltingThreadId == 0) {
-            // Something bad has happened if we hang here.
-        }
-        readThreadContext(g_haltingThreadId);
-
-        osThreadSetPriority(osThreadGetId(), osPriorityNormal);
-        mriDebugException();
-        osThreadSetPriority(osThreadGetId(), osPriorityRealtime7);
-
-        if (Platform_IsSingleStepping()) {
-            mriThreadSingleStepThreadId = g_haltingThreadId;
-            osThreadResume(mriThreadSingleStepThreadId);
-        } else {
-            resumeApplicationThreads();
-        }
-        g_haltingThreadId = 0;
-    }
-}
-
 
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Global Platform_* functions needed by MRI to initialize and communicate with MRI.
 // These functions will perform most of their work through the DebugSerial singleton.
 // ---------------------------------------------------------------------------------------------------------------------
-// Assembly Language fault handling stubs. They do some preprocessing and then call the C handler below if appropriate.
-extern "C" void mriDebugMonitorHandlerStub(void);
-extern "C" void mriFaultHandlerStub(void);
-// Assembly Language stubs for RTX context switching routines. They check to see if DebugMon should be pended before
-// calling the actual RTX handlers.
-extern "C" void mriSVCHandlerStub(void);
-extern "C" void mriPendSVHandlerStub(void);
-extern "C" void mriSysTickHandlerStub(void);
+void Platform_Init(Token* pParameterTokens)
+{
+    __try
+        mriCortexMInit((Token*)pParameterTokens);
+    __catch
+        __rethrow;
+
+    g_enableDWTandFPB = 0;
+    mriThreadSingleStepThreadId = NULL;
+    switchFaultHandlersToDebugger();
+    switchRtxHandlersToDebugStubs();
+}
+
+static void switchFaultHandlersToDebugger(void)
+{
+    NVIC_SetVector(HardFault_IRQn,        (uint32_t)mriFaultHandlerStub);
+    NVIC_SetVector(MemoryManagement_IRQn, (uint32_t)mriFaultHandlerStub);
+    NVIC_SetVector(BusFault_IRQn,         (uint32_t)mriFaultHandlerStub);
+    NVIC_SetVector(UsageFault_IRQn,       (uint32_t)mriFaultHandlerStub);
+    NVIC_SetVector(DebugMonitor_IRQn,     (uint32_t)mriDebugMonitorHandlerStub);
+}
+
+static void switchRtxHandlersToDebugStubs(void)
+{
+    NVIC_SetVector(SVCall_IRQn,        (uint32_t)mriSVCHandlerStub);
+    NVIC_SetVector(PendSV_IRQn, (uint32_t)mriPendSVHandlerStub);
+    NVIC_SetVector(SysTick_IRQn,         (uint32_t)mriSysTickHandlerStub);
+}
 
 
 
-// Forward Function Declarations
-static bool hasEncounteredDebugEvent();
-static void recordAndClearFaultStatusBits();
-static void wakeMriMainToDebugCurrentThread();
-static void stopSingleStepping();
-static void switchFaultHandlersToDebugger();
-static void switchRtxHandlersToDebugStubs();
+
+uint32_t Platform_CommHasReceiveData(void)
+{
+    return Serial.available();
+}
+
+int Platform_CommReceiveChar(void)
+{
+    while (!Serial.available()) {
+        // Busy wait.
+    }
+    return Serial.read();
+}
+
+void Platform_CommSendChar(int character)
+{
+    Serial.write(character);
+}
+
+int Platform_CommCausedInterrupt(void)
+{
+    return 0;
+}
+
+void Platform_CommClearInterrupt(void)
+{
+}
 
 
+
+
+static const char g_memoryMapXml[] = "<?xml version=\"1.0\"?>"
+                                     "<!DOCTYPE memory-map PUBLIC \"+//IDN gnu.org//DTD GDB Memory Map V1.0//EN\" \"http://sourceware.org/gdb/gdb-memory-map.dtd\">"
+                                     "<memory-map>"
+                                     "<memory type=\"ram\" start=\"0x00000000\" length=\"0x10000\"> </memory>"
+                                     "<memory type=\"flash\" start=\"0x08000000\" length=\"0x200000\"> <property name=\"blocksize\">0x20000</property></memory>"
+                                     "<memory type=\"ram\" start=\"0x10000000\" length=\"0x48000\"> </memory>"
+                                     "<memory type=\"ram\" start=\"0x1ff00000\" length=\"0x20000\"> </memory>"
+                                     "<memory type=\"ram\" start=\"0x20000000\" length=\"0x20000\"> </memory>"
+                                     "<memory type=\"ram\" start=\"0x24000000\" length=\"0x80000\"> </memory>"
+                                     "<memory type=\"ram\" start=\"0x30000000\" length=\"0x48000\"> </memory>"
+                                     "<memory type=\"ram\" start=\"0x38000000\" length=\"0x10000\"> </memory>"
+                                     "<memory type=\"ram\" start=\"0x38800000\" length=\"0x1000\"> </memory>"
+                                     "<memory type=\"ram\" start=\"0x58020000\" length=\"0x2c00\"> </memory>"
+                                     "<memory type=\"ram\" start=\"0x58024400\" length=\"0xc00\"> </memory>"
+                                     "<memory type=\"ram\" start=\"0x58025400\" length=\"0x800\"> </memory>"
+                                     "<memory type=\"ram\" start=\"0x58026000\" length=\"0x800\"> </memory>"
+                                     "<memory type=\"ram\" start=\"0x58027000\" length=\"0x400\"> </memory>"
+                                     "<memory type=\"flash\" start=\"0x90000000\" length=\"0x10000000\"> <property name=\"blocksize\">0x200</property></memory>"
+                                     "<memory type=\"ram\" start=\"0xc0000000\" length=\"0x800000\"> </memory>"
+                                     "</memory-map>";
+
+uint32_t Platform_GetDeviceMemoryMapXmlSize(void)
+{
+    return sizeof(g_memoryMapXml) - 1;
+}
+
+const char* Platform_GetDeviceMemoryMapXml(void)
+{
+    return g_memoryMapXml;
+}
+
+
+
+
+const uint8_t* Platform_GetUid(void)
+{
+    return NULL;
+}
+
+uint32_t Platform_GetUidSize(void)
+{
+    return 0;
+}
+
+int Semihost_IsDebuggeeMakingSemihostCall(void)
+{
+    return 0;
+}
+
+int Semihost_HandleSemihostRequest(void)
+{
+    return 0;
+}
+
+
+
+
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Functions called from Assembly Language fault/interrupt handlers to deal with crashes and debug events.
+// ---------------------------------------------------------------------------------------------------------------------
 extern "C" void mriDebugMonitorHandler(uint32_t excReturn)
 {
     excReturn &= 0xF;
@@ -246,10 +400,10 @@ extern "C" void mriDebugMonitorHandler(uint32_t excReturn)
     }
 
     if (!hasEncounteredDebugEvent()) {
-        if (mriThreadEnableDWTandFPB) {
+        if (g_enableDWTandFPB) {
             enableDWTandITM();
             enableFPB();
-            mriThreadEnableDWTandFPB = 0;
+            g_enableDWTandFPB = 0;
         }
         if (mriThreadSingleStepThreadId) {
             // Code is written to handle case where single stepping gets enabled because current thread was the one
@@ -278,6 +432,7 @@ extern "C" void mriFaultHandler(uint32_t excReturn)
     excReturn &= 0xF;
     bool isThreadMode = (excReturn == 0xD || excReturn == 0x9);
     if (isThreadMode) {
+        // A crash has been detected in thread mode. Wake debugger thread to debug it.
         recordAndClearFaultStatusBits();
         stopSingleStepping();
         wakeMriMainToDebugCurrentThread();
@@ -285,8 +440,8 @@ extern "C" void mriFaultHandler(uint32_t excReturn)
     }
 
     // The asm stub calling this function has already verified that a debug event during handler mode caused
-    // this fault.
-    mriThreadEnableDWTandFPB = 1;
+    // this fault. Disable DWT watchpoints and FPB breakpoints until re-entering thread mode.
+    g_enableDWTandFPB = 1;
     SCB->DFSR = SCB->DFSR;
     SCB->HFSR = SCB_HFSR_DEBUGEVT_Msk;
     disableDWTandITM();
@@ -318,8 +473,8 @@ static void recordAndClearFaultStatusBits()
 static void wakeMriMainToDebugCurrentThread()
 {
     disableSingleStep();
-    g_test = osThreadGetId();
-    g_haltingThreadId = g_test; // UNDONE: osThreadGetId();
+    g_debugThreadId = osThreadGetId();
+    g_haltedThreadId = g_debugThreadId; // UNDONE: osThreadGetId();
     osThreadFlagsSet(g_mriThreadId, MRI_THREAD_DEBUG_EVENT_FLAG);
 }
 
@@ -327,83 +482,4 @@ static void stopSingleStepping()
 {
     disableSingleStep();
     mriThreadSingleStepThreadId = NULL;
-}
-
-void Platform_Init(Token* pParameterTokens)
-{
-    __try
-        mriCortexMInit((Token*)pParameterTokens);
-    __catch
-        __rethrow;
-
-    mriThreadEnableDWTandFPB = 0;
-    mriThreadSingleStepThreadId = NULL;
-    switchFaultHandlersToDebugger();
-    switchRtxHandlersToDebugStubs();
-}
-
-static void switchFaultHandlersToDebugger(void) {
-    NVIC_SetVector(HardFault_IRQn,        (uint32_t)mriFaultHandlerStub);
-    NVIC_SetVector(MemoryManagement_IRQn, (uint32_t)mriFaultHandlerStub);
-    NVIC_SetVector(BusFault_IRQn,         (uint32_t)mriFaultHandlerStub);
-    NVIC_SetVector(UsageFault_IRQn,       (uint32_t)mriFaultHandlerStub);
-    NVIC_SetVector(DebugMonitor_IRQn,     (uint32_t)mriDebugMonitorHandlerStub);
-}
-
-static void switchRtxHandlersToDebugStubs(void) {
-    NVIC_SetVector(SVCall_IRQn,        (uint32_t)mriSVCHandlerStub);
-    NVIC_SetVector(PendSV_IRQn, (uint32_t)mriPendSVHandlerStub);
-    NVIC_SetVector(SysTick_IRQn,         (uint32_t)mriSysTickHandlerStub);
-}
-
-
-uint32_t Platform_CommHasReceiveData(void)
-{
-    return Serial.available();
-}
-
-int Platform_CommReceiveChar(void) {
-    while (!Serial.available())
-    {
-        // Busy wait.
-    }
-    return Serial.read();
-}
-
-void Platform_CommSendChar(int character) {
-    Serial.write(character);
-}
-
-int Platform_CommCausedInterrupt(void) {
-    return 0;
-}
-
-void Platform_CommClearInterrupt(void) {
-}
-
-uint32_t Platform_GetDeviceMemoryMapXmlSize(void) {
-    return sizeof(g_memoryMapXml) - 1;
-}
-
-const char* Platform_GetDeviceMemoryMapXml(void) {
-    return g_memoryMapXml;
-}
-
-
-const uint8_t* Platform_GetUid(void) {
-    return NULL;
-}
-
-uint32_t Platform_GetUidSize(void) {
-    return 0;
-}
-
-int Semihost_IsDebuggeeMakingSemihostCall(void)
-{
-    return 0;
-}
-
-int Semihost_HandleSemihostRequest(void)
-{
-    return 0;
 }

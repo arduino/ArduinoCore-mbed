@@ -21,6 +21,8 @@
 #include <core/buffer.h>
 
 /* Real name of functions are in mri namespace. */
+void    mriDebugException(void);
+
 void    mriCore_InitBuffer(void);
 Buffer* mriCore_GetBuffer(void);
 Buffer* mriCore_GetInitializedBuffer(void);

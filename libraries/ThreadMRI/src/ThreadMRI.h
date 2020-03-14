@@ -21,8 +21,7 @@ class ThreadMRI {
 public:
     ThreadMRI();
 
-    // UNDONE: Remove.
-    void debugException();
+    bool begin();
 };
 
 // Use to insert a hardcoded breakpoint into your code.

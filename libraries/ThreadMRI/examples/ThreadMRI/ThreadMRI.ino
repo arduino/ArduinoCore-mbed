@@ -12,7 +12,7 @@ extern "C" void testContext(void);
 void setup() {
     // UNDONE: Using Serial1 for now to unblock my progress.
     Serial1.begin(115200);
-    g_debugger.debugException();
+    g_debugger.begin();
     //testContext();
     __debugbreak();
 }
