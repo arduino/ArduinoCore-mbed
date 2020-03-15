@@ -61,17 +61,19 @@ mriDebugMonitorHandlerStub:
     */
 mriFaultHandlerStub:
     mov     r0, lr
+    mrs     r1, psp
+    mrs     r2, msp
     /* Jump to mriFaultHandler if interrupted code was running in thread mode. */
-    and     r1, r0, #0xF
-    cmp     r1, #EXC_RETURN_THREADMODE_PROCESSSTACK
+    and     r12, r0, #0xF
+    cmp     r12, #EXC_RETURN_THREADMODE_PROCESSSTACK
     beq.w   mriFaultHandler
-    cmp     r1, #EXC_RETURN_THREADMODE_MAINSTACK
+    cmp     r12, #EXC_RETURN_THREADMODE_MAINSTACK
     beq.w   mriFaultHandler
     /* Get here if interrupted code was running in handler mode. */
     /* Check HardFaultStatusRegister to see if this is a debug event. */
-    ldr     r1, =HFSR
-    ldr     r1, [r1]
-    tst     r1, #HFSR_DEBUG_EVENT_BIT
+    ldr     r12, =HFSR
+    ldr     r12, [r12]
+    tst     r12, #HFSR_DEBUG_EVENT_BIT
     /* If forced into hard fault due to debug event then breakpoint/watchpoint occurred and needs to be ignored. */
     bne.w   mriFaultHandler
     /* If not a debug event then fall through to default hard fault handler as something bad has happened. */

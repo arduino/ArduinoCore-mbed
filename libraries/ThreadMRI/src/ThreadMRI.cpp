@@ -52,6 +52,12 @@ extern "C"
 // Thread syncronization flag used to indicate that a debug event has occured.
 #define MRI_THREAD_DEBUG_EVENT_FLAG (1 << 0)
 
+// Lower nibble of EXC_RETURN in LR will have one of these values if interrupted code was running in thread mode.
+//  Using PSP.
+#define EXC_RETURN_THREADMODE_PROCESSSTACK  0xD
+//  Using MSP.
+#define EXC_RETURN_THREADMODE_MAINSTACK     0x9
+
 
 // Assert routine that will dump error text to GDB connection before entering infinite loop. If user is logging MRI
 // remote communications then they will see the error text in the log before debug stub becomes unresponseive.
@@ -73,9 +79,6 @@ extern "C"
 // Flag to verify that only one ThreadMRI object has been initialized.
 static bool                     g_alreadyInitialized;
 
-// The ID of the mriMain() thread.
-static osThreadId_t             g_mriThreadId;
-
 // The ID of the halted thread being debugged.
 static volatile osThreadId_t    g_haltedThreadId;
 
@@ -88,7 +91,10 @@ static uint32_t                 g_threadCount;
 
 // This flag is set to a non-zero value if the DebugMon handler is to re-enable DWT watchpoints and FPB breakpoints
 // after being disabled by the HardFault handler when a debug event is encounted in handler mode.
-static volatile uint32_t       g_enableDWTandFPB;
+static volatile uint32_t        g_enableDWTandFPB;
+
+// The ID of the mriMain() thread.
+volatile osThreadId_t           mriThreadId;
 
 // If non-NULL, this is the thread that we want to single step.
 // If NULL, single stepping is not enabled.
@@ -132,11 +138,20 @@ static void resumeApplicationThreads();
 static void readThreadContext(osThreadId_t thread);
 static void switchRtxHandlersToDebugStubsForSingleStepping();
 static void restoreRtxHandlers();
+static void setDebugActiveFlag();
+static void clearDebugActiveFlag();
+static bool isThreadMode(uint32_t excReturn);
 static bool hasEncounteredDebugEvent();
 static void recordAndClearFaultStatusBits();
 static void wakeMriMainToDebugCurrentThread();
 static void stopSingleStepping();
 static void recordAndSwitchFaultHandlersToDebugger();
+static bool isDebugThreadActive();
+static void setFaultDetectedFlag();
+static bool isImpreciseBusFault();
+static void advancePCToNextInstruction(uint32_t excReturn, uint32_t psp, uint32_t msp);
+static uint32_t* threadSP(uint32_t excReturn, uint32_t psp, uint32_t msp);
+static bool isInstruction32Bit(uint16_t firstWordOfInstruction);
 
 
 
@@ -166,8 +181,8 @@ bool ThreadMRI::begin()
         .stack_size = sizeof(stack),
         .priority = osPriorityNormal
     };
-    g_mriThreadId = osThreadNew(mriMain, NULL, &threadAttr);
-    if (g_mriThreadId == NULL) {
+    mriThreadId = osThreadNew(mriMain, NULL, &threadAttr);
+    if (mriThreadId == NULL) {
         return false;
     }
     g_alreadyInitialized = true;
@@ -189,11 +204,13 @@ static __NO_RETURN void mriMain(void *pv)
         if (Platform_IsSingleStepping()) {
             restoreRtxHandlers();
         }
+        setDebugActiveFlag();
 
         osThreadSetPriority(osThreadGetId(), osPriorityNormal);
         mriDebugException();
         osThreadSetPriority(osThreadGetId(), osPriorityRealtime7);
 
+        clearDebugActiveFlag();
         if (Platform_IsSingleStepping()) {
             mriThreadSingleStepThreadId = g_haltedThreadId;
             switchRtxHandlersToDebugStubsForSingleStepping();
@@ -214,7 +231,7 @@ static void suspendAllApplicationThreads()
         osThreadId_t thread = g_suspendedThreads[i];
         const char*  pThreadName = osThreadGetName(thread);
 
-        if (thread != g_mriThreadId && strcmp(pThreadName, "rtx_idle") != 0) {
+        if (thread != mriThreadId && strcmp(pThreadName, "rtx_idle") != 0) {
             osThreadSuspend(thread);
         }
         else {
@@ -298,6 +315,15 @@ static void restoreRtxHandlers()
     NVIC_SetVector(SysTick_IRQn, mriThreadOrigSysTick);
 }
 
+static void setDebugActiveFlag()
+{
+    mriCortexMState.flags |= CORTEXM_FLAGS_ACTIVE_DEBUG;
+}
+
+static void clearDebugActiveFlag()
+{
+    mriCortexMState.flags &= ~CORTEXM_FLAGS_ACTIVE_DEBUG;
+}
 
 
 
@@ -427,9 +453,7 @@ int Semihost_HandleSemihostRequest(void)
 // ---------------------------------------------------------------------------------------------------------------------
 extern "C" void mriDebugMonitorHandler(uint32_t excReturn)
 {
-    excReturn &= 0xF;
-    bool isThreadMode = (excReturn == 0xD || excReturn == 0x9);
-    while (!isThreadMode) {
+    while (!isThreadMode(excReturn)) {
         // DebugMon is running at such low priority that we should be getting ready to return to thread mode.
     }
 
@@ -461,11 +485,20 @@ extern "C" void mriDebugMonitorHandler(uint32_t excReturn)
 
 // This function is called if a fault (hard, mem, bus, usage) has occurred while running code in thread mode.
 // It is also called when a debug event has forced a hard fault while running code in handler mode.
-extern "C" void mriFaultHandler(uint32_t excReturn)
+extern "C" void mriFaultHandler(uint32_t excReturn, uint32_t psp, uint32_t msp)
 {
-    excReturn &= 0xF;
-    bool isThreadMode = (excReturn == 0xD || excReturn == 0x9);
-    if (isThreadMode) {
+    if (isThreadMode(excReturn)) {
+        if (isDebugThreadActive()) {
+            // Encountered memory fault when GDB attempted to access an invalid address.
+            // Set flag to let debugger thread know that its access failed and advance past the faulting instruction
+            // if it was a precise bus fault so that it doesn't just occur again on return.
+            setFaultDetectedFlag();
+            if (!isImpreciseBusFault()) {
+                advancePCToNextInstruction(excReturn, psp, msp);
+            }
+            return;
+        }
+
         // A crash has been detected in thread mode. Wake debugger thread to debug it.
         recordAndClearFaultStatusBits();
         stopSingleStepping();
@@ -481,6 +514,12 @@ extern "C" void mriFaultHandler(uint32_t excReturn)
     disableDWTandITM();
     disableFPB();
     setMonitorPending();
+}
+
+static bool isThreadMode(uint32_t excReturn)
+{
+    excReturn &= 0xF;
+    return excReturn == EXC_RETURN_THREADMODE_PROCESSSTACK || excReturn == EXC_RETURN_THREADMODE_MAINSTACK;
 }
 
 static bool hasEncounteredDebugEvent()
@@ -509,11 +548,61 @@ static void wakeMriMainToDebugCurrentThread()
     disableSingleStep();
     g_debugThreadId = osThreadGetId();
     g_haltedThreadId = g_debugThreadId; // UNDONE: osThreadGetId();
-    osThreadFlagsSet(g_mriThreadId, MRI_THREAD_DEBUG_EVENT_FLAG);
+    osThreadFlagsSet(mriThreadId, MRI_THREAD_DEBUG_EVENT_FLAG);
 }
 
 static void stopSingleStepping()
 {
     disableSingleStep();
     mriThreadSingleStepThreadId = NULL;
+}
+
+static bool isDebugThreadActive()
+{
+    return (mriCortexMState.flags & CORTEXM_FLAGS_ACTIVE_DEBUG) && mriThreadId == osThreadGetId();
+}
+
+static void setFaultDetectedFlag()
+{
+    mriCortexMState.flags |= CORTEXM_FLAGS_FAULT_DURING_DEBUG;
+}
+
+static bool isImpreciseBusFault()
+{
+    return SCB->CFSR & SCB_CFSR_IMPRECISERR_Msk;
+}
+
+static void advancePCToNextInstruction(uint32_t excReturn, uint32_t psp, uint32_t msp)
+{
+    uint32_t* pSP = threadSP(excReturn, psp, msp);
+    uint32_t* pPC = pSP + 7;
+    uint16_t  currentInstruction = *(uint16_t*)pPC;
+    if (isInstruction32Bit(currentInstruction)) {
+        *pPC += sizeof(uint32_t);
+    } else {
+        *pPC += sizeof(uint16_t);
+    }
+}
+
+static uint32_t* threadSP(uint32_t excReturn, uint32_t psp, uint32_t msp)
+{
+    uint32_t sp;
+    if ((excReturn & 0xF) == EXC_RETURN_THREADMODE_PROCESSSTACK) {
+        sp = psp;
+    } else {
+        sp = msp;
+    }
+    return (uint32_t*)sp;
+}
+
+
+static bool isInstruction32Bit(uint16_t firstWordOfInstruction)
+{
+    uint16_t maskedOffUpper5BitsOfWord = firstWordOfInstruction & 0xF800;
+
+    // 32-bit instructions start with 0b11101, 0b11110, 0b11111 according to page A5-152 of the
+    // ARMv7-M Architecture Manual.
+    return  (maskedOffUpper5BitsOfWord == 0xE800 ||
+             maskedOffUpper5BitsOfWord == 0xF000 ||
+             maskedOffUpper5BitsOfWord == 0xF800);
 }
