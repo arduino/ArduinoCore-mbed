@@ -100,6 +100,11 @@ volatile osThreadId_t           mriThreadSingleStepThreadId;
 volatile uint32_t               mriThreadOrigSVCall;
 volatile uint32_t               mriThreadOrigSysTick;
 volatile uint32_t               mriThreadOrigPendSV;
+// Addresses of the original fault handlers before being replaced with debugger specific ones.
+volatile uint32_t               mriThreadOrigHardFault;
+volatile uint32_t               mriThreadOrigMemManagement;
+volatile uint32_t               mriThreadOrigBusFault;
+volatile uint32_t               mriThreadOrigUsageFault;
 
 // UNDONE: For debugging. If different than g_haltedThreadId then the mriMain() thread was signalled when the previous
 //         instance was still running.
@@ -108,9 +113,12 @@ static volatile osThreadId_t    g_debugThreadId;
 
 
 
-// Assembly Language fault handling stubs. They do some preprocessing and then call the C handlers below if appropriate.
+// Assembly Language fault handling stubs. They do some preprocessing and then call the C handlers if appropriate.
 extern "C" void mriDebugMonitorHandlerStub(void);
-extern "C" void mriFaultHandlerStub(void);
+extern "C" void mriHardFaultHandlerStub(void);
+extern "C" void mriMemManagementHandlerStub(void);
+extern "C" void mriBusFaultHandlerStub(void);
+extern "C" void mriUsageFaultHandlerStub(void);
 // Assembly Language stubs for RTX context switching routines. They check to see if DebugMon should be pended before
 // calling the actual RTX handlers.
 extern "C" void mriSVCHandlerStub(void);
@@ -128,7 +136,7 @@ static bool hasEncounteredDebugEvent();
 static void recordAndClearFaultStatusBits();
 static void wakeMriMainToDebugCurrentThread();
 static void stopSingleStepping();
-static void switchFaultHandlersToDebugger();
+static void recordAndSwitchFaultHandlersToDebugger();
 
 
 
@@ -306,15 +314,20 @@ void Platform_Init(Token* pParameterTokens)
 
     g_enableDWTandFPB = 0;
     mriThreadSingleStepThreadId = NULL;
-    switchFaultHandlersToDebugger();
+    recordAndSwitchFaultHandlersToDebugger();
 }
 
-static void switchFaultHandlersToDebugger(void)
+static void recordAndSwitchFaultHandlersToDebugger()
 {
-    NVIC_SetVector(HardFault_IRQn,        (uint32_t)mriFaultHandlerStub);
-    NVIC_SetVector(MemoryManagement_IRQn, (uint32_t)mriFaultHandlerStub);
-    NVIC_SetVector(BusFault_IRQn,         (uint32_t)mriFaultHandlerStub);
-    NVIC_SetVector(UsageFault_IRQn,       (uint32_t)mriFaultHandlerStub);
+    mriThreadOrigHardFault = NVIC_GetVector(HardFault_IRQn);
+    mriThreadOrigMemManagement = NVIC_GetVector(MemoryManagement_IRQn);
+    mriThreadOrigBusFault = NVIC_GetVector(BusFault_IRQn);
+    mriThreadOrigUsageFault = NVIC_GetVector(UsageFault_IRQn);
+
+    NVIC_SetVector(HardFault_IRQn,        (uint32_t)mriHardFaultHandlerStub);
+    NVIC_SetVector(MemoryManagement_IRQn, (uint32_t)mriMemManagementHandlerStub);
+    NVIC_SetVector(BusFault_IRQn,         (uint32_t)mriBusFaultHandlerStub);
+    NVIC_SetVector(UsageFault_IRQn,       (uint32_t)mriUsageFaultHandlerStub);
     NVIC_SetVector(DebugMonitor_IRQn,     (uint32_t)mriDebugMonitorHandlerStub);
 }
 

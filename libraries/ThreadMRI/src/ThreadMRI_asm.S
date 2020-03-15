@@ -48,13 +48,13 @@ mriDebugMonitorHandlerStub:
     .size   mriDebugMonitorHandlerStub, .-mriDebugMonitorHandlerStub
 
 
-    // UNDONE: Have a separate stub for each fault handler (hard, memmanage, bus, usage)
     .global mriFaultHandlerStub
     .type mriFaultHandlerStub, function
     .thumb_func
     /* extern "C" void mriFaultHandlerStub(void);
-       This stub is called whenever a fault fires. It checks the EXC_RETURN value to determine if thread or handler
-       mode caused fault:
+       This stub is called whenever a fault fires w/ R3 set to the original handler for the particular fault. This
+       allows the original handler to be called if a crash occurs in handler mode which can't be debugged by ThreadMRI.
+       It checks the EXC_RETURN value to determine if thread or handler mode caused fault:
         Thread: Pass control to mriFaultHandler() so that it can be debugged.
         Handler: If caused by debug event, pass control to mriFaultHandler() so that break/watchpoints can be disabled.
                  Otherwise pass control to the standard mbed-os HardFault_Handler so that crash can be dumped.
@@ -72,12 +72,74 @@ mriFaultHandlerStub:
     ldr     r1, =HFSR
     ldr     r1, [r1]
     tst     r1, #HFSR_DEBUG_EVENT_BIT
-    /* If not a debug event then fall through to default hard fault handler as something bad has happened. */
-    beq.w   HardFault_Handler
     /* If forced into hard fault due to debug event then breakpoint/watchpoint occurred and needs to be ignored. */
-    b.w     mriFaultHandler
+    bne.w   mriFaultHandler
+    /* If not a debug event then fall through to default hard fault handler as something bad has happened. */
+    mov     pc, r3
     .pool
     .size   mriFaultHandlerStub, .-mriFaultHandlerStub
+
+
+    .global mriHardFaultHandlerStub
+    .type mriHardFaultHandlerStub, function
+    .thumb_func
+    /* extern "C" void mriHardFaultHandlerStub(void);
+       This stub is called whenever a Hard Fault fires.
+    */
+mriHardFaultHandlerStub:
+    /* Load address of real fault handler into r3 & call generic fault stub. */
+    ldr     r3, =mriThreadOrigHardFault
+    ldr     r3, [r3]
+    b       mriFaultHandlerStub
+    .pool
+    .size   mriHardFaultHandlerStub, .-mriHardFaultHandlerStub
+
+
+    .global mriMemManagementHandlerStub
+    .type mriMemManagementHandlerStub, function
+    .thumb_func
+    /* extern "C" void mriMemManagementHandlerStub(void);
+       This stub is called whenever a MemManagement fault fires.
+    */
+mriMemManagementHandlerStub:
+    /* Load address of real fault handler into r3 & call generic fault stub. */
+    ldr     r3, =mriThreadOrigMemManagement
+    ldr     r3, [r3]
+    b       mriFaultHandlerStub
+    .pool
+    .size   mriMemManagementHandlerStub, .-mriMemManagementHandlerStub
+
+
+    .global mriBusFaultHandlerStub
+    .type mriBusFaultHandlerStub, function
+    .thumb_func
+    /* extern "C" void mriBusFaultHandlerStub(void);
+       This stub is called whenever a Bus Fault fires.
+    */
+mriBusFaultHandlerStub:
+    /* Load address of real fault handler into r3 & call generic fault stub. */
+    ldr     r3, =mriThreadOrigBusFault
+    ldr     r3, [r3]
+    b       mriFaultHandlerStub
+    .pool
+    .size   mriBusFaultHandlerStub, .-mriBusFaultHandlerStub
+
+
+    .global mriUsageFaultHandlerStub
+    .type mriUsageFaultHandlerStub, function
+    .thumb_func
+    /* extern "C" void mriUsageFaultHandlerStub(void);
+       This stub is called whenever a Usage Fault fires.
+    */
+mriUsageFaultHandlerStub:
+    /* Load address of real fault handler into r3 & call generic fault stub. */
+    ldr     r3, =mriThreadOrigUsageFault
+    ldr     r3, [r3]
+    b       mriFaultHandlerStub
+    .pool
+    .size   mriUsageFaultHandlerStub, .-mriUsageFaultHandlerStub
+
+
 
 
     .global mriRTXHandlerStub
