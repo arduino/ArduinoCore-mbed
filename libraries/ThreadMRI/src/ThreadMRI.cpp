@@ -95,9 +95,15 @@ static volatile uint32_t       g_enableDWTandFPB;
 // Accessed by this module and the assembly language handlers in ThreadMRI_asm.S.
 volatile osThreadId_t           mriThreadSingleStepThreadId;
 
+// Addresses of the original RTX handlers for SVCall, SysTick, and PendSV when hooks to them have been inserted for
+// enabling single step.
+volatile uint32_t               mriThreadOrigSVCall;
+volatile uint32_t               mriThreadOrigSysTick;
+volatile uint32_t               mriThreadOrigPendSV;
+
 // UNDONE: For debugging. If different than g_haltedThreadId then the mriMain() thread was signalled when the previous
 //         instance was still running.
-static volatile osThreadId_t   g_debugThreadId;
+static volatile osThreadId_t    g_debugThreadId;
 
 
 
@@ -116,12 +122,13 @@ static __NO_RETURN void mriMain(void *pv);
 static void suspendAllApplicationThreads();
 static void resumeApplicationThreads();
 static void readThreadContext(osThreadId_t thread);
+static void switchRtxHandlersToDebugStubsForSingleStepping();
+static void restoreRtxHandlers();
 static bool hasEncounteredDebugEvent();
 static void recordAndClearFaultStatusBits();
 static void wakeMriMainToDebugCurrentThread();
 static void stopSingleStepping();
 static void switchFaultHandlersToDebugger();
-static void switchRtxHandlersToDebugStubs();
 
 
 
@@ -171,6 +178,9 @@ static __NO_RETURN void mriMain(void *pv)
         ASSERT ( g_haltedThreadId != 0 );
         suspendAllApplicationThreads();
         readThreadContext(g_haltedThreadId);
+        if (Platform_IsSingleStepping()) {
+            restoreRtxHandlers();
+        }
 
         osThreadSetPriority(osThreadGetId(), osPriorityNormal);
         mriDebugException();
@@ -178,6 +188,7 @@ static __NO_RETURN void mriMain(void *pv)
 
         if (Platform_IsSingleStepping()) {
             mriThreadSingleStepThreadId = g_haltedThreadId;
+            switchRtxHandlersToDebugStubsForSingleStepping();
             osThreadResume(mriThreadSingleStepThreadId);
         } else {
             resumeApplicationThreads();
@@ -262,6 +273,24 @@ static void readThreadContext(osThreadId_t thread)
     }
 }
 
+static void switchRtxHandlersToDebugStubsForSingleStepping()
+{
+    mriThreadOrigSVCall = NVIC_GetVector(SVCall_IRQn);
+    mriThreadOrigPendSV = NVIC_GetVector(PendSV_IRQn);
+    mriThreadOrigSysTick = NVIC_GetVector(SysTick_IRQn);
+    NVIC_SetVector(SVCall_IRQn, (uint32_t)mriSVCHandlerStub);
+    NVIC_SetVector(PendSV_IRQn, (uint32_t)mriPendSVHandlerStub);
+    NVIC_SetVector(SysTick_IRQn, (uint32_t)mriSysTickHandlerStub);
+}
+
+static void restoreRtxHandlers()
+{
+    NVIC_SetVector(SVCall_IRQn, mriThreadOrigSVCall);
+    NVIC_SetVector(PendSV_IRQn, mriThreadOrigPendSV);
+    NVIC_SetVector(SysTick_IRQn, mriThreadOrigSysTick);
+}
+
+
 
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -278,7 +307,6 @@ void Platform_Init(Token* pParameterTokens)
     g_enableDWTandFPB = 0;
     mriThreadSingleStepThreadId = NULL;
     switchFaultHandlersToDebugger();
-    switchRtxHandlersToDebugStubs();
 }
 
 static void switchFaultHandlersToDebugger(void)
@@ -288,13 +316,6 @@ static void switchFaultHandlersToDebugger(void)
     NVIC_SetVector(BusFault_IRQn,         (uint32_t)mriFaultHandlerStub);
     NVIC_SetVector(UsageFault_IRQn,       (uint32_t)mriFaultHandlerStub);
     NVIC_SetVector(DebugMonitor_IRQn,     (uint32_t)mriDebugMonitorHandlerStub);
-}
-
-static void switchRtxHandlersToDebugStubs(void)
-{
-    NVIC_SetVector(SVCall_IRQn,        (uint32_t)mriSVCHandlerStub);
-    NVIC_SetVector(PendSV_IRQn, (uint32_t)mriPendSVHandlerStub);
-    NVIC_SetVector(SysTick_IRQn,         (uint32_t)mriSysTickHandlerStub);
 }
 
 

@@ -80,6 +80,25 @@ mriFaultHandlerStub:
     .size   mriFaultHandlerStub, .-mriFaultHandlerStub
 
 
+    .global mriRTXHandlerStub
+    .type mriRTXHandlerStub, function
+    .thumb_func
+    /* extern "C" void mriRTXHandlerStub(void (*pOrigHandler)(void));
+       This stub pends a DebugMon interrupt whenever a RTX interrupt occurs that could perform a context switch so
+       that it has a chance to enable single stepping if switching to the thread to be single stepped.
+    */
+mriRTXHandlerStub:
+    /* Need to queue up a DebugMon interrupt to enable single stepping when switching to thread of interest. */
+    ldr     r1, =DEMCR
+    ldr     r2, [r1]
+    orr     r2, #DEMCR_MON_PEND_BIT
+    str     r2, [r1]
+    /* Run actual RTX handler. */
+1$: mov     pc, r0
+    .pool
+    .size   mriRTXHandlerStub, .-mriRTXHandlerStub
+
+
     .global mriSVCHandlerStub
     .type mriSVCHandlerStub, function
     .thumb_func
@@ -88,18 +107,10 @@ mriFaultHandlerStub:
        that it has a chance to enable single stepping if switching to the thread to be single stepped.
     */
 mriSVCHandlerStub:
-    /* Need to queue DebugMon on potential context switch when single stepping is enabled. */
-    ldr     r0, =mriThreadSingleStepThreadId
-    ldr     r1, [r0]
-    cbz     r1, 1$
-    /* Need to queue up a DebugMon interrupt. */
-    ldr     r0, =DEMCR
-    ldr     r1, [r0]
-    orr     r1, #DEMCR_MON_PEND_BIT
-    str     r1, [r0]
-    /* Run actual handler. */
-    // UNDONE: Use function pointer instead as it could have been changed dynamically.
-1$: b.w     SVC_Handler
+    /* Load address of real RTX handler into r0 & call generic stub to pend DebugMon for single stepping. */
+    ldr     r0, =mriThreadOrigSVCall
+    ldr     r0, [r0]
+    b       mriRTXHandlerStub
     .pool
     .size   mriSVCHandlerStub, .-mriSVCHandlerStub
 
@@ -112,17 +123,10 @@ mriSVCHandlerStub:
        that it has a chance to enable single stepping if switching to the thread to be single stepped.
     */
 mriPendSVHandlerStub:
-    /* Need to queue DebugMon on potential context switch when single stepping is enabled. */
-    ldr     r0, =mriThreadSingleStepThreadId
-    ldr     r1, [r0]
-    cbz     r1, 1$
-    /* Need to queue up a DebugMon interrupt. */
-    ldr     r0, =DEMCR
-    ldr     r1, [r0]
-    orr     r1, #DEMCR_MON_PEND_BIT
-    str     r1, [r0]
-    /* Run actual handler. */
-1$: b.w     PendSV_Handler
+    /* Load address of real RTX handler into r0 & call generic stub to pend DebugMon for single stepping. */
+    ldr     r0, =mriThreadOrigPendSV
+    ldr     r0, [r0]
+    b       mriRTXHandlerStub
     .pool
     .size   mriPendSVHandlerStub, .-mriPendSVHandlerStub
 
@@ -135,17 +139,10 @@ mriPendSVHandlerStub:
        that it has a chance to enable single stepping if switching to the thread to be single stepped.
     */
 mriSysTickHandlerStub:
-    /* Need to queue DebugMon on potential context switch when single stepping is enabled. */
-    ldr     r0, =mriThreadSingleStepThreadId
-    ldr     r1, [r0]
-    cbz     r1, 1$
-    /* Need to queue up a DebugMon interrupt. */
-    ldr     r0, =DEMCR
-    ldr     r1, [r0]
-    orr     r1, #DEMCR_MON_PEND_BIT
-    str     r1, [r0]
-    /* Run actual handler. */
-1$: b.w     SysTick_Handler
+    /* Load address of real RTX handler into r0 & call generic stub to pend DebugMon for single stepping. */
+    ldr     r0, =mriThreadOrigSysTick
+    ldr     r0, [r0]
+    b       mriRTXHandlerStub
     .pool
     .size   mriSysTickHandlerStub, .-mriSysTickHandlerStub
 
