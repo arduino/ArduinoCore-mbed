@@ -24,6 +24,7 @@
 #define CORTEXM_FLAGS_SINGLE_STEPPING       (1 << 2)
 #define CORTEXM_FLAGS_RESTORE_BASEPRI       (1 << 3)
 #define CORTEXM_FLAGS_SVC_STEP              (1 << 4)
+#define CORTEXM_FLAGS_CTRL_C                (1 << 5)
 
 /* Constants related to special memory area used by the debugger for its stack so that it doesn't interfere with
    the task's stack contents. */

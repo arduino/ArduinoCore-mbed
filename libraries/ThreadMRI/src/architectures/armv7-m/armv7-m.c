@@ -380,10 +380,16 @@ uint32_t Platform_GetPacketBufferSize(void)
 }
 
 
+static uint32_t hasControlCBeenDetected();
 static uint8_t  determineCauseOfDebugEvent(void);
 uint8_t Platform_DetermineCauseOfException(void)
 {
     uint32_t exceptionNumber = mriCortexMState.exceptionNumber;
+
+    if (hasControlCBeenDetected())
+    {
+        return SIGINT;
+    }
 
     switch(exceptionNumber)
     {
@@ -405,16 +411,15 @@ uint8_t Platform_DetermineCauseOfException(void)
     case 12:
         /* Debug Monitor */
         return determineCauseOfDebugEvent();
-    case 21:
-    case 22:
-    case 23:
-    case 24:
-        /* UART* */
-        return SIGINT;
     default:
         /* NOTE: Catch all signal will be SIGSTOP. */
         return SIGSTOP;
     }
+}
+
+static uint32_t hasControlCBeenDetected()
+{
+    return mriCortexMState.flags & CORTEXM_FLAGS_CTRL_C;
 }
 
 static uint8_t determineCauseOfDebugEvent(void)
@@ -704,9 +709,11 @@ static void clearHardwareBreakpointOnSvcHandler(void)
 
 
 static void checkStack(void);
+static void clearControlCFlag(void);
 void Platform_LeavingDebugger(void)
 {
     checkStack();
+    clearControlCFlag();
     clearMonitorPending();
 }
 
@@ -722,6 +729,11 @@ static void checkStack(void)
     spaceUsed = pEnd - (uint8_t*)pCurr;
     if (spaceUsed > mriCortexMState.maxStackUsed)
         mriCortexMState.maxStackUsed = spaceUsed;
+}
+
+static void clearControlCFlag(void)
+{
+    mriCortexMState.flags &= ~CORTEXM_FLAGS_CTRL_C;
 }
 
 

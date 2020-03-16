@@ -32,6 +32,7 @@ extern "C"
 // UNDONE: Switch back to the USB/CDC based serial port.
 #undef Serial
 #define Serial Serial1
+#define MRI_SERIAL_IRQ USART1_IRQn
 
 
 // Configuration Parameters
@@ -111,6 +112,8 @@ volatile uint32_t               mriThreadOrigHardFault;
 volatile uint32_t               mriThreadOrigMemManagement;
 volatile uint32_t               mriThreadOrigBusFault;
 volatile uint32_t               mriThreadOrigUsageFault;
+// Address of the original Serial peripheral ISR to be hooked.
+void                            (*g_origSerialISR)(void);
 
 // UNDONE: For debugging. If different than g_haltedThreadId then the mriMain() thread was signalled when the previous
 //         instance was still running.
@@ -142,23 +145,27 @@ static void setDebugActiveFlag();
 static void clearDebugActiveFlag();
 static bool isThreadMode(uint32_t excReturn);
 static bool hasEncounteredDebugEvent();
+static bool hasControlCBeenDetected();
 static void recordAndClearFaultStatusBits();
 static void wakeMriMainToDebugCurrentThread();
 static void stopSingleStepping();
 static void recordAndSwitchFaultHandlersToDebugger();
+static void hookSerialISR();
 static bool isDebugThreadActive();
 static void setFaultDetectedFlag();
 static bool isImpreciseBusFault();
 static void advancePCToNextInstruction(uint32_t excReturn, uint32_t psp, uint32_t msp);
 static uint32_t* threadSP(uint32_t excReturn, uint32_t psp, uint32_t msp);
 static bool isInstruction32Bit(uint16_t firstWordOfInstruction);
+static void serialISRHook();
+static bool isDebuggerActive();
+static void setControlCFlag();
 
 
 
 
 ThreadMRI::ThreadMRI()
 {
-    mriInit("");
 }
 
 
@@ -168,6 +175,9 @@ bool ThreadMRI::begin()
         // Only allow 1 ThreadMRI object to be initialized.
         return false;
     }
+
+    // UNDONE: Move into constructor.
+    mriInit("");
 
     static uint64_t             stack[MRI_THREAD_STACK_SIZE];
     static osRtxThread_t        threadTcb;
@@ -341,6 +351,7 @@ void Platform_Init(Token* pParameterTokens)
     g_enableDWTandFPB = 0;
     mriThreadSingleStepThreadId = NULL;
     recordAndSwitchFaultHandlersToDebugger();
+    hookSerialISR();
 }
 
 static void recordAndSwitchFaultHandlersToDebugger()
@@ -355,6 +366,12 @@ static void recordAndSwitchFaultHandlersToDebugger()
     NVIC_SetVector(BusFault_IRQn,         (uint32_t)mriBusFaultHandlerStub);
     NVIC_SetVector(UsageFault_IRQn,       (uint32_t)mriUsageFaultHandlerStub);
     NVIC_SetVector(DebugMonitor_IRQn,     (uint32_t)mriDebugMonitorHandlerStub);
+}
+
+static void hookSerialISR()
+{
+    g_origSerialISR = (void(*)(void))NVIC_GetVector(MRI_SERIAL_IRQ);
+    NVIC_SetVector(MRI_SERIAL_IRQ, (uint32_t)serialISRHook);
 }
 
 
@@ -457,7 +474,7 @@ extern "C" void mriDebugMonitorHandler(uint32_t excReturn)
         // DebugMon is running at such low priority that we should be getting ready to return to thread mode.
     }
 
-    if (!hasEncounteredDebugEvent()) {
+    if (!hasEncounteredDebugEvent() && !hasControlCBeenDetected()) {
         if (g_enableDWTandFPB) {
             enableDWTandITM();
             enableFPB();
@@ -528,6 +545,11 @@ static bool hasEncounteredDebugEvent()
 
 }
 
+static bool hasControlCBeenDetected()
+{
+    return mriCortexMState.flags & CORTEXM_FLAGS_CTRL_C;
+}
+
 static void recordAndClearFaultStatusBits()
 {
     mriCortexMState.exceptionNumber = getCurrentlyExecutingExceptionNumber();
@@ -595,7 +617,6 @@ static uint32_t* threadSP(uint32_t excReturn, uint32_t psp, uint32_t msp)
     return (uint32_t*)sp;
 }
 
-
 static bool isInstruction32Bit(uint16_t firstWordOfInstruction)
 {
     uint16_t maskedOffUpper5BitsOfWord = firstWordOfInstruction & 0xF800;
@@ -605,4 +626,25 @@ static bool isInstruction32Bit(uint16_t firstWordOfInstruction)
     return  (maskedOffUpper5BitsOfWord == 0xE800 ||
              maskedOffUpper5BitsOfWord == 0xF000 ||
              maskedOffUpper5BitsOfWord == 0xF800);
+}
+
+
+static void serialISRHook()
+{
+    g_origSerialISR();
+    if (!isDebuggerActive() && Serial.available() > 0) {
+        // Pend a halt into the debug monitor now that there is data from GDB ready to be read by it.
+        setControlCFlag();
+        setMonitorPending();
+    }
+}
+
+static bool isDebuggerActive()
+{
+    return mriCortexMState.flags & CORTEXM_FLAGS_ACTIVE_DEBUG;
+}
+
+static void setControlCFlag()
+{
+    mriCortexMState.flags |= CORTEXM_FLAGS_CTRL_C;
 }
