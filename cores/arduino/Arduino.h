@@ -80,6 +80,7 @@ void analogWriteResolution(int bits);
 
 #include "pins_arduino.h"
 
+#ifdef __cplusplus
 /* Types used for the table below */
 typedef struct _PinDescription
 {
@@ -105,6 +106,8 @@ extern PinDescription g_APinDescription[];
 #endif
 
 #include "overloads.h"
+#endif
+
 #include "macros.h"
 
 #endif
