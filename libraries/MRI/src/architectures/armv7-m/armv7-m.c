@@ -938,16 +938,16 @@ static int doesKindIndicate32BitInstruction(uint32_t kind)
 void Platform_SetHardwareBreakpoint(uint32_t address)
 {
     uint32_t* pFPBBreakpointComparator;
-    uint16_t  currentInstructionWord;
+    uint16_t  firstInstructionWord;
 
      __try
     {
-        currentInstructionWord = getFirstHalfWordOfCurrentInstruction();
+        firstInstructionWord = throwingMemRead16(address);
     }
     __catch
         __rethrow;
 
-    pFPBBreakpointComparator = enableFPBBreakpoint(address, isInstruction32Bit(currentInstructionWord));
+    pFPBBreakpointComparator = enableFPBBreakpoint(address, isInstruction32Bit(firstInstructionWord));
     if (!pFPBBreakpointComparator)
         __throw(exceededHardwareResourcesException);
 }
@@ -968,16 +968,16 @@ void Platform_ClearHardwareBreakpointOfGdbKind(uint32_t address, uint32_t kind)
 
 void Platform_ClearHardwareBreakpoint(uint32_t address)
 {
-    uint16_t  currentInstructionWord;
+    uint16_t  firstInstructionWord;
 
      __try
     {
-        currentInstructionWord = getFirstHalfWordOfCurrentInstruction();
+        firstInstructionWord = throwingMemRead16(address);
     }
     __catch
         __rethrow;
 
-    disableFPBBreakpointComparator(address, isInstruction32Bit(currentInstructionWord));
+    disableFPBBreakpointComparator(address, isInstruction32Bit(firstInstructionWord));
 }
 
 
