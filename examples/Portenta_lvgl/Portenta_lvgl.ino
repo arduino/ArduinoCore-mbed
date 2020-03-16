@@ -7,27 +7,59 @@
 static uint32_t lcd_x_size = 0;
 static uint32_t lcd_y_size = 0;
 
-uint16_t * fb;
+static uint16_t * fb;
+static lv_disp_drv_t disp_drv;
 
 /* Display flushing */
 static void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p)
 {
-
-   uint16_t * fb_start = fb + area->y1 * lcd_x_size + area->x1;
    uint32_t w = lv_area_get_width(area);
    uint32_t h = lv_area_get_height(area);
-   
-   //GPU: Has artifacts
-   //stm32_LCD_DrawImage((void*)color_p, (void*)fb_start, w, h, DMA2D_INPUT_RGB565);
 
+#if 1
+ //  SCB_InvalidateICache();
+
+//   SCB_CleanInvalidateDCache();
+
+  DMA2D_HandleTypeDef * dma2d = stm32_get_DMA2D();
+
+  lv_color_t * pDst = (lv_color_t*)fb;
+  pDst += area->y1 * lcd_x_size + area->x1;
+
+  /*##-1- Configure the DMA2D Mode, Color Mode and output offset #############*/
+  dma2d->Init.Mode         = DMA2D_M2M;
+  dma2d->Init.ColorMode    = DMA2D_OUTPUT_RGB565;
+  dma2d->Init.OutputOffset = lcd_x_size - w;
+  dma2d->Init.AlphaInverted = DMA2D_REGULAR_ALPHA;  /* No Output Alpha Inversion*/
+  dma2d->Init.RedBlueSwap   = DMA2D_RB_REGULAR;     /* No Output Red & Blue swap */
+
+  /*##-2- DMA2D Callbacks Configuration ######################################*/
+  dma2d->XferCpltCallback  = NULL;
+
+  /*##-3- Foreground Configuration ###########################################*/
+  dma2d->LayerCfg[1].AlphaMode = DMA2D_NO_MODIF_ALPHA;
+  dma2d->LayerCfg[1].InputAlpha = 0xFF;
+  dma2d->LayerCfg[1].InputColorMode = DMA2D_INPUT_RGB565;
+  dma2d->LayerCfg[1].InputOffset = 0;
+  dma2d->LayerCfg[1].RedBlueSwap = DMA2D_RB_REGULAR; /* No ForeGround Red/Blue swap */
+  dma2d->LayerCfg[1].AlphaInverted = DMA2D_REGULAR_ALPHA; /* No ForeGround Alpha inversion */
+
+  /* DMA2D Initialization */
+  if(HAL_DMA2D_Init(dma2d) == HAL_OK) {
+    if(HAL_DMA2D_ConfigLayer(dma2d, 1) == HAL_OK) {
+        HAL_DMA2D_Start(dma2d, (uint32_t)color_p, (uint32_t)pDst, w, h);
+        HAL_DMA2D_PollForTransfer(dma2d, 1000);
+    }
+  }
+#else
   //NO GPU
   int32_t y;    
   for(y = area->y1; y <= area->y2; y++) {
       memcpy(&fb[y * lcd_x_size + area->x1], color_p, w * sizeof(lv_color_t));
       color_p += w;
   }
-  
-  lv_disp_flush_ready(disp); /* tell lvgl that flushing is done */
+  #endif
+lv_disp_flush_ready(disp); /* tell lvgl that flushing is done */
 }
 
 
@@ -35,18 +67,64 @@ static void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t
  * It can be used only in buffered mode (LV_VDB_SIZE != 0 in lv_conf.h)*/
 static void gpu_blend(lv_disp_drv_t * disp_drv, lv_color_t * dest, const lv_color_t * src, uint32_t length, lv_opa_t opa)
 {
-   stm32_LCD_DrawImage((void*)src, (void*)dest, length, 1, DMA2D_INPUT_RGB565);  
+  
+//  SCB_CleanInvalidateDCache();
+  
+  DMA2D_HandleTypeDef * dma2d = stm32_get_DMA2D();
+
+  dma2d->Instance = DMA2D;
+  dma2d->Init.Mode = DMA2D_M2M_BLEND;
+  dma2d->Init.OutputOffset = 0;
+
+  /* Foreground layer */
+  dma2d->LayerCfg[1].AlphaMode = DMA2D_REPLACE_ALPHA;
+  dma2d->LayerCfg[1].InputAlpha = opa;
+  dma2d->LayerCfg[1].InputColorMode = DMA2D_INPUT_RGB565;
+  dma2d->LayerCfg[1].InputOffset = 0;
+  dma2d->LayerCfg[1].AlphaInverted = DMA2D_REGULAR_ALPHA;
+
+  /* Background layer */
+  dma2d->LayerCfg[0].AlphaMode = DMA2D_NO_MODIF_ALPHA;
+  dma2d->LayerCfg[0].InputColorMode = DMA2D_INPUT_RGB565;
+  dma2d->LayerCfg[0].InputOffset = 0;
+  
+  /* DMA2D Initialization */
+  if (HAL_DMA2D_Init(dma2d) == HAL_OK) {
+    if (HAL_DMA2D_ConfigLayer(dma2d, 0) == HAL_OK && HAL_DMA2D_ConfigLayer(dma2d, 1) == HAL_OK) {
+       HAL_DMA2D_BlendingStart(dma2d, (uint32_t) src, (uint32_t) dest, (uint32_t) dest, length, 1);
+       HAL_DMA2D_PollForTransfer(dma2d, 1000);
+    }
+  }
 }
 
-/* If your MCU has hardware accelerator (GPU) then you can use it to fill a memory with a color
- * It can be used only in buffered mode (LV_VDB_SIZE != 0 in lv_conf.h)*/
+/* If your MCU has hardware accelerator (GPU) then you can use it to fill a memory with a color */
 static void gpu_fill(lv_disp_drv_t * disp_drv, lv_color_t * dest_buf, lv_coord_t dest_width,
                     const lv_area_t * fill_area, lv_color_t color)
 {
-   uint16_t * fb_start = fb + fill_area->y1 * dest_width + fill_area->x1;
-   uint32_t w = lv_area_get_width(fill_area);
-   uint32_t h = lv_area_get_height(fill_area);
-//   stm32_LCD_FillArea((void*)color_p, (void*)fb_start, w, h, color.full);
+//  SCB_CleanInvalidateDCache();
+  
+  DMA2D_HandleTypeDef * dma2d = stm32_get_DMA2D();
+
+
+  lv_color_t * destination = dest_buf + (dest_width * fill_area->y1 + fill_area->x1);
+
+  uint32_t w = fill_area->x2 - fill_area->x1 + 1;
+  dma2d->Instance = DMA2D;
+  dma2d->Init.Mode = DMA2D_R2M;
+  dma2d->Init.ColorMode = DMA2D_OUTPUT_RGB565;
+  dma2d->Init.OutputOffset = dest_width - w;
+  dma2d->LayerCfg[1].InputAlpha = DMA2D_NO_MODIF_ALPHA;
+  dma2d->LayerCfg[1].InputColorMode = DMA2D_OUTPUT_RGB565;
+
+  /* DMA2D Initialization */
+  if (HAL_DMA2D_Init(dma2d) == HAL_OK) {
+    if (HAL_DMA2D_ConfigLayer(dma2d, 1) == HAL_OK) {
+      lv_coord_t h = lv_area_get_height(fill_area);
+      if(HAL_DMA2D_BlendingStart(dma2d, lv_color_to32(color), (uint32_t)destination, (uint32_t)destination, w, h) == HAL_OK) {
+        HAL_DMA2D_PollForTransfer(dma2d, 1000);
+      }
+    }
+  }
 }
 
 
@@ -92,11 +170,10 @@ void setup() {
   lv_disp_buf_init(&disp_buf, buf, NULL, LV_HOR_RES_MAX * LV_VER_RES_MAX / 6);
 
   /*Initialize the display*/
-  lv_disp_drv_t disp_drv;
   lv_disp_drv_init(&disp_drv);
   disp_drv.flush_cb = my_disp_flush;
- // disp_drv.gpu_fill_cb = gpu_fill;
- // disp_drv.gpu_blend_cb = gpu_blend;
+  disp_drv.gpu_fill_cb = gpu_fill;
+  disp_drv.gpu_blend_cb = gpu_blend;
   disp_drv.buffer = &disp_buf;
   lv_disp_drv_register(&disp_drv);
 
