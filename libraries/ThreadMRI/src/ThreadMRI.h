@@ -19,9 +19,35 @@
 
 class ThreadMRI {
 public:
-    ThreadMRI();
+    // You must declare your ThreadMRI object as a global or function scoped static so that it doesn't get
+    // destroyed. Which constructor you use, depends on where you declare it.
 
-    bool begin();
+    // Use this constructor when declaring ThreadMRI object as a global outside of any functions.
+    // You must specify the baudrate so that ThreadMRI can call begin() on the specified serial object.
+    //  breakInSetup - should it break at beginning of setup().
+    //
+    // Global Example:
+    //      ThreadMRI threadMRI(Serial1, USART1_IRQn, 115200);
+    ThreadMRI(HardwareSerial& serial, IRQn_Type IRQn, uint32_t baudRate, bool breakInSetup=true);
+
+    // Use this constructor when declaring ThreadMRI object as a function scoped static. You must call begin() on
+    // the serial object before constructing the ThreadMRI object.
+    //
+    // Function Scoped Static Example:
+    //      #include <MRI.h>
+    //      void setup() {
+    //          Serial1.begin(115200);
+    //          static ThreadMRI threadMRI(Serial1, USART1_IRQn);
+    //          __debugbreak();
+    //      }
+    ThreadMRI(HardwareSerial& serial, IRQn_Type IRQn);
+
+    // You should never let your ThreadMRI object go out of scope. Make it global or static. To warn you if you do
+    // let it go out of scope by mistake, this destructor will break into GDB and then enter an infinite loop.
+    ~ThreadMRI();
+
+protected:
+    void init(HardwareSerial& serial, IRQn_Type IRQn, uint32_t baudRate, bool breakInSetup);
 };
 
 // Use to insert a hardcoded breakpoint into your code.

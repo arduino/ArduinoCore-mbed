@@ -5,16 +5,13 @@
 
 #include <ThreadMRI.h>
 
-ThreadMRI g_debugger;
+ThreadMRI g_debugger(Serial1, USART1_IRQn, 115200, true);
 
 extern "C" void testContext(void);
 
 void setup() {
-    // UNDONE: Using Serial1 for now to unblock my progress.
-    Serial1.begin(115200);
-    g_debugger.begin();
     //testContext();
-    __debugbreak();
+    //__debugbreak();
 }
 
 void loop() {

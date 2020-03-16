@@ -29,15 +29,10 @@ extern "C"
     #include "architectures/armv7-m/debug_cm3.h"
 }
 
-// UNDONE: Switch back to the USB/CDC based serial port.
-#undef Serial
-#define Serial Serial1
-#define MRI_SERIAL_IRQ USART1_IRQn
-
 
 // Configuration Parameters
 // The size of the mriThread() stack in uint64_t objects.
-#define MRI_THREAD_STACK_SIZE   64
+#define MRI_THREAD_STACK_SIZE   128
 // The maximum number of active threads that can be handled by the debugger.
 #define MAXIMUM_ACTIVE_THREADS  64
 
@@ -77,8 +72,11 @@ extern "C"
 
 
 
-// Flag to verify that only one ThreadMRI object has been initialized.
-static bool                     g_alreadyInitialized;
+// Globals that describe the ThreadMRI singleton.
+static HardwareSerial*          g_pSerial;
+static IRQn_Type                g_irq;
+static uint32_t                 g_baudRate;
+static bool                     g_breakInSetup;
 
 // The ID of the halted thread being debugged.
 static volatile osThreadId_t    g_haltedThreadId;
@@ -143,6 +141,9 @@ static void switchRtxHandlersToDebugStubsForSingleStepping();
 static void restoreRtxHandlers();
 static void setDebugActiveFlag();
 static void clearDebugActiveFlag();
+static void callSerialBeginFromSetup();
+static int justEnteredSetupCallback(void* pv);
+static void hookSerialISR();
 static bool isThreadMode(uint32_t excReturn);
 static bool hasEncounteredDebugEvent();
 static bool hasControlCBeenDetected();
@@ -150,7 +151,6 @@ static void recordAndClearFaultStatusBits();
 static void wakeMriMainToDebugCurrentThread();
 static void stopSingleStepping();
 static void recordAndSwitchFaultHandlersToDebugger();
-static void hookSerialISR();
 static bool isDebugThreadActive();
 static void setFaultDetectedFlag();
 static bool isImpreciseBusFault();
@@ -164,21 +164,32 @@ static void setControlCFlag();
 
 
 
-ThreadMRI::ThreadMRI()
+ThreadMRI::ThreadMRI(HardwareSerial& serial, IRQn_Type IRQn, uint32_t baudRate, bool breakInSetup /* =true */)
 {
+    init(serial, IRQn, baudRate, breakInSetup);
 }
 
-
-bool ThreadMRI::begin()
+ThreadMRI::ThreadMRI(HardwareSerial& serial, IRQn_Type IRQn)
 {
-    if (g_alreadyInitialized) {
+    init(serial, IRQn, 0, false);
+}
+
+void ThreadMRI::init(HardwareSerial& serial, IRQn_Type IRQn, uint32_t baudRate, bool breakInSetup)
+{
+    if (g_pSerial != NULL) {
         // Only allow 1 ThreadMRI object to be initialized.
-        return false;
+        return;
     }
 
-    // UNDONE: Move into constructor.
+    // Setup the singleton.
+    g_irq = IRQn;
+    g_baudRate = baudRate;
+    g_breakInSetup = breakInSetup;
+
+    // Initialize the MRI core.
     mriInit("");
 
+    // Start the debugger thread.
     static uint64_t             stack[MRI_THREAD_STACK_SIZE];
     static osRtxThread_t        threadTcb;
     static const osThreadAttr_t threadAttr =
@@ -193,10 +204,13 @@ bool ThreadMRI::begin()
     };
     mriThreadId = osThreadNew(mriMain, NULL, &threadAttr);
     if (mriThreadId == NULL) {
-        return false;
+        return;
     }
-    g_alreadyInitialized = true;
-    return true;
+
+    g_pSerial = &serial;
+    if (g_baudRate != 0) {
+        callSerialBeginFromSetup();
+    }
 }
 
 static __NO_RETURN void mriMain(void *pv)
@@ -335,6 +349,37 @@ static void clearDebugActiveFlag()
     mriCortexMState.flags &= ~CORTEXM_FLAGS_ACTIVE_DEBUG;
 }
 
+static void callSerialBeginFromSetup()
+{
+    mriCore_SetTempBreakpoint((uint32_t)setup, justEnteredSetupCallback, NULL);
+}
+
+static int justEnteredSetupCallback(void* pv)
+{
+    g_pSerial->begin(g_baudRate);
+    hookSerialISR();
+
+    // Return 0 to indicate that we want to halt execution at the beginning of setup() or 1 to not force a halt.
+    return g_breakInSetup ? 0 : 1;
+}
+
+static void hookSerialISR()
+{
+    g_origSerialISR = (void(*)(void))NVIC_GetVector(g_irq);
+    NVIC_SetVector(g_irq, (uint32_t)serialISRHook);
+}
+
+
+ThreadMRI::~ThreadMRI() {
+    // IMPORTANT NOTE: You are attempting to destroy the connection to GDB which isn't allowed.
+    //                 Don't allow your ThreadMRI object to go out of scope like this.
+    __debugbreak();
+    for (;;) {
+        // Loop forever.
+    }
+}
+
+
 
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -351,7 +396,6 @@ void Platform_Init(Token* pParameterTokens)
     g_enableDWTandFPB = 0;
     mriThreadSingleStepThreadId = NULL;
     recordAndSwitchFaultHandlersToDebugger();
-    hookSerialISR();
 }
 
 static void recordAndSwitchFaultHandlersToDebugger()
@@ -368,31 +412,25 @@ static void recordAndSwitchFaultHandlersToDebugger()
     NVIC_SetVector(DebugMonitor_IRQn,     (uint32_t)mriDebugMonitorHandlerStub);
 }
 
-static void hookSerialISR()
-{
-    g_origSerialISR = (void(*)(void))NVIC_GetVector(MRI_SERIAL_IRQ);
-    NVIC_SetVector(MRI_SERIAL_IRQ, (uint32_t)serialISRHook);
-}
-
 
 
 
 uint32_t Platform_CommHasReceiveData(void)
 {
-    return Serial.available();
+    return g_pSerial->available();
 }
 
 int Platform_CommReceiveChar(void)
 {
-    while (!Serial.available()) {
+    while (!g_pSerial->available()) {
         // Busy wait.
     }
-    return Serial.read();
+    return g_pSerial->read();
 }
 
 void Platform_CommSendChar(int character)
 {
-    Serial.write(character);
+    g_pSerial->write(character);
 }
 
 int Platform_CommCausedInterrupt(void)
@@ -632,7 +670,7 @@ static bool isInstruction32Bit(uint16_t firstWordOfInstruction)
 static void serialISRHook()
 {
     g_origSerialISR();
-    if (!isDebuggerActive() && Serial.available() > 0) {
+    if (!isDebuggerActive() && g_pSerial->available() > 0) {
         // Pend a halt into the debug monitor now that there is data from GDB ready to be read by it.
         setControlCFlag();
         setMonitorPending();
