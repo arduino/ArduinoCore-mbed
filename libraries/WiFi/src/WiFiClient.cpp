@@ -36,6 +36,7 @@ int arduino::WiFiClient::connect(const char *host, uint16_t port) {
 	//sock->set_blocking(false);
 	sock->set_timeout(1000);
 	SocketAddress addr(host, port);
+	WiFi.getNetwork()->gethostbyname(host, &addr);
 	int ret = ((TCPSocket*)sock)->connect(addr);
 	if (ret == 0) {
 		return 1;
@@ -57,6 +58,7 @@ int arduino::WiFiClient::connectSSL(const char *host, uint16_t port) {
 	}
 	sock->set_timeout(1000);
 	SocketAddress addr(host, port);
+	WiFi.getNetwork()->gethostbyname(host, &addr);
 	int ret = ((TLSSocket*)sock)->connect(addr);
 	if (ret == 0) {
 		return 1;
