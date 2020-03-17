@@ -35,6 +35,7 @@ envie_m7.upload.native_usb=true
 envie_m7.upload.maximum_size=786432
 envie_m7.upload.maximum_data_size=523624
 
+envie_m7.debug.tool=gdb
 envie_m7.bootloader.tool=openocd
 envie_m7.bootloader.config=-f target/stm32h7x_dual_bank.cfg
 envie_m7.bootloader.programmer=-f interface/stlink.cfg
@@ -80,6 +81,8 @@ envie_m4.upload.wait_for_upload_port=true
 envie_m4.upload.native_usb=true
 envie_m4.upload.maximum_size=1048576
 envie_m4.upload.maximum_data_size=294248
+
+envie_m4.debug.tool=gdb
 
 ##############################################################
 

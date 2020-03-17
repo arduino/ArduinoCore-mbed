@@ -157,3 +157,14 @@ tools.dfu-util.cmd=dfu-util
 tools.dfu-util.upload.params.verbose=-d
 tools.dfu-util.upload.params.quiet=
 tools.dfu-util.upload.pattern="{path}/{cmd}" --device {upload.vid}:{upload.pid} -D "{build.path}/{build.project_name}.bin" -a{upload.interface} --dfuse-address={upload.address}:leave
+
+#
+# GDB (Debugger)
+#
+# EXPERIMENTAL feature: debug.pattern
+#  - this is alpha and may be subject to change without notice
+
+tools.gdb.path={runtime.tools.arm-none-eabi-gcc-7-2017q4.path}/bin/
+tools.gdb.cmd=arm-none-eabi-gdb
+tools.gdb.cmd.windows=arm-none-eabi-gdb.exe
+tools.gdb.debug.pattern="{path}/{cmd}" --interpreter=mi2 -ex "set pagination off" --baud 115200 -ex "set target-charset ASCII" -ex "target remote {debug.port}" {build.path}/{build.project_name}.elf
