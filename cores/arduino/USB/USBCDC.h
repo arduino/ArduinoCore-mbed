@@ -207,13 +207,13 @@ protected:
 
     OperationList<AsyncWrite> _tx_list;
     bool _tx_in_progress;
-    uint8_t _tx_buffer[64];
+    uint8_t _tx_buffer[512];
     uint8_t *_tx_buf;
     uint32_t _tx_size;
 
     OperationList<AsyncRead> _rx_list;
     bool _rx_in_progress;
-    uint8_t _rx_buffer[64];
+    uint8_t _rx_buffer[512];
     uint8_t *_rx_buf;
     uint32_t _rx_size;
 };
