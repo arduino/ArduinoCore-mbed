@@ -5,7 +5,8 @@
 
 #include <ThreadMRI.h>
 
-ThreadMRI g_debugger(Serial1, USART1_IRQn, 115200, true);
+//ThreadMRI g_debugger(Serial1, USART1_IRQn, 115200, true);
+ThreadMRI g_debugger(Serial, OTG_HS_IRQn, 115200, true);
 
 extern "C" void testContext(void);
 
