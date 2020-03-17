@@ -42,6 +42,8 @@ public:
     //      }
     ThreadMRI(HardwareSerial& serial, IRQn_Type IRQn);
 
+    ThreadMRI(HardwareSerial& serial, bool breakInSetup=true);
+
     // You should never let your ThreadMRI object go out of scope. Make it global or static. To warn you if you do
     // let it go out of scope by mistake, this destructor will break into GDB and then enter an infinite loop.
     ~ThreadMRI();

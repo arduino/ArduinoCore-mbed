@@ -169,6 +169,13 @@ ThreadMRI::ThreadMRI(HardwareSerial& serial, IRQn_Type IRQn, uint32_t baudRate, 
     init(serial, IRQn, baudRate, breakInSetup);
 }
 
+
+ThreadMRI::ThreadMRI(HardwareSerial& serial, bool breakInSetup /* =true */)
+{
+    init(serial, SysTick_IRQn, 115200, breakInSetup);
+}
+
+
 ThreadMRI::ThreadMRI(HardwareSerial& serial, IRQn_Type IRQn)
 {
     init(serial, IRQn, 0, false);
@@ -357,7 +364,13 @@ static void callSerialBeginFromSetup()
 static int justEnteredSetupCallback(void* pv)
 {
     g_pSerial->begin(g_baudRate);
-    hookSerialISR();
+    //while (!g_pSerial) {}
+
+    if (g_irq != SysTick_IRQn) {
+        hookSerialISR();
+    } else {
+        (static_cast<USBSerial*>(g_pSerial))->attach(serialISRHook);
+    }
 
     // Return 0 to indicate that we want to halt execution at the beginning of setup() or 1 to not force a halt.
     return g_breakInSetup ? 0 : 1;
@@ -669,7 +682,9 @@ static bool isInstruction32Bit(uint16_t firstWordOfInstruction)
 
 static void serialISRHook()
 {
-    g_origSerialISR();
+    if (g_origSerialISR) {
+        g_origSerialISR();
+    }
     if (!isDebuggerActive() && g_pSerial->available() > 0) {
         // Pend a halt into the debug monitor now that there is data from GDB ready to be read by it.
         setControlCFlag();
