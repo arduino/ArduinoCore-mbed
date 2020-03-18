@@ -7,6 +7,7 @@
   ],
   "target_overrides": {
     "*": {
+      "target.printf_lib": "std",
       "platform.stdio-buffered-serial": true,
       "platform.stdio-baud-rate": 115200,
       "platform.default-serial-baud-rate": 115200,
