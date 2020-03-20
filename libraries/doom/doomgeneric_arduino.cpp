@@ -1,7 +1,7 @@
 //doomgeneric for arduino
 
 #include "Arduino.h"
-#include "Envie_video_coreboot.h"
+#include "Portenta_Video.h"
 
 #define sleep _sleep
 
@@ -155,7 +155,9 @@ static void DMA2D_Init(uint16_t xsize, uint16_t ysize)
   clut.Size = 0xFF;
 
 #ifdef CORE_CM7
-  SCB_InvalidateDCache_by_Addr(clut.pCLUT, clut.Size);
+  SCB_CleanInvalidateDCache();
+  SCB_InvalidateICache();
+  //SCB_InvalidateDCache_by_Addr(clut.pCLUT, clut.Size);
 #endif
 
   HAL_DMA2D_CLUTLoad(&DMA2D_Handle, clut, 1);
@@ -193,6 +195,9 @@ void DG_Init()
   LCD_Y_Size = stm32_getYSize();
 
   SDRAM.begin(getFramebufferEnd());
+
+  stm32_LCD_Clear(0);
+  stm32_LCD_Clear(0);
 }
 
 void DG_OnPaletteReload() {
@@ -224,6 +229,7 @@ static void handleKeyInput()
 #endif
 }
 
+#define DEBUG_CM7_VIDEO
 
 static void DMA2D_CopyBuffer(uint32_t *pSrc, uint32_t *pDst)
 {
@@ -235,7 +241,7 @@ static void DMA2D_CopyBuffer(uint32_t *pSrc, uint32_t *pDst)
 
   destination = (uint32_t)pDst; // + ((yPos * stm32_getXSize()) + xPos) * 4;
 
-  HAL_DMA2D_PollForTransfer(&DMA2D_Handle, 25);  /* wait for the previous DMA2D transfer to ends */
+  HAL_DMA2D_PollForTransfer(&DMA2D_Handle, 200);  /* wait for the previous DMA2D transfer to ends */
   /* copy the new decoded frame to the LCD Frame buffer*/
   HAL_DMA2D_Start(&DMA2D_Handle, (uint32_t)pSrc, destination, DOOMGENERIC_RESX, DOOMGENERIC_RESY);
 #if defined(CORE_CM7) && !defined(DEBUG_CM7_VIDEO) 
@@ -247,7 +253,9 @@ void DG_DrawFrame()
 {
   uint32_t fb = getNextFrameBuffer();
 #ifdef CORE_CM7
-  SCB_InvalidateDCache_by_Addr((uint32_t *)fb, DOOMGENERIC_RESX * DOOMGENERIC_RESY * 4);
+  SCB_CleanInvalidateDCache();
+  SCB_InvalidateICache();
+  //SCB_InvalidateDCache_by_Addr((uint32_t *)fb, DOOMGENERIC_RESX * DOOMGENERIC_RESY * 4);
 #endif
 
   DMA2D_CopyBuffer((uint32_t *)DG_ScreenBuffer, (uint32_t *)fb);

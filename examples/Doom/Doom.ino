@@ -1,8 +1,8 @@
-#include "SDMMCBlockDevice.h"
+#include "QSPIFBlockDevice.h"
 #include "FATFileSystem.h"
 #include "doomgeneric.h"
 
-SDMMCBlockDevice block_device;
+QSPIFBlockDevice block_device(PD_11, PD_12, PF_7, PD_13,  PF_10, PG_6, QSPIF_POLARITY_MODE_1, 40000000);
 
 mbed::FATFileSystem fs("fs");
 
