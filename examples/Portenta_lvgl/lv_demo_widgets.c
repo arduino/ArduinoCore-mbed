@@ -139,9 +139,7 @@ static void controls_create(lv_obj_t * parent)
     lv_textarea_set_cursor_hidden(ta, true);
     lv_textarea_set_text_align(ta, LV_LABEL_ALIGN_CENTER);
     lv_obj_set_event_cb(ta, lv_ta_event_cb);
-
-    lv_theme_apply(ta, LV_THEME_TEXTAREA_ONELINE);
-
+   
     ta = lv_textarea_create(h, ta);
     lv_textarea_set_pwd_mode(ta, true);
     lv_textarea_set_placeholder_text(ta, "Password");
@@ -410,4 +408,3 @@ static void tab_changer_task_cb(lv_task_t * task)
 
     lv_tabview_set_tab_act(tv, act, LV_ANIM_ON);
 }
-

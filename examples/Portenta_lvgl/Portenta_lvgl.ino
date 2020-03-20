@@ -13,19 +13,19 @@ static lv_disp_drv_t disp_drv;
 /* Display flushing */
 static void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p)
 {
-   uint32_t w = lv_area_get_width(area);
-   uint32_t h = lv_area_get_height(area);
 
-#if 1
- //  SCB_InvalidateICache();
-
-//   SCB_CleanInvalidateDCache();
+#if ARDUINO_PORTENTA_H7_M7
+  SCB_CleanInvalidateDCache();
+  SCB_InvalidateICache();
+#endif
 
   DMA2D_HandleTypeDef * dma2d = stm32_get_DMA2D();
 
   lv_color_t * pDst = (lv_color_t*)fb;
   pDst += area->y1 * lcd_x_size + area->x1;
 
+  uint32_t w = lv_area_get_width(area);
+  uint32_t h = lv_area_get_height(area);
   /*##-1- Configure the DMA2D Mode, Color Mode and output offset #############*/
   dma2d->Init.Mode         = DMA2D_M2M;
   dma2d->Init.ColorMode    = DMA2D_OUTPUT_RGB565;
@@ -45,31 +45,26 @@ static void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t
   dma2d->LayerCfg[1].AlphaInverted = DMA2D_REGULAR_ALPHA; /* No ForeGround Alpha inversion */
 
   /* DMA2D Initialization */
-  if(HAL_DMA2D_Init(dma2d) == HAL_OK) {
-    if(HAL_DMA2D_ConfigLayer(dma2d, 1) == HAL_OK) {
-        HAL_DMA2D_Start(dma2d, (uint32_t)color_p, (uint32_t)pDst, w, h);
-        HAL_DMA2D_PollForTransfer(dma2d, 1000);
+  if (HAL_DMA2D_Init(dma2d) == HAL_OK) {
+    if (HAL_DMA2D_ConfigLayer(dma2d, 1) == HAL_OK) {
+      HAL_DMA2D_Start(dma2d, (uint32_t)color_p, (uint32_t)pDst, w, h);
+      HAL_DMA2D_PollForTransfer(dma2d, 1000);
     }
   }
-#else
-  //NO GPU
-  int32_t y;    
-  for(y = area->y1; y <= area->y2; y++) {
-      memcpy(&fb[y * lcd_x_size + area->x1], color_p, w * sizeof(lv_color_t));
-      color_p += w;
-  }
-  #endif
-lv_disp_flush_ready(disp); /* tell lvgl that flushing is done */
+
+  lv_disp_flush_ready(disp); /* tell lvgl that flushing is done */
 }
 
 
 /* If your MCU has hardware accelerator (GPU) then you can use it to blend to memories using opacity
- * It can be used only in buffered mode (LV_VDB_SIZE != 0 in lv_conf.h)*/
+   It can be used only in buffered mode (LV_VDB_SIZE != 0 in lv_conf.h)*/
 static void gpu_blend(lv_disp_drv_t * disp_drv, lv_color_t * dest, const lv_color_t * src, uint32_t length, lv_opa_t opa)
 {
-  
-//  SCB_CleanInvalidateDCache();
-  
+
+#if ARDUINO_PORTENTA_H7_M7
+  SCB_CleanInvalidateDCache();
+#endif
+
   DMA2D_HandleTypeDef * dma2d = stm32_get_DMA2D();
 
   dma2d->Instance = DMA2D;
@@ -87,24 +82,25 @@ static void gpu_blend(lv_disp_drv_t * disp_drv, lv_color_t * dest, const lv_colo
   dma2d->LayerCfg[0].AlphaMode = DMA2D_NO_MODIF_ALPHA;
   dma2d->LayerCfg[0].InputColorMode = DMA2D_INPUT_RGB565;
   dma2d->LayerCfg[0].InputOffset = 0;
-  
+
   /* DMA2D Initialization */
   if (HAL_DMA2D_Init(dma2d) == HAL_OK) {
     if (HAL_DMA2D_ConfigLayer(dma2d, 0) == HAL_OK && HAL_DMA2D_ConfigLayer(dma2d, 1) == HAL_OK) {
-       HAL_DMA2D_BlendingStart(dma2d, (uint32_t) src, (uint32_t) dest, (uint32_t) dest, length, 1);
-       HAL_DMA2D_PollForTransfer(dma2d, 1000);
+      HAL_DMA2D_BlendingStart(dma2d, (uint32_t) src, (uint32_t) dest, (uint32_t) dest, length, 1);
+      HAL_DMA2D_PollForTransfer(dma2d, 1000);
     }
   }
 }
 
 /* If your MCU has hardware accelerator (GPU) then you can use it to fill a memory with a color */
 static void gpu_fill(lv_disp_drv_t * disp_drv, lv_color_t * dest_buf, lv_coord_t dest_width,
-                    const lv_area_t * fill_area, lv_color_t color)
+                     const lv_area_t * fill_area, lv_color_t color)
 {
-//  SCB_CleanInvalidateDCache();
-  
-  DMA2D_HandleTypeDef * dma2d = stm32_get_DMA2D();
+#if ARDUINO_PORTENTA_H7_M7
+  SCB_CleanInvalidateDCache();
+#endif
 
+  DMA2D_HandleTypeDef * dma2d = stm32_get_DMA2D();
 
   lv_color_t * destination = dest_buf + (dest_width * fill_area->y1 + fill_area->x1);
 
@@ -120,7 +116,7 @@ static void gpu_fill(lv_disp_drv_t * disp_drv, lv_color_t * dest_buf, lv_coord_t
   if (HAL_DMA2D_Init(dma2d) == HAL_OK) {
     if (HAL_DMA2D_ConfigLayer(dma2d, 1) == HAL_OK) {
       lv_coord_t h = lv_area_get_height(fill_area);
-      if(HAL_DMA2D_BlendingStart(dma2d, lv_color_to32(color), (uint32_t)destination, (uint32_t)destination, w, h) == HAL_OK) {
+      if (HAL_DMA2D_BlendingStart(dma2d, lv_color_to32(color), (uint32_t)destination, (uint32_t)destination, w, h) == HAL_OK) {
         HAL_DMA2D_PollForTransfer(dma2d, 1000);
       }
     }
@@ -157,11 +153,11 @@ void setup() {
   anx7625_dp_start(0, &recognized_edid, EDID_MODE_720x480_60Hz);
   SDRAM.begin(getFramebufferEnd());
 
-  lv_init();  
-  
+  lv_init();
+
   lcd_x_size = stm32_getXSize();
   lcd_y_size = stm32_getYSize();
-  
+
   fb = (uint16_t *)getNextFrameBuffer();
   getNextFrameBuffer();
 
@@ -182,14 +178,11 @@ void setup() {
   //lv_label_set_text(label, "Hello Arduino! Dev-7,0");
   //lv_obj_align(label, NULL, LV_ALIGN_CENTER, 0, 0);
 
-   lv_demo_widgets();
+  lv_demo_widgets();
 
 }
 
 void loop() {
-  uint32_t t1 = millis();
   lv_task_handler();
   delay(3);
-  uint32_t t2 = millis();
-  lv_tick_inc(t2-t1);
 }
