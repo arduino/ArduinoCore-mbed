@@ -864,20 +864,21 @@ int anx7625_dp_start(uint8_t bus, const struct edid *edid, enum edid_modes mode)
 
 	anx7625_parse_edid(edid, &dt);
 
-/*
-	dt.pixelclock = envie_known_modes[mode].pixel_clock;
+	if (mode != EDID_MODE_AUTO) {
 
-	dt.hactive = envie_known_modes[mode].hactive;
-	dt.hsync_len = envie_known_modes[mode].hsync_len;
-	dt.hback_porch = envie_known_modes[mode].hback_porch;
-	dt.hfront_porch = envie_known_modes[mode].hfront_porch;
+		dt.pixelclock = envie_known_modes[mode].pixel_clock;
 
-	dt.vactive = envie_known_modes[mode].vactive;
-	dt.vsync_len = envie_known_modes[mode].vsync_len;;
-	dt.vback_porch = envie_known_modes[mode].vback_porch;
-	dt.vfront_porch = envie_known_modes[mode].vfront_porch;
-	dt.voffset = envie_known_modes[mode].voffset; //1;
-*/
+		dt.hactive = envie_known_modes[mode].hactive;
+		dt.hsync_len = envie_known_modes[mode].hsync_len;
+		dt.hback_porch = envie_known_modes[mode].hback_porch;
+		dt.hfront_porch = envie_known_modes[mode].hfront_porch;
+
+		dt.vactive = envie_known_modes[mode].vactive;
+		dt.vsync_len = envie_known_modes[mode].vsync_len;;
+		dt.vback_porch = envie_known_modes[mode].vback_porch;
+		dt.vfront_porch = envie_known_modes[mode].vfront_porch;
+		dt.voffset = envie_known_modes[mode].voffset; //1;
+	}
 
 	stm32_dsi_config(bus, (struct edid *)edid, &dt);
 
@@ -1211,6 +1212,11 @@ static void LL_FillBuffer(uint32_t LayerIndex, void *pDst, uint32_t xSize, uint3
 			}
 		}
 	}
+}
+
+DMA2D_HandleTypeDef* stm32_get_DMA2D(void)
+{
+	return &dma2d;
 }
 
 void stm32_LCD_Clear(uint32_t Color)

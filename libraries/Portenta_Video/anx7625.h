@@ -359,7 +359,7 @@ struct display_timing {
 	unsigned int voffset;
 };
 
-int anx7625_dp_start(uint8_t bus, const struct edid *edid, enum edid_modes mode = EDID_MODE_720x480_60Hz);
+int anx7625_dp_start(uint8_t bus, const struct edid *edid, enum edid_modes mode = EDID_MODE_AUTO);
 int anx7625_dp_get_edid(uint8_t bus, struct edid *out);
 int anx7625_init(uint8_t bus);
 int stm32_dsi_config(uint8_t bus, struct edid *edid, struct display_timing *dt);
@@ -371,5 +371,6 @@ uint32_t getNextFrameBuffer();
 uint32_t stm32_getXSize();
 uint32_t stm32_getYSize();
 uint32_t getFramebufferEnd();
+DMA2D_HandleTypeDef* stm32_get_DMA2D(void);
 
 #endif  /* __ANX7625_H__ */
