@@ -1,7 +1,4 @@
-#include "mbed_config.h"
-
 #pragma once
-#include "mbed_config.h"
 #include <macros.h>
 
 #ifndef __PINS_ARDUINO__

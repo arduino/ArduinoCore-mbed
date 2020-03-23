@@ -21,6 +21,7 @@
 #include "Arduino.h"
 #include "USBCDC.h"
 #include "platform/Stream.h"
+#include "mbed/rtos/rtos.h"
 #include "Callback.h"
 
 /**

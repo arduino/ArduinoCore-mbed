@@ -22,6 +22,7 @@
 
 #include "api/RingBuffer.h"
 #include "Arduino.h"
+#include "mbed/drivers/RawSerial.h"
 
 #ifdef __cplusplus
 

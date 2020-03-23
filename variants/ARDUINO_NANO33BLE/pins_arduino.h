@@ -1,5 +1,4 @@
 #pragma once
-#include "mbed_config.h"
 #include <stdint.h>
 #include <macros.h>
 

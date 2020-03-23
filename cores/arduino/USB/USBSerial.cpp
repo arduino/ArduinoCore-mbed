@@ -22,6 +22,7 @@
 #include "stdint.h"
 #include "PluggableUSBSerial.h"
 #include "usb_phy_api.h"
+#include "mbed.h"
 
 using namespace arduino;
 

@@ -22,6 +22,7 @@
 
 #include "Arduino.h"
 #include "pins_arduino.h"
+#include "mbed.h"
 
 void pinMode(PinName pin, PinMode mode)
 {
