@@ -5,7 +5,7 @@
 
 #include <MRI.h>
 
-DebugSerial debugSerial(Serial1, USART1_IRQn, 115200);
+DebugSerial debugSerial(Serial1, USART1_IRQn, 230400);
 
 void setup() {
 }
