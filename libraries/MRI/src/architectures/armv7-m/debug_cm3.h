@@ -13,8 +13,8 @@
    limitations under the License.
 */
 /* Declares registers, bit fields, and inline routines to utilize the debug hardware on the Cortex-M architecture. */
-#ifndef _DEBUG_CM3_H_
-#define _DEBUG_CM3_H_
+#ifndef DEBUG_CM3_H_
+#define DEBUG_CM3_H_
 
 #include <cmsis.h>
 #include <stdio.h>
@@ -91,15 +91,19 @@ static __INLINE void waitForDebuggerToDetach(uint32_t timeOut)
         __throw(timeoutException);
 }
 
-static __INLINE void enableDebugMonitorAtPriority0(void)
+static __INLINE void enableDebugMonitor()
 {
-    NVIC_SetPriority(DebugMonitor_IRQn, 0);
     CoreDebug->DEMCR |=  CoreDebug_DEMCR_MON_EN;
 }
 
 static __INLINE void enableDWTandITM(void)
 {
     CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA;
+}
+
+static __INLINE void disableDWTandITM(void)
+{
+    CoreDebug->DEMCR &= ~CoreDebug_DEMCR_TRCENA;
 }
 
 static __INLINE void disableSingleStep(void)
@@ -120,6 +124,11 @@ static __INLINE void clearMonitorPending(void)
 static __INLINE void setMonitorPending(void)
 {
     CoreDebug->DEMCR |= CoreDebug_DEMCR_MON_PEND;
+}
+
+static __INLINE uint32_t isMonitorPending(void)
+{
+    return CoreDebug->DEMCR & CoreDebug_DEMCR_MON_PEND;
 }
 
 /* Data Watchpoint and Trace Comparator Function Bits. */
@@ -661,6 +670,11 @@ static __INLINE void enableFPB(void)
     FPB->CTRL |= (FP_CTRL_KEY | FP_CTRL_ENABLE);
 }
 
+static __INLINE void disableFPB(void)
+{
+    FPB->CTRL = FP_CTRL_KEY | (FPB->CTRL & ~FP_CTRL_ENABLE);
+}
+
 static __INLINE void initFPB(void)
 {
     clearFPBComparators();
@@ -902,4 +916,4 @@ static __INLINE int has10MillisecondSysTickExpired(void)
 #define PSR_STACK_ALIGN     (1 << 9)
 
 
-#endif /* _DEBUG_CM3_H_ */
+#endif /* DEBUG_CM3_H_ */

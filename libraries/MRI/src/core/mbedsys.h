@@ -14,8 +14,8 @@
 */
 /* Definition of _sys_*() functions and associated constants implemented in mbed/capi.ar */
 
-#ifndef _MBEDSYS_H_
-#define _MBEDSYS_H_
+#ifndef MBEDSYS_H_
+#define MBEDSYS_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,4 +46,4 @@ int         _sys_istty(FILEHANDLE fh);
 }
 #endif
 
-#endif /* _MBEDSYS_H_ */
+#endif /* MBEDSYS_H_ */

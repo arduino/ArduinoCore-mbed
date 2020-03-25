@@ -13,8 +13,8 @@
    limitations under the License.
 */
 /* Constants used by gdb for remote file APIs. */
-#ifndef _FILEIO_H_
-#define _FILEIO_H_
+#ifndef FILEIO_H_
+#define FILEIO_H_
 
 #define O_RDONLY    0x0
 #define O_WRONLY    0x1
@@ -34,4 +34,4 @@
 #define SEEK_CUR    1
 #define SEEK_END    2
 
-#endif /* _FILEIO_H_ */
+#endif /* FILEIO_H_ */

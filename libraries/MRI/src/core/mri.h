@@ -1,4 +1,4 @@
-/* Copyright 2017 Adam Green (https://github.com/adamgreen/)
+/* Copyright 2020 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
    limitations under the License.
 */
 /* Monitor for Remote Inspection. */
-#ifndef _MRI_H_
-#define _MRI_H_
+#ifndef MRI_H_
+#define MRI_H_
 
 #include <stdint.h>
 
@@ -36,7 +36,7 @@ extern "C"
 #endif
 
 
-/* pDebuggerParameters string passed into __mriInit contains a space separated list of configuration parameters to be
+/* pDebuggerParameters string passed into mriInit contains a space separated list of configuration parameters to be
    used to initialize the debug monitor.  The supported options include:
 
    One of these options to indicate which UART to be used for the debugger connection:
@@ -110,29 +110,25 @@ extern "C"
     NOTE: LPC176x version of MRI supports a maximum baud rate of 3Mbaud and the core clock can't run faster than
           128MHz or calculating baud rate divisors will fail.
 */
-void __mriInit(const char* pDebuggerParameters);
+void mriInit(const char* pDebuggerParameters);
 
 
 /* Simple assembly language stubs that can be called from user's newlib stubs routines which will cause the operations
    to be redirected to the GDB host via MRI. */
-int __mriNewLib_SemihostOpen(const char *pFilename, int flags, int mode);
-int __mriNewLib_SemihostRename(const char *pOldFilename, const char *pNewFilename);
-int __mriNewLib_SemihostUnlink(const char *pFilename);
-int __mriNewLib_SemihostStat(const char *pFilename, void *pStat);
-int __mriNewlib_SemihostWrite(int file, const char *ptr, int len);
-int __mriNewlib_SemihostRead(int file, char *ptr, int len);
-int __mriNewlib_SemihostLSeek(int file, int offset, int whence);
-int __mriNewlib_SemihostClose(int file);
-int __mriNewlib_SemihostFStat(int file, void *pStat);
+int mriNewLib_SemihostOpen(const char *pFilename, int flags, int mode);
+int mriNewLib_SemihostRename(const char *pOldFilename, const char *pNewFilename);
+int mriNewLib_SemihostUnlink(const char *pFilename);
+int mriNewLib_SemihostStat(const char *pFilename, void *pStat);
+int mriNewlib_SemihostWrite(int file, const char *ptr, int len);
+int mriNewlib_SemihostRead(int file, char *ptr, int len);
+int mriNewlib_SemihostLSeek(int file, int offset, int whence);
+int mriNewlib_SemihostClose(int file);
+int mriNewlib_SemihostFStat(int file, void *pStat);
 
-
-
-/* Can be used by semihosting hooks to determine the index of the UART being used by MRI. */
-int __mriPlatform_CommUartIndex(void);
 
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _MRI_H_ */
+#endif /* MRI_H_ */

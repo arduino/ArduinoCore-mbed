@@ -13,17 +13,17 @@
    limitations under the License.
 */
 /* Handler for single step gdb command. */
-#ifndef _CMD_STEP_H_
-#define _CMD_STEP_H_
+#ifndef CMD_STEP_H_
+#define CMD_STEP_H_
 
 #include <stdint.h>
 
-/* Real name of functions are in __mri namespace. */
-uint32_t __mriCmd_HandleSingleStepCommand(void);
-uint32_t __mriCmd_HandleSingleStepWithSignalCommand(void);
+/* Real name of functions are in mri namespace. */
+uint32_t mriCmd_HandleSingleStepCommand(void);
+uint32_t mriCmd_HandleSingleStepWithSignalCommand(void);
 
-/* Macroes which allow code to drop the __mri namespace prefix. */
-#define HandleSingleStepCommand           __mriCmd_HandleSingleStepCommand
-#define HandleSingleStepWithSignalCommand __mriCmd_HandleSingleStepWithSignalCommand
+/* Macroes which allow code to drop the mri namespace prefix. */
+#define HandleSingleStepCommand           mriCmd_HandleSingleStepCommand
+#define HandleSingleStepWithSignalCommand mriCmd_HandleSingleStepWithSignalCommand
 
-#endif /* _CMD_STEP_H_ */
+#endif /* CMD_STEP_H_ */

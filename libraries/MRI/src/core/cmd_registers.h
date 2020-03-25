@@ -13,19 +13,19 @@
    limitations under the License.
 */
 /* Command handler for gdb commands related to CPU registers. */
-#ifndef _CMD_REGISTERS_H_
-#define _CMD_REGISTERS_H_
+#ifndef CMD_REGISTERS_H_
+#define CMD_REGISTERS_H_
 
 #include <stdint.h>
 
-/* Real name of functions are in __mri namespace. */
-uint32_t __mriCmd_Send_T_StopResponse(void);
-uint32_t __mriCmd_HandleRegisterReadCommand(void);
-uint32_t __mriCmd_HandleRegisterWriteCommand(void);
+/* Real name of functions are in mri namespace. */
+uint32_t mriCmd_Send_T_StopResponse(void);
+uint32_t mriCmd_HandleRegisterReadCommand(void);
+uint32_t mriCmd_HandleRegisterWriteCommand(void);
 
-/* Macroes which allow code to drop the __mri namespace prefix. */
-#define Send_T_StopResponse         __mriCmd_Send_T_StopResponse
-#define HandleRegisterReadCommand   __mriCmd_HandleRegisterReadCommand
-#define HandleRegisterWriteCommand  __mriCmd_HandleRegisterWriteCommand
+/* Macroes which allow code to drop the mri namespace prefix. */
+#define Send_T_StopResponse         mriCmd_Send_T_StopResponse
+#define HandleRegisterReadCommand   mriCmd_HandleRegisterReadCommand
+#define HandleRegisterWriteCommand  mriCmd_HandleRegisterWriteCommand
 
-#endif /* _CMD_REGISTERS_H_ */
+#endif /* CMD_REGISTERS_H_ */

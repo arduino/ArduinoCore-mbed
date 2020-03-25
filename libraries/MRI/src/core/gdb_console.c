@@ -21,20 +21,10 @@
 #include <core/gdb_console.h>
 
 
-static void writeStringToSharedCommChannel(const char* pString);
 static void writeStringToExclusiveGdbCommChannel(const char* pString);
 void WriteStringToGdbConsole(const char* pString)
 {
-    if (Platform_CommSharingWithApplication() && IsFirstException())
-        writeStringToSharedCommChannel(pString);
-    else
-        writeStringToExclusiveGdbCommChannel(pString);
-}
-
-static void writeStringToSharedCommChannel(const char* pString)
-{
-    while(*pString)
-        Platform_CommSendChar(*pString++);
+    writeStringToExclusiveGdbCommChannel(pString);
 }
 
 /* Send the 'O' command to gdb to output text to its console.

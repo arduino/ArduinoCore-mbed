@@ -13,8 +13,8 @@
    limitations under the License.
 */
 /* Monitor for Remote Inspection. */
-#ifndef _POSIX4WIN_H_
-#define _POSIX4WIN_H_
+#ifndef POSIX4WIN_H_
+#define POSIX4WIN_H_
 #ifdef WIN32
 
 
@@ -24,4 +24,4 @@
 
 
 #endif /* WIN32 */
-#endif /* _POSIX4WIN_H_ */
+#endif /* POSIX4WIN_H_ */

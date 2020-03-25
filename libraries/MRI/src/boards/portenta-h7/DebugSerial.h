@@ -19,10 +19,10 @@
 
 extern "C" {
     typedef struct Token Token;
-    void     __mriPlatform_Init(Token* pParameterTokens);
-    uint32_t __mriPlatform_CommHasReceiveData(void);
-    int      __mriPlatform_CommReceiveChar(void);
-    void     __mriPlatform_CommSendChar(int character);
+    void     mriPlatform_Init(Token* pParameterTokens);
+    uint32_t mriPlatform_CommHasReceiveData(void);
+    int      mriPlatform_CommReceiveChar(void);
+    void     mriPlatform_CommSendChar(int character);
 }
 
 
@@ -62,7 +62,7 @@ protected:
     void        callSerialBeginFromSetup();
 
     // These protected methods are called from global Platform* routines via singleton.
-    void        setSerialPriority(uint32_t priority);
+    void        setSerialPriority(uint8_t priority);
     uint32_t    hasReceiveData(void);
     int         receiveChar(void);
     void        sendChar(int character);
@@ -91,10 +91,10 @@ protected:
     IRQn_Type       _irq;
     bool            _breakInSetup;
 
-    friend void     ::__mriPlatform_Init(Token* pParameterTokens);
-    friend uint32_t ::__mriPlatform_CommHasReceiveData(void);
-    friend int      ::__mriPlatform_CommReceiveChar(void);
-    friend void     ::__mriPlatform_CommSendChar(int character);
+    friend void     ::mriPlatform_Init(Token* pParameterTokens);
+    friend uint32_t ::mriPlatform_CommHasReceiveData(void);
+    friend int      ::mriPlatform_CommReceiveChar(void);
+    friend void     ::mriPlatform_CommSendChar(int character);
 };
 
 } // namespace arduino

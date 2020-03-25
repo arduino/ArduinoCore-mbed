@@ -13,17 +13,17 @@
    limitations under the License.
 */
 /* Handler for continue gdb command. */
-#ifndef _CMD_CONTINUE_H_
-#define _CMD_CONTINUE_H_
+#ifndef CMD_CONTINUE_H_
+#define CMD_CONTINUE_H_
 
 #include <stdint.h>
 
-/* Real name of functions are in __mri namespace. */
-uint32_t __mriCmd_HandleContinueCommand(void);
-uint32_t __mriCmd_HandleContinueWithSignalCommand(void);
+/* Real name of functions are in mri namespace. */
+uint32_t mriCmd_HandleContinueCommand(void);
+uint32_t mriCmd_HandleContinueWithSignalCommand(void);
 
-/* Macroes which allow code to drop the __mri namespace prefix. */
-#define HandleContinueCommand           __mriCmd_HandleContinueCommand
-#define HandleContinueWithSignalCommand __mriCmd_HandleContinueWithSignalCommand
+/* Macroes which allow code to drop the mri namespace prefix. */
+#define HandleContinueCommand           mriCmd_HandleContinueCommand
+#define HandleContinueWithSignalCommand mriCmd_HandleContinueWithSignalCommand
 
-#endif /* _CMD_CONTINUE_H_ */
+#endif /* CMD_CONTINUE_H_ */

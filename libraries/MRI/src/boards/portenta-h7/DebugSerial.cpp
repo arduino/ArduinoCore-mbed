@@ -82,7 +82,7 @@ void DebugSerial::construct() {
     }
     g_pDebugSerial = this;
 
-    __mriInit("");
+    mriInit("");
 
     if (_baudRate != 0) {
         callSerialBeginFromSetup();
@@ -92,7 +92,7 @@ void DebugSerial::construct() {
 void DebugSerial::callSerialBeginFromSetup() {
     _contextBufferSize = Platform_GetPacketBufferSize();
     _pContextBuffer = new char[_contextBufferSize];
-    __mriCore_SetTempBreakpoint((uint32_t)setup, justEnteredSetupCallback, NULL);
+    mriCore_SetTempBreakpoint((uint32_t)setup, justEnteredSetupCallback, NULL);
 }
 
 int DebugSerial::justEnteredSetupCallback(void* pv){
@@ -116,7 +116,7 @@ int DebugSerial::justEnteredSetup() {
     Buffer_Reset(&buffer);
     Platform_CopyContextFromBuffer(&buffer);
 
-    __mriCore_SetTempBreakpoint((uint32_t)setup, justReturnedFromInitSerialCallback, NULL);
+    mriCore_SetTempBreakpoint((uint32_t)setup, justReturnedFromInitSerialCallback, NULL);
 
     // Return 1 to indicate that we want to resume execution.
     return 1;
@@ -168,8 +168,8 @@ DebugSerial::~DebugSerial() {
         // Loop forever.
     }
 }
-void DebugSerial::setSerialPriority(uint32_t priority) {
-    NVIC_SetPriority(_irq, priority);
+void DebugSerial::setSerialPriority(uint8_t priority) {
+    mriCortexMSetPriority(_irq, priority, 0);
 }
 
 void DebugSerial::_initSerial() {
@@ -226,28 +226,27 @@ void DebugSerial::sendChar(int character) {
 // Global Platform_* functions needed by MRI to initialize and communicate with MRI.
 // These functions will perform most of their work through the DebugSerial singleton.
 // ---------------------------------------------------------------------------------------------------------------------
-// The debugger uses these handlers to catch faults, debug events, etc.
-extern "C" void __mriExceptionHandler(void);
-extern "C" void __mriFaultHandler(void);
+// The debugger uses this handler to catch faults, debug events, etc.
+extern "C" void mriExceptionHandler(void);
 
 struct SystemHandlerPriorities {
-    uint32_t svcallPriority;
-    uint32_t pendsvPriority;
-    uint32_t systickPriority;
+    uint8_t svcallPriority;
+    uint8_t pendsvPriority;
+    uint8_t systickPriority;
 };
 
 // Forward Function Declarations
 static SystemHandlerPriorities getSystemHandlerPrioritiesBeforeMriModifiesThem();
-static void lowerPriorityOfNonDebugHandlers(const SystemHandlerPriorities* pPriorities);
-static void setHandlerPriorityLowerThanDebugger(IRQn_Type irq, uint32_t origPriority);
+static void restoreSystemHandlerPriorities(const SystemHandlerPriorities* pPriorities);
 static void switchFaultHandlersToDebugger();
 
 
 extern "C" void Platform_Init(Token* pParameterTokens) {
     SystemHandlerPriorities origPriorities = getSystemHandlerPrioritiesBeforeMriModifiesThem();
+    uint8_t                 debugMonPriority = 1;
 
     __try
-        __mriCortexMInit((Token*)pParameterTokens);
+        mriCortexMInit((Token*)pParameterTokens, debugMonPriority, WAKEUP_PIN_IRQn);
     __catch
         __rethrow;
 
@@ -255,9 +254,8 @@ extern "C" void Platform_Init(Token* pParameterTokens) {
     // Set interrupt used by serial comms (UART or USB) at highest priority.
     // Set DebugMonitor interrupt at next highest priority.
     // Set all other external interrupts lower than both serial comms and DebugMonitor.
-    lowerPriorityOfNonDebugHandlers(&origPriorities);
+    restoreSystemHandlerPriorities(&origPriorities);
     g_pDebugSerial->setSerialPriority(0);
-    NVIC_SetPriority(DebugMonitor_IRQn, 1);
 
     switchFaultHandlersToDebugger();
 }
@@ -271,42 +269,18 @@ static SystemHandlerPriorities getSystemHandlerPrioritiesBeforeMriModifiesThem()
     return priorities;
 }
 
-static void lowerPriorityOfNonDebugHandlers(const SystemHandlerPriorities* pPriorities) {
+static void restoreSystemHandlerPriorities(const SystemHandlerPriorities* pPriorities) {
     // Set priority of system handlers that aren't directly related to debugging lower than those that are.
-    setHandlerPriorityLowerThanDebugger(SVCall_IRQn, pPriorities->svcallPriority);
-    setHandlerPriorityLowerThanDebugger(PendSV_IRQn, pPriorities->pendsvPriority);
-    setHandlerPriorityLowerThanDebugger(SysTick_IRQn, pPriorities->systickPriority);
-
-    // Do the same for external interrupts.
-    for (int irq = WWDG_IRQn ; irq <= WAKEUP_PIN_IRQn ; irq++) {
-        setHandlerPriorityLowerThanDebugger((IRQn_Type)irq, NVIC_GetPriority((IRQn_Type)irq));
-    }
-}
-
-static void setHandlerPriorityLowerThanDebugger(IRQn_Type irq, uint32_t priority)
-{
-    // There are a total of 16 priority levels on the STM32H747XI,
-    // 4 of them reserved:
-    // 0 - Highest - Communication Peripheral ISR
-    // 1           - DebugMon
-    // 14          - SVCall
-    // 15 - Lowest - PendSV & SysTick for switching context
-    //
-    // Everything not listed above will be lowered in priority by 2 to make room for the debugger priorities
-    // except that ISRs that are already at priorities 12 & 13 will not be altered or they would conflict
-    // with the 2 lowest reserved priorities.
-    uint32_t highestPriority = (1 << __NVIC_PRIO_BITS) - 1;
-    if (priority <= highestPriority-4) {
-        priority += 2;
-    }
-    NVIC_SetPriority(irq, priority);
+    NVIC_SetPriority(SVCall_IRQn, pPriorities->svcallPriority);
+    NVIC_SetPriority(PendSV_IRQn, pPriorities->pendsvPriority);
+    NVIC_SetPriority(SysTick_IRQn, pPriorities->systickPriority);
 }
 
 static void switchFaultHandlersToDebugger(void) {
-    NVIC_SetVector(HardFault_IRQn,        (uint32_t)&__mriFaultHandler);
-    NVIC_SetVector(MemoryManagement_IRQn, (uint32_t)&__mriFaultHandler);
-    NVIC_SetVector(BusFault_IRQn,         (uint32_t)&__mriFaultHandler);
-    NVIC_SetVector(UsageFault_IRQn,       (uint32_t)&__mriExceptionHandler);
+    NVIC_SetVector(HardFault_IRQn,        (uint32_t)&mriExceptionHandler);
+    NVIC_SetVector(MemoryManagement_IRQn, (uint32_t)&mriExceptionHandler);
+    NVIC_SetVector(BusFault_IRQn,         (uint32_t)&mriExceptionHandler);
+    NVIC_SetVector(UsageFault_IRQn,       (uint32_t)&mriExceptionHandler);
 }
 
 
@@ -320,33 +294,6 @@ extern "C" int Platform_CommReceiveChar(void) {
 
 extern "C" void Platform_CommSendChar(int character) {
     g_pDebugSerial->sendChar(character);
-}
-
-extern "C" int Platform_CommCausedInterrupt(void) {
-    return 0;
-}
-
-extern "C" void Platform_CommClearInterrupt(void) {
-}
-
-extern "C" int Platform_CommSharingWithApplication(void) {
-    return 0;
-}
-
-extern "C" int Platform_CommShouldWaitForGdbConnect(void) {
-    return 0;
-}
-
-extern "C" int Platform_CommIsWaitingForGdbToConnect(void) {
-    return 0;
-}
-
-extern "C" void Platform_CommPrepareToWaitForGdbConnection(void) {
-    return;
-}
-
-extern "C" void Platform_CommWaitForReceiveDataToStop(void) {
-    return;
 }
 
 
