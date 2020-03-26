@@ -13,8 +13,8 @@
    limitations under the License.
 */
 /* Routines to output text to stdout on the gdb console. */
-#ifndef _GDB_CONSOLE_H_
-#define _GDB_CONSOLE_H_
+#ifndef GDB_CONSOLE_H_
+#define GDB_CONSOLE_H_
 
 #include <stdint.h>
 
@@ -26,4 +26,4 @@ void mriGdbConsole_WriteHexValue(uint32_t value);
 #define WriteStringToGdbConsole     mriGdbConsole_WriteString
 #define WriteHexValueToGdbConsole   mriGdbConsole_WriteHexValue
 
-#endif /* _GDB_CONSOLE_H_ */
+#endif /* GDB_CONSOLE_H_ */

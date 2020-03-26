@@ -14,8 +14,8 @@
 */
 /* Core mri functionality exposed to other modules within the debug monitor.  These are the private routines exposed
    from within mri.c.  The public functionality is exposed via mri.h. */
-#ifndef _CORE_H_
-#define _CORE_H_
+#ifndef CORE_H_
+#define CORE_H_
 
 #include <stdint.h>
 #include <core/buffer.h>
@@ -78,4 +78,4 @@ int     mriCore_SetTempBreakpoint(uint32_t breakpointAddress, TempBreakpointCall
     #define ADDR32_TO_POINTER(X) (void*)(X)
 #endif /* _LP64 */
 
-#endif /* _CORE_H_ */
+#endif /* CORE_H_ */

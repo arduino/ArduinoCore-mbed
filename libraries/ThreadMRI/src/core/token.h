@@ -13,8 +13,8 @@
    limitations under the License.
 */
 /* 'Class' used to parse and tokenize a string based on provided list of separators. */
-#ifndef _TOKEN_H_
-#define _TOKEN_H_
+#ifndef TOKEN_H_
+#define TOKEN_H_
 
 #include <stddef.h>
 #include <core/try_catch.h>
@@ -55,4 +55,4 @@ __throws const char* mriToken_GetToken(Token* pToken, size_t tokenIndex);
 #define Token_MatchingStringPrefix  mriToken_MatchingStringPrefix
 #define Token_Copy                  mriToken_Copy
 
-#endif /* _TOKEN_H_ */
+#endif /* TOKEN_H_ */

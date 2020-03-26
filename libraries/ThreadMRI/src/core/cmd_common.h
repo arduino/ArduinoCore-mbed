@@ -13,8 +13,8 @@
    limitations under the License.
 */
 /* Common functionality shared between gdb command handlers in mri. */
-#ifndef _CMD_COMMON_H_
-#define _CMD_COMMON_H_
+#ifndef CMD_COMMON_H_
+#define CMD_COMMON_H_
 
 #include <stdint.h>
 #include <core/buffer.h>
@@ -45,4 +45,4 @@ __throws void     mriCmd_ThrowIfNextCharIsNotEqualTo(Buffer* pBuffer, char thisC
 #define ReadUIntegerArgument                    mriCmd_ReadUIntegerArgument
 #define ThrowIfNextCharIsNotEqualTo             mriCmd_ThrowIfNextCharIsNotEqualTo
 
-#endif /* _CMD_COMMON_H_ */
+#endif /* CMD_COMMON_H_ */

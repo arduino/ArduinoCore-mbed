@@ -13,8 +13,8 @@
    limitations under the License.
 */
 /* Very rough exception handling like macros for C. */
-#ifndef _MRI_TRY_CATCH_H_
-#define _MRI_TRY_CATCH_H_
+#ifndef MRI_TRY_CATCH_H_
+#define MRI_TRY_CATCH_H_
 
 #define noException                         0
 #define bufferOverrunException              1
@@ -79,4 +79,4 @@ static inline void clearExceptionCode(void)
 }
 
 #endif /* MRI_SKIP_TRY_CATCH_MACRO_DEFINES */
-#endif /* _MRI_TRY_CATCH_H_ */
+#endif /* MRI_TRY_CATCH_H_ */

@@ -13,8 +13,8 @@
    limitations under the License.
 */
 /* Handlers for memory read and write gdb commands. */
-#ifndef _CMD_MEMORY_H_
-#define _CMD_MEMORY_H_
+#ifndef CMD_MEMORY_H_
+#define CMD_MEMORY_H_
 
 #include <stdint.h>
 
@@ -28,4 +28,4 @@ uint32_t mriCmd_HandleBinaryMemoryWriteCommand(void);
 #define HandleMemoryWriteCommand        mriCmd_HandleMemoryWriteCommand
 #define HandleBinaryMemoryWriteCommand  mriCmd_HandleBinaryMemoryWriteCommand
 
-#endif /* _CMD_MEMORY_H_ */
+#endif /* CMD_MEMORY_H_ */

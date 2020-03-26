@@ -65,6 +65,7 @@ void mriScatterGather_Set(ScatterGather* pThis, uint32_t index, uint32_t newValu
         if (index < count)
         {
             pThis->pEntries[i].pValues[index - base] = newValue;
+            return;
         }
     }
     __throw(bufferOverrunException);

@@ -13,8 +13,8 @@
    limitations under the License.
 */
 /* Handling and issuing routines for gdb file commands. */
-#ifndef _CMD_FILE_H_
-#define _CMD_FILE_H_
+#ifndef CMD_FILE_H_
+#define CMD_FILE_H_
 
 #include <stdint.h>
 #include <core/buffer.h>
@@ -86,4 +86,4 @@ uint32_t mriHandleFileIOCommand(void);
 #define IssueGdbFileRenameRequest   mriIssueGdbFileRenameRequest
 #define HandleFileIOCommand         mriHandleFileIOCommand
 
-#endif /* _CMD_FILE_H_ */
+#endif /* CMD_FILE_H_ */

@@ -13,8 +13,8 @@
    limitations under the License.
 */
 /* Routines to read/write memory and detect any faults that might occur while attempting to do so. */
-#ifndef _MEMORY_H_
-#define _MEMORY_H_
+#ifndef MEMORY_H_
+#define MEMORY_H_
 
 #include <stdint.h>
 #include <core/buffer.h>
@@ -29,4 +29,4 @@ int      mriMem_WriteBinaryBufferToMemory(Buffer* pBuffer, void* pvMemory, uint3
 #define WriteHexBufferToMemory      mriMem_WriteHexBufferToMemory
 #define WriteBinaryBufferToMemory   mriMem_WriteBinaryBufferToMemory
 
-#endif /* _MEMORY_H_ */
+#endif /* MEMORY_H_ */

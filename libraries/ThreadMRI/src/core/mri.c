@@ -166,12 +166,6 @@ void mriDebugException(void)
 {
     int justSingleStepped = Platform_IsSingleStepping();
 
-    if (Platform_CommCausedInterrupt() && !Platform_CommHasReceiveData())
-    {
-        Platform_CommClearInterrupt();
-        return;
-    }
-
     if (wasTempBreakpointHit())
     {
         TempBreakpointCallbackPtr pTempBreakpointCallback = g_mri.pTempBreakpointCallback;

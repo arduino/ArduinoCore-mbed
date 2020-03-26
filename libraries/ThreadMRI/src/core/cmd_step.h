@@ -13,8 +13,8 @@
    limitations under the License.
 */
 /* Handler for single step gdb command. */
-#ifndef _CMD_STEP_H_
-#define _CMD_STEP_H_
+#ifndef CMD_STEP_H_
+#define CMD_STEP_H_
 
 #include <stdint.h>
 
@@ -26,4 +26,4 @@ uint32_t mriCmd_HandleSingleStepWithSignalCommand(void);
 #define HandleSingleStepCommand           mriCmd_HandleSingleStepCommand
 #define HandleSingleStepWithSignalCommand mriCmd_HandleSingleStepWithSignalCommand
 
-#endif /* _CMD_STEP_H_ */
+#endif /* CMD_STEP_H_ */

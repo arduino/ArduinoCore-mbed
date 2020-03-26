@@ -17,6 +17,10 @@
 #pragma once
 
 
+// Pass THREADMRI_BREAK_ON_SETUP as breakInSetup parameter of ThreadMRI constructors to halt in setup().
+#define THREADMRI_BREAK_ON_SETUP true
+
+
 class ThreadMRI {
 public:
     // You must declare your ThreadMRI object as a global or function scoped static so that it doesn't get

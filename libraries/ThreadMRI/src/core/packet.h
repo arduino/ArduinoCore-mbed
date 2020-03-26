@@ -13,8 +13,8 @@
    limitations under the License.
 */
 /* 'Class' to manage the sending and receiving of packets to/from gdb.  Takes care of crc and ack/nak handling too. */
-#ifndef _PACKET_H_
-#define _PACKET_H_
+#ifndef PACKET_H_
+#define PACKET_H_
 
 #include <stdio.h>
 #include <core/buffer.h>
@@ -37,4 +37,4 @@ void    mriPacket_SendToGDB(Packet* pPacket, Buffer* pBuffer);
 #define Packet_SendToGDB    mriPacket_SendToGDB
 
 
-#endif /* _PACKET_H_ */
+#endif /* PACKET_H_ */

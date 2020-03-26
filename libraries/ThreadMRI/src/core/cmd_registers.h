@@ -13,8 +13,8 @@
    limitations under the License.
 */
 /* Command handler for gdb commands related to CPU registers. */
-#ifndef _CMD_REGISTERS_H_
-#define _CMD_REGISTERS_H_
+#ifndef CMD_REGISTERS_H_
+#define CMD_REGISTERS_H_
 
 #include <stdint.h>
 
@@ -28,4 +28,4 @@ uint32_t mriCmd_HandleRegisterWriteCommand(void);
 #define HandleRegisterReadCommand   mriCmd_HandleRegisterReadCommand
 #define HandleRegisterWriteCommand  mriCmd_HandleRegisterWriteCommand
 
-#endif /* _CMD_REGISTERS_H_ */
+#endif /* CMD_REGISTERS_H_ */

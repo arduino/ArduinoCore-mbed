@@ -1,4 +1,4 @@
-/* Copyright 2017 Adam Green (https://github.com/adamgreen/)
+/* Copyright 2020 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
    limitations under the License.
 */
 /* Monitor for Remote Inspection. */
-#ifndef _MRI_H_
-#define _MRI_H_
+#ifndef MRI_H_
+#define MRI_H_
 
 #include <stdint.h>
 
@@ -127,12 +127,8 @@ int mriNewlib_SemihostFStat(int file, void *pStat);
 
 
 
-/* Can be used by semihosting hooks to determine the index of the UART being used by MRI. */
-int mriPlatform_CommUartIndex(void);
-
-
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _MRI_H_ */
+#endif /* MRI_H_ */

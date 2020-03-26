@@ -113,6 +113,15 @@ volatile uint32_t               mriThreadOrigUsageFault;
 // Address of the original Serial peripheral ISR to be hooked.
 void                            (*g_origSerialISR)(void);
 
+// Entries to track the chunks of the context in a scatter list.
+#if MRI_DEVICE_HAS_FPU
+    #define CONTEXT_ENTRIES     (5 + 3)
+#else
+    #define CONTEXT_ENTRIES     5
+#endif
+
+static ScatterGatherEntry   g_contextEntries[CONTEXT_ENTRIES];
+
 // UNDONE: For debugging. If different than g_haltedThreadId then the mriMain() thread was signalled when the previous
 //         instance was still running.
 static volatile osThreadId_t    g_debugThreadId;
@@ -139,8 +148,6 @@ static void resumeApplicationThreads();
 static void readThreadContext(osThreadId_t thread);
 static void switchRtxHandlersToDebugStubsForSingleStepping();
 static void restoreRtxHandlers();
-static void setDebugActiveFlag();
-static void clearDebugActiveFlag();
 static void callSerialBeginFromSetup();
 static int justEnteredSetupCallback(void* pv);
 static void hookSerialISR();
@@ -235,13 +242,11 @@ static __NO_RETURN void mriMain(void *pv)
         if (Platform_IsSingleStepping()) {
             restoreRtxHandlers();
         }
-        setDebugActiveFlag();
 
         osThreadSetPriority(osThreadGetId(), osPriorityNormal);
         mriDebugException();
         osThreadSetPriority(osThreadGetId(), osPriorityRealtime7);
 
-        clearDebugActiveFlag();
         if (Platform_IsSingleStepping()) {
             mriThreadSingleStepThreadId = g_haltedThreadId;
             switchRtxHandlersToDebugStubsForSingleStepping();
@@ -297,35 +302,35 @@ static void readThreadContext(osThreadId_t thread)
 
     uint32_t* pThreadContext = (uint32_t*)pThread->sp;
     // R0 - R3
-    mriCortexMState.contextEntries[0].pValues = pThreadContext + offset + 8;
-    mriCortexMState.contextEntries[0].count = 4;
+    g_contextEntries[0].pValues = pThreadContext + offset + 8;
+    g_contextEntries[0].count = 4;
     // R4 - R11
-    mriCortexMState.contextEntries[1].pValues = pThreadContext + offset + 0;
-    mriCortexMState.contextEntries[1].count = 8;
+    g_contextEntries[1].pValues = pThreadContext + offset + 0;
+    g_contextEntries[1].count = 8;
     // R12
-    mriCortexMState.contextEntries[2].pValues = pThreadContext + offset + 12;
-    mriCortexMState.contextEntries[2].count = 1;
+    g_contextEntries[2].pValues = pThreadContext + offset + 12;
+    g_contextEntries[2].count = 1;
     // SP - Point scatter gather context to correct location for SP but set it to correct value once CPSR is more easily
     // fetched.
-    mriCortexMState.contextEntries[3].pValues = &mriCortexMState.sp;
-    mriCortexMState.contextEntries[3].count = 1;
+    g_contextEntries[3].pValues = &mriCortexMState.sp;
+    g_contextEntries[3].count = 1;
     // LR, PC, CPSR
-    mriCortexMState.contextEntries[4].pValues = pThreadContext + offset + 13;
-    mriCortexMState.contextEntries[4].count = 3;
+    g_contextEntries[4].pValues = pThreadContext + offset + 13;
+    g_contextEntries[4].count = 3;
     // Set SP to correct value using alignment bit in CPSR. Memory for SP is already tracked by context.
     uint32_t cpsr = ScatterGather_Get(&mriCortexMState.context, CPSR);
     mriCortexMState.sp = pThread->sp + sizeof(uint32_t) * (stackedCount + ((cpsr >> PSR_STACK_ALIGN_SHIFT) & 1));
 
     if (offset != 0) {
         // S0 - S15
-        mriCortexMState.contextEntries[5].pValues = pThreadContext + 32;
-        mriCortexMState.contextEntries[5].count = 16;
+        g_contextEntries[5].pValues = pThreadContext + 32;
+        g_contextEntries[5].count = 16;
         // S16 - S31
-        mriCortexMState.contextEntries[6].pValues = pThreadContext + 0;
-        mriCortexMState.contextEntries[6].count = 16;
+        g_contextEntries[6].pValues = pThreadContext + 0;
+        g_contextEntries[6].count = 16;
         // FPSCR
-        mriCortexMState.contextEntries[7].pValues = pThreadContext + 48;
-        mriCortexMState.contextEntries[7].count = 1;
+        g_contextEntries[7].pValues = pThreadContext + 48;
+        g_contextEntries[7].count = 1;
     }
 }
 
@@ -344,16 +349,6 @@ static void restoreRtxHandlers()
     NVIC_SetVector(SVCall_IRQn, mriThreadOrigSVCall);
     NVIC_SetVector(PendSV_IRQn, mriThreadOrigPendSV);
     NVIC_SetVector(SysTick_IRQn, mriThreadOrigSysTick);
-}
-
-static void setDebugActiveFlag()
-{
-    mriCortexMState.flags |= CORTEXM_FLAGS_ACTIVE_DEBUG;
-}
-
-static void clearDebugActiveFlag()
-{
-    mriCortexMState.flags &= ~CORTEXM_FLAGS_ACTIVE_DEBUG;
 }
 
 static void callSerialBeginFromSetup()
@@ -401,13 +396,16 @@ ThreadMRI::~ThreadMRI() {
 // ---------------------------------------------------------------------------------------------------------------------
 void Platform_Init(Token* pParameterTokens)
 {
+    uint32_t debugMonPriority = 255;
+
     __try
-        mriCortexMInit((Token*)pParameterTokens);
+        mriCortexMInit((Token*)pParameterTokens, debugMonPriority, (IRQn_Type)0);
     __catch
         __rethrow;
 
     g_enableDWTandFPB = 0;
     mriThreadSingleStepThreadId = NULL;
+    ScatterGather_Init(&mriCortexMState.context, g_contextEntries, sizeof(g_contextEntries)/sizeof(g_contextEntries[0]));
     recordAndSwitchFaultHandlersToDebugger();
 }
 
@@ -444,15 +442,6 @@ int Platform_CommReceiveChar(void)
 void Platform_CommSendChar(int character)
 {
     g_pSerial->write(character);
-}
-
-int Platform_CommCausedInterrupt(void)
-{
-    return 0;
-}
-
-void Platform_CommClearInterrupt(void)
-{
 }
 
 
@@ -598,7 +587,7 @@ static bool hasEncounteredDebugEvent()
 
 static bool hasControlCBeenDetected()
 {
-    return mriCortexMState.flags & CORTEXM_FLAGS_CTRL_C;
+    return mriCortexMFlags & CORTEXM_FLAGS_CTRL_C;
 }
 
 static void recordAndClearFaultStatusBits()
@@ -620,7 +609,7 @@ static void wakeMriMainToDebugCurrentThread()
 {
     disableSingleStep();
     g_debugThreadId = osThreadGetId();
-    g_haltedThreadId = g_debugThreadId; // UNDONE: osThreadGetId();
+    g_haltedThreadId = g_debugThreadId;
     osThreadFlagsSet(mriThreadId, MRI_THREAD_DEBUG_EVENT_FLAG);
 }
 
@@ -632,12 +621,12 @@ static void stopSingleStepping()
 
 static bool isDebugThreadActive()
 {
-    return (mriCortexMState.flags & CORTEXM_FLAGS_ACTIVE_DEBUG) && mriThreadId == osThreadGetId();
+    return (mriCortexMFlags & CORTEXM_FLAGS_ACTIVE_DEBUG) && mriThreadId == osThreadGetId();
 }
 
 static void setFaultDetectedFlag()
 {
-    mriCortexMState.flags |= CORTEXM_FLAGS_FAULT_DURING_DEBUG;
+    mriCortexMFlags |= CORTEXM_FLAGS_FAULT_DURING_DEBUG;
 }
 
 static bool isImpreciseBusFault()
@@ -649,7 +638,7 @@ static void advancePCToNextInstruction(uint32_t excReturn, uint32_t psp, uint32_
 {
     uint32_t* pSP = threadSP(excReturn, psp, msp);
     uint32_t* pPC = pSP + 7;
-    uint16_t  currentInstruction = *(uint16_t*)pPC;
+    uint16_t  currentInstruction = *(uint16_t*)*pPC;
     if (isInstruction32Bit(currentInstruction)) {
         *pPC += sizeof(uint32_t);
     } else {
@@ -694,10 +683,10 @@ static void serialISRHook()
 
 static bool isDebuggerActive()
 {
-    return mriCortexMState.flags & CORTEXM_FLAGS_ACTIVE_DEBUG;
+    return mriCortexMFlags & CORTEXM_FLAGS_ACTIVE_DEBUG;
 }
 
 static void setControlCFlag()
 {
-    mriCortexMState.flags |= CORTEXM_FLAGS_CTRL_C;
+    mriCortexMFlags |= CORTEXM_FLAGS_CTRL_C;
 }

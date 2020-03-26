@@ -13,8 +13,8 @@
    limitations under the License.
 */
 /* Declares registers, bit fields, and inline routines to utilize the debug hardware on the Cortex-M architecture. */
-#ifndef _DEBUG_CM3_H_
-#define _DEBUG_CM3_H_
+#ifndef DEBUG_CM3_H_
+#define DEBUG_CM3_H_
 
 #include <cmsis.h>
 #include <stdio.h>
@@ -91,9 +91,8 @@ static __INLINE void waitForDebuggerToDetach(uint32_t timeOut)
         __throw(timeoutException);
 }
 
-static __INLINE void enableDebugMonitorAtSpecifiedPriority(uint32_t priority)
+static __INLINE void enableDebugMonitor()
 {
-    NVIC_SetPriority(DebugMonitor_IRQn, priority);
     CoreDebug->DEMCR |=  CoreDebug_DEMCR_MON_EN;
 }
 
@@ -917,4 +916,4 @@ static __INLINE int has10MillisecondSysTickExpired(void)
 #define PSR_STACK_ALIGN     (1 << 9)
 
 
-#endif /* _DEBUG_CM3_H_ */
+#endif /* DEBUG_CM3_H_ */

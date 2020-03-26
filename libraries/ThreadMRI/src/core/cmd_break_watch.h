@@ -13,8 +13,8 @@
    limitations under the License.
 */
 /* Handlers for gdb breakpoint and watchpoint commands. */
-#ifndef _CMD_BREAK_WATCH_H_
-#define _CMD_BREAK_WATCH_H_
+#ifndef CMD_BREAK_WATCH_H_
+#define CMD_BREAK_WATCH_H_
 
 #include <stdint.h>
 
@@ -26,4 +26,4 @@ uint32_t mriCmd_HandleBreakpointWatchpointRemoveCommand(void);
 #define HandleBreakpointWatchpointSetCommand    mriCmd_HandleBreakpointWatchpointSetCommand
 #define HandleBreakpointWatchpointRemoveCommand mriCmd_HandleBreakpointWatchpointRemoveCommand
 
-#endif /* _CMD_BREAK_WATCH_H_ */
+#endif /* CMD_BREAK_WATCH_H_ */

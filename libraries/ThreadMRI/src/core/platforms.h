@@ -14,8 +14,8 @@
 */
 /* Declaration of routines that need to be provided for a specific target hardware platform before mri can be used to
    as a debug conduit for it. */
-#ifndef _PLATFORMS_H_
-#define _PLATFORMS_H_
+#ifndef PLATFORMS_H_
+#define PLATFORMS_H_
 
 #include <stdint.h>
 #include <core/token.h>
@@ -38,8 +38,6 @@ void      mriPlatform_MemWrite8(void* pv, uint8_t value);
 uint32_t  mriPlatform_CommHasReceiveData(void);
 int       mriPlatform_CommReceiveChar(void);
 void      mriPlatform_CommSendChar(int character);
-int       mriPlatform_CommCausedInterrupt(void);
-void      mriPlatform_CommClearInterrupt(void);
 
 uint8_t   mriPlatform_DetermineCauseOfException(void);
 void      mriPlatform_DisplayFaultCauseToGdbConsole(void);
@@ -114,8 +112,6 @@ uint32_t       mriPlatform_GetUidSize(void);
 #define Platform_CommHasReceiveData                         mriPlatform_CommHasReceiveData
 #define Platform_CommReceiveChar                            mriPlatform_CommReceiveChar
 #define Platform_CommSendChar                               mriPlatform_CommSendChar
-#define Platform_CommCausedInterrupt                        mriPlatform_CommCausedInterrupt
-#define Platform_CommClearInterrupt                         mriPlatform_CommClearInterrupt
 #define Platform_DetermineCauseOfException                  mriPlatform_DetermineCauseOfException
 #define Platform_DisplayFaultCauseToGdbConsole              mriPlatform_DisplayFaultCauseToGdbConsole
 #define Platform_EnableSingleStep                           mriPlatform_EnableSingleStep
@@ -145,4 +141,4 @@ uint32_t       mriPlatform_GetUidSize(void);
 #define Platform_GetUid                                     mriPlatform_GetUid
 #define Platform_GetUidSize                                 mriPlatform_GetUidSize
 
-#endif /* _PLATFORMS_H_ */
+#endif /* PLATFORMS_H_ */

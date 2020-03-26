@@ -13,8 +13,8 @@
    limitations under the License.
 */
 /* Semihost functionality for redirecting operations such as file I/O to the GNU debugger. */
-#ifndef _SEMIHOST_H_
-#define _SEMIHOST_H_
+#ifndef SEMIHOST_H_
+#define SEMIHOST_H_
 
 #include <core/platforms.h>
 
@@ -30,4 +30,4 @@ int mriSemihost_HandleMbedSemihostRequest(PlatformSemihostParameters* pParameter
 #define Semihost_HandleNewlibSemihostRequest    mriSemihost_HandleNewlibSemihostRequest
 #define Semihost_HandleMbedSemihostRequest      mriSemihost_HandleMbedSemihostRequest
 
-#endif /* _SEMIHOST_H_ */
+#endif /* SEMIHOST_H_ */
