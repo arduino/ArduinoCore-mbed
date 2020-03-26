@@ -386,6 +386,7 @@ static void tusb_otg_core_init(tusb_core_t* core)
     
     NVIC_SetPriority(OTG_HS_IRQn, 0);
     NVIC_EnableIRQ(OTG_HS_IRQn);
+    //NVIC_DisableIRQ(OTG_HS_IRQn);
 
     NVIC_SetVector(OTG_HS_IRQn, (uint32_t)&OTG_HS_IRQHandler);
     

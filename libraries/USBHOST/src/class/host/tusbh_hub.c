@@ -298,7 +298,7 @@ static int hub_data_xfered(tusbh_ep_info_t* ep)
         goto error;
     }
     TUSB_HUB_INFO("HUB port state = %02x\n", port_state);
-    for(;port_state; port_state>>=1, port++){
+    for(;port_state; port_state>>=1, port++) {
         if( (port_state & 1) == 0 ) continue;
         usb_hub_port_status_t status;
         TUSB_HUB_INFO("HUB get port %d status\n", port);
@@ -337,6 +337,7 @@ static int hub_data_xfered(tusbh_ep_info_t* ep)
                 child->speed = PORT_SPEED_FULL;
                 if(status.wPortStatus.PORT_HIGH_SPEED){
                     child->speed = PORT_SPEED_HIGH;
+                    child->hub_port = 0;
                 }
                 if(status.wPortStatus.PORT_LOW_SPEED){
                     child->speed = PORT_SPEED_LOW;
@@ -369,6 +370,7 @@ static int hub_data_xfered(tusbh_ep_info_t* ep)
                     dev->children[port-1] = 0;
                 }
                 child = tusbh_new_device();
+                child->hub_port = port;
                 dev->children[port-1] = child;
                 tusbh_set_hub_port_feature(dev, port, HUB_FEATURE_SEL_PORT_RESET);
             }

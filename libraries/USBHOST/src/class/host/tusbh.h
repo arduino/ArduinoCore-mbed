@@ -172,6 +172,7 @@ struct _tusbh_device{
     uint8_t speed;                                     /**< device speed   */
     uint8_t config;                                    /**< device current configuartion */
     uint8_t interface_num;                             /**< Interface number, interfaces under IAD treat as 1 interface */
+    uint8_t hub_port;                                  /**< If connected through a hub */
 };
 
 #define dev_root(dev)  ((tusbh_root_hub_t*)(dev->host->user_data))

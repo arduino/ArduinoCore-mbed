@@ -117,7 +117,7 @@ int tusbh_vendor_xfer_data(tusbh_ep_info_t* ep, void* data, uint32_t len)
     if( pipe_num < 0 ){
         return pipe_num;
     }
-    tusb_host_xfer_data(ep_host(ep), pipe_num, 1, data, len);
+    tusb_host_xfer_data(ep_host(ep), pipe_num, 1, data, len, ep_device(ep)->hub_port);
     return 0;
 }
 

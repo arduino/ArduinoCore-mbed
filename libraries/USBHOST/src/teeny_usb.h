@@ -606,7 +606,7 @@ int tusb_pipe_cancel(tusb_pipe_t* pipe);
  *  \param[in] data           data buffer for read/write
  *  \param[in] len            data length / data buffer size
  */
-uint32_t tusb_otg_host_xfer_data(tusb_host_t* host, uint8_t hc_num, uint8_t is_data, uint8_t* data, uint32_t len);
+uint32_t tusb_otg_host_xfer_data(tusb_host_t* host, uint8_t hc_num, uint8_t is_data, uint8_t* data, uint32_t len, uint8_t port);
 #define  tusb_host_xfer_data   tusb_otg_host_xfer_data
 
 /** Send a setup packet

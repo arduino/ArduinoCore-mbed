@@ -62,7 +62,7 @@ void tusb_host_port_changed(tusb_host_t* host, uint8_t port, host_port_state_t n
         POST_MESSAGE(root->mq, tusbh_msg_root_disconnected, 0, host, 0);
     }else{
         root->en_mask &= ~(1<<0);
-        POST_MESSAGE(root->mq, tusbh_msg_root_disable, 0, host, 0);
+        POST_MESSAGE(root->mq, tusbh_msg_root_disable, 0, host, new_state);
     }
 }
 
@@ -152,7 +152,6 @@ void tusbh_close_pipe(tusbh_device_t* dev, int pipe_num)
     tusb_pipe_close(&pipe);
 }
 
-#if 1
 static channel_state_t tusbh_pipe_xfer_and_wait(tusbh_device_t* dev, int pipe_num, uint8_t is_data, void* data, uint16_t len, uint32_t timeout)
 {
     void* bak = dev->host->hc[pipe_num].user_data;
@@ -168,48 +167,23 @@ static channel_state_t tusbh_pipe_xfer_and_wait(tusbh_device_t* dev, int pipe_nu
     channel_state_t s;
 
     do{
-        tusb_host_xfer_data(dev->host, pipe_num, is_data, p, remain);
+        tusb_host_xfer_data(dev->host, pipe_num, is_data, p, remain, dev->hub_port);
         tusbh_evt_wait(dev->xfer_evt.event, timeout);
         tusb_hc_data_t* hc = &dev->host->hc[pipe_num];
         s = (channel_state_t)hc->state;
-        if (s != TUSB_CS_TRANSFER_CSPLIT) {
-            if(s != TUSB_CS_TRANSFER_COMPLETE){
-                res = -(int)s;
-                goto error;
-            }
-            remain -= hc->count;
-            p += hc->count;
+        if(s != TUSB_CS_TRANSFER_COMPLETE){
+            res = -(int)s;
+            goto error;
         }
-    }while((remain && len) || (s == TUSB_CS_TRANSFER_CSPLIT));
+        remain -= hc->count;
+        p += hc->count;
+    }while((remain && len));
     res = p - ((uint8_t*)data);
 error:
     dev->host->hc[pipe_num].user_data = bak;
     r = (channel_state_t)dev->host->hc[pipe_num].state;
     return r;
 }
-
-#else
-
-static channel_state_t tusbh_pipe_xfer_and_wait(tusbh_device_t* dev, int pipe_num, uint8_t is_data, void* data, uint16_t len, uint32_t timeout)
-{   
-    void* bak = dev->host->hc[pipe_num].user_data;
-    dev->host->hc[pipe_num].user_data = &dev->xfer_evt;
-    
-    tusb_host_xfer_data(dev->host, pipe_num, is_data, data, len);
-    
-    channel_state_t r = TUSB_CS_UNKNOWN_ERROR;
-    
-    //int res = 
-    tusbh_evt_wait(dev->xfer_evt.event, timeout);
-    
-    //if(res == 0){
-        r = (channel_state_t)dev->host->hc[pipe_num].state;
-    //}
-    dev->host->hc[pipe_num].user_data = bak;
-    
-    return r;
-}
-#endif
 
 int tusbh_ep_xfer(tusbh_ep_info_t* ep, void* data, uint16_t len, uint32_t timeout)
 {
@@ -223,15 +197,17 @@ static int tusbh_ep_in_xfer_with_event(tusbh_ep_info_t* ep, void* data, uint16_t
     uint16_t remain = len;
     uint8_t* p = (uint8_t*)data;
     int res = 0;
+
+    channel_state_t s;
     do{
         uint16_t xfer_len = EP_MPS(ep->desc);
         if(xfer_len > remain){
             xfer_len = remain;
         }
-        tusb_host_xfer_data(ep_host(ep), ep->pipe_num, 1, p, xfer_len);
+        tusb_host_xfer_data(ep_host(ep), ep->pipe_num, 1, p, xfer_len, ep_device(ep)->hub_port);
         tusbh_evt_wait(action->event, timeout);
         tusb_hc_data_t* hc = &ep_device(ep)->host->hc[ep->pipe_num];
-        channel_state_t s = (channel_state_t)hc->state;
+        s = (channel_state_t)hc->state;
         if(s != TUSB_CS_TRANSFER_COMPLETE){
             res = -(int)s;
             goto error;
@@ -273,7 +249,7 @@ static int tusbh_ep_out_xfer_with_event(tusbh_ep_info_t* ep, void* data, uint16_
         }else{
             xfer_len = remain;
         }
-        tusb_host_xfer_data(ep_host(ep), ep->pipe_num, 1, p, xfer_len);
+        tusb_host_xfer_data(ep_host(ep), ep->pipe_num, 1, p, xfer_len, ep_device(ep)->hub_port);
         tusbh_evt_wait(action->event, timeout);
         tusb_hc_data_t* hc = &ep_device(ep)->host->hc[ep->pipe_num];
         channel_state_t s = (channel_state_t)hc->state;
@@ -876,7 +852,7 @@ static void tusbh_msg_root_disable(tusbh_message_t* msg)
     tusbh_root_hub_t* root = (tusbh_root_hub_t*)host->user_data;
     (void)port;
     (void)root;
-    TUSB_ROOT_INFO("Disable\n");
+    TUSB_ROOT_INFO("Disable %d\n", msg->len);
 }
 
 static void tusbh_ep_data_xfered(tusbh_message_t* msg)
@@ -949,7 +925,7 @@ static void start_period_in(tusbh_device_t* dev, tusbh_ep_info_t* ep)
     if(ep->pipe_num >= 0){
         uint16_t mps = EP_MPS(ep->desc);
         ep->xfer_in_progress = 1;
-        tusb_host_xfer_data(dev->host, ep->pipe_num, 1, ep->data, mps);
+        tusb_host_xfer_data(dev->host, ep->pipe_num, 1, ep->data, mps, dev->hub_port);
     }
 }
 

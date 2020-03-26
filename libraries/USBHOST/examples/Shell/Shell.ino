@@ -74,7 +74,7 @@ static tusbh_root_hub_t root_fs;
 static tusbh_root_hub_t root_hs;
 static const tusbh_boot_key_class_t cls_boot_key = {
   .backend = &tusbh_boot_keyboard_backend,
-  .on_key = process_key
+  //.on_key = process_key
 };
 
 static const tusbh_boot_mouse_class_t cls_boot_mouse = {
@@ -313,6 +313,10 @@ void setup()
   hs = 0;
 #endif
 
+  //usb_fakeirq.start(mbed::callback(usb_irq_thread));
+
+  //NVIC_DisableIRQ(OTG_HS_IRQn);
+
   cmd_len = 0;
 }
 
@@ -320,10 +324,11 @@ bool once = true;
 
 void loop() {
   if (millis() > 5000 && once) {
-    cmd_lsusb(NULL, 0);
+    //cmd_lsusb(NULL, 0);
     once = false;
   }
   //command_loop();
+
   // there is only one message q for every thing
   tusbh_msg_loop(mq);
 }
@@ -347,6 +352,7 @@ static const char tabB[] = "\t _+{}|~:\"~<>?";
 // route the key event to stdin
 static int process_key(tusbh_ep_info_t* ep, const uint8_t* keys)
 {
+  printf("\n");
   uint8_t modify = keys[0];
   uint8_t key = keys[2];
   uint8_t last_leds = key_leds;
@@ -386,8 +392,9 @@ static int process_key(tusbh_ep_info_t* ep, const uint8_t* keys)
 
 
 
+#if 1
 
-#ifdef DEBUG
+extern "C" {
 
 #define LOG_SIZE   1024
 static int hc_log_index;
@@ -410,6 +417,12 @@ void hc_log_begin(tusb_host_t* host, uint8_t hc_num)
   hc_info.HCTSIZ   = HC->HCTSIZ;
   hc_info.HCDMA    = HC->HCDMA;
   hc_log_index = 0;
+  //printf("hc_no            %x\n", hc_num);
+  //printf("hc_info.HCCHAR   %x\n", HC->HCCHAR);
+  //printf("hc_info.HCSPLT   %x\n", HC->HCSPLT);
+  //printf("hc_info.HCINTMSK %x\n", HC->HCINTMSK);
+  //printf("hc_info.HCTSIZ   %x\n", HC->HCTSIZ);
+  //printf("hc_info.HCDMA    %x\n", HC->HCDMA);
 }
 
 void hc_log_data(tusb_host_t* host, uint8_t hc_num, uint32_t data)
@@ -424,4 +437,5 @@ void hc_log_end(tusb_host_t* host, uint8_t hc_num)
 {
 }
 
+}
 #endif
