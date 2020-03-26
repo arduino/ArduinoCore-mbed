@@ -446,6 +446,15 @@ static void tusb_otg_in_channel_handler(tusb_host_t* host, uint8_t ch_num)
         }
       }
     }
+    else if (HC->HCSPLT & USB_OTG_HCSPLT_SPLITEN)
+    {
+      if (!(HC->HCSPLT & USB_OTG_HCSPLT_COMPLSPLT)) {
+        HC->HCSPLT |= USB_OTG_HCSPLT_COMPLSPLT;
+
+        hc->state = TUSB_CS_TRANSFER_CSPLIT;
+        hc->xfer_done = 1;
+      }
+    }
     else
     {
       /* ... */
@@ -674,6 +683,14 @@ static void tusb_otg_out_channel_handler(tusb_host_t* host, uint8_t ch_num)
     else if (hc->state == TUSB_CS_DT_ERROR)
     {
         hc->xfer_done = 1;
+    }
+    else if (HC->HCSPLT & USB_OTG_HCSPLT_SPLITEN)
+    {
+      if (!(HC->HCSPLT & USB_OTG_HCSPLT_COMPLSPLT)) {
+        HC->HCSPLT |= USB_OTG_HCSPLT_COMPLSPLT;
+        hc->state = TUSB_CS_TRANSFER_CSPLIT;
+        hc->xfer_done = 1;
+      }
     }
     else
     {
@@ -990,6 +1007,11 @@ uint32_t tusb_otg_host_submit(tusb_host_t* host, uint8_t hc_num)
             hc->toggle_out = 1;
             data_pid = HC_PID_DATA1;
           }
+        } else {
+          if (is_in && is_dma && (len>=mps)){
+            // control in
+            data_pid = hc->toggle_in ? HC_PID_DATA1 : HC_PID_DATA0;
+          }
         }
       }else{
         // otherwise setup packet
@@ -1056,6 +1078,11 @@ uint32_t tusb_otg_host_xfer_data(tusb_host_t* host, uint8_t hc_num, uint8_t is_d
   hc->ch_buf = data;
   hc->size = len;
   hc->count = 0;
+
+  if (hc->state != TUSB_CS_TRANSFER_CSPLIT) {
+    HC->HCSPLT = 0;
+  }
+
   hc->state = TUSB_CS_INIT;
   hc->do_ping = 0;
   hc->is_data = is_data;
@@ -1076,6 +1103,22 @@ uint32_t tusb_otg_host_xfer_data(tusb_host_t* host, uint8_t hc_num, uint8_t is_d
     }
 #endif
   }
+
+  if (hc->speed != PORT_SPEED_HIGH) {
+    // SPLIT enable
+    uint32_t tmpreg = USB_OTG_HCSPLT_SPLITEN;
+    tmpreg |= USB_OTG_HCSPLT_XACTPOS_0;
+    tmpreg |= USB_OTG_HCSPLT_XACTPOS_1;
+    /* Hub device address */
+    tmpreg |= USB_OTG_HCSPLT_HUBADDR_0;
+    /* Port number */
+    //tmpreg |= USB_OTG_HCSPLT_PRTADDR_0; // port1 -> USB_OTG_HCSPLT_PRTADDR_0
+    tmpreg |= USB_OTG_HCSPLT_PRTADDR_1; // port2 -> USB_OTG_HCSPLT_PRTADDR_1
+    //tmpreg |= USB_OTG_HCSPLT_PRTADDR_2; // port4 -> USB_OTG_HCSPLT_PRTADDR_2
+    HC->HCSPLT |= tmpreg;
+    __HAL_HCD_UNMASK_HALT_HC_INT(hc_num);
+  }
+
   tusb_otg_host_submit(host, hc_num);
   return 0;
 }

@@ -285,6 +285,7 @@ typedef enum {
   TUSB_CS_XFER_ONGOING,             /**< Channel data transfer is on going */
   TUSB_CS_XFER_CANCEL,              /**< Channel data transfer is canceled */
   TUSB_CS_UNKNOWN_ERROR,            /**< Channel Unknown error */
+  TUSB_CS_TRANSFER_CSPLIT,          /**< Request complete split */
 }channel_state_t;
 
 /** Enums for ID line state

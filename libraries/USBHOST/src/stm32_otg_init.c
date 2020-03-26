@@ -428,6 +428,8 @@ static void tusb_otg_core_init(tusb_core_t* core)
     // only HS core has DMA feature
     USBx->GAHBCFG |= USB_OTG_GAHBCFG_HBSTLEN_2;
     USBx->GAHBCFG |= USB_OTG_GAHBCFG_DMAEN;
+    SCB_CleanInvalidateDCache();
+    SCB_DisableDCache();
   }
 #endif
 }

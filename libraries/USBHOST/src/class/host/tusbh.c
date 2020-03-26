@@ -95,6 +95,7 @@ const char* channelState(channel_state_t state)
         SSS( TUSB_CS_XFER_ONGOING          )
         SSS( TUSB_CS_XFER_CANCEL           )
         SSS( TUSB_CS_UNKNOWN_ERROR         )
+        SSS( TUSB_CS_TRANSFER_CSPLIT       )
     }
     return "Unknown Channel State";
 #undef SSS
@@ -151,6 +152,44 @@ void tusbh_close_pipe(tusbh_device_t* dev, int pipe_num)
     tusb_pipe_close(&pipe);
 }
 
+#if 1
+static channel_state_t tusbh_pipe_xfer_and_wait(tusbh_device_t* dev, int pipe_num, uint8_t is_data, void* data, uint16_t len, uint32_t timeout)
+{
+    void* bak = dev->host->hc[pipe_num].user_data;
+    dev->host->hc[pipe_num].user_data = &dev->xfer_evt;
+
+    channel_state_t r = TUSB_CS_UNKNOWN_ERROR;
+
+    uint16_t remain = len;
+    uint8_t* p = (uint8_t*)data;
+    int res = 0;
+
+    dev->host->hc[pipe_num].toggle_in = 1;
+    channel_state_t s;
+
+    do{
+        tusb_host_xfer_data(dev->host, pipe_num, is_data, p, remain);
+        tusbh_evt_wait(dev->xfer_evt.event, timeout);
+        tusb_hc_data_t* hc = &dev->host->hc[pipe_num];
+        s = (channel_state_t)hc->state;
+        if (s != TUSB_CS_TRANSFER_CSPLIT) {
+            if(s != TUSB_CS_TRANSFER_COMPLETE){
+                res = -(int)s;
+                goto error;
+            }
+            remain -= hc->count;
+            p += hc->count;
+        }
+    }while((remain && len) || (s == TUSB_CS_TRANSFER_CSPLIT));
+    res = p - ((uint8_t*)data);
+error:
+    dev->host->hc[pipe_num].user_data = bak;
+    r = (channel_state_t)dev->host->hc[pipe_num].state;
+    return r;
+}
+
+#else
+
 static channel_state_t tusbh_pipe_xfer_and_wait(tusbh_device_t* dev, int pipe_num, uint8_t is_data, void* data, uint16_t len, uint32_t timeout)
 {   
     void* bak = dev->host->hc[pipe_num].user_data;
@@ -170,6 +209,7 @@ static channel_state_t tusbh_pipe_xfer_and_wait(tusbh_device_t* dev, int pipe_nu
     
     return r;
 }
+#endif
 
 int tusbh_ep_xfer(tusbh_ep_info_t* ep, void* data, uint16_t len, uint32_t timeout)
 {

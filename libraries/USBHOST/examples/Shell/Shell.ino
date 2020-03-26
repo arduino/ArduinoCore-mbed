@@ -31,6 +31,9 @@
    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE.
 */
+
+#include "USBHOST.h"
+
 extern "C" {
 #include "teeny_usb.h"
 #include "class/host/tusbh.h"
@@ -43,6 +46,8 @@ extern "C" {
 #include "string.h"
 #include "class/host/usb_key_code.h"
 }
+
+#include "mbed.h"
 
 #define TEENYUSB_LOGO \
   " _______                    _    _  _____ ____  \n"           \

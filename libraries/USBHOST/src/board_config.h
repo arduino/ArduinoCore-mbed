@@ -45,7 +45,7 @@
 //#define  OTG_FS_EMBEDDED_PHY
 
 /* Enable DMA for High speed phy */
-//#define  OTG_HS_ENABLE_DMA
+#define  OTG_HS_ENABLE_DMA
 
 /* Support for other speed config and device qualifier descriptor */
 #define  SUPPORT_OTHER_SPEED
@@ -97,6 +97,9 @@ do {} while(0U)
 
 #define  HOST_PORT_POWER_ON_FS() \
 do{}while(0)
+
+//#define RTOS_INTERRUPT_ENTER    core_util_critical_section_enter
+//#define RTOS_INTERRUPT_LEAVE    core_util_critical_section_exit
 
 // init the stdio hardware
 void stdio_init(void);
