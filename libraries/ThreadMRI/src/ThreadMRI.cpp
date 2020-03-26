@@ -120,7 +120,10 @@ void                            (*g_origSerialISR)(void);
     #define CONTEXT_ENTRIES     5
 #endif
 
-static ScatterGatherEntry   g_contextEntries[CONTEXT_ENTRIES];
+static ScatterGatherEntry       g_contextEntries[CONTEXT_ENTRIES];
+
+// Floats to be returned in context if the thread being debugged hsa no stored float state.
+static uint32_t                 g_tempFloats[33];
 
 // UNDONE: For debugging. If different than g_haltedThreadId then the mriMain() thread was signalled when the previous
 //         instance was still running.
@@ -331,6 +334,15 @@ static void readThreadContext(osThreadId_t thread)
         // FPSCR
         g_contextEntries[7].pValues = pThreadContext + 48;
         g_contextEntries[7].count = 1;
+    } else {
+        memset(g_tempFloats, 0, sizeof(g_tempFloats));
+        // S0-S31, FPSCR
+        g_contextEntries[5].pValues = g_tempFloats;
+        g_contextEntries[5].count = 33;
+        g_contextEntries[6].pValues = NULL;
+        g_contextEntries[6].count = 0;
+        g_contextEntries[7].pValues = NULL;
+        g_contextEntries[7].count = 0;
     }
 }
 
