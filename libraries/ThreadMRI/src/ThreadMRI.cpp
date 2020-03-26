@@ -167,6 +167,7 @@ static bool isImpreciseBusFault();
 static void advancePCToNextInstruction(uint32_t excReturn, uint32_t psp, uint32_t msp);
 static uint32_t* threadSP(uint32_t excReturn, uint32_t psp, uint32_t msp);
 static bool isInstruction32Bit(uint16_t firstWordOfInstruction);
+static void clearFaultStatusBits();
 static void serialISRHook();
 static bool isDebuggerActive();
 static void setControlCFlag();
@@ -565,6 +566,7 @@ extern "C" void mriFaultHandler(uint32_t excReturn, uint32_t psp, uint32_t msp)
             if (!isImpreciseBusFault()) {
                 advancePCToNextInstruction(excReturn, psp, msp);
             }
+            clearFaultStatusBits();
             return;
         }
 
@@ -649,7 +651,7 @@ static bool isImpreciseBusFault()
 static void advancePCToNextInstruction(uint32_t excReturn, uint32_t psp, uint32_t msp)
 {
     uint32_t* pSP = threadSP(excReturn, psp, msp);
-    uint32_t* pPC = pSP + 7;
+    uint32_t* pPC = pSP + 6;
     uint16_t  currentInstruction = *(uint16_t*)*pPC;
     if (isInstruction32Bit(currentInstruction)) {
         *pPC += sizeof(uint32_t);
@@ -678,6 +680,14 @@ static bool isInstruction32Bit(uint16_t firstWordOfInstruction)
     return  (maskedOffUpper5BitsOfWord == 0xE800 ||
              maskedOffUpper5BitsOfWord == 0xF000 ||
              maskedOffUpper5BitsOfWord == 0xF800);
+}
+
+static void clearFaultStatusBits()
+{
+    /* Clear fault status bits by writing 1s to bits that are already set. */
+    SCB->DFSR = SCB->DFSR;
+    SCB->HFSR = SCB->HFSR;
+    SCB->CFSR = SCB->CFSR;
 }
 
 
