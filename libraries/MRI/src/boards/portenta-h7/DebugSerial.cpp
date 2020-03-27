@@ -179,6 +179,7 @@ void DebugSerial::_initSerial() {
 
 void DebugSerial::initSerial() {
     _serial.begin(_baudRate);
+    setSerialPriority(0);
 
     // Hook communication port ISR to allow debug monitor to be awakened when GDB sends a command.
     _commIsr = (IsrFunctionPtr) NVIC_GetVector(_irq);
