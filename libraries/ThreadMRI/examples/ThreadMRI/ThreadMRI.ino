@@ -4,9 +4,11 @@
 
 #include <ThreadMRI.h>
 
-//ThreadMRI g_debugger(Serial1, USART1_IRQn, 115200, THREADMRI_BREAK_ON_SETUP);
-ThreadMRI g_debugger(Serial, OTG_HS_IRQn, 115200, THREADMRI_BREAK_ON_SETUP);
-//ThreadMRI g_debugger(Serial, false);
+//UartDebugCommInterface g_comm(SERIAL1_TX, SERIAL1_RX, 230400);
+//ThreadMRI              g_debugSerial(&g_comm, THREADMRI_BREAK_ON_SETUP);
+
+UsbDebugCommInterface  g_comm(&SerialUSB);
+ThreadMRI              g_debugSerial(&g_comm, THREADMRI_BREAK_ON_SETUP);
 
 extern "C" void testContext(void);
 

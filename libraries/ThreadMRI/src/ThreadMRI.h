@@ -16,45 +16,77 @@
 // the USB serial connection.
 #pragma once
 
+#include <mbed.h>
+
+
+class DebugCommInterface {
+public:
+    virtual ~DebugCommInterface() = 0;
+
+    virtual bool available() = 0;
+	virtual uint8_t read() = 0;
+	virtual void write(uint8_t c) = 0;
+    virtual void attach(void (*pCallback)()) = 0;
+};
+
+class UartDebugCommInterface : public DebugCommInterface {
+public:
+    UartDebugCommInterface(PinName txPin, PinName rxPin, uint32_t baudRate);
+    virtual ~UartDebugCommInterface();
+
+    virtual bool available();
+	virtual uint8_t read();
+	virtual void write(uint8_t c);
+    virtual void attach(void (*pCallback)());
+
+protected:
+    uint32_t wrappingIncrement(uint32_t val);
+    void onReceivedData();
+
+    void                    (* _pCallback)();
+    mbed::UnbufferedSerial  _serial;
+    volatile uint32_t       _read;
+    volatile uint32_t       _write;
+    uint8_t                 _queue[8];
+};
+
+class UsbDebugCommInterface : public DebugCommInterface {
+public:
+    UsbDebugCommInterface(arduino::USBSerial*);
+    virtual ~UsbDebugCommInterface();
+
+    virtual bool available();
+	virtual uint8_t read();
+	virtual void write(uint8_t c);
+    virtual void attach(void (*pCallback)());
+
+protected:
+    arduino::USBSerial*  _pSerial;
+};
+
 
 // Pass THREADMRI_BREAK_ON_SETUP as breakInSetup parameter of ThreadMRI constructors to halt in setup().
-#define THREADMRI_BREAK_ON_SETUP true
+#define THREADMRI_BREAK_ON_SETUP    true
+// Pass THREADMRI_NO_BREAK_ON_SETUP as breakInSetup parameter of ThreadMRI constructors to NOT halt in setup().
+#define THREADMRI_NO_BREAK_ON_SETUP false
 
 
 class ThreadMRI {
 public:
-    // You must declare your ThreadMRI object as a global or function scoped static so that it doesn't get
-    // destroyed. Which constructor you use, depends on where you declare it.
+    // You must declare your ThreadMRI object as a global.
+    // Examples:
+    //      UartDebugCommInterface g_comm(SERIAL1_TX, SERIAL1_RX, 230400);
+    //      ThreadMRI              g_debugSerial(&g_comm, THREADMRI_BREAK_ON_SETUP);
+    //              -- OR --
+    //      UsbDebugCommInterface  g_comm(&SerialUSB);
+    //      ThreadMRI              g_debugSerial(&g_comm, THREADMRI_BREAK_ON_SETUP);
+    ThreadMRI(DebugCommInterface* pCommInterface, bool breakInSetup=THREADMRI_BREAK_ON_SETUP);
 
-    // Use this constructor when declaring ThreadMRI object as a global outside of any functions.
-    // You must specify the baudrate so that ThreadMRI can call begin() on the specified serial object.
-    //  breakInSetup - should it break at beginning of setup().
-    //
-    // Global Example:
-    //      ThreadMRI threadMRI(Serial1, USART1_IRQn, 115200);
-    ThreadMRI(HardwareSerial& serial, IRQn_Type IRQn, uint32_t baudRate, bool breakInSetup=true);
-
-    // Use this constructor when declaring ThreadMRI object as a function scoped static. You must call begin() on
-    // the serial object before constructing the ThreadMRI object.
-    //
-    // Function Scoped Static Example:
-    //      #include <MRI.h>
-    //      void setup() {
-    //          Serial1.begin(115200);
-    //          static ThreadMRI threadMRI(Serial1, USART1_IRQn);
-    //          __debugbreak();
-    //      }
-    ThreadMRI(HardwareSerial& serial, IRQn_Type IRQn);
-
-    ThreadMRI(HardwareSerial& serial, bool breakInSetup=true);
-
-    // You should never let your ThreadMRI object go out of scope. Make it global or static. To warn you if you do
-    // let it go out of scope by mistake, this destructor will break into GDB and then enter an infinite loop.
+    // Your ThreadMRI object should never go out of scope. To warn you if you do let it go out of scope by mistake,
+    // this destructor will break into GDB and then enter an infinite loop.
     ~ThreadMRI();
-
-protected:
-    void init(HardwareSerial& serial, IRQn_Type IRQn, uint32_t baudRate, bool breakInSetup);
 };
+
 
 // Use to insert a hardcoded breakpoint into your code.
 #ifndef __debugbreak

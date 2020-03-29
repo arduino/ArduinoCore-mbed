@@ -73,9 +73,7 @@ extern "C"
 
 
 // Globals that describe the ThreadMRI singleton.
-static HardwareSerial*          g_pSerial;
-static IRQn_Type                g_irq;
-static uint32_t                 g_baudRate;
+static DebugCommInterface*      g_pComm;
 static bool                     g_breakInSetup;
 
 // The ID of the halted thread being debugged.
@@ -110,8 +108,6 @@ volatile uint32_t               mriThreadOrigHardFault;
 volatile uint32_t               mriThreadOrigMemManagement;
 volatile uint32_t               mriThreadOrigBusFault;
 volatile uint32_t               mriThreadOrigUsageFault;
-// Address of the original Serial peripheral ISR to be hooked.
-void                            (*g_origSerialISR)(void);
 
 // Entries to track the chunks of the context in a scatter list.
 #if MRI_DEVICE_HAS_FPU
@@ -151,9 +147,8 @@ static void resumeApplicationThreads();
 static void readThreadContext(osThreadId_t thread);
 static void switchRtxHandlersToDebugStubsForSingleStepping();
 static void restoreRtxHandlers();
-static void callSerialBeginFromSetup();
+static void callAttachFromSetup();
 static int justEnteredSetupCallback(void* pv);
-static void hookSerialISR();
 static bool isThreadMode(uint32_t excReturn);
 static bool hasEncounteredDebugEvent();
 static bool hasControlCBeenDetected();
@@ -174,35 +169,16 @@ static void setControlCFlag();
 
 
 
-
-ThreadMRI::ThreadMRI(HardwareSerial& serial, IRQn_Type IRQn, uint32_t baudRate, bool breakInSetup /* =true */)
+ThreadMRI::ThreadMRI(DebugCommInterface* pCommInterface, bool breakInSetup /*=true*/)
 {
-    init(serial, IRQn, baudRate, breakInSetup);
-}
-
-
-ThreadMRI::ThreadMRI(HardwareSerial& serial, bool breakInSetup /* =true */)
-{
-    init(serial, SysTick_IRQn, 115200, breakInSetup);
-}
-
-
-ThreadMRI::ThreadMRI(HardwareSerial& serial, IRQn_Type IRQn)
-{
-    init(serial, IRQn, 0, false);
-}
-
-void ThreadMRI::init(HardwareSerial& serial, IRQn_Type IRQn, uint32_t baudRate, bool breakInSetup)
-{
-    if (g_pSerial != NULL) {
+    if (g_pComm != NULL) {
         // Only allow 1 ThreadMRI object to be initialized.
         return;
     }
 
     // Setup the singleton.
-    g_irq = IRQn;
-    g_baudRate = baudRate;
     g_breakInSetup = breakInSetup;
+    g_pComm = pCommInterface;
 
     // Initialize the MRI core.
     mriInit("");
@@ -225,10 +201,7 @@ void ThreadMRI::init(HardwareSerial& serial, IRQn_Type IRQn, uint32_t baudRate, 
         return;
     }
 
-    g_pSerial = &serial;
-    if (g_baudRate != 0) {
-        callSerialBeginFromSetup();
-    }
+    callAttachFromSetup();
 }
 
 static __NO_RETURN void mriMain(void *pv)
@@ -364,30 +337,17 @@ static void restoreRtxHandlers()
     NVIC_SetVector(SysTick_IRQn, mriThreadOrigSysTick);
 }
 
-static void callSerialBeginFromSetup()
+static void callAttachFromSetup()
 {
     mriCore_SetTempBreakpoint((uint32_t)setup, justEnteredSetupCallback, NULL);
 }
 
 static int justEnteredSetupCallback(void* pv)
 {
-    g_pSerial->begin(g_baudRate);
-    //while (!g_pSerial) {}
-
-    if (g_irq != SysTick_IRQn) {
-        hookSerialISR();
-    } else {
-        (static_cast<USBSerial*>(g_pSerial))->attach(serialISRHook);
-    }
+    g_pComm->attach(serialISRHook);
 
     // Return 0 to indicate that we want to halt execution at the beginning of setup() or 1 to not force a halt.
     return g_breakInSetup ? 0 : 1;
-}
-
-static void hookSerialISR()
-{
-    g_origSerialISR = (void(*)(void))NVIC_GetVector(g_irq);
-    NVIC_SetVector(g_irq, (uint32_t)serialISRHook);
 }
 
 
@@ -441,20 +401,20 @@ static void recordAndSwitchFaultHandlersToDebugger()
 
 uint32_t Platform_CommHasReceiveData(void)
 {
-    return g_pSerial->available();
+    return g_pComm->available();
 }
 
 int Platform_CommReceiveChar(void)
 {
-    while (!g_pSerial->available()) {
+    while (!g_pComm->available()) {
         // Busy wait.
     }
-    return g_pSerial->read();
+    return g_pComm->read();
 }
 
 void Platform_CommSendChar(int character)
 {
-    g_pSerial->write(character);
+    g_pComm->write(character);
 }
 
 
@@ -693,10 +653,7 @@ static void clearFaultStatusBits()
 
 static void serialISRHook()
 {
-    if (g_origSerialISR) {
-        g_origSerialISR();
-    }
-    if (!isDebuggerActive() && g_pSerial->available() > 0) {
+    if (!isDebuggerActive() && g_pComm->available()) {
         // Pend a halt into the debug monitor now that there is data from GDB ready to be read by it.
         setControlCFlag();
         setMonitorPending();
@@ -711,4 +668,98 @@ static bool isDebuggerActive()
 static void setControlCFlag()
 {
     mriCortexMFlags |= CORTEXM_FLAGS_CTRL_C;
+}
+
+
+
+
+DebugCommInterface::~DebugCommInterface()
+{
+}
+
+UartDebugCommInterface::UartDebugCommInterface(PinName txPin, PinName rxPin, uint32_t baudRate) :
+    _pCallback(NULL), _serial(txPin, rxPin, baudRate), _read(0), _write(0)
+{
+}
+
+UartDebugCommInterface::~UartDebugCommInterface()
+{
+}
+
+bool UartDebugCommInterface::available()
+{
+    return _read != _write;
+}
+
+uint8_t UartDebugCommInterface::read()
+{
+    // This read should never block since Platform_CommReceiveChar() always checks available() first.
+    ASSERT ( available() );
+
+    uint8_t byte = _queue[_read];
+    _read = wrappingIncrement(_read);
+    return byte;
+}
+
+uint32_t UartDebugCommInterface::wrappingIncrement(uint32_t val)
+{
+    return (val + 1) & (sizeof(_queue) - 1);
+}
+
+void UartDebugCommInterface::write(uint8_t c)
+{
+    _serial.write(&c, 1);
+}
+
+void UartDebugCommInterface::attach(void (*pCallback)())
+{
+    _pCallback = pCallback;
+    _serial.attach(mbed::callback(this, &UartDebugCommInterface::onReceivedData));
+}
+
+void UartDebugCommInterface::onReceivedData()
+{
+    while (_serial.readable()) {
+        uint8_t byte;
+        _serial.read(&byte, 1);
+        if (wrappingIncrement(_write) != _read) {
+            // _queue isn't full so we can add this byte to it.
+            _queue[_write] = byte;
+            _write = wrappingIncrement(_write);
+        }
+    }
+
+    ASSERT ( _pCallback != NULL );
+    _pCallback();
+}
+
+
+
+UsbDebugCommInterface::UsbDebugCommInterface(arduino::USBSerial* pSerial) :
+    _pSerial(pSerial)
+{
+}
+
+UsbDebugCommInterface::~UsbDebugCommInterface()
+{
+}
+
+bool UsbDebugCommInterface::available()
+{
+    return _pSerial->available() > 0;
+}
+
+uint8_t UsbDebugCommInterface::read()
+{
+    return _pSerial->read();
+}
+
+void UsbDebugCommInterface::write(uint8_t c)
+{
+    _pSerial->write(c);
+}
+
+void UsbDebugCommInterface::attach(void (*pCallback)())
+{
+    _pSerial->attach(pCallback);
 }
