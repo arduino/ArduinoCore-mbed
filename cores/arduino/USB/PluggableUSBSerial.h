@@ -157,8 +157,8 @@ public:
     {
         USBCDC::lock();
 
-        if ((mptr != NULL) && (tptr != NULL)) {
-            rx[howManyCallbacks++] = ::mbed::Callback<void()>(mptr, tptr);
+        if ((mptr != NULL) && (tptr != NULL) && (_howManyCallbacks < sizeof(_rx)/sizeof(_rx[0]))) {
+            _rx[_howManyCallbacks++] = ::mbed::Callback<void()>(mptr, tptr);
         }
 
         USBCDC::unlock();
@@ -173,8 +173,8 @@ public:
     {
         USBCDC::lock();
 
-        if (fptr != NULL) {
-            rx[howManyCallbacks++] = ::mbed::Callback<void()>(fptr);
+        if ((fptr != NULL) && (_howManyCallbacks < sizeof(_rx)/sizeof(_rx[0]))) {
+            _rx[_howManyCallbacks++] = ::mbed::Callback<void()>(fptr);
         }
 
         USBCDC::unlock();
@@ -189,7 +189,9 @@ public:
     {
         USBCDC::lock();
 
-        rx[howManyCallbacks++] = cb;
+        if (_howManyCallbacks < sizeof(_rx)/sizeof(_rx[0])) {
+            _rx[_howManyCallbacks++] = cb;
+        }
 
         USBCDC::unlock();
     }
@@ -273,9 +275,9 @@ protected:
     }
 
 private:
-    ::mbed::Callback<void()> rx[MAX_CALLBACKS_ON_IRQ];
-    int howManyCallbacks = 0;
     void (*_settings_changed_callback)(int baud, int bits, int parity, int stop);
+    ::mbed::Callback<void()> _rx[MAX_CALLBACKS_ON_IRQ];
+    size_t _howManyCallbacks = 0;
 };
 }
 
