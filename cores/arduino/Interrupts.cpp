@@ -18,45 +18,31 @@
 
 #include "Arduino.h"
 
-#ifdef digitalPinToInterruptObj
-static mbed::InterruptIn* PinNameToInterruptObj(PinName P) {
-  // reverse search for pinName in g_APinDescription[P].name fields
-  for (pin_size_t i=0; i < PINS_COUNT; i++) {
-    if (g_APinDescription[i].name == P) {
-      return g_APinDescription[i].irq;
-    }
-  }
-  return NULL;
-}
-#endif
-
 void detachInterrupt(PinName interruptNum) {
-#ifdef digitalPinToInterruptObj
-  if (PinNameToInterruptObj(interruptNum) != NULL) {
-    delete PinNameToInterruptObj(interruptNum);
+  pin_size_t idx = PinNameToIndex(interruptNum);
+  if (idx != NOT_A_PIN) {
+    detachInterrupt(idx);
   }
-#endif
 }
 
 void detachInterrupt(pin_size_t interruptNum) {
-#ifdef digitalPinToInterruptObj
-  if (digitalPinToInterruptObj(interruptNum) != NULL) {
+  if ((interruptNum < PINS_COUNT) && (digitalPinToInterruptObj(interruptNum) != NULL)) {
     delete digitalPinToInterruptObj(interruptNum);
   }
-#endif
 }
 
 void attachInterruptParam(PinName interruptNum, voidFuncPtrParam func, PinStatus mode, void* param) {
-  detachInterrupt(interruptNum);
-  mbed::InterruptIn* irq = new mbed::InterruptIn(interruptNum);
-  if (mode == FALLING) {
-    irq->fall(mbed::callback(func, param));
+  pin_size_t idx = PinNameToIndex(interruptNum);
+  if (idx != NOT_A_PIN) {
+    attachInterruptParam(PinNameToIndex(interruptNum), func, mode, param);
   } else {
-    irq->rise(mbed::callback(func, param));
+    mbed::InterruptIn* irq = new mbed::InterruptIn(interruptNum);
+    if (mode == FALLING) {
+      irq->fall(mbed::callback(func, param));
+    } else {
+      irq->rise(mbed::callback(func, param));
+    }
   }
-#ifdef digitalPinToInterruptObj
-  digitalPinToInterruptObj(interruptNum) = irq;
-#endif
 }
 
 void attachInterrupt(PinName interruptNum, voidFuncPtr func, PinStatus mode) {
@@ -64,6 +50,9 @@ void attachInterrupt(PinName interruptNum, voidFuncPtr func, PinStatus mode) {
 }
 
 void attachInterruptParam(pin_size_t interruptNum, voidFuncPtrParam func, PinStatus mode, void* param) {
+  if (interruptNum >= PINS_COUNT) {
+    return;
+  }
   detachInterrupt(interruptNum);
   mbed::InterruptIn* irq = new mbed::InterruptIn(digitalPinToPinName(interruptNum));
   if (mode == FALLING) {
@@ -71,9 +60,7 @@ void attachInterruptParam(pin_size_t interruptNum, voidFuncPtrParam func, PinSta
   } else {
     irq->rise(mbed::callback(func, param));
   }
-#ifdef digitalPinToInterruptObj
   digitalPinToInterruptObj(interruptNum) = irq;
-#endif
 }
 
 void attachInterrupt(pin_size_t interruptNum, voidFuncPtr func, PinStatus mode) {

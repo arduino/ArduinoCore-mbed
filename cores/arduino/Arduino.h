@@ -32,6 +32,7 @@
 #include "mbed_config.h"
 #include "mbed/drivers/InterruptIn.h"
 #include "mbed/drivers/PwmOut.h"
+#include "mbed/drivers/AnalogIn.h"
 #undef PinMode
 #undef F
 #endif //__cplusplus
@@ -89,7 +90,11 @@ typedef struct _PinDescription
   PinName name;
   mbed::InterruptIn* irq;
   mbed::PwmOut* pwm;
+  mbed::AnalogIn* analog;
+  gpio_t* gpio;
 } PinDescription ;
+
+int PinNameToIndex(PinName P);
 
 // Pins table to be instantiated into variant.cpp
 extern PinDescription g_APinDescription[];

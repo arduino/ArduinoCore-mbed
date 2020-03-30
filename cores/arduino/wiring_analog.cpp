@@ -27,47 +27,32 @@
 static int write_resolution = 8;
 static int read_resolution = 10;
 
-#ifdef digitalPinToPwmObj
-static mbed::PwmOut* PinNameToPwmObj(PinName P) {
-  // reverse search for pinName in g_APinDescription[P].name fields
-  for (pin_size_t i=0; i < PINS_COUNT; i++) {
-    if (g_APinDescription[i].name == P) {
-      return g_APinDescription[i].pwm;
-    }
-  }
-  return NULL;
-}
-#endif
-
 void analogWrite(PinName pin, int val)
 {
-  float percent = (float)val/(float)(1 << write_resolution);
-#ifdef digitalPinToPwmObj
-  mbed::PwmOut* pwm = PinNameToPwmObj(pin);
-  if (pwm == NULL) {
-    pwm = new mbed::PwmOut(pin);
-    digitalPinToPwmObj(pin) = pwm;
+  pin_size_t idx = PinNameToIndex(pin);
+  if (idx != NOT_A_PIN) {
+    analogWrite(idx, val);
+  } else {
+    mbed::PwmOut* pwm = new mbed::PwmOut(pin);
     pwm->period_ms(2); //500Hz
+    float percent = (float)val/(float)(1 << write_resolution);
+    pwm->write(percent);
   }
-#else
-  // attention: this leaks badly
-  mbed::PwmOut* pwm = new mbed::PwmOut(digitalPinToPinName(pin));
-#endif
-  pwm->write(percent);
 }
 
 void analogWrite(pin_size_t pin, int val)
 {
+  if (pin >= PINS_COUNT) {
+    return;
+  }
   float percent = (float)val/(float)(1 << write_resolution);
-#ifdef digitalPinToPwmObj
-  mbed::PwmOut* pwm = digitalPinToPwmObj(pin);
+  mbed::PwmOut* pwm = digitalPinToPwm(pin);
   if (pwm == NULL) {
     pwm = new mbed::PwmOut(digitalPinToPinName(pin));
-    digitalPinToPwmObj(pin) = pwm;
+    digitalPinToPwm(pin) = pwm;
     pwm->period_ms(2); //500Hz
   }
   pwm->write(percent);
-#endif
 }
 
 void analogWriteResolution(int bits)
@@ -77,20 +62,24 @@ void analogWriteResolution(int bits)
 
 int analogRead(PinName pin)
 {
-  int multiply_factor = 1;
-#ifdef ANALOG_BUG_MBED
-  multiply_factor = 4;
-#endif
-  return (mbed::AnalogIn(pin).read_u16() >> (16 - read_resolution)) * multiply_factor;
+  return (mbed::AnalogIn(pin).read_u16() >> (16 - read_resolution));
 }
 
 int analogRead(pin_size_t pin)
 {
-  int multiply_factor = 1;
-#ifdef ANALOG_BUG_MBED
-  multiply_factor = 4;
-#endif
-  return (mbed::AnalogIn(analogPinToPinName(pin)).read_u16() >> (16 - read_resolution)) * multiply_factor;
+  if (pin >= PINS_COUNT) {
+    return -1;
+  }
+  PinName name = analogPinToPinName(pin);
+  if (name == NC) {
+    return -1;
+  }
+  mbed::AnalogIn* obj = analogPinToAnalogObj(pin);
+  if (obj == NULL) {
+    obj = new mbed::AnalogIn(name);
+    analogPinToAnalogObj(pin) = obj;
+  }
+  return (obj->read_u16() >> (16 - read_resolution));
 }
 
 void analogReadResolution(int bits)

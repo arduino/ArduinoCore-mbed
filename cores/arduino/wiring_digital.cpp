@@ -26,56 +26,83 @@
 
 void pinMode(PinName pin, PinMode mode)
 {
-  switch (mode) {
-    case INPUT:
-      mbed::DigitalIn(pin, PullNone);
-      break;
-    case OUTPUT:
-      mbed::DigitalOut(pin, 0);
-      break;
-    case INPUT_PULLUP:
-      mbed::DigitalIn(pin, PullUp);
-      break;
-    case INPUT_PULLDOWN:
-      mbed::DigitalIn(pin, PullDown);
-      break;
+  pin_size_t idx = PinNameToIndex(pin);
+  if (idx != NOT_A_PIN) {
+    pinMode(idx, mode);
+  } else {
+    switch (mode) {
+      case INPUT:
+        mbed::DigitalIn(pin, PullNone);
+        break;
+      case OUTPUT:
+        mbed::DigitalOut(pin, 0);
+        break;
+      case INPUT_PULLUP:
+        mbed::DigitalIn(pin, PullUp);
+        break;
+      case INPUT_PULLDOWN:
+        mbed::DigitalIn(pin, PullDown);
+        break;
+    }
   }
 }
 
 void pinMode(pin_size_t pin, PinMode mode)
 {
+  gpio_t* gpio = digitalPinToGpio(pin);
+  if (gpio == NULL) {
+    gpio = new gpio_t();
+    digitalPinToGpio(pin) = gpio;
+  }
+
   switch (mode) {
     case INPUT:
-      mbed::DigitalIn(digitalPinToPinName(pin), PullNone);
+      gpio_init_in_ex(gpio, digitalPinToPinName(pin), PullNone);
       break;
     case OUTPUT:
-      mbed::DigitalOut(digitalPinToPinName(pin));
+      gpio_init_out(gpio, digitalPinToPinName(pin));
       break;
     case INPUT_PULLUP:
-      mbed::DigitalIn(digitalPinToPinName(pin), PullUp);
+      gpio_init_in_ex(gpio, digitalPinToPinName(pin), PullUp);
       break;
     case INPUT_PULLDOWN:
-      mbed::DigitalIn(digitalPinToPinName(pin), PullDown);
+      gpio_init_in_ex(gpio, digitalPinToPinName(pin), PullDown);
       break;
   }
 }
 
 void digitalWrite(PinName pin, PinStatus val)
 {
-  mbed::DigitalOut(pin).write((int)val);
+  pin_size_t idx = PinNameToIndex(pin);
+  if (idx != NOT_A_PIN) {
+    digitalWrite(idx, val);
+  } else {
+    mbed::DigitalOut(pin).write((int)val);
+  }
 }
 
 void digitalWrite(pin_size_t pin, PinStatus val)
 {
-	mbed::DigitalOut(digitalPinToPinName(pin)).write((int)val);
+  if (pin >= PINS_COUNT) {
+    return;
+  }
+	gpio_write(digitalPinToGpio(pin), (int)val);
 }
 
 PinStatus digitalRead(PinName pin)
 {
-  return (PinStatus)mbed::DigitalIn(pin).read();
+  pin_size_t idx = PinNameToIndex(pin);
+  if (idx != NOT_A_PIN) {
+    return digitalRead(idx);
+  } else {
+    return (PinStatus)mbed::DigitalIn(pin).read();
+  }
 }
 
 PinStatus digitalRead(pin_size_t pin)
 {
-	return (PinStatus)mbed::DigitalIn(digitalPinToPinName(pin)).read();
+  if (pin >= PINS_COUNT) {
+    return LOW;
+  }
+	return (PinStatus)gpio_read(digitalPinToGpio(pin));
 }
