@@ -18,9 +18,6 @@
 #define CORTEXM_H_
 
 
-// UNDONE:
-#define MRI_THREAD_MRI 0
-
 /* Definitions used by C and Assembler code. */
 /* In some other build systems, MRI_DEVICE_HAS_FPU won't be passed in on compiler's command line so use the
    target Cortex-M type to determine if it has a FPU or not.

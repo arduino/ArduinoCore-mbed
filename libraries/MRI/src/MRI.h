@@ -12,13 +12,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-// Library to enable GDB debugging of the Arduino Portenta-H7 over a serial connection.
+// MRI - Monitor for Remote Inspection.  The GDB compatible debug monitor for Cortex-M devices.
 #pragma once
 
-#include "boards/portenta-h7/DebugSerial.h"
-
-// Use to insert a hardcoded breakpoint into your code.
-#ifndef __debugbreak
-    #define __debugbreak()  { __asm volatile ("bkpt #0"); }
-#endif
-
+#include "core/mri.h"
