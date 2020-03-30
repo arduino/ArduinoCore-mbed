@@ -275,6 +275,8 @@ static void command_loop(void)
   }
 }
 
+#include "usb_phy_api.h"
+
 tusbh_msg_q_t* mq;
 
 void setup()
