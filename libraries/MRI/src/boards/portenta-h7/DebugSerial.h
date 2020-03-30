@@ -15,19 +15,9 @@
 // GDB Kernel debugging of the Arduino Portenta-H7 over a serial connection.
 #pragma once
 
-#include <Arduino.h>
 #include <mbed.h>
 
-extern "C" {
-    typedef struct Token Token;
-    void     mriPlatform_Init(Token* pParameterTokens);
-    uint32_t mriPlatform_CommHasReceiveData(void);
-    int      mriPlatform_CommReceiveChar(void);
-    void     mriPlatform_CommSendChar(int character);
-}
 
-
-// UNDONE: Should I put the debugger objects into the Arduino namespace?
 namespace arduino {
 
 class DebugSerial {
@@ -42,30 +32,7 @@ public:
     ~DebugSerial();
 
 protected:
-    void        construct();
-    void        setupStopInSetup();
-
-    // These protected methods are called from global Platform* routines via singleton.
-    void        setSerialPriority(uint8_t priority);
-    uint32_t    hasReceiveData(void);
-    int         receiveChar(void);
-    void        sendChar(int character);
-
-    void        initSerial();
-
-    static int  justEnteredSetupCallback(void* pvContext);
-    int         justEnteredSetup();
-
-    typedef void(*IsrFunctionPtr)(void);
-
     mbed::UnbufferedSerial  _serial;
-    IRQn_Type               _irq;
-    bool                    _breakInSetup;
-
-    friend void     ::mriPlatform_Init(Token* pParameterTokens);
-    friend uint32_t ::mriPlatform_CommHasReceiveData(void);
-    friend int      ::mriPlatform_CommReceiveChar(void);
-    friend void     ::mriPlatform_CommSendChar(int character);
 };
 
 } // namespace arduino

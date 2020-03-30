@@ -24,107 +24,86 @@ extern "C" {
 }
 
 
-// The number of milliseconds to pause at the beginning of setup() to give time for host to enumerate USB device.
-#define STARTUP_DELAY_MSEC 250
-
-static const char g_memoryMapXml[] = "<?xml version=\"1.0\"?>"
-                                     "<!DOCTYPE memory-map PUBLIC \"+//IDN gnu.org//DTD GDB Memory Map V1.0//EN\" \"http://sourceware.org/gdb/gdb-memory-map.dtd\">"
-                                     "<memory-map>"
-                                     "<memory type=\"ram\" start=\"0x00000000\" length=\"0x10000\"> </memory>"
-                                     "<memory type=\"flash\" start=\"0x08000000\" length=\"0x200000\"> <property name=\"blocksize\">0x20000</property></memory>"
-                                     "<memory type=\"ram\" start=\"0x10000000\" length=\"0x48000\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x1ff00000\" length=\"0x20000\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x20000000\" length=\"0x20000\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x24000000\" length=\"0x80000\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x30000000\" length=\"0x48000\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x38000000\" length=\"0x10000\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x38800000\" length=\"0x1000\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x58020000\" length=\"0x2c00\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x58024400\" length=\"0xc00\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x58025400\" length=\"0x800\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x58026000\" length=\"0x800\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x58027000\" length=\"0x400\"> </memory>"
-                                     "<memory type=\"flash\" start=\"0x90000000\" length=\"0x10000000\"> <property name=\"blocksize\">0x200</property></memory>"
-                                     "<memory type=\"ram\" start=\"0xc0000000\" length=\"0x800000\"> </memory>"
-                                     "</memory-map>";
+// Globals that describe the DebugSerial singleton.
+static mbed::UnbufferedSerial*  g_pSerial;
+static IRQn_Type                g_irq;
+static bool                     g_breakInSetup;
 
 
-// The singleton through which all of the Platform* APIs redirect their calls.
-static DebugSerial* g_pDebugSerial = NULL;
+// Run the DebugMonitor and UART interrupts at this priority.
+#define DEBUG_ISR_PRIORITY 2
 
+
+struct SystemHandlerPriorities {
+    uint8_t svcallPriority;
+    uint8_t pendsvPriority;
+    uint8_t systickPriority;
+};
+
+
+// Forward Function Declarations
+static void setupStopInSetup();
+static int justEnteredSetupCallback(void* pv);
+static void initSerial();
+static SystemHandlerPriorities getSystemHandlerPrioritiesBeforeMriModifiesThem();
+static void restoreSystemHandlerPriorities(const SystemHandlerPriorities* pPriorities);
+static void switchFaultHandlersToDebugger();
+
+
+// Forward declaration of external functions used by DebugSerial.
 // Will be setting initial breakpoint on setup() routine.
-void setup();
-
+extern "C" void setup();
 // The debugger uses this handler to catch faults, debug events, etc.
 extern "C" void mriExceptionHandler(void);
 
 
-DebugSerial::DebugSerial(PinName txPin, PinName rxPin, IRQn_Type irq, uint32_t baudRate, bool breakInSetup /*=true*/) :
-    _serial(txPin, rxPin, baudRate), _irq(irq), _breakInSetup(breakInSetup)
+arduino::DebugSerial::DebugSerial(PinName txPin, PinName rxPin, IRQn_Type irq, uint32_t baudRate, bool breakInSetup /*=true*/) :
+    _serial(txPin, rxPin, baudRate)
 {
     // Just return without doing anything if the singleton has already been initialized.
     // This ends up using the first initialized DebugSerial object.
-    if (g_pDebugSerial != NULL) {
+    if (g_pSerial != NULL) {
         return;
     }
-    g_pDebugSerial = this;
+    g_irq = irq;
+    g_breakInSetup = breakInSetup;
+    g_pSerial = &_serial;
 
     mriInit("");
 
     setupStopInSetup();
 }
 
-void DebugSerial::setupStopInSetup() {
+static void setupStopInSetup()
+{
     mriCore_SetTempBreakpoint((uint32_t)setup, justEnteredSetupCallback, NULL);
 }
 
-int DebugSerial::justEnteredSetupCallback(void* pv){
-    return g_pDebugSerial->justEnteredSetup();
-}
-
-int DebugSerial::justEnteredSetup() {
+static int justEnteredSetupCallback(void* pv)
+{
     initSerial();
 
     // Return 0 to indicate that we want to halt execution at the beginning of setup() or 1 to not force a halt.
-    return _breakInSetup ? 0 : 1;
+    return g_breakInSetup ? 0 : 1;
+}
+
+static void initSerial()
+{
+    // Hook communication port ISR to allow debug monitor to be awakened when GDB sends a command.
+    g_pSerial->attach(mriExceptionHandler);
+    mriCortexMSetPriority(g_irq, DEBUG_ISR_PRIORITY, 0);
+    NVIC_SetVector(g_irq, (uint32_t)mriExceptionHandler);
 }
 
 
-DebugSerial::~DebugSerial() {
+arduino::DebugSerial::~DebugSerial()
+{
     // IMPORTANT NOTE: You are attempting to destroy the connection to GDB which isn't allowed.
     //                 Don't allow your DebugSerial object to go out of scope like this.
     __debugbreak();
     for (;;) {
         // Loop forever.
     }
-}
-
-void DebugSerial::setSerialPriority(uint8_t priority) {
-    mriCortexMSetPriority(_irq, priority, 0);
-}
-
-void DebugSerial::initSerial() {
-
-    // Hook communication port ISR to allow debug monitor to be awakened when GDB sends a command.
-    _serial.attach(mriExceptionHandler);
-    setSerialPriority(2);
-    NVIC_SetVector(_irq, (uint32_t)mriExceptionHandler);
-}
-
-uint32_t DebugSerial::hasReceiveData(void) {
-    return _serial.readable();
-}
-
-int DebugSerial::receiveChar(void) {
-    while (!hasReceiveData()) {
-    }
-    uint8_t byte;
-    _serial.read(&byte, 1);
-    return byte;
-}
-
-void DebugSerial::sendChar(int character) {
-    _serial.write(&character, 1);
 }
 
 
@@ -134,24 +113,12 @@ void DebugSerial::sendChar(int character) {
 // Global Platform_* functions needed by MRI to initialize and communicate with MRI.
 // These functions will perform most of their work through the DebugSerial singleton.
 // ---------------------------------------------------------------------------------------------------------------------
-struct SystemHandlerPriorities {
-    uint8_t svcallPriority;
-    uint8_t pendsvPriority;
-    uint8_t systickPriority;
-};
-
-// Forward Function Declarations
-static SystemHandlerPriorities getSystemHandlerPrioritiesBeforeMriModifiesThem();
-static void restoreSystemHandlerPriorities(const SystemHandlerPriorities* pPriorities);
-static void switchFaultHandlersToDebugger();
-
-
-extern "C" void Platform_Init(Token* pParameterTokens) {
+void Platform_Init(Token* pParameterTokens)
+{
     SystemHandlerPriorities origPriorities = getSystemHandlerPrioritiesBeforeMriModifiesThem();
-    uint8_t                 debugMonPriority = 2;
 
     __try
-        mriCortexMInit((Token*)pParameterTokens, debugMonPriority, WAKEUP_PIN_IRQn);
+        mriCortexMInit((Token*)pParameterTokens, DEBUG_ISR_PRIORITY, WAKEUP_PIN_IRQn);
     __catch
         __rethrow;
 
@@ -188,18 +155,50 @@ static void switchFaultHandlersToDebugger(void) {
 }
 
 
-extern "C" uint32_t Platform_CommHasReceiveData(void) {
-    return g_pDebugSerial->hasReceiveData();
+
+
+uint32_t Platform_CommHasReceiveData(void)
+{
+    return g_pSerial->readable();
 }
 
-extern "C" int Platform_CommReceiveChar(void) {
-    return g_pDebugSerial->receiveChar();
+int Platform_CommReceiveChar(void)
+{
+    while (!Platform_CommHasReceiveData()) {
+    }
+    uint8_t byte;
+    g_pSerial->read(&byte, 1);
+    return byte;
 }
 
-extern "C" void Platform_CommSendChar(int character) {
-    g_pDebugSerial->sendChar(character);
+void Platform_CommSendChar(int character)
+{
+    g_pSerial->write(&character, 1);
 }
 
+
+
+
+static const char g_memoryMapXml[] = "<?xml version=\"1.0\"?>"
+                                     "<!DOCTYPE memory-map PUBLIC \"+//IDN gnu.org//DTD GDB Memory Map V1.0//EN\" \"http://sourceware.org/gdb/gdb-memory-map.dtd\">"
+                                     "<memory-map>"
+                                     "<memory type=\"ram\" start=\"0x00000000\" length=\"0x10000\"> </memory>"
+                                     "<memory type=\"flash\" start=\"0x08000000\" length=\"0x200000\"> <property name=\"blocksize\">0x20000</property></memory>"
+                                     "<memory type=\"ram\" start=\"0x10000000\" length=\"0x48000\"> </memory>"
+                                     "<memory type=\"ram\" start=\"0x1ff00000\" length=\"0x20000\"> </memory>"
+                                     "<memory type=\"ram\" start=\"0x20000000\" length=\"0x20000\"> </memory>"
+                                     "<memory type=\"ram\" start=\"0x24000000\" length=\"0x80000\"> </memory>"
+                                     "<memory type=\"ram\" start=\"0x30000000\" length=\"0x48000\"> </memory>"
+                                     "<memory type=\"ram\" start=\"0x38000000\" length=\"0x10000\"> </memory>"
+                                     "<memory type=\"ram\" start=\"0x38800000\" length=\"0x1000\"> </memory>"
+                                     "<memory type=\"ram\" start=\"0x58020000\" length=\"0x2c00\"> </memory>"
+                                     "<memory type=\"ram\" start=\"0x58024400\" length=\"0xc00\"> </memory>"
+                                     "<memory type=\"ram\" start=\"0x58025400\" length=\"0x800\"> </memory>"
+                                     "<memory type=\"ram\" start=\"0x58026000\" length=\"0x800\"> </memory>"
+                                     "<memory type=\"ram\" start=\"0x58027000\" length=\"0x400\"> </memory>"
+                                     "<memory type=\"flash\" start=\"0x90000000\" length=\"0x10000000\"> <property name=\"blocksize\">0x200</property></memory>"
+                                     "<memory type=\"ram\" start=\"0xc0000000\" length=\"0x800000\"> </memory>"
+                                     "</memory-map>";
 
 extern "C" uint32_t Platform_GetDeviceMemoryMapXmlSize(void) {
     return sizeof(g_memoryMapXml) - 1;
@@ -208,6 +207,8 @@ extern "C" uint32_t Platform_GetDeviceMemoryMapXmlSize(void) {
 extern "C" const char* Platform_GetDeviceMemoryMapXml(void) {
     return g_memoryMapXml;
 }
+
+
 
 
 extern "C" const uint8_t* Platform_GetUid(void) {
