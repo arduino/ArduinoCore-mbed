@@ -36,12 +36,20 @@ extern "C"
 }
 
 
+// ---------------------------------------------------------------------------------------------------------------------
 // Configuration Parameters
+// ---------------------------------------------------------------------------------------------------------------------
 // The size of the mriThread() stack in uint64_t objects.
 #define MRI_THREAD_STACK_SIZE   128
 // The maximum number of active threads that can be handled by the debugger.
 #define MAXIMUM_ACTIVE_THREADS  64
 
+// Threads with these names will not be suspended when a debug event is occurred.
+// Typically these will be threads used by the communication stack to communicate with GDB or other important system
+// threads.
+static const char* g_threadNamesToIgnore[] = {
+    "rtx_idle"
+};
 
 
 
@@ -149,6 +157,7 @@ extern "C" void mriSysTickHandlerStub(void);
 // Forward Function Declarations
 static __NO_RETURN void mriMain(void *pv);
 static void suspendAllApplicationThreads();
+static bool isThreadToIgnore(osThreadId_t thread);
 static void resumeApplicationThreads();
 static void readThreadContext(osThreadId_t thread);
 static void switchRtxHandlersToDebugStubsForSingleStepping();
@@ -245,15 +254,28 @@ static void suspendAllApplicationThreads()
     osThreadEnumerate(g_suspendedThreads, sizeof(g_suspendedThreads)/sizeof(g_suspendedThreads[0]));
     for (uint32_t i = 0 ; i < g_threadCount ; i++) {
         osThreadId_t thread = g_suspendedThreads[i];
-        const char*  pThreadName = osThreadGetName(thread);
-
-        if (thread != mriThreadId && strcmp(pThreadName, "rtx_idle") != 0) {
+        if (isThreadToIgnore(thread)) {
+            g_suspendedThreads[i] = 0;
+        } else {
             osThreadSuspend(thread);
         }
-        else {
-            g_suspendedThreads[i] = 0;
+    }
+}
+
+static bool isThreadToIgnore(osThreadId_t thread)
+{
+    if (thread == mriThreadId) {
+        // Don't want to suspend the debugger thread itself.
+        return true;
+    }
+
+    const char*  pThreadName = osThreadGetName(thread);
+    for (size_t i = 0 ; i < sizeof(g_threadNamesToIgnore)/sizeof(g_threadNamesToIgnore[0]) ; i++) {
+        if (strcmp(pThreadName, g_threadNamesToIgnore[i]) == 0) {
+            return true;
         }
     }
+    return false;
 }
 
 static void resumeApplicationThreads()
