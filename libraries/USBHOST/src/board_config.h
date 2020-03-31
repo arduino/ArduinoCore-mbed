@@ -42,7 +42,7 @@
 //#define  OTG_HS_EMBEDDED_PHY
 
 /* Use embedded phy for full speed core */ 
-//#define  OTG_FS_EMBEDDED_PHY
+#define  OTG_FS_EMBEDDED_PHY
 
 /* Enable DMA for High speed phy */
 #define  OTG_HS_ENABLE_DMA
@@ -54,10 +54,8 @@
 #define  DESCRIPTOR_BUFFER_SIZE  256
 
 /* USB core ID used in test app, 0 - FS core, 1 - HS core */
-//#define  USB_CORE_ID_FS             0
+#define  USB_CORE_ID_FS             0
 #define  USB_CORE_ID_HS             1
-
-#define  TEST_APP_USB_CORE          USB_CORE_ID_HS
 
 
     /**USB_OTG_HS GPIO Configuration    

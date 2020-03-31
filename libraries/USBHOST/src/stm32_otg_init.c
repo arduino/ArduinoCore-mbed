@@ -321,6 +321,7 @@ static void tusb_setup_otg_hs_io(void)
 }
 #endif
 
+void OTG_FS_IRQHandler(void);
 void OTG_HS_IRQHandler(void);
 
 // init the IO and OTG core
@@ -344,6 +345,8 @@ static void tusb_otg_core_init(tusb_core_t* core)
     Wait_CoreReset(USBx);
     /* Deactivate the power down*/
     USBx->GCCFG = USB_OTG_GCCFG_PWRDWN;
+
+    NVIC_SetVector(OTG_FS_IRQn, (uint32_t)&OTG_FS_IRQHandler);
 #endif
   }
 #if defined(OTG_HS_EXTERNAL_PHY) || defined(OTG_HS_EMBEDDED_PHY)

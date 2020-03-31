@@ -32,7 +32,7 @@
    SOFTWARE.
 */
 
-#include "USBHOST.h"
+#include "USBHost.h"
 
 extern "C" {
 #include "teeny_usb.h"
@@ -59,14 +59,6 @@ extern "C" {
   "                       __/ |                    \n"           \
   "                      |___/                     \n"
 
-
-extern "C" {
-  // host need accurate delay
-  void tusb_delay_ms(uint32_t ms)
-  {
-    delayMicroseconds(ms*1000);
-  }
-}
 
 static int process_key(tusbh_ep_info_t* ep, const uint8_t* key);
 
@@ -276,6 +268,7 @@ static void command_loop(void)
 }
 
 #include "usb_phy_api.h"
+#include "Wire.h"
 
 tusbh_msg_q_t* mq;
 
@@ -284,7 +277,7 @@ void setup()
   Serial1.begin(115200);
   printf("\n" TEENYUSB_LOGO PROMPT);
 
-  get_usb_phy()->deinit();
+  //get_usb_phy()->deinit();
 
   mq = tusbh_mq_create();
   tusbh_mq_init(mq);
@@ -314,6 +307,8 @@ void setup()
   (void)root_hs;
   hs = 0;
 #endif
+
+  start_hub();
 
   //usb_fakeirq.start(mbed::callback(usb_irq_thread));
 

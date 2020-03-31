@@ -95,7 +95,8 @@ static const tusbh_class_reg_t class_table[] = {
 void setup()
 {
   Serial1.begin(115200);
-  usb.Init(class_table);
+  usb.Init(USB_CORE_ID_HS, class_table);
+  //usb.Init(USB_CORE_ID_FS, class_table);
 }
 
 void loop() {
