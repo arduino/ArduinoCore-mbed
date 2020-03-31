@@ -298,8 +298,10 @@ static int hub_data_xfered(tusbh_ep_info_t* ep)
         goto error;
     }
     TUSB_HUB_INFO("HUB port state = %02x\n", port_state);
-    for(;port_state; port_state>>=1, port++) {
-        if( (port_state & 1) == 0 ) continue;
+    while (port_state != 0) {
+        if( (port_state & 1) == 0 ) {
+            goto next_port;
+        }
         usb_hub_port_status_t status;
         TUSB_HUB_INFO("HUB get port %d status\n", port);
         res = tusbh_get_hub_port_staus(dev, port, &status);
@@ -342,7 +344,7 @@ static int hub_data_xfered(tusbh_ep_info_t* ep)
                 if(status.wPortStatus.PORT_LOW_SPEED){
                     child->speed = PORT_SPEED_LOW;
                 }
-                tusb_delay_ms(200);
+                //tusb_delay_ms(200);
                 
                 if(dev->ctrl_in>=0){
                     tusbh_close_pipe(dev, dev->ctrl_in);
@@ -360,7 +362,8 @@ static int hub_data_xfered(tusbh_ep_info_t* ep)
                 }
                 if(dev->ctrl_out<0){
                     TUSB_HUB_INFO("Fail to re-allocate hub ctrl out\n");
-                } 
+                }
+                goto next_port;
             }else{
                 TUSB_HUB_INFO("Connect\n");
                 tusbh_device_t* child = dev->children[port-1];
@@ -373,6 +376,8 @@ static int hub_data_xfered(tusbh_ep_info_t* ep)
                 child->hub_port = port;
                 dev->children[port-1] = child;
                 tusbh_set_hub_port_feature(dev, port, HUB_FEATURE_SEL_PORT_RESET);
+                tusb_delay_ms(info->hub_desc.bPowerOnToPowerGood);
+                continue;
             }
         }else{
             TUSB_HUB_INFO("Disconnect\n");
@@ -384,8 +389,11 @@ static int hub_data_xfered(tusbh_ep_info_t* ep)
                 dev->children[port-1] = 0;
             }
         }
+next_port:
+        port_state>>=1;
+        port++;
     }
-    
+
 error:
     if(dev->ctrl_in>=0){ tusbh_close_pipe(dev, dev->ctrl_in); }
     if(dev->ctrl_out>=0){ tusbh_close_pipe(dev, dev->ctrl_out); }

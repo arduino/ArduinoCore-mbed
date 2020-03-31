@@ -14,7 +14,6 @@ uint32_t USBHost::Init(uint8_t id, const tusbh_class_reg_t class_table[]) {
     root_fs.support_classes = class_table;
     tusb_host_init(_fs, &root_fs);
     tusb_open_host(_fs);
-
     start_hub();
   }
 

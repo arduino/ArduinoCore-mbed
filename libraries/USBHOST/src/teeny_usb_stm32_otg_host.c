@@ -1157,7 +1157,7 @@ uint32_t tusb_otg_host_xfer_data_split(tusb_host_t* host, uint8_t hc_num, uint8_
     tusb_otg_host_submit(host, hc_num);
   } while (0);
 
-  delayMicroseconds(300);
+  delayMicroseconds(200);
 
   HC->HCSPLT = 0;
 
@@ -1202,13 +1202,17 @@ uint32_t tusb_otg_host_xfer_data_normal(tusb_host_t* host, uint8_t hc_num, uint8
 #endif
   }
 
+  if ((USBx == USB_OTG_FS) && (hc->speed == PORT_SPEED_LOW)) {
+    //delayMicroseconds(200);
+  }
+
   tusb_otg_host_submit(host, hc_num);
   return 0;
 }
 
 uint32_t tusb_otg_host_xfer_data(tusb_host_t* host, uint8_t hc_num, uint8_t is_data, uint8_t* data, uint32_t len, uint8_t port)
 {
-  if (port == 0 || GetUSB(host) == USB_OTG_FS) {
+  if ((port == 0) || (GetUSB(host) == USB_OTG_FS)) {
     return tusb_otg_host_xfer_data_normal(host, hc_num, is_data, data, len);
   } else {
     return tusb_otg_host_xfer_data_split(host, hc_num, is_data, data, len, port);
