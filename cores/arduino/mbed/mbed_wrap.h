@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#if !defined(MBED_H)
+#ifndef MBED_H
 #define MBED_H
 
 #include "platform/mbed_version.h"

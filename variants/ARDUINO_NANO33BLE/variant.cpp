@@ -37,18 +37,18 @@ PinDescription g_APinDescription[] = {
 
   { P0_19, NULL, NULL, NULL, NULL },     // INT APDS
 
-  { // PDM }
+  // PDM
   { P0_17, NULL, NULL, NULL, NULL },     // PDM PWR
   { P0_26, NULL, NULL, NULL, NULL },     // PDM CLK
   { P0_25, NULL, NULL, NULL, NULL },     // PDM DIN
 
-  { // Internal I2C }
+  // Internal I2C
   { P0_14, NULL, NULL, NULL, NULL },     // SDA2
   { P0_15, NULL, NULL, NULL, NULL },     // SCL2
 
   // Internal I2C
   { P1_0,  NULL, NULL, NULL, NULL },     // I2C_PULL
-  { P0_22, NULL, NULL, NULL, NULL },     // VDD_ENV_ENABLE
+  { P0_22, NULL, NULL, NULL, NULL }     // VDD_ENV_ENABLE
 };
 
 extern "C" {
