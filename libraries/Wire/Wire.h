@@ -19,8 +19,11 @@
 #pragma once
 
 #include "Arduino.h"
+#include "Print.h"
 #include "drivers/I2C.h"
 #include "drivers/I2CSlave.h"
+
+typedef void (*voidFuncPtrParamInt)(int);
 
 namespace arduino {
 
@@ -46,6 +49,7 @@ class MbedI2C : public HardwareI2C
 
     virtual size_t write(uint8_t data);
     virtual size_t write(const uint8_t* data, int len);
+    using Print::write;
     virtual int read();
     virtual int peek();
     virtual void flush();
@@ -63,6 +67,10 @@ private:
     RingBufferN<256> rxBuffer;
     uint8_t txBuffer[256];
     uint32_t usedTxBuffer;
+    voidFuncPtrParamInt onReceiveCb = NULL;
+    voidFuncPtr onRequestCb = NULL;
+    rtos::Thread slave_th;
+    void receiveThd();
 };
 
 }

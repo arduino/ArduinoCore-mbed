@@ -31,7 +31,8 @@ void arduino::MbedI2C::begin() {
 void arduino::MbedI2C::begin(uint8_t slaveAddr) {
 #ifdef DEVICE_I2CSLAVE
 	slave = new mbed::I2CSlave((PinName)_sda, (PinName)_scl);
-	slave->address(slaveAddr);
+	slave->address(slaveAddr << 1);
+	slave_th.start(mbed::callback(this, &arduino::MbedI2C::receiveThd));
 #endif
 }
 
@@ -118,9 +119,45 @@ int arduino::MbedI2C::peek() {
 void arduino::MbedI2C::flush() {
 }
 
+void arduino::MbedI2C::receiveThd() {
+	while (1) {
+		int i = slave->receive();
+		switch (i) {
+			case mbed::I2CSlave::ReadAddressed:
+				if (onRequestCb != NULL) {
+					onRequestCb();
+				}
+				slave->write((const char *) txBuffer, usedTxBuffer);
+				slave->stop();
+				break;
+			case mbed::I2CSlave::WriteGeneral:
+			case mbed::I2CSlave::WriteAddressed:
+				rxBuffer.clear();
+				char buf[16];
+				while (1) {
+					int c = slave->read(buf, sizeof(buf));
+					for (int i = 0; i < c; i++) {
+						rxBuffer.store_char(uint8_t(buf[i]));
+					}
+					if (c <= sizeof(buf)) {
+						break;
+					}
+				}
+				if (rxBuffer.available() > 0 && onReceiveCb != NULL) {
+					onReceiveCb(rxBuffer.available());
+				}
+				slave->stop();
+				break;
+		}
+	}
+}
 
-void arduino::MbedI2C::onReceive(void(*)(int)) {}
-void arduino::MbedI2C::onRequest(void(*)(void)) {}
+void arduino::MbedI2C::onReceive(voidFuncPtrParamInt cb) {
+	onReceiveCb = cb;
+}
+void arduino::MbedI2C::onRequest(voidFuncPtr cb) {
+	onRequestCb = cb;
+}
 
 
 #if WIRE_HOWMANY > 0
