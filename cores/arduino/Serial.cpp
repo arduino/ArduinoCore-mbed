@@ -30,7 +30,46 @@ using namespace arduino;
 
 void UART::begin(unsigned long baudrate, uint16_t config) {
 	begin(baudrate);
-	_serial->format();
+	int bits = 8;
+	mbed::SerialBase::Parity parity = mbed::SerialBase::None;
+	int stop_bits = 1;
+
+	switch (config & SERIAL_DATA_MASK) {
+		case SERIAL_DATA_7:
+			bits = 7;
+			break;
+		case SERIAL_DATA_8:
+			bits = 8;
+			break;
+/*
+		case SERIAL_DATA_9:
+			bits = 9;
+			break;
+*/
+	}
+
+	switch (config & SERIAL_STOP_BIT_MASK) {
+		case SERIAL_STOP_BIT_1:
+			stop_bits = 1;
+			break;
+		case SERIAL_STOP_BIT_2:
+			stop_bits = 2;
+			break;
+	}
+
+	switch (config & SERIAL_PARITY_MASK) {
+		case SERIAL_PARITY_EVEN:
+			parity = mbed::SerialBase::Even;
+			break;
+		case SERIAL_PARITY_ODD:
+			parity = mbed::SerialBase::Odd;
+			break;
+		case SERIAL_PARITY_NONE:
+			parity = mbed::SerialBase::None;
+			break;
+	}
+
+	_serial->format(bits, parity, stop_bits);
 }
 
 void UART::begin(unsigned long baudrate) {
@@ -40,7 +79,9 @@ void UART::begin(unsigned long baudrate) {
 	if (rts != NC) {
 		_serial->set_flow_control(mbed::SerialBase::Flow::RTSCTS, rts, cts);
 	}
-	_serial->attach(mbed::callback(this, &UART::on_rx), mbed::SerialBase::RxIrq);
+	if (_serial != NULL) {
+		_serial->attach(mbed::callback(this, &UART::on_rx), mbed::SerialBase::RxIrq);
+	}
 }
 
 void UART::on_rx() {
@@ -52,6 +93,7 @@ void UART::on_rx() {
 void UART::end() {
 	if (_serial != NULL) {
 		delete _serial;
+		_serial = NULL;
 	}
 }
 
