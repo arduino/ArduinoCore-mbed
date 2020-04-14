@@ -1182,6 +1182,11 @@ const char* Platform_GetTargetXml(void)
 }
 
 
+void Platform_ResetDevice(void)
+{
+    NVIC_SystemReset();
+}
+
 
 
 #if !MRI_THREAD_MRI

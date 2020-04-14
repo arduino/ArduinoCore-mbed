@@ -33,6 +33,7 @@ extern "C" {
 
 // Globals that describe the KernelDebug singleton.
 static mbed::UnbufferedSerial*  g_pSerial;
+static uint32_t                 g_baudRate;
 static IRQn_Type                g_irq;
 static bool                     g_breakInSetup;
 
@@ -72,6 +73,7 @@ arduino::KernelDebug::KernelDebug(PinName txPin, PinName rxPin, IRQn_Type irq, u
     if (g_pSerial != NULL) {
         return;
     }
+    g_baudRate = baudRate;
     g_irq = irq;
     g_breakInSetup = breakInSetup;
     g_pSerial = &_serial;
@@ -173,6 +175,21 @@ static void switchFaultHandlersToDebugger(void)
 uint32_t Platform_CommHasReceiveData(void)
 {
     return g_pSerial->readable();
+}
+
+uint32_t Platform_CommHasTransmitCompleted(void)
+{
+    // This function is called by MRI to make sure that last GDB command has been ACKed before it executes a reset
+    // request. We will busy wait in here until that has happened and then always return true.
+    while (!g_pSerial->writable()) {
+        // Wait until transmit data register is empty.
+    }
+
+    // Might still have one byte in output shift register so wait 10 bit times to be safe.
+    uint32_t microsecondsForOneByte = (10  * 1000000) / g_baudRate;
+    delayMicroseconds(microsecondsForOneByte);
+
+    return 1;
 }
 
 int Platform_CommReceiveChar(void)

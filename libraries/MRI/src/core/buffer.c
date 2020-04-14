@@ -1,4 +1,4 @@
-/* Copyright 2014 Adam Green (https://github.com/adamgreen/)
+/* Copyright 2020 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -368,17 +368,32 @@ static void advanceToNextChar(Buffer* pBuffer)
 }
 
 
+typedef struct CompareParams
+{
+    int     (*compareFuncPtr)(Buffer* pBuffer, const char* pDesiredString, size_t stringLength);
+    size_t  charLength;
+} CompareParams;
+
+static int matchesString(CompareParams* pParams, Buffer* pBuffer, const char* pString, size_t stringLength);
 static int doesBufferContainThisString(Buffer* pBuffer, const char* pDesiredString, size_t stringLength);
+static int doesBufferContainThisHexString(Buffer* pBuffer, const char* pDesiredString, size_t stringLength);
+static int hexStringCompare(Buffer* pBuffer, const char* pDesiredString, size_t stringLength);
 int Buffer_MatchesString(Buffer* pBuffer, const char* pString, size_t stringLength)
 {
+    CompareParams params = { doesBufferContainThisString, 1 };
+    return matchesString(&params, pBuffer, pString, stringLength);
+}
+
+static int matchesString(CompareParams* pParams, Buffer* pBuffer, const char* pString, size_t stringLength)
+{
     __try
-        throwExceptionIfBufferLeftIsSmallerThan(pBuffer, stringLength);
+        throwExceptionIfBufferLeftIsSmallerThan(pBuffer, stringLength * pParams->charLength);
     __catch
         __rethrow_and_return(0);
 
-    if(doesBufferContainThisString(pBuffer, pString, stringLength))
+    if(pParams->compareFuncPtr(pBuffer, pString, stringLength))
     {
-        pBuffer->pCurrent += stringLength;
+        pBuffer->pCurrent += stringLength * pParams->charLength;
         return 1;
     }
 
@@ -391,5 +406,45 @@ static int doesBufferContainThisString(Buffer* pBuffer, const char* pDesiredStri
 
     return (strncmp(pBufferString, pDesiredString, stringLength) == 0) &&
            (Buffer_BytesLeft(pBuffer) == stringLength ||
-            pBufferString[stringLength] == ':');
+            pBufferString[stringLength] == ':' ||
+            pBufferString[stringLength] == ',');
+}
+
+
+int Buffer_MatchesHexString(Buffer* pBuffer, const char* pString, size_t stringLength)
+{
+    CompareParams params = { doesBufferContainThisHexString, 2 };
+    return matchesString(&params, pBuffer, pString, stringLength);
+}
+
+static int doesBufferContainThisHexString(Buffer* pBuffer, const char* pDesiredString, size_t stringLength)
+{
+    return (hexStringCompare(pBuffer, pDesiredString, stringLength) == 0) &&
+           (Buffer_BytesLeft(pBuffer) == stringLength*2 ||
+            (Buffer_BytesLeft(pBuffer) >= (stringLength+1)*2 &&
+             pBuffer->pCurrent[stringLength*2] == '2' &&
+             pBuffer->pCurrent[stringLength*2+1] == '0'));
+}
+
+static int hexStringCompare(Buffer* pBuffer, const char* pDesiredString, size_t stringLength)
+{
+    char* pOrig = pBuffer->pCurrent;
+    int   result = 0;
+    size_t i;
+    for (i = 0 ; i < stringLength ; i++)
+    {
+        uint8_t byte = Buffer_ReadByteAsHex(pBuffer);
+        if (byte < (uint8_t)pDesiredString[i])
+        {
+            result = -1;
+            break;
+        }
+        if (byte > (uint8_t)pDesiredString[i])
+        {
+            result = 1;
+            break;
+        }
+    }
+    pBuffer->pCurrent = pOrig;
+    return result;
 }

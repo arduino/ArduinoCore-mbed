@@ -36,8 +36,11 @@ void      mriPlatform_MemWrite16(void* pv, uint16_t value);
 void      mriPlatform_MemWrite8(void* pv, uint8_t value);
 
 uint32_t  mriPlatform_CommHasReceiveData(void);
+uint32_t  mriPlatform_CommHasTransmitCompleted(void);
 int       mriPlatform_CommReceiveChar(void);
 void      mriPlatform_CommSendChar(int character);
+
+uint32_t  mriPlatform_HandleGDBComand(Buffer* pBuffer);
 
 uint8_t   mriPlatform_DetermineCauseOfException(void);
 void      mriPlatform_DisplayFaultCauseToGdbConsole(void);
@@ -96,6 +99,8 @@ void                        mriPlatform_SetSemihostCallReturnAndErrnoValues(int 
 const uint8_t* mriPlatform_GetUid(void);
 uint32_t       mriPlatform_GetUidSize(void);
 
+void           mriPlatform_ResetDevice(void);
+
 
 /* Macroes which allow code to drop the mri namespace prefix. */
 #define Platform_Init                                       mriPlatform_Init
@@ -110,6 +115,7 @@ uint32_t       mriPlatform_GetUidSize(void);
 #define Platform_MemWrite16                                 mriPlatform_MemWrite16
 #define Platform_MemWrite8                                  mriPlatform_MemWrite8
 #define Platform_CommHasReceiveData                         mriPlatform_CommHasReceiveData
+#define Platform_CommHasTransmitCompleted                   mriPlatform_CommHasTransmitCompleted
 #define Platform_CommReceiveChar                            mriPlatform_CommReceiveChar
 #define Platform_CommSendChar                               mriPlatform_CommSendChar
 #define Platform_DetermineCauseOfException                  mriPlatform_DetermineCauseOfException
@@ -140,5 +146,6 @@ uint32_t       mriPlatform_GetUidSize(void);
 #define Platform_SetSemihostCallReturnAndErrnoValues        mriPlatform_SetSemihostCallReturnAndErrnoValues
 #define Platform_GetUid                                     mriPlatform_GetUid
 #define Platform_GetUidSize                                 mriPlatform_GetUidSize
+#define Platform_ResetDevice                                mriPlatform_ResetDevice
 
 #endif /* PLATFORMS_H_ */

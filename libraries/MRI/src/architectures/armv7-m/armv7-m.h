@@ -46,7 +46,7 @@
 */
 #define CORTEXM_DEBUGGER_STACK_FILL            0xDEADBEEF
 #if MRI_DEVICE_HAS_FPU
-    #define CORTEXM_DEBUGGER_STACK_SIZE        90
+    #define CORTEXM_DEBUGGER_STACK_SIZE        180
 #else
     #define CORTEXM_DEBUGGER_STACK_SIZE        45
 #endif

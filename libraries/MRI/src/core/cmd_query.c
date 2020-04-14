@@ -1,4 +1,4 @@
-/* Copyright 2014 Adam Green (https://github.com/adamgreen/)
+/* Copyright 2020 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 #include <core/mri.h>
 #include <core/cmd_common.h>
 #include <core/cmd_query.h>
+#include <core/gdb_console.h>
 
 
 typedef struct
@@ -40,6 +41,10 @@ static void        validateAnnexIsNull(const char* pAnnex);
 static void        handleQueryTransferReadCommand(AnnexOffsetLength* pArguments);
 static uint32_t    handleQueryTransferFeaturesCommand(void);
 static void        validateAnnexIs(const char* pAnnex, const char* pExpected);
+static uint32_t    handleMonitorCommand(void);
+static uint32_t    handleMonitorResetCommand(void);
+static uint32_t    handleMonitorShowFaultCommand(void);
+static uint32_t    handleMonitorHelpCommand(void);
 /* Handle the 'q' command used by gdb to communicate state to debug monitor and vice versa.
 
     Command Format: qSSS
@@ -50,6 +55,7 @@ uint32_t HandleQueryCommand(void)
     Buffer*             pBuffer = GetBuffer();
     static const char   qSupportedCommand[] = "Supported";
     static const char   qXferCommand[] = "Xfer";
+    static const char   qRcmdCommand[] = "Rcmd";
 
     if (Buffer_MatchesString(pBuffer, qSupportedCommand, sizeof(qSupportedCommand)-1))
     {
@@ -58,6 +64,10 @@ uint32_t HandleQueryCommand(void)
     else if (Buffer_MatchesString(pBuffer, qXferCommand, sizeof(qXferCommand)-1))
     {
         return handleQueryTransferCommand();
+    }
+    else if (Buffer_MatchesString(pBuffer, qRcmdCommand, sizeof(qRcmdCommand)-1))
+    {
+        return handleMonitorCommand();
     }
     else
     {
@@ -267,4 +277,65 @@ static void validateAnnexIs(const char* pAnnex, const char* pExpected)
 {
     if (pAnnex == NULL || 0 != strcmp(pAnnex, pExpected))
         __throw(invalidArgumentException);
+}
+
+/* Handle the "qRcmd" command used by gdb to send "monitor" commands to the stub.
+
+    Command Format: qRcmd,XXYY...
+    Where XXYY... are the hexadecimal representation of the ASCII command text.
+*/
+static uint32_t handleMonitorCommand(void)
+{
+    Buffer*             pBuffer =GetBuffer();
+    static const char   reset[] = "reset";
+    static const char   showfault[] = "showfault";
+    static const char   help[] = "help";
+
+    if (!Buffer_IsNextCharEqualTo(pBuffer, ','))
+    {
+        PrepareStringResponse(MRI_ERROR_INVALID_ARGUMENT);
+        return 0;
+    }
+
+    if (Buffer_MatchesHexString(pBuffer, reset, sizeof(reset)-1))
+    {
+        return handleMonitorResetCommand();
+    }
+    else if (Buffer_MatchesHexString(pBuffer, showfault, sizeof(showfault)-1))
+    {
+        return handleMonitorShowFaultCommand();
+    }
+    else if (Buffer_MatchesHexString(pBuffer, help, sizeof(help)-1))
+    {
+        return handleMonitorHelpCommand();
+    }
+    else
+    {
+        WriteStringToGdbConsole("Unrecognized monitor command!\r\n");
+        return handleMonitorHelpCommand();
+    }
+}
+
+static uint32_t handleMonitorResetCommand(void)
+{
+    RequestResetOnNextContinue();
+    WriteStringToGdbConsole("Will reset on next continue.\r\n");
+    PrepareStringResponse("OK");
+    return 0;
+}
+
+static uint32_t handleMonitorShowFaultCommand(void)
+{
+    Platform_DisplayFaultCauseToGdbConsole();
+    PrepareStringResponse("OK");
+    return 0;
+}
+
+static uint32_t handleMonitorHelpCommand(void)
+{
+    WriteStringToGdbConsole("Supported monitor commands:\r\n");
+    WriteStringToGdbConsole("reset\r\n");
+    WriteStringToGdbConsole("showfault\r\n");
+    PrepareStringResponse("OK");
+    return 0;
 }

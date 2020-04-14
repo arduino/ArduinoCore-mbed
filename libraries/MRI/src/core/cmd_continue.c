@@ -1,4 +1,4 @@
-/* Copyright 2017 Adam Green (https://github.com/adamgreen/)
+/* Copyright 2020 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -108,4 +108,18 @@ uint32_t HandleContinueWithSignalCommand(void)
     }
 
     return (returnValue | HANDLER_RETURN_RESUME_PROGRAM | HANDLER_RETURN_RETURN_IMMEDIATELY);
+}
+
+
+/* Handle the 'D' command which is sent from gdb to resume execution before it detaches and exits.
+
+    Command Format:     D
+    Response Format:    OK
+
+*/
+uint32_t HandleDetachCommand(void)
+{
+    skipHardcodedBreakpoint();
+    PrepareStringResponse("OK");
+    return HANDLER_RETURN_RESUME_PROGRAM;
 }

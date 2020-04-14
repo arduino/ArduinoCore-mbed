@@ -1,4 +1,4 @@
-/* Copyright 2012 Adam Green (https://github.com/adamgreen/)
+/* Copyright 2020 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ int32_t  mriBuffer_ReadIntegerAsHex(Buffer* pBuffer);
 void     mriBuffer_WriteIntegerAsHex(Buffer* pBuffer, int32_t value);
 int      mriBuffer_IsNextCharEqualTo(Buffer* pBuffer, char thisChar);
 int      mriBuffer_MatchesString(Buffer* pBuffer, const char* pString, size_t stringLength);
+int      mriBuffer_MatchesHexString(Buffer* pBuffer, const char* pString, size_t stringLength);
 
 /* Macroes which allow code to drop the mri namespace prefix. */
 #define Buffer_Init                 mriBuffer_Init
@@ -68,5 +69,6 @@ int      mriBuffer_MatchesString(Buffer* pBuffer, const char* pString, size_t st
 #define Buffer_WriteIntegerAsHex    mriBuffer_WriteIntegerAsHex
 #define Buffer_IsNextCharEqualTo    mriBuffer_IsNextCharEqualTo
 #define Buffer_MatchesString        mriBuffer_MatchesString
+#define Buffer_MatchesHexString     mriBuffer_MatchesHexString
 
 #endif /* BUFFER_H_ */

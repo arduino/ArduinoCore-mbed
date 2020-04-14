@@ -1,4 +1,4 @@
-/* Copyright 2017 Adam Green (https://github.com/adamgreen/)
+/* Copyright 2020 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -21,9 +21,11 @@
 /* Real name of functions are in mri namespace. */
 uint32_t mriCmd_HandleContinueCommand(void);
 uint32_t mriCmd_HandleContinueWithSignalCommand(void);
+uint32_t mriCmd_HandleDetachCommand(void);
 
 /* Macroes which allow code to drop the mri namespace prefix. */
 #define HandleContinueCommand           mriCmd_HandleContinueCommand
 #define HandleContinueWithSignalCommand mriCmd_HandleContinueWithSignalCommand
+#define HandleDetachCommand             mriCmd_HandleDetachCommand
 
 #endif /* CMD_CONTINUE_H_ */

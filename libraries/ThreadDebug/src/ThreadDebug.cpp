@@ -427,12 +427,17 @@ static void recordAndSwitchFaultHandlersToDebugger()
 
 uint32_t Platform_CommHasReceiveData(void)
 {
-    return g_pComm->available();
+    return g_pComm->readable();
+}
+
+uint32_t Platform_CommHasTransmitCompleted(void)
+{
+    return g_pComm->writeable();
 }
 
 int Platform_CommReceiveChar(void)
 {
-    while (!g_pComm->available()) {
+    while (!g_pComm->readable()) {
         // Busy wait.
     }
     return g_pComm->read();
@@ -663,7 +668,7 @@ static void clearFaultStatusBits()
 
 static void serialISRHook()
 {
-    if (!isDebuggerActive() && g_pComm->available()) {
+    if (!isDebuggerActive() && g_pComm->readable()) {
         // Pend a halt into the debug monitor now that there is data from GDB ready to be read by it.
         setControlCFlag();
         setMonitorPending();
@@ -683,7 +688,7 @@ DebugCommInterface::~DebugCommInterface()
 }
 
 UartDebugCommInterface::UartDebugCommInterface(PinName txPin, PinName rxPin, uint32_t baudRate) :
-    _pCallback(NULL), _serial(txPin, rxPin, baudRate), _read(0), _write(0)
+    _pCallback(NULL), _serial(txPin, rxPin, baudRate), _baudRate(baudRate), _read(0), _write(0)
 {
     _serial.attach(mbed::callback(this, &UartDebugCommInterface::onReceivedData));
 }
@@ -692,15 +697,30 @@ UartDebugCommInterface::~UartDebugCommInterface()
 {
 }
 
-bool UartDebugCommInterface::available()
+bool UartDebugCommInterface::readable()
 {
     return _read != _write;
 }
 
+bool UartDebugCommInterface::writeable()
+{
+    // This function is called by MRI to make sure that last GDB command has been ACKed before it executes a reset
+    // request. We will busy wait in here until that has happened and then always return true.
+    while (!_serial.writable()) {
+        // Wait until transmit data register is empty.
+    }
+
+    // Might still have one byte in output shift register so wait 10 bit times to be safe.
+    uint32_t microsecondsForOneByte = (10  * 1000000) / _baudRate;
+    delayMicroseconds(microsecondsForOneByte);
+
+    return 1;
+}
+
 uint8_t UartDebugCommInterface::read()
 {
-    // This read should never block since Platform_CommReceiveChar() always checks available() first.
-    ASSERT ( available() );
+    // This read should never block since Platform_CommReceiveChar() always checks readable() first.
+    ASSERT ( readable() );
 
     uint8_t byte = _queue[_read];
     _read = wrappingIncrement(_read);
@@ -750,9 +770,15 @@ UsbDebugCommInterface::~UsbDebugCommInterface()
 {
 }
 
-bool UsbDebugCommInterface::available()
+bool UsbDebugCommInterface::readable()
 {
     return _pSerial->available() > 0;
+}
+
+bool UsbDebugCommInterface::writeable()
+{
+    // The USBSerial::write() method blocks until data is actually sent to the PC.
+    return true;
 }
 
 uint8_t UsbDebugCommInterface::read()

@@ -69,7 +69,8 @@ class DebugCommInterface {
 public:
     virtual ~DebugCommInterface() = 0;
 
-    virtual bool available() = 0;
+    virtual bool readable() = 0;
+    virtual bool writeable() = 0;
 	virtual uint8_t read() = 0;
 	virtual void write(uint8_t c) = 0;
     virtual void attach(void (*pCallback)()) = 0;
@@ -81,7 +82,8 @@ public:
     UsbDebugCommInterface(arduino::USBSerial*);
     virtual ~UsbDebugCommInterface();
 
-    virtual bool available();
+    virtual bool readable();
+    virtual bool writeable();
 	virtual uint8_t read();
 	virtual void write(uint8_t c);
     virtual void attach(void (*pCallback)());
@@ -96,7 +98,8 @@ public:
     UartDebugCommInterface(PinName txPin, PinName rxPin, uint32_t baudRate=230400);
     virtual ~UartDebugCommInterface();
 
-    virtual bool available();
+    virtual bool readable();
+    virtual bool writeable();
 	virtual uint8_t read();
 	virtual void write(uint8_t c);
     virtual void attach(void (*pCallback)());
@@ -107,6 +110,7 @@ protected:
 
     void                    (* _pCallback)();
     mbed::UnbufferedSerial  _serial;
+    uint32_t                _baudRate;
     volatile uint32_t       _read;
     volatile uint32_t       _write;
     uint8_t                 _queue[8];

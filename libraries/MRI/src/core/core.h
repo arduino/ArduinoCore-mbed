@@ -35,6 +35,7 @@ int     mriCore_WasSemihostCallCancelledByGdb(void);
 void    mriCore_FlagSemihostCallAsHandled(void);
 int     mriCore_IsFirstException(void);
 int     mriCore_WasSuccessfullyInit(void);
+void    mriCore_RequestResetOnNextContinue(void);
 
 void    mriCore_SetSignalValue(uint8_t signalValue);
 uint8_t mriCore_GetSignalValue(void);
@@ -60,6 +61,7 @@ int     mriCore_SetTempBreakpoint(uint32_t breakpointAddress, TempBreakpointCall
 #define FlagSemihostCallAsHandled       mriCore_FlagSemihostCallAsHandled
 #define IsFirstException                mriCore_IsFirstException
 #define WasSuccessfullyInit             mriCore_WasSuccessfullyInit
+#define RequestResetOnNextContinue      mriCore_RequestResetOnNextContinue
 #define SetSignalValue                  mriCore_SetSignalValue
 #define GetSignalValue                  mriCore_GetSignalValue
 #define SetSemihostReturnValues         mriCore_SetSemihostReturnValues

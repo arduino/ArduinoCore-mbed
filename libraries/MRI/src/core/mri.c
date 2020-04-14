@@ -42,6 +42,9 @@ typedef struct
 {
     TempBreakpointCallbackPtr   pTempBreakpointCallback;
     void*                       pvTempBreakpointContext;
+    MriDebuggerHookPtr          pEnteringHook;
+    MriDebuggerHookPtr          pLeavingHook;
+    void*                       pvEnteringLeavingContext;
     Packet                      packet;
     Buffer                      buffer;
     uint32_t                    tempBreakpointAddress;
@@ -54,20 +57,14 @@ typedef struct
 static MriCore g_mri;
 
 /* MriCore::flags bit definitions. */
-#define MRI_FLAGS_SUCCESSFUL_INIT   1
-#define MRI_FLAGS_FIRST_EXCEPTION   2
-#define MRI_FLAGS_SEMIHOST_CTRL_C   4
-#define MRI_FLAGS_TEMP_BREAKPOINT   8
+#define MRI_FLAGS_SUCCESSFUL_INIT   (1 << 0)
+#define MRI_FLAGS_FIRST_EXCEPTION   (1 << 1)
+#define MRI_FLAGS_SEMIHOST_CTRL_C   (1 << 2)
+#define MRI_FLAGS_TEMP_BREAKPOINT   (1 << 3)
+#define MRI_FLAGS_RESET_ON_CONTINUE (1 << 4)
 
 /* Calculates the number of items in a static array at compile time. */
 #define ARRAY_SIZE(X) (sizeof(X)/sizeof(X[0]))
-
-/* These two routines can be provided by the debuggee to get notified on debugger entry/exit.  Can be used to safely
-   turn off some external hardware so that it doesn't keep running while sitting at a breakpoint. */
-void mriPlatform_EnteringDebuggerHook(void) __attribute__((weak));
-void mriPlatform_LeavingDebuggerHook(void) __attribute__((weak));
-#define Platform_EnteringDebuggerHook mriPlatform_EnteringDebuggerHook
-#define Platform_LeavingDebuggerHook  mriPlatform_LeavingDebuggerHook
 
 static void clearCoreStructure(void);
 static void initializePlatformSpecificModulesWithDebuggerParameters(const char* pDebuggerParameters);
@@ -155,6 +152,14 @@ static void setTempBreakpointFlag(void)
 }
 
 
+void mriSetDebuggerHooks(MriDebuggerHookPtr pEnteringHook, MriDebuggerHookPtr pLeavingHook, void* pvContext)
+{
+    g_mri.pEnteringHook = pEnteringHook;
+    g_mri.pLeavingHook = pLeavingHook;
+    g_mri.pvEnteringLeavingContext = pvContext;
+}
+
+
 static int wasTempBreakpointHit(void);
 static void clearTempBreakpoint(void);
 static void clearTempBreakpointFlag(void);
@@ -162,6 +167,8 @@ static void determineSignalValue(void);
 static int  isDebugTrap(void);
 static void prepareForDebuggerExit(void);
 static void clearFirstExceptionFlag(void);
+static int hasResetBeenRequested(void);
+static void waitForAckToBeTransmitted(void);
 void mriDebugException(void)
 {
     int justSingleStepped = Platform_IsSingleStepping();
@@ -181,7 +188,8 @@ void mriDebugException(void)
         }
     }
 
-    Platform_EnteringDebuggerHook();
+    if (g_mri.pEnteringHook)
+        g_mri.pEnteringHook(g_mri.pvEnteringLeavingContext);
     Platform_EnteringDebugger();
     determineSignalValue();
 
@@ -238,9 +246,27 @@ static int isDebugTrap(void)
 
 static void prepareForDebuggerExit(void)
 {
+    if (hasResetBeenRequested()) {
+        waitForAckToBeTransmitted();
+        Platform_ResetDevice();
+    }
     Platform_LeavingDebugger();
-    Platform_LeavingDebuggerHook();
+    if (g_mri.pLeavingHook)
+        g_mri.pLeavingHook(g_mri.pvEnteringLeavingContext);
     clearFirstExceptionFlag();
+}
+
+static int hasResetBeenRequested(void)
+{
+    return (int)(g_mri.flags & MRI_FLAGS_RESET_ON_CONTINUE);
+}
+
+static void waitForAckToBeTransmitted(void)
+{
+    while ( !Platform_CommHasTransmitCompleted() )
+    {
+        // Waiting for ACK to be sent back to GDB for last command received.
+    }
 }
 
 static void clearFirstExceptionFlag(void)
@@ -264,6 +290,7 @@ void GdbCommandHandlingLoop(void)
     } while (!startDebuggeeUpAgain);
 }
 
+__attribute__((weak)) uint32_t  mriPlatform_HandleGDBComand(Buffer* pBuffer);
 static int handleGDBCommand(void)
 {
     Buffer*         pBuffer = GetBuffer();
@@ -279,6 +306,7 @@ static int handleGDBCommand(void)
         {Send_T_StopResponse,                       '?'},
         {HandleContinueCommand,                     'c'},
         {HandleContinueWithSignalCommand,           'C'},
+        {HandleDetachCommand,                       'D'},
         {HandleFileIOCommand,                       'F'},
         {HandleRegisterReadCommand,                 'g'},
         {HandleRegisterWriteCommand,                'G'},
@@ -294,27 +322,27 @@ static int handleGDBCommand(void)
 
     getPacketFromGDB();
 
-    commandChar = Buffer_ReadChar(pBuffer);
-    for (i = 0 ; i < ARRAY_SIZE(commandTable) ; i++)
+    if (mriPlatform_HandleGDBComand)
+        handlerResult = mriPlatform_HandleGDBComand(pBuffer);
+    if (handlerResult == 0)
     {
-        if (commandTable[i].commandChar == commandChar)
+        Buffer_Reset(pBuffer);
+        commandChar = Buffer_ReadChar(pBuffer);
+        for (i = 0 ; i < ARRAY_SIZE(commandTable) ; i++)
         {
-            handlerResult = commandTable[i].Handler();
-            if (handlerResult & HANDLER_RETURN_RETURN_IMMEDIATELY)
+            if (commandTable[i].commandChar == commandChar)
             {
-                return handlerResult & HANDLER_RETURN_RESUME_PROGRAM;
-            }
-            else
-            {
+                handlerResult = commandTable[i].Handler();
                 break;
             }
         }
+        if (ARRAY_SIZE(commandTable) == i)
+            PrepareEmptyResponseForUnknownCommand();
     }
-    if (ARRAY_SIZE(commandTable) == i)
-        PrepareEmptyResponseForUnknownCommand();
 
-    SendPacketToGdb();
-    return (handlerResult & HANDLER_RETURN_RESUME_PROGRAM);
+    if ((handlerResult & HANDLER_RETURN_RETURN_IMMEDIATELY) == 0)
+        SendPacketToGdb();
+    return handlerResult & HANDLER_RETURN_RESUME_PROGRAM;
 }
 
 static void getPacketFromGDB(void)
@@ -348,6 +376,10 @@ int WasControlCFlagSentFromGdb(void)
     return (int)(g_mri.flags & MRI_FLAGS_SEMIHOST_CTRL_C);
 }
 
+void RequestResetOnNextContinue(void)
+{
+    g_mri.flags |= MRI_FLAGS_RESET_ON_CONTINUE;
+}
 
 
 void RecordControlCFlagSentFromGdb(int controlCFlag)

@@ -1,4 +1,4 @@
-/* Copyright 2012 Adam Green (https://github.com/adamgreen/)
+/* Copyright 2020 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -23,9 +23,10 @@
 /* The bits that can be set in the return value from a command handler to indicate if the caller should return
    immediately or send the prepared response back to gdb.  It also indicates whether program execution should be
    resumed for commands like continue and single step. */
-#define HANDLER_RETURN_RESUME_PROGRAM       1
-#define HANDLER_RETURN_RETURN_IMMEDIATELY   2
-#define HANDLER_RETURN_SKIPPED_OVER_BREAK   4
+#define HANDLER_RETURN_RESUME_PROGRAM       (1 << 0)
+#define HANDLER_RETURN_RETURN_IMMEDIATELY   (1 << 1)
+#define HANDLER_RETURN_SKIPPED_OVER_BREAK   (1 << 2)
+#define HANDLER_RETURN_HANDLED              (1 << 31)
 
 typedef struct
 {
