@@ -23,7 +23,7 @@
 #include "platform/PlatformMutex.h"
 #include "BSP.h"
 
-using namespace mbed;
+//using namespace mbed;
 
 /**
  * SDMMCBlockDevice class.
@@ -90,7 +90,7 @@ using namespace mbed;
  * @endcode
  *
  */
-class SDMMCBlockDevice : public BlockDevice
+class SDMMCBlockDevice : public mbed::BlockDevice
 {
 public:
 
@@ -121,7 +121,7 @@ public:
      *  @param size     Size to read in bytes, must be a multiple of read block size
      *  @return         0 on success, negative error code on failure
      */
-    virtual int read(void *buffer, bd_addr_t addr, bd_size_t size);
+    virtual int read(void *buffer, mbed::bd_addr_t addr, mbed::bd_size_t size);
 
     /** Program blocks to a block device
      *
@@ -132,7 +132,7 @@ public:
      *  @param size     Size to write in bytes, must be a multiple of program block size
      *  @return         0 on success, negative error code on failure
      */
-    virtual int program(const void *buffer, bd_addr_t addr, bd_size_t size);
+    virtual int program(const void *buffer, mbed::bd_addr_t addr, mbed::bd_size_t size);
 
     /** Erase blocks on a block device
      *
@@ -142,41 +142,41 @@ public:
      *  @param size     Size to erase in bytes, must be a multiple of erase block size
      *  @return         0 on success, negative error code on failure
      */
-    virtual int erase(bd_addr_t addr, bd_size_t size);
+    virtual int erase(mbed::bd_addr_t addr, mbed::bd_size_t size);
 
     /** Get the size of a readable block
      *
      *  @return         Size of a readable block in bytes
      */
-    virtual bd_size_t get_read_size() const;
+    virtual mbed::bd_size_t get_read_size() const;
 
     /** Get the size of a programable block
      *
      *  @return         Size of a programable block in bytes
      */
-    virtual bd_size_t get_program_size() const;
+    virtual mbed::bd_size_t get_program_size() const;
 
     /** Get the size of a eraseable block
      *
      *  @return         Size of a eraseable block in bytes
      */
-    virtual bd_size_t get_erase_size() const;
+    virtual mbed::bd_size_t get_erase_size() const;
 
     /** Get the total size of the underlying device
      *
      *  @return         Size of the underlying device in bytes
      */
-    virtual bd_size_t size() const;
+    virtual mbed::bd_size_t size() const;
 
     virtual const char *get_type() const;
 
 private:
     uint8_t _card_type;
-    bd_size_t _read_size;
-    bd_size_t _program_size;
-    bd_size_t _erase_size;
-    bd_size_t _block_size;
-    bd_size_t _capacity_in_blocks;
+    mbed::bd_size_t _read_size;
+    mbed::bd_size_t _program_size;
+    mbed::bd_size_t _erase_size;
+    mbed::bd_size_t _block_size;
+    mbed::bd_size_t _capacity_in_blocks;
     BSP_SD_CardInfo _current_card_info;
     uint8_t _sd_state;
     uint32_t _timeout;

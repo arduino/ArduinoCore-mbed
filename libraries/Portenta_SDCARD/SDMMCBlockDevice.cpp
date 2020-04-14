@@ -29,6 +29,8 @@
 
 #define SD_DBG 0 /*!< 1 - Enable debugging */
 
+using namespace mbed;
+
 /** Enum of standard error codes
  *
  *  @enum bd_sd_error
