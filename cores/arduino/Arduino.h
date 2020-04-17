@@ -103,13 +103,15 @@ extern PinDescription g_APinDescription[];
 #if defined(SERIAL_CDC)
 #include "USB/PluggableUSBSerial.h"
 #define Serial SerialUSB
-#define Serial1 UART1
-#define Serial2 UART2
-#define Serial3 UART3
+#define Serial1 _UART1_
+#define Serial2 _UART2_
+#define Serial3 _UART3_
+#define Serial4 _UART4_
 #else
-#define Serial UART1
-#define Serial1 UART2
-#define Serial2 UART3
+#define Serial  _UART1_
+#define Serial1 _UART2_
+#define Serial2 _UART3_
+#define Serial3 _UART4_
 #endif
 
 #include "overloads.h"
