@@ -22,7 +22,7 @@
 #define __MBED_CONFIG_DATA__
 
 // Configuration parameters
-#define APB1CLK                                                               112500000                                                                                        // set by target:PORTENTA_H7
+#define APB1CLK                                                               100000000                                                                                        // set by target:PORTENTA_H7
 #define ATT_NUM_SIMUL_NTF                                                     1                                                                                                // set by library:cordio
 #define ATT_NUM_SIMUL_WRITE_CMD                                               1                                                                                                // set by library:cordio
 #define BLE_FEATURE_EXTENDED_ADVERTISING                                      1                                                                                                // set by library:ble
@@ -44,7 +44,7 @@
 #define DM_NUM_ADV_SETS                                                       3                                                                                                // set by library:cordio
 #define DM_NUM_PHYS                                                           3                                                                                                // set by library:cordio
 #define DM_SYNC_MAX                                                           1                                                                                                // set by library:cordio
-#define HSE_VALUE                                                             27000000                                                                                         // set by target:PORTENTA_H7
+#define HSE_VALUE                                                             25000000                                                                                         // set by target:PORTENTA_H7
 #define L2C_COC_CHAN_MAX                                                      1                                                                                                // set by library:cordio
 #define L2C_COC_REG_MAX                                                       1                                                                                                // set by library:cordio
 #define LPTICKER_DELAY_TICKS                                                  0                                                                                                // set by target:PORTENTA_H7

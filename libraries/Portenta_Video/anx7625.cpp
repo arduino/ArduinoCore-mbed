@@ -980,7 +980,7 @@ int stm32_dsi_config(uint8_t bus, struct edid *edid, struct display_timing *dt) 
 	static const uint32_t LTDC_PLLODF = DSI_PLL_OUT_DIV1;
 	static const uint32_t LTDC_TXEXCAPECLOCKDIV = 4;
 
-	static const uint32_t LTDC_PLL3M = 27;
+	static const uint32_t LTDC_PLL3M = 25;
 	static const uint32_t LTDC_PLL3N = 336;
 	static const uint32_t LTDC_PLL3P = 2;
 	static const uint32_t LTDC_PLL3Q = 7;

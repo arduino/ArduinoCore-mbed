@@ -12,6 +12,7 @@ MEMORY
 }
  __OPENAMP_region_start__ = ORIGIN(OPEN_AMP_SHMEM);
  __OPENAMP_region_end__ = ORIGIN(OPEN_AMP_SHMEM) + LENGTH(OPEN_AMP_SHMEM);
+_ConfigStart = 0x0801F000;
 ENTRY(Reset_Handler)
 SECTIONS
 {
@@ -33,6 +34,10 @@ SECTIONS
         *(.dtors)
         *(.rodata*)
         KEEP(*(.eh_frame*))
+    } > FLASH
+    .ConfigData _ConfigStart :
+    {
+        KEEP(*(.bootloader_version))
     } > FLASH
     .ARM.extab :
     {
