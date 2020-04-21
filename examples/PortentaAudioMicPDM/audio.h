@@ -165,9 +165,9 @@ typedef struct
 #define AUDIO_IN_SAI_PDMx_CLK_IN_ENABLE()       __HAL_RCC_GPIOE_CLK_ENABLE()
 #define AUDIO_IN_SAI_PDMx_CLK_IN_PIN            GPIO_PIN_2
 #define AUDIO_IN_SAI_PDMx_CLK_IN_PORT           GPIOE
-#define AUDIO_IN_SAI_PDMx_DATA_IN_ENABLE()      __HAL_RCC_GPIOC_CLK_ENABLE()
-#define AUDIO_IN_SAI_PDMx_DATA_IN_PIN           GPIO_PIN_1
-#define AUDIO_IN_SAI_PDMx_DATA_IN_PORT          GPIOC
+#define AUDIO_IN_SAI_PDMx_DATA_IN_ENABLE()      __HAL_RCC_GPIOB_CLK_ENABLE()
+#define AUDIO_IN_SAI_PDMx_DATA_IN_PIN           GPIO_PIN_2
+#define AUDIO_IN_SAI_PDMx_DATA_IN_PORT          GPIOB
 #define AUDIO_IN_SAI_PDMx_DATA_CLK_AF           GPIO_AF10_SAI4
 #define AUDIO_IN_SAI_PDMx_IRQHandler            SAI4_IRQHandler
 #define AUDIO_IN_SAI_PDMx_IRQ                   SAI4_IRQn
