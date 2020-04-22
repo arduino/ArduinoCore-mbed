@@ -33,12 +33,34 @@ static void sdram_init_seq(SDRAM_HandleTypeDef
         *hsdram, FMC_SDRAM_CommandTypeDef *command);
 extern void __fatal_error(const char *msg);
 
+static HAL_StatusTypeDef FMC_SDRAM_Clock_Config(void)
+{
+  RCC_PeriphCLKInitTypeDef  RCC_PeriphCLKInitStruct;
+  
+  /* PLL2_VCO Input = HSE_VALUE/PLL2_M = 5 Mhz */
+  /* PLL2_VCO Output = PLL2_VCO Input * PLL_N = 800 Mhz */
+  /* FMC Kernel Clock = PLL2_VCO Output/PLL_R = 800/4 = 200 Mhz */
+  RCC_PeriphCLKInitStruct.PeriphClockSelection = RCC_PERIPHCLK_FMC;
+  RCC_PeriphCLKInitStruct.FmcClockSelection = RCC_FMCCLKSOURCE_PLL2;
+  RCC_PeriphCLKInitStruct.PLL2.PLL2RGE = RCC_PLL1VCIRANGE_2;
+  RCC_PeriphCLKInitStruct.PLL2.PLL2M = 5;
+  RCC_PeriphCLKInitStruct.PLL2.PLL2N = 333;
+  RCC_PeriphCLKInitStruct.PLL2.PLL2FRACN = 0;
+  RCC_PeriphCLKInitStruct.PLL2.PLL2P = 2;
+  RCC_PeriphCLKInitStruct.PLL2.PLL2R = 4;
+  RCC_PeriphCLKInitStruct.PLL2.PLL2Q = 4;
+  RCC_PeriphCLKInitStruct.PLL2.PLL2VCOSEL = RCC_PLL2VCOWIDE;
+  return HAL_RCCEx_PeriphCLKConfig(&RCC_PeriphCLKInitStruct);
+}
+
 bool sdram_init(void) {
     SDRAM_HandleTypeDef hsdram;
     FMC_SDRAM_TimingTypeDef SDRAM_Timing;
     FMC_SDRAM_CommandTypeDef command;
     static MDMA_HandleTypeDef mdma_handle;
     GPIO_InitTypeDef gpio_init_structure;
+
+    FMC_SDRAM_Clock_Config();
 
     /* Enable FMC clock */
     __HAL_RCC_FMC_CLK_ENABLE();
@@ -221,55 +243,6 @@ static void sdram_init_seq(SDRAM_HandleTypeDef
      */
     #define REFRESH_COUNT (MICROPY_HW_SDRAM_REFRESH_RATE * 90000 / 8192 - 20)
     HAL_SDRAM_ProgramRefreshRate(hsdram, REFRESH_COUNT);
-}
-
-bool __attribute__((optimize("O0"))) sdram_test(bool fast) {
-    uint8_t const pattern = 0xaa;
-    uint8_t const antipattern = 0x55;
-    uint8_t *const mem_base = (uint8_t*)sdram_start();
-
-    /* test data bus */
-    for (uint8_t i = 1; i; i <<= 1) {
-        *mem_base = i;
-        if (*mem_base != i) {
-            printf("data bus lines test failed! data (%d)\n", i);
-            __asm__ volatile ("BKPT");
-        }
-    }
-
-    /* test address bus */
-    /* Check individual address lines */
-    for (uint32_t i = 1; i < HW_SDRAM_SIZE; i <<= 1) {
-        mem_base[i] = pattern;
-        if (mem_base[i] != pattern) {
-            printf("address bus lines test failed! address (%p)\n", &mem_base[i]);
-            __asm__ volatile ("BKPT");
-        }
-    }
-
-    /* Check for aliasing (overlaping addresses) */
-    mem_base[0] = antipattern;
-    for (uint32_t i = 1; i < HW_SDRAM_SIZE; i <<= 1) {
-        if (mem_base[i] != pattern) {
-            printf("address bus overlap %p\n", &mem_base[i]);
-            __asm__ volatile ("BKPT");
-        }
-    }
-
-    /* test all ram cells */
-    if (!fast) {
-        for (uint32_t i = 0; i < HW_SDRAM_SIZE; ++i) {
-            mem_base[i] = pattern;
-            if (mem_base[i] != pattern) {
-                printf("address bus test failed! address (%p)\n", &mem_base[i]);
-                __asm__ volatile ("BKPT");
-            }
-        }
-    } else {
-        memset(mem_base, pattern, HW_SDRAM_SIZE);
-    }
-
-    return true;
 }
 
 #endif // FMC_SDRAM_BANK

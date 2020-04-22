@@ -13,6 +13,7 @@ public:
 	int begin(uint32_t start_address = SDRAM_START_ADDRESS);
 	void* malloc(size_t size);
 	void free(void* ptr);
+	bool test(bool fast = false);
 private:
 	void mpu_config_start(void) {
 		__disable_irq();

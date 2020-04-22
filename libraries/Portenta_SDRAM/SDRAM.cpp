@@ -38,4 +38,53 @@ void SDRAMClass::free(void* ptr) {
 	ea_free(ptr);
 }
 
+bool __attribute__((optimize("O0"))) SDRAMClass::test(bool fast) {
+    uint8_t const pattern = 0xaa;
+    uint8_t const antipattern = 0x55;
+    uint8_t *const mem_base = (uint8_t*)SDRAM_START_ADDRESS;
+
+    /* test data bus */
+    for (uint8_t i = 1; i; i <<= 1) {
+        *mem_base = i;
+        if (*mem_base != i) {
+            printf("data bus lines test failed! data (%d)\n", i);
+            __asm__ volatile ("BKPT");
+        }
+    }
+
+    /* test address bus */
+    /* Check individual address lines */
+    for (uint32_t i = 1; i < HW_SDRAM_SIZE; i <<= 1) {
+        mem_base[i] = pattern;
+        if (mem_base[i] != pattern) {
+            printf("address bus lines test failed! address (%p)\n", &mem_base[i]);
+            __asm__ volatile ("BKPT");
+        }
+    }
+
+    /* Check for aliasing (overlaping addresses) */
+    mem_base[0] = antipattern;
+    for (uint32_t i = 1; i < HW_SDRAM_SIZE; i <<= 1) {
+        if (mem_base[i] != pattern) {
+            printf("address bus overlap %p\n", &mem_base[i]);
+            __asm__ volatile ("BKPT");
+        }
+    }
+
+    /* test all ram cells */
+    if (!fast) {
+        for (uint32_t i = 0; i < HW_SDRAM_SIZE; ++i) {
+            mem_base[i] = pattern;
+            if (mem_base[i] != pattern) {
+                printf("address bus test failed! address (%p)\n", &mem_base[i]);
+                __asm__ volatile ("BKPT");
+            }
+        }
+    } else {
+        memset(mem_base, pattern, HW_SDRAM_SIZE);
+    }
+
+    return true;
+}
+
 SDRAMClass SDRAM;
