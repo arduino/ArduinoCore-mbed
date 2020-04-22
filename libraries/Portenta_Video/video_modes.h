@@ -11,4 +11,6 @@ struct envie_edid_mode {
 	unsigned int vback_porch;
 	unsigned int vfront_porch;
 	unsigned int voffset;
+	unsigned int hpol : 1;
+	unsigned int vpol : 1;
 };

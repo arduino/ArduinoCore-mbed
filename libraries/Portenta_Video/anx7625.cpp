@@ -846,7 +846,6 @@ static void anx7625_parse_edid(const struct edid *edid,
 	dt->vfront_porch = edid->mode.vso - edid->mode.vborder;
 	dt->vback_porch = (edid->mode.vbl - edid->mode.vso -
 			   edid->mode.vspw - edid->mode.vborder);
-	dt->voffset = 0;
 
 	ANXINFO("pixelclock(%d).\n"
 		" hactive(%d), hsync(%d), hfp(%d), hbp(%d)\n"
@@ -878,7 +877,8 @@ int anx7625_dp_start(uint8_t bus, const struct edid *edid, enum edid_modes mode)
 		dt.vsync_len = envie_known_modes[mode].vsync_len;;
 		dt.vback_porch = envie_known_modes[mode].vback_porch;
 		dt.vfront_porch = envie_known_modes[mode].vfront_porch;
-		dt.voffset = envie_known_modes[mode].voffset; //1;
+		dt.hpol = envie_known_modes[mode].hpol;
+		dt.vpol = envie_known_modes[mode].vpol;
 	}
 
 	stm32_dsi_config(bus, (struct edid *)edid, &dt);
@@ -975,19 +975,24 @@ uint32_t stm32_getYSize() {
 
 int stm32_dsi_config(uint8_t bus, struct edid *edid, struct display_timing *dt) {
 
-	static const uint32_t LTDC_PLLNDIV = 37;
-	static const uint32_t LTDC_PLLIDF = DSI_PLL_IN_DIV2;
-	static const uint32_t LTDC_PLLODF = DSI_PLL_OUT_DIV1;
-	static const uint32_t LTDC_TXEXCAPECLOCKDIV = 4;
+	static const uint32_t DSI_PLLNDIV = 40;
+	static const uint32_t DSI_PLLIDF = DSI_PLL_IN_DIV2;
+	static const uint32_t DSI_PLLODF = DSI_PLL_OUT_DIV1;
+	static const uint32_t DSI_TXEXCAPECLOCKDIV = 4;
 
-	static const uint32_t LTDC_PLL3M = 25;
-	static const uint32_t LTDC_PLL3N = 336;
+	static uint32_t LTDC_FREQ_STEP = 100;
+	// set PLL3 to start from a 1MHz reference and increment by 100 or 200 KHz based on the frequency range
+
+	if (dt->pixelclock/LTDC_FREQ_STEP > 512) LTDC_FREQ_STEP = 200;
+
+	static const uint32_t LTDC_PLL3M = HSE_VALUE/1000000;
+	static const uint32_t LTDC_PLL3N = dt->pixelclock/LTDC_FREQ_STEP;
 	static const uint32_t LTDC_PLL3P = 2;
 	static const uint32_t LTDC_PLL3Q = 7;
-	static const uint32_t LTDC_PLL3R = 336000 / dt->pixelclock; // expected pixel clock
-	dt->pixelclock = 336000 / LTDC_PLL3R; 	// real pixel clock
+	static const uint32_t LTDC_PLL3R = 1000 / LTDC_FREQ_STEP; // expected pixel clock
+	dt->pixelclock = (LTDC_PLL3N) *LTDC_FREQ_STEP; 	// real pixel clock
 
-	static const uint32_t LANE_BYTE_CLOCK =	62437;
+	static const uint32_t LANE_BYTE_CLOCK =	62500;
 
 
 	// TODO: switch USB to use HSI48
@@ -1049,14 +1054,14 @@ int stm32_dsi_config(uint8_t bus, struct edid *edid, struct display_timing *dt) 
 	HAL_DSI_DeInit(&(dsi));
 
 	/* Configure the DSI PLL */
-	dsiPllInit.PLLNDIV    = LTDC_PLLNDIV;
-	dsiPllInit.PLLIDF     = LTDC_PLLIDF;
-	dsiPllInit.PLLODF     = LTDC_PLLODF;
+	dsiPllInit.PLLNDIV    = DSI_PLLNDIV;
+	dsiPllInit.PLLIDF     = DSI_PLLIDF;
+	dsiPllInit.PLLODF     = DSI_PLLODF;
 
 	/* Set number of Lanes */
 	dsi.Init.NumberOfLanes = DSI_TWO_DATA_LANES;
 	/* Set the TX escape clock division ratio */
-	dsi.Init.TXEscapeCkdiv = LTDC_TXEXCAPECLOCKDIV;
+	dsi.Init.TXEscapeCkdiv = DSI_TXEXCAPECLOCKDIV;
 	/* Disable the automatic clock lane control (the ANX7265 must be clocked) */
 	dsi.Init.AutomaticClockLaneControl = DSI_AUTO_CLK_LANE_CTRL_DISABLE;
 
@@ -1155,7 +1160,7 @@ int stm32_dsi_config(uint8_t bus, struct edid *edid, struct display_timing *dt) 
 	ltdc.Init.HorizontalSync = (dt->hsync_len -1);
 	ltdc.Init.AccumulatedHBP = (dt->hsync_len + dt->hback_porch -1);
 	ltdc.Init.AccumulatedActiveW = (dt->hactive + dt->hsync_len + dt->hback_porch -1);
-	ltdc.Init.TotalWidth = (dt->hactive + dt->hsync_len + dt->hback_porch + dt->hfront_porch -1 + dt->voffset);
+	ltdc.Init.TotalWidth = (dt->hactive + dt->hsync_len + dt->hback_porch + dt->hfront_porch -1);
 	ltdc.Init.VerticalSync = (dt->vsync_len -1);
 	ltdc.Init.AccumulatedVBP = (dt->vsync_len + dt->vback_porch-1);
 	ltdc.Init.AccumulatedActiveH = (dt->vactive + dt->vsync_len + dt->vback_porch-1);
@@ -1170,8 +1175,8 @@ int stm32_dsi_config(uint8_t bus, struct edid *edid, struct display_timing *dt) 
 	ltdc.LayerCfg->ImageHeight = lcd_y_size;
 
 	/* Polarity */
-	ltdc.Init.HSPolarity = LTDC_HSPOLARITY_AL;
-	ltdc.Init.VSPolarity = LTDC_VSPOLARITY_AL;
+	ltdc.Init.HSPolarity = dt->hpol ? LTDC_HSPOLARITY_AH : LTDC_HSPOLARITY_AL;
+	ltdc.Init.VSPolarity = dt->vpol ? LTDC_VSPOLARITY_AH : LTDC_VSPOLARITY_AL;
 	ltdc.Init.DEPolarity = LTDC_DEPOLARITY_AL;
 	ltdc.Init.PCPolarity = LTDC_PCPOLARITY_IPC;
 

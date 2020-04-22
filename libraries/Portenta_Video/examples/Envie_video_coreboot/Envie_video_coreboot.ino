@@ -1,6 +1,7 @@
 #include "Portenta_Video.h"
 #include "image_320x240_argb8888.h"
 #include "SDRAM.h"
+#include "mbed.h"
 
 struct edid recognized_edid;
 
