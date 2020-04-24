@@ -209,14 +209,13 @@ a
 wq
 EOF
 	fi
-        mv "$ARDUINOCOREMBED"/mbed.h "$ARDUINOCOREMBED"/mbed_wrap.h
 	echo " done."
 }
 
 patch_spi_h () {
 	echo -n "Patching SPI headers..."
 	mv "$ARDUINOCOREMBED"/drivers/SPI.h "$ARDUINOCOREMBED"/drivers/SPIMaster.h
-	for header in mbed_wrap.h features/nfc/controllers/PN512SPITransportDriver.h components/storage/blockdevice/COMPONENT_SD/SDBlockDevice.h; do
+	for header in mbed.h features/nfc/controllers/PN512SPITransportDriver.h components/storage/blockdevice/COMPONENT_SD/SDBlockDevice.h; do
 		sed -i.bak 's#drivers/SPI\.h#drivers/SPIMaster\.h#g' "$ARDUINOCOREMBED"/$header
 		rm "$ARDUINOCOREMBED"/$header.bak
 	done

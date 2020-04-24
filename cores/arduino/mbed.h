@@ -11,10 +11,8 @@
 #undef F
 #endif // F (mbed included after arduino.h)
 #define F Mbed_F
-#include "mbed_wrap.h"
-#else
-#include "mbed.h"
 #endif // !ARDUINO_AS_MBED_LIBRARY
+#include "mbed/mbed.h"
 #undef PinMode
 #undef F
 #endif //__cplusplus
