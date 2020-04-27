@@ -2,10 +2,6 @@
 
 static struct rpmsg_endpoint rp_endpoints[4];
 
-void rpc::client::getResult(RPCLIB_MSGPACK::object_handle& res) {
-  RPC1.getResult(res);
-}
-
 void rpc::client::post(RPCLIB_MSGPACK::sbuffer *buffer) {
 #ifdef CORE_CM7
   RPC1.write(ENDPOINT_CM7TOCM4, (const uint8_t*)buffer->data(), buffer->size());
@@ -215,7 +211,7 @@ void RPC::dispatch() {
         RPCLIB_MSGPACK::unpacked result;
         while (pac_.next(result)) {
           auto msg = result.get();
-          auto resp = server.dispatch(msg, true);
+          auto resp = rpc::detail::dispatcher::dispatch(msg, true);
           auto data = resp.get_data();
           if (resp.is_empty()) {
             //printf("no response\n");
@@ -225,7 +221,6 @@ void RPC::dispatch() {
 #else
             write(ENDPOINT_CM7TOCM4, (const uint8_t*)data.data(), data.size());
 #endif
-            // printf("result: %d\n", resp.get_result()->as<int>());
           }
         }
       }
@@ -234,9 +229,16 @@ void RPC::dispatch() {
         while (pac_.next(result)) {
           auto r = rpc::detail::response(std::move(result));
           auto id = r.get_id();
-          call_result = std::move(*r.get_result());
+          // fill the correct client stuff
+          int i = 0;
+          for (i = 0; i<10; i++) {
+            if (clients[i] != NULL && (int)clients[i]->callThreadId == id) {
+              break;
+            }
+          }
+          clients[i]->result = std::move(*r.get_result());
           // Unlock callThreadId thread
-          osSignalSet(client.callThreadId, 0x1);
+          osSignalSet(clients[i]->callThreadId, 0x1);
         }
       }
     }

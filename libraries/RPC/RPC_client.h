@@ -13,27 +13,28 @@ class client {
     template <typename... Args>
     RPCLIB_MSGPACK::object_handle call(std::string const &func_name,
                                        Args... args) {
-      LOG_DEBUG("Sending notification {}", func_name);
+      LOG_DEBUG("Call function {} and wait for result", func_name);
+
+      callThreadId = osThreadGetId();
 
       auto args_obj = std::make_tuple(args...);
       auto call_obj = std::make_tuple(
-                        static_cast<uint8_t>(client::request_type::call), 0, func_name,
+                        static_cast<uint8_t>(client::request_type::call), (const int)callThreadId, func_name,
                         args_obj);
 
       auto buffer = new RPCLIB_MSGPACK::sbuffer;
       RPCLIB_MSGPACK::pack(*buffer, call_obj);
 
       post(buffer);
-      callThreadId = osThreadGetId();
 
       osSignalWait(0, osWaitForever);
 
-      RPCLIB_MSGPACK::object_handle result;
-
-      getResult(result);
+      //getResult(result);
 
       delete buffer;
-      return result;
+
+      RPCLIB_MSGPACK::object_handle q = std::move(result);
+      return q;
     }
 
     //! \brief Sends a notification with the given name and arguments (if any).
@@ -44,7 +45,7 @@ class client {
     //! \tparam Args THe types of the arguments.
     template <typename... Args>
     void send(std::string const &func_name, Args... args) {
-      LOG_DEBUG("Sending notification {}", func_name);
+      LOG_DEBUG("Call function {} and forget", func_name);
 
       auto args_obj = std::make_tuple(args...);
       auto call_obj = std::make_tuple(
@@ -61,6 +62,7 @@ class client {
   protected:
     osThreadId callThreadId;
     friend class arduino::RPC;
+    RPCLIB_MSGPACK::object_handle result;
 
   private:
     enum class request_type { call = 0, notification = 2 };

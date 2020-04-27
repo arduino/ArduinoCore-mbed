@@ -33,7 +33,7 @@ extern "C" {
 #endif
 }
 
-#include "Arduino.h"
+#include "mbed.h"
 
 enum endpoints_t {
 	ENDPOINT_CM7TOCM4 = 0,
@@ -47,7 +47,7 @@ typedef struct _service_request {
 
 namespace arduino {
 
-class RPC : public Stream {
+class RPC : public Stream, public rpc::detail::dispatcher {
 	public:
 		RPC() {};
 		int begin();
@@ -71,12 +71,29 @@ class RPC : public Stream {
 			return initialized;
 		}
 
-		void getResult(RPCLIB_MSGPACK::object_handle& res) {
-			res = std::move(call_result);
-		}
+		template <typename... Args>
+    	RPCLIB_MSGPACK::object_handle call(std::string const &func_name,
+                                       Args... args) {
+    		// find a free spot in clients[]
+    		// create new object
+    		// protect this with mutex
+    		int i = 0;
+    		for (i=0; i<10; i++) {
+    			if (clients[i] == NULL) {
+    				clients[i] = new rpc::client();
+    				break;
+    			}
+    		}
+    		// thread start and client .call
+    		clients[i]->call(func_name, args...);
+    		RPCLIB_MSGPACK::object_handle ret = std::move(clients[i]->result);
 
-		rpc::detail::dispatcher server;
-		rpc::client client;
+    		delete clients[i];
+    		clients[i] = NULL;
+    		return ret;
+    	}
+
+		rpc::client* clients[10];
 
 	private:
 		RingBufferN<256> rx_buffer;
