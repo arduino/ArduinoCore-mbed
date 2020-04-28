@@ -74,7 +74,7 @@ void UART::begin(unsigned long baudrate, uint16_t config) {
 
 void UART::begin(unsigned long baudrate) {
 	if (_serial == NULL) {
-		_serial = new mbed::RawSerial(tx, rx, baudrate);
+		_serial = new mbed::UnbufferedSerial(tx, rx, baudrate);
 	}
 	if (rts != NC) {
 		_serial->set_flow_control(mbed::SerialBase::Flow::RTSCTS, rts, cts);
@@ -86,7 +86,8 @@ void UART::begin(unsigned long baudrate) {
 
 void UART::on_rx() {
 	while(_serial->readable()) {
-		rx_buffer.store_char(_serial->getc());
+		char c;
+		rx_buffer.store_char(_serial->read(&c, 1));
 	}
 }
 
@@ -115,33 +116,16 @@ void UART::flush() {
 
 size_t UART::write(uint8_t c) {
 	while (!_serial->writeable()) {}
-	int ret = _serial->putc(c);
+	int ret = _serial->write(&c, 1);
 	return ret == -1 ? 0 : 1;
 }
 
-#ifdef DEVICE_SERIAL_ASYNCH
 size_t UART::write(const uint8_t* c, size_t len) {
-
-	uint8_t* p = (uint8_t*)c;
-	uint8_t* end = p + len;
-
-	while (!_serial->writeable()) yield();
-
-	auto _write_block = [this](const uint8_t* c, size_t len) {
-		_block = true;
-		_serial->write(c, len, mbed::callback(this, &UART::block_tx));
-		while (_block == true) yield();
-		return len;
-	};
-
-	while ( p < end ) {
-		size_t _len = end - p < WRITE_BUFF_SZ ? len % WRITE_BUFF_SZ : WRITE_BUFF_SZ;
-		p += _write_block(p, _len);
-	}
-
-	return len;
+	while (!_serial->writeable()) {}
+	_serial->set_blocking(true);
+	int ret = _serial->write(c, len);
+	return ret == -1 ? 0 : 1;
 }
-#endif
 
 void UART::block_tx(int _a) {
 	_block = false;

@@ -30,7 +30,8 @@ int arduino::WiFiClient::connect(IPAddress ip, uint16_t port) {
 
 int arduino::WiFiClient::connect(const char *host, uint16_t port) {
 	if (sock == NULL) {
-		sock = new TCPSocket(WiFi.getNetwork());
+		sock = new TCPSocket();
+		((TCPSocket*)sock)->open(WiFi.getNetwork());
 	}
 	//sock->sigio(mbed::callback(this, &WiFiClient::getStatus));
 	//sock->set_blocking(false);

@@ -17,7 +17,8 @@ uint8_t arduino::WiFiServer::status() {
 
 void arduino::WiFiServer::begin() {
 	if (sock == NULL) {
-		sock = new TCPSocket(WiFi.getNetwork());
+		sock = new TCPSocket();
+		((TCPSocket*)sock)->open(WiFi.getNetwork());
 	}
 	sock->bind(_port);
 	sock->listen(5);
