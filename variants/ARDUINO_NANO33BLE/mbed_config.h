@@ -47,6 +47,8 @@
 #define L2C_COC_CHAN_MAX                                                      1                                                                                                // set by library:cordio
 #define L2C_COC_REG_MAX                                                       1                                                                                                // set by library:cordio
 #define LHCI_ENABLE_VS                                                        0                                                                                                // set by library:cordio-ll
+#define MBED_CONF_ALT1250_PPP_BAUDRATE                                        115200                                                                                           // set by library:ALT1250_PPP
+#define MBED_CONF_ALT1250_PPP_PROVIDE_DEFAULT                                 0                                                                                                // set by library:ALT1250_PPP
 #define MBED_CONF_ATMEL_RF_ASSUME_SPACED_SPI                                  0                                                                                                // set by library:atmel-rf
 #define MBED_CONF_ATMEL_RF_FULL_SPI_SPEED                                     7500000                                                                                          // set by library:atmel-rf
 #define MBED_CONF_ATMEL_RF_FULL_SPI_SPEED_BYTE_SPACING                        250                                                                                              // set by library:atmel-rf
@@ -95,6 +97,11 @@
 #define MBED_CONF_ESP8266_POWER_ON_TIME_MS                                    3                                                                                                // set by library:esp8266
 #define MBED_CONF_ESP8266_PROVIDE_DEFAULT                                     0                                                                                                // set by library:esp8266
 #define MBED_CONF_ESP8266_SERIAL_BAUDRATE                                     115200                                                                                           // set by library:esp8266
+#define MBED_CONF_ESP8266_SNTP_ENABLE                                         0                                                                                                // set by library:esp8266
+#define MBED_CONF_ESP8266_SNTP_SERVER0                                        ""                                                                                               // set by library:esp8266
+#define MBED_CONF_ESP8266_SNTP_SERVER1                                        ""                                                                                               // set by library:esp8266
+#define MBED_CONF_ESP8266_SNTP_SERVER2                                        ""                                                                                               // set by library:esp8266
+#define MBED_CONF_ESP8266_SNTP_TIMEZONE                                       0                                                                                                // set by library:esp8266
 #define MBED_CONF_ESP8266_SOCKET_BUFSIZE                                      8192                                                                                             // set by library:esp8266
 #define MBED_CONF_EVENTS_PRESENT                                              1                                                                                                // set by library:events
 #define MBED_CONF_EVENTS_SHARED_DISPATCH_FROM_APPLICATION                     0                                                                                                // set by library:events
@@ -241,6 +248,7 @@
 #define MBED_CONF_MBED_MESH_API_WISUN_BC_DWELL_INTERVAL                       0                                                                                                // set by library:mbed-mesh-api
 #define MBED_CONF_MBED_MESH_API_WISUN_BC_FIXED_CHANNEL                        65535                                                                                            // set by library:mbed-mesh-api
 #define MBED_CONF_MBED_MESH_API_WISUN_BC_INTERVAL                             0                                                                                                // set by library:mbed-mesh-api
+#define MBED_CONF_MBED_MESH_API_WISUN_DEVICE_TYPE                             MESH_DEVICE_TYPE_WISUN_ROUTER                                                                    // set by library:mbed-mesh-api
 #define MBED_CONF_MBED_MESH_API_WISUN_NETWORK_NAME                            "Wi-SUN Network"                                                                                 // set by library:mbed-mesh-api
 #define MBED_CONF_MBED_MESH_API_WISUN_OPERATING_CLASS                         255                                                                                              // set by library:mbed-mesh-api
 #define MBED_CONF_MBED_MESH_API_WISUN_OPERATING_MODE                          255                                                                                              // set by library:mbed-mesh-api
@@ -268,6 +276,8 @@
 #define MBED_CONF_NSAPI_PRESENT                                               1                                                                                                // set by library:nsapi
 #define MBED_CONF_NSAPI_SOCKET_STATS_ENABLED                                  0                                                                                                // set by library:nsapi
 #define MBED_CONF_NSAPI_SOCKET_STATS_MAX_COUNT                                10                                                                                               // set by library:nsapi
+#define MBED_CONF_PLATFORM_CALLBACK_COMPARABLE                                1                                                                                                // set by library:platform
+#define MBED_CONF_PLATFORM_CALLBACK_NONTRIVIAL                                1                                                                                                // set by library:platform
 #define MBED_CONF_PLATFORM_CRASH_CAPTURE_ENABLED                              0                                                                                                // set by library:platform
 #define MBED_CONF_PLATFORM_CTHUNK_COUNT_MAX                                   8                                                                                                // set by library:platform
 #define MBED_CONF_PLATFORM_DEFAULT_SERIAL_BAUD_RATE                           115200                                                                                           // set by application[*]
@@ -277,7 +287,6 @@
 #define MBED_CONF_PLATFORM_ERROR_HIST_SIZE                                    4                                                                                                // set by library:platform
 #define MBED_CONF_PLATFORM_ERROR_REBOOT_MAX                                   1                                                                                                // set by library:platform
 #define MBED_CONF_PLATFORM_FATAL_ERROR_AUTO_REBOOT_ENABLED                    0                                                                                                // set by library:platform
-#define MBED_CONF_PLATFORM_FORCE_NON_COPYABLE_ERROR                           0                                                                                                // set by library:platform
 #define MBED_CONF_PLATFORM_MAX_ERROR_FILENAME_LEN                             16                                                                                               // set by library:platform
 #define MBED_CONF_PLATFORM_MINIMAL_PRINTF_ENABLE_64_BIT                       1                                                                                                // set by library:platform
 #define MBED_CONF_PLATFORM_MINIMAL_PRINTF_ENABLE_FLOATING_POINT               0                                                                                                // set by library:platform
@@ -302,6 +311,7 @@
 #define MBED_CONF_QUECTEL_BG96_PROVIDE_DEFAULT                                0                                                                                                // set by library:QUECTEL_BG96
 #define MBED_CONF_QUECTEL_EC2X_BAUDRATE                                       115200                                                                                           // set by library:QUECTEL_EC2X
 #define MBED_CONF_QUECTEL_EC2X_PROVIDE_DEFAULT                                0                                                                                                // set by library:QUECTEL_EC2X
+#define MBED_CONF_QUECTEL_EC2X_START_TIMEOUT                                  15000                                                                                            // set by library:QUECTEL_EC2X
 #define MBED_CONF_QUECTEL_M26_BAUDRATE                                        115200                                                                                           // set by library:QUECTEL_M26
 #define MBED_CONF_QUECTEL_M26_PROVIDE_DEFAULT                                 0                                                                                                // set by library:QUECTEL_M26
 #define MBED_CONF_QUECTEL_UG96_BAUDRATE                                       115200                                                                                           // set by library:QUECTEL_UG96
@@ -309,12 +319,20 @@
 #define MBED_CONF_RM1000_AT_BAUDRATE                                          230400                                                                                           // set by library:RM1000_AT
 #define MBED_CONF_RM1000_AT_PROVIDE_DEFAULT                                   0                                                                                                // set by library:RM1000_AT
 #define MBED_CONF_RTOS_API_PRESENT                                            1                                                                                                // set by library:rtos-api
+#define MBED_CONF_RTOS_EVFLAGS_NUM                                            0                                                                                                // set by library:rtos
 #define MBED_CONF_RTOS_IDLE_THREAD_STACK_SIZE                                 512                                                                                              // set by library:rtos
 #define MBED_CONF_RTOS_IDLE_THREAD_STACK_SIZE_DEBUG_EXTRA                     0                                                                                                // set by library:rtos
 #define MBED_CONF_RTOS_IDLE_THREAD_STACK_SIZE_TICKLESS_EXTRA                  256                                                                                              // set by library:rtos
 #define MBED_CONF_RTOS_MAIN_THREAD_STACK_SIZE                                 32768                                                                                            // set by application[*]
+#define MBED_CONF_RTOS_MSGQUEUE_DATA_SIZE                                     0                                                                                                // set by library:rtos
+#define MBED_CONF_RTOS_MSGQUEUE_NUM                                           0                                                                                                // set by library:rtos
+#define MBED_CONF_RTOS_MUTEX_NUM                                              0                                                                                                // set by library:rtos
 #define MBED_CONF_RTOS_PRESENT                                                1                                                                                                // set by library:rtos
+#define MBED_CONF_RTOS_SEMAPHORE_NUM                                          0                                                                                                // set by library:rtos
+#define MBED_CONF_RTOS_THREAD_NUM                                             0                                                                                                // set by library:rtos
 #define MBED_CONF_RTOS_THREAD_STACK_SIZE                                      4096                                                                                             // set by library:rtos
+#define MBED_CONF_RTOS_THREAD_USER_STACK_SIZE                                 0                                                                                                // set by library:rtos
+#define MBED_CONF_RTOS_TIMER_NUM                                              0                                                                                                // set by library:rtos
 #define MBED_CONF_RTOS_TIMER_THREAD_STACK_SIZE                                768                                                                                              // set by library:rtos
 #define MBED_CONF_S2LP_PROVIDE_DEFAULT                                        0                                                                                                // set by library:s2lp
 #define MBED_CONF_SARA4_PPP_BAUDRATE                                          115200                                                                                           // set by library:SARA4_PPP

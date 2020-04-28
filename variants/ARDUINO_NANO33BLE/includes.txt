@@ -265,6 +265,9 @@
 -iwithprefixbefore/mbed/features/cellular/framework/targets/GENERIC
 -iwithprefixbefore/mbed/features/cellular/framework/targets/GEMALTO/CINTERION
 -iwithprefixbefore/mbed/features/cellular/framework/targets/GEMALTO
+-iwithprefixbefore/mbed/features/cellular/framework/targets/Altair/ALT1250/PPP
+-iwithprefixbefore/mbed/features/cellular/framework/targets/Altair/ALT1250
+-iwithprefixbefore/mbed/features/cellular/framework/targets/Altair
 -iwithprefixbefore/mbed/features/cellular/framework/targets
 -iwithprefixbefore/mbed/features/cellular/framework/device
 -iwithprefixbefore/mbed/features/cellular/framework/common

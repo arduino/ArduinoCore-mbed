@@ -57,11 +57,14 @@ static const uint8_t SCK  = PIN_SPI_SCK;
 #define PIN_WIRE_SDA        (11u)
 #define PIN_WIRE_SCL        (12u)
 
-#define SERIAL_HOWMANY		2
+#define SERIAL_HOWMANY		3
 #define SERIAL1_TX			(digitalPinToPinName(PIN_SERIAL_TX))
 #define SERIAL1_RX			(digitalPinToPinName(PIN_SERIAL_RX))
 #define SERIAL2_TX			(PA_0)
 #define SERIAL2_RX			(PI_9)
+
+#define SERIAL3_TX			(PJ_8)
+#define SERIAL3_RX			(PJ_9)
 
 #define SERIAL_CDC			1
 #define HAS_UNIQUE_ISERIAL_DESCRIPTOR
@@ -98,5 +101,10 @@ void _ontouch1200bps_();
 #define SERIAL_PORT_MONITOR         SerialUSB
 #define SERIAL_PORT_HARDWARE        Serial1
 #define SERIAL_PORT_HARDWARE_OPEN   Serial2
+
+#define SerialLoRa		Serial3
+#define LORA_BOOT0  	(PJ_10)
+#define LORA_RESET  	(PJ_7)
+#define LORA_IRQ_DUMB	(PA_0)
 
 #endif //__PINS_ARDUINO__
