@@ -31,6 +31,7 @@
 #include "wm8994.h"
 #include "stm32h7xx_hal.h"
 #include <stdlib.h>
+#include <stdbool.h>
 /* Include PDM to PCM lib header file */
 #include "pdm2pcm_glo.h"
 
@@ -318,6 +319,8 @@ void    BSP_AUDIO_IN_Error_CallBack(void);
 void BSP_AUDIO_IN_ClockConfig(uint32_t AudioFreq, void *Params);
 void BSP_AUDIO_IN_MspInit(void);
 void BSP_AUDIO_IN_MspDeInit(void);
+
+bool isBoardRev2();
 
 /**
   * @}

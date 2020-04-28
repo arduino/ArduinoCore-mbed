@@ -616,7 +616,11 @@ __weak void BSP_AUDIO_OUT_ClockConfig(SAI_HandleTypeDef *hsai, uint32_t AudioFre
     rcc_ex_clk_init_struct.PLL2.PLL2Q = 1;
     rcc_ex_clk_init_struct.PLL2.PLL2R = 1;
     rcc_ex_clk_init_struct.PLL2.PLL2N = 429;
-    rcc_ex_clk_init_struct.PLL2.PLL2M = 25;
+    if (isBoardRev2()) {
+      rcc_ex_clk_init_struct.PLL2.PLL2M = 25;
+    } else {
+      rcc_ex_clk_init_struct.PLL2.PLL2M = 27;
+    }
     HAL_RCCEx_PeriphCLKConfig(&rcc_ex_clk_init_struct);
   }
   else /* AUDIO_FREQUENCY_8K, AUDIO_FREQUENCY_16K, AUDIO_FREQUENCY_48K, AUDIO_FREQUENCY_96K */
@@ -631,7 +635,11 @@ __weak void BSP_AUDIO_OUT_ClockConfig(SAI_HandleTypeDef *hsai, uint32_t AudioFre
     rcc_ex_clk_init_struct.PLL2.PLL2Q = 1;
     rcc_ex_clk_init_struct.PLL2.PLL2R = 1;
     rcc_ex_clk_init_struct.PLL2.PLL2N = 344;
-    rcc_ex_clk_init_struct.PLL2.PLL2M = 25;
+    if (isBoardRev2()) {
+      rcc_ex_clk_init_struct.PLL2.PLL2M = 25;
+    } else {
+      rcc_ex_clk_init_struct.PLL2.PLL2M = 27;
+    }
     HAL_RCCEx_PeriphCLKConfig(&rcc_ex_clk_init_struct);
   }
 }
@@ -1249,7 +1257,11 @@ __weak void BSP_AUDIO_IN_ClockConfig(uint32_t AudioFreq, void *Params)
     rcc_ex_clk_init_struct.PLL2.PLL2Q = 1;
     rcc_ex_clk_init_struct.PLL2.PLL2R = 1;
     rcc_ex_clk_init_struct.PLL2.PLL2N = 429;
-    rcc_ex_clk_init_struct.PLL2.PLL2M = 25;
+    if (isBoardRev2()) {
+      rcc_ex_clk_init_struct.PLL2.PLL2M = 25;
+    } else {
+      rcc_ex_clk_init_struct.PLL2.PLL2M = 27;
+    }
     if (hAudioIn.Interface == AUDIO_IN_INTERFACE_PDM)
     {
       rcc_ex_clk_init_struct.PeriphClockSelection = RCC_PERIPHCLK_SAI4A;
@@ -1270,7 +1282,11 @@ __weak void BSP_AUDIO_IN_ClockConfig(uint32_t AudioFreq, void *Params)
     rcc_ex_clk_init_struct.PLL2.PLL2Q = 1;
     rcc_ex_clk_init_struct.PLL2.PLL2R = 1;
     rcc_ex_clk_init_struct.PLL2.PLL2N = 344;
-    rcc_ex_clk_init_struct.PLL2.PLL2M = 25;
+    if (isBoardRev2()) {
+      rcc_ex_clk_init_struct.PLL2.PLL2M = 25;
+    } else {
+      rcc_ex_clk_init_struct.PLL2.PLL2M = 27;
+    }
     if (hAudioIn.Interface == AUDIO_IN_INTERFACE_PDM)
     {
       rcc_ex_clk_init_struct.PeriphClockSelection = RCC_PERIPHCLK_SAI4A;
