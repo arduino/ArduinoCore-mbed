@@ -147,6 +147,19 @@ struct analogin_s {
     uint8_t differential;
 };
 
+#if DEVICE_QSPI
+struct qspi_s {
+    QSPI_HandleTypeDef handle;
+    QSPIName qspi;
+    PinName io0;
+    PinName io1;
+    PinName io2;
+    PinName io3;
+    PinName sclk;
+    PinName ssel;
+};
+#endif
+
 #define GPIO_IP_WITHOUT_BRR
 
 #if defined(DUAL_CORE)
@@ -195,23 +208,6 @@ struct can_s {
 #endif
 
 #define HAL_CRC_IS_SUPPORTED(polynomial, width) ((width) == 7 || (width) == 8 || (width) == 16 || (width) == 32)
-
-#if DEVICE_QSPI
-struct qspi_s {
-#if defined(OCTOSPI1)
-    OSPI_HandleTypeDef handle;
-#else
-    QSPI_HandleTypeDef handle;
-#endif
-    QSPIName qspi;
-    PinName io0;
-    PinName io1;
-    PinName io2;
-    PinName io3;
-    PinName sclk;
-    PinName ssel;
-};
-#endif
 
 /* rtc_api.c */
 #define __HAL_RCC_PWR_CLK_ENABLE()

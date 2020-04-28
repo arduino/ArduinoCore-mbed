@@ -17,11 +17,6 @@
 #ifndef MBED_NONCOPYABLE_H_
 #define MBED_NONCOPYABLE_H_
 
-#if (!defined(MBED_DEBUG) && (MBED_CONF_PLATFORM_FORCE_NON_COPYABLE_ERROR == 0))
-#include "platform/mbed_toolchain.h"
-#include "platform/mbed_debug.h"
-#endif
-
 namespace mbed {
 
 /** \addtogroup platform-public-api */
@@ -91,18 +86,16 @@ namespace mbed {
  * in the base declaration.
  *
  * To solve that problem, the copy constructor and assignment operator have to
- * be declared (but don't need to be defined) in the private section of the
- * Connection class:
+ * be defined as deleted:
  *
  * @code
  * struct Connection {
- * private:
- *     Connection(const Connection&);
- *     Connection& operator=(const Connection&);
+ *     Connection(const Connection &) = delete;
+ *     Connection &operator=(const Connection &) = delete;
  * }
  * @endcode
  *
- * Although manually declaring private copy constructor and assignment functions
+ * Although manually defining deleted copy constructor and assignment functions
  * works, it is not ideal. These declarations are usually easy to forget,
  * not immediately visible, and may be obscure to uninformed programmers.
  *
@@ -178,52 +171,18 @@ protected:
      */
     ~NonCopyable() = default;
 
-#if (!defined(MBED_DEBUG) && (MBED_CONF_PLATFORM_FORCE_NON_COPYABLE_ERROR == 0))
+public:
     /**
-     * NonCopyable copy constructor.
-     *
-     * A compile time warning is issued when this function is used, and a runtime
-     * warning is printed when the copy construction of the noncopyable happens.
-     *
-     * If you see this warning, your code is probably doing something unspecified.
-     * Copying of noncopyable resources can lead to resource leak and random error.
-     */
-    MBED_DEPRECATED("Invalid copy construction of a NonCopyable resource.")
-    NonCopyable(const NonCopyable &)
-    {
-        debug("Invalid copy construction of a NonCopyable resource: %s\r\n", MBED_PRETTY_FUNCTION);
-    }
-
-    /**
-     * NonCopyable copy assignment operator.
-     *
-     * A compile time warning is issued when this function is used, and a runtime
-     * warning is printed when the copy construction of the noncopyable happens.
-     *
-     * If you see this warning, your code is probably doing something unspecified.
-     * Copying of noncopyable resources can lead to resource leak and random error.
-     */
-    MBED_DEPRECATED("Invalid copy assignment of a NonCopyable resource.")
-    NonCopyable &operator=(const NonCopyable &)
-    {
-        debug("Invalid copy assignment of a NonCopyable resource: %s\r\n", MBED_PRETTY_FUNCTION);
-        return *this;
-    }
-
-#else
-private:
-    /**
-     * Declare copy constructor as private. Any attempt to copy construct
+     * Define copy constructor as deleted. Any attempt to copy construct
      * a NonCopyable will fail at compile time.
      */
-    NonCopyable(const NonCopyable &);
+    NonCopyable(const NonCopyable &) = delete;
 
     /**
-     * Declare copy assignment operator as private. Any attempt to copy assign
+     * Define copy assignment operator as deleted. Any attempt to copy assign
      * a NonCopyable will fail at compile time.
      */
-    NonCopyable &operator=(const NonCopyable &);
-#endif
+    NonCopyable &operator=(const NonCopyable &) = delete;
 #endif
 };
 

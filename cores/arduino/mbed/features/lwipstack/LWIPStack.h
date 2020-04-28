@@ -30,6 +30,12 @@
 #include "netsocket/OnboardNetworkStack.h"
 #include "LWIPMemoryManager.h"
 
+#if LWIP_IPV6
+#include "lwip/ip6_addr.h"
+#define IP_ADDR_VALID IP6_ADDR_VALID
+#else
+#define IP_ADDR_VALID 0
+#endif
 
 class LWIP : public OnboardNetworkStack, private mbed::NonCopyable<LWIP> {
 public:
@@ -38,6 +44,33 @@ public:
 
     class Interface final : public OnboardNetworkStack::Interface {
     public:
+        /** Set IP address to LWIP stack
+         *
+         * This function can set both IPv4 or IPv6 address to LWIP stack.
+         *
+         * bringup() can only take one IP address and in dual stack case
+         * another IP address can be set using this function.
+         *
+         * IPv4 or IPv6 address should be in format of https://tools.ietf.org/html/draft-main-ipaddr-text-rep-00.
+         *
+         * @param    ip         IP address to be used for the interface as IPv4 or IPv6 address string.
+         *                      This parameter should not be NULL.
+         * @param    netmask    Net mask to be used for the interface as IPv4 address string or NULL.
+         *                      NULL value will set this value to 255.255.255.255.
+         *                      This parameter will be ignored for IPv6 ip argument.
+         * @param    gw         Gateway address to be used for the interface as IPv4 address string or NULL
+         *                      NULL value will set this value to 0.0.0.0
+         *                      This parameter will be ignored for IPv6 ip argument.
+         * @param    ipv6_flag  Provide this flag for IPv6 state flag override. For example, you can set IP6_ADDR_PREFERRED.
+         *                      Default value is IP6_ADDR_VALID. For IPv4, this value will be ignored.
+         * @return              NSAPI_ERROR_OK on success, or error code
+         */
+        nsapi_error_t set_ip_address(const char *ip,
+                                     const char *netmask,
+                                     const char *gw,
+                                     uint8_t ipv6_flag = IP_ADDR_VALID
+                                    ) override;
+
         /** Connect the interface to the network
          *
          * Sets up a connection on specified network interface, using DHCP or provided network details. If the @a dhcp is set to
@@ -128,6 +161,7 @@ public:
         static void netif_link_irq(struct netif *netif);
         static void netif_status_irq(struct netif *netif);
         static Interface *our_if_from_netif(struct netif *netif);
+        static void delete_interface(OnboardNetworkStack::Interface **interface_out);
 
 #if LWIP_ETHERNET
         static err_t emac_low_level_output(struct netif *netif, struct pbuf *p);
@@ -187,6 +221,8 @@ public:
             void *hw; /**< alternative implementation pointer - used for PPP */
         };
 
+        mbed_rtos_storage_semaphore_t remove_interface_sem;
+        osSemaphoreId_t remove_interface;
         mbed_rtos_storage_semaphore_t linked_sem;
         osSemaphoreId_t linked;
         mbed_rtos_storage_semaphore_t unlinked_sem;
@@ -260,6 +296,14 @@ public:
      * @return                      NSAPI_ERROR_OK on success, or error code
      */
     nsapi_error_t add_ppp_interface(PPP &ppp, bool default_if, OnboardNetworkStack::Interface **interface_out) override;
+
+    /** Remove a network interface from IP stack
+     *
+     * Removes layer 3 IP objects,network interface from stack list .
+     * @param[out] interface_out    pointer to stack interface object controlling the EMAC
+     * @return                      NSAPI_ERROR_OK on success, or error code
+     */
+    nsapi_error_t remove_ethernet_interface(OnboardNetworkStack::Interface **interface_out) override;
 
     /** Remove a network interface from IP stack
      *

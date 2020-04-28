@@ -124,19 +124,19 @@ namespace interface {
  * Sequence diagram "Just Works" pairing
  *
  * \verbatim
- *  /----------- Device 1 --------------\  *------ BLE link ------*  /-------------- Device 2 -------------\
+ *  /-------- Device 1 ---------\  *----- BLE link -----*  /----------- Device 2-----------\
  *
- * App  EventHandler              SecurityManager              SecurityManager           EventHandler     App
- *  |        |                          |                            |                        |            |
- *  |---------------------------> requestPairing()                   |                        |            |
- *  |        |                          |------[pairing start]------>|                        |            |
- *  |        |                          |                            |----------------> pairingRequest() ->|
- *  |        |                          |                        acceptPairing() <------------------------ |
- *  |        |                          |<---[pairing complete]----->|                        |            |
- *  |<- pairingResult() <---------------|                            |----------------> pairingResult() -->|
- *  |        |                          |                            |                        |            |
+ * App  EventHandler      SecurityManager            SecurityManager    EventHandler      App
+ *  |        |                  |                          |                 |             |
+ *  |-------------------> requestPairing()                 |                 |             |
+ *  |        |                  |-----[pairing start]----->|                 |             |
+ *  |        |                  |                          |---------> pairingRequest() -->|
+ *  |        |                  |                   acceptPairing() <--------------------- |
+ *  |        |                  |<--[pairing complete]---->|                 |             |
+ *  |<- pairingResult() <-------|                          |---------> pairingResult() --->|
+ *  |        |                  |                          |                 |             |
  * @endverbatim
- * 
+ *
  *  @note the requestPairing() call isn't required to trigger pairing. Pairing will also be triggered
  *  if you request encryption and authentication and no bonding information is available. The sequence will
  *  be the same save for the lack of explicit requestPairing() call.
@@ -145,16 +145,16 @@ namespace interface {
  *  Sequence diagram Encryption request when bonding information is available
  *
  * \verbatim
- *  /----------- Device 1 --------------\  *------ BLE link ------*  /-------------- Device 2 -------------\
+ *  /--------- Device 1 ---------\  *------ BLE link ------*  /--------- Device 2 ---------\
  *
- * App  EventHandler              SecurityManager              SecurityManager           EventHandler     App
- *  |       |                           |                            |                        |            |
- *  |---------------------------> setLinkEncryption()                |                        |            |
- *  |       |                           |<-[encryption established]->|                        |            |
- *  |<- linkEncryptionResult() <--------|                            |---------> linkEncryptionResult() -->|
- *  |       |                           |                            |                        |            |
+ * App  EventHandler       SecurityManager              SecurityManager   EventHandler    App
+ *  |       |                    |                            |                |           |
+ *  |--------------------> setLinkEncryption()                |                |           |
+ *  |       |                    |<-[encryption established]->|                |           |
+ *  |<- linkEncryptionResult() <-|                            |-> linkEncryptionResult() ->|
+ *  |       |                    |                            |                |           |
  * @endverbatim
- * 
+ *
  * @note if bonding information is not available, pairing will be triggered
  *
  *
@@ -162,27 +162,27 @@ namespace interface {
  * and other a keyboard
  *
  * \verbatim
- *  /----------- Device 1 (keyboard) ---\  *------ BLE link ------*  /-------------- Device 2 (display) ---\
+ *  /---- Device 1 (keyboard) ---\  *------ BLE link ------*  /----- Device 2 (display) ---\
  *
- * App  EventHandler              SecurityManager              SecurityManager           EventHandler     App
- *  |        |                          |                            |                        |            |
- *  |---------------------------> requestPairing()                   |                        |            |
- *  |        |                          |------[pairing start]------>|                        |            |
- *  |        |                          |                            |----------------> pairingRequest() ->|
- *  |        |                          |                        acceptPairing() <------------------------ |
- *  |        |                          |<---[secure con. pairing]-->|                        |            |
- *  |<- passkeyRequest() <--------------|                            |----------------> passkeyDisplay() ->|
- *  |        |                          |                            |                        |            |
+ * App  EventHandler       SecurityManager              SecurityManager  EventHandler     App
+ *  |       |                    |                            |               |            |
+ *  |--------------------> requestPairing()                   |               |            |
+ *  |        |                   |------[pairing start]------>|               |            |
+ *  |        |                   |                            |-------> pairingRequest() ->|
+ *  |        |                   |                        acceptPairing() <--------------- |
+ *  |        |                   |<---[secure con. pairing]-->|               |            |
+ *  |<- passkeyRequest() <-------|                            |-------> passkeyDisplay() ->|
+ *  |        |                   |                            |               |            |
  *
- *                       user reads the passkey on Device 2 and inputs it on Device 1
+ *                  user reads the passkey on Device 2 and inputs it on Device 1
  *
- *  |        |                          |                            |                        |            |
- *  |-------------------------->passkeyEntered()                     |                        |            |
- *  |        |                          |<---[pairing complete]----->|                        |            |
- *  |<- pairingResult() <---------------|                            |----------------> pairingResult() -->|
- *  |        |                          |                            |                        |            |
+ *  |        |                   |                            |               |            |
+ *  |------------------->passkeyEntered()                     |               |            |
+ *  |        |                   |<---[pairing complete]----->|               |            |
+ *  |<- pairingResult() <--------|                            |-------> pairingResult() -->|
+ *  |        |                   |                            |               |            |
  * @endverbatim
- * 
+ *
  */
 #if !defined(DOXYGEN_ONLY)
 template <class Impl>
@@ -211,17 +211,6 @@ public:
         SECURITY_MODE_ENCRYPTION_WITH_MITM, /**< Require encryption and MITM protection. */
         SECURITY_MODE_SIGNED_NO_MITM,       /**< Require signing or encryption, but no MITM protection. */
         SECURITY_MODE_SIGNED_WITH_MITM,     /**< Require signing or encryption, and MITM protection. */
-    };
-
-    /**
-     * @brief Defines possible security status or states.
-     *
-     * @details Defines possible security status or states of a link when requested by getLinkSecurity().
-     */
-    enum LinkSecurityStatus_t {
-        NOT_ENCRYPTED,          /**< The link is not secured. */
-        ENCRYPTION_IN_PROGRESS, /**< Link security is being established.*/
-        ENCRYPTED               /**< The link is secure.*/
     };
 
     /** Input/output capability of the device and application */
@@ -262,13 +251,6 @@ public:
 
     typedef FunctionPointerWithContext<const SecurityManager *> SecurityManagerShutdownCallback_t;
     typedef CallChainOfFunctionPointersWithContext<const SecurityManager *> SecurityManagerShutdownCallbackChain_t;
-
-    /* legacy callbacks, please use SecurityManagerEventHandler instead */
-    typedef void (*HandleSpecificEvent_t)(ble::connection_handle_t connectionHandle);
-    typedef void (*SecuritySetupInitiatedCallback_t)(ble::connection_handle_t, bool allowBonding, bool requireMITM, SecurityIOCapabilities_t iocaps);
-    typedef void (*SecuritySetupCompletedCallback_t)(ble::connection_handle_t, SecurityCompletionStatus_t status);
-    typedef void (*LinkSecuredCallback_t)(ble::connection_handle_t connectionHandle, SecurityMode_t securityMode);
-    typedef void (*PasskeyDisplayCallback_t)(ble::connection_handle_t connectionHandle, const Passkey_t passkey);
 
     /** The stack will use these functions to signal events to the application,
      *  subclass to override handlers. Use SecurityManager::setSecurityManagerEventHandler
@@ -312,7 +294,7 @@ public:
          *
          * @param[in] whitelist pointer to the whitelist filled with entries based on bonding information
          */
-        virtual void whitelistFromBondTable(::Gap::Whitelist_t* whitelist) {
+        virtual void whitelistFromBondTable(::ble::whitelist_t* whitelist) {
             (void)whitelist;
         }
 
@@ -534,7 +516,7 @@ public:
      *
      * @retval BLE_ERROR_NONE On success, else an error code indicating reason for failure
      */
-    ble_error_t generateWhitelistFromBondTable(::Gap::Whitelist_t *whitelist) const;
+    ble_error_t generateWhitelistFromBondTable(::ble::whitelist_t *whitelist) const;
 
     ////////////////////////////////////////////////////////////////////////////
     // Pairing
@@ -880,141 +862,6 @@ protected:
 
     ~SecurityManager() { };
 
-public:
-    /**
-     * @deprecated use generateWhitelistFromBondTable instead
-     *
-     * Get a list of addresses from all peers in the bond table.
-     *
-     * @param[in,out]   addresses
-     *                  (on input) addresses.capacity contains the maximum
-     *                  number of addresses to be returned.
-     *                  (on output) The populated table with copies of the
-     *                  addresses in the implementation's whitelist.
-     *
-     * @retval BLE_ERROR_NONE             On success, else an error code indicating reason for failure.
-     * @retval BLE_ERROR_INVALID_STATE    If the API is called without module initialization or
-     *                                    application registration.
-     */
-    ble_error_t getAddressesFromBondTable(::Gap::Whitelist_t &addresses) const;
-
-    /**
-     * @deprecated
-     *
-     * Get the security status of a connection.
-     *
-     * @param[in]  connectionHandle Handle to identify the connection.
-     * @param[out] securityStatus   Security status.
-     *
-     * @return BLE_ERROR_NONE or appropriate error code indicating the failure reason.
-     */
-    ble_error_t getLinkSecurity(ble::connection_handle_t connectionHandle, LinkSecurityStatus_t *securityStatus) {
-        ble::link_encryption_t encryption(ble::link_encryption_t::NOT_ENCRYPTED);
-        ble_error_t err = getLinkEncryption(connectionHandle, &encryption);
-        if (err) {
-            return err;
-        }
-
-        switch (encryption.value()) {
-            case ble::link_encryption_t::NOT_ENCRYPTED:
-                *securityStatus = NOT_ENCRYPTED;
-                break;
-            case ble::link_encryption_t::ENCRYPTION_IN_PROGRESS:
-                *securityStatus = ENCRYPTION_IN_PROGRESS;
-                break;
-            case ble::link_encryption_t::ENCRYPTED:
-            case ble::link_encryption_t::ENCRYPTED_WITH_MITM:
-            case ble::link_encryption_t::ENCRYPTED_WITH_SC_AND_MITM:
-                *securityStatus = ENCRYPTED;
-                break;
-            default:
-                // should never happen
-                MBED_ASSERT(false);
-                *securityStatus = NOT_ENCRYPTED;
-                break;
-        }
-
-        return BLE_ERROR_NONE;
-    }
-
-    /**
-     * @deprecated
-     *
-     * To indicate that a security procedure for the link has started.
-     */
-    void onSecuritySetupInitiated(SecuritySetupInitiatedCallback_t callback) {
-        defaultEventHandler.securitySetupInitiatedCallback = callback;
-    }
-
-    /**
-     * @deprecated
-     *
-     * To indicate that the security procedure for the link has completed.
-     */
-    void onSecuritySetupCompleted(SecuritySetupCompletedCallback_t callback) {
-        defaultEventHandler.securitySetupCompletedCallback = callback;
-    }
-
-    /**
-     * @deprecated
-     *
-     * To indicate that the link with the peer is secured. For bonded devices,
-     * subsequent reconnections with a bonded peer will result only in this callback
-     * when the link is secured; setup procedures will not occur (unless the
-     * bonding information is either lost or deleted on either or both sides).
-     */
-    void onLinkSecured(LinkSecuredCallback_t callback) {
-        defaultEventHandler.linkSecuredCallback = callback;
-    }
-
-    /**
-     * @deprecated
-     *
-     * To indicate that device context is stored persistently.
-     */
-    void onSecurityContextStored(HandleSpecificEvent_t callback) {
-        defaultEventHandler.securityContextStoredCallback = callback;
-    }
-
-    /** @deprecated
-     *
-     * To set the callback for when the passkey needs to be displayed on a peripheral with DISPLAY capability.
-     */
-    void onPasskeyDisplay(PasskeyDisplayCallback_t callback) {
-        defaultEventHandler.passkeyDisplayCallback = callback;
-    }
-
-    /* Entry points for the underlying stack to report events back to the user. */
-public:
-    /** @deprecated */
-    void processSecuritySetupInitiatedEvent(ble::connection_handle_t connectionHandle, bool allowBonding, bool requireMITM, SecurityIOCapabilities_t iocaps) {
-        if (defaultEventHandler.securitySetupInitiatedCallback) {
-            defaultEventHandler.securitySetupInitiatedCallback(connectionHandle, allowBonding, requireMITM, iocaps);
-        }
-    }
-    /** @deprecated */
-    void processSecuritySetupCompletedEvent(ble::connection_handle_t connectionHandle, SecurityCompletionStatus_t status) {
-        eventHandler->pairingResult(connectionHandle, status);
-    }
-    /** @deprecated */
-    void processLinkSecuredEvent(ble::connection_handle_t connectionHandle, SecurityMode_t securityMode) {
-        if (securityMode == SECURITY_MODE_ENCRYPTION_NO_MITM) {
-            eventHandler->linkEncryptionResult(connectionHandle, ble::link_encryption_t::ENCRYPTED);
-        } else {
-            eventHandler->linkEncryptionResult(connectionHandle, ble::link_encryption_t::NOT_ENCRYPTED);
-        }
-    }
-    /** @deprecated */
-    void processSecurityContextStoredEvent(ble::connection_handle_t connectionHandle) {
-        if (defaultEventHandler.securityContextStoredCallback) {
-            defaultEventHandler.securityContextStoredCallback(connectionHandle);
-        }
-    }
-    /** @deprecated */
-    void processPasskeyDisplayEvent(ble::connection_handle_t connectionHandle, const Passkey_t passkey) {
-        eventHandler->passkeyDisplay(connectionHandle, passkey);
-    }
-
 protected:
     /* --- _virtual_ implementations declaration --- */
 
@@ -1037,7 +884,7 @@ protected:
     ble_error_t purgeAllBondingState_(void);
 
     ble_error_t generateWhitelistFromBondTable_(
-        ::Gap::Whitelist_t *whitelist
+        ::ble::whitelist_t *whitelist
     ) const;
 
     ble_error_t requestPairing_(
@@ -1136,62 +983,12 @@ protected:
         bool authenticated
     );
 
-    ble_error_t getAddressesFromBondTable_(::Gap::Whitelist_t &addresses) const;
-
-private:
-    /* Legacy compatibility with old callbacks (from both sides so any
-     * combination of new and old works) */
-    class LegacyEventHandler : public EventHandler {
-    public:
-        LegacyEventHandler() :
-            securitySetupInitiatedCallback(),
-            securitySetupCompletedCallback(),
-            linkSecuredCallback(),
-            securityContextStoredCallback(),
-            passkeyDisplayCallback() { };
-
-        virtual void pairingResult(ble::connection_handle_t connectionHandle, SecurityCompletionStatus_t result) {
-            if (securitySetupCompletedCallback) {
-                securitySetupCompletedCallback(connectionHandle, result);
-            }
-        }
-
-        virtual void linkEncryptionResult(ble::connection_handle_t connectionHandle, ble::link_encryption_t result) {
-            if (linkSecuredCallback) {
-                SecurityMode_t securityMode;
-                if (result == ble::link_encryption_t::ENCRYPTED) {
-                    securityMode = SECURITY_MODE_ENCRYPTION_NO_MITM;
-                } else if (
-                    result == ble::link_encryption_t::ENCRYPTED_WITH_MITM ||
-                    result == ble::link_encryption_t::ENCRYPTED_WITH_SC_AND_MITM
-                ) {
-                    securityMode = SECURITY_MODE_ENCRYPTION_WITH_MITM;
-                } else {
-                    securityMode = SECURITY_MODE_ENCRYPTION_OPEN_LINK;
-                }
-                linkSecuredCallback(connectionHandle, securityMode);
-            }
-        };
-
-        virtual void passkeyDisplay(ble::connection_handle_t connectionHandle, const Passkey_t passkey) {
-            if (passkeyDisplayCallback) {
-                passkeyDisplayCallback(connectionHandle, passkey);
-            }
-        };
-
-        SecuritySetupInitiatedCallback_t securitySetupInitiatedCallback;
-        SecuritySetupCompletedCallback_t securitySetupCompletedCallback;
-        LinkSecuredCallback_t            linkSecuredCallback;
-        HandleSpecificEvent_t            securityContextStoredCallback;
-        PasskeyDisplayCallback_t         passkeyDisplayCallback;
-    };
-
 private:
     SecurityManagerShutdownCallbackChain_t shutdownCallChain;
 
 protected:
     EventHandler*      eventHandler;
-    LegacyEventHandler defaultEventHandler;
+    EventHandler       defaultEventHandler;
 };
 
 

@@ -90,6 +90,8 @@ struct Waiter;
  *
  * @note Synchronization level: Thread safe
  *
+ * @note Bare metal profile: This class is not supported.
+ *
  * Example:
  *
  * @code
@@ -140,7 +142,7 @@ struct Waiter;
  *     // Mutex must be unlocked before the worker thread can acquire it.
  *     mutex.unlock();
  *
- *     wait(1.0);
+ *     ThisThread::sleep_for(1000);
  *   }
  *
  *   // Change done and notify waiters of this.

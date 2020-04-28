@@ -21,7 +21,6 @@
 #include "platform/Callback.h"
 #include "platform/NonCopyable.h"
 #include "ble/BLETypes.h"
-#include "ble/BLEProtocol.h"
 #include "ble/SecurityManager.h"
 #include "ble/pal/GapTypes.h"
 
@@ -30,7 +29,6 @@ namespace pal {
 
 typedef ::SecurityManager::SecurityCompletionStatus_t SecurityCompletionStatus_t;
 typedef ::SecurityManager::SecurityMode_t SecurityMode_t;
-typedef ::SecurityManager::LinkSecurityStatus_t LinkSecurityStatus_t;
 typedef ::SecurityManager::Keypress_t Keypress_t;
 
 /**

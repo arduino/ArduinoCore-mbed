@@ -324,6 +324,18 @@ public:
      */
     virtual nsapi_error_t add_dns_server(const SocketAddress &address, const char *interface_name);
 
+    /** Get a domain name server from a list of servers to query
+     *
+     *  Returns a DNS server address for a index. If returns error no more
+     *  DNS servers to read.
+     *
+     *  @param index    Index of the DNS server, starts from zero
+     *  @param address  Destination for the host address
+     *  @param interface_name  Network interface name
+     *  @return         NSAPI_ERROR_OK on success, negative error code on failure
+     */
+    virtual nsapi_error_t get_dns_server(int index, SocketAddress *address, const char *interface_name = NULL);
+
     /** Register callback for status reporting.
      *
      *  The specified status callback function will be called on status changes
@@ -352,6 +364,7 @@ public:
      */
     void add_event_listener(mbed::Callback<void(nsapi_event_t, intptr_t)> status_cb);
 
+#if MBED_CONF_PLATFORM_CALLBACK_COMPARABLE
     /** Remove event listener from interface.
      *
      * Remove previously added callback from the handler list.
@@ -359,6 +372,7 @@ public:
      *  @param status_cb The callback to unregister.
      */
     void remove_event_listener(mbed::Callback<void(nsapi_event_t, intptr_t)> status_cb);
+#endif
 
     /** Get the connection status.
      *
@@ -421,13 +435,7 @@ public:
 #if !defined(DOXYGEN_ONLY)
 
 protected:
-    friend class InternetSocket;
-    friend class UDPSocket;
-    friend class TCPSocket;
-    friend class TCPServer;
-    friend class SocketAddress;
-    template <typename IF>
-    friend NetworkStack *nsapi_create_stack(IF *iface);
+    friend NetworkStack *_nsapi_create_stack(NetworkInterface *iface, std::false_type);
 
     /** Provide access to the NetworkStack object
      *

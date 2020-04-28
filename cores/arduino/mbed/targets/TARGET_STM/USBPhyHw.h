@@ -41,7 +41,6 @@
 #else
 #define USBHAL_IRQn  USB_IRQn
 #endif
-#define NB_ENDPOINT 4
 
 #elif (MBED_CONF_TARGET_USB_SPEED == USE_USB_OTG_FS)
 #define USBHAL_IRQn  OTG_FS_IRQn
@@ -51,9 +50,7 @@
 
 #endif
 
-#ifndef NB_ENDPOINT
 #define NB_ENDPOINT  16
-#endif
 
 // #define MAXTRANSFER_SIZE  0x200
 #define MAX_PACKET_SIZE_SETUP (48)

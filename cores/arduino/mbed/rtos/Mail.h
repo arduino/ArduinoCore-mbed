@@ -59,6 +59,9 @@ namespace rtos {
  * Memory considerations: The mail data store and control structures are part of this class - they do not (themselves)
  * allocate memory on the heap, both for the Mbed OS and underlying RTOS objects (static or dynamic RTOS memory
  * pools are not being used).
+ *
+ * @note
+ * Bare metal profile: This class is not supported.
  */
 template<typename T, uint32_t queue_sz>
 class Mail : private mbed::NonCopyable<Mail<T, queue_sz> > {
@@ -200,11 +203,12 @@ public:
      *
      * @param millisec Timeout value (default: osWaitForever).
      *
-     * @return Event that contains mail information or error code.
-     * @retval osEventMessage   Message received.
-     * @retval osOK             No mail is available (and no timeout was specified).
-     * @retval osEventTimeout   No mail has arrived during the given timeout period.
-     * @retval osErrorParameter A parameter is invalid or outside of a permitted range.
+     * @return Event that contains mail information and status code. The status code
+     *         is stored in the status member:
+     *         @a osEventMail      Mail successfully received.
+     *         @a osOK             No mail is available (and no timeout was specified).
+     *         @a osEventTimeout   No mail has arrived during the given timeout period.
+     *         @a osErrorParameter A parameter is invalid or outside of a permitted range.
      *
      * @note You may call this function from ISR context if the millisec parameter is set to 0.
      */
