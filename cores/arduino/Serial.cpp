@@ -87,7 +87,8 @@ void UART::begin(unsigned long baudrate) {
 void UART::on_rx() {
 	while(_serial->readable()) {
 		char c;
-		rx_buffer.store_char(_serial->read(&c, 1));
+		_serial->read(&c, 1);
+		rx_buffer.store_char(c);
 	}
 }
 
