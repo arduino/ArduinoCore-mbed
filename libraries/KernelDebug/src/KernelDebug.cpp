@@ -15,6 +15,8 @@
 // The GDB compatible debug monitor for kernel debugging of thread and handler mode code.
 // Utilizes MRI (Monitor for Remote Inspection) library for core debugging functionality.
 #include <MRI.h>
+#include <cmsis_os2.h>
+#include <rtx_os.h>
 #include "KernelDebug.h"
 
 // Put armv7-m module into handler mode before including its header and source code.
@@ -31,22 +33,84 @@ extern "C" {
 }
 
 
+// Run the DebugMonitor and UART interrupts at this priority.
+#define DEBUG_ISR_PRIORITY 2
+
+// Valid RAM memory ranges used for verifying thread pointers before dereferencing them.
+struct RamRange
+{
+    uint32_t start;
+    uint32_t length;
+};
+
+static RamRange g_ramRanges[] =
+{
+    {0x00000000, 0x10000},
+    {0x10000000, 0x48000},
+    {0x1ff00000, 0x20000},
+    {0x20000000, 0x20000},
+    {0x24000000, 0x80000},
+    {0x30000000, 0x48000},
+    {0x38000000, 0x10000},
+    {0x38800000, 0x1000},
+    {0x58020000, 0x2c00},
+    {0x58024400, 0xc00},
+    {0x58025400, 0x800},
+    {0x58026000, 0x800},
+    {0x58027000, 0x400}
+};
+
+
+
+// Bit location in PSR which indicates if the stack needed to be 8-byte aligned or not.
+#define PSR_STACK_ALIGN_SHIFT   9
+
+// Entries to track the chunks of the context in a scatter list.
+#if MRI_DEVICE_HAS_FPU
+    #define CONTEXT_SECTIONS    (6 + 3)
+#else
+    #define CONTEXT_SECTIONS    6
+#endif
+
+
+// Structures used for iterating over RTX threads via getFirstThreadId()/getNextThreadId().
+struct ThreadIteratorState;
+
+typedef uint32_t (*IteratorFunc)(ThreadIteratorState* pState);
+
+struct ThreadIteratorState
+{
+    IteratorFunc   pFunc;
+    osRtxThread_t* pThread;
+    bool           done;
+};
+
+// Priorities of system handlers before mriInit() modifies them.
+struct SystemHandlerPriorities {
+    uint8_t svcallPriority;
+    uint8_t pendsvPriority;
+    uint8_t systickPriority;
+};
+
 // Globals that describe the KernelDebug singleton.
 static mbed::UnbufferedSerial*  g_pSerial;
 static uint32_t                 g_baudRate;
 static IRQn_Type                g_irq;
 static bool                     g_breakInSetup;
 
+// Thread context for the most recent call to Platform_RtosGetThreadContext() from the MRI core.
+static MriContext               g_threadContext;
+static ContextSection           g_threadContextSections[CONTEXT_SECTIONS];
+static uint32_t                 g_threadSP;
 
-// Run the DebugMonitor and UART interrupts at this priority.
-#define DEBUG_ISR_PRIORITY 2
+// Floats to be returned in context if the thread being debugged has no stored float state.
+static uint32_t                 g_tempFloats[33];
 
+// Fake out the special registers (MSP, PSP, etc) when dumping anything but the halting thead.
+static uint32_t                 g_fakeSpecialRegs[6];
 
-struct SystemHandlerPriorities {
-    uint8_t svcallPriority;
-    uint8_t pendsvPriority;
-    uint8_t systickPriority;
-};
+// Global used for iterating over RTX threads via Platform_RtosGetFirstThreadId()/Platform_RtosGetNextThreadId().
+static ThreadIteratorState      g_threadIterState;
 
 
 // Forward Function Declarations
@@ -56,13 +120,22 @@ static void initSerial();
 static SystemHandlerPriorities getSystemHandlerPrioritiesBeforeMriModifiesThem();
 static void restoreSystemHandlerPriorities(const SystemHandlerPriorities* pPriorities);
 static void switchFaultHandlersToDebugger();
-
+static uint32_t getFirstThreadId(ThreadIteratorState* pState);
+static uint32_t getNextThreadId(ThreadIteratorState* pState);
+static osRtxThread_t* verifiedThreadPtr(osRtxThread_t* pThread);
+static bool isValidRamAddress(uint8_t* p);
+static uint32_t iterateOverReadyList(ThreadIteratorState* pState);
+static uint32_t iterateOverDelayList(ThreadIteratorState* pState);
+static uint32_t iterateOverWaitList(ThreadIteratorState* pState);
+static const char* getThreadStateName(uint8_t threadState);
+static void readThreadContext(MriContext* pContext, uint32_t* pSP, osRtxThread_t* pThread);
 
 // Forward declaration of external functions used by KernelDebug.
 // Will be setting initial breakpoint on setup() routine.
 extern "C" void setup();
 // The debugger uses this handler to catch faults, debug events, etc.
 extern "C" void mriExceptionHandler(void);
+
 
 
 arduino::KernelDebug::KernelDebug(PinName txPin, PinName rxPin, IRQn_Type irq, uint32_t baudRate, bool breakInSetup /*=true*/) :
@@ -126,6 +199,10 @@ arduino::KernelDebug::~KernelDebug()
 // ---------------------------------------------------------------------------------------------------------------------
 void Platform_Init(Token* pParameterTokens)
 {
+    Context_Init(&g_threadContext,
+                 g_threadContextSections,
+                 sizeof(g_threadContextSections)/sizeof(g_threadContextSections[0]));
+
     SystemHandlerPriorities origPriorities = getSystemHandlerPrioritiesBeforeMriModifiesThem();
 
     __try
@@ -260,5 +337,269 @@ extern "C" int Semihost_IsDebuggeeMakingSemihostCall(void)
 
 int Semihost_HandleSemihostRequest(void)
 {
+    return 0;
+}
+
+
+
+
+uint32_t Platform_RtosGetHaltedThreadId(void)
+{
+    return (uint32_t)osThreadGetId();
+}
+
+uint32_t Platform_RtosGetFirstThreadId(void)
+{
+    return getFirstThreadId(&g_threadIterState);
+}
+
+uint32_t Platform_RtosGetNextThreadId(void)
+{
+    return getNextThreadId(&g_threadIterState);
+}
+
+static uint32_t getFirstThreadId(ThreadIteratorState* pState)
+{
+    osRtxThread_t* pRunningThread = verifiedThreadPtr(osRtxInfo.thread.run.curr);
+    if (pRunningThread == NULL) {
+        pState->done = true;
+        pState->pFunc = NULL;
+        pState->pThread = NULL;
+        return 0;
+    }
+
+    pState->done = false;
+    pState->pFunc = iterateOverReadyList;
+    pState->pThread = NULL;
+    return (uint32_t)pRunningThread;
+}
+
+static uint32_t getNextThreadId(ThreadIteratorState* pState)
+{
+    if (pState->done) {
+        return 0;
+    }
+
+    uint32_t threadId;
+    do {
+        threadId = pState->pFunc(pState);
+    } while (threadId == 0 && !pState->done);
+
+    return threadId;
+}
+
+static osRtxThread_t* verifiedThreadPtr(osRtxThread_t* pThread)
+{
+    if (pThread == NULL) {
+        return NULL;
+    }
+
+    uint8_t* pStart = (uint8_t*)pThread;
+    uint8_t* pEnd = (uint8_t*)(pThread + 1) - 1;
+    if (isValidRamAddress(pStart) && isValidRamAddress(pEnd) && pThread->id == osRtxIdThread) {
+        return pThread;
+    } else {
+        return NULL;
+    }
+}
+
+static bool isValidRamAddress(uint8_t* p)
+{
+    uint32_t addr = (uint32_t)p;
+
+    for (size_t i = 0 ; i < sizeof(g_ramRanges)/sizeof(g_ramRanges[0]) ; i++) {
+        if (addr >= g_ramRanges[i].start && addr < g_ramRanges[i].start + g_ramRanges[i].length) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static uint32_t iterateOverReadyList(ThreadIteratorState* pState)
+{
+    if (pState->pThread == NULL) {
+        pState->pThread = verifiedThreadPtr(osRtxInfo.thread.ready.thread_list);
+    }
+    else {
+        pState->pThread = verifiedThreadPtr(pState->pThread->thread_next);
+    }
+
+    if (pState->pThread == NULL) {
+        pState->pFunc = iterateOverDelayList;
+    }
+    return (uint32_t)pState->pThread;
+}
+
+static uint32_t iterateOverDelayList(ThreadIteratorState* pState)
+{
+    if (pState->pThread == NULL) {
+        pState->pThread = verifiedThreadPtr(osRtxInfo.thread.delay_list);
+    }
+    else {
+        pState->pThread = verifiedThreadPtr(pState->pThread->delay_next);
+    }
+
+    if (pState->pThread == NULL) {
+        pState->pFunc = iterateOverWaitList;
+    }
+    return (uint32_t)pState->pThread;
+}
+
+static uint32_t iterateOverWaitList(ThreadIteratorState* pState)
+{
+    if (pState->pThread == NULL) {
+        pState->pThread = verifiedThreadPtr(osRtxInfo.thread.wait_list);
+    }
+    else {
+        pState->pThread = verifiedThreadPtr(pState->pThread->delay_next);
+    }
+
+    if (pState->pThread == NULL) {
+        pState->pFunc = NULL;
+        pState->done = true;
+    }
+    return (uint32_t)pState->pThread;
+}
+
+const char* Platform_RtosGetExtraThreadInfo(uint32_t threadId)
+{
+    osRtxThread_t* pThread = verifiedThreadPtr((osRtxThread_t*)threadId);
+    if (pThread == NULL) {
+        return "Invalid Thread Pointer";
+    }
+
+    static char threadExtraInfo[64];
+    const char* pState = getThreadStateName(pThread->state);
+    const char* pThreadName = pThread->name;
+    snprintf(threadExtraInfo, sizeof(threadExtraInfo), "\"%s\" %s", pThreadName ? pThreadName : "", pState);
+    return threadExtraInfo;
+}
+
+static const char* getThreadStateName(uint8_t threadState)
+{
+    switch (threadState) {
+        case osRtxThreadInactive:
+            return "Inactive";
+        case osRtxThreadReady:
+            return "Ready";
+        case osRtxThreadRunning:
+            return "Running";
+        case osRtxThreadBlocked:
+            return "Blocked";
+        case osRtxThreadTerminated:
+            return "Terminated";
+        case osRtxThreadWaitingDelay:
+            return "WaitingDelay";
+        case osRtxThreadWaitingJoin:
+            return "WaitingJoin";
+        case osRtxThreadWaitingThreadFlags:
+            return "WaitingThreadFlags";
+        case osRtxThreadWaitingEventFlags:
+            return "WaitingEventFlags";
+        case osRtxThreadWaitingMutex:
+            return "WaitingMutex";
+        case osRtxThreadWaitingSemaphore:
+            return "WaitingSemaphore";
+        case osRtxThreadWaitingMemoryPool:
+            return "WaitingMemoryPool";
+        case osRtxThreadWaitingMessageGet:
+            return "WaitingMessageGet";
+        case osRtxThreadWaitingMessagePut:
+            return "WaitingMessagePut";
+        default:
+            return "";
+    }
+}
+
+MriContext* Platform_RtosGetThreadContext(uint32_t threadId)
+{
+    osRtxThread_t* pThread = verifiedThreadPtr((osRtxThread_t*)threadId);
+    if (pThread == NULL) {
+        return NULL;
+    }
+    if (pThread == osThreadGetId()) {
+        return &mriCortexMState.context;
+    }
+    readThreadContext(&g_threadContext, &g_threadSP, pThread);
+    return &g_threadContext;
+}
+
+static void readThreadContext(MriContext* pContext, uint32_t* pSP, osRtxThread_t* pThread)
+{
+    ContextSection* pSections = pContext->pSections;
+
+    uint32_t offset;
+    uint32_t stackedCount;
+    if (MRI_DEVICE_HAS_FPU && (pThread->stack_frame & LR_FLOAT_STACK) == 0) {
+        offset = 16;
+        stackedCount = 16 + 34;
+    } else {
+        offset = 0;
+        stackedCount = 16;
+    }
+
+    uint32_t* pThreadContext = (uint32_t*)pThread->sp;
+    // R0 - R3
+    pSections[0].pValues = pThreadContext + offset + 8;
+    pSections[0].count = 4;
+    // R4 - R11
+    pSections[1].pValues = pThreadContext + offset + 0;
+    pSections[1].count = 8;
+    // R12
+    pSections[2].pValues = pThreadContext + offset + 12;
+    pSections[2].count = 1;
+    // SP - Point scatter gather context to correct location for SP but set it to correct value once CPSR is more easily
+    // fetched.
+    pSections[3].pValues = pSP;
+    pSections[3].count = 1;
+    // LR, PC, CPSR
+    pSections[4].pValues = pThreadContext + offset + 13;
+    pSections[4].count = 3;
+    // Set SP to correct value using alignment bit in CPSR. Memory for SP is already tracked by context.
+    uint32_t cpsr = Context_Get(pContext, CPSR);
+    Context_Set(pContext, SP, pThread->sp + sizeof(uint32_t) * (stackedCount + ((cpsr >> PSR_STACK_ALIGN_SHIFT) & 1)));
+
+    memset(g_fakeSpecialRegs, 0, sizeof(g_fakeSpecialRegs));
+    pSections[5].pValues = g_fakeSpecialRegs;
+    pSections[5].count = 6;
+
+    if (offset != 0) {
+        // S0 - S15
+        pSections[6].pValues = pThreadContext + 32;
+        pSections[6].count = 16;
+        // S16 - S31
+        pSections[7].pValues = pThreadContext + 0;
+        pSections[7].count = 16;
+        // FPSCR
+        pSections[8].pValues = pThreadContext + 48;
+        pSections[8].count = 1;
+    }
+    else if (MRI_DEVICE_HAS_FPU && offset == 0) {
+        memset(g_tempFloats, 0, sizeof(g_tempFloats));
+        // S0-S31, FPSCR
+        pSections[6].pValues = g_tempFloats;
+        pSections[6].count = 33;
+        pSections[7].pValues = NULL;
+        pSections[7].count = 0;
+        pSections[8].pValues = NULL;
+        pSections[8].count = 0;
+    }
+}
+
+int Platform_RtosIsThreadActive(uint32_t threadId)
+{
+    if (verifiedThreadPtr((osRtxThread_t*)threadId) == NULL) {
+        return 0;
+    }
+
+    ThreadIteratorState state;
+    uint32_t currThreadId = getFirstThreadId(&state);
+    while (currThreadId != 0) {
+        if (currThreadId == threadId) {
+            return 1;
+        }
+        currThreadId = getNextThreadId(&state);
+    }
+
     return 0;
 }

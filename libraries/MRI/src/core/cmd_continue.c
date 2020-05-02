@@ -24,32 +24,11 @@
 static uint32_t skipHardcodedBreakpoint(void);
 static int shouldSkipHardcodedBreakpoint(void);
 static int isCurrentInstructionHardcodedBreakpoint(void);
-/* Handle the 'c' command which is sent from gdb to tell the debugger to continue execution of the currently halted
-   program.
-
-    Command Format:     cAAAAAAAA
-    Response Format:    Blank until the next exception, at which time a 'T' stop response packet will be sent.
-
-    Where AAAAAAAA is an optional value to be used for the Program Counter when restarting the program.
-*/
-uint32_t HandleContinueCommand(void)
+uint32_t ContinueExecution(int setPC, uint32_t newPC)
 {
-    Buffer*     pBuffer = GetBuffer();
-    uint32_t    returnValue = 0;
-    uint32_t    newPC;
-
-    returnValue |= skipHardcodedBreakpoint();
-    /* New program counter value is optional parameter. */
-    __try
-    {
-        __throwing_func( newPC = ReadUIntegerArgument(pBuffer) );
+    uint32_t returnValue = skipHardcodedBreakpoint();
+    if (setPC)
         Platform_SetProgramCounter(newPC);
-    }
-    __catch
-    {
-        clearExceptionCode();
-    }
-
     return (returnValue | HANDLER_RETURN_RESUME_PROGRAM | HANDLER_RETURN_RETURN_IMMEDIATELY);
 }
 
@@ -75,6 +54,35 @@ static int isCurrentInstructionHardcodedBreakpoint(void)
 }
 
 
+/* Handle the 'c' command which is sent from gdb to tell the debugger to continue execution of the currently halted
+   program.
+
+    Command Format:     cAAAAAAAA
+    Response Format:    Blank until the next exception, at which time a 'T' stop response packet will be sent.
+
+    Where AAAAAAAA is an optional value to be used for the Program Counter when restarting the program.
+*/
+uint32_t HandleContinueCommand(void)
+{
+    Buffer*     pBuffer = GetBuffer();
+    int         setPC = 0;
+    uint32_t    newPC = 0;
+
+    /* New program counter value is optional parameter. */
+    __try
+    {
+        __throwing_func( newPC = ReadUIntegerArgument(pBuffer) );
+        setPC = 1;
+    }
+    __catch
+    {
+        clearExceptionCode();
+    }
+    return ContinueExecution(setPC, newPC);
+}
+
+
+
 /* Handle the 'C' command which is sent from gdb to tell the debugger to continue execution of the currently halted
    program. It is similar to the 'c' command but it also provides a signal level, which MRI ignores.
 
@@ -87,10 +95,9 @@ static int isCurrentInstructionHardcodedBreakpoint(void)
 uint32_t HandleContinueWithSignalCommand(void)
 {
     Buffer*     pBuffer = GetBuffer();
-    uint32_t    returnValue = 0;
-    uint32_t    newPC;
+    int         setPC = 0;
+    uint32_t    newPC = 0;
 
-    returnValue |= skipHardcodedBreakpoint();
     __try
     {
         /* Fetch signal value but ignore it. */
@@ -98,7 +105,7 @@ uint32_t HandleContinueWithSignalCommand(void)
         if (Buffer_BytesLeft(pBuffer) && Buffer_IsNextCharEqualTo(pBuffer, ';'))
         {
             __throwing_func( newPC = ReadUIntegerArgument(pBuffer) );
-            Platform_SetProgramCounter(newPC);
+            setPC = 1;
         }
     }
     __catch
@@ -106,8 +113,7 @@ uint32_t HandleContinueWithSignalCommand(void)
         PrepareStringResponse(MRI_ERROR_INVALID_ARGUMENT);
         return 0;
     }
-
-    return (returnValue | HANDLER_RETURN_RESUME_PROGRAM | HANDLER_RETURN_RETURN_IMMEDIATELY);
+    return ContinueExecution(setPC, newPC);
 }
 
 

@@ -18,6 +18,7 @@
 #define PLATFORMS_H_
 
 #include <stdint.h>
+#include <core/context.h>
 #include <core/token.h>
 #include <core/buffer.h>
 #include <core/try_catch.h>
@@ -42,8 +43,26 @@ void      mriPlatform_CommSendChar(int character);
 
 uint32_t  mriPlatform_HandleGDBComand(Buffer* pBuffer);
 
-uint8_t   mriPlatform_DetermineCauseOfException(void);
-void      mriPlatform_DisplayFaultCauseToGdbConsole(void);
+typedef enum
+{
+    MRI_PLATFORM_TRAP_TYPE_UNKNOWN = 0,
+    MRI_PLATFORM_TRAP_TYPE_HWBREAK,
+    MRI_PLATFORM_TRAP_TYPE_SWBREAK,
+    MRI_PLATFORM_TRAP_TYPE_WATCH,
+    MRI_PLATFORM_TRAP_TYPE_RWATCH,
+    MRI_PLATFORM_TRAP_TYPE_AWATCH,
+} PlatformTrapType;
+
+typedef struct
+{
+    PlatformTrapType    type;
+    uint32_t            address;
+} PlatformTrapReason;
+
+uint8_t             mriPlatform_DetermineCauseOfException(void);
+PlatformTrapReason  mriPlatform_GetTrapReason(void);
+void                mriPlatform_DisplayFaultCauseToGdbConsole(void);
+
 void      mriPlatform_EnableSingleStep(void);
 void      mriPlatform_DisableSingleStep(void);
 int       mriPlatform_IsSingleStepping(void);
@@ -54,8 +73,6 @@ int       mriPlatform_WasProgramCounterModifiedByUser(void);
 int       mriPlatform_WasMemoryFaultEncountered(void);
 
 void      mriPlatform_WriteTResponseRegistersToBuffer(Buffer* pBuffer);
-void      mriPlatform_CopyContextToBuffer(Buffer* pBuffer);
-void      mriPlatform_CopyContextFromBuffer(Buffer* pBuffer);
 
 uint32_t     mriPlatform_GetDeviceMemoryMapXmlSize(void);
 const char*  mriPlatform_GetDeviceMemoryMapXml(void);
@@ -101,6 +118,13 @@ uint32_t       mriPlatform_GetUidSize(void);
 
 void           mriPlatform_ResetDevice(void);
 
+uint32_t        mriPlatform_RtosGetHaltedThreadId(void);
+uint32_t        mriPlatform_RtosGetFirstThreadId(void);
+uint32_t        mriPlatform_RtosGetNextThreadId(void);
+const char*     mriPlatform_RtosGetExtraThreadInfo(uint32_t threadId);
+MriContext*     mriPlatform_RtosGetThreadContext(uint32_t threadId);
+int             mriPlatform_RtosIsThreadActive(uint32_t threadId);
+
 
 /* Macroes which allow code to drop the mri namespace prefix. */
 #define Platform_Init                                       mriPlatform_Init
@@ -119,6 +143,7 @@ void           mriPlatform_ResetDevice(void);
 #define Platform_CommReceiveChar                            mriPlatform_CommReceiveChar
 #define Platform_CommSendChar                               mriPlatform_CommSendChar
 #define Platform_DetermineCauseOfException                  mriPlatform_DetermineCauseOfException
+#define Platform_GetTrapReason                              mriPlatform_GetTrapReason
 #define Platform_DisplayFaultCauseToGdbConsole              mriPlatform_DisplayFaultCauseToGdbConsole
 #define Platform_EnableSingleStep                           mriPlatform_EnableSingleStep
 #define Platform_DisableSingleStep                          mriPlatform_DisableSingleStep
@@ -129,8 +154,6 @@ void           mriPlatform_ResetDevice(void);
 #define Platform_WasProgramCounterModifiedByUser            mriPlatform_WasProgramCounterModifiedByUser
 #define Platform_WasMemoryFaultEncountered                  mriPlatform_WasMemoryFaultEncountered
 #define Platform_WriteTResponseRegistersToBuffer            mriPlatform_WriteTResponseRegistersToBuffer
-#define Platform_CopyContextToBuffer                        mriPlatform_CopyContextToBuffer
-#define Platform_CopyContextFromBuffer                      mriPlatform_CopyContextFromBuffer
 #define Platform_GetDeviceMemoryMapXmlSize                  mriPlatform_GetDeviceMemoryMapXmlSize
 #define Platform_GetTargetXmlSize                           mriPlatform_GetTargetXmlSize
 #define Platform_GetTargetXml                               mriPlatform_GetTargetXml
@@ -147,5 +170,11 @@ void           mriPlatform_ResetDevice(void);
 #define Platform_GetUid                                     mriPlatform_GetUid
 #define Platform_GetUidSize                                 mriPlatform_GetUidSize
 #define Platform_ResetDevice                                mriPlatform_ResetDevice
+#define Platform_RtosGetHaltedThreadId                      mriPlatform_RtosGetHaltedThreadId
+#define Platform_RtosGetFirstThreadId                       mriPlatform_RtosGetFirstThreadId
+#define Platform_RtosGetNextThreadId                        mriPlatform_RtosGetNextThreadId
+#define Platform_RtosGetExtraThreadInfo                     mriPlatform_RtosGetExtraThreadInfo
+#define Platform_RtosGetThreadContext                       mriPlatform_RtosGetThreadContext
+#define Platform_RtosIsThreadActive                         mriPlatform_RtosIsThreadActive
 
 #endif /* PLATFORMS_H_ */

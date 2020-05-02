@@ -41,6 +41,7 @@ void     mriBuffer_WriteByteAsHex(Buffer* pBuffer, uint8_t byte);
 uint8_t  mriBuffer_ReadByteAsHex(Buffer* pBuffer);
 void     mriBuffer_WriteString(Buffer* pBuffer, const char* pString);
 void     mriBuffer_WriteSizedString(Buffer* pBuffer, const char* pString, size_t length);
+void     mriBuffer_WriteStringAsHex(Buffer* pBuffer, const char* pString);
 uint32_t mriBuffer_ReadUIntegerAsHex(Buffer* pBuffer);
 void     mriBuffer_WriteUIntegerAsHex(Buffer* pBuffer, uint32_t value);
 int32_t  mriBuffer_ReadIntegerAsHex(Buffer* pBuffer);
@@ -63,6 +64,7 @@ int      mriBuffer_MatchesHexString(Buffer* pBuffer, const char* pString, size_t
 #define Buffer_ReadByteAsHex        mriBuffer_ReadByteAsHex
 #define Buffer_WriteString          mriBuffer_WriteString
 #define Buffer_WriteSizedString     mriBuffer_WriteSizedString
+#define Buffer_WriteStringAsHex     mriBuffer_WriteStringAsHex
 #define Buffer_ReadUIntegerAsHex    mriBuffer_ReadUIntegerAsHex
 #define Buffer_WriteUIntegerAsHex   mriBuffer_WriteUIntegerAsHex
 #define Buffer_ReadIntegerAsHex     mriBuffer_ReadIntegerAsHex

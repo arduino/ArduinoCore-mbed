@@ -12,22 +12,18 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-/* Handler for continue gdb command. */
-#ifndef CMD_CONTINUE_H_
-#define CMD_CONTINUE_H_
+/* Command handler for gdb commands related to threads. */
+#ifndef CMD_THREAD_H_
+#define CMD_THREAD_H_
 
 #include <stdint.h>
 
 /* Real name of functions are in mri namespace. */
-uint32_t mriCmd_ContinueExecution(int setPC, uint32_t newPC);
-uint32_t mriCmd_HandleContinueCommand(void);
-uint32_t mriCmd_HandleContinueWithSignalCommand(void);
-uint32_t mriCmd_HandleDetachCommand(void);
+uint32_t mriCmd_HandleThreadContextCommand(void);
+uint32_t mriCmd_HandleIsThreadActiveCommand(void);
 
 /* Macroes which allow code to drop the mri namespace prefix. */
-#define ContinueExecution               mriCmd_ContinueExecution
-#define HandleContinueCommand           mriCmd_HandleContinueCommand
-#define HandleContinueWithSignalCommand mriCmd_HandleContinueWithSignalCommand
-#define HandleDetachCommand             mriCmd_HandleDetachCommand
+#define HandleThreadContextCommand          mriCmd_HandleThreadContextCommand
+#define HandleIsThreadActiveCommand         mriCmd_HandleIsThreadActiveCommand
 
-#endif /* CMD_CONTINUE_H_ */
+#endif /* CMD_THREAD_H_ */

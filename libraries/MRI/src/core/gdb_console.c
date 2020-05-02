@@ -37,8 +37,7 @@ static void writeStringToExclusiveGdbCommChannel(const char* pString)
     Buffer* pBuffer = GetInitializedBuffer();
 
     Buffer_WriteChar(pBuffer, 'O');
-    while (*pString)
-        Buffer_WriteByteAsHex(pBuffer, *pString++);
+    Buffer_WriteStringAsHex(pBuffer, pString);
     if (!Buffer_OverrunDetected(pBuffer))
         SendPacketToGdb();
 }

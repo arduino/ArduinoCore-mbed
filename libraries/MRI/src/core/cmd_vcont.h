@@ -12,22 +12,16 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-/* Handler for continue gdb command. */
-#ifndef CMD_CONTINUE_H_
-#define CMD_CONTINUE_H_
+/* Handler for gdb's vCont and vCont? commands which support multithreaded single stepping/continuing. */
+#ifndef CMD_VCONT_H_
+#define CMD_VCONT_H_
 
 #include <stdint.h>
 
 /* Real name of functions are in mri namespace. */
-uint32_t mriCmd_ContinueExecution(int setPC, uint32_t newPC);
-uint32_t mriCmd_HandleContinueCommand(void);
-uint32_t mriCmd_HandleContinueWithSignalCommand(void);
-uint32_t mriCmd_HandleDetachCommand(void);
+uint32_t mriCmd_HandleVContCommands(void);
 
 /* Macroes which allow code to drop the mri namespace prefix. */
-#define ContinueExecution               mriCmd_ContinueExecution
-#define HandleContinueCommand           mriCmd_HandleContinueCommand
-#define HandleContinueWithSignalCommand mriCmd_HandleContinueWithSignalCommand
-#define HandleDetachCommand             mriCmd_HandleDetachCommand
+#define HandleVContCommands     mriCmd_HandleVContCommands
 
-#endif /* CMD_CONTINUE_H_ */
+#endif /* CMD_VCONT_H_ */

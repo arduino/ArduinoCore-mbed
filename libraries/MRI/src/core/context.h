@@ -15,33 +15,38 @@
 /*  'Class' which represents a scatter gather list of registers so that blocks of them can be pulled from various
     locations on the stack and they don't all need to be placed in one contiguous place in memory.
 */
-#ifndef SCATTER_GATHER_H_
-#define SCATTER_GATHER_H_
+#ifndef CONTEXT_H_
+#define CONTEXT_H_
 
 #include <stdint.h>
+#include <core/buffer.h>
 
 typedef struct
 {
     uint32_t* pValues;
     uint32_t  count;
-} ScatterGatherEntry;
+} ContextSection;
 
 typedef struct
 {
-    ScatterGatherEntry* pEntries;
-    uint32_t            entryCount;
-} ScatterGather;
+    ContextSection*     pSections;
+    uint32_t            sectionCount;
+} MriContext;
 
 /* Real name of functions are in mri namespace. */
-void     mriScatterGather_Init(ScatterGather* pThis, ScatterGatherEntry* pEntries, uint32_t entryCount);
-uint32_t mriScatterGather_Count(ScatterGather* pThis);
-uint32_t mriScatterGather_Get(const ScatterGather* pThis, uint32_t index);
-void     mriScatterGather_Set(ScatterGather* pThis, uint32_t index, uint32_t newValue);
+void     mriContext_Init(MriContext* pThis, ContextSection* pSections, uint32_t sectionCount);
+uint32_t mriContext_Count(MriContext* pThis);
+uint32_t mriContext_Get(const MriContext* pThis, uint32_t index);
+void     mriContext_Set(MriContext* pThis, uint32_t index, uint32_t newValue);
+void     mriContext_CopyToBuffer(MriContext* pThis, Buffer* pBuffer);
+void     mriContext_CopyFromBuffer(MriContext* pThis, Buffer* pBuffer);
 
 /* Macroes which allow code to drop the mri namespace prefix. */
-#define ScatterGather_Init      mriScatterGather_Init
-#define ScatterGather_Count     mriScatterGather_Count
-#define ScatterGather_Get       mriScatterGather_Get
-#define ScatterGather_Set       mriScatterGather_Set
+#define Context_Init            mriContext_Init
+#define Context_Count           mriContext_Count
+#define Context_Get             mriContext_Get
+#define Context_Set             mriContext_Set
+#define Context_CopyToBuffer    mriContext_CopyToBuffer
+#define Context_CopyFromBuffer  mriContext_CopyFromBuffer
 
-#endif /* SCATTER_GATHER_H_ */
+#endif /* CONTEXT_H_ */

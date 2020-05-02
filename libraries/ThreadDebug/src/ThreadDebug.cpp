@@ -28,7 +28,7 @@ extern "C"
     #include <core/core.h>
     #include <core/platforms.h>
     #include <core/semihost.h>
-    #include <core/scatter_gather.h>
+    #include <core/context.h>
     #include <architectures/armv7-m/armv7-m.h>
     // Source code for armv7-m module which is included here, configured for supporting thread mode debugging.
     #include <architectures/armv7-m/armv7-m.x>
@@ -68,6 +68,8 @@ static const char* g_threadNamesToIgnore[] = {
 //  Using MSP.
 #define EXC_RETURN_THREADMODE_MAINSTACK     0x9
 
+// Macro to make is easier to calculate array size.
+#define ARRAY_SIZE(X) (sizeof(X)/sizeof(X[0]))
 
 // Assert routine that will dump error text to USB GDB connection before entering infinite loop. If user is logging MRI
 // remote communications then they will see the error text in the log before debug stub becomes unresponseive.
@@ -96,9 +98,15 @@ static volatile osThreadId_t    g_haltedThreadId;
 // The list of threads which were suspended upon entry into the debugger. These are the threads that will be resumed
 // upon exit from the debugger.
 static osThreadId_t             g_suspendedThreads[MAXIMUM_ACTIVE_THREADS];
+// The state of each thread before being suspended.
+static uint8_t                  g_threadStates[MAXIMUM_ACTIVE_THREADS];
 // The number of active threads that were placed in g_suspendedThreads. Some of those entries may be NULL if they were
 // important enough to not be suspended.
 static uint32_t                 g_threadCount;
+// The current index into the g_suspendedThreads array being returned from Platform_RtosGetFirstThread.
+static uint32_t                 g_threadIndex;
+// Buffer to be used for storing extra thread info.
+static char                     g_threadExtraInfo[64];
 
 // This flag is set to a non-zero value if the DebugMon handler is to re-enable DWT watchpoints and FPB breakpoints
 // after being disabled by the HardFault handler when a debug event is encounted in handler mode.
@@ -125,12 +133,18 @@ volatile uint32_t               mriThreadOrigUsageFault;
 
 // Entries to track the chunks of the context in a scatter list.
 #if MRI_DEVICE_HAS_FPU
-    #define CONTEXT_ENTRIES     (5 + 3)
+    #define CONTEXT_SECTIONS    (5 + 3)
 #else
-    #define CONTEXT_ENTRIES     5
+    #define CONTEXT_SECTIONS    5
 #endif
 
-static ScatterGatherEntry       g_contextEntries[CONTEXT_ENTRIES];
+// The halting thread's context sections will be placed in these entries and hooked into mriCortexMState.context.
+static ContextSection           g_contextSections[CONTEXT_SECTIONS];
+
+// Thread context for the most recent call to Platform_RtosGetThreadContext() from the MRI core.
+static MriContext               g_threadContext;
+static ContextSection           g_threadContextSections[CONTEXT_SECTIONS];
+static uint32_t                 g_threadSP;
 
 // Floats to be returned in context if the thread being debugged has no stored float state.
 static uint32_t                 g_tempFloats[33];
@@ -159,7 +173,7 @@ static __NO_RETURN void mriMain(void *pv);
 static void suspendAllApplicationThreads();
 static bool isThreadToIgnore(osThreadId_t thread);
 static void resumeApplicationThreads();
-static void readThreadContext(osThreadId_t thread);
+static void readThreadContext(MriContext* pContext, uint32_t* pSP, osThreadId_t thread);
 static void switchRtxHandlersToDebugStubsForSingleStepping();
 static void restoreRtxHandlers();
 static void callAttachFromSetup();
@@ -170,6 +184,8 @@ static void recordAndClearFaultStatusBits();
 static void wakeMriMainToDebugCurrentThread();
 static void stopSingleStepping();
 static void recordAndSwitchFaultHandlersToDebugger();
+static void skipNullThreadIds();
+static const char* getThreadStateName(uint8_t threadState);
 static bool isDebugThreadActive();
 static void setFaultDetectedFlag();
 static bool isImpreciseBusFault();
@@ -227,13 +243,13 @@ static __NO_RETURN void mriMain(void *pv)
         ASSERT ( waitResult > 0 );
         ASSERT ( g_haltedThreadId != 0 );
         suspendAllApplicationThreads();
-        readThreadContext(g_haltedThreadId);
+        readThreadContext(&mriCortexMState.context, &mriCortexMState.sp, g_haltedThreadId);
         if (Platform_IsSingleStepping()) {
             restoreRtxHandlers();
         }
 
         osThreadSetPriority(osThreadGetId(), osPriorityNormal);
-        mriDebugException();
+        mriDebugException(&mriCortexMState.context);
         osThreadSetPriority(osThreadGetId(), osPriorityRealtime7);
 
         if (Platform_IsSingleStepping()) {
@@ -250,13 +266,15 @@ static __NO_RETURN void mriMain(void *pv)
 static void suspendAllApplicationThreads()
 {
     g_threadCount = osThreadGetCount();
-    ASSERT ( g_threadCount <= sizeof(g_suspendedThreads)/sizeof(g_suspendedThreads[0]) );
-    osThreadEnumerate(g_suspendedThreads, sizeof(g_suspendedThreads)/sizeof(g_suspendedThreads[0]));
+    ASSERT ( g_threadCount <= ARRAY_SIZE(g_suspendedThreads) );
+    osThreadEnumerate(g_suspendedThreads, ARRAY_SIZE(g_suspendedThreads));
     for (uint32_t i = 0 ; i < g_threadCount ; i++) {
         osThreadId_t thread = g_suspendedThreads[i];
         if (isThreadToIgnore(thread)) {
             g_suspendedThreads[i] = 0;
         } else {
+            osRtxThread_t* pThread = (osRtxThread_t*)thread;
+            g_threadStates[i] = pThread->state;
             osThreadSuspend(thread);
         }
     }
@@ -270,7 +288,7 @@ static bool isThreadToIgnore(osThreadId_t thread)
     }
 
     const char*  pThreadName = osThreadGetName(thread);
-    for (size_t i = 0 ; i < sizeof(g_threadNamesToIgnore)/sizeof(g_threadNamesToIgnore[0]) ; i++) {
+    for (size_t i = 0 ; i < ARRAY_SIZE(g_threadNamesToIgnore) ; i++) {
         if (strcmp(pThreadName, g_threadNamesToIgnore[i]) == 0) {
             return true;
         }
@@ -288,9 +306,10 @@ static void resumeApplicationThreads()
     }
 }
 
-static void readThreadContext(osThreadId_t thread)
+static void readThreadContext(MriContext* pContext, uint32_t* pSP, osThreadId_t thread)
 {
     osRtxThread_t* pThread = (osRtxThread_t*)thread;
+    ContextSection* pSections = pContext->pSections;
 
     uint32_t offset;
     uint32_t stackedCount;
@@ -304,44 +323,44 @@ static void readThreadContext(osThreadId_t thread)
 
     uint32_t* pThreadContext = (uint32_t*)pThread->sp;
     // R0 - R3
-    g_contextEntries[0].pValues = pThreadContext + offset + 8;
-    g_contextEntries[0].count = 4;
+    pSections[0].pValues = pThreadContext + offset + 8;
+    pSections[0].count = 4;
     // R4 - R11
-    g_contextEntries[1].pValues = pThreadContext + offset + 0;
-    g_contextEntries[1].count = 8;
+    pSections[1].pValues = pThreadContext + offset + 0;
+    pSections[1].count = 8;
     // R12
-    g_contextEntries[2].pValues = pThreadContext + offset + 12;
-    g_contextEntries[2].count = 1;
+    pSections[2].pValues = pThreadContext + offset + 12;
+    pSections[2].count = 1;
     // SP - Point scatter gather context to correct location for SP but set it to correct value once CPSR is more easily
     // fetched.
-    g_contextEntries[3].pValues = &mriCortexMState.sp;
-    g_contextEntries[3].count = 1;
+    pSections[3].pValues = pSP;
+    pSections[3].count = 1;
     // LR, PC, CPSR
-    g_contextEntries[4].pValues = pThreadContext + offset + 13;
-    g_contextEntries[4].count = 3;
+    pSections[4].pValues = pThreadContext + offset + 13;
+    pSections[4].count = 3;
     // Set SP to correct value using alignment bit in CPSR. Memory for SP is already tracked by context.
-    uint32_t cpsr = ScatterGather_Get(&mriCortexMState.context, CPSR);
-    mriCortexMState.sp = pThread->sp + sizeof(uint32_t) * (stackedCount + ((cpsr >> PSR_STACK_ALIGN_SHIFT) & 1));
+    uint32_t cpsr = Context_Get(pContext, CPSR);
+    Context_Set(pContext, SP, pThread->sp + sizeof(uint32_t) * (stackedCount + ((cpsr >> PSR_STACK_ALIGN_SHIFT) & 1)));
 
     if (offset != 0) {
         // S0 - S15
-        g_contextEntries[5].pValues = pThreadContext + 32;
-        g_contextEntries[5].count = 16;
+        pSections[5].pValues = pThreadContext + 32;
+        pSections[5].count = 16;
         // S16 - S31
-        g_contextEntries[6].pValues = pThreadContext + 0;
-        g_contextEntries[6].count = 16;
+        pSections[6].pValues = pThreadContext + 0;
+        pSections[6].count = 16;
         // FPSCR
-        g_contextEntries[7].pValues = pThreadContext + 48;
-        g_contextEntries[7].count = 1;
+        pSections[7].pValues = pThreadContext + 48;
+        pSections[7].count = 1;
     } else if (MRI_DEVICE_HAS_FPU && offset == 0) {
         memset(g_tempFloats, 0, sizeof(g_tempFloats));
         // S0-S31, FPSCR
-        g_contextEntries[5].pValues = g_tempFloats;
-        g_contextEntries[5].count = 33;
-        g_contextEntries[6].pValues = NULL;
-        g_contextEntries[6].count = 0;
-        g_contextEntries[7].pValues = NULL;
-        g_contextEntries[7].count = 0;
+        pSections[5].pValues = g_tempFloats;
+        pSections[5].count = 33;
+        pSections[6].pValues = NULL;
+        pSections[6].count = 0;
+        pSections[7].pValues = NULL;
+        pSections[7].count = 0;
     }
 }
 
@@ -404,7 +423,8 @@ void Platform_Init(Token* pParameterTokens)
 
     g_enableDWTandFPB = 0;
     mriThreadSingleStepThreadId = NULL;
-    ScatterGather_Init(&mriCortexMState.context, g_contextEntries, sizeof(g_contextEntries)/sizeof(g_contextEntries[0]));
+    Context_Init(&mriCortexMState.context, g_contextSections, ARRAY_SIZE(g_contextSections));
+    Context_Init(&g_threadContext, g_threadContextSections, ARRAY_SIZE(g_threadContextSections));
     recordAndSwitchFaultHandlersToDebugger();
 }
 
@@ -505,6 +525,101 @@ int Semihost_HandleSemihostRequest(void)
     return 0;
 }
 
+
+
+
+uint32_t Platform_RtosGetHaltedThreadId(void)
+{
+    return (uint32_t)g_haltedThreadId;
+}
+
+uint32_t Platform_RtosGetFirstThreadId(void)
+{
+    g_threadIndex = 0;
+    return Platform_RtosGetNextThreadId();
+}
+
+uint32_t Platform_RtosGetNextThreadId(void)
+{
+    skipNullThreadIds();
+    if (g_threadIndex >= g_threadCount)
+        return 0;
+    return (uint32_t)g_suspendedThreads[g_threadIndex++];
+}
+
+static void skipNullThreadIds()
+{
+    while (g_threadIndex < g_threadCount && g_suspendedThreads[g_threadIndex] == 0)
+        g_threadIndex++;
+}
+
+const char* Platform_RtosGetExtraThreadInfo(uint32_t threadId)
+{
+    const char*    pState = "";
+    const char*    pThreadName = osThreadGetName((osThreadId)threadId);
+    for (uint32_t i = 0 ; i < g_threadCount ; i++) {
+        if ((uint32_t)g_suspendedThreads[i] == threadId) {
+            pState = getThreadStateName(g_threadStates[i]);
+            break;
+        }
+    }
+    snprintf(g_threadExtraInfo, sizeof(g_threadExtraInfo), "\"%s\" %s", pThreadName ? pThreadName : "", pState);
+    return g_threadExtraInfo;
+}
+
+static const char* getThreadStateName(uint8_t threadState)
+{
+    switch (threadState) {
+        case osRtxThreadInactive:
+            return "Inactive";
+        case osRtxThreadReady:
+            return "Ready";
+        case osRtxThreadRunning:
+            return "Running";
+        case osRtxThreadBlocked:
+            return "Blocked";
+        case osRtxThreadTerminated:
+            return "Terminated";
+        case osRtxThreadWaitingDelay:
+            return "WaitingDelay";
+        case osRtxThreadWaitingJoin:
+            return "WaitingJoin";
+        case osRtxThreadWaitingThreadFlags:
+            return "WaitingThreadFlags";
+        case osRtxThreadWaitingEventFlags:
+            return "WaitingEventFlags";
+        case osRtxThreadWaitingMutex:
+            return "WaitingMutex";
+        case osRtxThreadWaitingSemaphore:
+            return "WaitingSemaphore";
+        case osRtxThreadWaitingMemoryPool:
+            return "WaitingMemoryPool";
+        case osRtxThreadWaitingMessageGet:
+            return "WaitingMessageGet";
+        case osRtxThreadWaitingMessagePut:
+            return "WaitingMessagePut";
+        default:
+            return "";
+    }
+}
+
+MriContext* Platform_RtosGetThreadContext(uint32_t threadId)
+{
+    if ((osThreadId_t)threadId == g_haltedThreadId)
+        return &mriCortexMState.context;
+    readThreadContext(&g_threadContext, &g_threadSP, (osThreadId_t)threadId);
+    return &g_threadContext;
+}
+
+int Platform_RtosIsThreadActive(uint32_t threadId)
+{
+    for (uint32_t i = 0 ; i < g_threadCount ; i++) {
+        if ((uint32_t)g_suspendedThreads[i] == threadId) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 
 

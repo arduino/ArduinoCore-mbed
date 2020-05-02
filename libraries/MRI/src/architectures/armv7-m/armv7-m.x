@@ -234,11 +234,78 @@ void mriCortexMSetPriority(IRQn_Type irq, uint8_t priority, uint8_t subPriority)
 }
 
 
-static void clearSingleSteppingFlag(void);
+static void     cleanupIfSingleStepping(void);
+static void     restoreBasePriorityIfNeeded(void);
+static uint32_t shouldRestoreBasePriority(void);
+static void     clearRestoreBasePriorityFlag(void);
+static void     removeHardwareBreakpointOnSvcHandlerIfNeeded(void);
+static int      shouldRemoveHardwareBreakpointOnSvcHandler(void);
+static void     clearSvcStepFlag(void);
+static void     clearHardwareBreakpointOnSvcHandler(void);
+static uint32_t getNvicVector(IRQn_Type irq);
+static void     clearSingleSteppingFlag(void);
 void Platform_DisableSingleStep(void)
 {
+    cleanupIfSingleStepping();
     disableSingleStep();
     clearSingleSteppingFlag();
+}
+
+static void cleanupIfSingleStepping(void)
+{
+    restoreBasePriorityIfNeeded();
+    removeHardwareBreakpointOnSvcHandlerIfNeeded();
+}
+
+static void restoreBasePriorityIfNeeded(void)
+{
+    if (shouldRestoreBasePriority())
+    {
+        clearRestoreBasePriorityFlag();
+        Context_Set(&mriCortexMState.context, BASEPRI, mriCortexMState.originalBasePriority);
+        mriCortexMState.originalBasePriority = 0;
+    }
+}
+
+static uint32_t shouldRestoreBasePriority(void)
+{
+    return mriCortexMFlags & CORTEXM_FLAGS_RESTORE_BASEPRI;
+}
+
+static void clearRestoreBasePriorityFlag(void)
+{
+    mriCortexMFlags &= ~CORTEXM_FLAGS_RESTORE_BASEPRI;
+}
+
+static void removeHardwareBreakpointOnSvcHandlerIfNeeded(void)
+{
+    if (shouldRemoveHardwareBreakpointOnSvcHandler())
+    {
+        clearSvcStepFlag();
+        clearHardwareBreakpointOnSvcHandler();
+    }
+}
+
+static int shouldRemoveHardwareBreakpointOnSvcHandler(void)
+{
+    return mriCortexMFlags & CORTEXM_FLAGS_SVC_STEP;
+}
+
+static void clearSvcStepFlag(void)
+{
+    mriCortexMFlags &= ~CORTEXM_FLAGS_SVC_STEP;
+}
+
+static void clearHardwareBreakpointOnSvcHandler(void)
+{
+    Platform_ClearHardwareBreakpoint(getNvicVector(SVCall_IRQn) & ~1);
+}
+
+static uint32_t getNvicVector(IRQn_Type irq)
+{
+    const uint32_t           nvicBaseVectorOffset = 16;
+    volatile const uint32_t* pVectors = (volatile const uint32_t*)SCB->VTOR;
+    return pVectors[irq + nvicBaseVectorOffset];
 }
 
 static void clearSingleSteppingFlag(void)
@@ -249,7 +316,6 @@ static void clearSingleSteppingFlag(void)
 
 static int      doesPCPointToSVCInstruction(void);
 static void     setHardwareBreakpointOnSvcHandler(void);
-static uint32_t getNvicVector(IRQn_Type irq);
 static void     setSvcStepFlag(void);
 static void     setSingleSteppingFlag(void);
 static void     setSingleSteppingFlag(void);
@@ -321,13 +387,6 @@ static void setHardwareBreakpointOnSvcHandler(void)
     Platform_SetHardwareBreakpoint(getNvicVector(SVCall_IRQn) & ~1);
 }
 
-static uint32_t getNvicVector(IRQn_Type irq)
-{
-    const uint32_t           nvicBaseVectorOffset = 16;
-    volatile const uint32_t* pVectors = (volatile const uint32_t*)SCB->VTOR;
-    return pVectors[irq + nvicBaseVectorOffset];
-}
-
 static void setSvcStepFlag(void)
 {
     mriCortexMFlags |= CORTEXM_FLAGS_SVC_STEP;
@@ -342,8 +401,8 @@ static void recordCurrentBasePriorityAndRaisePriorityToDisableNonDebugInterrupts
 {
     if (!doesPCPointToBASEPRIUpdateInstruction())
         recordCurrentBasePriority();
-    ScatterGather_Set(&mriCortexMState.context, BASEPRI,
-                      calculateBasePriorityForThisCPU(mriCortexMGetPriority(DebugMonitor_IRQn) + 1));
+    Context_Set(&mriCortexMState.context, BASEPRI,
+                calculateBasePriorityForThisCPU(mriCortexMGetPriority(DebugMonitor_IRQn) + 1));
 }
 
 static int doesPCPointToBASEPRIUpdateInstruction(void)
@@ -413,7 +472,7 @@ static int isSecondHalfWordOfMSR_BASEPRI_MAX(uint16_t instructionHalfWord1)
 
 static void recordCurrentBasePriority(void)
 {
-    mriCortexMState.originalBasePriority = ScatterGather_Get(&mriCortexMState.context, BASEPRI);
+    mriCortexMState.originalBasePriority = Context_Get(&mriCortexMState.context, BASEPRI);
     setRestoreBasePriorityFlag();
 }
 
@@ -463,11 +522,15 @@ uint32_t Platform_GetPacketBufferSize(void)
 }
 
 
+static PlatformTrapReason cacheTrapReason(void);
+static PlatformTrapReason findMatchedWatchpoint(void);
+static PlatformTrapReason getReasonFromMatchComparator(const DWT_COMP_Type* pComparator);
 static uint32_t hasControlCBeenDetected();
 static uint8_t  determineCauseOfDebugEvent(void);
 uint8_t Platform_DetermineCauseOfException(void)
 {
     uint32_t exceptionNumber = mriCortexMState.exceptionNumber;
+    mriCortexMState.reason = cacheTrapReason();
 
     if (hasControlCBeenDetected())
     {
@@ -495,9 +558,68 @@ uint8_t Platform_DetermineCauseOfException(void)
         /* Debug Monitor */
         return determineCauseOfDebugEvent();
     default:
-        /* NOTE: Catch all signal will be SIGSTOP. */
-        return SIGSTOP;
+        /* NOTE: Catch all signal will be SIGINT. */
+        return SIGINT;
     }
+}
+
+PlatformTrapReason cacheTrapReason(void)
+{
+    PlatformTrapReason reason = { MRI_PLATFORM_TRAP_TYPE_UNKNOWN, 0x00000000 };
+
+    uint32_t debugFaultStatus = mriCortexMState.dfsr;
+    if (debugFaultStatus & SCB_DFSR_BKPT)
+    {
+        /* Was caused by hardware or software breakpoint. If PC points to BKPT then report as software breakpoint. */
+        if (Platform_TypeOfCurrentInstruction() == MRI_PLATFORM_INSTRUCTION_HARDCODED_BREAKPOINT)
+            reason.type = MRI_PLATFORM_TRAP_TYPE_SWBREAK;
+        else
+            reason.type = MRI_PLATFORM_TRAP_TYPE_HWBREAK;
+    }
+    else if (debugFaultStatus & SCB_DFSR_DWTTRAP)
+    {
+        reason = findMatchedWatchpoint();
+    }
+    return reason;
+}
+
+static PlatformTrapReason findMatchedWatchpoint(void)
+{
+    PlatformTrapReason reason = { MRI_PLATFORM_TRAP_TYPE_UNKNOWN, 0x00000000 };
+    DWT_COMP_Type*     pCurrentComparator = DWT_COMP_ARRAY;
+    uint32_t           comparatorCount;
+    uint32_t           i;
+
+    comparatorCount = getDWTComparatorCount();
+    for (i = 0 ; i < comparatorCount ; i++)
+    {
+        if (pCurrentComparator->FUNCTION & DWT_COMP_FUNCTION_MATCHED)
+            reason = getReasonFromMatchComparator(pCurrentComparator);
+        pCurrentComparator++;
+    }
+    return reason;
+}
+
+static PlatformTrapReason getReasonFromMatchComparator(const DWT_COMP_Type* pComparator)
+{
+    PlatformTrapReason reason;
+    switch (pComparator->FUNCTION & DWT_COMP_FUNCTION_FUNCTION_MASK)
+    {
+    case DWT_COMP_FUNCTION_FUNCTION_DATA_READ:
+        reason.type = MRI_PLATFORM_TRAP_TYPE_RWATCH;
+        break;
+    case DWT_COMP_FUNCTION_FUNCTION_DATA_WRITE:
+        reason.type = MRI_PLATFORM_TRAP_TYPE_WATCH;
+        break;
+    case DWT_COMP_FUNCTION_FUNCTION_DATA_READWRITE:
+        reason.type = MRI_PLATFORM_TRAP_TYPE_AWATCH;
+        break;
+    default:
+        reason.type = MRI_PLATFORM_TRAP_TYPE_UNKNOWN;
+        break;
+    }
+    reason.address = pComparator->COMP;
+    return reason;
 }
 
 static uint32_t hasControlCBeenDetected()
@@ -531,6 +653,14 @@ static uint8_t determineCauseOfDebugEvent(void)
 
     /* NOTE: Default catch all signal is SIGSTOP. */
     return SIGSTOP;
+}
+
+
+PlatformTrapReason Platform_GetTrapReason(void)
+{
+    /* Return reason cached earlier by call to Platform_DetermineCauseOfException() so that findMatchedWatchpoint()
+       doesn't get called multiple times as it has the side effect of clearing the watchpoint MATCH bits. */
+    return mriCortexMState.reason;
 }
 
 
@@ -719,14 +849,6 @@ static void displayUsageFaultCauseToGdbConsole(void)
 
 
 static void     clearMemoryFaultFlag(void);
-static void     cleanupIfSingleStepping(void);
-static void     restoreBasePriorityIfNeeded(void);
-static uint32_t shouldRestoreBasePriority(void);
-static void     clearRestoreBasePriorityFlag(void);
-static void     removeHardwareBreakpointOnSvcHandlerIfNeeded(void);
-static int      shouldRemoveHardwareBreakpointOnSvcHandler(void);
-static void     clearSvcStepFlag(void);
-static void     clearHardwareBreakpointOnSvcHandler(void);
 static int      isExternalInterrupt(uint32_t exceptionNumber);
 static void     setControlCFlag(void);
 static void     setActiveDebugFlag(void);
@@ -734,7 +856,7 @@ void Platform_EnteringDebugger(void)
 {
     clearMemoryFaultFlag();
     mriCortexMState.originalPC = Platform_GetProgramCounter();
-    cleanupIfSingleStepping();
+    Platform_DisableSingleStep();
     if (isExternalInterrupt(mriCortexMState.exceptionNumber))
         setControlCFlag();
     setActiveDebugFlag();
@@ -743,57 +865,6 @@ void Platform_EnteringDebugger(void)
 static void clearMemoryFaultFlag(void)
 {
     mriCortexMFlags &= ~CORTEXM_FLAGS_FAULT_DURING_DEBUG;
-}
-
-static void cleanupIfSingleStepping(void)
-{
-    restoreBasePriorityIfNeeded();
-    removeHardwareBreakpointOnSvcHandlerIfNeeded();
-    Platform_DisableSingleStep();
-}
-
-static void restoreBasePriorityIfNeeded(void)
-{
-    if (shouldRestoreBasePriority())
-    {
-        clearRestoreBasePriorityFlag();
-        ScatterGather_Set(&mriCortexMState.context, BASEPRI, mriCortexMState.originalBasePriority);
-        mriCortexMState.originalBasePriority = 0;
-    }
-}
-
-static uint32_t shouldRestoreBasePriority(void)
-{
-    return mriCortexMFlags & CORTEXM_FLAGS_RESTORE_BASEPRI;
-}
-
-static void clearRestoreBasePriorityFlag(void)
-{
-    mriCortexMFlags &= ~CORTEXM_FLAGS_RESTORE_BASEPRI;
-}
-
-static void removeHardwareBreakpointOnSvcHandlerIfNeeded(void)
-{
-    if (shouldRemoveHardwareBreakpointOnSvcHandler())
-    {
-        clearSvcStepFlag();
-        clearHardwareBreakpointOnSvcHandler();
-    }
-}
-
-static int shouldRemoveHardwareBreakpointOnSvcHandler(void)
-{
-    return mriCortexMFlags & CORTEXM_FLAGS_SVC_STEP;
-}
-
-static void clearSvcStepFlag(void)
-{
-    mriCortexMFlags &= ~CORTEXM_FLAGS_SVC_STEP;
-}
-
-static void clearHardwareBreakpointOnSvcHandler(void)
-{
-    Platform_ClearHardwareBreakpoint(getNvicVector(SVCall_IRQn) & ~1);
 }
 
 static int isExternalInterrupt(uint32_t exceptionNumber)
@@ -851,13 +922,13 @@ static void checkStack(void)
 
 uint32_t Platform_GetProgramCounter(void)
 {
-    return ScatterGather_Get(&mriCortexMState.context, PC);
+    return Context_Get(&mriCortexMState.context, PC);
 }
 
 
 void Platform_SetProgramCounter(uint32_t newPC)
 {
-    ScatterGather_Set(&mriCortexMState.context, PC, newPC);
+    Context_Set(&mriCortexMState.context, PC, newPC);
 }
 
 
@@ -961,10 +1032,10 @@ PlatformSemihostParameters Platform_GetSemihostCallParameters(void)
 {
     PlatformSemihostParameters parameters;
 
-    parameters.parameter1 = ScatterGather_Get(&mriCortexMState.context, R0);
-    parameters.parameter2 = ScatterGather_Get(&mriCortexMState.context, R1);
-    parameters.parameter3 = ScatterGather_Get(&mriCortexMState.context, R2);
-    parameters.parameter4 = ScatterGather_Get(&mriCortexMState.context, R3);
+    parameters.parameter1 = Context_Get(&mriCortexMState.context, R0);
+    parameters.parameter2 = Context_Get(&mriCortexMState.context, R1);
+    parameters.parameter3 = Context_Get(&mriCortexMState.context, R2);
+    parameters.parameter4 = Context_Get(&mriCortexMState.context, R3);
 
     return parameters;
 }
@@ -972,7 +1043,7 @@ PlatformSemihostParameters Platform_GetSemihostCallParameters(void)
 
 void Platform_SetSemihostCallReturnAndErrnoValues(int returnValue, int err)
 {
-    ScatterGather_Set(&mriCortexMState.context, R0, returnValue);
+    Context_Set(&mriCortexMState.context, R0, returnValue);
     if (returnValue < 0)
         errno = err;
 }
@@ -994,10 +1065,10 @@ static void sendRegisterForTResponse(Buffer* pBuffer, uint8_t registerOffset, ui
 static void writeBytesToBufferAsHex(Buffer* pBuffer, void* pBytes, size_t byteCount);
 void Platform_WriteTResponseRegistersToBuffer(Buffer* pBuffer)
 {
-    sendRegisterForTResponse(pBuffer, R7, ScatterGather_Get(&mriCortexMState.context, R7));
-    sendRegisterForTResponse(pBuffer, SP, ScatterGather_Get(&mriCortexMState.context, SP));
-    sendRegisterForTResponse(pBuffer, LR, ScatterGather_Get(&mriCortexMState.context, LR));
-    sendRegisterForTResponse(pBuffer, PC, ScatterGather_Get(&mriCortexMState.context, PC));
+    sendRegisterForTResponse(pBuffer, R7, Context_Get(&mriCortexMState.context, R7));
+    sendRegisterForTResponse(pBuffer, SP, Context_Get(&mriCortexMState.context, SP));
+    sendRegisterForTResponse(pBuffer, LR, Context_Get(&mriCortexMState.context, LR));
+    sendRegisterForTResponse(pBuffer, PC, Context_Get(&mriCortexMState.context, PC));
 }
 
 static void sendRegisterForTResponse(Buffer* pBuffer, uint8_t registerOffset, uint32_t registerValue)
@@ -1015,41 +1086,6 @@ static void writeBytesToBufferAsHex(Buffer* pBuffer, void* pBytes, size_t byteCo
 
     for (i = 0 ; i < byteCount ; i++)
         Buffer_WriteByteAsHex(pBuffer, *pByte++);
-}
-
-
-void Platform_CopyContextToBuffer(Buffer* pBuffer)
-{
-    uint32_t count = ScatterGather_Count(&mriCortexMState.context);
-    uint32_t i;
-
-    for (i = 0 ; i < count ; i++) {
-        uint32_t reg = ScatterGather_Get(&mriCortexMState.context, i);
-        writeBytesToBufferAsHex(pBuffer, &reg, sizeof(reg));
-    }
-}
-
-
-static void readBytesFromBufferAsHex(Buffer* pBuffer, void* pBytes, size_t byteCount);
-void Platform_CopyContextFromBuffer(Buffer* pBuffer)
-{
-    uint32_t count = ScatterGather_Count(&mriCortexMState.context);
-    uint32_t i;
-
-    for (i = 0 ; i < count ; i++) {
-        uint32_t reg;
-        readBytesFromBufferAsHex(pBuffer, &reg, sizeof(reg));
-        ScatterGather_Set(&mriCortexMState.context, i, reg);
-    }
-}
-
-static void readBytesFromBufferAsHex(Buffer* pBuffer, void* pBytes, size_t byteCount)
-{
-    uint8_t* pByte = (uint8_t*)pBytes;
-    size_t   i;
-
-    for (i = 0 ; i < byteCount; i++)
-        *pByte++ = Buffer_ReadByteAsHex(pBuffer);
 }
 
 
@@ -1200,7 +1236,7 @@ void Platform_ResetDevice(void)
     #define CONTEXT_ENTRIES     6
 #endif
 
-static ScatterGatherEntry   g_contextEntries[CONTEXT_ENTRIES];
+static ContextSection   g_contextEntries[CONTEXT_ENTRIES];
 
 
 /* Lower nibble of EXC_RETURN in LR will have one of these values if interrupted code was running in thread mode.
@@ -1360,7 +1396,7 @@ void mriCortexMExceptionHandler(IntegerRegisters* pIntegerRegs, uint32_t* pFloat
     if (needToFakeFloatRegs)
         allocateFakeFloatRegAndCallMriDebugException();
     else
-        mriDebugException();
+        mriDebugException(&mriCortexMState.context);
 }
 
 static void recordAndClearFaultStatusBits(uint32_t exceptionNumber)
@@ -1448,7 +1484,7 @@ static int prepareThreadContext(ExceptionStack* pExceptionStack, IntegerRegister
         entryCount += 1;
     }
 
-    ScatterGather_Init(&mriCortexMState.context, g_contextEntries, entryCount);
+    Context_Init(&mriCortexMState.context, g_contextEntries, entryCount);
 
     /* Return true if we need to allocate space for floating point registers on stack. */
     return (MRI_DEVICE_HAS_FPU && fpuRegCount == 0);
@@ -1462,7 +1498,7 @@ static void allocateFakeFloatRegAndCallMriDebugException(void)
     g_contextEntries[6].pValues = fakeFloats;
     g_contextEntries[6].count = sizeof(fakeFloats)/sizeof(fakeFloats[0]);
 
-    mriDebugException();
+    mriDebugException(&mriCortexMState.context);
 }
 
 #endif /* !MRI_THREAD_MRI */
