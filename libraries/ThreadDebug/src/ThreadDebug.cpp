@@ -48,7 +48,6 @@ extern "C"
 // Typically these will be threads used by the communication stack to communicate with GDB or other important system
 // threads.
 static const char* g_threadNamesToIgnore[] = {
-    "rtx_idle"
 };
 
 
@@ -88,6 +87,17 @@ static const char* g_threadNamesToIgnore[] = {
 
 
 
+// Structure used to store a 'suspended' thread's original priority settings (current and base) so that they can be
+// later restored.
+struct ThreadPriority
+{
+    int8_t priority;
+    int8_t basePriority;
+};
+
+
+
+
 // Globals that describe the ThreadDebug singleton.
 static DebugCommInterface*      g_pComm;
 static bool                     g_breakInSetup;
@@ -98,8 +108,8 @@ static volatile osThreadId_t    g_haltedThreadId;
 // The list of threads which were suspended upon entry into the debugger. These are the threads that will be resumed
 // upon exit from the debugger.
 static osThreadId_t             g_suspendedThreads[MAXIMUM_ACTIVE_THREADS];
-// The state of each thread before being suspended.
-static uint8_t                  g_threadStates[MAXIMUM_ACTIVE_THREADS];
+// The priorities (current and base) of each thread modified to suspend application threads when halting in debugger.
+static ThreadPriority           g_threadPriorities[MAXIMUM_ACTIVE_THREADS];
 // The number of active threads that were placed in g_suspendedThreads. Some of those entries may be NULL if they were
 // important enough to not be suspended.
 static uint32_t                 g_threadCount;
@@ -107,6 +117,8 @@ static uint32_t                 g_threadCount;
 static uint32_t                 g_threadIndex;
 // Buffer to be used for storing extra thread info.
 static char                     g_threadExtraInfo[64];
+// The ID of the rtx_idle thread to be skipped when providing list of threads to GDB.
+static osThreadId_t             g_idleThread;
 
 // This flag is set to a non-zero value if the DebugMon handler is to re-enable DWT watchpoints and FPB breakpoints
 // after being disabled by the HardFault handler when a debug event is encounted in handler mode.
@@ -185,6 +197,7 @@ static void wakeMriMainToDebugCurrentThread();
 static void stopSingleStepping();
 static void recordAndSwitchFaultHandlersToDebugger();
 static void skipNullThreadIds();
+static bool isNullOrIdleThread(osThreadId_t threadId);
 static const char* getThreadStateName(uint8_t threadState);
 static bool isDebugThreadActive();
 static void setFaultDetectedFlag();
@@ -236,7 +249,7 @@ static __NO_RETURN void mriMain(void *pv)
 {
     // Run the code which suspends, resumes, etc the other threads at highest priority so that it doesn't context
     // switch to one of the other threads. Switch to normal priority when running mriDebugException() though.
-    osThreadSetPriority(osThreadGetId(), osPriorityRealtime7);
+    osThreadSetPriority(osThreadGetId(), osPriorityISR);
 
     while (1) {
         int waitResult = osThreadFlagsWait(MRI_THREAD_DEBUG_EVENT_FLAG, osFlagsWaitAny, osWaitForever);
@@ -250,32 +263,42 @@ static __NO_RETURN void mriMain(void *pv)
 
         osThreadSetPriority(osThreadGetId(), osPriorityNormal);
         mriDebugException(&mriCortexMState.context);
-        osThreadSetPriority(osThreadGetId(), osPriorityRealtime7);
+        osThreadSetPriority(osThreadGetId(), osPriorityISR);
 
         if (Platform_IsSingleStepping()) {
             mriThreadSingleStepThreadId = g_haltedThreadId;
             switchRtxHandlersToDebugStubsForSingleStepping();
-            osThreadResume(mriThreadSingleStepThreadId);
-        } else {
-            resumeApplicationThreads();
         }
+        resumeApplicationThreads();
         g_haltedThreadId = 0;
     }
 }
 
 static void suspendAllApplicationThreads()
 {
+    // Suspend application threads by setting their priorities to the lowest setting, osPriorityIdle.
+    // Bump rtx_idle thread up one priority level so that it will run instead of the 'suspended' application threads if
+    // the debug related threads go idle.
+    g_idleThread = 0;
     g_threadCount = osThreadGetCount();
     ASSERT ( g_threadCount <= ARRAY_SIZE(g_suspendedThreads) );
     osThreadEnumerate(g_suspendedThreads, ARRAY_SIZE(g_suspendedThreads));
     for (uint32_t i = 0 ; i < g_threadCount ; i++) {
         osThreadId_t thread = g_suspendedThreads[i];
+        osPriority_t newPriority = osPriorityIdle;
+        const char* pThreadName = osThreadGetName(thread);
+        if (strcmp(pThreadName, "rtx_idle") == 0) {
+            newPriority = (osPriority_t)(osPriorityIdle + 1);
+            g_idleThread = thread;
+        }
+
         if (isThreadToIgnore(thread)) {
             g_suspendedThreads[i] = 0;
         } else {
             osRtxThread_t* pThread = (osRtxThread_t*)thread;
-            g_threadStates[i] = pThread->state;
-            osThreadSuspend(thread);
+            g_threadPriorities[i].basePriority = pThread->priority_base;
+            g_threadPriorities[i].priority = pThread->priority;
+            osThreadSetPriority(thread, newPriority);
         }
     }
 }
@@ -301,7 +324,9 @@ static void resumeApplicationThreads()
     for (uint32_t i = 0 ; i < g_threadCount ; i++) {
         osThreadId_t thread = g_suspendedThreads[i];
         if (thread != 0) {
-            osThreadResume(thread);
+            osThreadSetPriority(thread, (osPriority_t)g_threadPriorities[i].priority);
+            osRtxThread_t* pThread = (osRtxThread_t*)thread;
+            pThread->priority_base = g_threadPriorities[i].basePriority;
         }
     }
 }
@@ -549,20 +574,20 @@ uint32_t Platform_RtosGetNextThreadId(void)
 
 static void skipNullThreadIds()
 {
-    while (g_threadIndex < g_threadCount && g_suspendedThreads[g_threadIndex] == 0)
+    while (g_threadIndex < g_threadCount && isNullOrIdleThread(g_suspendedThreads[g_threadIndex]))
         g_threadIndex++;
+}
+
+static bool isNullOrIdleThread(osThreadId_t threadId)
+{
+    return threadId == 0 || threadId == g_idleThread;
 }
 
 const char* Platform_RtosGetExtraThreadInfo(uint32_t threadId)
 {
-    const char*    pState = "";
     const char*    pThreadName = osThreadGetName((osThreadId)threadId);
-    for (uint32_t i = 0 ; i < g_threadCount ; i++) {
-        if ((uint32_t)g_suspendedThreads[i] == threadId) {
-            pState = getThreadStateName(g_threadStates[i]);
-            break;
-        }
-    }
+    osRtxThread_t* pThread = (osRtxThread_t*)threadId;
+    const char*    pState = getThreadStateName(pThread->state);
     snprintf(g_threadExtraInfo, sizeof(g_threadExtraInfo), "\"%s\" %s", pThreadName ? pThreadName : "", pState);
     return g_threadExtraInfo;
 }
