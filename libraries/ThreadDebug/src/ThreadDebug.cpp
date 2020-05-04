@@ -107,13 +107,15 @@ static volatile osThreadId_t    g_haltedThreadId;
 
 // The list of threads which were suspended upon entry into the debugger. These are the threads that will be resumed
 // upon exit from the debugger.
-static osThreadId_t             g_suspendedThreads[MAXIMUM_ACTIVE_THREADS];
+static osThreadId_t*            g_pSuspendedThreads;
 // The priorities (current and base) of each thread modified to suspend application threads when halting in debugger.
-static ThreadPriority           g_threadPriorities[MAXIMUM_ACTIVE_THREADS];
-// The number of active threads that were placed in g_suspendedThreads. Some of those entries may be NULL if they were
+static ThreadPriority*          g_pThreadPriorities;
+// The maximum number of threads which can be stored in the above arrays, set in ThreadDebug constructor.
+static uint32_t                 g_maxThreadCount;
+// The number of active threads that were placed in g_pSuspendedThreads. Some of those entries may be NULL if they were
 // important enough to not be suspended.
 static uint32_t                 g_threadCount;
-// The current index into the g_suspendedThreads array being returned from Platform_RtosGetFirstThread.
+// The current index into the g_pSuspendedThreads array being returned from Platform_RtosGetFirstThread.
 static uint32_t                 g_threadIndex;
 // Buffer to be used for storing extra thread info.
 static char                     g_threadExtraInfo[64];
@@ -210,7 +212,7 @@ static bool isDebuggerActive();
 
 
 
-ThreadDebug::ThreadDebug(DebugCommInterface* pCommInterface, bool breakInSetup)
+ThreadDebug::ThreadDebug(DebugCommInterface* pCommInterface, bool breakInSetup, uint32_t maxThreadCount/* =32 */)
 {
     if (g_pComm != NULL) {
         // Only allow 1 ThreadDebug object to be initialized.
@@ -220,6 +222,14 @@ ThreadDebug::ThreadDebug(DebugCommInterface* pCommInterface, bool breakInSetup)
     // Setup the singleton.
     g_breakInSetup = breakInSetup;
     g_pComm = pCommInterface;
+
+    // Allocate the arrays to store thread information.
+    if (maxThreadCount < 5) {
+        maxThreadCount = 5;
+    }
+    g_pSuspendedThreads = new osThreadId_t[maxThreadCount];
+    g_pThreadPriorities = new ThreadPriority[maxThreadCount];
+    g_maxThreadCount = maxThreadCount;
 
     // Initialize the MRI core.
     mriInit("");
@@ -281,10 +291,10 @@ static void suspendAllApplicationThreads()
     // the debug related threads go idle.
     g_idleThread = 0;
     g_threadCount = osThreadGetCount();
-    ASSERT ( g_threadCount <= ARRAY_SIZE(g_suspendedThreads) );
-    osThreadEnumerate(g_suspendedThreads, ARRAY_SIZE(g_suspendedThreads));
+    ASSERT ( g_threadCount <= g_maxThreadCount );
+    osThreadEnumerate(g_pSuspendedThreads, g_maxThreadCount);
     for (uint32_t i = 0 ; i < g_threadCount ; i++) {
-        osThreadId_t thread = g_suspendedThreads[i];
+        osThreadId_t thread = g_pSuspendedThreads[i];
         osPriority_t newPriority = osPriorityIdle;
         const char* pThreadName = osThreadGetName(thread);
         if (strcmp(pThreadName, "rtx_idle") == 0) {
@@ -293,11 +303,11 @@ static void suspendAllApplicationThreads()
         }
 
         if (isThreadToIgnore(thread)) {
-            g_suspendedThreads[i] = 0;
+            g_pSuspendedThreads[i] = 0;
         } else {
             osRtxThread_t* pThread = (osRtxThread_t*)thread;
-            g_threadPriorities[i].basePriority = pThread->priority_base;
-            g_threadPriorities[i].priority = pThread->priority;
+            g_pThreadPriorities[i].basePriority = pThread->priority_base;
+            g_pThreadPriorities[i].priority = pThread->priority;
             osThreadSetPriority(thread, newPriority);
         }
     }
@@ -322,11 +332,11 @@ static bool isThreadToIgnore(osThreadId_t thread)
 static void resumeApplicationThreads()
 {
     for (uint32_t i = 0 ; i < g_threadCount ; i++) {
-        osThreadId_t thread = g_suspendedThreads[i];
+        osThreadId_t thread = g_pSuspendedThreads[i];
         if (thread != 0) {
-            osThreadSetPriority(thread, (osPriority_t)g_threadPriorities[i].priority);
+            osThreadSetPriority(thread, (osPriority_t)g_pThreadPriorities[i].priority);
             osRtxThread_t* pThread = (osRtxThread_t*)thread;
-            pThread->priority_base = g_threadPriorities[i].basePriority;
+            pThread->priority_base = g_pThreadPriorities[i].basePriority;
         }
     }
 }
@@ -422,6 +432,11 @@ static int justEnteredSetupCallback(void* pv)
 
 ThreadDebug::~ThreadDebug()
 {
+    delete []g_pThreadPriorities;
+    delete []g_pSuspendedThreads;
+    g_pThreadPriorities = NULL;
+    g_pSuspendedThreads = NULL;
+
     // IMPORTANT NOTE: You are attempting to destroy the connection to GDB which isn't allowed.
     //                 Don't allow your ThreadDebug object to go out of scope like this.
     debugBreak();
@@ -569,12 +584,12 @@ uint32_t Platform_RtosGetNextThreadId(void)
     skipNullThreadIds();
     if (g_threadIndex >= g_threadCount)
         return 0;
-    return (uint32_t)g_suspendedThreads[g_threadIndex++];
+    return (uint32_t)g_pSuspendedThreads[g_threadIndex++];
 }
 
 static void skipNullThreadIds()
 {
-    while (g_threadIndex < g_threadCount && isNullOrIdleThread(g_suspendedThreads[g_threadIndex]))
+    while (g_threadIndex < g_threadCount && isNullOrIdleThread(g_pSuspendedThreads[g_threadIndex]))
         g_threadIndex++;
 }
 
@@ -639,7 +654,7 @@ MriContext* Platform_RtosGetThreadContext(uint32_t threadId)
 int Platform_RtosIsThreadActive(uint32_t threadId)
 {
     for (uint32_t i = 0 ; i < g_threadCount ; i++) {
-        if ((uint32_t)g_suspendedThreads[i] == threadId) {
+        if ((uint32_t)g_pSuspendedThreads[i] == threadId) {
             return 1;
         }
     }
