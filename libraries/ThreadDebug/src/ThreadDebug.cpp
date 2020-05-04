@@ -39,12 +39,12 @@ extern "C"
 // ---------------------------------------------------------------------------------------------------------------------
 // Configuration Parameters
 // ---------------------------------------------------------------------------------------------------------------------
-// The size of the mriThread() stack in uint64_t objects.
+// The size of the mriMain() stack in uint64_t objects.
 #define MRI_THREAD_STACK_SIZE   128
-// The maximum number of active threads that can be handled by the debugger.
-#define MAXIMUM_ACTIVE_THREADS  64
+// The size of the mriIdle() stack in uint64_t objects.
+#define IDLE_THREAD_STACK_SIZE  40
 
-// Threads with these names will not be suspended when a debug event is occurred.
+// Threads with these names will not be suspended when a debug event has occurred.
 // Typically these will be threads used by the communication stack to communicate with GDB or other important system
 // threads.
 static const char* g_threadNamesToIgnore[] = {
@@ -119,8 +119,6 @@ static uint32_t                 g_threadCount;
 static uint32_t                 g_threadIndex;
 // Buffer to be used for storing extra thread info.
 static char                     g_threadExtraInfo[64];
-// The ID of the rtx_idle thread to be skipped when providing list of threads to GDB.
-static osThreadId_t             g_idleThread;
 
 // This flag is set to a non-zero value if the DebugMon handler is to re-enable DWT watchpoints and FPB breakpoints
 // after being disabled by the HardFault handler when a debug event is encounted in handler mode.
@@ -128,6 +126,8 @@ static volatile uint32_t        g_enableDWTandFPB;
 
 // The ID of the mriMain() thread.
 volatile osThreadId_t           mriThreadId;
+// The ID of the mriIdle() thread.
+static   osThreadId_t           g_mriIdleThreadId;
 
 // If non-NULL, this is the thread that we want to single step.
 // If NULL, single stepping is not enabled.
@@ -183,6 +183,7 @@ extern "C" void mriPendSVHandlerStub(void);
 extern "C" void mriSysTickHandlerStub(void);
 
 // Forward Function Declarations
+static __NO_RETURN void mriIdle(void *pv);
 static __NO_RETURN void mriMain(void *pv);
 static void suspendAllApplicationThreads();
 static bool isThreadToIgnore(osThreadId_t thread);
@@ -199,7 +200,6 @@ static void wakeMriMainToDebugCurrentThread();
 static void stopSingleStepping();
 static void recordAndSwitchFaultHandlersToDebugger();
 static void skipNullThreadIds();
-static bool isNullOrIdleThread(osThreadId_t threadId);
 static const char* getThreadStateName(uint8_t threadState);
 static bool isDebugThreadActive();
 static void setFaultDetectedFlag();
@@ -234,25 +234,51 @@ ThreadDebug::ThreadDebug(DebugCommInterface* pCommInterface, bool breakInSetup, 
     // Initialize the MRI core.
     mriInit("");
 
+    // Start the debugger's idle thread and suspend it for now.
+    static uint64_t             idleStack[IDLE_THREAD_STACK_SIZE];
+    static osRtxThread_t        idleThreadTcb;
+    static const osThreadAttr_t idleThreadAttr =
+    {
+        .name = "mriIdle",
+        .attr_bits = osThreadDetached,
+        .cb_mem  = &idleThreadTcb,
+        .cb_size = sizeof(idleThreadTcb),
+        .stack_mem = idleStack,
+        .stack_size = sizeof(idleStack),
+        .priority = (osPriority_t)(osPriorityIdle + 1)
+    };
+    g_mriIdleThreadId = osThreadNew(mriIdle, NULL, &idleThreadAttr);
+    if (g_mriIdleThreadId == NULL) {
+        return;
+    }
+    osThreadSuspend(g_mriIdleThreadId);
+
     // Start the debugger thread.
-    static uint64_t             stack[MRI_THREAD_STACK_SIZE];
-    static osRtxThread_t        threadTcb;
-    static const osThreadAttr_t threadAttr =
+    static uint64_t             mainStack[MRI_THREAD_STACK_SIZE];
+    static osRtxThread_t        mainThreadTcb;
+    static const osThreadAttr_t mainThreadAttr =
     {
         .name = "mriMain",
         .attr_bits = osThreadDetached,
-        .cb_mem  = &threadTcb,
-        .cb_size = sizeof(threadTcb),
-        .stack_mem = stack,
-        .stack_size = sizeof(stack),
+        .cb_mem  = &mainThreadTcb,
+        .cb_size = sizeof(mainThreadTcb),
+        .stack_mem = mainStack,
+        .stack_size = sizeof(mainStack),
         .priority = osPriorityNormal
     };
-    mriThreadId = osThreadNew(mriMain, NULL, &threadAttr);
+    mriThreadId = osThreadNew(mriMain, NULL, &mainThreadAttr);
     if (mriThreadId == NULL) {
         return;
     }
 
     callAttachFromSetup();
+}
+
+static __NO_RETURN void mriIdle(void *pv)
+{
+    while (true) {
+        // Infinite loop at low priority if nothing else to do while debugging.
+    }
 }
 
 static __NO_RETURN void mriMain(void *pv)
@@ -271,9 +297,11 @@ static __NO_RETURN void mriMain(void *pv)
             restoreRtxHandlers();
         }
 
+        osThreadResume(g_mriIdleThreadId);
         osThreadSetPriority(osThreadGetId(), osPriorityNormal);
         mriDebugException(&mriCortexMState.context);
         osThreadSetPriority(osThreadGetId(), osPriorityISR);
+        osThreadSuspend(g_mriIdleThreadId);
 
         if (Platform_IsSingleStepping()) {
             mriThreadSingleStepThreadId = g_haltedThreadId;
@@ -287,20 +315,12 @@ static __NO_RETURN void mriMain(void *pv)
 static void suspendAllApplicationThreads()
 {
     // Suspend application threads by setting their priorities to the lowest setting, osPriorityIdle.
-    // Bump rtx_idle thread up one priority level so that it will run instead of the 'suspended' application threads if
-    // the debug related threads go idle.
-    g_idleThread = 0;
     g_threadCount = osThreadGetCount();
     ASSERT ( g_threadCount <= g_maxThreadCount );
     osThreadEnumerate(g_pSuspendedThreads, g_maxThreadCount);
     for (uint32_t i = 0 ; i < g_threadCount ; i++) {
         osThreadId_t thread = g_pSuspendedThreads[i];
         osPriority_t newPriority = osPriorityIdle;
-        const char* pThreadName = osThreadGetName(thread);
-        if (strcmp(pThreadName, "rtx_idle") == 0) {
-            newPriority = (osPriority_t)(osPriorityIdle + 1);
-            g_idleThread = thread;
-        }
 
         if (isThreadToIgnore(thread)) {
             g_pSuspendedThreads[i] = 0;
@@ -315,8 +335,8 @@ static void suspendAllApplicationThreads()
 
 static bool isThreadToIgnore(osThreadId_t thread)
 {
-    if (thread == mriThreadId) {
-        // Don't want to suspend the debugger thread itself.
+    if (thread == mriThreadId || thread == g_mriIdleThreadId) {
+        // Don't want to suspend the debugger threads themselves.
         return true;
     }
 
@@ -589,13 +609,8 @@ uint32_t Platform_RtosGetNextThreadId(void)
 
 static void skipNullThreadIds()
 {
-    while (g_threadIndex < g_threadCount && isNullOrIdleThread(g_pSuspendedThreads[g_threadIndex]))
+    while (g_threadIndex < g_threadCount && g_pSuspendedThreads[g_threadIndex] == 0)
         g_threadIndex++;
-}
-
-static bool isNullOrIdleThread(osThreadId_t threadId)
-{
-    return threadId == 0 || threadId == g_idleThread;
 }
 
 const char* Platform_RtosGetExtraThreadInfo(uint32_t threadId)
@@ -823,7 +838,7 @@ static void clearFaultStatusBits()
 
 static void serialISRHook()
 {
-    if (!isDebuggerActive() && g_pComm->readable()) {
+    if (!isDebuggerActive() && !isThreadToIgnore(osThreadGetId()) && g_pComm->readable()) {
         // Pend a halt into the debug monitor now that there is data from GDB ready to be read by it.
         setControlCFlag();
         setMonitorPending();
