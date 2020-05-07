@@ -21,18 +21,17 @@
 #include <core/cmd_continue.h>
 
 
-static uint32_t skipHardcodedBreakpoint(void);
 static int shouldSkipHardcodedBreakpoint(void);
 static int isCurrentInstructionHardcodedBreakpoint(void);
 uint32_t ContinueExecution(int setPC, uint32_t newPC)
 {
-    uint32_t returnValue = skipHardcodedBreakpoint();
+    uint32_t returnValue = SkipHardcodedBreakpoint();
     if (setPC)
         Platform_SetProgramCounter(newPC);
     return (returnValue | HANDLER_RETURN_RESUME_PROGRAM | HANDLER_RETURN_RETURN_IMMEDIATELY);
 }
 
-static uint32_t skipHardcodedBreakpoint(void)
+uint32_t SkipHardcodedBreakpoint(void)
 {
     if (shouldSkipHardcodedBreakpoint())
     {
@@ -125,7 +124,7 @@ uint32_t HandleContinueWithSignalCommand(void)
 */
 uint32_t HandleDetachCommand(void)
 {
-    skipHardcodedBreakpoint();
+    SkipHardcodedBreakpoint();
     PrepareStringResponse("OK");
     return HANDLER_RETURN_RESUME_PROGRAM;
 }

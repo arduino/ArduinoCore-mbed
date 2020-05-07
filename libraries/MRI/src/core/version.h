@@ -6,7 +6,7 @@
 
 #define MRI_VERSION_MAJOR       1
 #define MRI_VERSION_MINOR       1
-#define MRI_VERSION_BUILD       20200413
+#define MRI_VERSION_BUILD       20200506
 #define MRI_VERSION_SUBBUILD    0
 
 #define MRI_STR(X) MRI_STR2(X)

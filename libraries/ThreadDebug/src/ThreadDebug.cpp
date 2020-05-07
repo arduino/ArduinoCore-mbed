@@ -87,12 +87,144 @@ static const char* g_threadNamesToIgnore[] = {
 
 
 
+// If non-NULL, this is the thread that we want to single step.
+// If NULL, single stepping is not enabled.
+// Accessed by this module and the assembly language handlers in ThreadDebug_asm.S.
+volatile osThreadId_t           mriThreadSingleStepThreadId;
+
 // Structure used to store a 'suspended' thread's original priority settings (current and base) so that they can be
-// later restored.
-struct ThreadPriority
+// later restored. It also tracks the current frozen/thawed/single-stepping state as well.
+struct ThreadInfo
 {
-    int8_t priority;
-    int8_t basePriority;
+    osThreadId_t threadId;
+    int8_t       priority;
+    int8_t       basePriority;
+    uint8_t      state;
+};
+
+struct ThreadList
+{
+    ThreadInfo* pThreadList;
+    uint32_t    threadCount;
+    uint32_t    maxThreadCount;
+    uint32_t    index;
+
+    void allocate(uint32_t count)
+    {
+        pThreadList = new ThreadInfo[count];
+        threadCount = 0;
+        index = 0;
+        maxThreadCount = count;
+    }
+
+    void free()
+    {
+        delete []pThreadList;
+        pThreadList = NULL;
+        maxThreadCount = 0;
+        threadCount = 0;
+    }
+
+    void reset()
+    {
+        threadCount = 0;
+        index = 0;
+    }
+
+    void add(osThreadId_t threadId, int8_t priority, int8_t basePriority)
+    {
+        if (threadCount < maxThreadCount) {
+            ThreadInfo* pInfo = pThreadList + threadCount;
+            pInfo->threadId = threadId;
+            pInfo->priority = priority;
+            pInfo->basePriority = basePriority;
+            pInfo->state = (int8_t)MRI_PLATFORM_THREAD_FROZEN;
+            threadCount++;
+        }
+    }
+
+    void resumeThreads()
+    {
+        for (uint32_t i = 0 ; i < threadCount ; i++) {
+            ThreadInfo*  pInfo = &pThreadList[i];
+            if (pInfo->state != MRI_PLATFORM_THREAD_FROZEN) {
+                thawThread(pInfo, pInfo->priority, pInfo->basePriority);
+            }
+            if (shouldThawIdleThreadDuringSingleStep(pInfo)) {
+                // Gives RTX a thread to run if single stepping thread is waiting on sync object.
+                thawThread(pInfo, osPriorityIdle+1, osPriorityIdle+1);
+            }
+        }
+    }
+
+    void thawThread(ThreadInfo* pInfo, int8_t priority, int8_t basePriority)
+    {
+        osThreadId_t threadId = pInfo->threadId;
+        osThreadSetPriority(threadId, (osPriority_t)priority);
+        osRtxThread_t* pThread = (osRtxThread_t*)threadId;
+        pThread->priority_base = basePriority;
+    }
+
+    bool shouldThawIdleThreadDuringSingleStep(ThreadInfo* pInfo)
+    {
+        return pInfo->threadId == osRtxInfo.thread.idle &&
+               pInfo->state == (uint8_t)MRI_PLATFORM_THREAD_FROZEN &&
+               mriThreadSingleStepThreadId != 0;
+    }
+
+    void sort()
+    {
+        qsort(pThreadList, threadCount, sizeof(*pThreadList), compareThreadInfo);
+    }
+
+    static int compareThreadInfo(const void* pvThread1, const void* pvThread2)
+    {
+        ThreadInfo* pThread1 = (ThreadInfo*)pvThread1;
+        ThreadInfo* pThread2 = (ThreadInfo*)pvThread2;
+        osThreadId_t threadId1 = pThread1->threadId;
+        osThreadId_t threadId2 = pThread2->threadId;
+
+        if (threadId1 < threadId2) {
+            return -1;
+        }
+        else if (threadId1 > threadId2) {
+            return 1;
+        }
+        else {
+            return 0;
+        }
+    }
+
+    osThreadId_t firstThreadId()
+    {
+        index = 0;
+        return nextThreadId();
+    }
+
+    osThreadId_t nextThreadId()
+    {
+        if (index >= threadCount) {
+            return 0;
+        }
+        return pThreadList[index++].threadId;
+    }
+
+    ThreadInfo* findThreadId(osThreadId_t threadId)
+    {
+        for (uint32_t i = 0 ; i < threadCount ; i++) {
+            if (pThreadList[i].threadId == threadId) {
+                return &pThreadList[i];
+            }
+        }
+        return NULL;
+    }
+
+    void setStateOnAllThreads(PlatformThreadState state)
+    {
+        for (uint32_t i = 0 ; i < threadCount ; i++) {
+            pThreadList[i].state = (uint8_t)state;
+        }
+    }
 };
 
 
@@ -108,15 +240,15 @@ static volatile osThreadId_t    g_haltedThreadId;
 // The list of threads which were suspended upon entry into the debugger. These are the threads that will be resumed
 // upon exit from the debugger.
 static osThreadId_t*            g_pSuspendedThreads;
-// The priorities (current and base) of each thread modified to suspend application threads when halting in debugger.
-static ThreadPriority*          g_pThreadPriorities;
+// The priorities (current and base) & state (frozen, thawed, etc) of each thread modified to suspend application
+// threads when halting in debugger.
+static ThreadList               g_threadLists[2];
+// Previous thread info list.
+static ThreadList*              g_pPrevThreadList;
+// Current thread info list.
+static ThreadList*              g_pCurrThreadList;
 // The maximum number of threads which can be stored in the above arrays, set in ThreadDebug constructor.
 static uint32_t                 g_maxThreadCount;
-// The number of active threads that were placed in g_pSuspendedThreads. Some of those entries may be NULL if they were
-// important enough to not be suspended.
-static uint32_t                 g_threadCount;
-// The current index into the g_pSuspendedThreads array being returned from Platform_RtosGetFirstThread.
-static uint32_t                 g_threadIndex;
 // Buffer to be used for storing extra thread info.
 static char                     g_threadExtraInfo[64];
 
@@ -128,11 +260,6 @@ static volatile uint32_t        g_enableDWTandFPB;
 volatile osThreadId_t           mriThreadId;
 // The ID of the mriIdle() thread.
 static   osThreadId_t           g_mriIdleThreadId;
-
-// If non-NULL, this is the thread that we want to single step.
-// If NULL, single stepping is not enabled.
-// Accessed by this module and the assembly language handlers in ThreadDebug_asm.S.
-volatile osThreadId_t           mriThreadSingleStepThreadId;
 
 // Addresses of the original RTX handlers for SVCall, SysTick, and PendSV when hooks to them have been inserted for
 // enabling single step.
@@ -186,8 +313,8 @@ extern "C" void mriSysTickHandlerStub(void);
 static __NO_RETURN void mriIdle(void *pv);
 static __NO_RETURN void mriMain(void *pv);
 static void suspendAllApplicationThreads();
+static void swapThreadLists();
 static bool isThreadToIgnore(osThreadId_t thread);
-static void resumeApplicationThreads();
 static void readThreadContext(MriContext* pContext, uint32_t* pSP, osThreadId_t thread);
 static void switchRtxHandlersToDebugStubsForSingleStepping();
 static void restoreRtxHandlers();
@@ -199,7 +326,6 @@ static void recordAndClearFaultStatusBits();
 static void wakeMriMainToDebugCurrentThread();
 static void stopSingleStepping();
 static void recordAndSwitchFaultHandlersToDebugger();
-static void skipNullThreadIds();
 static const char* getThreadStateName(uint8_t threadState);
 static bool isDebugThreadActive();
 static void setFaultDetectedFlag();
@@ -228,7 +354,10 @@ ThreadDebug::ThreadDebug(DebugCommInterface* pCommInterface, bool breakInSetup, 
         maxThreadCount = 5;
     }
     g_pSuspendedThreads = new osThreadId_t[maxThreadCount];
-    g_pThreadPriorities = new ThreadPriority[maxThreadCount];
+    g_threadLists[0].allocate(maxThreadCount);
+    g_threadLists[1].allocate(maxThreadCount);
+    g_pCurrThreadList = &g_threadLists[0];
+    g_pPrevThreadList = &g_threadLists[1];
     g_maxThreadCount = maxThreadCount;
 
     // Initialize the MRI core.
@@ -293,21 +422,17 @@ static __NO_RETURN void mriMain(void *pv)
         ASSERT ( g_haltedThreadId != 0 );
         suspendAllApplicationThreads();
         readThreadContext(&mriCortexMState.context, &mriCortexMState.sp, g_haltedThreadId);
-        if (Platform_IsSingleStepping()) {
-            restoreRtxHandlers();
-        }
 
         osThreadResume(g_mriIdleThreadId);
         osThreadSetPriority(osThreadGetId(), osPriorityNormal);
-        mriDebugException(&mriCortexMState.context);
+            mriDebugException(&mriCortexMState.context);
         osThreadSetPriority(osThreadGetId(), osPriorityISR);
         osThreadSuspend(g_mriIdleThreadId);
 
         if (Platform_IsSingleStepping()) {
-            mriThreadSingleStepThreadId = g_haltedThreadId;
             switchRtxHandlersToDebugStubsForSingleStepping();
         }
-        resumeApplicationThreads();
+        g_pCurrThreadList->resumeThreads();
         g_haltedThreadId = 0;
     }
 }
@@ -315,22 +440,37 @@ static __NO_RETURN void mriMain(void *pv)
 static void suspendAllApplicationThreads()
 {
     // Suspend application threads by setting their priorities to the lowest setting, osPriorityIdle.
-    g_threadCount = osThreadGetCount();
-    ASSERT ( g_threadCount <= g_maxThreadCount );
+    swapThreadLists();
+    g_pCurrThreadList->reset();
+    uint32_t threadCount = osThreadGetCount();
+    ASSERT ( threadCount <= g_maxThreadCount );
     osThreadEnumerate(g_pSuspendedThreads, g_maxThreadCount);
-    for (uint32_t i = 0 ; i < g_threadCount ; i++) {
+    for (uint32_t i = 0 ; i < threadCount ; i++) {
         osThreadId_t thread = g_pSuspendedThreads[i];
-        osPriority_t newPriority = osPriorityIdle;
 
-        if (isThreadToIgnore(thread)) {
-            g_pSuspendedThreads[i] = 0;
-        } else {
+        if (!isThreadToIgnore(thread)) {
             osRtxThread_t* pThread = (osRtxThread_t*)thread;
-            g_pThreadPriorities[i].basePriority = pThread->priority_base;
-            g_pThreadPriorities[i].priority = pThread->priority;
-            osThreadSetPriority(thread, newPriority);
+            int8_t priority = pThread->priority;
+            int8_t basePriority = pThread->priority_base;
+            ThreadInfo* pPrevThreadInfo = g_pPrevThreadList->findThreadId(thread);
+            if (pPrevThreadInfo && pPrevThreadInfo->state == (uint8_t)MRI_PLATFORM_THREAD_FROZEN) {
+                // If thread was already frozen then the thread's current priorities will be osPriorityIdle and the
+                // correct priorities will be stored in the previous thread list.
+                priority = pPrevThreadInfo->priority;
+                basePriority = pPrevThreadInfo->basePriority;
+            }
+            g_pCurrThreadList->add(thread, priority, basePriority);
+            osThreadSetPriority(thread, osPriorityIdle);
         }
     }
+    g_pCurrThreadList->sort();
+}
+
+static void swapThreadLists()
+{
+    ThreadList* pTemp = g_pPrevThreadList;
+    g_pPrevThreadList = g_pCurrThreadList;
+    g_pCurrThreadList = pTemp;
 }
 
 static bool isThreadToIgnore(osThreadId_t thread)
@@ -347,18 +487,6 @@ static bool isThreadToIgnore(osThreadId_t thread)
         }
     }
     return false;
-}
-
-static void resumeApplicationThreads()
-{
-    for (uint32_t i = 0 ; i < g_threadCount ; i++) {
-        osThreadId_t thread = g_pSuspendedThreads[i];
-        if (thread != 0) {
-            osThreadSetPriority(thread, (osPriority_t)g_pThreadPriorities[i].priority);
-            osRtxThread_t* pThread = (osRtxThread_t*)thread;
-            pThread->priority_base = g_pThreadPriorities[i].basePriority;
-        }
-    }
 }
 
 static void readThreadContext(MriContext* pContext, uint32_t* pSP, osThreadId_t thread)
@@ -452,9 +580,9 @@ static int justEnteredSetupCallback(void* pv)
 
 ThreadDebug::~ThreadDebug()
 {
-    delete []g_pThreadPriorities;
+    g_threadLists[0].free();
+    g_threadLists[1].free();
     delete []g_pSuspendedThreads;
-    g_pThreadPriorities = NULL;
     g_pSuspendedThreads = NULL;
 
     // IMPORTANT NOTE: You are attempting to destroy the connection to GDB which isn't allowed.
@@ -595,26 +723,20 @@ uint32_t Platform_RtosGetHaltedThreadId(void)
 
 uint32_t Platform_RtosGetFirstThreadId(void)
 {
-    g_threadIndex = 0;
-    return Platform_RtosGetNextThreadId();
+    return (uint32_t)g_pCurrThreadList->firstThreadId();
 }
 
 uint32_t Platform_RtosGetNextThreadId(void)
 {
-    skipNullThreadIds();
-    if (g_threadIndex >= g_threadCount)
-        return 0;
-    return (uint32_t)g_pSuspendedThreads[g_threadIndex++];
-}
-
-static void skipNullThreadIds()
-{
-    while (g_threadIndex < g_threadCount && g_pSuspendedThreads[g_threadIndex] == 0)
-        g_threadIndex++;
+    return (uint32_t)g_pCurrThreadList->nextThreadId();
 }
 
 const char* Platform_RtosGetExtraThreadInfo(uint32_t threadId)
 {
+    if (!Platform_RtosIsThreadActive(threadId)) {
+        return NULL;
+    }
+
     const char*    pThreadName = osThreadGetName((osThreadId)threadId);
     osRtxThread_t* pThread = (osRtxThread_t*)threadId;
     const char*    pState = getThreadStateName(pThread->state);
@@ -660,20 +782,44 @@ static const char* getThreadStateName(uint8_t threadState)
 
 MriContext* Platform_RtosGetThreadContext(uint32_t threadId)
 {
-    if ((osThreadId_t)threadId == g_haltedThreadId)
+    if (!Platform_RtosIsThreadActive(threadId)) {
+        return NULL;
+    }
+
+    if ((osThreadId_t)threadId == g_haltedThreadId) {
         return &mriCortexMState.context;
-    readThreadContext(&g_threadContext, &g_threadSP, (osThreadId_t)threadId);
-    return &g_threadContext;
+    } else {
+        readThreadContext(&g_threadContext, &g_threadSP, (osThreadId_t)threadId);
+        return &g_threadContext;
+    }
 }
 
 int Platform_RtosIsThreadActive(uint32_t threadId)
 {
-    for (uint32_t i = 0 ; i < g_threadCount ; i++) {
-        if ((uint32_t)g_pSuspendedThreads[i] == threadId) {
-            return 1;
-        }
+    return g_pCurrThreadList->findThreadId((osThreadId_t)threadId) != NULL;
+}
+
+int Platform_RtosIsSetThreadStateSupported(void)
+{
+    return 1;
+}
+
+void Platform_RtosSetThreadState(uint32_t threadId, PlatformThreadState state)
+{
+    if (threadId == MRI_PLATFORM_ALL_THREADS) {
+        g_pCurrThreadList->setStateOnAllThreads(state);
+        return;
     }
-    return 0;
+
+    ThreadInfo* pThreadInfo = g_pCurrThreadList->findThreadId((osThreadId_t)threadId);
+    if (pThreadInfo == NULL) {
+        return;
+    }
+    pThreadInfo->state = (uint8_t)state;
+
+    if (state == MRI_PLATFORM_THREAD_SINGLE_STEPPING) {
+        mriThreadSingleStepThreadId = (osThreadId_t)threadId;
+    }
 }
 
 
@@ -777,7 +923,6 @@ static void recordAndClearFaultStatusBits()
 
 static void wakeMriMainToDebugCurrentThread()
 {
-    disableSingleStep();
     g_debugThreadId = osThreadGetId();
     g_haltedThreadId = g_debugThreadId;
     osThreadFlagsSet(mriThreadId, MRI_THREAD_DEBUG_EVENT_FLAG);
@@ -785,6 +930,9 @@ static void wakeMriMainToDebugCurrentThread()
 
 static void stopSingleStepping()
 {
+    if (Platform_IsSingleStepping()) {
+        restoreRtxHandlers();
+    }
     disableSingleStep();
     mriThreadSingleStepThreadId = NULL;
 }

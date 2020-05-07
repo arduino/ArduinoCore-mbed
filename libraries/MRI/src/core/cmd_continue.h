@@ -20,12 +20,14 @@
 
 /* Real name of functions are in mri namespace. */
 uint32_t mriCmd_ContinueExecution(int setPC, uint32_t newPC);
+uint32_t mriCmd_SkipHardcodedBreakpoint(void);
 uint32_t mriCmd_HandleContinueCommand(void);
 uint32_t mriCmd_HandleContinueWithSignalCommand(void);
 uint32_t mriCmd_HandleDetachCommand(void);
 
 /* Macroes which allow code to drop the mri namespace prefix. */
 #define ContinueExecution               mriCmd_ContinueExecution
+#define SkipHardcodedBreakpoint         mriCmd_SkipHardcodedBreakpoint
 #define HandleContinueCommand           mriCmd_HandleContinueCommand
 #define HandleContinueWithSignalCommand mriCmd_HandleContinueWithSignalCommand
 #define HandleDetachCommand             mriCmd_HandleDetachCommand

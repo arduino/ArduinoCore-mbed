@@ -603,3 +603,12 @@ int Platform_RtosIsThreadActive(uint32_t threadId)
 
     return 0;
 }
+
+int Platform_RtosIsSetThreadStateSupported(void)
+{
+    return 0;
+}
+
+void Platform_RtosSetThreadState(uint32_t threadId, PlatformThreadState state)
+{
+}

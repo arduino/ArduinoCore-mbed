@@ -113,10 +113,20 @@ PlatformInstructionType     mriPlatform_TypeOfCurrentInstruction(void);
 PlatformSemihostParameters  mriPlatform_GetSemihostCallParameters(void);
 void                        mriPlatform_SetSemihostCallReturnAndErrnoValues(int returnValue, int err);
 
-const uint8_t* mriPlatform_GetUid(void);
-uint32_t       mriPlatform_GetUidSize(void);
+const uint8_t*  mriPlatform_GetUid(void);
+uint32_t        mriPlatform_GetUidSize(void);
 
-void           mriPlatform_ResetDevice(void);
+void            mriPlatform_ResetDevice(void);
+
+typedef enum
+{
+    MRI_PLATFORM_THREAD_FROZEN,
+    MRI_PLATFORM_THREAD_THAWED,
+    MRI_PLATFORM_THREAD_SINGLE_STEPPING
+} PlatformThreadState;
+
+/* Can be passed as threadId to Platform_RtosSetThreadState() to set state of all threads at once. */
+#define MRI_PLATFORM_ALL_THREADS 0xFFFFFFFF
 
 uint32_t        mriPlatform_RtosGetHaltedThreadId(void);
 uint32_t        mriPlatform_RtosGetFirstThreadId(void);
@@ -124,6 +134,8 @@ uint32_t        mriPlatform_RtosGetNextThreadId(void);
 const char*     mriPlatform_RtosGetExtraThreadInfo(uint32_t threadId);
 MriContext*     mriPlatform_RtosGetThreadContext(uint32_t threadId);
 int             mriPlatform_RtosIsThreadActive(uint32_t threadId);
+int             mriPlatform_RtosIsSetThreadStateSupported(void);
+void            mriPlatform_RtosSetThreadState(uint32_t threadId, PlatformThreadState state);
 
 
 /* Macroes which allow code to drop the mri namespace prefix. */
@@ -176,5 +188,7 @@ int             mriPlatform_RtosIsThreadActive(uint32_t threadId);
 #define Platform_RtosGetExtraThreadInfo                     mriPlatform_RtosGetExtraThreadInfo
 #define Platform_RtosGetThreadContext                       mriPlatform_RtosGetThreadContext
 #define Platform_RtosIsThreadActive                         mriPlatform_RtosIsThreadActive
+#define Platform_RtosIsSetThreadStateSupported              mriPlatform_RtosIsSetThreadStateSupported
+#define Platform_RtosSetThreadState                         mriPlatform_RtosSetThreadState
 
 #endif /* PLATFORMS_H_ */
