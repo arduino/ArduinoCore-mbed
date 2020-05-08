@@ -14,11 +14,11 @@ extern "C" unsigned int PINCOUNT_fn();
 
 // LEDs
 // ----
-#define PIN_LED     (PK_6)
+#define PIN_LED     (23u)
 #define LED_BUILTIN PIN_LED
-#define LEDR        (PK_5)
-#define LEDG        (PK_6)
-#define LEDB        (PK_7)
+#define LEDR        (22u)
+#define LEDG        (23u)
+#define LEDB        (24u)
 
 // Analog pins
 // -----------
@@ -60,8 +60,11 @@ static const uint8_t SCK  = PIN_SPI_SCK;
 #define SERIAL_HOWMANY		3
 #define SERIAL1_TX			(digitalPinToPinName(PIN_SERIAL_TX))
 #define SERIAL1_RX			(digitalPinToPinName(PIN_SERIAL_RX))
-#define SERIAL2_TX			(PA_0)
-#define SERIAL2_RX			(PI_9)
+
+#define SERIAL2_TX			PA_15
+#define SERIAL2_RX			PF_6
+#define SERIAL2_RTS			PF_8
+#define SERIAL2_CTS			PF_9
 
 #define SERIAL3_TX			(PJ_8)
 #define SERIAL3_RX			(PJ_9)

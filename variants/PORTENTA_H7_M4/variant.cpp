@@ -28,6 +28,11 @@ PinDescription g_APinDescription[] = {
   { PC_2_ALT0,    NULL, NULL, NULL, NULL },    // A4    ADC1_INP12
   { PC_3_ALT2,    NULL, NULL, NULL, NULL },    // A5    ADC2_INP13
   { PA_4,         NULL, NULL, NULL, NULL },    // A6    ADC1_INP18
+
+  // LEDS
+  { PK_5,         NULL, NULL, NULL, NULL },    // LEDR
+  { PK_6,         NULL, NULL, NULL, NULL },    // LEDG
+  { PK_7,         NULL, NULL, NULL, NULL },    // LEDB
 };
 
 extern "C" {

@@ -14,11 +14,11 @@ extern "C" unsigned int PINCOUNT_fn();
 
 // LEDs
 // ----
-#define PIN_LED     (PK_6)
+#define PIN_LED     (23u)
 #define LED_BUILTIN PIN_LED
-#define LEDR        (PK_5)
-#define LEDG        (PK_6)
-#define LEDB        (PK_7)
+#define LEDR        (22u)
+#define LEDG        (23u)
+#define LEDB        (24u)
 
 // Analog pins
 // -----------
