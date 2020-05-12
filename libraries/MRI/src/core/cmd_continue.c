@@ -25,6 +25,8 @@ static int shouldSkipHardcodedBreakpoint(void);
 static int isCurrentInstructionHardcodedBreakpoint(void);
 uint32_t ContinueExecution(int setPC, uint32_t newPC)
 {
+    if (Platform_RtosIsSetThreadStateSupported())
+        Platform_RtosSetThreadState(MRI_PLATFORM_ALL_THREADS, MRI_PLATFORM_THREAD_THAWED);
     uint32_t returnValue = SkipHardcodedBreakpoint();
     if (setPC)
         Platform_SetProgramCounter(newPC);
@@ -124,6 +126,8 @@ uint32_t HandleContinueWithSignalCommand(void)
 */
 uint32_t HandleDetachCommand(void)
 {
+    if (Platform_RtosIsSetThreadStateSupported())
+        Platform_RtosSetThreadState(MRI_PLATFORM_ALL_THREADS, MRI_PLATFORM_THREAD_THAWED);
     SkipHardcodedBreakpoint();
     PrepareStringResponse("OK");
     return HANDLER_RETURN_RESUME_PROGRAM;
