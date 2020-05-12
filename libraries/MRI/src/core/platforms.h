@@ -126,7 +126,9 @@ typedef enum
 } PlatformThreadState;
 
 /* Can be passed as threadId to Platform_RtosSetThreadState() to set state of all threads at once. */
-#define MRI_PLATFORM_ALL_THREADS 0xFFFFFFFF
+#define MRI_PLATFORM_ALL_THREADS        0xFFFFFFFF
+/* Can be passed as threadId to Platform_RtosSetThreadState() to set state of all threads that are still frozen. */
+#define MRI_PLATFORM_ALL_FROZEN_THREADS 0xFFFFFFFE
 
 uint32_t        mriPlatform_RtosGetHaltedThreadId(void);
 uint32_t        mriPlatform_RtosGetFirstThreadId(void);
@@ -136,6 +138,7 @@ MriContext*     mriPlatform_RtosGetThreadContext(uint32_t threadId);
 int             mriPlatform_RtosIsThreadActive(uint32_t threadId);
 int             mriPlatform_RtosIsSetThreadStateSupported(void);
 void            mriPlatform_RtosSetThreadState(uint32_t threadId, PlatformThreadState state);
+void            mriPlatform_RtosRestorePrevThreadState(void);
 
 
 /* Macroes which allow code to drop the mri namespace prefix. */
@@ -190,5 +193,6 @@ void            mriPlatform_RtosSetThreadState(uint32_t threadId, PlatformThread
 #define Platform_RtosIsThreadActive                         mriPlatform_RtosIsThreadActive
 #define Platform_RtosIsSetThreadStateSupported              mriPlatform_RtosIsSetThreadStateSupported
 #define Platform_RtosSetThreadState                         mriPlatform_RtosSetThreadState
+#define Platform_RtosRestorePrevThreadState                 mriPlatform_RtosRestorePrevThreadState
 
 #endif /* PLATFORMS_H_ */

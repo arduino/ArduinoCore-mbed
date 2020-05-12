@@ -5,7 +5,7 @@
 
 #include <KernelDebug.h>
 
-KernelDebug kernelDebug(SERIAL1_TX, SERIAL1_RX, USART1_IRQn, 230400, DEBUG_BREAK_ON_SETUP);
+KernelDebug kernelDebug(SERIAL1_TX, SERIAL1_RX, USART1_IRQn, 230400, DEBUG_BREAK_IN_SETUP);
 
 void setup() {
 

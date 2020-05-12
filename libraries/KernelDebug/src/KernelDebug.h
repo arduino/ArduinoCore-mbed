@@ -36,9 +36,9 @@
 namespace arduino {
 
 // Pass as breakInSetup parameter of constructor to halt in setup().
-#define DEBUG_BREAK_ON_SETUP    true
+#define DEBUG_BREAK_IN_SETUP    true
 // Pass as breakInSetup parameter of constructors to NOT halt in setup().
-#define DEBUG_NO_BREAK_ON_SETUP false
+#define DEBUG_NO_BREAK_IN_SETUP false
 
 
 class KernelDebug {
@@ -46,7 +46,7 @@ public:
     // You must declare your KernelDebug object as a global.
     // Example:
     //      KernelDebug debug(SERIAL1_TX, SERIAL1_RX, USART1_IRQn, 230400, DEBUG_BREAK_ON_SETUP);
-    KernelDebug(PinName txPin, PinName rxPin, IRQn_Type irq, uint32_t baudRate=230400, bool breakInSetup=DEBUG_BREAK_ON_SETUP);
+    KernelDebug(PinName txPin, PinName rxPin, IRQn_Type irq, uint32_t baudRate=230400, bool breakInSetup=DEBUG_BREAK_IN_SETUP);
 
     // You should never let your DebugSerial object go out of scope. Make it global or static. To warn you if you do
     // let it go out of scope by mistake, this destructor will break into GDB and then enter an infinite loop.

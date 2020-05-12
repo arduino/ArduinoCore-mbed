@@ -109,20 +109,14 @@ mriExceptionHandler:
     bl      mriCortexHandleDebuggerFault
     pop     {r1, pc}
 
-    /* Fill debugger stack with 0xDEADBEEF before switching MSP to it. */
+    /* Point R0 to the top of the debugger stack, where MSP should be pointed. */
 1$: ldr     r0, =mriCortexMDebuggerStack
-    ldr     r1, =CORTEXM_DEBUGGER_STACK_FILL
-    mov     r2, r1
-    ldr     r3, =CORTEXM_DEBUGGER_STACK_SIZE
-2$: cbz     r3, 3$
-    strd    r1, r2, [r0], #8
-    subs    r3, #1
-    b       2$
-    /* R0 is now pointing to top of stack, where MSP should be pointed to. */
+    ldr     r1, =CORTEXM_DEBUGGER_STACK_SIZE * 8
+    add     r0, r0, r1
 
     /* Save away copy of MSP value at the time of the fault into R0. */
 3$: mrs     r1, msp
-    /* Set MSP to top of debugger stack returned from mriCortexMDebuggerStack. */
+    /* Set MSP to top of debugger stack. */
     msr     msp, r0
 
     /* Saving integer registers to debugger stack. */

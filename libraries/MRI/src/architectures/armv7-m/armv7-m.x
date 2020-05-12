@@ -131,6 +131,7 @@ static const char g_targetXml[] =
 void mriExceptionHandler(void);
 
 
+static void fillDebuggerStack(void);
 static void clearState(void);
 static void determineSubPriorityBitCount(void);
 static void configureDWTandFPB(void);
@@ -147,6 +148,7 @@ void mriCortexMInit(Token* pParameterTokens, uint8_t debugMonPriority, IRQn_Type
     }
     (void)pParameterTokens;
 
+    fillDebuggerStack();
     clearState();
     determineSubPriorityBitCount();
     configureDWTandFPB();
@@ -161,6 +163,15 @@ void mriCortexMInit(Token* pParameterTokens, uint8_t debugMonPriority, IRQn_Type
         enableDebugMonitorAtSpecifiedPriority(255);
     else
         enableDebugMonitorAtSpecifiedPriority(debugMonPriority);
+}
+
+static void fillDebuggerStack(void)
+{
+    uint64_t fillValue = ((uint64_t)CORTEXM_DEBUGGER_STACK_FILL << 32) | (uint64_t)CORTEXM_DEBUGGER_STACK_FILL;
+    size_t i;
+
+    for (i = 0 ; i < sizeof(mriCortexMDebuggerStack)/sizeof(mriCortexMDebuggerStack[0]) ; i++)
+        mriCortexMDebuggerStack[i] = fillValue;
 }
 
 static void clearState(void)

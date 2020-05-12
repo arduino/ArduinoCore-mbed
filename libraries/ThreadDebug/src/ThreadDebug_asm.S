@@ -18,20 +18,20 @@
     .syntax unified
 
 
-    /* Lower nibble of EXC_RETURN in LR will have this value if interrupted was running in thread mode. */
+    /* Lower nibble of EXC_RETURN in LR will have of these values if interrupted code was running in thread mode. */
     .equ EXC_RETURN_THREADMODE_PROCESSSTACK, 0xD
     .equ EXC_RETURN_THREADMODE_MAINSTACK, 0x9
 
     /* Hard Fault Status Register */
     .equ HFSR, 0xE000ED2C
+    /* This bit is set in HFSR if a hard fault was forced by debug event occuring in handler mode. */
     .equ HFSR_DEBUG_EVENT_BIT,  (1 << 31)
-
-    /* Flag set in mriThreadDebugMonFlags to let DebugMon handler know it was pended for a reason. */
-    .equ DEBUGMON_FLAG_PENDED,  (1 << 0)
 
     /* System register and bits for pending DebugMon interrupt. */
     .equ DEMCR, 0xE000EDFC
     .equ DEMCR_MON_PEND_BIT, (1 << 17)
+
+
 
     .global mriDebugMonitorHandlerStub
     .type mriDebugMonitorHandlerStub, function

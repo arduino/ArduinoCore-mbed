@@ -55,14 +55,13 @@ typedef struct
 } Action;
 
 
-/* Store last continue/step actions here so that they can be used to replay Platform_RtosSetThreadState() calls
-   during ranged single steps. */
-static Action g_lastContinueAction;
-static Action g_lastStepAction;
-
-
 static uint32_t handleVContQueryCommand(void);
 static uint32_t handleVContCommand(void);
+static void     firstParsePass(Buffer* pBuffer, Action* pContinueAction, Action* pStepAction);
+static int      isActionMoreSpecificThanCurrent(Action* pCurr, Action* pNew);
+static uint32_t getActionPriority(Action* pAction);
+static int      isActionSpecificToNonHaltedThreadId(const Action* pAction);
+static int      isActionSpecificToHaltedThreadId(const Action* pAction);
 static Action   parseAction(Buffer* pBuffer);
 static Action   parseContinueAction(Buffer* pBuffer);
 static Action   parseContinueWithSignalAction(Buffer* pBuffer);
@@ -71,12 +70,15 @@ static Action   parseSingleStepWithSignalAction(Buffer* pBuffer);
 static Action   parseRangedSingleStepAction(Buffer* pBuffer);
 static AddressRange parseAddressRange(Buffer* pBuffer);
 static ThreadId parseOptionalThreadId(Buffer* pBuffer);
-static int      doesThreadIdMatchHaltedThreadId(const Action* pAction);
 static uint32_t handleSingleStepAndContinueCommands(const Action* pContinueAction, const Action* pStepAction);
 static uint32_t handleAction(const Action* pAction);
-static uint32_t handleSingleStepAndContinueCommandsWithSetThreadState(const Action* pContinueAction, const Action* pStepAction);
-static uint32_t handleActionWithSetThreadState(const Action* pAction);
+static uint32_t handleSingleStepAndContinueCommandsWithSetThreadState(Buffer* pBuffer,
+                                                                      const Action* pContinueAction,
+                                                                      const Action* pStepAction);
 static uint32_t justAdvancedPastBreakpoint(uint32_t continueReturn);
+static uint32_t secondParsePass(Buffer* pBuffer);
+static uint32_t handleActionWithSetThreadState(const Action* pAction);
+static uint32_t getThreadIdFromAction(const Action* pAction);
 /* Handle the extended 'v' commands used by gdb.
 
     Command Format: vSSS
@@ -129,7 +131,23 @@ static uint32_t handleVContCommand(void)
     Action            continueAction = { {0, THREAD_ID_NONE}, {0, 0}, ACTION_NONE };
     Action            stepAction = { {0, THREAD_ID_NONE}, {0, 0}, ACTION_NONE };
     Buffer*           pBuffer = GetBuffer();
-    Action            action;
+    Buffer            replayBuffer = *pBuffer;
+
+    __try
+        firstParsePass(pBuffer, &continueAction, &stepAction);
+    __catch
+        return 0;
+
+    if (Platform_RtosIsSetThreadStateSupported())
+        return handleSingleStepAndContinueCommandsWithSetThreadState(&replayBuffer, &continueAction, &stepAction);
+    else
+        return handleSingleStepAndContinueCommands(&continueAction, &stepAction);
+}
+
+static void firstParsePass(Buffer* pBuffer, Action* pContinueAction, Action* pStepAction)
+{
+    uint32_t actionCount = 0;
+    Action   action;
 
     while (Buffer_BytesLeft(pBuffer) > 0 && Buffer_IsNextCharEqualTo(pBuffer, ';'))
     {
@@ -140,29 +158,20 @@ static uint32_t handleVContCommand(void)
         __catch
         {
             PrepareStringResponse(MRI_ERROR_INVALID_ARGUMENT);
-            return 0;
+            __rethrow;
         }
 
+        actionCount++;
         switch (action.type)
         {
             case ACTION_RANGED_SINGLE_STEP:
             case ACTION_SINGLE_STEP:
-                if (stepAction.type != ACTION_NONE)
-                {
-                    /* Should only have 1 single step action in vCont command. */
-                    PrepareStringResponse(MRI_ERROR_INVALID_ARGUMENT);
-                    return 0;
-                }
-                stepAction = action;
+                if (isActionMoreSpecificThanCurrent(pStepAction, &action))
+                    *pStepAction = action;
                 break;
             case ACTION_CONTINUE:
-                if (action.threadId.type == THREAD_ID_SPECIFIC || continueAction.type != ACTION_NONE)
-                {
-                    /* Continue action shouldn't specify thread id & there should only be 1 of them in vCont command. */
-                    PrepareStringResponse(MRI_ERROR_INVALID_ARGUMENT);
-                    return 0;
-                }
-                continueAction = action;
+                if (isActionMoreSpecificThanCurrent(pContinueAction, &action))
+                    *pContinueAction = action;
                 break;
             default:
                 break;
@@ -172,13 +181,60 @@ static uint32_t handleVContCommand(void)
     {
         /* After processing all arguments, there should be no bytes left in packet. */
         PrepareStringResponse(MRI_ERROR_INVALID_ARGUMENT);
-        return 0;
+        __throw(invalidArgumentException);
     }
+    if (!Platform_RtosIsSetThreadStateSupported() && pContinueAction->type == ACTION_NONE && pStepAction->type == ACTION_NONE)
+    {
+        PrepareStringResponse(MRI_ERROR_INVALID_ARGUMENT);
+        __throw(invalidArgumentException);
+    }
+    if (Platform_RtosIsSetThreadStateSupported() && actionCount == 0)
+    {
+        PrepareStringResponse(MRI_ERROR_INVALID_ARGUMENT);
+        __throw(invalidArgumentException);
+    }
+}
 
-    if (Platform_RtosIsSetThreadStateSupported())
-        return handleSingleStepAndContinueCommandsWithSetThreadState(&continueAction, &stepAction);
-    else
-        return handleSingleStepAndContinueCommands(&continueAction, &stepAction);
+static int isActionMoreSpecificThanCurrent(Action* pCurr, Action* pNew)
+{
+    uint32_t currPriority = getActionPriority(pCurr);
+    uint32_t newPriority = getActionPriority(pNew);
+    return newPriority > currPriority;
+}
+
+static uint32_t getActionPriority(Action* pAction)
+{
+    /* When Platform_RtosSetThreadState() isn't supported, we will treat actions (ie. single stepping) that are
+       specific to a thread other than the halted thread as though it was specific to the halted thread. This means that
+       single stepping an arbitrary thread in GDB will result in single stepping the current thread instead of just
+       returning a cryptic E01 parsing error to the user.
+       When Platform_RtosSetThreadState() is supported, those same actions specific to a thread other than the one
+       currently halted have no impact what so ever on the currently halted thread.
+    */
+    uint32_t returnValue = 0;
+    if (pAction->type == ACTION_NONE)
+        returnValue = 0;
+    else if (Platform_RtosIsSetThreadStateSupported() && isActionSpecificToNonHaltedThreadId(pAction))
+        returnValue = 0;
+    else if (pAction->threadId.type == THREAD_ID_NONE)
+        returnValue = 1;
+    else if (!Platform_RtosIsSetThreadStateSupported() && isActionSpecificToNonHaltedThreadId(pAction))
+        returnValue = 2;
+    else if (pAction->threadId.type == THREAD_ID_ALL)
+        returnValue = 3;
+    else if (isActionSpecificToHaltedThreadId(pAction))
+        returnValue = 4;
+    return returnValue;
+}
+
+static int isActionSpecificToNonHaltedThreadId(const Action* pAction)
+{
+    return pAction->threadId.type == THREAD_ID_SPECIFIC && pAction->threadId.id != Platform_RtosGetHaltedThreadId();
+}
+
+static int isActionSpecificToHaltedThreadId(const Action* pAction)
+{
+    return pAction->threadId.type == THREAD_ID_SPECIFIC && pAction->threadId.id == Platform_RtosGetHaltedThreadId();
 }
 
 static Action parseAction(Buffer* pBuffer)
@@ -310,11 +366,6 @@ static ThreadId parseOptionalThreadId(Buffer* pBuffer)
     return threadId;
 }
 
-static int doesThreadIdMatchHaltedThreadId(const Action* pAction)
-{
-    return pAction->threadId.type == THREAD_ID_SPECIFIC && pAction->threadId.id == Platform_RtosGetHaltedThreadId();
-}
-
 static uint32_t handleSingleStepAndContinueCommands(const Action* pContinueAction, const Action* pStepAction)
 {
     uint32_t returnValue = 0;
@@ -352,63 +403,59 @@ static uint32_t handleAction(const Action* pAction)
    }
 }
 
-static uint32_t handleSingleStepAndContinueCommandsWithSetThreadState(const Action* pContinueAction, const Action* pStepAction)
+static uint32_t handleSingleStepAndContinueCommandsWithSetThreadState(Buffer* pBuffer,
+                                                                      const Action* pContinueAction,
+                                                                      const Action* pStepAction)
+{
+    if (pContinueAction->type != ACTION_NONE || pStepAction->type != ACTION_NONE) {
+        uint32_t skippedHardcodedBreakpoint = SkipHardcodedBreakpoint();
+        if (pStepAction->type != ACTION_NONE && justAdvancedPastBreakpoint(skippedHardcodedBreakpoint))
+        {
+            /* Treat the advance over hardcoded breakpoints as the single step and don't resume execution but send T
+                stop response instead. */
+            return Send_T_StopResponse();
+        }
+    }
+
+    return secondParsePass(pBuffer);
+}
+
+static uint32_t justAdvancedPastBreakpoint(uint32_t continueReturn)
+{
+    return continueReturn & HANDLER_RETURN_SKIPPED_OVER_BREAK;
+}
+
+static uint32_t secondParsePass(Buffer* pBuffer)
 {
     uint32_t returnValue = 0;
-    uint32_t skippedHardcodedBreakpoint = 0;
+    Action   action;
 
-    if (pContinueAction->type != ACTION_NONE || doesThreadIdMatchHaltedThreadId(pStepAction))
-        skippedHardcodedBreakpoint = SkipHardcodedBreakpoint();
-
-    if (pContinueAction->type != ACTION_NONE)
-        returnValue |= handleActionWithSetThreadState(pContinueAction);
-
-    if (pStepAction->type != ACTION_NONE)
+    while (Buffer_BytesLeft(pBuffer) > 0 && Buffer_IsNextCharEqualTo(pBuffer, ';'))
     {
-        if (pStepAction->threadId.type != THREAD_ID_SPECIFIC)
-        {
-            PrepareStringResponse(MRI_ERROR_INVALID_ARGUMENT);
-            return 0;
-        }
-        returnValue |= handleActionWithSetThreadState(pStepAction);
+        action = parseAction(pBuffer);
+        returnValue |= handleActionWithSetThreadState(&action);
     }
-
-    if (pContinueAction->type == ACTION_NONE && pStepAction->type == ACTION_NONE)
-    {
-        PrepareStringResponse(MRI_ERROR_INVALID_ARGUMENT);
-        return 0;
-    }
-
-    g_lastContinueAction = *pContinueAction;
-    g_lastStepAction = *pStepAction;
-
-    if (doesThreadIdMatchHaltedThreadId(pStepAction) && justAdvancedPastBreakpoint(skippedHardcodedBreakpoint))
-    {
-        /* Treat the advance over hardcoded breakpoints as the single step and don't resume execution but send T
-            stop response instead. */
-        return Send_T_StopResponse();
-    }
-
     return returnValue;
 }
 
 static uint32_t handleActionWithSetThreadState(const Action* pAction)
 {
     uint32_t returnValue = 0;
+    uint32_t threadId = getThreadIdFromAction(pAction);
 
     switch (pAction->type)
     {
         case ACTION_CONTINUE:
-            Platform_RtosSetThreadState(MRI_PLATFORM_ALL_THREADS, MRI_PLATFORM_THREAD_THAWED);
+            Platform_RtosSetThreadState(threadId, MRI_PLATFORM_THREAD_THAWED);
             returnValue = HANDLER_RETURN_RESUME_PROGRAM | HANDLER_RETURN_RETURN_IMMEDIATELY;
             break;
         case ACTION_SINGLE_STEP:
-            Platform_RtosSetThreadState(pAction->threadId.id, MRI_PLATFORM_THREAD_SINGLE_STEPPING);
+            Platform_RtosSetThreadState(threadId, MRI_PLATFORM_THREAD_SINGLE_STEPPING);
             Platform_EnableSingleStep();
             returnValue = HANDLER_RETURN_RESUME_PROGRAM | HANDLER_RETURN_RETURN_IMMEDIATELY;
             break;
         case ACTION_RANGED_SINGLE_STEP:
-            Platform_RtosSetThreadState(pAction->threadId.id, MRI_PLATFORM_THREAD_SINGLE_STEPPING);
+            Platform_RtosSetThreadState(threadId, MRI_PLATFORM_THREAD_SINGLE_STEPPING);
             Platform_EnableSingleStep();
             SetSingleSteppingRange(&pAction->range);
             returnValue = HANDLER_RETURN_RESUME_PROGRAM | HANDLER_RETURN_RETURN_IMMEDIATELY;
@@ -419,25 +466,28 @@ static uint32_t handleActionWithSetThreadState(const Action* pAction)
    return returnValue;
 }
 
-static uint32_t justAdvancedPastBreakpoint(uint32_t continueReturn)
+static uint32_t getThreadIdFromAction(const Action* pAction)
 {
-    return continueReturn & HANDLER_RETURN_SKIPPED_OVER_BREAK;
+    uint32_t threadId = 0;
+    switch (pAction->threadId.type)
+    {
+        case THREAD_ID_NONE:
+            threadId = MRI_PLATFORM_ALL_FROZEN_THREADS;
+            break;
+        case THREAD_ID_ALL:
+            threadId = MRI_PLATFORM_ALL_THREADS;
+            break;
+        case THREAD_ID_SPECIFIC:
+            threadId = pAction->threadId.id;
+            break;
+    }
+    return threadId;
 }
 
 
-void ReplaySetThreadStateCalls(void)
+void RestoreThreadStates(void)
 {
     if (!Platform_RtosIsSetThreadStateSupported())
         return;
-    if (g_lastContinueAction.type != ACTION_NONE)
-        Platform_RtosSetThreadState(MRI_PLATFORM_ALL_THREADS, MRI_PLATFORM_THREAD_THAWED);
-    if (g_lastStepAction.type != ACTION_NONE)
-        Platform_RtosSetThreadState(g_lastStepAction.threadId.id, MRI_PLATFORM_THREAD_SINGLE_STEPPING);
-}
-
-
-void ForgetSetThreadStateCalls(void)
-{
-    memset(&g_lastContinueAction, 0, sizeof(g_lastContinueAction));
-    memset(&g_lastStepAction, 0, sizeof(g_lastStepAction));
+    Platform_RtosRestorePrevThreadState();
 }

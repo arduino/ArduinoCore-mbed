@@ -39,9 +39,9 @@ namespace arduino {
 
 
 // Pass as breakInSetup parameter of constructor to halt in setup().
-#define DEBUG_BREAK_ON_SETUP    true
+#define DEBUG_BREAK_IN_SETUP    true
 // Pass as breakInSetup parameter of constructors to NOT halt in setup().
-#define DEBUG_NO_BREAK_ON_SETUP false
+#define DEBUG_NO_BREAK_IN_SETUP false
 
 
 class DebugCommInterface;
@@ -55,7 +55,7 @@ public:
     //              -- OR --
     //      UsbDebugCommInterface  debugComm(&SerialUSB);
     //      ThreadDebug            threadDebug(&debugComm, DEBUG_BREAK_ON_SETUP);
-    ThreadDebug(DebugCommInterface* pCommInterface, bool breakInSetup=DEBUG_BREAK_ON_SETUP, uint32_t maxThreadCount=32);
+    ThreadDebug(DebugCommInterface* pCommInterface, bool breakInSetup=DEBUG_BREAK_IN_SETUP, uint32_t maxThreadCount=32);
 
     // Your ThreadDebug object should never go out of scope. To warn you if you do let it go out of scope by mistake,
     // this destructor will break into GDB and then enter an infinite loop.

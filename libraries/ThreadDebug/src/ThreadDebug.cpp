@@ -19,6 +19,7 @@
 #include "ThreadDebug.h"
 #include <cmsis_os2.h>
 #include <rtx_os.h>
+#include <rtx_core_c.h>
 
 // Put armv7-m module into thread mode before including its header and source code.
 #define MRI_THREAD_MRI 1
@@ -42,7 +43,9 @@ extern "C"
 // The size of the mriMain() stack in uint64_t objects.
 #define MRI_THREAD_STACK_SIZE   128
 // The size of the mriIdle() stack in uint64_t objects.
-#define IDLE_THREAD_STACK_SIZE  40
+#define IDLE_THREAD_STACK_SIZE  10
+// The minimum number of threads that can be specified maxThreadCount parameter of the ThreadDebug constructor.
+#define MINIMUM_THREAD_COUNT    6
 
 // Threads with these names will not be suspended when a debug event has occurred.
 // Typically these will be threads used by the communication stack to communicate with GDB or other important system
@@ -53,13 +56,13 @@ static const char* g_threadNamesToIgnore[] = {
 
 
 // Bit location in PSR which indicates if the stack needed to be 8-byte aligned or not.
-#define PSR_STACK_ALIGN_SHIFT   9
+#define PSR_STACK_ALIGN_SHIFT               9
 
 // Bit in LR set to 0 when automatic stacking of floating point registers occurs during exception handling.
-#define LR_FLOAT_STACK          (1 << 4)
+#define LR_FLOAT_STACK                      (1 << 4)
 
 // RTX Thread synchronization flag used to indicate that a debug event has occured.
-#define MRI_THREAD_DEBUG_EVENT_FLAG (1 << 0)
+#define MRI_THREAD_DEBUG_EVENT_FLAG         (1 << 0)
 
 // Lower nibble of EXC_RETURN in LR will have one of these values if interrupted code was running in thread mode.
 //  Using PSP.
@@ -92,8 +95,9 @@ static const char* g_threadNamesToIgnore[] = {
 // Accessed by this module and the assembly language handlers in ThreadDebug_asm.S.
 volatile osThreadId_t           mriThreadSingleStepThreadId;
 
-// Structure used to store a 'suspended' thread's original priority settings (current and base) so that they can be
-// later restored. It also tracks the current frozen/thawed/single-stepping state as well.
+// Structures used to track information about all of the application's threads.  It tracks a thread's original priority
+// settings (current and base) so that they can be later restored. It also tracks the thread-id and current
+// frozen/thawed/single-stepping state as well.
 struct ThreadInfo
 {
     osThreadId_t threadId;
@@ -211,18 +215,40 @@ struct ThreadList
 
     ThreadInfo* findThreadId(osThreadId_t threadId)
     {
-        for (uint32_t i = 0 ; i < threadCount ; i++) {
-            if (pThreadList[i].threadId == threadId) {
-                return &pThreadList[i];
-            }
-        }
-        return NULL;
+        ThreadInfo key = {
+            .threadId = threadId,
+            .priority = 0,
+            .basePriority = 0,
+            .state = MRI_PLATFORM_THREAD_FROZEN
+        };
+        return (ThreadInfo*)bsearch(&key, pThreadList, threadCount, sizeof(*pThreadList), compareThreadInfo);
     }
 
     void setStateOnAllThreads(PlatformThreadState state)
     {
         for (uint32_t i = 0 ; i < threadCount ; i++) {
             pThreadList[i].state = (uint8_t)state;
+        }
+    }
+
+    void setStateOnFrozenThreads(PlatformThreadState state)
+    {
+        for (uint32_t i = 0 ; i < threadCount ; i++) {
+            if (pThreadList[i].state == MRI_PLATFORM_THREAD_FROZEN)
+                pThreadList[i].state = (uint8_t)state;
+        }
+    }
+
+    void copyFrom(ThreadList* pFrom)
+    {
+        for (uint32_t i = 0 ; i < threadCount ; i++) {
+            ThreadInfo* pThread = pFrom->findThreadId(pThreadList[i].threadId);
+            if (pThread) {
+                pThreadList[i].state = pThread->state;
+                if (pThread->state == MRI_PLATFORM_THREAD_SINGLE_STEPPING) {
+                    mriThreadSingleStepThreadId = pThread->threadId;
+                }
+            }
         }
     }
 };
@@ -237,11 +263,11 @@ static bool                     g_breakInSetup;
 // The ID of the halted thread being debugged.
 static volatile osThreadId_t    g_haltedThreadId;
 
-// The list of threads which were suspended upon entry into the debugger. These are the threads that will be resumed
-// upon exit from the debugger.
-static osThreadId_t*            g_pSuspendedThreads;
+// The list of all RTX threads which were active upon entry into the debugger. The application's threads will be pulled
+// from this list and used to populate g_pCurrThreadList.
+static osThreadId_t*            g_pAllActiveThreads;
 // The priorities (current and base) & state (frozen, thawed, etc) of each thread modified to suspend application
-// threads when halting in debugger.
+// threads when halting in debugger. g_pPrevThreadList and g_pCurrThreadList will ping pong between these 2 instances.
 static ThreadList               g_threadLists[2];
 // Previous thread info list.
 static ThreadList*              g_pPrevThreadList;
@@ -255,6 +281,9 @@ static char                     g_threadExtraInfo[64];
 // This flag is set to a non-zero value if the DebugMon handler is to re-enable DWT watchpoints and FPB breakpoints
 // after being disabled by the HardFault handler when a debug event is encounted in handler mode.
 static volatile uint32_t        g_enableDWTandFPB;
+
+// This flag is set to a non-zero value if a DebugMon interrupt was pended because GDB sent CTRL+C.
+static volatile uint32_t        g_controlC;
 
 // The ID of the mriMain() thread.
 volatile osThreadId_t           mriThreadId;
@@ -304,7 +333,7 @@ extern "C" void mriMemManagementHandlerStub(void);
 extern "C" void mriBusFaultHandlerStub(void);
 extern "C" void mriUsageFaultHandlerStub(void);
 // Assembly Language stubs for RTX context switching routines. They check to see if DebugMon should be pended before
-// calling the actual RTX handlers.
+// calling the actual RTX handlers to enable single stepping on mriThreadSingleStepThreadId.
 extern "C" void mriSVCHandlerStub(void);
 extern "C" void mriPendSVHandlerStub(void);
 extern "C" void mriSysTickHandlerStub(void);
@@ -338,7 +367,7 @@ static bool isDebuggerActive();
 
 
 
-ThreadDebug::ThreadDebug(DebugCommInterface* pCommInterface, bool breakInSetup, uint32_t maxThreadCount/* =32 */)
+ThreadDebug::ThreadDebug(DebugCommInterface* pCommInterface, bool breakInSetup, uint32_t maxThreadCount)
 {
     if (g_pComm != NULL) {
         // Only allow 1 ThreadDebug object to be initialized.
@@ -350,10 +379,10 @@ ThreadDebug::ThreadDebug(DebugCommInterface* pCommInterface, bool breakInSetup, 
     g_pComm = pCommInterface;
 
     // Allocate the arrays to store thread information.
-    if (maxThreadCount < 5) {
-        maxThreadCount = 5;
+    if (maxThreadCount < MINIMUM_THREAD_COUNT) {
+        maxThreadCount = MINIMUM_THREAD_COUNT;
     }
-    g_pSuspendedThreads = new osThreadId_t[maxThreadCount];
+    g_pAllActiveThreads = new osThreadId_t[maxThreadCount];
     g_threadLists[0].allocate(maxThreadCount);
     g_threadLists[1].allocate(maxThreadCount);
     g_pCurrThreadList = &g_threadLists[0];
@@ -444,9 +473,9 @@ static void suspendAllApplicationThreads()
     g_pCurrThreadList->reset();
     uint32_t threadCount = osThreadGetCount();
     ASSERT ( threadCount <= g_maxThreadCount );
-    osThreadEnumerate(g_pSuspendedThreads, g_maxThreadCount);
+    osThreadEnumerate(g_pAllActiveThreads, g_maxThreadCount);
     for (uint32_t i = 0 ; i < threadCount ; i++) {
-        osThreadId_t thread = g_pSuspendedThreads[i];
+        osThreadId_t thread = g_pAllActiveThreads[i];
 
         if (!isThreadToIgnore(thread)) {
             osRtxThread_t* pThread = (osRtxThread_t*)thread;
@@ -573,8 +602,14 @@ static int justEnteredSetupCallback(void* pv)
 {
     g_pComm->attach(serialISRHook);
 
-    // Return 0 to indicate that we want to halt execution at the beginning of setup() or 1 to not force a halt.
-    return g_breakInSetup ? 0 : 1;
+    if (!g_breakInSetup) {
+        // Unfreeze all of the threads and return 1 to not force a halt in setup().
+        g_pCurrThreadList->setStateOnAllThreads(MRI_PLATFORM_THREAD_THAWED);
+        return 1;
+    }
+
+    // Return 0 to indicate that we want to halt execution at the beginning of setup().
+    return 0;
 }
 
 
@@ -582,8 +617,8 @@ ThreadDebug::~ThreadDebug()
 {
     g_threadLists[0].free();
     g_threadLists[1].free();
-    delete []g_pSuspendedThreads;
-    g_pSuspendedThreads = NULL;
+    delete []g_pAllActiveThreads;
+    g_pAllActiveThreads = NULL;
 
     // IMPORTANT NOTE: You are attempting to destroy the connection to GDB which isn't allowed.
     //                 Don't allow your ThreadDebug object to go out of scope like this.
@@ -811,6 +846,11 @@ void Platform_RtosSetThreadState(uint32_t threadId, PlatformThreadState state)
         return;
     }
 
+    if (threadId == MRI_PLATFORM_ALL_FROZEN_THREADS) {
+        g_pCurrThreadList->setStateOnFrozenThreads(state);
+        return;
+    }
+
     ThreadInfo* pThreadInfo = g_pCurrThreadList->findThreadId((osThreadId_t)threadId);
     if (pThreadInfo == NULL) {
         return;
@@ -821,6 +861,13 @@ void Platform_RtosSetThreadState(uint32_t threadId, PlatformThreadState state)
         mriThreadSingleStepThreadId = (osThreadId_t)threadId;
     }
 }
+
+
+void Platform_RtosRestorePrevThreadState(void)
+{
+    g_pCurrThreadList->copyFrom(g_pPrevThreadList);
+}
+
 
 
 
@@ -834,12 +881,13 @@ extern "C" void mriDebugMonitorHandler(uint32_t excReturn)
         // DebugMon is running at such low priority that we should be getting ready to return to thread mode.
     }
 
-    if (!hasEncounteredDebugEvent() && !hasControlCBeenDetected()) {
-        if (g_enableDWTandFPB) {
-            enableDWTandITM();
-            enableFPB();
-            g_enableDWTandFPB = 0;
-        }
+    if (g_enableDWTandFPB > 0) {
+        enableDWTandITM();
+        enableFPB();
+        atomic_dec32((uint32_t*)&g_enableDWTandFPB);
+    }
+
+    if (!hasEncounteredDebugEvent() && !g_controlC) {
         if (mriThreadSingleStepThreadId) {
             // Code is written to handle case where single stepping gets enabled because current thread was the one
             // to be single stepped but then a higher priority interrupt comes in and makes another thread the
@@ -854,9 +902,17 @@ extern "C" void mriDebugMonitorHandler(uint32_t excReturn)
         return;
     }
 
+    // Just return if debug event was created by MRI handling GDB commands, such as reading from an address of
+    // interest before clearing the rwatch.
+    if (isDebuggerActive()) {
+        SCB->DFSR = SCB->DFSR;
+        return;
+    }
+
     // Get here when a debug event of interest has occurred in a thread.
     recordAndClearFaultStatusBits();
     stopSingleStepping();
+    g_controlC = 0;
     wakeMriMainToDebugCurrentThread();
 }
 
@@ -886,7 +942,7 @@ extern "C" void mriFaultHandler(uint32_t excReturn, uint32_t psp, uint32_t msp)
 
     // The asm stub calling this function has already verified that a debug event during handler mode caused
     // this fault. Disable DWT watchpoints and FPB breakpoints until re-entering thread mode.
-    g_enableDWTandFPB = 1;
+    atomic_inc32((uint32_t*)&g_enableDWTandFPB);
     SCB->DFSR = SCB->DFSR;
     SCB->HFSR = SCB_HFSR_DEBUGEVT_Msk;
     disableDWTandITM();
@@ -989,6 +1045,7 @@ static void serialISRHook()
     if (!isDebuggerActive() && !isThreadToIgnore(osThreadGetId()) && g_pComm->readable()) {
         // Pend a halt into the debug monitor now that there is data from GDB ready to be read by it.
         setControlCFlag();
+        g_controlC = 1;
         setMonitorPending();
     }
 }

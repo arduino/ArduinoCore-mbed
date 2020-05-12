@@ -195,7 +195,7 @@ void mriDebugException(MriContext* pContext)
             resumeExecution = pTempBreakpointCallback(pvTempBreakpointContext);
             if (resumeExecution)
             {
-                ReplaySetThreadStateCalls();
+                RestoreThreadStates();
                 return;
             }
         }
@@ -209,7 +209,7 @@ void mriDebugException(MriContext* pContext)
         {
             Platform_DisableSingleStep();
             Platform_EnableSingleStep();
-            ReplaySetThreadStateCalls();
+            RestoreThreadStates();
             return;
         }
     }
@@ -224,7 +224,7 @@ void mriDebugException(MriContext* pContext)
         Semihost_HandleSemihostRequest() &&
         !justSingleStepped )
     {
-        ReplaySetThreadStateCalls();
+        RestoreThreadStates();
         prepareForDebuggerExit();
         return;
     }
@@ -233,7 +233,6 @@ void mriDebugException(MriContext* pContext)
         Platform_DisplayFaultCauseToGdbConsole();
     Send_T_StopResponse();
 
-    ForgetSetThreadStateCalls();
     GdbCommandHandlingLoop();
 
     prepareForDebuggerExit();

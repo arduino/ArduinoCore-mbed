@@ -612,3 +612,7 @@ int Platform_RtosIsSetThreadStateSupported(void)
 void Platform_RtosSetThreadState(uint32_t threadId, PlatformThreadState state)
 {
 }
+
+void Platform_RtosRestorePrevThreadState(void)
+{
+}
