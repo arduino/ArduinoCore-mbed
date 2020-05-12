@@ -1,4 +1,4 @@
-/* Copyright 2017 Adam Green (https://github.com/adamgreen/)
+/* Copyright 2020 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -21,39 +21,19 @@
 #include <core/cmd_continue.h>
 
 
-static uint32_t skipHardcodedBreakpoint(void);
 static int shouldSkipHardcodedBreakpoint(void);
 static int isCurrentInstructionHardcodedBreakpoint(void);
-/* Handle the 'c' command which is sent from gdb to tell the debugger to continue execution of the currently halted
-   program.
-
-    Command Format:     cAAAAAAAA
-    Response Format:    Blank until the next exception, at which time a 'T' stop response packet will be sent.
-
-    Where AAAAAAAA is an optional value to be used for the Program Counter when restarting the program.
-*/
-uint32_t HandleContinueCommand(void)
+uint32_t ContinueExecution(int setPC, uint32_t newPC)
 {
-    Buffer*     pBuffer = GetBuffer();
-    uint32_t    returnValue = 0;
-    uint32_t    newPC;
-
-    returnValue |= skipHardcodedBreakpoint();
-    /* New program counter value is optional parameter. */
-    __try
-    {
-        __throwing_func( newPC = ReadUIntegerArgument(pBuffer) );
+    if (Platform_RtosIsSetThreadStateSupported())
+        Platform_RtosSetThreadState(MRI_PLATFORM_ALL_THREADS, MRI_PLATFORM_THREAD_THAWED);
+    uint32_t returnValue = SkipHardcodedBreakpoint();
+    if (setPC)
         Platform_SetProgramCounter(newPC);
-    }
-    __catch
-    {
-        clearExceptionCode();
-    }
-
     return (returnValue | HANDLER_RETURN_RESUME_PROGRAM | HANDLER_RETURN_RETURN_IMMEDIATELY);
 }
 
-static uint32_t skipHardcodedBreakpoint(void)
+uint32_t SkipHardcodedBreakpoint(void)
 {
     if (shouldSkipHardcodedBreakpoint())
     {
@@ -75,6 +55,35 @@ static int isCurrentInstructionHardcodedBreakpoint(void)
 }
 
 
+/* Handle the 'c' command which is sent from gdb to tell the debugger to continue execution of the currently halted
+   program.
+
+    Command Format:     cAAAAAAAA
+    Response Format:    Blank until the next exception, at which time a 'T' stop response packet will be sent.
+
+    Where AAAAAAAA is an optional value to be used for the Program Counter when restarting the program.
+*/
+uint32_t HandleContinueCommand(void)
+{
+    Buffer*     pBuffer = GetBuffer();
+    int         setPC = 0;
+    uint32_t    newPC = 0;
+
+    /* New program counter value is optional parameter. */
+    __try
+    {
+        __throwing_func( newPC = ReadUIntegerArgument(pBuffer) );
+        setPC = 1;
+    }
+    __catch
+    {
+        clearExceptionCode();
+    }
+    return ContinueExecution(setPC, newPC);
+}
+
+
+
 /* Handle the 'C' command which is sent from gdb to tell the debugger to continue execution of the currently halted
    program. It is similar to the 'c' command but it also provides a signal level, which MRI ignores.
 
@@ -87,10 +96,9 @@ static int isCurrentInstructionHardcodedBreakpoint(void)
 uint32_t HandleContinueWithSignalCommand(void)
 {
     Buffer*     pBuffer = GetBuffer();
-    uint32_t    returnValue = 0;
-    uint32_t    newPC;
+    int         setPC = 0;
+    uint32_t    newPC = 0;
 
-    returnValue |= skipHardcodedBreakpoint();
     __try
     {
         /* Fetch signal value but ignore it. */
@@ -98,7 +106,7 @@ uint32_t HandleContinueWithSignalCommand(void)
         if (Buffer_BytesLeft(pBuffer) && Buffer_IsNextCharEqualTo(pBuffer, ';'))
         {
             __throwing_func( newPC = ReadUIntegerArgument(pBuffer) );
-            Platform_SetProgramCounter(newPC);
+            setPC = 1;
         }
     }
     __catch
@@ -106,6 +114,21 @@ uint32_t HandleContinueWithSignalCommand(void)
         PrepareStringResponse(MRI_ERROR_INVALID_ARGUMENT);
         return 0;
     }
+    return ContinueExecution(setPC, newPC);
+}
 
-    return (returnValue | HANDLER_RETURN_RESUME_PROGRAM | HANDLER_RETURN_RETURN_IMMEDIATELY);
+
+/* Handle the 'D' command which is sent from gdb to resume execution before it detaches and exits.
+
+    Command Format:     D
+    Response Format:    OK
+
+*/
+uint32_t HandleDetachCommand(void)
+{
+    if (Platform_RtosIsSetThreadStateSupported())
+        Platform_RtosSetThreadState(MRI_PLATFORM_ALL_THREADS, MRI_PLATFORM_THREAD_THAWED);
+    SkipHardcodedBreakpoint();
+    PrepareStringResponse("OK");
+    return HANDLER_RETURN_RESUME_PROGRAM;
 }

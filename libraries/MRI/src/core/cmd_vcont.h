@@ -12,7 +12,18 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-// MRI - Monitor for Remote Inspection.  The GDB compatible debug monitor for Cortex-M devices.
-#pragma once
+/* Handler for gdb's vCont and vCont? commands which support multithreaded single stepping/continuing. */
+#ifndef CMD_VCONT_H_
+#define CMD_VCONT_H_
 
-#include "core/mri.h"
+#include <stdint.h>
+
+/* Real name of functions are in mri namespace. */
+uint32_t mriCmd_HandleVContCommands(void);
+void     mriCmd_RestoreThreadStates(void);
+
+/* Macroes which allow code to drop the mri namespace prefix. */
+#define HandleVContCommands         mriCmd_HandleVContCommands
+#define RestoreThreadStates   mriCmd_RestoreThreadStates
+
+#endif /* CMD_VCONT_H_ */

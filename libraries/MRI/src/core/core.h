@@ -14,60 +14,78 @@
 */
 /* Core mri functionality exposed to other modules within the debug monitor.  These are the private routines exposed
    from within mri.c.  The public functionality is exposed via mri.h. */
-#ifndef _CORE_H_
-#define _CORE_H_
+#ifndef CORE_H_
+#define CORE_H_
 
 #include <stdint.h>
 #include <core/buffer.h>
+#include <core/context.h>
 
-/* Real name of functions are in __mri namespace. */
-void    __mriCore_InitBuffer(void);
-Buffer* __mriCore_GetBuffer(void);
-Buffer* __mriCore_GetInitializedBuffer(void);
-void    __mriCore_PrepareStringResponse(const char* pErrorString);
-#define PrepareEmptyResponseForUnknownCommand() __mriCore_PrepareStringResponse("")
 
-int     __mriCore_WasControlCFlagSentFromGdb(void);
-void    __mriCore_RecordControlCFlagSentFromGdb(int controlCFlag);
-int     __mriCore_WasSemihostCallCancelledByGdb(void);
-void    __mriCore_FlagSemihostCallAsHandled(void);
-int     __mriCore_IsFirstException(void);
-int     __mriCore_WasSuccessfullyInit(void);
-int     __mriCore_IsWaitingForGdbToConnect(void);
+typedef struct
+{
+    uint32_t start;
+    uint32_t end;
+} AddressRange;
 
-void    __mriCore_SetSignalValue(uint8_t signalValue);
-uint8_t __mriCore_GetSignalValue(void);
-void    __mriCore_SetSemihostReturnValues(int semihostReturnCode, int semihostErrNo);
-int     __mriCore_GetSemihostReturnCode(void);
-int     __mriCore_GetSemihostErrno(void);
 
-void    __mriCore_SendPacketToGdb(void);
-void    __mriCore_GdbCommandHandlingLoop(void);
+/* Real name of functions are in mri namespace. */
+void    mriDebugException(MriContext* pContext);
+
+void    mriCore_InitBuffer(void);
+Buffer* mriCore_GetBuffer(void);
+Buffer* mriCore_GetInitializedBuffer(void);
+void    mriCore_PrepareStringResponse(const char* pErrorString);
+#define PrepareEmptyResponseForUnknownCommand() mriCore_PrepareStringResponse("")
+
+int     mriCore_WasControlCFlagSentFromGdb(void);
+void    mriCore_RecordControlCFlagSentFromGdb(int controlCFlag);
+int     mriCore_WasSemihostCallCancelledByGdb(void);
+void    mriCore_FlagSemihostCallAsHandled(void);
+int     mriCore_IsFirstException(void);
+int     mriCore_WasSuccessfullyInit(void);
+void    mriCore_RequestResetOnNextContinue(void);
+void    mriCore_SetSingleSteppingRange(const AddressRange* pRange);
+
+MriContext* mriCore_GetContext(void);
+void        mriCore_SetContext(MriContext* pContext);
+
+void    mriCore_SetSignalValue(uint8_t signalValue);
+uint8_t mriCore_GetSignalValue(void);
+void    mriCore_SetSemihostReturnValues(int semihostReturnCode, int semihostErrNo);
+int     mriCore_GetSemihostReturnCode(void);
+int     mriCore_GetSemihostErrno(void);
+
+void    mriCore_SendPacketToGdb(void);
+void    mriCore_GdbCommandHandlingLoop(void);
 
 typedef int (*TempBreakpointCallbackPtr)(void*);
-int     __mriCore_SetTempBreakpoint(uint32_t breakpointAddress, TempBreakpointCallbackPtr pCallback, void* pvContext);
+int     mriCore_SetTempBreakpoint(uint32_t breakpointAddress, TempBreakpointCallbackPtr pCallback, void* pvContext);
 
 
-/* Macroes which allow code to drop the __mri namespace prefix. */
-#define InitBuffer                      __mriCore_InitBuffer
-#define GetBuffer                       __mriCore_GetBuffer
-#define GetInitializedBuffer            __mriCore_GetInitializedBuffer
-#define PrepareStringResponse           __mriCore_PrepareStringResponse
-#define WasControlCFlagSentFromGdb      __mriCore_WasControlCFlagSentFromGdb
-#define RecordControlCFlagSentFromGdb   __mriCore_RecordControlCFlagSentFromGdb
-#define WasSemihostCallCancelledByGdb   __mriCore_WasSemihostCallCancelledByGdb
-#define FlagSemihostCallAsHandled       __mriCore_FlagSemihostCallAsHandled
-#define IsFirstException                __mriCore_IsFirstException
-#define WasSuccessfullyInit             __mriCore_WasSuccessfullyInit
-#define IsWaitingForGdbToConnect        __mriCore_IsWaitingForGdbToConnect
-#define SetSignalValue                  __mriCore_SetSignalValue
-#define GetSignalValue                  __mriCore_GetSignalValue
-#define SetSemihostReturnValues         __mriCore_SetSemihostReturnValues
-#define GetSemihostReturnCode           __mriCore_GetSemihostReturnCode
-#define GetSemihostErrno                __mriCore_GetSemihostErrno
-#define SendPacketToGdb                 __mriCore_SendPacketToGdb
-#define GdbCommandHandlingLoop          __mriCore_GdbCommandHandlingLoop
-#define SetTempBreakpoint               __mriCore_SetTempBreakpoint
+/* Macroes which allow code to drop the mri namespace prefix. */
+#define InitBuffer                      mriCore_InitBuffer
+#define GetBuffer                       mriCore_GetBuffer
+#define GetInitializedBuffer            mriCore_GetInitializedBuffer
+#define PrepareStringResponse           mriCore_PrepareStringResponse
+#define WasControlCFlagSentFromGdb      mriCore_WasControlCFlagSentFromGdb
+#define RecordControlCFlagSentFromGdb   mriCore_RecordControlCFlagSentFromGdb
+#define WasSemihostCallCancelledByGdb   mriCore_WasSemihostCallCancelledByGdb
+#define FlagSemihostCallAsHandled       mriCore_FlagSemihostCallAsHandled
+#define IsFirstException                mriCore_IsFirstException
+#define WasSuccessfullyInit             mriCore_WasSuccessfullyInit
+#define RequestResetOnNextContinue      mriCore_RequestResetOnNextContinue
+#define SetSingleSteppingRange          mriCore_SetSingleSteppingRange
+#define GetContext                      mriCore_GetContext
+#define SetContext                      mriCore_SetContext
+#define SetSignalValue                  mriCore_SetSignalValue
+#define GetSignalValue                  mriCore_GetSignalValue
+#define SetSemihostReturnValues         mriCore_SetSemihostReturnValues
+#define GetSemihostReturnCode           mriCore_GetSemihostReturnCode
+#define GetSemihostErrno                mriCore_GetSemihostErrno
+#define SendPacketToGdb                 mriCore_SendPacketToGdb
+#define GdbCommandHandlingLoop          mriCore_GdbCommandHandlingLoop
+#define SetTempBreakpoint               mriCore_SetTempBreakpoint
 
 /* Macro to convert 32-bit addresses sent from GDB to pointer. */
 #if _LP64
@@ -78,4 +96,4 @@ int     __mriCore_SetTempBreakpoint(uint32_t breakpointAddress, TempBreakpointCa
     #define ADDR32_TO_POINTER(X) (void*)(X)
 #endif /* _LP64 */
 
-#endif /* _CORE_H_ */
+#endif /* CORE_H_ */

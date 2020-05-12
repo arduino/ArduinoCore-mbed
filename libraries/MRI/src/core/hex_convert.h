@@ -13,8 +13,8 @@
    limitations under the License.
 */
 /* Hexadecimal to/from text conversion helpers. */
-#ifndef _HEX_CONVERT_H_
-#define _HEX_CONVERT_H_
+#ifndef HEX_CONVERT_H_
+#define HEX_CONVERT_H_
 
 #include <core/try_catch.h>
 
@@ -42,4 +42,4 @@ static inline int HexCharToNibble(unsigned char HexChar)
     __throw_and_return(invalidHexDigitException, -1);
 }
 
-#endif /* _HEX_CONVERT_H_ */
+#endif /* HEX_CONVERT_H_ */

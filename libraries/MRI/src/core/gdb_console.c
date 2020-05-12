@@ -21,20 +21,10 @@
 #include <core/gdb_console.h>
 
 
-static void writeStringToSharedCommChannel(const char* pString);
 static void writeStringToExclusiveGdbCommChannel(const char* pString);
 void WriteStringToGdbConsole(const char* pString)
 {
-    if (Platform_CommSharingWithApplication() && IsFirstException())
-        writeStringToSharedCommChannel(pString);
-    else
-        writeStringToExclusiveGdbCommChannel(pString);
-}
-
-static void writeStringToSharedCommChannel(const char* pString)
-{
-    while(*pString)
-        Platform_CommSendChar(*pString++);
+    writeStringToExclusiveGdbCommChannel(pString);
 }
 
 /* Send the 'O' command to gdb to output text to its console.
@@ -47,8 +37,7 @@ static void writeStringToExclusiveGdbCommChannel(const char* pString)
     Buffer* pBuffer = GetInitializedBuffer();
 
     Buffer_WriteChar(pBuffer, 'O');
-    while (*pString)
-        Buffer_WriteByteAsHex(pBuffer, *pString++);
+    Buffer_WriteStringAsHex(pBuffer, pString);
     if (!Buffer_OverrunDetected(pBuffer))
         SendPacketToGdb();
 }

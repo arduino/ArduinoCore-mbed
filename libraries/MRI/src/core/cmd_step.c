@@ -40,7 +40,11 @@ uint32_t HandleSingleStepCommand(void)
     }
 
     if (returnValue)
+    {
+        if (Platform_RtosIsSetThreadStateSupported())
+            Platform_RtosSetThreadState(Platform_RtosGetHaltedThreadId(), MRI_PLATFORM_THREAD_SINGLE_STEPPING);
         Platform_EnableSingleStep();
+    }
 
     return returnValue;
 }
@@ -71,7 +75,11 @@ uint32_t HandleSingleStepWithSignalCommand(void)
     }
 
     if (returnValue)
+    {
+        if (Platform_RtosIsSetThreadStateSupported())
+            Platform_RtosSetThreadState(Platform_RtosGetHaltedThreadId(), MRI_PLATFORM_THREAD_SINGLE_STEPPING);
         Platform_EnableSingleStep();
+    }
 
     return returnValue;
 }

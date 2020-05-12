@@ -1,4 +1,4 @@
-/* Copyright 2012 Adam Green (https://github.com/adamgreen/)
+/* Copyright 2020 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
    limitations under the License.
 */
 /* Command handler for gdb commands related to CPU registers. */
+#include <signal.h>
 #include <core/cmd_common.h>
 #include <core/platforms.h>
 #include <core/buffer.h>
@@ -21,6 +22,8 @@
 #include <core/cmd_registers.h>
 
 
+static void writeThreadIdToBuffer(Buffer* pBuffer, uint32_t threadId);
+static void writeTrapReasonToBuffer(Buffer* pBuffer);
 /* Sent when an exception occurs while program is executing because of previous 'c' (Continue) or 's' (Step) commands.
 
     Data Format: Tssii:xxxxxxxx;ii:xxxxxxxx;...
@@ -33,14 +36,60 @@
 */
 uint32_t Send_T_StopResponse(void)
 {
+    uint8_t signalValue = GetSignalValue();
     Buffer* pBuffer = GetInitializedBuffer();
+    uint32_t threadId = Platform_RtosGetHaltedThreadId();
 
     Buffer_WriteChar(pBuffer, 'T');
-    Buffer_WriteByteAsHex(pBuffer, GetSignalValue());
+    Buffer_WriteByteAsHex(pBuffer, signalValue);
+    if (threadId != 0)
+        writeThreadIdToBuffer(pBuffer, threadId);
+    if (signalValue == SIGTRAP)
+        writeTrapReasonToBuffer(pBuffer);
     Platform_WriteTResponseRegistersToBuffer(pBuffer);
 
     SendPacketToGdb();
     return HANDLER_RETURN_RETURN_IMMEDIATELY;
+}
+
+static void writeThreadIdToBuffer(Buffer* pBuffer, uint32_t threadId)
+{
+    Buffer_WriteString(pBuffer, "thread");
+    Buffer_WriteChar(pBuffer, ':');
+    Buffer_WriteUIntegerAsHex(pBuffer, threadId);
+    Buffer_WriteChar(pBuffer, ';');
+}
+
+static void writeTrapReasonToBuffer(Buffer* pBuffer)
+{
+    const char* pReason;
+    int         outputAddress;
+
+    PlatformTrapReason reason = Platform_GetTrapReason();
+    switch (reason.type)
+    {
+    case MRI_PLATFORM_TRAP_TYPE_WATCH:
+        pReason = "watch";
+        outputAddress = 1;
+        break;
+    case MRI_PLATFORM_TRAP_TYPE_RWATCH:
+        pReason = "rwatch";
+        outputAddress = 1;
+        break;
+    case MRI_PLATFORM_TRAP_TYPE_AWATCH:
+        pReason = "awatch";
+        outputAddress = 1;
+        break;
+    default:
+        /* Don't dump trap reason if it is unknown. */
+        return;
+    }
+
+    Buffer_WriteString(pBuffer, pReason);
+    Buffer_WriteChar(pBuffer, ':');
+    if (outputAddress)
+        Buffer_WriteUIntegerAsHex(pBuffer, reason.address);
+    Buffer_WriteChar(pBuffer, ';');
 }
 
 
@@ -55,8 +104,7 @@ uint32_t Send_T_StopResponse(void)
 */
 uint32_t HandleRegisterReadCommand(void)
 {
-    Platform_CopyContextToBuffer(GetInitializedBuffer());
-
+    Context_CopyToBuffer(GetContext(), GetInitializedBuffer());
     return 0;
 }
 
@@ -74,7 +122,7 @@ uint32_t HandleRegisterWriteCommand(void)
 {
     Buffer*     pBuffer = GetBuffer();
 
-    Platform_CopyContextFromBuffer(pBuffer);
+    Context_CopyFromBuffer(GetContext(), pBuffer);
 
     if (Buffer_OverrunDetected(pBuffer))
         PrepareStringResponse(MRI_ERROR_BUFFER_OVERRUN);

@@ -13,15 +13,15 @@
    limitations under the License.
 */
 /* Handler for gdb query commands. */
-#ifndef _CMD_QUERY_H_
-#define _CMD_QUERY_H_
+#ifndef CMD_QUERY_H_
+#define CMD_QUERY_H_
 
 #include <stdint.h>
 
-/* Real name of functions are in __mri namespace. */
-uint32_t __mriCmd_HandleQueryCommand(void);
+/* Real name of functions are in mri namespace. */
+uint32_t mriCmd_HandleQueryCommand(void);
 
-/* Macroes which allow code to drop the __mri namespace prefix. */
-#define HandleQueryCommand __mriCmd_HandleQueryCommand
+/* Macroes which allow code to drop the mri namespace prefix. */
+#define HandleQueryCommand mriCmd_HandleQueryCommand
 
-#endif /* _CMD_QUERY_H_ */
+#endif /* CMD_QUERY_H_ */

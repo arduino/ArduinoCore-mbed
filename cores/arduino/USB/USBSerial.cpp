@@ -95,14 +95,12 @@ void USBSerial::data_rx()
     USBCDC::assert_locked();
 
     //call a potential handler
-    int i = 0;
-    while (i < howManyCallbacks) {
-        if (rx[i]) {
-            rx[i].call();
+    for (size_t i = 0 ; i < _howManyCallbacks ; i++) {
+        if (_rx[i]) {
+            _rx[i].call();
         } else {
             break;
         }
-        i++;
     }
 }
 
