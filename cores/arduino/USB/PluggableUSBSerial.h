@@ -221,14 +221,17 @@ public:
     }
 
     int available(void) {
+        onInterrupt();
         return rx_buffer.available();
     }
 
     int peek(void) {
+        onInterrupt();
         return rx_buffer.peek();
     }
 
     int read(void) {
+        onInterrupt();
         return rx_buffer.read_char();
     }
 
