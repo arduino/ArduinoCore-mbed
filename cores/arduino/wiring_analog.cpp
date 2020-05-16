@@ -34,7 +34,7 @@ void analogWriteDAC(PinName pin, int val) {
   if (dac == NULL) {
     dac = new mbed::AnalogOut(pin);
   }
-  float percent = (float)val/(float)(1 << write_resolution);
+  float percent = (float)val/(float)((1 << write_resolution)-1);
   if (percent > 1.0f) {
     percent = 1.0f;
   }
@@ -50,7 +50,7 @@ void analogWrite(PinName pin, int val)
   } else {
     mbed::PwmOut* pwm = new mbed::PwmOut(pin);
     pwm->period_ms(2); //500Hz
-    float percent = (float)val/(float)(1 << write_resolution);
+    float percent = (float)val/(float)((1 << write_resolution)-1);
     pwm->write(percent);
   }
 }
@@ -66,7 +66,7 @@ void analogWrite(pin_size_t pin, int val)
       return;
     }
 #endif
-  float percent = (float)val/(float)(1 << write_resolution);
+  float percent = (float)val/(float)((1 << write_resolution)-1);
   mbed::PwmOut* pwm = digitalPinToPwm(pin);
   if (pwm == NULL) {
     pwm = new mbed::PwmOut(digitalPinToPinName(pin));
