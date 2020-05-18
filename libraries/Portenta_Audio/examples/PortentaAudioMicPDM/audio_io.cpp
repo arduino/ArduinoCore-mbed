@@ -54,10 +54,10 @@ uint16_t AUDIO_IO_Read(uint8_t Addr, uint16_t Reg)
   Wire1.write((uint8_t)Reg);
   Wire1.endTransmission(false);
 
-  Wire.requestFrom(Addr, 2);
+  Wire1.requestFrom(Addr, 2);
   int i = 0;
-  while (Wire.available()) {
-    read_value[i++] = Wire.read();
+  while (Wire1.available()) {
+    read_value[i++] = Wire1.read();
   }
 
   return ((read_value[0] << 8) | read_value[1]);

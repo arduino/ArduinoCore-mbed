@@ -1,6 +1,7 @@
 //doomgeneric for arduino
 
 #include "Arduino.h"
+#include "mbed.h"
 #include "Portenta_Video.h"
 
 #define sleep _sleep

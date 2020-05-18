@@ -33,6 +33,7 @@
 */
 
 #include "USBHost.h"
+#include "USB251xB.h"
 
 extern "C" {
 #include "teeny_usb.h"
