@@ -361,6 +361,15 @@ typedef enum {
     LED2 = LED_GREEN,
     LED3 = LED_BLUE,
 
+    CYBSP_BT_UART_RX = PF_6,
+    CYBSP_BT_UART_TX = PA_15,
+    CYBSP_BT_UART_RTS = PF_8,
+    CYBSP_BT_UART_CTS = PF_9,
+
+    CYBSP_BT_POWER = PJ_12,
+    CYBSP_BT_HOST_WAKE = PJ_13,
+    CYBSP_BT_DEVICE_WAKE = PJ_14,
+
     USER_BUTTON = PC_13,
     // Standardized button names
     BUTTON1 = USER_BUTTON,
