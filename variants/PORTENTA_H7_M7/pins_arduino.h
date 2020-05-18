@@ -6,6 +6,7 @@
 
 #ifdef __cplusplus
 extern "C" unsigned int PINCOUNT_fn();
+extern "C" bool isBetaBoard();
 #endif
 #define PINS_COUNT           (PINCOUNT_fn())
 #define NUM_DIGITAL_PINS     (22u)
@@ -79,7 +80,6 @@ static const uint8_t SCK  = PIN_SPI_SCK;
 
 uint8_t getUniqueSerialNumber(uint8_t* name);
 void _ontouch1200bps_();
-
 
 #define WIRE_HOWMANY		2
 

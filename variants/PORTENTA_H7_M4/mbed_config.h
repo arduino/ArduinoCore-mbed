@@ -44,7 +44,7 @@
 #define DM_NUM_ADV_SETS                                                       3                                                                                                // set by library:cordio
 #define DM_NUM_PHYS                                                           3                                                                                                // set by library:cordio
 #define DM_SYNC_MAX                                                           1                                                                                                // set by library:cordio
-#define HSE_VALUE                                                             25000000                                                                                         // set by target:PORTENTA_H7
+#define HSE_VALUE                                                             (isBetaBoard()?27000000:25000000)                                                                // set by target:PORTENTA_H7
 #define L2C_COC_CHAN_MAX                                                      1                                                                                                // set by library:cordio
 #define L2C_COC_REG_MAX                                                       1                                                                                                // set by library:cordio
 #define LPTICKER_DELAY_TICKS                                                  0                                                                                                // set by target:PORTENTA_H7
@@ -376,7 +376,7 @@
 #define MBED_CONF_TARGET_LPTICKER_LPTIM                                       1                                                                                                // set by target:PORTENTA_H7
 #define MBED_CONF_TARGET_LPTICKER_LPTIM_CLOCK                                 1                                                                                                // set by target:FAMILY_STM32
 #define MBED_CONF_TARGET_LPUART_CLOCK_SOURCE                                  USE_LPUART_CLK_LSE|USE_LPUART_CLK_PCLK1                                                          // set by target:FAMILY_STM32
-#define MBED_CONF_TARGET_LSE_AVAILABLE                                        1                                                                                                // set by target:FAMILY_STM32
+#define MBED_CONF_TARGET_LSE_AVAILABLE                                        0                                                                                                // set by target:PORTENTA_H7
 #define MBED_CONF_TARGET_LSE_BYPASS                                           1                                                                                                // set by target:PORTENTA_H7
 #define MBED_CONF_TARGET_MPU_ROM_END                                          0x0fffffff                                                                                       // set by target:Target
 #define MBED_CONF_TARGET_NETWORK_DEFAULT_INTERFACE_TYPE                       WIFI                                                                                             // set by target:PORTENTA_H7

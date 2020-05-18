@@ -6,6 +6,7 @@
 
 #ifdef __cplusplus
 extern "C" unsigned int PINCOUNT_fn();
+extern "C" bool isBetaBoard();
 #endif
 #define PINS_COUNT           (PINCOUNT_fn())
 #define NUM_DIGITAL_PINS     (22u)
