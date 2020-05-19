@@ -20,7 +20,7 @@ extern "C" unsigned int PINCOUNT_fn();
 #endif
 #define PINS_COUNT           (PINCOUNT_fn())
 #define NUM_DIGITAL_PINS     (21u)
-#define NUM_ANALOG_INPUTS    (7u)
+#define NUM_ANALOG_INPUTS    (8u)
 #define NUM_ANALOG_OUTPUTS   (0u)
 
 // LEDs
