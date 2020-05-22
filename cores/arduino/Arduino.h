@@ -90,14 +90,20 @@ typedef struct _PinDescription
   PinName name;
   mbed::InterruptIn* irq;
   mbed::PwmOut* pwm;
-  mbed::AnalogIn* analog;
   gpio_t* gpio;
 } PinDescription ;
+
+typedef struct _AnalogPinDescription
+{
+  PinName name;
+  mbed::AnalogIn* adc;
+} AnalogPinDescription ;
 
 int PinNameToIndex(PinName P);
 
 // Pins table to be instantiated into variant.cpp
 extern PinDescription g_APinDescription[];
+extern AnalogPinDescription g_AAnalogPinDescription[];
 
 #include "Serial.h"
 #if defined(SERIAL_CDC)

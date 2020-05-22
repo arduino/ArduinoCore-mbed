@@ -62,7 +62,12 @@ void analogWriteResolution(int bits)
 
 int analogRead(PinName pin)
 {
-  return (mbed::AnalogIn(pin).read_u16() >> (16 - read_resolution));
+  for (pin_size_t i = 0; i < NUM_ANALOG_INPUTS; i++) {
+    if (analogPinToPinName(i) == pin) {
+      return analogRead(i + A0);
+    }
+  }
+  return -1;
 }
 
 int analogRead(pin_size_t pin)
@@ -74,12 +79,12 @@ int analogRead(pin_size_t pin)
   if (name == NC) {
     return -1;
   }
-  mbed::AnalogIn* obj = analogPinToAnalogObj(pin);
-  if (obj == NULL) {
-    obj = new mbed::AnalogIn(name);
-    analogPinToAnalogObj(pin) = obj;
+  mbed::AnalogIn* adc = analogPinToAdcObj(pin);
+  if (adc == NULL) {
+    adc = new mbed::AnalogIn(name);
+    analogPinToAdcObj(pin) = adc;
   }
-  return (obj->read_u16() >> (16 - read_resolution));
+  return (adc->read_u16() >> (16 - read_resolution));
 }
 
 void analogReadResolution(int bits)
