@@ -80,6 +80,13 @@ public:
      */
     AnalogIn(PinName pin);
 
+
+    /** Reconfigure the adc object using the given configuration
+     *
+     * @param config reference to structure which holds AnalogIn configuration
+     */
+    void configure(const analogin_config_t &config);
+
     /** Read the input voltage, represented as a float in the range [0.0, 1.0]
      *
      * @returns A floating-point value representing the current input voltage, measured as a percentage
