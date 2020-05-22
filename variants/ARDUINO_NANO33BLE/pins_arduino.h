@@ -18,6 +18,17 @@ enum _AnalogReferenceMode
   AR_INTERNAL2V4  // 2.4 V
 };
 
+/* Analog acquisition time options */
+enum _AnalogAcquisitionTime
+{
+  AT_3_US,         
+  AT_5_US,    
+  AT_10_US, // Default value
+  AT_15_US,
+  AT_20_US,  
+  AT_40_US  
+};
+
 // Frequency of the board main oscillator
 #define VARIANT_MAINOSC (32768ul)
 

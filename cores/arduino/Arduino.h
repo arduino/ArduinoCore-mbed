@@ -109,6 +109,9 @@ extern AnalogPinDescription g_AAnalogPinDescription[];
 
 typedef enum _AnalogReferenceMode AnalogReferenceMode;
 void analogReference(uint8_t mode);
+/* nRF specific function to change analog acquisition time */
+typedef enum _AnalogAcquisitionTime AnalogAcquisitionTime;
+void analogAcquisitionTime(uint8_t time);
 
 /* Function to reconfigure already active ADC channels */
 void analogUpdate();
