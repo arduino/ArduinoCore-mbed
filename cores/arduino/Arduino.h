@@ -105,6 +105,18 @@ int PinNameToIndex(PinName P);
 extern PinDescription g_APinDescription[];
 extern AnalogPinDescription g_AAnalogPinDescription[];
 
+#ifdef ANALOG_CONFIG
+
+typedef enum _AnalogReferenceMode AnalogReferenceMode;
+void analogReference(uint8_t mode);
+
+/* Function to reconfigure already active ADC channels */
+void analogUpdate();
+extern bool isAdcConfigChanged;
+extern analogin_config_t adcCurrentConfig;
+
+#endif
+
 #include "Serial.h"
 #if defined(SERIAL_CDC)
 #include "USB/PluggableUSBSerial.h"

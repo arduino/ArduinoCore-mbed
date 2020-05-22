@@ -1,5 +1,47 @@
 #include "Arduino.h"
 
+/* wiring_analog variables definition */
+/* Flag to indicate whether the ADC config has been changed from the default one */
+bool isAdcConfigChanged = false;
+
+/* 
+ * Configuration used for all the active ADC channels, it is initialized with the mbed default values
+ * When it is changed, all the ADC channels are reconfigured accordingly 
+ */
+analogin_config_t adcCurrentConfig = {
+    .resistor_p = NRF_SAADC_RESISTOR_DISABLED,
+    .resistor_n = NRF_SAADC_RESISTOR_DISABLED,
+    .gain       = NRF_SAADC_GAIN1_4,
+    .reference  = NRF_SAADC_REFERENCE_VDD4,
+    .acq_time   = NRF_SAADC_ACQTIME_10US,
+    .mode       = NRF_SAADC_MODE_SINGLE_ENDED,
+    .burst      = NRF_SAADC_BURST_DISABLED,
+    .pin_p      = NRF_SAADC_INPUT_DISABLED,
+    .pin_n      = NRF_SAADC_INPUT_DISABLED
+};
+
+void analogReference(uint8_t mode)
+{
+  nrf_saadc_reference_t reference = NRF_SAADC_REFERENCE_VDD4;
+  nrf_saadc_gain_t gain = NRF_SAADC_GAIN1_4;
+  if (mode == AR_VDD) {
+    reference = NRF_SAADC_REFERENCE_VDD4;
+    gain = NRF_SAADC_GAIN1_4;
+  } else if (mode == AR_INTERNAL) {
+    reference = NRF_SAADC_REFERENCE_INTERNAL;
+    gain = NRF_SAADC_GAIN1;
+  } else if (mode == AR_INTERNAL1V2) {
+    reference = NRF_SAADC_REFERENCE_INTERNAL;
+    gain = NRF_SAADC_GAIN1_2;
+  } else if (mode == AR_INTERNAL2V4) {
+    reference = NRF_SAADC_REFERENCE_INTERNAL;
+    gain = NRF_SAADC_GAIN1_4;
+  }
+  adcCurrentConfig.reference = reference;
+  adcCurrentConfig.gain = gain;
+  analogUpdate();
+}
+
 AnalogPinDescription g_AAnalogPinDescription[] = {
     // A0 - A7
   { P0_4,  NULL },    // A0

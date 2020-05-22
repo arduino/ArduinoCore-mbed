@@ -83,9 +83,28 @@ int analogRead(pin_size_t pin)
   if (adc == NULL) {
     adc = new mbed::AnalogIn(name);
     analogPinToAdcObj(pin) = adc;
+#ifdef ANALOG_CONFIG
+    if (isAdcConfigChanged) {
+      adc->configure(adcCurrentConfig);
+    }
+#endif
   }
   return (adc->read_u16() >> (16 - read_resolution));
 }
+
+#ifdef ANALOG_CONFIG
+/* Spot all active ADCs to reconfigure them */
+void analogUpdate() 
+{
+  isAdcConfigChanged = true;
+  //for (pin_size_t i = A0; i < A0 + NUM_ANALOG_INPUTS; i++) {  //also the other works
+  for (pin_size_t i = 0; i < NUM_ANALOG_INPUTS; i++) {
+    if (analogPinToAdcObj(i) != NULL) {
+      analogPinToAdcObj(i)->configure(adcCurrentConfig);
+    }
+  }
+}
+#endif
 
 void analogReadResolution(int bits)
 {
