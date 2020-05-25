@@ -67,6 +67,10 @@ void attachInterruptParam(pin_size_t interruptNum, voidFuncPtrParam func, PinSta
     irq->rise(mbed::callback(func, param));
   }
   digitalPinToInterruptObj(interruptNum) = irq;
+  // Give a default pullup for the pin, since calling InterruptIn with PinMode is impossible
+  if (digitalPinToGpio(interruptNum) == NULL) {
+    pinMode(interruptNum, mode == FALLING ? INPUT_PULLUP : INPUT_PULLDOWN);
+  }
 }
 
 void attachInterrupt(pin_size_t interruptNum, voidFuncPtr func, PinStatus mode) {
