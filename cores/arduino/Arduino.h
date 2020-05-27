@@ -22,7 +22,9 @@
 
 #if defined(__cplusplus)
 #if !defined(ARDUINO_AS_MBED_LIBRARY)
-#define PinMode MbedPinMode
+
+#include "pinmode_arduino.h"
+
 #ifdef F
 #define Arduino_F F
 #undef F
@@ -33,7 +35,7 @@
 #include "mbed/drivers/InterruptIn.h"
 #include "mbed/drivers/PwmOut.h"
 #include "mbed/drivers/AnalogIn.h"
-#undef PinMode
+#include "mbed/drivers/DigitalInOut.h"
 #undef F
 #endif //__cplusplus
 
@@ -90,7 +92,7 @@ typedef struct _PinDescription
   PinName name;
   mbed::InterruptIn* irq;
   mbed::PwmOut* pwm;
-  gpio_t* gpio;
+  mbed::DigitalInOut* gpio;
 } PinDescription ;
 
 typedef struct _AnalogPinDescription

@@ -41,6 +41,7 @@ void pinMode(PinName pin, PinMode mode)
         mbed::DigitalIn(pin, PullUp);
         break;
       case INPUT_PULLDOWN:
+      default:
         mbed::DigitalIn(pin, PullDown);
         break;
     }
@@ -49,24 +50,28 @@ void pinMode(PinName pin, PinMode mode)
 
 void pinMode(pin_size_t pin, PinMode mode)
 {
-  gpio_t* gpio = digitalPinToGpio(pin);
+  mbed::DigitalInOut* gpio = digitalPinToGpio(pin);
   if (gpio == NULL) {
-    gpio = new gpio_t();
+    gpio = new mbed::DigitalInOut(digitalPinToPinName(pin));
     digitalPinToGpio(pin) = gpio;
   }
 
   switch (mode) {
     case INPUT:
-      gpio_init_in_ex(gpio, digitalPinToPinName(pin), PullNone);
+      gpio->input();
+      gpio->mode(PullNone);
       break;
     case OUTPUT:
-      gpio_init_out(gpio, digitalPinToPinName(pin));
+      gpio->output();
       break;
     case INPUT_PULLUP:
-      gpio_init_in_ex(gpio, digitalPinToPinName(pin), PullUp);
+      gpio->input();
+      gpio->mode(PullUp);
       break;
     case INPUT_PULLDOWN:
-      gpio_init_in_ex(gpio, digitalPinToPinName(pin), PullDown);
+    default:
+      gpio->input();
+      gpio->mode(PullDown);
       break;
   }
 }
@@ -86,7 +91,7 @@ void digitalWrite(pin_size_t pin, PinStatus val)
   if (pin >= PINS_COUNT) {
     return;
   }
-	gpio_write(digitalPinToGpio(pin), (int)val);
+  digitalPinToGpio(pin)->write(val);
 }
 
 PinStatus digitalRead(PinName pin)
@@ -104,5 +109,5 @@ PinStatus digitalRead(pin_size_t pin)
   if (pin >= PINS_COUNT) {
     return LOW;
   }
-	return (PinStatus)gpio_read(digitalPinToGpio(pin));
+	return (PinStatus) digitalPinToGpio(pin)->read();
 }

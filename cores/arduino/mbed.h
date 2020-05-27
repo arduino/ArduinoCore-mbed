@@ -5,7 +5,6 @@
 
 #if defined(__cplusplus)
 #if !defined(ARDUINO_AS_MBED_LIBRARY)
-#define PinMode MbedPinMode
 #ifdef F
 #define Arduino_F F
 #undef F
@@ -13,7 +12,6 @@
 #define F Mbed_F
 #endif // !ARDUINO_AS_MBED_LIBRARY
 #include "mbed/mbed.h"
-#undef PinMode
 #undef F
 #endif //__cplusplus
 
