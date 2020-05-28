@@ -91,7 +91,12 @@ void digitalWrite(pin_size_t pin, PinStatus val)
   if (pin >= PINS_COUNT) {
     return;
   }
-  digitalPinToGpio(pin)->write(val);
+  mbed::DigitalInOut* gpio = digitalPinToGpio(pin);
+  if (gpio == NULL) {
+    gpio = new mbed::DigitalInOut(digitalPinToPinName(pin), PIN_OUTPUT, PullNone, val);
+    digitalPinToGpio(pin) = gpio;
+  }
+  gpio->write(val);
 }
 
 PinStatus digitalRead(PinName pin)
@@ -108,6 +113,11 @@ PinStatus digitalRead(pin_size_t pin)
 {
   if (pin >= PINS_COUNT) {
     return LOW;
+  }  
+  mbed::DigitalInOut* gpio = digitalPinToGpio(pin);
+  if (gpio == NULL) {
+    gpio = new mbed::DigitalInOut(digitalPinToPinName(pin), PIN_INPUT, PullNone, 0);
+    digitalPinToGpio(pin) = gpio;
   }
-	return (PinStatus) digitalPinToGpio(pin)->read();
+  return (PinStatus) gpio->read();
 }
