@@ -25,7 +25,7 @@ PinDescription g_APinDescription[] = {
 
   // D8 - D14
   { PC_3,         NULL, NULL, NULL },    // D8
-  { PI_2,         NULL, NULL, NULL },    // D9
+  { PI_1,         NULL, NULL, NULL },    // D9
   { PC_2,         NULL, NULL, NULL },    // D10
   { PH_8,         NULL, NULL, NULL },    // D11
   { PH_7,         NULL, NULL, NULL },    // D12
