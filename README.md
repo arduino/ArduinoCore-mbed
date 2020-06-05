@@ -9,7 +9,7 @@ Clone the repository in `$sketchbook/hardware/arduino`
 ```bash
 mkdir -p $sketchbook/hardware/arduino
 cd $sketchbook/hardware/arduino
-git clone git@github.com:bcmi-labs/ArduinoCore-mbed mbed
+git clone git@github.com:arduino/ArduinoCore-mbed mbed
 ```
 
 Then clone https://github.com/arduino/ArduinoCore-API in a directory at your choice. Checkout `namespace_arduino` branch.
@@ -24,7 +24,7 @@ Open Arduino IDE; you should now see three new targets under `MBED boards` label
 
 ## Adding an mbed target
 
-Adding a target is a mostly automatic procedure that involves running https://github.com/bcmi-labs/ArduinoCore-mbed/blob/master/mbed-os-to-arduino after setting `BOARDNAME` and `ARDUINOCORE` env variables.
+Adding a target is a mostly automatic procedure that involves running https://github.com/arduino/ArduinoCore-mbed/blob/master/mbed-os-to-arduino after setting `BOARDNAME` and `ARDUINOCORE` env variables.
 Actions marked as TODO must be executed manually.
 
 **Minimum Example**: `./mbed-os-to-arduino -r /home/alex/projects/arduino/cores/mbed-os-h747 ENVIE_M7:ENVIE_M7`
