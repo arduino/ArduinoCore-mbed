@@ -259,7 +259,7 @@ bool USBCDC::callback_request_xfer_done(const USBDevice::setup_packet_t *setup, 
 
     bool success = false;
 
-    if (setup->wIndex != pluggedInterface) {
+    if (setup->wIndex != pluggedInterface || aborted) {
         return success;
     }
 
