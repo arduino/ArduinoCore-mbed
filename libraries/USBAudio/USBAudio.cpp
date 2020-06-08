@@ -26,6 +26,8 @@
 
 using namespace arduino;
 
+#warning "USBAudio library is EXTREMELY EXPERIMENTAL, expect crashes"
+
 #define SAMPLE_SIZE                 2
 #define XFER_FREQUENCY_HZ           1000
 #define WRITE_READY_UNBLOCK         (1 << 0)
@@ -639,7 +641,7 @@ void USBAudio::_build_configuration_desc()
         // Interface 0, Alternate Setting 0, Audio Control
         INTERFACE_DESCRIPTOR_LENGTH,            // bLength
         INTERFACE_DESCRIPTOR,                   // bDescriptorType
-        0x00,                                   // bInterfaceNumber
+        uint8_t(pluggedInterface),              // bInterfaceNumber
         0x00,                                   // bAlternateSetting
         0x00,                                   // bNumEndpoints
         AUDIO_CLASS,                            // bInterfaceClass
@@ -657,8 +659,8 @@ void USBAudio::_build_configuration_desc()
         LSB(TOTAL_CONTROL_INTF_LENGTH),         // wTotalLength
         MSB(TOTAL_CONTROL_INTF_LENGTH),         // wTotalLength
         0x02,                                   // bInCollection
-        0x01,                                   // baInterfaceNr
-        0x02,                                   // baInterfaceNr
+        uint8_t(pluggedInterface+1),            // baInterfaceNr
+        uint8_t(pluggedInterface+2),            // baInterfaceNr
 
         // Audio Input Terminal (Speaker)
         INPUT_TERMINAL_DESCRIPTOR_LENGTH,       // bLength
@@ -731,7 +733,7 @@ void USBAudio::_build_configuration_desc()
         // Interface 1, Alternate Setting 0, Audio Streaming - Zero Bandwith
         INTERFACE_DESCRIPTOR_LENGTH,            // bLength
         INTERFACE_DESCRIPTOR,                   // bDescriptorType
-        0x01,                                   // bInterfaceNumber
+        uint8_t(pluggedInterface+1),            // bInterfaceNumber
         0x00,                                   // bAlternateSetting
         0x00,                                   // bNumEndpoints
         AUDIO_CLASS,                            // bInterfaceClass
@@ -742,7 +744,7 @@ void USBAudio::_build_configuration_desc()
         // Interface 1, Alternate Setting 1, Audio Streaming - Operational
         INTERFACE_DESCRIPTOR_LENGTH,            // bLength
         INTERFACE_DESCRIPTOR,                   // bDescriptorType
-        0x01,                                   // bInterfaceNumber
+        uint8_t(pluggedInterface+1),            // bInterfaceNumber
         0x01,                                   // bAlternateSetting
         0x01,                                   // bNumEndpoints
         AUDIO_CLASS,                            // bInterfaceClass
@@ -796,7 +798,7 @@ void USBAudio::_build_configuration_desc()
         // Interface 1, Alternate Setting 0, Audio Streaming - Zero Bandwith
         INTERFACE_DESCRIPTOR_LENGTH,            // bLength
         INTERFACE_DESCRIPTOR,                   // bDescriptorType
-        0x02,                                   // bInterfaceNumber
+        uint8_t(pluggedInterface+2),            // bInterfaceNumber
         0x00,                                   // bAlternateSetting
         0x00,                                   // bNumEndpoints
         AUDIO_CLASS,                            // bInterfaceClass
@@ -807,7 +809,7 @@ void USBAudio::_build_configuration_desc()
         // Interface 1, Alternate Setting 1, Audio Streaming - Operational
         INTERFACE_DESCRIPTOR_LENGTH,            // bLength
         INTERFACE_DESCRIPTOR,                   // bDescriptorType
-        0x02,                                   // bInterfaceNumber
+        uint8_t(pluggedInterface+2),            // bInterfaceNumber
         0x01,                                   // bAlternateSetting
         0x01,                                   // bNumEndpoints
         AUDIO_CLASS,                            // bInterfaceClass
