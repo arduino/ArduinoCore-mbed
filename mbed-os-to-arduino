@@ -122,7 +122,11 @@ mbed_compile () {
 
 	PROFILE_FLAG=""
 	if [ x"$PROFILE" != x ]; then
-		PROFILE_FLAG=--profile="$ARDUINOVARIANT"/conf/profile/$PROFILE.json
+		if [ -f "$ARDUINOVARIANT/conf/profile/$PROFILE.json" ]; then
+			PROFILE_FLAG=--profile="$ARDUINOVARIANT"/conf/profile/$PROFILE.json
+		else
+			PROFILE_FLAG=--profile="${PROFILE}"
+		fi
 		export PROFILE=-${PROFILE^^}
 	fi
 
