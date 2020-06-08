@@ -5,6 +5,7 @@
       "target.usb_speed": "USE_USB_OTG_FS",
       "platform.stdio-baud-rate": 115200,
       "platform.default-serial-baud-rate": 115200,
+      "platform.callback-nontrivial": true,
       "rtos.main-thread-stack-size": 32768,
       "target.macros_add": [
         "MBED_HEAP_STATS_ENABLED=1",

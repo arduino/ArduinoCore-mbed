@@ -134,8 +134,8 @@ SECTIONS
         __end__ = .;
         end = __end__;
         *(.heap*);
-        ASSERT(. <= (ORIGIN(RAM) + LENGTH(RAM) - 2048), "heap region overflowed into stack");
-        . = ORIGIN(RAM) + LENGTH(RAM) - 2048;
+        ASSERT(. <= (ORIGIN(RAM) + LENGTH(RAM) - 1024), "heap region overflowed into stack");
+        . = ORIGIN(RAM) + LENGTH(RAM) - 1024;
         __HeapLimit = .;
     } > RAM
     PROVIDE(__heap_start = ADDR(.heap));
@@ -149,6 +149,6 @@ SECTIONS
         . = ORIGIN(RAM) + LENGTH(RAM);
     } > RAM
     __StackTop = ORIGIN(RAM) + LENGTH(RAM);
-    __StackLimit = __StackTop - 2048;
+    __StackLimit = __StackTop - 1024;
     PROVIDE(__stack = __StackTop);
 }

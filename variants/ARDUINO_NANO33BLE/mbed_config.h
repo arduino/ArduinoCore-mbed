@@ -229,6 +229,7 @@
 #define MBED_CONF_MBED_MESH_API_6LOWPAN_ND_SEC_LEVEL                          5                                                                                                // set by library:mbed-mesh-api
 #define MBED_CONF_MBED_MESH_API_HEAP_SIZE                                     32500                                                                                            // set by library:mbed-mesh-api
 #define MBED_CONF_MBED_MESH_API_HEAP_STAT_INFO                                NULL                                                                                             // set by library:mbed-mesh-api
+#define MBED_CONF_MBED_MESH_API_MAC_NEIGH_TABLE_SIZE                          32                                                                                               // set by library:mbed-mesh-api
 #define MBED_CONF_MBED_MESH_API_THREAD_CONFIG_CHANNEL                         22                                                                                               // set by library:mbed-mesh-api
 #define MBED_CONF_MBED_MESH_API_THREAD_CONFIG_CHANNEL_MASK                    0x7fff800                                                                                        // set by library:mbed-mesh-api
 #define MBED_CONF_MBED_MESH_API_THREAD_CONFIG_CHANNEL_PAGE                    0                                                                                                // set by library:mbed-mesh-api
@@ -277,7 +278,7 @@
 #define MBED_CONF_NSAPI_SOCKET_STATS_ENABLED                                  0                                                                                                // set by library:nsapi
 #define MBED_CONF_NSAPI_SOCKET_STATS_MAX_COUNT                                10                                                                                               // set by library:nsapi
 #define MBED_CONF_PLATFORM_CALLBACK_COMPARABLE                                1                                                                                                // set by library:platform
-#define MBED_CONF_PLATFORM_CALLBACK_NONTRIVIAL                                1                                                                                                // set by library:platform
+#define MBED_CONF_PLATFORM_CALLBACK_NONTRIVIAL                                1                                                                                                // set by application[*]
 #define MBED_CONF_PLATFORM_CRASH_CAPTURE_ENABLED                              0                                                                                                // set by library:platform
 #define MBED_CONF_PLATFORM_CTHUNK_COUNT_MAX                                   8                                                                                                // set by library:platform
 #define MBED_CONF_PLATFORM_DEFAULT_SERIAL_BAUD_RATE                           115200                                                                                           // set by application[*]
@@ -294,8 +295,8 @@
 #define MBED_CONF_PLATFORM_POLL_USE_LOWPOWER_TIMER                            0                                                                                                // set by library:platform
 #define MBED_CONF_PLATFORM_STDIO_BAUD_RATE                                    115200                                                                                           // set by application[*]
 #define MBED_CONF_PLATFORM_STDIO_BUFFERED_SERIAL                              1                                                                                                // set by application[*]
-#define MBED_CONF_PLATFORM_STDIO_CONVERT_NEWLINES                             0                                                                                                // set by library:platform
-#define MBED_CONF_PLATFORM_STDIO_CONVERT_TTY_NEWLINES                         0                                                                                                // set by library:platform
+#define MBED_CONF_PLATFORM_STDIO_CONVERT_NEWLINES                             1                                                                                                // set by library:platform
+#define MBED_CONF_PLATFORM_STDIO_CONVERT_TTY_NEWLINES                         1                                                                                                // set by library:platform
 #define MBED_CONF_PLATFORM_STDIO_FLUSH_AT_EXIT                                1                                                                                                // set by library:platform
 #define MBED_CONF_PLATFORM_STDIO_MINIMAL_CONSOLE_ONLY                         0                                                                                                // set by library:platform
 #define MBED_CONF_PLATFORM_USE_MPU                                            1                                                                                                // set by library:platform
@@ -363,7 +364,7 @@
 #define MBED_CONF_STORAGE_TDB_EXTERNAL_RBP_INTERNAL_SIZE                      0                                                                                                // set by library:storage_tdb_external
 #define MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_BASE_ADDRESS                  0                                                                                                // set by library:storage_tdb_internal
 #define MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE                          0                                                                                                // set by library:storage_tdb_internal
-#define MBED_CONF_TARGET_BOOT_STACK_SIZE                                      0x800                                                                                            // set by library:rtos[MCU_NRF52840]
+#define MBED_CONF_TARGET_BOOT_STACK_SIZE                                      0x400                                                                                            // set by library:rtos[*]
 #define MBED_CONF_TARGET_CONSOLE_UART                                         1                                                                                                // set by target:Target
 #define MBED_CONF_TARGET_DEEP_SLEEP_LATENCY                                   0                                                                                                // set by target:Target
 #define MBED_CONF_TARGET_INIT_US_TICKER_AT_BOOT                               0                                                                                                // set by target:Target
@@ -383,6 +384,12 @@
 #define MBED_CONF_UBLOX_PPP_BAUDRATE                                          115200                                                                                           // set by library:UBLOX_PPP
 #define MBED_CONF_UBLOX_PPP_PROVIDE_DEFAULT                                   0                                                                                                // set by library:UBLOX_PPP
 #define MBED_CRC_TABLE_SIZE                                                   16                                                                                               // set by library:drivers
+#define MBED_LFS2_BLOCK_CYCLES                                                1024                                                                                             // set by library:littlefs2
+#define MBED_LFS2_BLOCK_SIZE                                                  512                                                                                              // set by library:littlefs2
+#define MBED_LFS2_CACHE_SIZE                                                  64                                                                                               // set by library:littlefs2
+#define MBED_LFS2_ENABLE_INFO                                                 0                                                                                                // set by library:littlefs2
+#define MBED_LFS2_INTRINSICS                                                  1                                                                                                // set by library:littlefs2
+#define MBED_LFS2_LOOKAHEAD_SIZE                                              64                                                                                               // set by library:littlefs2
 #define MBED_LFS_BLOCK_SIZE                                                   512                                                                                              // set by library:littlefs
 #define MBED_LFS_ENABLE_INFO                                                  0                                                                                                // set by library:littlefs
 #define MBED_LFS_INTRINSICS                                                   1                                                                                                // set by library:littlefs
@@ -406,7 +413,6 @@
 #define LL_MAX_PER_SCAN                                                       3                                                                                                // defined by library:cordio-nordic-ll
 #define MBEDTLS_CIPHER_MODE_CTR                                                                                                                                                // defined by library:SecureStore
 #define MBEDTLS_CMAC_C                                                                                                                                                         // defined by library:SecureStore
-#define MBEDTLS_PSA_HAS_ITS_IO                                                                                                                                                 // defined by library:mbed-crypto
 #define MBED_HEAP_STATS_ENABLED                                               1                                                                                                // defined by application
 #define MBED_MEM_TRACING_ENABLED                                              1                                                                                                // defined by application
 #define MBED_STACK_STATS_ENABLED                                              1                                                                                                // defined by application

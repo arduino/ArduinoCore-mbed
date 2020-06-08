@@ -1,5 +1,6 @@
 -iwithprefixbefore/mbed/targets/TARGET_STM/TARGET_STM32H7/device
 -iwithprefixbefore/mbed/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/device
+-iwithprefixbefore/mbed/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7_M4
 -iwithprefixbefore/mbed/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/src/include
 -iwithprefixbefore/mbed/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/src/bus_protocols
 -iwithprefixbefore/mbed/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/src
@@ -42,6 +43,8 @@
 -iwithprefixbefore/mbed/features/storage/kvstore/direct_access_devicekey
 -iwithprefixbefore/mbed/features/storage/kvstore/conf
 -iwithprefixbefore/mbed/features/storage/kvstore
+-iwithprefixbefore/mbed/features/storage/filesystem/littlefsv2/littlefs
+-iwithprefixbefore/mbed/features/storage/filesystem/littlefsv2
 -iwithprefixbefore/mbed/features/storage/filesystem/littlefs/littlefs
 -iwithprefixbefore/mbed/features/storage/filesystem/littlefs
 -iwithprefixbefore/mbed/features/storage/filesystem/fat/ChaN
@@ -169,12 +172,6 @@
 -iwithprefixbefore/mbed/features/mbedtls/targets/TARGET_STM
 -iwithprefixbefore/mbed/features/mbedtls/platform/inc
 -iwithprefixbefore/mbed/features/mbedtls/platform
--iwithprefixbefore/mbed/features/mbedtls/mbed-crypto/platform/COMPONENT_PSA_SRV_IMPL/COMPONENT_NSPE
--iwithprefixbefore/mbed/features/mbedtls/mbed-crypto/platform/COMPONENT_PSA_SRV_IMPL
--iwithprefixbefore/mbed/features/mbedtls/mbed-crypto/inc/psa
--iwithprefixbefore/mbed/features/mbedtls/mbed-crypto/inc/mbedtls
--iwithprefixbefore/mbed/features/mbedtls/mbed-crypto/inc
--iwithprefixbefore/mbed/features/mbedtls/mbed-crypto
 -iwithprefixbefore/mbed/features/mbedtls/inc/mbedtls
 -iwithprefixbefore/mbed/features/mbedtls/inc
 -iwithprefixbefore/mbed/features/mbedtls
