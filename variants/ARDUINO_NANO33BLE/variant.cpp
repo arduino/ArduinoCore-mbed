@@ -132,6 +132,8 @@ extern "C" {
 }
 
 #include "nrf_rtc.h"
+#include "nrf_uarte.h"
+#include "nrf_uart.h"
 
 void initVariant() {
   // turn power LED on
@@ -155,7 +157,13 @@ void initVariant() {
 
   digitalWrite(PIN_ENABLE_SENSORS_3V3, HIGH);
   digitalWrite(PIN_ENABLE_I2C_PULLUP, HIGH);
- 
+
+  // Disable UARTE0 which is initially enabled by the bootloader
+  nrf_uarte_task_trigger(NRF_UARTE0, NRF_UARTE_TASK_STOPRX); 
+  while (!nrf_uarte_event_check(NRF_UARTE0, NRF_UARTE_EVENT_RXTO)) ; 
+  NRF_UARTE0->ENABLE = 0; 
+  NRF_UART0->ENABLE = 0; 
+
   NRF_PWM_Type* PWM[] = {
     NRF_PWM0, NRF_PWM1, NRF_PWM2
 #ifdef NRF_PWM3
