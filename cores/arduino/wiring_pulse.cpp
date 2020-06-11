@@ -1,5 +1,7 @@
 #include "Arduino.h"
 
+#if defined(ARDUINO_ARCH_NRF52840)
+
 #include <hal/nrf_timer.h>
 #include <hal/nrf_gpiote.h>
 #include <hal/nrf_gpio.h>
@@ -201,3 +203,5 @@ unsigned long pulseInLong(PinName pin, PinStatus state, unsigned long timeout)
 {
     return pulseIn(pin, state, timeout);
 }
+
+#endif
