@@ -32,9 +32,18 @@ uint8_t arduino::MbedSPI::transfer(uint8_t data) {
 }
 
 uint16_t arduino::MbedSPI::transfer16(uint16_t data) {
-    uint8_t ret[2];
-    dev->write((const char*)&data, 2, (char*)ret, 2);
-    return ret[0] << 8 | ret[1];
+
+    union { uint16_t val; struct { uint8_t lsb; uint8_t msb; }; } t;
+    t.val = data;
+
+    if (settings.getBitOrder() == LSBFIRST) {
+        t.lsb = transfer(t.lsb);
+        t.msb = transfer(t.msb);
+    } else {
+        t.msb = transfer(t.msb);
+        t.lsb = transfer(t.lsb);
+    }
+    return t.val;
 }
 
 void arduino::MbedSPI::transfer(void *buf, size_t count) {
