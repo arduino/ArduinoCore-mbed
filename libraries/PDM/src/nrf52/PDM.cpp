@@ -21,6 +21,9 @@
 */
 
 #include "PDM.h"
+
+#if defined(ARDUINO_ARCH_NRF52840)
+
 #include <hal/nrf_pdm.h>
 
 #define DEFAULT_PDM_GAIN     20
@@ -180,7 +183,7 @@ void PDMClass::setBufferSize(int bufferSize)
   _doubleBuffer.setSize(bufferSize);
 }
 
-void PDMClass::IrqHandler()
+void PDMClass::IrqHandler(bool halftranfer)
 {
   if (nrf_pdm_event_check(NRF_PDM_EVENT_STARTED)) {
     nrf_pdm_event_clear(NRF_PDM_EVENT_STARTED);
@@ -210,8 +213,10 @@ void PDMClass::IrqHandler()
 extern "C" {
   __attribute__((__used__)) void PDM_IRQHandler_v(void)
   {
-    PDM.IrqHandler();
+    PDM.IrqHandler(true);
   }
 }
 
 PDMClass PDM(PIN_PDM_DIN, PIN_PDM_CLK, PIN_PDM_PWR);
+
+#endif

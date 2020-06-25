@@ -31,6 +31,7 @@ void setup() {
   // put your setup code here, to run once:
   /* Set audio input interface */
   Serial.begin(115200);
+  //while (!Serial);
 
   if (isBoardRev2()) {
     mbed::I2C i2c(PB_7, PB_6);
@@ -99,6 +100,12 @@ extern "C" {
       @param  None
       @retval None
   */
+
+  void _print(char* str) {
+    Serial.println(str);
+  }
+
+
   void BSP_AUDIO_IN_TransferComplete_CallBack(void)
   {
     if (BSP_AUDIO_IN_GetInterface() == AUDIO_IN_INTERFACE_PDM)

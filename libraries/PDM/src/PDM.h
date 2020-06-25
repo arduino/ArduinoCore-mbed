@@ -21,10 +21,6 @@
 
 #include <Arduino.h>
 
-#if !defined(ARDUINO_ARCH_NRF52840) && !defined(ARDUINO_AS_MBED_LIBRARY)
-#error "This library targets only NRF52840 boards, not every mbed target"
-#endif
-
 #include "utility/PDMDoubleBuffer.h"
 
 class PDMClass
@@ -45,7 +41,7 @@ public:
   void setBufferSize(int bufferSize);
 
 // private:
-  void IrqHandler();
+  void IrqHandler(bool halftranfer);
 
 private:
   int _dinPin;
