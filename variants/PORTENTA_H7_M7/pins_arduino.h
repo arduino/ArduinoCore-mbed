@@ -39,6 +39,9 @@ static const uint8_t A5  = PIN_A5;
 static const uint8_t A6  = PIN_A6;
 #define ADC_RESOLUTION 12
 
+//DACs
+#define DAC           (A6)
+
 // Serial
 #define PIN_SERIAL_RX (13ul)
 #define PIN_SERIAL_TX (14ul)
@@ -90,7 +93,6 @@ void _ontouch1200bps_();
 #define I2C_SCL_INTERNAL	(PB_6)
 #define I2C_SDA1			I2C_SDA_INTERNAL
 #define I2C_SCL1			I2C_SCL_INTERNAL
-
 
 #define SPI_HOWMANY			1
 

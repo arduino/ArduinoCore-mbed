@@ -39,6 +39,9 @@ static const uint8_t A5  = PIN_A5;
 static const uint8_t A6  = PIN_A6;
 #define ADC_RESOLUTION 12
 
+//DACs
+#define DAC           (A6)
+
 // Serial
 #define PIN_SERIAL_RX (13ul)
 #define PIN_SERIAL_TX (14ul)
@@ -97,6 +100,6 @@ void _ontouch1200bps_();
 #define SPI_MOSI			(digitalPinToPinName(PIN_SPI_MOSI))
 #define SPI_SCK				(digitalPinToPinName(PIN_SPI_SCK))
 
-#define digitalPinToPort(P)		(digitalPinToPinName(P)/32)
+#define digitalPinToPort(P)		(digitalPinToPinName(P)/16)
 
 #endif //__PINS_ARDUINO__
