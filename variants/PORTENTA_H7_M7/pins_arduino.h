@@ -108,8 +108,8 @@ void _ontouch1200bps_();
 #define SERIAL_PORT_HARDWARE_OPEN   Serial2
 
 #define SerialLoRa		Serial3
-#define LORA_BOOT0  	(PJ_10)
-#define LORA_RESET  	(PJ_7)
-#define LORA_IRQ_DUMB	(PA_0)
+#define LORA_BOOT0      (PG_7)
+#define LORA_RESET      (PC_7)
+#define LORA_IRQ_DUMB   (PJ_11)
 
 #endif //__PINS_ARDUINO__
