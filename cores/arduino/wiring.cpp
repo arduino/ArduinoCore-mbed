@@ -32,19 +32,22 @@ static mbed::LowPowerTimer t;
 static mbed::Timer t;
 #endif
 
+using namespace std::chrono_literals;
+using namespace std::chrono;
+
 unsigned long millis()
 {
-  return t.read_ms();
+  return duration_cast<milliseconds>(t.elapsed_time()).count();
 }
 
 unsigned long micros() {
-  return t.read_us();
+  return t.elapsed_time().count();
 }
 
 void delay(unsigned long ms)
 {
 #ifndef NO_RTOS
-  rtos::ThisThread::sleep_for(ms);
+  rtos::ThisThread::sleep_for(ms * 1ms);
 #else
   wait_us(ms * 1000);
 #endif

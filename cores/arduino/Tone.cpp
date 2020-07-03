@@ -1,6 +1,9 @@
 #include "Arduino.h"
 #include "mbed.h"
 
+using namespace std::chrono_literals;
+using namespace std::chrono;
+
 class Tone {
     mbed::DigitalOut   *pin;
     mbed::Timer        timer;
@@ -21,7 +24,7 @@ public:
     }
 
     void start(void) {
-        ticker.attach(mbed::callback(this, &Tone::toggle), 0.5f / float(frequency));
+        ticker.attach(mbed::callback(this, &Tone::toggle), 500ms / frequency );
         if (duration != 0) {
             start_timeout();
         }
@@ -37,7 +40,7 @@ public:
     }
 
     void start_timeout(void) {
-        timeout.attach(mbed::callback(this, &Tone::stop), duration/1000.0f);
+        timeout.attach(mbed::callback(this, &Tone::stop), duration * 1ms);
     }
 };
 
