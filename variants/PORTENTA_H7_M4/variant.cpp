@@ -1,10 +1,10 @@
 #include "Arduino.h"
 
 AnalogPinDescription g_AAnalogPinDescription[] = {
-  { PA_0_C_ALT2,  NULL },    // A0    ADC2_INP0
-  { PA_1_C_ALT0,  NULL },    // A1    ADC2_INP1
-  { PC_2_C_ALT0,  NULL },    // A2    ADC3_INP0
-  { PC_3_C,       NULL },    // A3    ADC3_INP1
+  { PA_0C,        NULL },    // A0    ADC2_INP0
+  { PA_1C,        NULL },    // A1    ADC2_INP1
+  { PC_2C,        NULL },    // A2    ADC3_INP0
+  { PC_3C,        NULL },    // A3    ADC3_INP1
   { PC_2_ALT0,    NULL },    // A4    ADC1_INP12
   { PC_3_ALT2,    NULL },    // A5    ADC2_INP13
   { PA_4,         NULL }     // A6    ADC1_INP18
@@ -31,10 +31,10 @@ PinDescription g_APinDescription[] = {
   { PA_9,         NULL, NULL, NULL },    // D14
 
   // A0 - A7
-  { PA_0_C_ALT2,  NULL, NULL, NULL },    // A0    ADC2_INP0
-  { PA_1_C_ALT0,  NULL, NULL, NULL },    // A1    ADC2_INP1
-  { PC_2_C_ALT0,  NULL, NULL, NULL },    // A2    ADC3_INP0
-  { PC_3_C,       NULL, NULL, NULL },    // A3    ADC3_INP1
+  { PA_0C,        NULL, NULL, NULL },    // A0    ADC2_INP0
+  { PA_1C,        NULL, NULL, NULL },    // A1    ADC2_INP1
+  { PC_2C,        NULL, NULL, NULL },    // A2    ADC3_INP0
+  { PC_3C,        NULL, NULL, NULL },    // A3    ADC3_INP1
   { PC_2_ALT0,    NULL, NULL, NULL },    // A4    ADC1_INP12
   { PC_3_ALT2,    NULL, NULL, NULL },    // A5    ADC2_INP13
   { PA_4,         NULL, NULL, NULL },    // A6    ADC1_INP18

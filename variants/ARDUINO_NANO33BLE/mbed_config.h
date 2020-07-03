@@ -38,6 +38,7 @@
 #define BLE_ROLE_CENTRAL                                                      1                                                                                                // set by library:ble
 #define BLE_ROLE_OBSERVER                                                     1                                                                                                // set by library:ble
 #define BLE_ROLE_PERIPHERAL                                                   1                                                                                                // set by library:ble
+#define BLE_SECURITY_DATABASE_MAX_ENTRIES                                     5                                                                                                // set by library:ble
 #define CHCI_TR_UART                                                          0                                                                                                // set by library:cordio-ll
 #define CORDIO_ZERO_COPY_HCI                                                  1                                                                                                // set by library:cordio-nordic-ll
 #define DM_CONN_MAX                                                           3                                                                                                // set by library:cordio
@@ -80,6 +81,8 @@
 #define MBED_CONF_CORDIO_LL_RX_BUFFERS                                        4                                                                                                // set by library:cordio-ll
 #define MBED_CONF_CORDIO_LL_TX_BUFFERS                                        4                                                                                                // set by library:cordio-ll
 #define MBED_CONF_CORDIO_MAX_PREPARED_WRITES                                  4                                                                                                // set by library:cordio
+#define MBED_CONF_CORDIO_PREFERRED_TX_POWER                                   0                                                                                                // set by library:cordio
+#define MBED_CONF_CORDIO_ROUTE_UNHANDLED_COMMAND_COMPLETE_EVENTS              1                                                                                                // set by library:cordio
 #define MBED_CONF_CORDIO_RX_ACL_BUFFER_SIZE                                   70                                                                                               // set by library:cordio
 #define MBED_CONF_CRYPTOCELL310_PRESENT                                       1                                                                                                // set by library:cryptocell310
 #define MBED_CONF_DRIVERS_QSPI_CSN                                            QSPI_FLASH1_CSN                                                                                  // set by library:drivers
@@ -263,6 +266,8 @@
 #define MBED_CONF_NANOSTACK_HAL_EVENT_LOOP_DISPATCH_FROM_APPLICATION          0                                                                                                // set by library:nanostack-hal
 #define MBED_CONF_NANOSTACK_HAL_EVENT_LOOP_THREAD_STACK_SIZE                  6144                                                                                             // set by library:nanostack-hal
 #define MBED_CONF_NANOSTACK_HAL_EVENT_LOOP_USE_MBED_EVENTS                    0                                                                                                // set by library:nanostack-hal
+#define MBED_CONF_NANOSTACK_HAL_KVSTORE_PATH                                  "/kv/"                                                                                           // set by library:nanostack-hal
+#define MBED_CONF_NANOSTACK_HAL_USE_KVSTORE                                   0                                                                                                // set by library:nanostack-hal
 #define MBED_CONF_NORDIC_NRF_LF_CLOCK_CALIB_MODE_CONFIG                       0                                                                                                // set by target:MCU_NRF52840
 #define MBED_CONF_NORDIC_NRF_LF_CLOCK_CALIB_TIMER_INTERVAL                    16                                                                                               // set by target:MCU_NRF52840
 #define MBED_CONF_NORDIC_NRF_LF_CLOCK_SRC                                     NRF_LF_SRC_XTAL                                                                                  // set by target:MCU_NRF52840
@@ -367,6 +372,7 @@
 #define MBED_CONF_TARGET_BOOT_STACK_SIZE                                      0x400                                                                                            // set by library:rtos[*]
 #define MBED_CONF_TARGET_CONSOLE_UART                                         1                                                                                                // set by target:Target
 #define MBED_CONF_TARGET_DEEP_SLEEP_LATENCY                                   0                                                                                                // set by target:Target
+#define MBED_CONF_TARGET_DEFAULT_ADC_VREF                                     NAN                                                                                              // set by target:Target
 #define MBED_CONF_TARGET_INIT_US_TICKER_AT_BOOT                               0                                                                                                // set by target:Target
 #define MBED_CONF_TARGET_MPU_ROM_END                                          0x1fffffff                                                                                       // set by target:MCU_NRF52840
 #define MBED_CONF_TARGET_TICKLESS_FROM_US_TICKER                              0                                                                                                // set by target:Target
@@ -375,6 +381,8 @@
 #define MBED_CONF_TARGET_XIP_ENABLE                                           0                                                                                                // set by target:Target
 #define MBED_CONF_TELIT_HE910_BAUDRATE                                        115200                                                                                           // set by library:TELIT_HE910
 #define MBED_CONF_TELIT_HE910_PROVIDE_DEFAULT                                 0                                                                                                // set by library:TELIT_HE910
+#define MBED_CONF_TELIT_ME310_BAUDRATE                                        115200                                                                                           // set by library:TELIT_ME310
+#define MBED_CONF_TELIT_ME310_PROVIDE_DEFAULT                                 0                                                                                                // set by library:TELIT_ME310
 #define MBED_CONF_TELIT_ME910_BAUDRATE                                        115200                                                                                           // set by library:TELIT_ME910
 #define MBED_CONF_TELIT_ME910_PROVIDE_DEFAULT                                 0                                                                                                // set by library:TELIT_ME910
 #define MBED_CONF_UBLOX_AT_BAUDRATE                                           115200                                                                                           // set by library:UBLOX_AT

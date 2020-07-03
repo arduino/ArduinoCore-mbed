@@ -53,7 +53,6 @@
 -iwithprefixbefore/mbed/rtos/source
 -iwithprefixbefore/mbed/rtos
 -iwithprefixbefore/mbed/platform/source/minimal-printf
--iwithprefixbefore/mbed/platform/source/TARGET_CORTEX_M
 -iwithprefixbefore/mbed/platform/source
 -iwithprefixbefore/mbed/platform/internal
 -iwithprefixbefore/mbed/platform/cxxsupport
@@ -244,6 +243,7 @@
 -iwithprefixbefore/mbed/features/cellular/framework/targets/UBLOX/AT
 -iwithprefixbefore/mbed/features/cellular/framework/targets/UBLOX
 -iwithprefixbefore/mbed/features/cellular/framework/targets/TELIT/ME910
+-iwithprefixbefore/mbed/features/cellular/framework/targets/TELIT/ME310
 -iwithprefixbefore/mbed/features/cellular/framework/targets/TELIT/HE910
 -iwithprefixbefore/mbed/features/cellular/framework/targets/TELIT
 -iwithprefixbefore/mbed/features/cellular/framework/targets/RiotMicro/AT

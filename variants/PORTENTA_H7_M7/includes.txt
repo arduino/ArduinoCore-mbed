@@ -1,5 +1,3 @@
--iwithprefixbefore/mbed/targets/TARGET_STM/TARGET_STM32H7/device
--iwithprefixbefore/mbed/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/device
 -iwithprefixbefore/mbed/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7_M7
 -iwithprefixbefore/mbed/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/src/include
 -iwithprefixbefore/mbed/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/src/bus_protocols
@@ -14,6 +12,10 @@
 -iwithprefixbefore/mbed/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD
 -iwithprefixbefore/mbed/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7
 -iwithprefixbefore/mbed/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI
+-iwithprefixbefore/mbed/targets/TARGET_STM/TARGET_STM32H7/STM32Cube_FW/STM32H7xx_HAL_Driver/Legacy
+-iwithprefixbefore/mbed/targets/TARGET_STM/TARGET_STM32H7/STM32Cube_FW/STM32H7xx_HAL_Driver
+-iwithprefixbefore/mbed/targets/TARGET_STM/TARGET_STM32H7/STM32Cube_FW/CMSIS
+-iwithprefixbefore/mbed/targets/TARGET_STM/TARGET_STM32H7/STM32Cube_FW
 -iwithprefixbefore/mbed/targets/TARGET_STM/TARGET_STM32H7
 -iwithprefixbefore/mbed/targets/TARGET_STM
 -iwithprefixbefore/mbed/rtos/source/TARGET_CORTEX/rtx5/RTX/Source
@@ -27,7 +29,6 @@
 -iwithprefixbefore/mbed/rtos/source
 -iwithprefixbefore/mbed/rtos
 -iwithprefixbefore/mbed/platform/source/minimal-printf
--iwithprefixbefore/mbed/platform/source/TARGET_CORTEX_M
 -iwithprefixbefore/mbed/platform/source
 -iwithprefixbefore/mbed/platform/internal
 -iwithprefixbefore/mbed/platform/cxxsupport
@@ -223,6 +224,7 @@
 -iwithprefixbefore/mbed/features/cellular/framework/targets/UBLOX/AT
 -iwithprefixbefore/mbed/features/cellular/framework/targets/UBLOX
 -iwithprefixbefore/mbed/features/cellular/framework/targets/TELIT/ME910
+-iwithprefixbefore/mbed/features/cellular/framework/targets/TELIT/ME310
 -iwithprefixbefore/mbed/features/cellular/framework/targets/TELIT/HE910
 -iwithprefixbefore/mbed/features/cellular/framework/targets/TELIT
 -iwithprefixbefore/mbed/features/cellular/framework/targets/RiotMicro/AT
