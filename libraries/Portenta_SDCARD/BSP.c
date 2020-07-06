@@ -100,12 +100,8 @@ uint8_t BSP_SD_Init(void)
   /* if CLKDIV = 0 then SDMMC Clock frequency = SDMMC Kernel Clock
      else SDMMC Clock frequency = SDMMC Kernel Clock / [2 * CLKDIV].
   */
-#if ! defined (BSP_SD_HIGH_PERFORMANCE_CONFIG)
-  uSdHandle.Init.ClockDiv            = 4;
-#else
   /* Code for high performance */
-  uSdHandle.Init.ClockDiv            = 2;
-#endif /* BSP_SD_HIGH_PERFORMANCE_CONFIG  */
+  uSdHandle.Init.ClockDiv            = 6;
   uSdHandle.Init.ClockPowerSave      = SDMMC_CLOCK_POWER_SAVE_DISABLE;
   uSdHandle.Init.ClockEdge           = SDMMC_CLOCK_EDGE_RISING;
   uSdHandle.Init.HardwareFlowControl = SDMMC_HARDWARE_FLOW_CONTROL_DISABLE;
