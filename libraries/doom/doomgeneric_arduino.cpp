@@ -230,7 +230,7 @@ static void handleKeyInput()
 #endif
 }
 
-#define DEBUG_CM7_VIDEO
+//#define DEBUG_CM7_VIDEO
 
 static void DMA2D_CopyBuffer(uint32_t *pSrc, uint32_t *pDst)
 {
@@ -242,11 +242,11 @@ static void DMA2D_CopyBuffer(uint32_t *pSrc, uint32_t *pDst)
 
   destination = (uint32_t)pDst; // + ((yPos * stm32_getXSize()) + xPos) * 4;
 
-  HAL_DMA2D_PollForTransfer(&DMA2D_Handle, 200);  /* wait for the previous DMA2D transfer to ends */
+  HAL_DMA2D_PollForTransfer(&DMA2D_Handle, 100);  /* wait for the previous DMA2D transfer to ends */
   /* copy the new decoded frame to the LCD Frame buffer*/
   HAL_DMA2D_Start(&DMA2D_Handle, (uint32_t)pSrc, destination, DOOMGENERIC_RESX, DOOMGENERIC_RESY);
 #if defined(CORE_CM7) && !defined(DEBUG_CM7_VIDEO) 
-  HAL_DMA2D_PollForTransfer(&DMA2D_Handle, 200);  /* wait for the previous DMA2D transfer to ends */
+  HAL_DMA2D_PollForTransfer(&DMA2D_Handle, 100);  /* wait for the previous DMA2D transfer to ends */
 #endif
 }
 
@@ -254,9 +254,9 @@ void DG_DrawFrame()
 {
   uint32_t fb = getNextFrameBuffer();
 #ifdef CORE_CM7
-  SCB_CleanInvalidateDCache();
-  SCB_InvalidateICache();
-  //SCB_InvalidateDCache_by_Addr((uint32_t *)fb, DOOMGENERIC_RESX * DOOMGENERIC_RESY * 4);
+  //SCB_CleanInvalidateDCache();
+  //SCB_InvalidateICache();
+  SCB_InvalidateDCache_by_Addr((uint32_t *)fb, DOOMGENERIC_RESX * DOOMGENERIC_RESY * 4);
 #endif
 
   DMA2D_CopyBuffer((uint32_t *)DG_ScreenBuffer, (uint32_t *)fb);
