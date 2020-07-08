@@ -169,6 +169,10 @@ generate_flags () {
 	for fl in c cxx ld; do
 		jq -r '.flags | .[] | select(. != "-MMD")' ./BUILD/"$BOARDNAME"/GCC_ARM${PROFILE}/.profile-${fl} \
 		> "$ARDUINOVARIANT"/${fl}flags.txt
+		if [[$ARDUINOVARIANT == *"PORTENTA"*]]; then
+			echo -n "Patching '-fno-exceptions' flag for $ARDUINOVARIANT."
+			sed -i '/-fno-exceptions/d' "$ARDUINOVARIANT"/${fl}flags.txt
+		fi
 	done
 	echo " done."
 }
@@ -334,7 +338,6 @@ echo
 
 # TODO
 # - Add include path for rpc library to envie
-# - Remove -fno-exception from Envie cppflags
 #
 
 exit 0
