@@ -37,6 +37,9 @@ extern "C" {
 #include "WhdSoftAPInterface.h"
 #endif
 
+#define DEFAULT_IP_ADDRESS "192.168.3.1"
+#define DEFAULT_NETMASK "255.255.255.0"
+
 namespace arduino {
 
 typedef void* (*voidPrtFuncPtr)(void);

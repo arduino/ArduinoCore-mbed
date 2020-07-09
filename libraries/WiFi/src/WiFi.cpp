@@ -59,13 +59,13 @@ int arduino::WiFiClass::beginAP(const char* ssid, const char *passphrase, uint8_
 
 void arduino::WiFiClass::ensureDefaultAPNetworkConfiguration() {
     if(_ip == nullptr){
-        _ip = SocketAddress("192.168.3.1");
+        _ip = SocketAddress(DEFAULT_IP_ADDRESS);
     }
     if(_gateway == nullptr){
         _gateway = _ip;
     }
     if(_netmask == nullptr){
-        _netmask = SocketAddress("255.255.255.0");
+        _netmask = SocketAddress(DEFAULT_NETMASK);
     }
 }
 
