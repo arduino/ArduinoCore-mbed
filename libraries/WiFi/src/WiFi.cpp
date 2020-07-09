@@ -48,6 +48,8 @@ int arduino::WiFiClass::beginAP(const char* ssid, const char *passphrase, uint8_
         return WL_CONNECT_FAILED;
     }
 
+    ensureDefaultAPNetworkConfiguration();
+
     //Set ap ssid, password and channel    
     ((WhdSoftAPInterface*)softap)->set_network(_ip, _netmask, _gateway);
     nsapi_error_t ret = ((WhdSoftAPInterface*)softap)->start(ssid, passphrase, NSAPI_SECURITY_WPA2, channel, true /* dhcp server */, NULL, true /* cohexistance */);
@@ -55,10 +57,31 @@ int arduino::WiFiClass::beginAP(const char* ssid, const char *passphrase, uint8_
     return ret == NSAPI_ERROR_OK ? WL_AP_LISTENING : WL_CONNECT_FAILED;
 }
 
+void arduino::WiFiClass::ensureDefaultAPNetworkConfiguration() {
+    if(_ip == nullptr){
+        _ip = SocketAddress("192.168.3.1");
+    }
+    if(_gateway == nullptr){
+        _gateway = _ip;
+    }
+    if(_netmask == nullptr){
+        _netmask = SocketAddress("255.255.255.0");
+    }
+}
+
 void arduino::WiFiClass::end() {
     if (softap != NULL) {
         ((WhdSoftAPInterface*)softap)->stop();
     }
+}
+
+void arduino::WiFiClass::config(arduino::IPAddress local_ip){    
+    nsapi_addr_t convertedIP = {NSAPI_IPv4, {local_ip[0], local_ip[1], local_ip[2], local_ip[3]}};    
+    _ip = SocketAddress(convertedIP);    
+}
+
+void arduino::WiFiClass::config(const char *local_ip){
+    _ip = SocketAddress(local_ip);    
 }
 
 char* arduino::WiFiClass::SSID() {

@@ -97,6 +97,12 @@ public:
         * param local_ip: 	Static ip configuration
         */
     void config(IPAddress local_ip);
+    
+    /* Change Ip configuration settings disabling the dhcp client
+        *
+        * param local_ip: 	Static ip configuration as string
+        */
+    void config(const char *local_ip);
 
     /* Change Ip configuration settings disabling the dhcp client
         *
@@ -282,11 +288,11 @@ public:
 private:
 
     EMACInterface* softap;
+    SocketAddress _ip = nullptr;
+    SocketAddress _gateway = nullptr;
+    SocketAddress _netmask = nullptr;
 
-    SocketAddress _ip = SocketAddress("192.168.3.1");
-    SocketAddress _gateway = SocketAddress("192.168.3.1");
-    SocketAddress _netmask = SocketAddress("255.255.255.0");
-
+    void ensureDefaultAPNetworkConfiguration();
     bool isVisible(char* ssid);
     char* _ssid;
     WiFiInterface* wifi_if;
