@@ -283,6 +283,10 @@ private:
 
     EMACInterface* softap;
 
+    SocketAddress _ip = SocketAddress("192.168.3.1");
+    SocketAddress _gateway = SocketAddress("192.168.3.1");
+    SocketAddress _netmask = SocketAddress("255.255.255.0");
+
     bool isVisible(char* ssid);
     char* _ssid;
     WiFiInterface* wifi_if;

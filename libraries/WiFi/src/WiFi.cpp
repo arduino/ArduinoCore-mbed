@@ -48,11 +48,8 @@ int arduino::WiFiClass::beginAP(const char* ssid, const char *passphrase, uint8_
         return WL_CONNECT_FAILED;
     }
 
-    //Set ap ssid, password and channel
-    SocketAddress ip("192.168.3.1");
-    SocketAddress gw("192.168.3.1");
-    SocketAddress netmask("255.255.255.0");
-    ((WhdSoftAPInterface*)softap)->set_network(ip, gw, netmask);
+    //Set ap ssid, password and channel    
+    ((WhdSoftAPInterface*)softap)->set_network(_ip, _netmask, _gateway);
     nsapi_error_t ret = ((WhdSoftAPInterface*)softap)->start(ssid, passphrase, NSAPI_SECURITY_WPA2, channel, true /* dhcp server */, NULL, true /* cohexistance */);
 
     return ret == NSAPI_ERROR_OK ? WL_AP_LISTENING : WL_CONNECT_FAILED;
