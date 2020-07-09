@@ -294,6 +294,8 @@ private:
     SocketAddress _ip = nullptr;
     SocketAddress _gateway = nullptr;
     SocketAddress _netmask = nullptr;
+    SocketAddress _dnsServer1 = nullptr;
+    SocketAddress _dnsServer2 = nullptr;
 
     void ensureDefaultAPNetworkConfiguration();
     bool isVisible(char* ssid);

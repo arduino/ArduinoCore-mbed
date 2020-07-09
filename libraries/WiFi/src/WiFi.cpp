@@ -84,6 +84,36 @@ void arduino::WiFiClass::config(const char *local_ip){
     _ip = SocketAddress(local_ip);    
 }
 
+void arduino::WiFiClass::config(IPAddress local_ip, IPAddress dns_server){
+    config(local_ip);
+    nsapi_addr_t convertedDNSServer = {NSAPI_IPv4, {dns_server[0], dns_server[1], dns_server[2], dns_server[3]}};    
+    _dnsServer1 = SocketAddress(convertedDNSServer);
+}
+
+void arduino::WiFiClass::config(IPAddress local_ip, IPAddress dns_server, IPAddress gateway){
+    config(local_ip, dns_server);
+    nsapi_addr_t convertedGatewayIP = {NSAPI_IPv4, {gateway[0], gateway[1], gateway[2], gateway[3]}};    
+    _gateway = SocketAddress(convertedGatewayIP);
+}
+
+void arduino::WiFiClass::config(IPAddress local_ip, IPAddress dns_server, IPAddress gateway, IPAddress subnet){    
+    config(local_ip, dns_server, gateway);
+    nsapi_addr_t convertedSubnetMask = {NSAPI_IPv4, {subnet[0], subnet[1], subnet[2], subnet[3]}};    
+    _netmask = SocketAddress(convertedSubnetMask);
+}
+
+void arduino::WiFiClass::setDNS(IPAddress dns_server1){
+    nsapi_addr_t convertedDNSServer = {NSAPI_IPv4, {dns_server1[0], dns_server1[1], dns_server1[2], dns_server1[3]}};    
+    _dnsServer1 = SocketAddress(convertedDNSServer);
+}
+
+void arduino::WiFiClass::setDNS(IPAddress dns_server1, IPAddress dns_server2){
+    nsapi_addr_t convertedDNSServer1 = {NSAPI_IPv4, {dns_server1[0], dns_server1[1], dns_server1[2], dns_server1[3]}};    
+    _dnsServer1 = SocketAddress(convertedDNSServer1);
+    nsapi_addr_t convertedDNSServer2 = {NSAPI_IPv4, {dns_server2[0], dns_server2[1], dns_server2[2], dns_server2[3]}};    
+    _dnsServer2 = SocketAddress(convertedDNSServer2);    
+}
+
 char* arduino::WiFiClass::SSID() {
     return _ssid;
 }
