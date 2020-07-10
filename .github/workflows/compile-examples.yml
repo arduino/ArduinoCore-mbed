@@ -1,0 +1,77 @@
+name: Compile Examples
+
+on: [pull_request, push]
+
+jobs:
+  compile-test:
+    runs-on: ubuntu-latest
+
+    env:
+      # sketch paths to compile (recursive) for all boards
+      UNIVERSAL_SKETCH_PATHS: '"libraries/Scheduler"'
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        board: [
+          {"fqbn": "arduino-beta:mbed:nano33ble"},
+          {"fqbn": "arduino-beta:mbed:envie_m4"},
+          {"fqbn": "arduino-beta:mbed:envie_m7"}
+        ]
+
+        # make board type-specific customizations to the matrix jobs
+        include:
+          # normal boards
+          - board:
+              fqbn: "arduino-beta:mbed:nano33ble"
+            additional-sketch-paths: '"libraries/PDM"'
+          - board:
+              fqbn: "arduino-beta:mbed:envie_m4"
+            additional-sketch-paths: '"libraries/doom"'
+          - board:
+              fqbn: "arduino-beta:mbed:envie_m7"
+            additional-sketch-paths: '"libraries/doom"'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # The source files are in a subfolder of the ArduinoCore-API repository, so it's not possible to clone it directly to the final destination in the core
+      #- name: Checkout ArduinoCore-API
+      #  uses: actions/checkout@v2
+        #with:
+        #  repository: arduino/ArduinoCore-API
+        #  path: extras/ArduinoCore-API
+
+      #- name: Install ArduinoCore-API
+      #  run: mv "$GITHUB_WORKSPACE/extras/ArduinoCore-API/api" "$GITHUB_WORKSPACE/cores/arduino"   
+
+      #- name: Checkout Adafruit WiFiNINA
+      #  uses: actions/checkout@v2
+      #  with:
+      #    repository: adafruit/WiFiNINA
+      #    path: adafruit/WiFiNINA
+
+      - name: Compile examples
+        uses: arduino/actions/libraries/compile-examples@master
+        with:
+          fqbn: ${{ matrix.board.fqbn }}
+          # libraries: |
+            # ${{ env.UNIVERSAL_LIBRARIES }}
+          platforms: |
+            # Use Board Manager to install the latest release of Arduino mbed Boards to get the toolchain
+            - name: "arduino-beta:mbed"
+            # Overwrite the Board Manager installation with the local platform
+            # - source-path: "./"
+            #   name: "arduino-beta:mbed"
+          sketch-paths: "${{ env.UNIVERSAL_SKETCH_PATHS }} ${{ matrix.additional-sketch-paths }}"
+          # enable-size-deltas-report: 'true'
+          verbose: 'false'
+
+      # - name: Save memory usage change report as artifact
+      #   if: github.event_name == 'pull_request'
+      #   uses: actions/upload-artifact@v1
+      #   with:
+      #     name: 'size-deltas-reports'
+      #     path: 'size-deltas-reports'
