@@ -39,6 +39,7 @@ extern "C" {
 
 #define DEFAULT_IP_ADDRESS "192.168.3.1"
 #define DEFAULT_NETMASK "255.255.255.0"
+#define DEFAULT_AP_CHANNEL 6
 
 namespace arduino {
 
@@ -93,7 +94,7 @@ public:
      */
     int begin(char* ssid, const char *passphrase);
 
-    int beginAP(const char *ssid, const char* passphrase, uint8_t channel = 6);
+    int beginAP(const char *ssid, const char* passphrase, uint8_t channel = DEFAULT_AP_CHANNEL);
 
     /* Change Ip configuration settings disabling the dhcp client
         *
