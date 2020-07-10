@@ -33,8 +33,7 @@ namespace arduino {
 class WiFiUDP : public UDP {
 private:
   UDPSocket _socket;  // Mbed OS socket
-  const char *_host;  // Host to be used to send data (todo: switch to SocketAddress)
-  uint16_t _port;     // Port to be used to send data (^)
+  SocketAddress _host;  // Host to be used to send data  
 
   uint8_t* _packet_buffer;  // Raw packet buffer (contains data we got from the UDPSocket)
 

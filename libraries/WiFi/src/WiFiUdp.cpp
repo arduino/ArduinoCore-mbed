@@ -39,10 +39,9 @@ void arduino::WiFiUDP::stop() {
 // int arduino::WiFiUDP::beginPacket(IPAddress ip, uint16_t port) {
 // }
 
-int arduino::WiFiUDP::beginPacket(const char *host, uint16_t port) {
-    _host = host;
-    _port = port;
-
+int arduino::WiFiUDP::beginPacket(IPAddress host, uint16_t port) {
+    nsapi_addr_t convertedHost = {NSAPI_IPv4, {host[0], host[1], host[2], host[3]}};   
+    _host = SocketAddress(convertedHost, port);
     return 1;
 }
 
