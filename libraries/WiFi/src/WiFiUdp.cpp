@@ -151,3 +151,14 @@ int arduino::WiFiUDP::read(unsigned char* buffer, size_t len) {
 
     return len;
 }
+
+IPAddress arduino::WiFiUDP::remoteIP() {
+    SocketAddress remoteAddress("");
+
+    if(_socket.getpeername(&remoteAddress)) != NSAPI_ERROR_OK){
+        return nullptr;
+    }
+
+    nsapi_addr_t address = remoteAddress.get_addr();
+    return IPAddress(address[1][0], address[1][1], address[1][2], address[1][3]);
+}

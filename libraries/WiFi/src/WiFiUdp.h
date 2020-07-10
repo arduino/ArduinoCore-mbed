@@ -84,7 +84,7 @@ public:
   // virtual void flush();	// Finish reading the current packet
 
   // Return the IP address of the host who sent the current incoming packet
-  // virtual IPAddress remoteIP();
+  virtual IPAddress remoteIP();
   // // Return the port of the host who sent the current incoming packet
   // virtual uint16_t remotePort();
 };
