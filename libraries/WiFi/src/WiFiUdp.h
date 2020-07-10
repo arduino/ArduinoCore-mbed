@@ -86,7 +86,7 @@ public:
   // Return the IP address of the host who sent the current incoming packet
   virtual IPAddress remoteIP();
   // // Return the port of the host who sent the current incoming packet
-  // virtual uint16_t remotePort();
+  virtual uint16_t remotePort();
 };
 
 }

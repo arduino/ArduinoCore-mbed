@@ -163,3 +163,13 @@ IPAddress arduino::WiFiUDP::remoteIP() {
     nsapi_addr_t address = remoteAddress.get_addr();
     return IPAddress(address[1][0], address[1][1], address[1][2], address[1][3]);
 }
+
+uint16_t arduino::WiFiUDP::remotePort() {
+    SocketAddress remoteAddress("");
+
+    if(_socket.getpeername(&remoteAddress)) != NSAPI_ERROR_OK){
+        return nullptr;
+    }
+
+    return remoteAddress.get_port();
+}
