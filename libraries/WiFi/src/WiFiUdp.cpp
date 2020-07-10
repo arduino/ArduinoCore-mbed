@@ -67,11 +67,14 @@ int arduino::WiFiUDP::parsePacket() {
     if (ret == NSAPI_ERROR_WOULD_BLOCK) {
         // no data
         return 0;
+    } else if(ret == NSAPI_ERROR_NO_SOCKET){
+        // socket was not created correctly.
+        return -1;
     }
     // error codes below zero are errors
     else if (ret <= 0) {
         // something else went wrong, need some tracing info...
-        return 0;
+        return -1;
     }
 
     // set current packet states
