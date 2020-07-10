@@ -177,4 +177,11 @@ uint16_t arduino::WiFiUDP::remotePort() {
 void arduino::WiFiUDP::flush(){
     // TODO: a real check to ensure transmission has been completed
 }
+
+int arduino::WiFiUDP::peek(){
+  if (_current_packet_size < 1){
+    return -1;
+  }
+
+  return _current_packet[0];
 }

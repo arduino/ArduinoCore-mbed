@@ -80,7 +80,7 @@ public:
   // Returns the number of characters read, or 0 if none are available
   virtual int read(char* buffer, size_t len) { return read((unsigned char*)buffer, len); };
   // Return the next byte from the current packet without moving on to the next byte
-  // virtual int peek();
+  virtual int peek();
   virtual void flush();	// Finish reading the current packet
 
   // Return the IP address of the host who sent the current incoming packet
