@@ -37,9 +37,17 @@ extern "C" {
 #include "WhdSoftAPInterface.h"
 #endif
 
+#ifndef DEFAULT_IP_ADDRESS
 #define DEFAULT_IP_ADDRESS "192.168.3.1"
+#endif
+
+#ifndef DEFAULT_NETMASK
 #define DEFAULT_NETMASK "255.255.255.0"
+#endif
+
+#ifndef DEFAULT_AP_CHANNEL
 #define DEFAULT_AP_CHANNEL 6
+#endif
 
 namespace arduino {
 
