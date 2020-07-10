@@ -35,14 +35,15 @@ void arduino::WiFiUDP::stop() {
     _socket.close();
 }
 
-// we should get the octets out of the IPAddress... there's nothing for it right now
-// int arduino::WiFiUDP::beginPacket(IPAddress ip, uint16_t port) {
-// }
-
-int arduino::WiFiUDP::beginPacket(IPAddress host, uint16_t port) {
-    nsapi_addr_t convertedHost = {NSAPI_IPv4, {host[0], host[1], host[2], host[3]}};   
-    _host = SocketAddress(convertedHost, port);
+int arduino::WiFiUDP::beginPacket(IPAddress ip, uint16_t port) {
+    nsapi_addr_t convertedIP = {NSAPI_IPv4, {ip[0], ip[1], ip[2], ip[3]}};   
+    _host = SocketAddress(convertedIP, port);
     return 1;
+}
+
+int arduino::WiFiUDP::beginPacket(const char *host, uint16_t port) {     
+    _host = SocketAddress(host, port);
+    return 1; 
 }
 
 int arduino::WiFiUDP::endPacket() {
