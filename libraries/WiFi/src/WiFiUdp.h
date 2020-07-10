@@ -34,6 +34,7 @@ class WiFiUDP : public UDP {
 private:
   UDPSocket _socket;  // Mbed OS socket
   SocketAddress _host;  // Host to be used to send data  
+  SocketAddress _remoteHost; // Remote host that sent incoming packets
 
   uint8_t* _packet_buffer;  // Raw packet buffer (contains data we got from the UDPSocket)
 

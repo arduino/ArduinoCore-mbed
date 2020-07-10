@@ -62,7 +62,7 @@ size_t arduino::WiFiUDP::write(const uint8_t *buffer, size_t size) {
 }
 
 int arduino::WiFiUDP::parsePacket() {
-    nsapi_size_or_error_t ret = _socket.recvfrom(NULL, _packet_buffer, WIFI_UDP_BUFFER_SIZE);
+    nsapi_size_or_error_t ret = _socket.recvfrom(&_remoteHost, _packet_buffer, WIFI_UDP_BUFFER_SIZE);
 
     if (ret == NSAPI_ERROR_WOULD_BLOCK) {
         // no data
@@ -152,24 +152,12 @@ int arduino::WiFiUDP::read(unsigned char* buffer, size_t len) {
 }
 
 IPAddress arduino::WiFiUDP::remoteIP() {
-    SocketAddress remoteAddress("");
-
-    if(_socket.getpeername(&remoteAddress) != NSAPI_ERROR_OK){
-        return nullptr;
-    }
-
-    nsapi_addr_t address = remoteAddress.get_addr();
+    nsapi_addr_t address = _remoteHost.get_addr();
     return IPAddress(address.bytes[0], address.bytes[1], address.bytes[2], address.bytes[3]);
 }
 
-uint16_t arduino::WiFiUDP::remotePort() {
-    SocketAddress remoteAddress("");
-
-    if(_socket.getpeername(&remoteAddress) != NSAPI_ERROR_OK){
-        return -1;
-    }
-
-    return remoteAddress.get_port();
+uint16_t arduino::WiFiUDP::remotePort() {    
+    return _remoteHost.get_port();
 }
 
 void arduino::WiFiUDP::flush(){
