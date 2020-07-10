@@ -166,7 +166,7 @@ uint16_t arduino::WiFiUDP::remotePort() {
     SocketAddress remoteAddress("");
 
     if(_socket.getpeername(&remoteAddress) != NSAPI_ERROR_OK){
-        return nullptr;
+        return -1;
     }
 
     return remoteAddress.get_port();
