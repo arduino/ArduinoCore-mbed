@@ -159,7 +159,7 @@ IPAddress arduino::WiFiUDP::remoteIP() {
     }
 
     nsapi_addr_t address = remoteAddress.get_addr();
-    return IPAddress(address[1][0], address[1][1], address[1][2], address[1][3]);
+    return IPAddress(address.bytes[0], address.bytes[1], address.bytes[2], address.bytes[3]);
 }
 
 uint16_t arduino::WiFiUDP::remotePort() {
