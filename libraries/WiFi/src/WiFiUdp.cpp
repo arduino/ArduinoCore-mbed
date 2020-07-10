@@ -173,3 +173,8 @@ uint16_t arduino::WiFiUDP::remotePort() {
 
     return remoteAddress.get_port();
 }
+
+void arduino::WiFiUDP::flush(){
+    // TODO: a real check to ensure transmission has been completed
+}
+}
