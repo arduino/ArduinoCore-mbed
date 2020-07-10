@@ -70,7 +70,7 @@ public:
   // Returns the size of the packet in bytes, or 0 if no packets are available
   virtual int parsePacket();
   // Number of bytes remaining in the current packet
-  // virtual int available();
+  virtual int available();
   // Read a single byte from the current packet
   virtual int read();
   // Read up to len bytes from the current packet and place them into buffer

@@ -82,6 +82,10 @@ int arduino::WiFiUDP::parsePacket() {
     return 1;
 }
 
+int arduino::WiFiUDP::available() {
+    return _current_packet_size;
+}
+
 // Read a single byte from the current packet
 int arduino::WiFiUDP::read() {
     // no current packet...
