@@ -308,6 +308,7 @@ private:
 
     void ensureDefaultAPNetworkConfiguration();
     bool isVisible(char* ssid);
+    arduino::IPAddress ipAddressFromSocketAddress(SocketAddress socketAddress);
     char* _ssid;
     WiFiInterface* wifi_if;
     voidPrtFuncPtr cb;

@@ -10,6 +10,11 @@ bool arduino::WiFiClass::isVisible(char* ssid) {
     return false;
 }
 
+arduino::IPAddress arduino::WiFiClass::ipAddressFromSocketAddress(SocketAddress socketAddress) {
+    nsapi_addr_t address = socketAddress.get_addr();
+    return IPAddress(address.bytes[0], address.bytes[1], address.bytes[2], address.bytes[3]);    
+}
+
 int arduino::WiFiClass::begin(char* ssid, const char *passphrase) {
     if (_ssid) free(_ssid);
 
