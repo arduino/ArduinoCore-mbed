@@ -77,8 +77,14 @@ void arduino::WiFiClass::ensureDefaultAPNetworkConfiguration() {
 }
 
 void arduino::WiFiClass::end() {
+    disconnect();
+}
+
+int arduino::WiFiClass::disconnect() {
     if (softap != NULL) {
-        ((WhdSoftAPInterface*)softap)->stop();
+        return static_cast<WhdSoftAPInterface*>(softap)->stop();        
+    } else {
+        return wifi_if->disconnect();
     }
 }
 
