@@ -21,6 +21,10 @@ uint8_t arduino::WiFiUDP::begin(uint16_t port) {
         return 0;
     }
 
+    if (_socket.bind(port) < 0) {
+        return 0; //Failed to bind UDP Socket to port
+    }
+
     if (!_packet_buffer) {
         return 0;
     }
