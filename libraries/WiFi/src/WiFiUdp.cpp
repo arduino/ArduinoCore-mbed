@@ -86,7 +86,7 @@ int arduino::WiFiUDP::parsePacket() {
     _current_packet = _packet_buffer;
     _current_packet_size = ret;
 
-    return 1;
+    return _current_packet_size;
 }
 
 int arduino::WiFiUDP::available() {
@@ -106,7 +106,7 @@ int arduino::WiFiUDP::read() {
     // check for overflow
     if (_current_packet > _packet_buffer + _current_packet_size) {
         // try reading the next packet...
-        if (parsePacket() == 1) {
+        if (parsePacket() > 0) {
             // if so, read first byte of next packet;
             return read();
         }
@@ -141,7 +141,7 @@ int arduino::WiFiUDP::read(unsigned char* buffer, size_t len) {
     // at the end of the packet?
     if (max_bytes == 0) {
         // try read next packet...
-        if (parsePacket() == 1) {
+        if (parsePacket() > 0) {
             return read(buffer, len);
         }
         else {
