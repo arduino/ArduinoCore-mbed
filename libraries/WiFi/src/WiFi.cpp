@@ -219,17 +219,25 @@ uint8_t* arduino::WiFiClass::macAddress(uint8_t* mac) {
     return mac;
 }
 
-arduino::IPAddress arduino::WiFiClass::localIP() {
-    arduino::IPAddress addr;
-
+arduino::IPAddress arduino::WiFiClass::localIP() {    
     SocketAddress ip;
-    if (softap != NULL) {
-        softap->get_ip_address(&ip);
-    } else {
-        wifi_if->get_ip_address(&ip);
-    }
-    addr.fromString(ip.get_ip_address()); // @todo: the IP we get from Mbed is correct, but is parsed incorrectly by Arduino
-    return addr;
+    NetworkInterface *interface = getNetwork();
+    interface->get_ip_address(&ip);
+    return ipAddressFromSocketAddress(ip);    
+}
+
+arduino::IPAddress arduino::WiFiClass::subnetMask() {    
+    SocketAddress ip;
+    NetworkInterface *interface = getNetwork();
+    interface->get_netmask(&ip);
+    return ipAddressFromSocketAddress(ip);    
+}
+
+arduino::IPAddress arduino::WiFiClass::gatewayIP() {    
+    SocketAddress ip;
+    NetworkInterface *interface = getNetwork();
+    interface->get_gateway(&ip);
+    return ipAddressFromSocketAddress(ip);    
 }
 
 NetworkInterface *arduino::WiFiClass::getNetwork() {
