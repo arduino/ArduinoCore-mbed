@@ -208,7 +208,7 @@ uint8_t* arduino::WiFiClass::BSSID(unsigned char* bssid) {
 }
 
 uint8_t* arduino::WiFiClass::macAddress(uint8_t* mac) {
-    const char *mac_str = wifi_if->get_mac_address();
+    const char *mac_str = getNetwork()->get_mac_address();
     for( int b = 0; b < 6; b++ )
     {
         uint32_t tmp;
