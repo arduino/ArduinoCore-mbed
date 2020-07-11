@@ -25,7 +25,9 @@ int arduino::WiFiClass::begin(char* ssid, const char *passphrase) {
     }
 
     if (wifi_if == NULL) {
-       wifi_if = (WiFiInterface*)cb();
+        //Q: What is the callback for?
+        cb();
+        if(wifi_if == NULL) return WL_CONNECT_FAILED;
     }
 
     // too long? break it off
