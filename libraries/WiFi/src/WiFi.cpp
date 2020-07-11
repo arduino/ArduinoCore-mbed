@@ -35,12 +35,14 @@ int arduino::WiFiClass::begin(char* ssid, const char *passphrase) {
     scanNetworks();
     // use scan result to populate security field
     if (!isVisible(ssid)) {
-        return WL_CONNECT_FAILED;
+        _currentNetworkStatus = WL_CONNECT_FAILED;
+        return _currentNetworkStatus;
     }
 
     nsapi_error_t ret = wifi_if->connect(ssid, passphrase, ap_list[connected_ap].get_security());
 
-    return ret == NSAPI_ERROR_OK ? WL_CONNECTED : WL_CONNECT_FAILED;
+    _currentNetworkStatus = ret == NSAPI_ERROR_OK ? WL_CONNECTED : WL_CONNECT_FAILED;
+    return _currentNetworkStatus;
 }
 
 int arduino::WiFiClass::beginAP(const char* ssid, const char *passphrase, uint8_t channel) {
@@ -183,9 +185,8 @@ int32_t arduino::WiFiClass::RSSI() {
     return wifi_if->get_rssi();
 }
 
-uint8_t arduino::WiFiClass::status() {
-    // @todo: fix
-    return WL_CONNECTED;
+uint8_t arduino::WiFiClass::status() {    
+    return _currentNetworkStatus;
 }
 
 uint8_t arduino::WiFiClass::encryptionType() {

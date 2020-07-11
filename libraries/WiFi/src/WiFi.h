@@ -310,6 +310,7 @@ private:
     bool isVisible(char* ssid);
     arduino::IPAddress ipAddressFromSocketAddress(SocketAddress socketAddress);
     char* _ssid;
+    wl_status_t _currentNetworkStatus = WL_IDLE_STATUS;
     WiFiInterface* wifi_if;
     voidPrtFuncPtr cb;
     WiFiAccessPoint* ap_list = NULL;
