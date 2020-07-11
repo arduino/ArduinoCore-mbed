@@ -7,10 +7,10 @@ extern WiFiClass WiFi;
 #endif
 
 arduino::WiFiUDP::WiFiUDP() {
-    _packet_buffer = (uint8_t*)malloc(WIFI_UDP_BUFFER_SIZE);
+    _packet_buffer = new uint8_t[WIFI_UDP_BUFFER_SIZE];
     _current_packet = NULL;
     _current_packet_size = 0;
-    // if this malloc fails then ::begin will fail
+    // if this allocation fails then ::begin will fail
 }
 
 uint8_t arduino::WiFiUDP::begin(uint16_t port) {
@@ -33,6 +33,7 @@ uint8_t arduino::WiFiUDP::begin(uint16_t port) {
 
 void arduino::WiFiUDP::stop() {
     _socket.close();
+    delete[] _packet_buffer;
 }
 
 int arduino::WiFiUDP::beginPacket(IPAddress ip, uint16_t port) {
