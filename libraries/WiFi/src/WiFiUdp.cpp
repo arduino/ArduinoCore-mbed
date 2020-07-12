@@ -46,12 +46,14 @@ void arduino::WiFiUDP::stop() {
 int arduino::WiFiUDP::beginPacket(IPAddress ip, uint16_t port) {
     nsapi_addr_t convertedIP = {NSAPI_IPv4, {ip[0], ip[1], ip[2], ip[3]}};   
     _host = SocketAddress(convertedIP, port);
-    return 1;
+    //If IP is null and port is 0 the initialization failed
+    return (_host.get_ip_address() == nullptr && _host.get_port() == 0) ? 0 : 1;
 }
 
 int arduino::WiFiUDP::beginPacket(const char *host, uint16_t port) {     
     _host = SocketAddress(host, port);
-    return 1; 
+    //If IP is null and port is 0 the initialization failed
+    return (_host.get_ip_address() == nullptr && _host.get_port() == 0) ? 0 : 1;
 }
 
 int arduino::WiFiUDP::endPacket() {
