@@ -13,6 +13,10 @@ arduino::WiFiUDP::WiFiUDP() {
     // if this allocation fails then ::begin will fail
 }
 
+arduino::WiFiUDP::~WiFiUDP() {
+    delete[] _packet_buffer;
+}
+
 uint8_t arduino::WiFiUDP::begin(uint16_t port) {
     // success = 1, fail = 0
 
@@ -36,8 +40,7 @@ uint8_t arduino::WiFiUDP::begin(uint16_t port) {
 }
 
 void arduino::WiFiUDP::stop() {
-    _socket.close();
-    delete[] _packet_buffer;
+    _socket.close();    
 }
 
 int arduino::WiFiUDP::beginPacket(IPAddress ip, uint16_t port) {
