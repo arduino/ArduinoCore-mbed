@@ -24,10 +24,10 @@ int arduino::WiFiClass::begin(char* ssid, const char *passphrase) {
         return WL_CONNECT_FAILED;
     }
 
-    if (wifi_if == NULL) {
+    if (wifi_if == nullptr) {
         //Q: What is the callback for?
-        cb();
-        if(wifi_if == NULL) return WL_CONNECT_FAILED;
+        _initializerCallback();
+        if(wifi_if == nullptr) return WL_CONNECT_FAILED;
     }
 
     // too long? break it off
@@ -50,18 +50,18 @@ int arduino::WiFiClass::begin(char* ssid, const char *passphrase) {
 int arduino::WiFiClass::beginAP(const char* ssid, const char *passphrase, uint8_t channel) {
 
 #if defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_PORTENTA_H7_M4)
-    softap = WhdSoftAPInterface::get_default_instance();
+    _softAP = WhdSoftAPInterface::get_default_instance();
 #endif
 
-    if (softap == NULL) {
+    if (_softAP == NULL) {
         return WL_CONNECT_FAILED;
     }
 
     ensureDefaultAPNetworkConfiguration();
 
     //Set ap ssid, password and channel    
-    ((WhdSoftAPInterface*)softap)->set_network(_ip, _netmask, _gateway);
-    nsapi_error_t ret = ((WhdSoftAPInterface*)softap)->start(ssid, passphrase, NSAPI_SECURITY_WPA2, channel, true /* dhcp server */, NULL, true /* cohexistance */);
+    static_cast<WhdSoftAPInterface*>(_softAP)->set_network(_ip, _netmask, _gateway);
+    nsapi_error_t ret = static_cast<WhdSoftAPInterface*>(_softAP)->start(ssid, passphrase, NSAPI_SECURITY_WPA2, channel, true /* dhcp server */, NULL, true /* cohexistance */);
 
     return ret == NSAPI_ERROR_OK ? WL_AP_LISTENING : WL_CONNECT_FAILED;
 }
@@ -83,8 +83,8 @@ void arduino::WiFiClass::end() {
 }
 
 int arduino::WiFiClass::disconnect() {
-    if (softap != NULL) {
-        return static_cast<WhdSoftAPInterface*>(softap)->stop();        
+    if (_softAP != nullptr) {
+        return static_cast<WhdSoftAPInterface*>(_softAP)->stop();        
     } else {
         return wifi_if->disconnect();
     }
@@ -171,7 +171,7 @@ static uint8_t sec2enum(nsapi_security_t sec)
 
 int8_t arduino::WiFiClass::scanNetworks() {
     uint8_t count = 10;
-    if (ap_list == NULL) {
+    if (ap_list == nullptr) {
         ap_list = new WiFiAccessPoint[count];
     }
     return wifi_if->scan(ap_list, count);
@@ -243,8 +243,8 @@ arduino::IPAddress arduino::WiFiClass::gatewayIP() {
 }
 
 NetworkInterface *arduino::WiFiClass::getNetwork() {
-    if (softap != NULL) {
-        return softap;
+    if (_softAP != nullptr) {
+        return _softAP;
     } else {
         return wifi_if;
     }
