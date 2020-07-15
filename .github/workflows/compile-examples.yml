@@ -1,9 +1,25 @@
 name: Compile Examples
 
-on: [pull_request, push]
+on: 
+  pull_request:
+    paths:
+      - ".github/workflows/compile-examples.yml"
+      - "cores/**"
+      - "libraries/**"
+      - "variants/**"
+      - "boards.txt"
+      - "platform.txt"
+  push:
+    paths:
+      - ".github/workflows/compile-examples.yml"
+      - "cores/**"
+      - "libraries/**"
+      - "variants/**"
+      - "boards.txt"
+      - "platform.txt"
 
 jobs:
-  compile-test:
+  compile-examples:
     runs-on: ubuntu-latest
 
     env:
@@ -14,22 +30,21 @@ jobs:
       fail-fast: false
 
       matrix:
-        board: [
-          {"fqbn": "arduino-beta:mbed:nano33ble"},
-          {"fqbn": "arduino-beta:mbed:envie_m4"},
-          {"fqbn": "arduino-beta:mbed:envie_m7"}
-        ]
+        board:
+          - fqbn: arduino-beta:mbed:nano33ble
+          - fqbn: arduino-beta:mbed:envie_m4
+          - fqbn: arduino-beta:mbed:envie_m7
 
         # compile only the examples compatible with each board
         include:
           - board:
-              fqbn: "arduino-beta:mbed:nano33ble"
+              fqbn: arduino-beta:mbed:nano33ble
             additional-sketch-paths: '"libraries/PDM" "libraries/ThreadDebug"'
           - board:
-              fqbn: "arduino-beta:mbed:envie_m4"
+              fqbn: arduino-beta:mbed:envie_m4
             additional-sketch-paths: '"libraries/doom" "libraries/KernelDebug" "libraries/Portenta_SDCARD" "libraries/Portenta_System" "libraries/Portenta_Video" '
           - board:
-              fqbn: "arduino-beta:mbed:envie_m7"
+              fqbn: arduino-beta:mbed:envie_m7
             additional-sketch-paths: '"libraries/doom" "libraries/KernelDebug" "libraries/Portenta_Audio" "libraries/Portenta_SDCARD" "libraries/Portenta_System" "libraries/Portenta_Video" "libraries/ThreadDebug" "libraries/USBHOST"'
 
     steps:
