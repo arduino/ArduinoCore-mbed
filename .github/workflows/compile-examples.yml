@@ -77,3 +77,11 @@ jobs:
               name: "arduino-beta:mbed"
           sketch-paths: "${{ env.UNIVERSAL_SKETCH_PATHS }} ${{ matrix.additional-sketch-paths }}"
           verbose: 'false'
+          enable-size-deltas-report: true
+
+      - name: Save memory usage change report as artifact
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v1
+        with:
+          name: size-deltas-reports
+          path: size-deltas-reports
