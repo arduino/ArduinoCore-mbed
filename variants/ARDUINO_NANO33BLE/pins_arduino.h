@@ -55,6 +55,11 @@ extern "C" unsigned int PINCOUNT_fn();
 #define LEDG        (23u)
 #define LEDB        (24u)
 #define LED_PWR     (25u)
+#define LED_ONBOARD_HIGH 0   // grounded to turn LED on
+#define LED_ONBOARD_LOW  1   // not grounded to turn LED off
+#define LED_RED     LEDR
+#define LED_GREEN   LEDG
+#define LED_BLUE    LEDB
 
 // Analog pins
 // -----------
