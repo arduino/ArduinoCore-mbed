@@ -37,22 +37,31 @@ extern "C" {
 #include "WhdSoftAPInterface.h"
 #endif
 
+#ifndef DEFAULT_IP_ADDRESS
+#define DEFAULT_IP_ADDRESS "192.168.3.1"
+#endif
+
+#ifndef DEFAULT_NETMASK
+#define DEFAULT_NETMASK "255.255.255.0"
+#endif
+
+#ifndef DEFAULT_AP_CHANNEL
+#define DEFAULT_AP_CHANNEL 6
+#endif
+
 namespace arduino {
 
 typedef void* (*voidPrtFuncPtr)(void);
 
 class WiFiClass
 {
-private:
-
-    static void init();
 public:
     static int16_t 	_state[MAX_SOCK_NUM];
     static uint16_t _server_port[MAX_SOCK_NUM];
 
     WiFiClass(WiFiInterface* _if) : wifi_if(_if) {};
 
-    WiFiClass(voidPrtFuncPtr _cb) : cb(_cb) {};
+    WiFiClass(voidPrtFuncPtr _cb) : _initializerCallback(_cb) {};
 
     /*
      * Get the first socket available
@@ -90,13 +99,19 @@ public:
      */
     int begin(char* ssid, const char *passphrase);
 
-    int beginAP(const char *ssid, const char* passphrase, uint8_t channel = 6);
+    int beginAP(const char *ssid, const char* passphrase, uint8_t channel = DEFAULT_AP_CHANNEL);
 
     /* Change Ip configuration settings disabling the dhcp client
         *
         * param local_ip: 	Static ip configuration
         */
     void config(IPAddress local_ip);
+    
+    /* Change Ip configuration settings disabling the dhcp client
+        *
+        * param local_ip: 	Static ip configuration as string
+        */
+    void config(const char *local_ip);
 
     /* Change Ip configuration settings disabling the dhcp client
         *
@@ -276,19 +291,26 @@ public:
     friend class WiFiClient;
     friend class WiFiServer;
 
-public:
     NetworkInterface *getNetwork();
 
 private:
 
-    EMACInterface* softap;
-
-    bool isVisible(char* ssid);
-    char* _ssid;
-    WiFiInterface* wifi_if;
-    voidPrtFuncPtr cb;
-    WiFiAccessPoint* ap_list = NULL;
+    EMACInterface* _softAP = nullptr;
+    SocketAddress _ip = nullptr;
+    SocketAddress _gateway = nullptr;
+    SocketAddress _netmask = nullptr;
+    SocketAddress _dnsServer1 = nullptr;
+    SocketAddress _dnsServer2 = nullptr;
+    char* _ssid = nullptr;
+    wl_status_t _currentNetworkStatus = WL_IDLE_STATUS;
+    WiFiInterface* wifi_if = nullptr;
+    voidPrtFuncPtr _initializerCallback;
+    WiFiAccessPoint* ap_list = nullptr;
     uint8_t connected_ap;
+
+    void ensureDefaultAPNetworkConfiguration();
+    bool isVisible(char* ssid);
+    arduino::IPAddress ipAddressFromSocketAddress(SocketAddress socketAddress);
 };
 
 }
