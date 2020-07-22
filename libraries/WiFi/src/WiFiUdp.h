@@ -33,8 +33,8 @@ namespace arduino {
 class WiFiUDP : public UDP {
 private:
   UDPSocket _socket;  // Mbed OS socket
-  const char *_host;  // Host to be used to send data (todo: switch to SocketAddress)
-  uint16_t _port;     // Port to be used to send data (^)
+  SocketAddress _host;  // Host to be used to send data  
+  SocketAddress _remoteHost; // Remote host that sent incoming packets
 
   uint8_t* _packet_buffer;  // Raw packet buffer (contains data we got from the UDPSocket)
 
@@ -45,15 +45,16 @@ private:
 
 public:
   WiFiUDP();  // Constructor
+  ~WiFiUDP();
   virtual uint8_t begin(uint16_t);	// initialize, start listening on specified port. Returns 1 if successful, 0 if there are no sockets available to use
-  // virtual uint8_t beginMulticast(IPAddress, uint16_t);  // initialize, start listening on specified multicast IP address and port. Returns 1 if successful, 0 if there are no sockets available to use
+  virtual uint8_t beginMulticast(IPAddress, uint16_t);  // initialize, start listening on specified multicast IP address and port. Returns 1 if successful, 0 if there are no sockets available to use
   virtual void stop();  // Finish with the UDP socket
 
   // Sending UDP packets
 
   // Start building up a packet to send to the remote host specific in ip and port
   // Returns 1 if successful, 0 if there was a problem with the supplied IP address or port
-  // virtual int beginPacket(IPAddress ip, uint16_t port);
+  virtual int beginPacket(IPAddress ip, uint16_t port);
   // Start building up a packet to send to the remote host specific in host and port
   // Returns 1 if successful, 0 if there was a problem resolving the hostname or port
   virtual int beginPacket(const char *host, uint16_t port);
@@ -71,7 +72,7 @@ public:
   // Returns the size of the packet in bytes, or 0 if no packets are available
   virtual int parsePacket();
   // Number of bytes remaining in the current packet
-  // virtual int available();
+  virtual int available();
   // Read a single byte from the current packet
   virtual int read();
   // Read up to len bytes from the current packet and place them into buffer
@@ -81,13 +82,13 @@ public:
   // Returns the number of characters read, or 0 if none are available
   virtual int read(char* buffer, size_t len) { return read((unsigned char*)buffer, len); };
   // Return the next byte from the current packet without moving on to the next byte
-  // virtual int peek();
-  // virtual void flush();	// Finish reading the current packet
+  virtual int peek();
+  virtual void flush();	// Finish reading the current packet
 
   // Return the IP address of the host who sent the current incoming packet
-  // virtual IPAddress remoteIP();
+  virtual IPAddress remoteIP();
   // // Return the port of the host who sent the current incoming packet
-  // virtual uint16_t remotePort();
+  virtual uint16_t remotePort();
 };
 
 }
