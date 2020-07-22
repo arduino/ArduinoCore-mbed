@@ -8,6 +8,13 @@
 extern "C" unsigned int PINCOUNT_fn();
 extern "C" bool isBetaBoard();
 #endif
+
+// Booting
+// ----
+#define bootM4() LL_RCC_ForceCM4Boot() // Provide a memorable alias
+
+// Pin count
+// ----
 #define PINS_COUNT           (PINCOUNT_fn())
 #define NUM_DIGITAL_PINS     (22u)
 #define NUM_ANALOG_INPUTS    (7u)
