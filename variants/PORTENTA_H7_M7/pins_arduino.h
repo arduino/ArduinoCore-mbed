@@ -119,4 +119,6 @@ void _ontouch1200bps_();
 #define LORA_RESET      (PC_7)
 #define LORA_IRQ_DUMB   (PJ_11)
 
+#define CRYPTO_WIRE		Wire1
+
 #endif //__PINS_ARDUINO__
