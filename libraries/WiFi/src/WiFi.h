@@ -78,7 +78,7 @@ public:
      *
      * param ssid: Pointer to the SSID string.
      */
-    int begin(char* ssid);
+    int begin(const char* ssid);
 
     /* Start Wifi connection with WEP encryption.
      * Configure a key into the device. The key type (WEP-40, WEP-104)
@@ -88,7 +88,7 @@ public:
      * param key_idx: The key index to set. Valid values are 0-3.
      * param key: Key input buffer.
      */
-    int begin(char* ssid, uint8_t key_idx, const char* key);
+    int begin(const char* ssid, uint8_t key_idx, const char* key);
 
     /* Start Wifi connection with passphrase
      * the most secure supported mode will be automatically selected
@@ -97,7 +97,7 @@ public:
      * param passphrase: Passphrase. Valid characters in a passphrase
      *        must be between ASCII 32-126 (decimal).
      */
-    int begin(char* ssid, const char *passphrase);
+    int begin(const char* ssid, const char *passphrase);
 
     int beginAP(const char *ssid, const char* passphrase, uint8_t channel = DEFAULT_AP_CHANNEL);
 
@@ -309,7 +309,7 @@ private:
     uint8_t connected_ap;
 
     void ensureDefaultAPNetworkConfiguration();
-    bool isVisible(char* ssid);
+    bool isVisible(const char* ssid);
     arduino::IPAddress ipAddressFromSocketAddress(SocketAddress socketAddress);
 };
 

@@ -1,6 +1,6 @@
 #include "WiFi.h"
 
-bool arduino::WiFiClass::isVisible(char* ssid) {
+bool arduino::WiFiClass::isVisible(const char* ssid) {
     for (int i=0; i<10; i++) {
         if (strncmp(ap_list[i].get_ssid(), ssid, 32) == 0) {
             connected_ap = i;
@@ -15,7 +15,7 @@ arduino::IPAddress arduino::WiFiClass::ipAddressFromSocketAddress(SocketAddress 
     return IPAddress(address.bytes[0], address.bytes[1], address.bytes[2], address.bytes[3]);    
 }
 
-int arduino::WiFiClass::begin(char* ssid, const char *passphrase) {
+int arduino::WiFiClass::begin(const char* ssid, const char *passphrase) {
     if (_ssid) free(_ssid);
 
     _ssid = (char*)malloc(33);
@@ -30,18 +30,18 @@ int arduino::WiFiClass::begin(char* ssid, const char *passphrase) {
         if(wifi_if == nullptr) return WL_CONNECT_FAILED;
     }
 
-    // too long? break it off
-    if (strlen(ssid) > 32) ssid[32] = 0;
     memcpy(_ssid, ssid, 33);
+    // too long? break it off
+    if (strlen(ssid) > 32) _ssid[32] = 0;
 
     scanNetworks();
     // use scan result to populate security field
-    if (!isVisible(ssid)) {
+    if (!isVisible(_ssid)) {
         _currentNetworkStatus = WL_CONNECT_FAILED;
         return _currentNetworkStatus;
     }
 
-    nsapi_error_t ret = wifi_if->connect(ssid, passphrase, ap_list[connected_ap].get_security());
+    nsapi_error_t ret = wifi_if->connect(_ssid, passphrase, ap_list[connected_ap].get_security());
 
     _currentNetworkStatus = ret == NSAPI_ERROR_OK ? WL_CONNECTED : WL_CONNECT_FAILED;
     return _currentNetworkStatus;
