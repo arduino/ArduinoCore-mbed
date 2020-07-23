@@ -250,7 +250,17 @@ NetworkInterface *arduino::WiFiClass::getNetwork() {
     }
 }
 
+unsigned long arduino::WiFiClass::getTime() {
+    return 0;
+}
+
 #if defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_PORTENTA_H7_M4)
+
+#include "whd_version.h"
+char* arduino::WiFiClass::firmwareVersion() {
+    return WHD_VERSION;
+}
+
 arduino::WiFiClass WiFi(WiFiInterface::get_default_instance());
 #endif
 
