@@ -33,8 +33,7 @@ uint8_t arduino::WiFiUDP::begin(uint16_t port) {
         return 0;
     }
 
-    // do not block when trying to read from socket
-    _socket.set_blocking(false);
+    _socket.set_timeout(1000);
 
     return 1;
 }
