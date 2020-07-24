@@ -1,0 +1,71 @@
+#include "QSPIFBlockDevice.h"
+#include "MBRBlockDevice.h"
+#include "FATFileSystem.h"
+
+QSPIFBlockDevice root(PD_11, PD_12, PF_7, PD_13,  PF_10, PG_6, QSPIF_POLARITY_MODE_1, 40000000);
+mbed::MBRBlockDevice wifi_data(&root, 1);
+mbed::MBRBlockDevice other_data(&root, 2);
+mbed::FATFileSystem wifi_data_fs("wlan");
+mbed::FATFileSystem other_data_fs("fs");
+
+void setup() {
+
+  Serial.begin(115200);
+  while (!Serial);
+
+  mbed::MBRBlockDevice::partition(&root, 1, 0x0B, 0, 1024 * 1024 * 8);
+  mbed::MBRBlockDevice::partition(&root, 2, 0x0B, 1024 * 1024 * 8, 2048 * 1024 * 8);
+
+  int err =  wifi_data_fs.mount(&wifi_data);
+  if (err) {
+    // Reformat if we can't mount the filesystem
+    // this should only happen on the first boot
+    Serial.println("No filesystem found, formatting...");
+    err = wifi_data_fs.reformat(&wifi_data);
+  }
+
+  err =  other_data_fs.mount(&other_data);
+  if (err) {
+    // Reformat if we can't mount the filesystem
+    // this should only happen on the first boot
+    Serial.println("No filesystem found, formatting... ");
+    err = other_data_fs.reformat(&other_data);
+  }
+
+  DIR *dir;
+  struct dirent *ent;
+
+  if ((dir = opendir("/wlan")) != NULL) {
+    /* print all the files and directories within directory */
+    while ((ent = readdir (dir)) != NULL) {
+      Serial.println(ent->d_name);
+      String fullname = "/wlan/" + String(ent->d_name);
+      if (fullname == "/wlan/4343WA1.BIN") {
+        Serial.println("Firmware found! Force update? [Y/n]");
+        while (1) {
+          if (Serial.available()) {
+            int c = Serial.read();
+            if (c == 'Y' || c == 'y') {
+              break;
+            }
+            if (c == 'N' || c == 'n') {
+              return;
+            }
+          }
+        }
+      }
+    }
+    closedir (dir);
+  }
+
+  extern const unsigned char wifi_firmware_image_data[];
+  FILE* fp = fopen("/wlan/4343WA1.BIN", "w");
+  fwrite(wifi_firmware_image_data, 420690, 1, fp);
+  fclose(fp);
+
+  Serial.println("Firmware and certificates updated!");
+}
+
+void loop() {
+
+}
