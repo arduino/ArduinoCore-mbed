@@ -40,6 +40,19 @@ envie_m7.upload.native_usb=true
 envie_m7.upload.maximum_size=786432
 envie_m7.upload.maximum_data_size=523624
 
+### WIP!  Note, this may not be able to coexist - proceed accordingly! --- jcw
+
+## for jlink - REM:  Must use WINUSB w/jlink (Zadig good utility for this under win10.)
+
+envie_m7.debug.tool=gdb
+envie_m7.bootloader.tool=openocd
+envie_m7.bootloader.config=-f target/stm32h7x_dual_bank.cfg
+envie_m7.bootloader.programmer=-f interface/jlink.cfg
+envie_m7.bootloader.extra_action.preflash=stm32h7x option_write 0 0x01c 0xb86aaf0
+envie_m7.bootloader.file=PORTENTA_H7/portentah7_bootloader_mbed_hs.elf
+
+## for stlink
+
 envie_m7.debug.tool=gdb
 envie_m7.bootloader.tool=openocd
 envie_m7.bootloader.config=-f target/stm32h7x_dual_bank.cfg
