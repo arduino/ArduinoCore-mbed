@@ -271,8 +271,6 @@
 -iwithprefixbefore/mbed/features/cellular/framework/API
 -iwithprefixbefore/mbed/features/cellular/framework
 -iwithprefixbefore/mbed/features/cellular
--iwithprefixbefore/mbed/features/FEATURE_BLE/targets/TARGET_NORDIC/TARGET_NORDIC_CORDIO/TARGET_NRF5x/stack/include
--iwithprefixbefore/mbed/features/FEATURE_BLE/targets/TARGET_NORDIC/TARGET_NORDIC_CORDIO/TARGET_NRF5x/stack
 -iwithprefixbefore/mbed/features/FEATURE_BLE/targets/TARGET_NORDIC/TARGET_NORDIC_CORDIO/TARGET_NRF5x
 -iwithprefixbefore/mbed/features/FEATURE_BLE/targets/TARGET_CORDIO_LL/stack_adaptation
 -iwithprefixbefore/mbed/features/FEATURE_BLE/targets/TARGET_CORDIO_LL/stack/thirdparty/uecc
@@ -297,9 +295,6 @@
 -iwithprefixbefore/mbed/features/FEATURE_BLE/targets/TARGET_CORDIO_LL/stack
 -iwithprefixbefore/mbed/features/FEATURE_BLE/targets/TARGET_CORDIO_LL
 -iwithprefixbefore/mbed/features/FEATURE_BLE/targets/TARGET_CORDIO/stack_adaptation
--iwithprefixbefore/mbed/features/FEATURE_BLE/targets/TARGET_CORDIO/stack/wsf/sources/port/baremetal
--iwithprefixbefore/mbed/features/FEATURE_BLE/targets/TARGET_CORDIO/stack/wsf/sources/port
--iwithprefixbefore/mbed/features/FEATURE_BLE/targets/TARGET_CORDIO/stack/wsf/sources
 -iwithprefixbefore/mbed/features/FEATURE_BLE/targets/TARGET_CORDIO/stack/wsf/include/util
 -iwithprefixbefore/mbed/features/FEATURE_BLE/targets/TARGET_CORDIO/stack/wsf/include
 -iwithprefixbefore/mbed/features/FEATURE_BLE/targets/TARGET_CORDIO/stack/wsf

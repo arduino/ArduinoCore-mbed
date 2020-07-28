@@ -254,9 +254,6 @@
 -iwithprefixbefore/mbed/features/cellular
 -iwithprefixbefore/mbed/features/FEATURE_BLE/targets/TARGET_STM/TARGET_CYW4343X
 -iwithprefixbefore/mbed/features/FEATURE_BLE/targets/TARGET_CORDIO/stack_adaptation
--iwithprefixbefore/mbed/features/FEATURE_BLE/targets/TARGET_CORDIO/stack/wsf/sources/port/baremetal
--iwithprefixbefore/mbed/features/FEATURE_BLE/targets/TARGET_CORDIO/stack/wsf/sources/port
--iwithprefixbefore/mbed/features/FEATURE_BLE/targets/TARGET_CORDIO/stack/wsf/sources
 -iwithprefixbefore/mbed/features/FEATURE_BLE/targets/TARGET_CORDIO/stack/wsf/include/util
 -iwithprefixbefore/mbed/features/FEATURE_BLE/targets/TARGET_CORDIO/stack/wsf/include
 -iwithprefixbefore/mbed/features/FEATURE_BLE/targets/TARGET_CORDIO/stack/wsf

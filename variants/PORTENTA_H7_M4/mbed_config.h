@@ -39,12 +39,15 @@
 #define BLE_ROLE_CENTRAL                                                      1                                                                                                // set by library:ble
 #define BLE_ROLE_OBSERVER                                                     1                                                                                                // set by library:ble
 #define BLE_ROLE_PERIPHERAL                                                   1                                                                                                // set by library:ble
+#define BLE_SECURITY_DATABASE_FILESYSTEM                                      1                                                                                                // set by library:ble
+#define BLE_SECURITY_DATABASE_KVSTORE                                         0                                                                                                // set by library:ble
 #define BLE_SECURITY_DATABASE_MAX_ENTRIES                                     5                                                                                                // set by library:ble
 #define CLOCK_SOURCE                                                          USE_PLL_HSE_EXTC                                                                                 // set by target:PORTENTA_H7
 #define DM_CONN_MAX                                                           3                                                                                                // set by library:cordio
 #define DM_NUM_ADV_SETS                                                       3                                                                                                // set by library:cordio
 #define DM_NUM_PHYS                                                           3                                                                                                // set by library:cordio
 #define DM_SYNC_MAX                                                           1                                                                                                // set by library:cordio
+#define EATT_CONN_CHAN_MAX                                                    1                                                                                                // set by library:cordio
 #define HSE_VALUE                                                             (isBetaBoard()?27000000:25000000)                                                                // set by target:PORTENTA_H7
 #define L2C_COC_CHAN_MAX                                                      1                                                                                                // set by library:cordio
 #define L2C_COC_REG_MAX                                                       1                                                                                                // set by library:cordio
@@ -184,7 +187,7 @@
 #define MBED_CONF_LWIP_MBOX_SIZE                                              8                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_MEMP_NUM_TCPIP_MSG_INPKT                               8                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_MEMP_NUM_TCP_SEG                                       16                                                                                               // set by library:lwip
-#define MBED_CONF_LWIP_MEM_SIZE                                               2310                                                                                             // set by library:lwip[STM]
+#define MBED_CONF_LWIP_MEM_SIZE                                               16000                                                                                            // set by library:lwip[PORTENTA_H7]
 #define MBED_CONF_LWIP_NUM_NETBUF                                             8                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_NUM_PBUF                                               8                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_PBUF_POOL_SIZE                                         5                                                                                                // set by library:lwip

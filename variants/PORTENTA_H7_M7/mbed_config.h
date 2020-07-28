@@ -39,12 +39,15 @@
 #define BLE_ROLE_CENTRAL                                                      1                                                                                                // set by library:ble
 #define BLE_ROLE_OBSERVER                                                     1                                                                                                // set by library:ble
 #define BLE_ROLE_PERIPHERAL                                                   1                                                                                                // set by library:ble
+#define BLE_SECURITY_DATABASE_FILESYSTEM                                      1                                                                                                // set by library:ble
+#define BLE_SECURITY_DATABASE_KVSTORE                                         0                                                                                                // set by library:ble
 #define BLE_SECURITY_DATABASE_MAX_ENTRIES                                     5                                                                                                // set by library:ble
 #define CLOCK_SOURCE                                                          USE_PLL_HSE_EXTC                                                                                 // set by target:PORTENTA_H7
 #define DM_CONN_MAX                                                           3                                                                                                // set by library:cordio
 #define DM_NUM_ADV_SETS                                                       3                                                                                                // set by library:cordio
 #define DM_NUM_PHYS                                                           3                                                                                                // set by library:cordio
 #define DM_SYNC_MAX                                                           1                                                                                                // set by library:cordio
+#define EATT_CONN_CHAN_MAX                                                    1                                                                                                // set by library:cordio
 #define HSE_VALUE                                                             (isBetaBoard()?27000000:25000000)                                                                // set by target:PORTENTA_H7
 #define L2C_COC_CHAN_MAX                                                      1                                                                                                // set by library:cordio
 #define L2C_COC_REG_MAX                                                       1                                                                                                // set by library:cordio
@@ -70,6 +73,7 @@
 #define MBED_CONF_CORDIO_PREFERRED_TX_POWER                                   0                                                                                                // set by library:cordio
 #define MBED_CONF_CORDIO_ROUTE_UNHANDLED_COMMAND_COMPLETE_EVENTS              1                                                                                                // set by library:cordio
 #define MBED_CONF_CORDIO_RX_ACL_BUFFER_SIZE                                   70                                                                                               // set by library:cordio
+#define MBED_CONF_CY_PSOC6_WHD_PRESENT                                        1                                                                                                // set by library:cy_psoc6_whd
 #define MBED_CONF_DRIVERS_QSPI_CSN                                            QSPI_FLASH1_CSN                                                                                  // set by library:drivers
 #define MBED_CONF_DRIVERS_QSPI_IO0                                            QSPI_FLASH1_IO0                                                                                  // set by library:drivers
 #define MBED_CONF_DRIVERS_QSPI_IO1                                            QSPI_FLASH1_IO1                                                                                  // set by library:drivers
