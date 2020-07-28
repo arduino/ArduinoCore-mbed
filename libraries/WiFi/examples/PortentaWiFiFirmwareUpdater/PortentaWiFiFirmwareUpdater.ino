@@ -1,12 +1,21 @@
 #include "QSPIFBlockDevice.h"
 #include "MBRBlockDevice.h"
 #include "FATFileSystem.h"
+#include "wiced_resource.h"
 
 QSPIFBlockDevice root(PD_11, PD_12, PF_7, PD_13,  PF_10, PG_6, QSPIF_POLARITY_MODE_1, 40000000);
 mbed::MBRBlockDevice wifi_data(&root, 1);
 mbed::MBRBlockDevice other_data(&root, 2);
 mbed::FATFileSystem wifi_data_fs("wlan");
 mbed::FATFileSystem other_data_fs("fs");
+
+long getFileSize(FILE *fp) {
+    fseek(fp, 0, SEEK_END);
+    int size = ftell(fp);
+    fseek(fp, 0, SEEK_SET);
+    
+    return size;
+}
 
 void setup() {
 
@@ -46,6 +55,7 @@ void setup() {
           if (Serial.available()) {
             int c = Serial.read();
             if (c == 'Y' || c == 'y') {
+              wifi_data_fs.reformat(&wifi_data);
               break;
             }
             if (c == 'N' || c == 'n') {
@@ -59,10 +69,13 @@ void setup() {
   }
 
   extern const unsigned char wifi_firmware_image_data[];
-  FILE* fp = fopen("/wlan/4343WA1.BIN", "w");
-  fwrite(wifi_firmware_image_data, 420690, 1, fp);
+  extern const resource_hnd_t wifi_firmware_image;
+  FILE* fp = fopen("/wlan/4343WA1.BIN", "wb");
+  int ret = fwrite(wifi_firmware_image_data, 421098, 1, fp);
   fclose(fp);
 
+  Serial.println(ret);
+  Serial.println(wifi_firmware_image.size);
   Serial.println("Firmware and certificates updated!");
 }
 

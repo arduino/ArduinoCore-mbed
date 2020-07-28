@@ -270,7 +270,8 @@ extern "C" bool wiced_filesystem_mount() {
   mbed::MBRBlockDevice::partition(&root, 1, 0x0B, 0, 1024 * 1024 * 8);
   int err =  wifi_data_fs.mount(&wifi_data);
   if (err) {
-    err = wifi_data_fs.reformat(&wifi_data);
+    Serial.println("Failed to mount filesystem");
+    goto error;
   }
 
   DIR *dir;
@@ -278,15 +279,20 @@ extern "C" bool wiced_filesystem_mount() {
   if ((dir = opendir("/wlan")) != NULL) {
     /* print all the files and directories within directory */
     while ((ent = readdir(dir)) != NULL) {
-      if (ent->d_name == "4343WA1.BIN") {
+      String fullname = "/wlan/" + String(ent->d_name);
+      if (fullname == "/wlan/4343WA1.BIN") {
         closedir(dir);
         firmware_available = true;
         return true;
       }
     }
+    Serial.println("File not found");
     closedir(dir);
   }
+error:
   Serial.println("Please run \"PortentaWiFiFirmwareUpdater\" sketch once");
+  whd_print_logbuffer();
+  while (1) {}
   return false;
 }
 
