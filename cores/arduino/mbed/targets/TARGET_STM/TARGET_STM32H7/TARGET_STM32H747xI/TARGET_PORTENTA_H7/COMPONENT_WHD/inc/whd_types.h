@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Cypress Semiconductor Corporation
+ * Copyright 2020 Cypress Semiconductor Corporation
  * SPDX-License-Identifier: Apache-2.0
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +23,6 @@
 #include <stdint.h>
 #include "cy_result.h"
 #include "cyhal_hw_types.h"
-#include "gpio_api.h"
 
 #ifndef INCLUDED_WHD_TYPES_H_
 #define INCLUDED_WHD_TYPES_H_
@@ -45,6 +44,7 @@ extern "C"
 #define WPA_SECURITY       0x00200000  /**< Flag to enable WPA Security        */
 #define WPA2_SECURITY      0x00400000  /**< Flag to enable WPA2 Security       */
 #define WPA3_SECURITY      0x01000000  /**< Flag to enable WPA3 PSK Security   */
+#define SECURITY_MASK      (WEP_ENABLED | TKIP_ENABLED | AES_ENABLED) /**< Flag to Security mask */
 
 #define ENTERPRISE_ENABLED 0x02000000  /**< Flag to enable Enterprise Security */
 #define WPS_ENABLED        0x10000000  /**< Flag to enable WPS Security        */
@@ -77,6 +77,11 @@ typedef void *whd_buffer_t;
 typedef struct wl_bss_info_struct whd_bss_info_t;
 typedef struct edcf_acparam whd_edcf_ac_param_t;
 typedef struct wl_af_params whd_af_params_t;
+typedef struct whd_arp_stats_s whd_arp_stats_t;
+typedef struct wl_pkt_filter_stats whd_pkt_filter_stats_t;
+typedef struct whd_tko_retry whd_tko_retry_t;
+typedef struct whd_tko_connect whd_tko_connect_t;
+typedef struct whd_tko_status whd_tko_status_t;
 /** @endcond */
 /******************************************************
 *                    Constants
@@ -119,7 +124,9 @@ typedef struct wl_af_params whd_af_params_t;
 /**
  * The maximum size in bytes of the data part of an Ethernet frame
  */
+#ifndef WHD_PAYLOAD_MTU
 #define WHD_PAYLOAD_MTU           (1500)
+#endif
 
 /**
  * The maximum size in bytes of a packet used within whd.
@@ -185,6 +192,9 @@ typedef enum
     WHD_SECURITY_WPA2_MIXED_PSK   = (WPA2_SECURITY | AES_ENABLED | TKIP_ENABLED),                      /**< WPA2 PSK Security with AES & TKIP                     */
     WHD_SECURITY_WPA2_FBT_PSK     = (WPA2_SECURITY | AES_ENABLED | FBT_ENABLED),                       /**< WPA2 FBT PSK Security with AES & TKIP */
     WHD_SECURITY_WPA3_SAE         = (WPA3_SECURITY | AES_ENABLED),                                     /**< WPA3 Security with AES */
+    WHD_SECURITY_WPA2_WPA_AES_PSK  = (WPA2_SECURITY | WPA_SECURITY | AES_ENABLED),                     /**< WPA2 WPA PSK Security with AES                        */
+    WHD_SECURITY_WPA2_WPA_MIXED_PSK = (WPA2_SECURITY | WPA_SECURITY | AES_ENABLED | TKIP_ENABLED),      /**< WPA2 WPA PSK Security with AES & TKIP                 */
+
     WHD_SECURITY_WPA3_WPA2_PSK    = (WPA3_SECURITY | WPA2_SECURITY | AES_ENABLED),                     /**< WPA3 WPA2 PSK Security with AES */
 
     WHD_SECURITY_WPA_TKIP_ENT     = (ENTERPRISE_ENABLED | WPA_SECURITY | TKIP_ENABLED),                /**< WPA Enterprise Security with TKIP                     */
@@ -196,8 +206,7 @@ typedef enum
     WHD_SECURITY_WPA2_FBT_ENT     = (ENTERPRISE_ENABLED | WPA2_SECURITY | AES_ENABLED | FBT_ENABLED),  /**< WPA2 Enterprise Security with AES & FBT               */
 
     WHD_SECURITY_IBSS_OPEN        = (IBSS_ENABLED),                                                    /**< Open security on IBSS ad-hoc network                  */
-    WHD_SECURITY_WPS_OPEN         = (WPS_ENABLED),                                                     /**< WPS with open security                                */
-    WHD_SECURITY_WPS_SECURE       = (WPS_ENABLED | AES_ENABLED),                                       /**< WPS with AES security                                 */
+    WHD_SECURITY_WPS_SECURE       = AES_ENABLED,                                                       /**< WPS with AES security                                 */
 
     WHD_SECURITY_UNKNOWN          = -1,                                                                /**< May be returned by scan function if security is unknown. Do not pass this to the join function! */
 
@@ -1010,6 +1019,33 @@ typedef struct whd_coex_config
 {
     whd_btc_lescan_params_t le_scan_params;  /**< LE Scan Parameters */
 } whd_coex_config_t;
+
+#define PORT_FILTER_LEN 26  /**< Port filter len */
+#define PACKET_FILTER_LIST_BUFFER_MAX_LEN 1000  /**< Packet filter buffer max len */
+/**
+ * Enumeration of packet filter rules
+ */
+typedef enum
+{
+    WHD_PACKET_FILTER_RULE_POSITIVE_MATCHING  = 0, /**< Specifies that a filter should match a given pattern	 */
+    WHD_PACKET_FILTER_RULE_NEGATIVE_MATCHING  = 1  /**< Specifies that a filter should NOT match a given pattern */
+} whd_packet_filter_rule_t;
+
+/**
+ * Structure describing a packet filter list item
+ */
+typedef struct
+{
+    uint32_t id;                                  /**< Unique identifier for a packet filter item							  */
+    whd_packet_filter_rule_t rule;                /**< Filter matches are either POSITIVE or NEGATIVE matching */
+    uint16_t offset;                              /**< Offset in bytes to start filtering (referenced to the start of the ethernet packet) */
+    uint16_t mask_size;                           /**< Size of the mask in bytes */
+    uint8_t *mask;                                /**< Pattern mask bytes to be ANDed with the pattern eg. "\xff00" (must be in network byte order) */
+    uint8_t *pattern;                             /**< Pattern bytes used to filter eg. "\x0800"  (must be in network byte order) */
+    whd_bool_t enabled_status;                     /**< When returned from wwd_wifi_get_packet_filters, indicates if the filter is enabled */
+} whd_packet_filter_t;
+
+#define TKO_DATA_OFFSET offsetof(wl_tko_t, data)  /**< TKO data offset */
 
 #ifdef __cplusplus
 }     /* extern "C" */

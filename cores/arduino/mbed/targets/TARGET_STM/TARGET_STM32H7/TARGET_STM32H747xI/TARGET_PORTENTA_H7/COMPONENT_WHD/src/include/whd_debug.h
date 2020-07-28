@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Cypress Semiconductor Corporation
+ * Copyright 2020 Cypress Semiconductor Corporation
  * SPDX-License-Identifier: Apache-2.0
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,11 +32,11 @@ extern "C"
 *                      Macros
 ******************************************************/
 #define WPRINT_ENABLE_WHD_ERROR
-#define WPRINT_ENABLE_WHD_INFO
-#define WPRINT_ENABLE_WHD_DEBUG
+/* #define WPRINT_ENABLE_WHD_INFO */
+/* #define WPRINT_ENABLE_WHD_DEBUG */
 
 #define WHD_ENABLE_STATS
-#define WHD_LOGGING_BUFFER_ENABLE
+/*#define WHD_LOGGING_BUFFER_ENABLE*/
 
 #if defined (__GNUC__)
 #define WHD_TRIGGER_BREAKPOINT( ) do { __asm__ ("bkpt"); } while (0)
@@ -54,17 +54,26 @@ extern "C"
 #define whd_minor_assert(error_string, \
                          assertion)   do { if (!(assertion) ) WPRINT_MACRO( (error_string) ); } while (0)
 #else
-#define whd_assert(error_string, assertion)         do { if (!(assertion) ) WPRINT_MACRO( (error_string) ); } while (0)
+#define whd_assert(error_string, \
+                   assertion)         do { if (!(assertion) ){ WPRINT_MACRO( (error_string) ); } } while (0)
 #define whd_minor_assert(error_string, assertion)   do { (void)(assertion); } while (0)
 #endif
 
 /******************************************************
 *             Print declarations
 ******************************************************/
+/* IF MFG TEST is enabled then disable all LOGGING VIA UART as
+ + * this interrupts communication between WL TOOL and MFG Test APP
+ + * via STDIO UART causing Wrong Message Exchange and failure.
+ + */
+#ifdef WLAN_MFG_FIRMWARE
+#define WPRINT_MACRO(args)
+#else
 #if defined(WHD_LOGGING_BUFFER_ENABLE)
 #define WPRINT_MACRO(args) do { whd_buffer_printf args; } while (0 == 1)
 #else
 #define WPRINT_MACRO(args) do { printf args;} while (0 == 1)
+#endif
 #endif
 
 

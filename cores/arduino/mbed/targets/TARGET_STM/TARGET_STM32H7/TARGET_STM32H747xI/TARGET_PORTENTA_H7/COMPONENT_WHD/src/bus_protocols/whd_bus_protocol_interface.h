@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Cypress Semiconductor Corporation
+ * Copyright 2020 Cypress Semiconductor Corporation
  * SPDX-License-Identifier: Apache-2.0
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -45,7 +45,7 @@ typedef enum
 /******************************************************
 *             Macros
 ******************************************************/
-#define PLATFORM_WLAN_ALLOW_BUS_TO_SLEEP_DELAY_MS 50
+#define PLATFORM_WLAN_ALLOW_BUS_TO_SLEEP_DELAY_MS 10
 
 #define DELAYED_BUS_RELEASE_SCHEDULE(whd_driver, schedule) do {  whd_delayed_bus_release_schedule_update(whd_driver, \
                                                                                                          schedule); \
