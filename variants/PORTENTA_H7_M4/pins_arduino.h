@@ -102,4 +102,6 @@ void _ontouch1200bps_();
 
 #define digitalPinToPort(P)		(digitalPinToPinName(P)/16)
 
+#define CRYPTO_WIRE		Wire1
+
 #endif //__PINS_ARDUINO__

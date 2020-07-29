@@ -17,6 +17,9 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+#if ARDUINO_LIBRARY_DISCOVERY_PHASE == 1
+#define ARDUINO_LIB_DISCOVERY_PHASE
+#endif
 #if !defined(Arduino_h) && !defined(ARDUINO_LIB_DISCOVERY_PHASE)
 #define Arduino_h
 

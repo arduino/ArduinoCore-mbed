@@ -8,6 +8,13 @@
 extern "C" unsigned int PINCOUNT_fn();
 extern "C" bool isBetaBoard();
 #endif
+
+// Booting
+// ----
+#define bootM4() LL_RCC_ForceCM4Boot() // Provide a memorable alias
+
+// Pin count
+// ----
 #define PINS_COUNT           (PINCOUNT_fn())
 #define NUM_DIGITAL_PINS     (22u)
 #define NUM_ANALOG_INPUTS    (7u)
@@ -111,5 +118,7 @@ void _ontouch1200bps_();
 #define LORA_BOOT0      (PG_7)
 #define LORA_RESET      (PC_7)
 #define LORA_IRQ_DUMB   (PJ_11)
+
+#define CRYPTO_WIRE		Wire1
 
 #endif //__PINS_ARDUINO__

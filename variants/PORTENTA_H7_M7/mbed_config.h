@@ -184,7 +184,7 @@
 #define MBED_CONF_LWIP_MBOX_SIZE                                              8                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_MEMP_NUM_TCPIP_MSG_INPKT                               8                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_MEMP_NUM_TCP_SEG                                       16                                                                                               // set by library:lwip
-#define MBED_CONF_LWIP_MEM_SIZE                                               2310                                                                                             // set by library:lwip[STM]
+#define MBED_CONF_LWIP_MEM_SIZE                                               16000                                                                                            // set by library:lwip[PORTENTA_H7]
 #define MBED_CONF_LWIP_NUM_NETBUF                                             8                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_NUM_PBUF                                               8                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_PBUF_POOL_SIZE                                         5                                                                                                // set by library:lwip
