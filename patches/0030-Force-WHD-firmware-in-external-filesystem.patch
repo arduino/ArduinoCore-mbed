@@ -1,0 +1,140 @@
+From 18c42dfcded988ba347a7e799ff04711a0914324 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Fri, 24 Jul 2020 17:32:06 +0200
+Subject: [PATCH 30/31] Force WHD firmware in external filesystem
+
+---
+ .../COMPONENT_WHD/port/cy_hal.c               | 42 +++++++++++++++++++
+ .../firmware/COMPONENT_4343W/4343WA1_bin.c    |  6 ++-
+ .../resources/resource_imp/whd_resources.c    | 21 ++++------
+ .../COMPONENT_WHD/whd_config.h                |  1 +
+ 4 files changed, 56 insertions(+), 14 deletions(-)
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/cy_hal.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/cy_hal.c
+index 651b7a16b2..075d0156db 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/cy_hal.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/cy_hal.c
+@@ -3,6 +3,7 @@
+ #include "cyhal_spi.h"
+ #include "cyhal_gpio.h"
+ #include <stdio.h>
++#include "sockets.h"
+ 
+ void Cy_SysLib_Delay(uint32_t milliseconds) {
+ 	thread_sleep_for(milliseconds);
+@@ -10,4 +11,45 @@ void Cy_SysLib_Delay(uint32_t milliseconds) {
+ 
+ void Cy_SysLib_DelayUs(uint16_t microseconds) {
+ 	wait_us(microseconds);
++}
++
++static bool filesystem_mounted = false;
++extern bool wiced_filesystem_mount();
++
++int wiced_filesystem_file_open(int* fd, const char* filename) {
++	if (!filesystem_mounted) {
++		filesystem_mounted = wiced_filesystem_mount();
++	}
++	if (!filesystem_mounted) {
++		return WHD_BADARG;
++	}
++	*fd = open(filename, O_RDONLY);
++	if (*fd == -1) {
++		return WHD_BADARG;
++	}
++	return WHD_SUCCESS;
++}
++
++int wiced_filesystem_file_seek(int* fd, uint32_t offset) {
++	if (*fd == -1) {
++		return WHD_BADARG;
++	}
++	lseek(*fd, offset, SEEK_SET);
++	return WHD_SUCCESS;
++}
++
++int wiced_filesystem_file_read(int* fd, void *buffer, uint32_t maxsize, uint32_t* size) {
++	if (*fd == -1) {
++		return WHD_BADARG;
++	}
++	*size = read(*fd, buffer, maxsize);
++	return WHD_SUCCESS;
++}
++
++int wiced_filesystem_file_close(int* fd) {
++	if (*fd == -1) {
++		return WHD_BADARG;
++	}
++	close(*fd);
++	return WHD_SUCCESS;
+ }
+\ No newline at end of file
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/resources/firmware/COMPONENT_4343W/4343WA1_bin.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/resources/firmware/COMPONENT_4343W/4343WA1_bin.c
+index 8e815648f2..85eb03987c 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/resources/firmware/COMPONENT_4343W/4343WA1_bin.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/resources/firmware/COMPONENT_4343W/4343WA1_bin.c
+@@ -25464,6 +25464,8 @@ const unsigned char wifi_firmware_image_data[420690] =
+     49, 45, 102, 55, 49, 50, 56, 53, 49, 55, 0, 254, 0, 68, 86, 73, 68,
+     32, 48, 49, 45, 53, 50, 100, 50, 48, 57, 102, 55
+ };
+-const resource_hnd_t wifi_firmware_image =
+-{ RESOURCE_IN_MEMORY, 420690, {.mem = { (const char *)wifi_firmware_image_data }}};
++//const resource_hnd_t wifi_firmware_image =
++//{ RESOURCE_IN_MEMORY, 420690, {.mem = { (const char *)wifi_firmware_image_data }}};
+ 
++const resource_hnd_t wifi_firmware_image =
++{ RESOURCE_IN_FILESYSTEM, 420690, {.fs = { 0, "/wlan/4343WA1.BIN" }}};
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/resources/resource_imp/whd_resources.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/resources/resource_imp/whd_resources.c
+index b8c9298d74..ec763ac48a 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/resources/resource_imp/whd_resources.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/resources/resource_imp/whd_resources.c
+@@ -104,25 +104,22 @@ resource_result_t resource_read(const resource_hnd_t *resource, uint32_t offset,
+ #ifdef USES_RESOURCE_GENERIC_FILESYSTEM
+     else
+     {
+-        wiced_file_t file_handle;
+-        uint64_t size64;
+-        uint64_t maxsize64 =  maxsize;
+-        if (WICED_SUCCESS !=
+-            wiced_filesystem_file_open (&resource_fs_handle, &file_handle, resource->val.fs.filename,
+-                                        WICED_FILESYSTEM_OPEN_FOR_READ) )
++        int file_handle = -1;
++        if (WHD_SUCCESS !=
++            wiced_filesystem_file_open (&file_handle, resource->val.fs.filename) )
+         {
+-            return RESOURCE_FILE_OPEN_FAIL;
++            return WHD_BADARG;
+         }
+-        if (WICED_SUCCESS != wiced_filesystem_file_seek (&file_handle, (offset + resource->val.fs.offset), SEEK_SET) )
++        if (WHD_SUCCESS != wiced_filesystem_file_seek (&file_handle, (offset + resource->val.fs.offset)) )
+         {
+-            return RESOURCE_FILE_SEEK_FAIL;
++            wiced_filesystem_file_close (&file_handle);
++            return WHD_BADARG;
+         }
+-        if (WICED_SUCCESS != wiced_filesystem_file_read (&file_handle, buffer, maxsize64, &size64) )
++        if (WHD_SUCCESS != wiced_filesystem_file_read (&file_handle, buffer, *size, &size) )
+         {
+             wiced_filesystem_file_close (&file_handle);
+-            return RESOURCE_FILE_READ_FAIL;
++            return WHD_BADARG;
+         }
+-        *size = (uint32_t)size64;
+         wiced_filesystem_file_close (&file_handle);
+     }
+ #else
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/whd_config.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/whd_config.h
+index e757cfb27e..147b7d7763 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/whd_config.h
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/whd_config.h
+@@ -20,6 +20,7 @@
+ #define WLAN_POWER_UP_DELAY_MS  		250
+ #define SDIO_ENUMERATION_TIMEOUT_MS     500
+ 
++#define USES_RESOURCE_GENERIC_FILESYSTEM
+ 
+ #define BSP_LED1   	{GPIOK,{.Pin= GPIO_PIN_5 , .Mode = GPIO_MODE_OUTPUT_PP , .Pull = GPIO_NOPULL , .Speed= GPIO_SPEED_FREQ_LOW}}
+ #define BSP_LED2		{GPIOK,{.Pin= GPIO_PIN_6 , .Mode = GPIO_MODE_OUTPUT_PP , .Pull = GPIO_NOPULL , .Speed= GPIO_SPEED_FREQ_LOW}}
+-- 
+2.27.0
+

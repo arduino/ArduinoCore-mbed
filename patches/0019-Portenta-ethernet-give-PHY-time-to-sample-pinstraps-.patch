@@ -1,0 +1,25 @@
+From e6366da733fa358c5a0734fdd3d553e6487ee5d1 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Tue, 28 Apr 2020 13:57:23 +0200
+Subject: [PATCH 19/31] Portenta: ethernet: give PHY time to sample pinstraps
+ after reset
+
+---
+ .../TARGET_STM32H7/TARGET_PORTENTA_H7/stm32h7_eth_init.c         | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/features/netsocket/emac-drivers/TARGET_STM/TARGET_STM32H7/TARGET_PORTENTA_H7/stm32h7_eth_init.c b/features/netsocket/emac-drivers/TARGET_STM/TARGET_STM32H7/TARGET_PORTENTA_H7/stm32h7_eth_init.c
+index 38d9611ba4..53de30a37f 100644
+--- a/features/netsocket/emac-drivers/TARGET_STM/TARGET_STM32H7/TARGET_PORTENTA_H7/stm32h7_eth_init.c
++++ b/features/netsocket/emac-drivers/TARGET_STM/TARGET_STM32H7/TARGET_PORTENTA_H7/stm32h7_eth_init.c
+@@ -96,6 +96,7 @@ void HAL_ETH_MspInit(ETH_HandleTypeDef *heth)
+         HAL_GPIO_Init(GPIOA, &gpio_eth_rst_init_structure);
+         HAL_GPIO_WritePin(GPIOA, ETH_CRS_DV_Pin, 1);
+ 
++        HAL_Delay(25);
+         HAL_GPIO_WritePin(GPIOJ, GPIO_PIN_15, 0);
+         HAL_Delay(100);
+         HAL_GPIO_WritePin(GPIOJ, GPIO_PIN_15, 1);
+-- 
+2.27.0
+

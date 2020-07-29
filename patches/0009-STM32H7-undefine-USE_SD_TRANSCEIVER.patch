@@ -1,0 +1,26 @@
+From 579c403fcfd041845132a59b67bbb8b23f5d9f74 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Tue, 21 Jan 2020 17:51:34 +0100
+Subject: [PATCH 09/31] STM32H7: undefine USE_SD_TRANSCEIVER
+
+This patch should be surrounded by ifndef
+---
+ .../TARGET_STM/TARGET_STM32H7/STM32Cube_FW/stm32h7xx_hal_conf.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/STM32Cube_FW/stm32h7xx_hal_conf.h b/targets/TARGET_STM/TARGET_STM32H7/STM32Cube_FW/stm32h7xx_hal_conf.h
+index 6b40f995ae..84c9e6b360 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/STM32Cube_FW/stm32h7xx_hal_conf.h
++++ b/targets/TARGET_STM/TARGET_STM32H7/STM32Cube_FW/stm32h7xx_hal_conf.h
+@@ -164,7 +164,7 @@
+ #define  VDD_VALUE                    ((uint32_t)3300) /*!< Value of VDD in mv */
+ #define  TICK_INT_PRIORITY            ((uint32_t)0x0F) /*!< tick interrupt priority */
+ #define  USE_RTOS                     0
+-#define  USE_SD_TRANSCEIVER           1U               /*!< use uSD Transceiver */
++#define  USE_SD_TRANSCEIVER           0U               /*!< use uSD Transceiver */
+ #define  USE_SPI_CRC                  1U               /*!< use CRC in SPI */
+ 
+ #define  USE_HAL_ADC_REGISTER_CALLBACKS     0U /* ADC register callback disabled     */
+-- 
+2.27.0
+

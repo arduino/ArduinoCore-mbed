@@ -1,0 +1,915 @@
+From 83339328fc5d67ea45db92e361c1330ea01726c9 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Tue, 12 May 2020 12:35:29 +0200
+Subject: [PATCH 22/31] PortentaH7: implement low power on BLE
+
+---
+ .../TARGET_CYW4343X/CyH4TransportDriver.cpp   | 248 +++++++++++++++++
+ .../TARGET_CYW4343X/CyH4TransportDriver.h     | 124 +++++++++
+ .../TARGET_STM/TARGET_CYW4343X/HCIDriver.cpp  | 251 ++++++++++++------
+ .../TARGET_PORTENTA_H7/cy_bt_cordio_cfg.cpp   |  98 +++++++
+ .../TARGET_PORTENTA_H7/PinNames.h             |   9 +
+ 5 files changed, 650 insertions(+), 80 deletions(-)
+ create mode 100644 features/FEATURE_BLE/targets/TARGET_STM/TARGET_CYW4343X/CyH4TransportDriver.cpp
+ create mode 100644 features/FEATURE_BLE/targets/TARGET_STM/TARGET_CYW4343X/CyH4TransportDriver.h
+ create mode 100644 features/FEATURE_BLE/targets/TARGET_STM/TARGET_CYW4343X/TARGET_PORTENTA_H7/cy_bt_cordio_cfg.cpp
+
+diff --git a/features/FEATURE_BLE/targets/TARGET_STM/TARGET_CYW4343X/CyH4TransportDriver.cpp b/features/FEATURE_BLE/targets/TARGET_STM/TARGET_CYW4343X/CyH4TransportDriver.cpp
+new file mode 100644
+index 0000000000..556f1b7812
+--- /dev/null
++++ b/features/FEATURE_BLE/targets/TARGET_STM/TARGET_CYW4343X/CyH4TransportDriver.cpp
+@@ -0,0 +1,248 @@
++/* mbed Microcontroller Library
++ * Copyright (c) 2017-2017 ARM Limited
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *     http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++#if DEVICE_SERIAL && DEVICE_SERIAL_FC
++
++#include "CyH4TransportDriver.h"
++
++namespace ble {
++namespace vendor {
++namespace cypress_ble {
++
++CyH4TransportDriver::CyH4TransportDriver(PinName tx, PinName rx, PinName cts, PinName rts, int baud, PinName bt_host_wake_name, PinName bt_device_wake_name, uint8_t host_wake_irq, uint8_t dev_wake_irq) :
++    uart(tx, rx), cts(cts), rts(rts),
++    bt_host_wake_name(bt_host_wake_name),
++    bt_device_wake_name(bt_device_wake_name),
++    bt_host_wake(bt_host_wake_name, PIN_INPUT, PullNone, 0),
++    bt_device_wake(bt_device_wake_name, PIN_OUTPUT, PullNone, 1),
++    host_wake_irq_event(host_wake_irq),
++    dev_wake_irq_event(dev_wake_irq)
++{
++    enabled_powersave = true;
++    bt_host_wake_active = false;
++}
++
++CyH4TransportDriver::CyH4TransportDriver(PinName tx, PinName rx, PinName cts, PinName rts, int baud) :
++    uart(tx, rx), cts(cts),
++    rts(rts),
++    bt_host_wake_name(NC),
++    bt_device_wake_name(NC),
++    bt_host_wake(bt_host_wake_name),
++    bt_device_wake(bt_device_wake_name)
++{
++    enabled_powersave = false;
++    bt_host_wake_active = false;
++    sleep_manager_lock_deep_sleep();
++    holding_deep_sleep_lock = true;
++}
++
++CyH4TransportDriver::~CyH4TransportDriver()
++{
++    if (holding_deep_sleep_lock)
++    {
++       sleep_manager_unlock_deep_sleep();
++       holding_deep_sleep_lock = false;
++    }
++}
++
++void CyH4TransportDriver::bt_host_wake_rise_irq_handler(void)
++{
++    if (host_wake_irq_event == WAKE_EVENT_ACTIVE_LOW) {
++        if(bt_host_wake_active == true)
++        {
++            /* lock PSoC 6 DeepSleep entry as long as host_wake is asserted */
++            sleep_manager_unlock_deep_sleep();
++            bt_host_wake_active = false;
++        }
++    } else {
++        /* lock PSoC 6 DeepSleep entry as long as host_wake is asserted */
++        sleep_manager_lock_deep_sleep();
++        bt_host_wake_active = true;
++    }
++}
++
++void CyH4TransportDriver::bt_host_wake_fall_irq_handler(void)
++{
++    if (host_wake_irq_event == WAKE_EVENT_ACTIVE_LOW) {
++        /* lock PSoC 6 DeepSleep entry as long as host_wake is asserted */
++        sleep_manager_lock_deep_sleep();
++        bt_host_wake_active = true;
++    } else {
++        if(bt_host_wake_active == true)
++        {
++            /* lock PSoC 6 DeepSleep entry as long as host_wake is asserted */
++            sleep_manager_unlock_deep_sleep();
++            bt_host_wake_active = false;
++        }
++    }
++}
++
++void CyH4TransportDriver::on_controller_irq()
++{
++    sleep_manager_lock_deep_sleep();
++
++    while (uart.readable()) {
++        uint8_t char_received;
++        if (uart.read(&char_received, 1)) {
++            CordioHCITransportDriver::on_data_received(&char_received, 1);
++        }
++    }
++
++    sleep_manager_unlock_deep_sleep();
++}
++
++void CyH4TransportDriver::initialize()
++{
++#if (defined(MBED_TICKLESS) && DEVICE_SLEEP && DEVICE_LPTICKER)
++	InterruptIn *host_wake_pin;
++#endif
++
++    sleep_manager_lock_deep_sleep();
++
++    uart.format(
++        /* bits */ 8,
++        /* parity */ SerialBase::None,
++        /* stop bit */ 1
++    );
++
++    uart.set_flow_control(
++        /* flow */ SerialBase::RTSCTS,
++        /* rts */ rts,
++        /* cts */ cts
++    );
++
++    uart.attach(
++        callback(this, &CyH4TransportDriver::on_controller_irq),
++        SerialBase::RxIrq
++    );
++
++#if (defined(MBED_TICKLESS) && DEVICE_SLEEP && DEVICE_LPTICKER)
++    if (bt_host_wake_name != NC) {
++        //Register IRQ for Host WAKE
++        host_wake_pin = new InterruptIn(bt_host_wake_name);
++        host_wake_pin->fall(callback(this, &CyH4TransportDriver::bt_host_wake_fall_irq_handler));
++        host_wake_pin->rise(callback(this, &CyH4TransportDriver::bt_host_wake_rise_irq_handler));
++    }
++#endif
++    if (dev_wake_irq_event == WAKE_EVENT_ACTIVE_LOW) {
++       if (bt_device_wake_name != NC)
++           bt_device_wake = WAKE_EVENT_ACTIVE_LOW;
++    } else {
++       if (bt_device_wake_name != NC)
++           bt_device_wake = WAKE_EVENT_ACTIVE_HIGH;
++    }
++    sleep_manager_unlock_deep_sleep();
++    rtos::ThisThread::sleep_for(500);
++}
++
++void CyH4TransportDriver::terminate() {  }
++
++uint16_t CyH4TransportDriver::write(uint8_t type, uint16_t len, uint8_t *pData)
++{
++    uint16_t i = 0;
++
++    sleep_manager_lock_deep_sleep();
++    assert_bt_dev_wake();
++
++    while (i < len + 1) {
++        uint8_t to_write = i == 0 ? type : pData[i - 1];
++        while (uart.writeable() == 0);
++        uart.write(&to_write, 1);
++        ++i;
++    }
++
++    deassert_bt_dev_wake();
++    sleep_manager_unlock_deep_sleep();
++    return len;
++}
++
++void CyH4TransportDriver::assert_bt_dev_wake()
++{
++#if (defined(MBED_TICKLESS) && DEVICE_SLEEP && DEVICE_LPTICKER)
++    if (enabled_powersave) {
++        if (dev_wake_irq_event == WAKE_EVENT_ACTIVE_LOW) {
++           bt_device_wake = WAKE_EVENT_ACTIVE_LOW;
++        } else {
++           bt_device_wake = WAKE_EVENT_ACTIVE_HIGH;
++        }
++    }
++#endif
++}
++
++void CyH4TransportDriver::deassert_bt_dev_wake()
++{
++#if (defined(MBED_TICKLESS) && DEVICE_SLEEP && DEVICE_LPTICKER)
++    if (enabled_powersave) {
++        if (dev_wake_irq_event == WAKE_EVENT_ACTIVE_LOW) {
++           bt_device_wake = WAKE_EVENT_ACTIVE_HIGH;
++        } else {
++           bt_device_wake = WAKE_EVENT_ACTIVE_LOW;
++        }
++    }
++#endif
++}
++
++
++void CyH4TransportDriver::update_uart_baud_rate(int baud)
++{
++    uart.baud((uint32_t)baud);
++}
++
++bool CyH4TransportDriver::get_enabled_powersave()
++{
++    return (enabled_powersave);
++}
++
++uint8_t CyH4TransportDriver::get_host_wake_irq_event()
++{
++    return (host_wake_irq_event);
++}
++
++uint8_t CyH4TransportDriver::get_dev_wake_irq_event()
++{
++    return (dev_wake_irq_event);
++}
++
++
++} // namespace cypress_ble
++} // namespace vendor
++} // namespace ble
++
++ble::vendor::cypress_ble::CyH4TransportDriver& ble_cordio_get_default_h4_transport_driver()
++{
++#if (defined(CYBSP_BT_HOST_WAKE) && defined(CYBSP_BT_DEVICE_WAKE))
++    static ble::vendor::cypress_ble::CyH4TransportDriver s_transport_driver(
++       /* TX */ CYBSP_BT_UART_TX, /* RX */ CYBSP_BT_UART_RX,
++       /* cts */ CYBSP_BT_UART_CTS, /* rts */ CYBSP_BT_UART_RTS, DEF_BT_BAUD_RATE,
++       CYBSP_BT_HOST_WAKE, CYBSP_BT_DEVICE_WAKE
++    );
++
++#else
++    static ble::vendor::cypress_ble::CyH4TransportDriver s_transport_driver(
++        /* TX */ CYBSP_BT_UART_TX, /* RX */ CYBSP_BT_UART_RX,
++        /* cts */ CYBSP_BT_UART_CTS, /* rts */ CYBSP_BT_UART_RTS, DEF_BT_BAUD_RATE);
++#endif
++    return s_transport_driver;
++}
++
++MBED_WEAK
++ble::vendor::cypress_ble::CyH4TransportDriver& ble_cordio_get_h4_transport_driver()
++{
++    return (ble_cordio_get_default_h4_transport_driver());
++}
++
++#endif
+diff --git a/features/FEATURE_BLE/targets/TARGET_STM/TARGET_CYW4343X/CyH4TransportDriver.h b/features/FEATURE_BLE/targets/TARGET_STM/TARGET_CYW4343X/CyH4TransportDriver.h
+new file mode 100644
+index 0000000000..15777714f0
+--- /dev/null
++++ b/features/FEATURE_BLE/targets/TARGET_STM/TARGET_CYW4343X/CyH4TransportDriver.h
+@@ -0,0 +1,124 @@
++/* mbed Microcontroller Library
++ * Copyright (c) 2017-2017 ARM Limited
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *     http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++#ifndef CY_H4TRANSPORT_DRIVER_H_
++#define CY_H4TRANSPORT_DRIVER_H_
++
++#if (DEVICE_SERIAL && DEVICE_SERIAL_FC) || defined(DOXYGEN_ONLY)
++
++#include <stdint.h>
++#include "mbed.h"
++#include "CordioHCITransportDriver.h"
++#include "drivers/DigitalInOut.h"
++
++namespace ble {
++namespace vendor {
++namespace cypress_ble {
++
++using namespace ble::vendor;
++
++/**
++ * Implementation of the H4 driver over Cypress based chips.
++ */
++class CyH4TransportDriver : public cordio::CordioHCITransportDriver {
++public:
++    /**
++     * Initialize the transport driver.
++     *
++     */
++	CyH4TransportDriver(PinName tx, PinName rx, PinName cts, PinName rts, int baud, PinName bt_host_wake_name, PinName bt_device_wake_name,
++                            uint8_t host_wake_irq = 0, uint8_t dev_wake_irq = 0);
++        CyH4TransportDriver(PinName tx, PinName rx, PinName cts, PinName rts, int baud);
++
++    /**
++     * Destructor
++     */
++    virtual ~CyH4TransportDriver();
++
++    /**
++     * @see CordioHCITransportDriver::initialize
++     */
++    virtual void initialize();
++
++    /**
++     * @see CordioHCITransportDriver::terminate
++     */
++    virtual void terminate();
++
++    /**
++     * @see CordioHCITransportDriver::write
++     */
++    virtual uint16_t write(uint8_t type, uint16_t len, uint8_t *pData);
++
++    void bt_host_wake_rise_irq_handler();
++    void bt_host_wake_fall_irq_handler();
++
++#if (defined(MBED_TICKLESS) && DEVICE_SLEEP && DEVICE_LPTICKER)
++    void on_host_stack_inactivity();
++#endif
++
++    void update_uart_baud_rate(int baud);
++
++    bool get_enabled_powersave();
++    uint8_t get_host_wake_irq_event();
++    uint8_t get_dev_wake_irq_event();
++
++private:
++    void assert_bt_dev_wake();
++    void deassert_bt_dev_wake();
++    void on_controller_irq();
++
++    // Use HAL serial because Cypress UART is buffered.
++    // The PUTC function does not actually blocks until data is fully transmitted,
++    // it only blocks until data gets into HW buffer.
++    // The UART APIs prevents sleep while there are data in the HW buffer.
++    // However UART APIs does not prevent the BT radio from going to sleep.
++    // Use the HAL APIs to prevent the radio from going to sleep until UART transmition is complete.
++    // Mbed layer has no API that distinguish between data in HW buffer v.s. data already transmitted.
++    
++    UnbufferedSerial uart;
++    PinName cts;
++    PinName rts;
++    PinName bt_host_wake_name;
++    PinName bt_device_wake_name;
++
++    DigitalInOut bt_host_wake;
++    DigitalInOut bt_device_wake;
++    bool bt_host_wake_active;
++
++    bool     enabled_powersave;
++    uint8_t  host_wake_irq_event;
++    uint8_t  dev_wake_irq_event;
++
++    bool     holding_deep_sleep_lock;
++
++};
++
++} // namespace cypress
++} // namespace vendor
++} // namespace ble
++
++#define DEF_BT_BAUD_RATE    (115200)
++#define DEF_BT_3M_BAUD_RATE (3000000)     /* Both Host and BT device have to be adapt to this */
++
++#define WAKE_EVENT_ACTIVE_HIGH ( 1 )      /* Interrupt Rising Edge  */
++#define WAKE_EVENT_ACTIVE_LOW  ( 0 )      /* Interrupt Falling Edge */
++
++ble::vendor::cypress_ble::CyH4TransportDriver& ble_cordio_get_default_h4_transport_driver();
++ble::vendor::cypress_ble::CyH4TransportDriver& ble_cordio_get_h4_transport_driver();
++#endif
++#endif /* CY_H4TRANSPORT_DRIVER_H_ */
+diff --git a/features/FEATURE_BLE/targets/TARGET_STM/TARGET_CYW4343X/HCIDriver.cpp b/features/FEATURE_BLE/targets/TARGET_STM/TARGET_CYW4343X/HCIDriver.cpp
+index dc6062a216..a9290bf28e 100644
+--- a/features/FEATURE_BLE/targets/TARGET_STM/TARGET_CYW4343X/HCIDriver.cpp
++++ b/features/FEATURE_BLE/targets/TARGET_STM/TARGET_CYW4343X/HCIDriver.cpp
+@@ -1,5 +1,6 @@
+ /*
+  * Copyright (c) 2018 ARM Limited
++ * SPDX-License-Identifier: Apache-2.0
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+@@ -23,68 +24,69 @@
+ #include "bstream.h"
+ #include <stdbool.h>
+ #include "hci_mbed_os_adaptation.h"
+-#include "H4TransportDriver.h"
++#include "CyH4TransportDriver.h"
+ 
+ extern const int brcm_patch_ram_length;
+ extern const uint8_t brcm_patchram_buf[];
+ 
++#ifndef BT_UART_NO_3M_SUPPORT
+ static const uint8_t pre_brcm_patchram_buf[] = {
+-    // RESET followed by download mini driver cmd
++    // RESET followed by update uart baudrate
+     0x03, 0x0C, 0x00,
++        0x18, 0xFC, 0x06, 0x00, 0x00, 0xC0, 0xC6, 0x2D, 0x00,   //update uart baudrate 3 mbp
++};
++#else /* BT_UART_NO_3M_SUPPORT */
++static const uint8_t pre_brcm_patchram_buf[] = {
++    // RESET cmd
++    0x03, 0x0C, 0x00,
++};
++#endif /* BT_UART_NO_3M_SUPPORT */
++
++static const uint8_t pre_brcm_patchram_buf2[] = {
++        //download mini driver
+     0x2E, 0xFC, 0x00,
+ };
++
++static const uint8_t post_brcm_patchram_buf[] = {
++    // RESET cmd
++    0x03, 0x0C, 0x00,
++};
++
+ static const int pre_brcm_patch_ram_length = sizeof(pre_brcm_patchram_buf);
++static const int pre_brcm_patch_ram_length2 = sizeof(pre_brcm_patchram_buf2);
++static const int post_brcm_patch_ram_length = sizeof(post_brcm_patchram_buf);
+ 
+ #define HCI_RESET_RAND_CNT        4
++#define HCI_VS_CMD_UPDATE_UART_BAUD_RATE 0xFC18
+ #define HCI_VS_CMD_SET_SLEEP_MODE 0xFC27
+ 
+ 
+ extern "C" uint32_t Set_GPIO_Clock(uint32_t port_idx);
+ 
+-// 0: push pull
+-// 1: open drain
+-static void output_mode(PinName pin, int mode)
+-{
+-    MBED_ASSERT(pin != (PinName)NC);
+-    uint32_t port_index = STM_PORT(pin);
+-    uint32_t pin_index  = STM_PIN(pin);
+-
+-    // Enable GPIO clock
+-    uint32_t gpio_add = Set_GPIO_Clock(port_index);
+-    GPIO_TypeDef *gpio = (GPIO_TypeDef *)gpio_add;
+-
+-#if defined(STM32H7)
+-    #define GPIO_OTYPER_OT_0 GPIO_OTYPER_OT0
+-#endif
+-
+-    /* Output mode configuration*/
+-    gpio->OTYPER  &= ~((GPIO_OTYPER_OT_0) << ((uint16_t)pin_index)) ;
+-    gpio->OTYPER |= (uint16_t)(((uint16_t)mode) << ((uint16_t)pin_index));
+-}
+-
+ namespace ble {
+ namespace vendor {
+-namespace wise1530 {
++namespace cypress {
+ 
+ class HCIDriver : public cordio::CordioHCIDriver {
+ public:
+     HCIDriver(
+-        cordio::CordioHCITransportDriver& transport_driver,
+-        PinName bt_host_wake_name,
+-        PinName bt_device_wake_name,
+-        PinName bt_power_name
++        ble::vendor::cypress_ble::CyH4TransportDriver& transport_driver,
++        PinName bt_power_name,
++	bool ps_enabled,
++	uint8_t host_wake_irq,
++	uint8_t dev_wake_irq
+     ) : cordio::CordioHCIDriver(transport_driver),
+-        bt_host_wake_name(bt_host_wake_name),
+-        bt_device_wake_name(bt_device_wake_name),
+         bt_power_name(bt_power_name),
+-        bt_host_wake(bt_host_wake_name, PIN_INPUT, PullNone, 0),
+-        bt_device_wake(bt_device_wake_name, PIN_OUTPUT, PullDefault, 1),
+         bt_power(bt_power_name, PIN_OUTPUT, PullUp, 0),
++	is_powersave_enabled(ps_enabled),
++	host_wake_irq(host_wake_irq),
++	dev_wake_irq(dev_wake_irq),
+         service_pack_index(0),
+         service_pack_ptr(0),
+         service_pack_length(0),
+         service_pack_next(),
+-        service_pack_transfered(false) {
++        service_pack_transfered(false),
++        cy_transport_driver(transport_driver) {
+     }
+ 
+     virtual cordio::buf_pool_desc_t get_buffer_pool_description()
+@@ -95,17 +97,11 @@ public:
+ 
+     virtual void do_initialize()
+     {
+-        output_mode(bt_host_wake_name, 1);
+-        output_mode(bt_device_wake_name, 0);
+-        output_mode(bt_power_name, 1);
+-
+-        ThisThread::sleep_for(500);
+-
+-        bt_device_wake = 0;
+-        ThisThread::sleep_for(500);
+-
++        //Prevent PSoC6 to enter deep-sleep till BT initialization is complete
++        sleep_manager_lock_deep_sleep();
++        rtos::ThisThread::sleep_for(500);
+         bt_power = 1;
+-        ThisThread::sleep_for(500);
++        rtos::ThisThread::sleep_for(500);
+     }
+ 
+     virtual void do_terminate() { }
+@@ -136,9 +132,46 @@ public:
+ 
+             /* decode opcode */
+             switch (opcode) {
++                case HCI_VS_CMD_UPDATE_UART_BAUD_RATE:
++#ifndef BT_UART_NO_3M_SUPPORT
++                    cy_transport_driver.update_uart_baud_rate(DEF_BT_3M_BAUD_RATE);
++#endif /* BT_UART_NO_3M_SUPPORT */
++#ifdef CY_DEBUG
++                    HciReadLocalVerInfoCmd();
++#else
++                    set_sleep_mode();
++#endif
++                    break;
++
++#ifdef CY_DEBUG
++                case HCI_OPCODE_READ_LOCAL_VER_INFO:
++                    uint8_t hci_version;
++                    uint8_t hci_revision;
++                    uint8_t lmp_revision;
++                    uint16_t manufacturer_name;
++
++                    BSTREAM_TO_UINT8(hci_version, pMsg);
++                    BSTREAM_TO_UINT8(hci_revision, pMsg);
++                    BSTREAM_TO_UINT8(lmp_revision, pMsg);
++                    BSTREAM_TO_UINT16(manufacturer_name, pMsg);
++
++                    if(hci_revision == 0 || manufacturer_name == 0xF)
++                    {
++                        printf("bt firmware download failed, rom code is being used\n");
++                    }
++                    else
++                    {
++                        printf("bt firmware download success\n");
++                    }
++
++                    set_sleep_mode();
++                    break;
++#endif
++
+                 // Note: Reset is handled by ack_service_pack.
+                 case HCI_VS_CMD_SET_SLEEP_MODE:
+                     HciWriteLeHostSupport();
++                    sleep_manager_unlock_deep_sleep();
+                     break;
+ 
+                 case HCI_OPCODE_WRITE_LE_HOST_SUPPORT:
+@@ -285,25 +318,53 @@ public:
+ 
+ private:
+ 
+-    // send pre_brcm_patchram_buf
++    // send pre_brcm_patchram_buf issue hci reset and update baud rate on 43012
+     void prepare_service_pack_transfert(void)
+     {
+         service_pack_ptr = pre_brcm_patchram_buf;
+         service_pack_length = pre_brcm_patch_ram_length;
++        service_pack_next = &HCIDriver::prepare_service_pack_transfert2;
++        service_pack_index = 0;
++        service_pack_transfered = false;
++        send_service_pack_command();
++    }
++
++    // Called one pre_brcm_patchram_buf has been transferred; send pre_brcm_patchram_buf2 update uart baudrate
++    // on PSoC6 to send hci download minidriver
++    void prepare_service_pack_transfert2(void)
++    {
++#ifndef BT_UART_NO_3M_SUPPORT
++        cy_transport_driver.update_uart_baud_rate(DEF_BT_3M_BAUD_RATE);
++#endif /* BT_UART_NO_3M_SUPPORT */
++        service_pack_ptr = pre_brcm_patchram_buf2;
++        service_pack_length = pre_brcm_patch_ram_length2;
+         service_pack_next = &HCIDriver::start_service_pack_transfert;
+         service_pack_index = 0;
+         service_pack_transfered = false;
+         send_service_pack_command();
+     }
+ 
+-    // Called once pre_brcm_patchram_buf has been transferred; send brcm_patchram_buf
++    // Called once pre_brcm_patchram_buf2 has been transferred; send brcm_patchram_buf
+     void start_service_pack_transfert(void)
+     {
+         service_pack_ptr = brcm_patchram_buf;
+         service_pack_length = brcm_patch_ram_length;
+-        service_pack_next = &HCIDriver::terminate_service_pack_transfert;
++        service_pack_next = &HCIDriver::post_service_pack_transfert;
++        service_pack_index = 0;
++        service_pack_transfered = false;
++        send_service_pack_command();
++    }
++
++    // Called once brcm_patchram_buf has been transferred; send post_brcm_patchram_buf
++    void post_service_pack_transfert(void)
++    {
++        cy_transport_driver.update_uart_baud_rate(DEF_BT_BAUD_RATE);
++        service_pack_ptr = post_brcm_patchram_buf;
++        service_pack_length = post_brcm_patch_ram_length;
++        service_pack_next = &HCIDriver::terminate_service_pack_transfert;;
+         service_pack_index = 0;
+         service_pack_transfered = false;
++        rtos::ThisThread::sleep_for(1000);
+         send_service_pack_command();
+     }
+ 
+@@ -315,8 +376,11 @@ private:
+         service_pack_next = NULL;
+         service_pack_index = 0;
+         service_pack_transfered = true;
+-        ThisThread::sleep_for(1000);
++#ifndef BT_UART_NO_3M_SUPPORT
++        HciUpdateUartBaudRate();
++#else /* BT_UART_NO_3M_SUPPORT */
+         set_sleep_mode();
++#endif /* BT_UART_NO_3M_SUPPORT */
+     }
+ 
+     void send_service_pack_command(void)
+@@ -345,7 +409,7 @@ private:
+         // update service pack index
+         service_pack_index += (HCI_CMD_HDR_LEN + service_pack_ptr[service_pack_index + 2]);
+ 
+-        if (service_pack_index < service_pack_length) {
++        if (service_pack_index < (size_t)service_pack_length) {
+             send_service_pack_command();
+         } else {
+             (this->*service_pack_next)();
+@@ -357,18 +421,50 @@ private:
+             uint8_t *pBuf;
+             if ((pBuf = hciCmdAlloc(HCI_VS_CMD_SET_SLEEP_MODE, 12)) != NULL)
+             {
+-                  pBuf[HCI_CMD_HDR_LEN] = 0x00; // no sleep moode
++                  if (is_powersave_on()) {
++                     pBuf[HCI_CMD_HDR_LEN] = 0x01; // sleep
++		  } else {
++                     pBuf[HCI_CMD_HDR_LEN] = 0x00; // no sleep
++		  }
+                   pBuf[HCI_CMD_HDR_LEN + 1] = 0x00; // no idle threshold host (N/A)
+-                  pBuf[HCI_CMD_HDR_LEN + 2] = 0x00; // no idle threshold HC (N/A)
+-                  pBuf[HCI_CMD_HDR_LEN + 3] = 0x00; // BT WAKE
+-                  pBuf[HCI_CMD_HDR_LEN + 4] = 0x00; // HOST WAKE
++                  if (is_powersave_on()) {
++                     pBuf[HCI_CMD_HDR_LEN + 2] = 0x05; // no idle threshold HC (N/A)
++		  } else {
++                     pBuf[HCI_CMD_HDR_LEN + 2] = 0x00; // no idle threshold HC (N/A)
++                  }
++                  if (is_powersave_on()) {
++                     pBuf[HCI_CMD_HDR_LEN + 3] = dev_wake_irq; // BT WAKE
++		  } else {
++                     pBuf[HCI_CMD_HDR_LEN + 3] = 0x00; // BT WAKE
++		  }
++                  if (is_powersave_on()) {
++                      pBuf[HCI_CMD_HDR_LEN + 4] = host_wake_irq; // HOST WAKE
++		  } else {
++                     pBuf[HCI_CMD_HDR_LEN + 4] = 0x00; // HOST WAKE
++		  }
+                   pBuf[HCI_CMD_HDR_LEN + 5] = 0x00; // Sleep during SCO
+                   pBuf[HCI_CMD_HDR_LEN + 6] = 0x00; // Combining sleep mode and SCM
+                   pBuf[HCI_CMD_HDR_LEN + 7] = 0x00; // Tristate TX
+                   pBuf[HCI_CMD_HDR_LEN + 8] = 0x00; // Active connection handling on suspend
+                   pBuf[HCI_CMD_HDR_LEN + 9] = 0x00; // resume timeout
+                   pBuf[HCI_CMD_HDR_LEN + 10] = 0x00; // break to host
+-                  pBuf[HCI_CMD_HDR_LEN + 10] = 0x00; // Pulsed host wake
++                  pBuf[HCI_CMD_HDR_LEN + 11] = 0x00; // Pulsed host wake
++                  hciCmdSend(pBuf);
++            }
++    }
++
++    // 0x18, 0xFC, 0x06, 0x00, 0x00, 0xC0, 0xC6, 0x2D, 0x00,   //update uart baudrate 3 mbp
++    void HciUpdateUartBaudRate()
++    {
++            uint8_t *pBuf;
++            if ((pBuf = hciCmdAlloc(HCI_VS_CMD_UPDATE_UART_BAUD_RATE, 6)) != NULL)
++            {
++                  pBuf[HCI_CMD_HDR_LEN] = 0x00; // encoded_baud_rate
++                  pBuf[HCI_CMD_HDR_LEN + 1] = 0x00; // use_encoded_form
++                  pBuf[HCI_CMD_HDR_LEN + 2] = 0xC0; // explicit baud rate bit 0-7
++                  pBuf[HCI_CMD_HDR_LEN + 3] = 0xC6; // explicit baud rate bit 8-15
++                  pBuf[HCI_CMD_HDR_LEN + 4] = 0x2D; // explicit baud rate bit 16-23
++                  pBuf[HCI_CMD_HDR_LEN + 5] = 0x00; // explicit baud rate bit 24-31
+                   hciCmdSend(pBuf);
+             }
+     }
+@@ -420,46 +516,41 @@ private:
+         }
+     }
+ 
+-    PinName bt_host_wake_name;
+-    PinName bt_device_wake_name;
++    bool is_powersave_on(void)
++    {
++       return (is_powersave_enabled);
++    }
++
+     PinName bt_power_name;
+-    DigitalInOut bt_host_wake;
+-    DigitalInOut bt_device_wake;
+     DigitalInOut bt_power;
++
++    bool is_powersave_enabled;
++    uint8_t host_wake_irq;
++    uint8_t dev_wake_irq;
++
+     size_t service_pack_index;
+     const uint8_t* service_pack_ptr;
+     int service_pack_length;
+     void (HCIDriver::*service_pack_next)();
+     bool service_pack_transfered;
++    ble::vendor::cypress_ble::CyH4TransportDriver& cy_transport_driver;
+ 
+ };
+ 
+-} // namespace wise1530
++} // namespace cypress
+ } // namespace vendor
+ } // namespace ble
+ 
+-#if defined(STM32H7)
+-
+-ble::vendor::cordio::CordioHCIDriver& ble_cordio_get_hci_driver() {
+-    static ble::vendor::cordio::H4TransportDriver transport_driver(
+-        /* TX */ PA_15, /* RX */ PF_6, /* cts */ PF_9, /* rts */ PF_8, 115200
+-    );
+-    static ble::vendor::wise1530::HCIDriver hci_driver(
+-        transport_driver, /* host wake */ PJ_13, /* device wake */ PJ_14, /* bt_power */ PJ_12
+-    );
+-    return hci_driver;
+-}
+-
+-#else
+-
+-ble::vendor::cordio::CordioHCIDriver& ble_cordio_get_hci_driver() {
+-    static ble::vendor::cordio::H4TransportDriver transport_driver(
+-        /* TX */ PA_2, /* RX */ PA_3, /* cts */ PA_0, /* rts */ PA_1, 115200
+-    );
+-    static ble::vendor::wise1530::HCIDriver hci_driver(
+-        transport_driver, /* host wake */ PC_0, /* device wake */ PB_8, /* bt_power */ PC_6
++ble::vendor::cordio::CordioHCIDriver& ble_cordio_get_hci_driver()
++{
++    static ble::vendor::cypress_ble::CyH4TransportDriver& transport_driver =
++          ble_cordio_get_h4_transport_driver();
++    static ble::vendor::cypress::HCIDriver hci_driver(
++        transport_driver,
++        /* bt_power */ CYBSP_BT_POWER,
++	transport_driver.get_enabled_powersave(),
++	transport_driver.get_host_wake_irq_event(),
++	transport_driver.get_dev_wake_irq_event()
+     );
+     return hci_driver;
+ }
+-
+-#endif
+\ No newline at end of file
+diff --git a/features/FEATURE_BLE/targets/TARGET_STM/TARGET_CYW4343X/TARGET_PORTENTA_H7/cy_bt_cordio_cfg.cpp b/features/FEATURE_BLE/targets/TARGET_STM/TARGET_CYW4343X/TARGET_PORTENTA_H7/cy_bt_cordio_cfg.cpp
+new file mode 100644
+index 0000000000..cfe675c36e
+--- /dev/null
++++ b/features/FEATURE_BLE/targets/TARGET_STM/TARGET_CYW4343X/TARGET_PORTENTA_H7/cy_bt_cordio_cfg.cpp
+@@ -0,0 +1,98 @@
++/*******************************************************************************
++* \file cy_bt_cordio_cfg.cpp
++* \version 1.0
++*
++*
++* Low Power Assist BT Pin configuration implementation.
++*
++********************************************************************************
++* \copyright
++* Copyright 2019 Cypress Semiconductor Corporation
++* SPDX-License-Identifier: Apache-2.0
++*
++* Licensed under the Apache License, Version 2.0 (the "License");
++* you may not use this file except in compliance with the License.
++* You may obtain a copy of the License at
++*
++*     http://www.apache.org/licenses/LICENSE-2.0
++*
++* Unless required by applicable law or agreed to in writing, software
++* distributed under the License is distributed on an "AS IS" BASIS,
++* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++* See the License for the specific language governing permissions and
++* limitations under the License.
++*******************************************************************************/
++
++#include <stdio.h>
++#include "CordioBLE.h"
++#include "CordioHCIDriver.h"
++#include "hci_api.h"
++#include "hci_cmd.h"
++#include "hci_core.h"
++#include "bstream.h"
++#include "assert.h"
++#include <stdbool.h>
++#include "hci_mbed_os_adaptation.h"
++#include "CyH4TransportDriver.h"
++
++#define cyhal_gpio_to_rtos(x)   (x)
++#define CYCFG_BT_LP_ENABLED     (1)
++#define CYCFG_BT_HOST_WAKE_IRQ_EVENT  WAKE_EVENT_ACTIVE_LOW
++#define CYCFG_BT_DEV_WAKE_POLARITY    WAKE_EVENT_ACTIVE_LOW
++
++/*******************************************************************************
++* Function Name: ble_cordio_get_h4_transport_driver
++********************************************************************************
++*
++* Strong implementation of function which calls CyH4TransportDriver constructor and return it
++*
++* \param none
++*
++* \return
++* Returns the transport driver object
++*******************************************************************************/
++ble::vendor::cypress_ble::CyH4TransportDriver& ble_cordio_get_h4_transport_driver()
++{
++#if (defined(MBED_TICKLESS) && DEVICE_SLEEP && DEVICE_LPTICKER)
++
++#if (defined(CYCFG_BT_LP_ENABLED))
++    if (CYCFG_BT_LP_ENABLED) {
++       static ble::vendor::cypress_ble::CyH4TransportDriver s_transport_driver(
++          /* TX */ cyhal_gpio_to_rtos(CYBSP_BT_UART_TX),
++          /* RX */ cyhal_gpio_to_rtos(CYBSP_BT_UART_RX),
++          /* cts */ cyhal_gpio_to_rtos(CYBSP_BT_UART_CTS),
++          /* rts */ cyhal_gpio_to_rtos(CYBSP_BT_UART_RTS), DEF_BT_BAUD_RATE,
++          cyhal_gpio_to_rtos(CYBSP_BT_HOST_WAKE),
++          cyhal_gpio_to_rtos(CYBSP_BT_DEVICE_WAKE),
++          CYCFG_BT_HOST_WAKE_IRQ_EVENT,
++          CYCFG_BT_DEV_WAKE_POLARITY
++       );
++       return s_transport_driver;
++    } else { /* CYCFG_BT_LP_ENABLED */
++       static ble::vendor::cypress_ble::CyH4TransportDriver s_transport_driver(
++          /* TX */ cyhal_gpio_to_rtos(CYBSP_BT_UART_TX),
++          /* RX */ cyhal_gpio_to_rtos(CYBSP_BT_UART_RX),
++          /* cts */ cyhal_gpio_to_rtos(CYBSP_BT_UART_CTS),
++          /* rts */ cyhal_gpio_to_rtos(CYBSP_BT_UART_RTS), DEF_BT_BAUD_RATE);
++       return s_transport_driver;
++    }
++#else  /* (defined(CYCFG_BT_LP_ENABLED)) */
++    static ble::vendor::cypress_ble::CyH4TransportDriver s_transport_driver(
++       /* TX */ cyhal_gpio_to_rtos(CYBSP_BT_UART_TX),
++       /* RX */ cyhal_gpio_to_rtos(CYBSP_BT_UART_RX),
++       /* cts */ cyhal_gpio_to_rtos(CYBSP_BT_UART_CTS),
++       /* rts */ cyhal_gpio_to_rtos(CYBSP_BT_UART_RTS), DEF_BT_BAUD_RATE,
++       cyhal_gpio_to_rtos(CYBSP_BT_HOST_WAKE), cyhal_gpio_to_rtos(CYBSP_BT_DEVICE_WAKE)
++    );
++    return s_transport_driver;
++#endif /* (defined(CYCFG_BT_LP_ENABLED)) */
++
++#else /* (defined(MBED_TICKLESS) && DEVICE_SLEEP && DEVICE_LPTICKER) */
++    static ble::vendor::cypress_ble::CyH4TransportDriver s_transport_driver(
++       /* TX */ cyhal_gpio_to_rtos(CYBSP_BT_UART_TX),
++       /* RX */ cyhal_gpio_to_rtos(CYBSP_BT_UART_RX),
++       /* cts */ cyhal_gpio_to_rtos(CYBSP_BT_UART_CTS),
++       /* rts */ cyhal_gpio_to_rtos(CYBSP_BT_UART_RTS), DEF_BT_BAUD_RATE);
++    return s_transport_driver;
++#endif /* (defined(MBED_TICKLESS) && DEVICE_SLEEP && DEVICE_LPTICKER) */
++}
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/PinNames.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/PinNames.h
+index ee3e6284a3..104b30e6af 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/PinNames.h
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/PinNames.h
+@@ -361,6 +361,15 @@ typedef enum {
+     LED2 = LED_GREEN,
+     LED3 = LED_BLUE,
+ 
++    CYBSP_BT_UART_RX = PF_6,
++    CYBSP_BT_UART_TX = PA_15,
++    CYBSP_BT_UART_RTS = PF_8,
++    CYBSP_BT_UART_CTS = PF_9,
++
++    CYBSP_BT_POWER = PJ_12,
++    CYBSP_BT_HOST_WAKE = PJ_13,
++    CYBSP_BT_DEVICE_WAKE = PJ_14,
++
+     USER_BUTTON = PC_13,
+     // Standardized button names
+     BUTTON1 = USER_BUTTON,
+-- 
+2.27.0
+

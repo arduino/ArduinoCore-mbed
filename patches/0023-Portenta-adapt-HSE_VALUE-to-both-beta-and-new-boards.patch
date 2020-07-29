@@ -1,0 +1,58 @@
+From 0484d817f5a3829d2e0529dc4a4c87c11da1162d Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Mon, 18 May 2020 14:59:28 +0200
+Subject: [PATCH 23/31] Portenta: adapt HSE_VALUE to both beta and new boards
+
+---
+ .../TARGET_PORTENTA_H7/system_stm32h7xx.c           | 13 ++-----------
+ targets/targets.json                                |  2 +-
+ 2 files changed, 3 insertions(+), 12 deletions(-)
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/system_stm32h7xx.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/system_stm32h7xx.c
+index 94a4c6413b..93d92e958b 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/system_stm32h7xx.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/system_stm32h7xx.c
+@@ -52,11 +52,9 @@
+ #include <math.h>
+ #include "nvic_addr.h" // MBED PATCH for Bootloader
+ 
+-#if defined  (HSE_VALUE)
+-#undef HSE_VALUE
+-#endif /* HSE_VALUE */
++#if !defined  (HSE_VALUE)
+ 
+-uint32_t HSE_VALUE = ((uint32_t)25000000);
++#endif /* HSE_VALUE */
+ 
+ #if !defined  (CSI_VALUE)
+   #define CSI_VALUE    ((uint32_t)4000000) /*!< Value of the Internal oscillator in Hz*/
+@@ -302,13 +300,6 @@ void SystemCoreClockUpdate (void)
+   uint32_t pllp, pllsource, pllm, pllfracen, hsivalue, tmp;
+   float_t fracn1, pllvco;
+ 
+-  uint8_t* bootloader_data = (uint8_t*)(0x801F000);
+-  if (bootloader_data[0] != 0xA0 || bootloader_data[1] < 14) {
+-    HSE_VALUE = 27000000;
+-  } else {
+-    HSE_VALUE = bootloader_data[10] * 1000000;
+-  }
+-
+   /* Get SYSCLK source -------------------------------------------------------*/
+ 
+   switch (RCC->CFGR & RCC_CFGR_SWS)
+diff --git a/targets/targets.json b/targets/targets.json
+index 285b515317..1395690a7f 100644
+--- a/targets/targets.json
++++ b/targets/targets.json
+@@ -2703,7 +2703,7 @@
+             },
+             "hse_value": {
+                 "help": "HSE default value is 27MHz in HAL",
+-                "value": "25000000",
++                "value": "(isBetaBoard()?27000000:25000000)",
+                 "macro_name": "HSE_VALUE"
+             },
+             "usb_speed": {
+-- 
+2.27.0
+

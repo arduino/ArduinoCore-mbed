@@ -1,0 +1,154 @@
+From edaf4cd33fef63f4e2cfe1fb29e12453f4c54385 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Wed, 8 Apr 2020 12:56:21 +0200
+Subject: [PATCH 18/31] PortentaH7: self configure HSE based on bootloader
+ information
+
+PortentaH7: change ext clock speed based on bootloader provided info
+
+Portenta: Use slower clock in bootloader
+
+fixed isBootloader to correctly report status
+---
+ .../TARGET_PORTENTA_H7/system_clock.c         | 22 +++++++++++++++----
+ .../TARGET_PORTENTA_H7/system_stm32h7xx.c     | 14 ++++++++++--
+ .../TOOLCHAIN_GCC_ARM/STM32H747xI.ld          |  7 ++++++
+ targets/targets.json                          |  2 +-
+ 4 files changed, 38 insertions(+), 7 deletions(-)
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/system_clock.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/system_clock.c
+index 013b8bc1a2..6963f21039 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/system_clock.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/system_clock.c
+@@ -85,6 +85,11 @@ void SetSysClock(void)
+     }
+ }
+ 
++static const uint32_t _keep;
++bool isBootloader() {
++  return ((uint32_t)&_keep < 0x8040000);
++}
++
+ #if ( ((CLOCK_SOURCE) & USE_PLL_HSE_XTAL) || ((CLOCK_SOURCE) & USE_PLL_HSE_EXTC) )
+ /******************************************************************************/
+ /*            PLL (clocked by HSE) used as System clock source                */
+@@ -109,7 +114,12 @@ uint8_t SetSysClock_PLL_HSE(uint8_t bypass)
+     /* Supply configuration update enable */
+     HAL_PWREx_ConfigSupply(PWR_SMPS_1V8_SUPPLIES_LDO);
+     /* Configure the main internal regulator output voltage */
+-    __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE0);
++
++    if (isBootloader()) {
++      __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE3);
++    } else {
++      __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
++    }
+ 
+     while (!__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY)) {}
+ 
+@@ -123,8 +133,12 @@ uint8_t SetSysClock_PLL_HSE(uint8_t bypass)
+     RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
+     RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+     RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+-    RCC_OscInitStruct.PLL.PLLM = 9;
+-    RCC_OscInitStruct.PLL.PLLN = 300;
++    RCC_OscInitStruct.PLL.PLLM = 5;
++    if (isBootloader()) {
++      RCC_OscInitStruct.PLL.PLLN = 40;
++    } else {
++      RCC_OscInitStruct.PLL.PLLN = 160;
++    }
+     RCC_OscInitStruct.PLL.PLLFRACN = 0;
+     RCC_OscInitStruct.PLL.PLLP = 2;
+     RCC_OscInitStruct.PLL.PLLR = 2;
+@@ -202,7 +216,7 @@ uint8_t SetSysClock_PLL_HSI(void)
+     RCC_OscInitStruct.PLL.PLLQ = 10;
+     RCC_OscInitStruct.PLL.PLLR = 2;
+     RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1VCOWIDE;
+-    RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1VCIRANGE_2;
++    RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1VCIRANGE_3;
+     RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+     if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
+         return 0; // FAIL
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/system_stm32h7xx.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/system_stm32h7xx.c
+index f39a7c3472..94a4c6413b 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/system_stm32h7xx.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/system_stm32h7xx.c
+@@ -52,10 +52,12 @@
+ #include <math.h>
+ #include "nvic_addr.h" // MBED PATCH for Bootloader
+ 
+-#if !defined  (HSE_VALUE)
+-#define HSE_VALUE    ((uint32_t)25000000) /*!< Value of the External oscillator in Hz */
++#if defined  (HSE_VALUE)
++#undef HSE_VALUE
+ #endif /* HSE_VALUE */
+ 
++uint32_t HSE_VALUE = ((uint32_t)25000000);
++
+ #if !defined  (CSI_VALUE)
+   #define CSI_VALUE    ((uint32_t)4000000) /*!< Value of the Internal oscillator in Hz*/
+ #endif /* CSI_VALUE */
+@@ -300,6 +302,13 @@ void SystemCoreClockUpdate (void)
+   uint32_t pllp, pllsource, pllm, pllfracen, hsivalue, tmp;
+   float_t fracn1, pllvco;
+ 
++  uint8_t* bootloader_data = (uint8_t*)(0x801F000);
++  if (bootloader_data[0] != 0xA0 || bootloader_data[1] < 14) {
++    HSE_VALUE = 27000000;
++  } else {
++    HSE_VALUE = bootloader_data[10] * 1000000;
++  }
++
+   /* Get SYSCLK source -------------------------------------------------------*/
+ 
+   switch (RCC->CFGR & RCC_CFGR_SWS)
+@@ -319,6 +328,7 @@ void SystemCoreClockUpdate (void)
+ 
+   case RCC_CFGR_SWS_PLL1:  /* PLL1 used as system clock  source */
+ 
++
+     /* PLL_VCO = (HSE_VALUE or HSI_VALUE or CSI_VALUE/ PLLM) * PLLN
+     SYSCLK = PLL_VCO / PLLR
+     */
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7_M7/TOOLCHAIN_GCC_ARM/STM32H747xI.ld b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7_M7/TOOLCHAIN_GCC_ARM/STM32H747xI.ld
+index 62fb0bdba2..c0e822f5b2 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7_M7/TOOLCHAIN_GCC_ARM/STM32H747xI.ld
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7_M7/TOOLCHAIN_GCC_ARM/STM32H747xI.ld
+@@ -39,6 +39,8 @@ MEMORY
+  __OPENAMP_region_start__  = ORIGIN(OPEN_AMP_SHMEM);
+  __OPENAMP_region_end__ = ORIGIN(OPEN_AMP_SHMEM) + LENGTH(OPEN_AMP_SHMEM);
+ 
++_ConfigStart = 0x0801F000;
++
+ /* Linker script to place sections and symbol values. Should be used together
+  * with other linker script that defines memory regions FLASH and RAM.
+  * It references following symbols, which must be defined in code:
+@@ -96,6 +98,11 @@ SECTIONS
+         KEEP(*(.eh_frame*))
+     } > FLASH
+ 
++    .ConfigData _ConfigStart :
++    {
++        KEEP(*(.bootloader_version))
++    } > FLASH
++
+     .ARM.extab :
+     {
+         *(.ARM.extab* .gnu.linkonce.armextab.*)
+diff --git a/targets/targets.json b/targets/targets.json
+index 111c8bfdb8..4c00de9d4e 100644
+--- a/targets/targets.json
++++ b/targets/targets.json
+@@ -2703,7 +2703,7 @@
+             },
+             "hse_value": {
+                 "help": "HSE default value is 27MHz in HAL",
+-                "value": "27000000",
++                "value": "25000000",
+                 "macro_name": "HSE_VALUE"
+             },
+             "usb_speed": {
+-- 
+2.27.0
+

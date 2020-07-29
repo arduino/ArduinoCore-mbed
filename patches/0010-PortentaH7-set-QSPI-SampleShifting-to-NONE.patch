@@ -1,0 +1,25 @@
+From bdf3bedf674156782d7510cb0b2b337a7bb17afd Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Wed, 8 Jan 2020 01:12:19 +0100
+Subject: [PATCH 10/31] PortentaH7: set QSPI SampleShifting to NONE
+
+---
+ targets/TARGET_STM/qspi_api.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/targets/TARGET_STM/qspi_api.c b/targets/TARGET_STM/qspi_api.c
+index fe8eb23205..5613eb7846 100644
+--- a/targets/TARGET_STM/qspi_api.c
++++ b/targets/TARGET_STM/qspi_api.c
+@@ -555,7 +555,7 @@ static qspi_status_t _qspi_init_direct(qspi_t *obj, const qspi_pinmap_t *pinmap,
+     // Set default QSPI handle values
+     obj->handle.Init.ClockPrescaler = 1;
+     obj->handle.Init.FifoThreshold = 1;
+-    obj->handle.Init.SampleShifting = QSPI_SAMPLE_SHIFTING_HALFCYCLE;
++    obj->handle.Init.SampleShifting = QSPI_SAMPLE_SHIFTING_NONE; //QSPI_SAMPLE_SHIFTING_HALFCYCLE;
+     obj->handle.Init.FlashSize = POSITION_VAL(QSPI_FLASH_SIZE_DEFAULT) - 1;
+     obj->handle.Init.ChipSelectHighTime = QSPI_CS_HIGH_TIME_5_CYCLE;
+     obj->handle.Init.ClockMode = QSPI_CLOCK_MODE_0;
+-- 
+2.27.0
+

@@ -1,0 +1,106 @@
+From 36a8381faa5a816021b457ff07a707b80797ddca Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Mon, 8 Jun 2020 12:55:57 +0200
+Subject: [PATCH 25/31] PortentaH7: fix baremetal build
+
+---
+ .../TARGET_PORTENTA_H7_M4/cmsis_nvic.h        | 40 +++++++++++++++++++
+ .../TARGET_PORTENTA_H7_M7/cmsis_nvic.h        | 39 ++++++++++++++++++
+ 2 files changed, 79 insertions(+)
+ create mode 100644 targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7_M4/cmsis_nvic.h
+ create mode 100644 targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7_M7/cmsis_nvic.h
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7_M4/cmsis_nvic.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7_M4/cmsis_nvic.h
+new file mode 100644
+index 0000000000..82b9862fcc
+--- /dev/null
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7_M4/cmsis_nvic.h
+@@ -0,0 +1,40 @@
++/* mbed Microcontroller Library
++ * SPDX-License-Identifier: BSD-3-Clause
++ ******************************************************************************
++ * @attention
++ *
++ * <h2><center>&copy; Copyright (c) 2016-2020 STMicroelectronics.
++ * All rights reserved.</center></h2>
++ *
++ * This software component is licensed by ST under BSD 3-Clause license,
++ * the "License"; You may not use this file except in compliance with the
++ * License. You may obtain a copy of the License at:
++ *                        opensource.org/licenses/BSD-3-Clause
++ *
++ ******************************************************************************
++*/
++
++#ifndef MBED_CMSIS_NVIC_H
++#define MBED_CMSIS_NVIC_H
++
++#if !defined(MBED_ROM_START)
++#define MBED_ROM_START  0x8100000
++#endif
++
++#if !defined(MBED_ROM_SIZE)
++#define MBED_ROM_SIZE  0x100000  // 1.0 MB
++#endif
++
++#if !defined(MBED_RAM_START)
++#define MBED_RAM_START  0x10000000
++#endif
++
++#if !defined(MBED_RAM_SIZE)
++#define MBED_RAM_SIZE  0x48000  // 288 KB
++#endif
++
++
++#define NVIC_NUM_VECTORS        166
++#define NVIC_RAM_VECTOR_ADDRESS MBED_RAM_START
++
++#endif
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7_M7/cmsis_nvic.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7_M7/cmsis_nvic.h
+new file mode 100644
+index 0000000000..54f04ba4e7
+--- /dev/null
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7_M7/cmsis_nvic.h
+@@ -0,0 +1,39 @@
++/*
++  ******************************************************************************
++  * @attention
++  *
++  * <h2><center>&copy; Copyright (c) 2018-2019 STMicroelectronics.
++  * All rights reserved.</center></h2>
++  *
++  * This software component is licensed by ST under BSD 3-Clause license,
++  * the "License"; You may not use this file except in compliance with the
++  * License. You may obtain a copy of the License at:
++  *                        opensource.org/licenses/BSD-3-Clause
++  *
++  ******************************************************************************
++*/
++
++#ifndef MBED_CMSIS_NVIC_H
++#define MBED_CMSIS_NVIC_H
++
++#if !defined(MBED_ROM_START)
++#define MBED_ROM_START  0x8000000
++#endif
++
++#if !defined(MBED_ROM_SIZE)
++#define MBED_ROM_SIZE  0x100000  // 1.0 MB
++#endif
++
++#if !defined(MBED_RAM_START)
++#define MBED_RAM_START  0x24000000
++#endif
++
++#if !defined(MBED_RAM_SIZE)
++#define MBED_RAM_SIZE  0x80000  // 512 KB
++#endif
++
++
++#define NVIC_NUM_VECTORS        166
++#define NVIC_RAM_VECTOR_ADDRESS 0x20000000
++
++#endif
+-- 
+2.27.0
+

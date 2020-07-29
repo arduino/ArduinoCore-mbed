@@ -1,0 +1,86 @@
+From 6ccc62ffaaebaaac9d7ff9ec25aee3af35b93e80 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Wed, 29 Apr 2020 16:14:41 +0200
+Subject: [PATCH 20/31] Portenta: Fix clocks for Beta boards
+
+---
+ .../TARGET_PORTENTA_H7/system_clock.c         | 35 ++++++++++++++++---
+ 1 file changed, 31 insertions(+), 4 deletions(-)
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/system_clock.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/system_clock.c
+index 6963f21039..4e58b5228b 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/system_clock.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/system_clock.c
+@@ -90,6 +90,15 @@ bool isBootloader() {
+   return ((uint32_t)&_keep < 0x8040000);
+ }
+ 
++bool isBetaBoard() {
++  uint8_t* bootloader_data = (uint8_t*)(0x801F000);
++  if (bootloader_data[0] != 0xA0 || bootloader_data[1] < 14) {
++    return true;
++  } else {
++    return (bootloader_data[10] == 27);
++  }
++}
++
+ #if ( ((CLOCK_SOURCE) & USE_PLL_HSE_XTAL) || ((CLOCK_SOURCE) & USE_PLL_HSE_EXTC) )
+ /******************************************************************************/
+ /*            PLL (clocked by HSE) used as System clock source                */
+@@ -112,7 +121,11 @@ uint8_t SetSysClock_PLL_HSE(uint8_t bypass)
+     HAL_GPIO_WritePin(GPIOH, GPIO_PIN_1, 1);
+ 
+     /* Supply configuration update enable */
+-    HAL_PWREx_ConfigSupply(PWR_SMPS_1V8_SUPPLIES_LDO);
++    if (isBetaBoard()) {
++      HAL_PWREx_ConfigSupply(PWR_SMPS_1V8_SUPPLIES_EXT);
++    } else {
++      HAL_PWREx_ConfigSupply(PWR_SMPS_1V8_SUPPLIES_LDO);
++    }
+     /* Configure the main internal regulator output voltage */
+ 
+     if (isBootloader()) {
+@@ -139,6 +152,15 @@ uint8_t SetSysClock_PLL_HSE(uint8_t bypass)
+     } else {
+       RCC_OscInitStruct.PLL.PLLN = 160;
+     }
++    if (isBetaBoard()) {
++      RCC_OscInitStruct.PLL.PLLM = 9;
++      if (isBootloader()) {
++        RCC_OscInitStruct.PLL.PLLN = 80;
++      } else {
++        RCC_OscInitStruct.PLL.PLLN = 300;
++      }
++    }
++
+     RCC_OscInitStruct.PLL.PLLFRACN = 0;
+     RCC_OscInitStruct.PLL.PLLP = 2;
+     RCC_OscInitStruct.PLL.PLLR = 2;
+@@ -195,8 +217,13 @@ uint8_t SetSysClock_PLL_HSI(void)
+     RCC_ClkInitTypeDef RCC_ClkInitStruct;
+     RCC_OscInitTypeDef RCC_OscInitStruct;
+ 
+-    /*!< Supply configuration update enable */
+-    HAL_PWREx_ConfigSupply(PWR_LDO_SUPPLY);
++    /* Supply configuration update enable */
++    if (isBetaBoard()) {
++      HAL_PWREx_ConfigSupply(PWR_SMPS_1V8_SUPPLIES_EXT);
++    } else {
++      HAL_PWREx_ConfigSupply(PWR_SMPS_1V8_SUPPLIES_LDO);
++    }
++
+     /* The voltage scaling allows optimizing the power consumption when the device is
+     clocked below the maximum system frequency, to update the voltage scaling value
+     regarding system frequency refer to product datasheet.  */
+@@ -211,7 +238,7 @@ uint8_t SetSysClock_PLL_HSI(void)
+     RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+     RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
+     RCC_OscInitStruct.PLL.PLLM = 8;
+-    RCC_OscInitStruct.PLL.PLLN = 113;
++    RCC_OscInitStruct.PLL.PLLN = 100;
+     RCC_OscInitStruct.PLL.PLLP = 2;
+     RCC_OscInitStruct.PLL.PLLQ = 10;
+     RCC_OscInitStruct.PLL.PLLR = 2;
+-- 
+2.27.0
+

@@ -1,0 +1,95 @@
+From fd1e5d2babf5f5b4af8f738679cba6de19b505d7 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Tue, 17 Mar 2020 11:37:07 +0100
+Subject: [PATCH 15/31] STM32: allow high speed USB endpoints
+
+---
+ drivers/USBCDC.h                    |  6 ++++--
+ drivers/source/usb/USBCDC.cpp       |  2 --
+ targets/TARGET_STM/USBPhy_STM32.cpp | 16 +++++++++++++++-
+ 3 files changed, 19 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/USBCDC.h b/drivers/USBCDC.h
+index 5f173c84a6..777b352ad0 100644
+--- a/drivers/USBCDC.h
++++ b/drivers/USBCDC.h
+@@ -33,6 +33,8 @@ class AsyncOp;
+  * @{
+  */
+ 
++#define CDC_MAX_PACKET_SIZE   64
++
+ class USBCDC: public USBDevice {
+ public:
+ 
+@@ -219,13 +221,13 @@ protected:
+ 
+     OperationList<AsyncWrite> _tx_list;
+     bool _tx_in_progress;
+-    uint8_t _tx_buffer[64];
++    uint8_t _tx_buffer[CDC_MAX_PACKET_SIZE];
+     uint8_t *_tx_buf;
+     uint32_t _tx_size;
+ 
+     OperationList<AsyncRead> _rx_list;
+     bool _rx_in_progress;
+-    uint8_t _rx_buffer[64];
++    uint8_t _rx_buffer[CDC_MAX_PACKET_SIZE];
+     uint8_t *_rx_buf;
+     uint32_t _rx_size;
+ };
+diff --git a/drivers/source/usb/USBCDC.cpp b/drivers/source/usb/USBCDC.cpp
+index e4e1737f15..9cf1ed04d9 100644
+--- a/drivers/source/usb/USBCDC.cpp
++++ b/drivers/source/usb/USBCDC.cpp
+@@ -34,8 +34,6 @@ static const uint8_t cdc_line_coding_default[7] = {0x80, 0x25, 0x00, 0x00, 0x00,
+ #define CLS_DTR   (1 << 0)
+ #define CLS_RTS   (1 << 1)
+ 
+-#define CDC_MAX_PACKET_SIZE    64
+-
+ class USBCDC::AsyncWrite: public AsyncOp {
+ public:
+     AsyncWrite(USBCDC *serial, uint8_t *buf, uint32_t size):
+diff --git a/targets/TARGET_STM/USBPhy_STM32.cpp b/targets/TARGET_STM/USBPhy_STM32.cpp
+index d7dd337093..b604f671be 100644
+--- a/targets/TARGET_STM/USBPhy_STM32.cpp
++++ b/targets/TARGET_STM/USBPhy_STM32.cpp
+@@ -28,10 +28,21 @@
+ #define IDX_TO_EP(idx)      (((idx) >> 1)|((idx) & 1) << 7)
+ 
+ /* endpoint defines */
+-#define NUM_ENDPOINTS           4
++
++#if (MBED_CONF_TARGET_USB_SPEED == USE_USB_OTG_HS)
++
++#define NUM_ENDPOINTS                6
++#define MAX_PACKET_SIZE_NON_ISO      512
++#define MAX_PACKET_SIZE_ISO          1023     // Spec can go up to 1023, only ram for this though
++
++#else
++
++#define NUM_ENDPOINTS                4
+ #define MAX_PACKET_SIZE_NON_ISO      64
+ #define MAX_PACKET_SIZE_ISO          (256 + 128)     // Spec can go up to 1023, only ram for this though
+ 
++#endif
++
+ static const uint32_t tx_ep_sizes[NUM_ENDPOINTS] = {
+     MAX_PACKET_SIZE_NON_ISO,
+     MAX_PACKET_SIZE_NON_ISO,
+@@ -307,8 +318,11 @@ void USBPhyHw::init(USBPhyEvents *events)
+         total_bytes += fifo_size;
+     }
+ 
++#if (MBED_CONF_TARGET_USB_SPEED != USE_USB_OTG_HS)
+     /* 1.25 kbytes */
+     MBED_ASSERT(total_bytes <= 1280);
++#endif
++
+ #endif
+ 
+     // Configure interrupt vector
+-- 
+2.27.0
+

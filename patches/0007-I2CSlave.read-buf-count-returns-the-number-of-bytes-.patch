@@ -1,0 +1,40 @@
+From ac478a6e0e46218b21ce9df3a1f903319fda8b7a Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Wed, 1 Apr 2020 12:21:59 +0200
+Subject: [PATCH 07/31] I2CSlave.read(buf, count) returns the number of bytes
+ actually read
+
+---
+ drivers/I2CSlave.h          | 2 +-
+ drivers/source/I2CSlave.cpp | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/I2CSlave.h b/drivers/I2CSlave.h
+index 663b326870..96cbddfd93 100644
+--- a/drivers/I2CSlave.h
++++ b/drivers/I2CSlave.h
+@@ -172,7 +172,7 @@ public:
+      *
+      *  @return Result of the operation.
+      *  @retval 0       If the number of bytes read is equal to length requested.
+-     *  @retval nonzero On error or if the number of bytes read is less than requested.
++     *  @retval the number of bytes read.
+      */
+     int read(char *data, int length);
+ 
+diff --git a/drivers/source/I2CSlave.cpp b/drivers/source/I2CSlave.cpp
+index 4317df9656..e4515820ad 100644
+--- a/drivers/source/I2CSlave.cpp
++++ b/drivers/source/I2CSlave.cpp
+@@ -52,7 +52,7 @@ int I2CSlave::receive(void)
+ 
+ int I2CSlave::read(char *data, int length)
+ {
+-    return i2c_slave_read(&_i2c, data, length) != length;
++    return i2c_slave_read(&_i2c, data, length);
+ }
+ 
+ int I2CSlave::read(void)
+-- 
+2.27.0
+

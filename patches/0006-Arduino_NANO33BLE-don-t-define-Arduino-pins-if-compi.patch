@@ -1,0 +1,37 @@
+From 75293441f48a323f713c0d20ff74397e401e2aa8 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Thu, 12 Mar 2020 16:12:42 +0100
+Subject: [PATCH 06/31] Arduino_NANO33BLE: don't define Arduino pins if
+ compiling in Arduino core
+
+---
+ .../TARGET_MCU_NRF52840/TARGET_ARDUINO_NANO33BLE/PinNames.h | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/targets/TARGET_NORDIC/TARGET_NRF5x/TARGET_NRF52/TARGET_MCU_NRF52840/TARGET_ARDUINO_NANO33BLE/PinNames.h b/targets/TARGET_NORDIC/TARGET_NRF5x/TARGET_NRF52/TARGET_MCU_NRF52840/TARGET_ARDUINO_NANO33BLE/PinNames.h
+index 631bc74679..bf5a72109c 100644
+--- a/targets/TARGET_NORDIC/TARGET_NRF5x/TARGET_NRF52/TARGET_MCU_NRF52840/TARGET_ARDUINO_NANO33BLE/PinNames.h
++++ b/targets/TARGET_NORDIC/TARGET_NRF5x/TARGET_NRF52/TARGET_MCU_NRF52840/TARGET_ARDUINO_NANO33BLE/PinNames.h
+@@ -169,7 +169,8 @@ typedef enum {
+ 
+     I2C_SDA0 = p31,
+     I2C_SCL0 = p2,
+-    
++
++#ifndef ARDUINO_ARCH_MBED
+     // Digital Pins
+     D2  = P1_11,
+     D3  = P1_12,
+@@ -193,7 +194,8 @@ typedef enum {
+     A5 = p2,
+     A6 = p28,
+     A7 = p3,
+-    
++#endif
++
+     AIN0 = p4,
+     AIN1 = p5,
+     AIN2 = p30,
+-- 
+2.27.0
+

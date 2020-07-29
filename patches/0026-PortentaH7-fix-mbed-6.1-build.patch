@@ -1,0 +1,1410 @@
+From 9e2c6ee790ccd88c2c7141149c6ad7e567b6b3c5 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Fri, 3 Jul 2020 11:43:17 +0200
+Subject: [PATCH 26/31] PortentaH7: fix mbed 6.1 build
+
+---
+ .../TARGET_PORTENTA_H7/PeripheralPins.c       | 151 +++--
+ .../TARGET_PORTENTA_H7/PinNames.h             | 535 +++++++++---------
+ .../TARGET_PORTENTA_H7/clocks.c               |  30 -
+ ...system_clock.c => system_clock_override.c} |  14 +
+ .../TARGET_PORTENTA_H7/system_stm32h7xx.c     | 391 -------------
+ .../TARGET_STM32H747xI/system_clock.c         |   6 +-
+ 6 files changed, 343 insertions(+), 784 deletions(-)
+ delete mode 100644 targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/clocks.c
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/{system_clock.c => system_clock_override.c} (98%)
+ delete mode 100644 targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/system_stm32h7xx.c
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/PeripheralPins.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/PeripheralPins.c
+index 7fe76b5bfc..62def5b8a7 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/PeripheralPins.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/PeripheralPins.c
+@@ -1,33 +1,18 @@
+ /* mbed Microcontroller Library
+- *******************************************************************************
+- * Copyright (c) 2019, STMicroelectronics
+- * All rights reserved.
++ * SPDX-License-Identifier: BSD-3-Clause
++ ******************************************************************************
+  *
+- * Redistribution and use in source and binary forms, with or without
+- * modification, are permitted provided that the following conditions are met:
++ * Copyright (c) 2016-2020 STMicroelectronics.
++ * All rights reserved.
+  *
+- * 1. Redistributions of source code must retain the above copyright notice,
+- *    this list of conditions and the following disclaimer.
+- * 2. Redistributions in binary form must reproduce the above copyright notice,
+- *    this list of conditions and the following disclaimer in the documentation
+- *    and/or other materials provided with the distribution.
+- * 3. Neither the name of STMicroelectronics nor the names of its contributors
+- *    may be used to endorse or promote products derived from this software
+- *    without specific prior written permission.
++ * This software component is licensed by ST under BSD 3-Clause license,
++ * the "License"; You may not use this file except in compliance with the
++ * License. You may obtain a copy of the License at:
++ *                        opensource.org/licenses/BSD-3-Clause
+  *
+- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+- *******************************************************************************
++ ******************************************************************************
+  *
+- * Automatically generated from STM32H747XIHx.xml
++ * Automatically generated from STM32CubeMX/db/mcu/STM32H747XIHx.xml
+  */
+ 
+ #include "PeripheralPins.h"
+@@ -55,15 +40,15 @@
+ //*** ADC ***
+ 
+ MBED_WEAK const PinMap PinMap_ADC[] = {
+-    {PA_0,       ADC_1, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 16, 0)}, // ADC1_INP16 // Connected to PMOD\#1- USART2_CTS_NSS
+-    {PA_0_C,     ADC_1, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 1, 0)}, // ADC1_INN1 // Connected to ARD_A2
+-    {PA_0_C_ALT0,ADC_1, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 0, 0)}, // ADC1_INP0 // Connected to ARD_A2
+-    {PA_0_C_ALT1,ADC_2, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 1, 0)}, // ADC2_INN1 // Connected to ARD_A2
+-    {PA_0_C_ALT2,ADC_2, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 0, 0)}, // ADC2_INP0 // Connected to ARD_A2
++    {PA_0,       ADC_1, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 16, 0)}, // ADC1_INP16
++    {PA_0C,      ADC_1, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 0, 0)}, // ADC1_INP0 // Connected to ARD_A2
++    {PA_0C_ALT0, ADC_1, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 1, 0)}, // ADC1_INN1 // Connected to ARD_A2
++    {PA_0C_ALT1, ADC_2, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 1, 0)}, // ADC2_INN1 // Connected to ARD_A2
++    {PA_0C_ALT2, ADC_2, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 0, 0)}, // ADC2_INP0 // Connected to ARD_A2
+     {PA_1,       ADC_1, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 16, 0)}, // ADC1_INN16 // Connected to ETH_REF_CLK
+     {PA_1_ALT0,  ADC_1, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 17, 0)}, // ADC1_INP17 // Connected to ETH_REF_CLK
+-    {PA_1_C,     ADC_1, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 1, 0)}, // ADC1_INP1 // Connected to ARD_A3
+-    {PA_1_C_ALT0,ADC_2, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 1, 0)}, // ADC2_INP1 // Connected to ARD_A3
++    {PA_1C,      ADC_1, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 1, 0)}, // ADC1_INP1 // Connected to ARD_A3
++    {PA_1C_ALT0, ADC_2, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 1, 0)}, // ADC2_INP1 // Connected to ARD_A3
+     {PA_2,       ADC_1, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 14, 0)}, // ADC1_INP14 // Connected to ETH_MDIO
+     {PA_2_ALT0,  ADC_2, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 14, 0)}, // ADC2_INP14 // Connected to ETH_MDIO
+     {PA_3,       ADC_1, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 15, 0)}, // ADC1_INP15 // Connected to ULPI_D0
+@@ -89,25 +74,25 @@ MBED_WEAK const PinMap PinMap_ADC[] = {
+     {PC_0,       ADC_1, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 10, 0)}, // ADC1_INP10 // Connected to ULPI_STP
+     {PC_0_ALT0,  ADC_2, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 10, 0)}, // ADC2_INP10 // Connected to ULPI_STP
+     {PC_0_ALT1,  ADC_3, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 10, 0)}, // ADC3_INP10 // Connected to ULPI_STP
+-    {PC_1,       ADC_1, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 10, 0)}, // ADC1_INN10 // Connected to SAI4_D1 (default: SB8 off/SB21 on), ETH_MDC (SB8 on/SB21 off)
+-    {PC_1_ALT0,  ADC_1, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 11, 0)}, // ADC1_INP11 // Connected to SAI4_D1 (default: SB8 off/SB21 on), ETH_MDC (SB8 on/SB21 off)
+-    {PC_1_ALT1,  ADC_2, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 10, 0)}, // ADC2_INN10 // Connected to SAI4_D1 (default: SB8 off/SB21 on), ETH_MDC (SB8 on/SB21 off)
+-    {PC_1_ALT2,  ADC_2, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 11, 0)}, // ADC2_INP11 // Connected to SAI4_D1 (default: SB8 off/SB21 on), ETH_MDC (SB8 on/SB21 off)
+-    {PC_1_ALT3,  ADC_3, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 10, 0)}, // ADC3_INN10 // Connected to SAI4_D1 (default: SB8 off/SB21 on), ETH_MDC (SB8 on/SB21 off)
+-    {PC_1_ALT4,  ADC_3, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 11, 0)}, // ADC3_INP11 // Connected to SAI4_D1 (default: SB8 off/SB21 on), ETH_MDC (SB8 on/SB21 off)
++    {PC_1,       ADC_1, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 10, 0)}, // ADC1_INN10 // Connected to ETH_MDC/SAI4_D1
++    {PC_1_ALT0,  ADC_1, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 11, 0)}, // ADC1_INP11 // Connected to ETH_MDC/SAI4_D1
++    {PC_1_ALT1,  ADC_2, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 10, 0)}, // ADC2_INN10 // Connected to ETH_MDC/SAI4_D1
++    {PC_1_ALT2,  ADC_2, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 11, 0)}, // ADC2_INP11 // Connected to ETH_MDC/SAI4_D1
++    {PC_1_ALT3,  ADC_3, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 10, 0)}, // ADC3_INN10 // Connected to ETH_MDC/SAI4_D1
++    {PC_1_ALT4,  ADC_3, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 11, 0)}, // ADC3_INP11 // Connected to ETH_MDC/SAI4_D1
+     {PC_2,       ADC_1, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 11, 0)}, // ADC1_INN11 // Connected to PMOD\#3
+     {PC_2_ALT0,  ADC_1, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 12, 0)}, // ADC1_INP12 // Connected to PMOD\#3
+     {PC_2_ALT1,  ADC_2, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 11, 0)}, // ADC2_INN11 // Connected to PMOD\#3
+     {PC_2_ALT2,  ADC_2, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 12, 0)}, // ADC2_INP12 // Connected to PMOD\#3
+     {PC_2_ALT3,  ADC_3, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 11, 0)}, // ADC3_INN11 // Connected to PMOD\#3
+     {PC_2_ALT4,  ADC_3, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 12, 0)}, // ADC3_INP12 // Connected to PMOD\#3
+-    {PC_2_C,     ADC_3, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 1, 0)}, // ADC3_INN1 // Connected to ARD_A4
+-    {PC_2_C_ALT0,ADC_3, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 0, 0)}, // ADC3_INP0 // Connected to ARD_A4
++    {PC_2C,      ADC_3, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 0, 0)}, // ADC3_INP0 // Connected to ARD_A4
++    {PC_2C_ALT0, ADC_3, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 1, 0)}, // ADC3_INN1 // Connected to ARD_A4
+     {PC_3,       ADC_1, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 12, 0)}, // ADC1_INN12 // Connected to PMOD\#2
+     {PC_3_ALT0,  ADC_1, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 13, 0)}, // ADC1_INP13 // Connected to PMOD\#2
+     {PC_3_ALT1,  ADC_2, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 12, 0)}, // ADC2_INN12 // Connected to PMOD\#2
+     {PC_3_ALT2,  ADC_2, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 13, 0)}, // ADC2_INP13 // Connected to PMOD\#2
+-    {PC_3_C,     ADC_3, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 1, 0)}, // ADC3_INP1 // Connected to ARD_A5
++    {PC_3C,      ADC_3, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 1, 0)}, // ADC3_INP1 // Connected to ARD_A5
+     {PC_4,       ADC_1, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 4, 0)}, // ADC1_INP4 // Connected to ETH_RXD0
+     {PC_4_ALT0,  ADC_2, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 4, 0)}, // ADC2_INP4 // Connected to ETH_RXD0
+     {PC_5,       ADC_1, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 4, 0)}, // ADC1_INN4 // Connected to ETH_RXD1
+@@ -121,11 +106,11 @@ MBED_WEAK const PinMap PinMap_ADC[] = {
+     {PF_6,       ADC_3, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 4, 0)}, // ADC3_INN4 // Connected to QSPI_BK1_IO3
+     {PF_6_ALT0,  ADC_3, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 8, 0)}, // ADC3_INP8 // Connected to QSPI_BK1_IO3
+     {PF_7,       ADC_3, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 3, 0)}, // ADC3_INP3 // Connected to QSPI_BK1_IO2
+-    {PF_8,       ADC_3, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 3, 0)}, // ADC3_INN3 // Connected to PMOD\#14/ARD_D3
+-    {PF_8_ALT0,  ADC_3, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 7, 0)}, // ADC3_INP7 // Connected to PMOD\#14/ARD_D3
++    {PF_8,       ADC_3, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 7, 0)}, // ADC3_INP7 // Connected to PMOD\#14/ARD_D3
++    {PF_8_ALT0,  ADC_3, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 3, 0)}, // ADC3_INN3 // Connected to PMOD\#14/ARD_D3
+     {PF_9,       ADC_3, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 2, 0)}, // ADC3_INP2 // Connected to QSPI_BK1_IO1
+-    {PF_10,      ADC_3, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 2, 0)}, // ADC3_INN2 // Connected to ARD_A1
+-    {PF_10_ALT0, ADC_3, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 6, 0)}, // ADC3_INP6 // Connected to ARD_A1
++    {PF_10,      ADC_3, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 6, 0)}, // ADC3_INP6 // Connected to ARD_A1
++    {PF_10_ALT0, ADC_3, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 2, 0)}, // ADC3_INN2 // Connected to ARD_A1
+     {PF_11,      ADC_1, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 2, 0)}, // ADC1_INP2 // Connected to FMC_SDRAS
+     {PF_12,      ADC_1, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 2, 0)}, // ADC1_INN2 // Connected to FMC_A6
+     {PF_12_ALT0, ADC_1, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 6, 0)}, // ADC1_INP6 // Connected to FMC_A6
+@@ -163,8 +148,8 @@ MBED_WEAK const PinMap PinMap_DAC[] = {
+ MBED_WEAK const PinMap PinMap_I2C_SDA[] = {
+     {PB_7,       I2C_1, STM_PIN_DATA(STM_MODE_AF_OD, GPIO_NOPULL, GPIO_AF4_I2C1)},
+     {PB_7_ALT0,  I2C_4, STM_PIN_DATA(STM_MODE_AF_OD, GPIO_NOPULL, GPIO_AF6_I2C4)},
+-    {PB_9,       I2C_1, STM_PIN_DATA(STM_MODE_AF_OD, GPIO_NOPULL, GPIO_AF4_I2C1)}, // Connected to PMOD\#19_DFSDM-DATA7
+-    {PB_9_ALT0,  I2C_4, STM_PIN_DATA(STM_MODE_AF_OD, GPIO_NOPULL, GPIO_AF6_I2C4)}, // Connected to PMOD\#19_DFSDM-DATA7
++    {PB_9,       I2C_1, STM_PIN_DATA(STM_MODE_AF_OD, GPIO_NOPULL, GPIO_AF4_I2C1)},
++    {PB_9_ALT0,  I2C_4, STM_PIN_DATA(STM_MODE_AF_OD, GPIO_NOPULL, GPIO_AF6_I2C4)},
+     {PB_11,      I2C_2, STM_PIN_DATA(STM_MODE_AF_OD, GPIO_NOPULL, GPIO_AF4_I2C2)}, // Connected to ULPI_D4
+     {PC_9,       I2C_3, STM_PIN_DATA(STM_MODE_AF_OD, GPIO_NOPULL, GPIO_AF4_I2C3)}, // Connected to SDIO1_D1
+     {PD_13,      I2C_4, STM_PIN_DATA(STM_MODE_AF_OD, GPIO_NOPULL, GPIO_AF4_I2C4)},
+@@ -180,8 +165,8 @@ MBED_WEAK const PinMap PinMap_I2C_SCL[] = {
+     {PA_8,       I2C_3, STM_PIN_DATA(STM_MODE_AF_OD, GPIO_NOPULL, GPIO_AF4_I2C3)}, // Connected to CEC_CK/MCO1
+     {PB_6,       I2C_1, STM_PIN_DATA(STM_MODE_AF_OD, GPIO_NOPULL, GPIO_AF4_I2C1)}, // Connected to HDMI_CEC
+     {PB_6_ALT0,  I2C_4, STM_PIN_DATA(STM_MODE_AF_OD, GPIO_NOPULL, GPIO_AF6_I2C4)}, // Connected to HDMI_CEC
+-    {PB_8,       I2C_1, STM_PIN_DATA(STM_MODE_AF_OD, GPIO_NOPULL, GPIO_AF4_I2C1)}, // Connected to PMOD\#20_DFSDM-CK7
+-    {PB_8_ALT0,  I2C_4, STM_PIN_DATA(STM_MODE_AF_OD, GPIO_NOPULL, GPIO_AF6_I2C4)}, // Connected to PMOD\#20_DFSDM-CK7
++    {PB_8,       I2C_1, STM_PIN_DATA(STM_MODE_AF_OD, GPIO_NOPULL, GPIO_AF4_I2C1)},
++    {PB_8_ALT0,  I2C_4, STM_PIN_DATA(STM_MODE_AF_OD, GPIO_NOPULL, GPIO_AF6_I2C4)},
+     {PB_10,      I2C_2, STM_PIN_DATA(STM_MODE_AF_OD, GPIO_NOPULL, GPIO_AF4_I2C2)}, // Connected to ULPI_D3
+     {PD_12,      I2C_4, STM_PIN_DATA(STM_MODE_AF_OD, GPIO_NOPULL, GPIO_AF4_I2C4)},
+     {PF_1,       I2C_2, STM_PIN_DATA(STM_MODE_AF_OD, GPIO_NOPULL, GPIO_AF4_I2C2)}, // Connected to FMC_A1
+@@ -234,10 +219,10 @@ MBED_WEAK const PinMap PinMap_PWM[] = {
+     {PB_6_ALT0,  PWM_16, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF1_TIM16, 1, 1)}, // TIM16_CH1N // Connected to HDMI_CEC
+     {PB_7,       PWM_4,  STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF2_TIM4, 2, 0)}, // TIM4_CH2
+     {PB_7_ALT0,  PWM_17, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF1_TIM17, 1, 1)}, // TIM17_CH1N
+-    {PB_8,       PWM_4,  STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF2_TIM4, 3, 0)}, // TIM4_CH3 // Connected to PMOD\#20_DFSDM-CK7
+-    {PB_8_ALT0,  PWM_16, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF1_TIM16, 1, 0)}, // TIM16_CH1 // Connected to PMOD\#20_DFSDM-CK7
+-    {PB_9,       PWM_4,  STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF2_TIM4, 4, 0)}, // TIM4_CH4 // Connected to PMOD\#19_DFSDM-DATA7
+-    {PB_9_ALT0,  PWM_17, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF1_TIM17, 1, 0)}, // TIM17_CH1 // Connected to PMOD\#19_DFSDM-DATA7
++    {PB_8,       PWM_4,  STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF2_TIM4, 3, 0)}, // TIM4_CH3
++    {PB_8_ALT0,  PWM_16, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF1_TIM16, 1, 0)}, // TIM16_CH1
++    {PB_9,       PWM_4,  STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF2_TIM4, 4, 0)}, // TIM4_CH4
++    {PB_9_ALT0,  PWM_17, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF1_TIM17, 1, 0)}, // TIM17_CH1
+ //  {PB_10,      PWM_2,  STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF1_TIM2, 3, 0)}, // TIM2_CH3 // Connected to ULPI_D3
+ //  {PB_11,      PWM_2,  STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF1_TIM2, 4, 0)}, // TIM2_CH4 // Connected to ULPI_D4
+     {PB_13,      PWM_1,  STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF1_TIM1, 1, 1)}, // TIM1_CH1N // Connected to ULPI_D6
+@@ -249,8 +234,8 @@ MBED_WEAK const PinMap PinMap_PWM[] = {
+     {PB_15_ALT1, PWM_12, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF2_TIM12, 2, 0)}, // TIM12_CH2 // Connected to PMOD\#8
+     {PC_6,       PWM_3,  STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF2_TIM3, 1, 0)}, // TIM3_CH1
+     {PC_6_ALT0,  PWM_8,  STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF3_TIM8, 1, 0)}, // TIM8_CH1
+-    {PC_7,       PWM_3,  STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF2_TIM3, 2, 0)}, // TIM3_CH2 // Connected to PMOD\#17_DFSDM_DATA3
+-    {PC_7_ALT0,  PWM_8,  STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF3_TIM8, 2, 0)}, // TIM8_CH2 // Connected to PMOD\#17_DFSDM_DATA3
++    {PC_7,       PWM_3,  STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF2_TIM3, 2, 0)}, // TIM3_CH2
++    {PC_7_ALT0,  PWM_8,  STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF3_TIM8, 2, 0)}, // TIM8_CH2
+     {PC_8,       PWM_3,  STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF2_TIM3, 3, 0)}, // TIM3_CH3 // Connected to SDIO1_D0
+     {PC_8_ALT0,  PWM_8,  STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF3_TIM8, 3, 0)}, // TIM8_CH3 // Connected to SDIO1_D0
+     {PC_9,       PWM_3,  STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF2_TIM3, 4, 0)}, // TIM3_CH4 // Connected to SDIO1_D1
+@@ -308,17 +293,17 @@ MBED_WEAK const PinMap PinMap_PWM[] = {
+ //*** SERIAL ***
+ 
+ MBED_WEAK const PinMap PinMap_UART_TX[] = {
+-    {PA_0,       UART_4,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF8_UART4)}, // Connected to PMOD\#1- USART2_CTS_NSS
++    {PA_0,       UART_4,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF8_UART4)},
+     {PA_2,       UART_2,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_USART2)}, // Connected to ETH_MDIO
+     {PA_9,       UART_1,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_USART1)}, // Connected to STDIO_UART_TX
+-    {PA_9_ALT0,  LPUART_1,STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF3_LPUART)}, // Connected to STDIO_UART_TX
++    {PA_9_ALT0,  LPUART_1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF3_LPUART)}, // Connected to STDIO_UART_TX
+     {PA_12,      UART_4,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF6_UART4)}, // Connected to SPI2_SCK
+     {PA_15,      UART_7,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF11_UART7)},
+     {PB_4,       UART_7,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF11_UART7)},
+     {PB_6,       UART_1,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_USART1)}, // Connected to HDMI_CEC
+     {PB_6_ALT0,  UART_5,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF14_UART5)}, // Connected to HDMI_CEC
+-    {PB_6_ALT1,  LPUART_1,STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF8_LPUART)}, // Connected to HDMI_CEC
+-    {PB_9,       UART_4,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF8_UART4)}, // Connected to PMOD\#19_DFSDM-DATA7
++    {PB_6_ALT1,  LPUART_1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF8_LPUART)}, // Connected to HDMI_CEC
++    {PB_9,       UART_4,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF8_UART4)},
+     {PB_10,      UART_3,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_USART3)}, // Connected to ULPI_D3
+     {PB_13,      UART_5,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF14_UART5)}, // Connected to ULPI_D6
+     {PB_14,      UART_1,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF4_USART1)}, // Connected to PMOD\#9
+@@ -327,7 +312,7 @@ MBED_WEAK const PinMap PinMap_UART_TX[] = {
+     {PC_10_ALT0, UART_4,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF8_UART4)}, // Connected to SDIO1_D2
+     {PC_12,      UART_5,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF8_UART5)}, // Connected to SDIO1_CK
+     {PD_1,       UART_4,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF8_UART4)}, // Connected to FMC_D3
+-    {PD_5,       UART_2,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_USART2)}, // Connected to STDIO_UART_TX
++    {PD_5,       UART_2,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_USART2)},
+     {PD_8,       UART_3,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_USART3)}, // Connected to FMC_D13
+     {PE_1,       UART_8,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF8_UART8)}, // Connected to FMC_NBL1
+     {PE_8,       UART_7,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_UART7)}, // Connected to FMC_D5
+@@ -343,22 +328,22 @@ MBED_WEAK const PinMap PinMap_UART_RX[] = {
+     {PA_3,       UART_2,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_USART2)}, // Connected to ULPI_D0
+     {PA_8,       UART_7,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF11_UART7)}, // Connected to CEC_CK/MCO1
+     {PA_10,      UART_1,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_USART1)}, // Connected to STDIO_UART_RX
+-    {PA_10_ALT0, LPUART_1,STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF3_LPUART)}, // Connected to STDIO_UART_RX
++    {PA_10_ALT0, LPUART_1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF3_LPUART)}, // Connected to STDIO_UART_RX
+     {PA_11,      UART_4,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF6_UART4)}, // Connected to PMOD\#1
+     {PB_3,       UART_7,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF11_UART7)},
+     {PB_5,       UART_5,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF14_UART5)}, // Connected to ULPI_D7
+     {PB_7,       UART_1,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_USART1)},
+-    {PB_7_ALT0,  LPUART_1,STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF8_LPUART)},
+-    {PB_8,       UART_4,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF8_UART4)}, // Connected to PMOD\#20_DFSDM-CK7
++    {PB_7_ALT0,  LPUART_1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF8_LPUART)},
++    {PB_8,       UART_4,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF8_UART4)},
+     {PB_11,      UART_3,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_USART3)}, // Connected to ULPI_D4
+     {PB_12,      UART_5,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF14_UART5)}, // Connected to ULPI_D5
+     {PB_15,      UART_1,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF4_USART1)}, // Connected to PMOD\#8
+-    {PC_7,       UART_6,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_USART6)}, // Connected to PMOD\#17_DFSDM_DATA3
++    {PC_7,       UART_6,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_USART6)},
+     {PC_11,      UART_3,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_USART3)}, // Connected to SDIO1_D3
+     {PC_11_ALT0, UART_4,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF8_UART4)}, // Connected to SDIO1_D3
+     {PD_0,       UART_4,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF8_UART4)}, // Connected to FMC_D2
+     {PD_2,       UART_5,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF8_UART5)}, // Connected to SDIO1_CMD
+-    {PD_6,       UART_2,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_USART2)}, // Connected to STDIO_UART_RX
++    {PD_6,       UART_2,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_USART2)},
+     {PD_9,       UART_3,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_USART3)}, // Connected to FMC_D14
+     {PE_0,       UART_8,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF8_UART8)}, // Connected to FMC_NBL0
+     {PE_7,       UART_7,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_UART7)}, // Connected to FMC_D4
+@@ -373,12 +358,12 @@ MBED_WEAK const PinMap PinMap_UART_RX[] = {
+ MBED_WEAK const PinMap PinMap_UART_RTS[] = {
+     {PA_1,       UART_2,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_USART2)}, // Connected to ETH_REF_CLK
+     {PA_12,      UART_1,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_USART1)}, // Connected to SPI2_SCK
+-    {PA_12_ALT0, LPUART_1,STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF3_LPUART)}, // Connected to SPI2_SCK
++    {PA_12_ALT0, LPUART_1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF3_LPUART)}, // Connected to SPI2_SCK
+     {PA_15,      UART_4,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF8_UART4)},
+     {PB_14,      UART_3,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_USART3)}, // Connected to PMOD\#9
+     {PB_14_ALT0, UART_4,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF8_UART4)}, // Connected to PMOD\#9
+     {PC_8,       UART_5,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF8_UART5)}, // Connected to SDIO1_D0
+-    {PD_4,       UART_2,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_USART2)}, // Connected to PMOD\#4- USART2_RTS
++    {PD_4,       UART_2,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_USART2)},
+     {PD_12,      UART_3,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_USART3)},
+     {PD_15,      UART_8,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF8_UART8)}, // Connected to FMC_D1
+     {PE_9,       UART_7,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_UART7)}, // Connected to FMC_D6
+@@ -389,14 +374,14 @@ MBED_WEAK const PinMap PinMap_UART_RTS[] = {
+ };
+ 
+ MBED_WEAK const PinMap PinMap_UART_CTS[] = {
+-    {PA_0,       UART_2,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_USART2)}, // Connected to PMOD\#1- USART2_CTS_NSS
++    {PA_0,       UART_2,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_USART2)},
+     {PA_11,      UART_1,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_USART1)}, // Connected to PMOD\#1
+-    {PA_11_ALT0, LPUART_1,STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF3_LPUART)}, // Connected to PMOD\#1
++    {PA_11_ALT0, LPUART_1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF3_LPUART)}, // Connected to PMOD\#1
+     {PB_0,       UART_4,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF8_UART4)}, // Connected to ULPI_D1
+     {PB_13,      UART_3,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_USART3)}, // Connected to ULPI_D6
+     {PB_15,      UART_4,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF8_UART4)}, // Connected to PMOD\#8
+     {PC_9,       UART_5,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF8_UART5)}, // Connected to SDIO1_D1
+-    {PD_3,       UART_2,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_USART2)}, // Connected to PMOD\#18_DFSDM_CKOUT
++    {PD_3,       UART_2,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_USART2)},
+     {PD_11,      UART_3,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_USART3)}, // Connected to QSPI_BK1_IO0
+     {PD_14,      UART_8,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF8_UART8)}, // Connected to FMC_D0
+     {PE_10,      UART_7,  STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF7_UART7)}, // Connected to FMC_D7
+@@ -416,7 +401,7 @@ MBED_WEAK const PinMap PinMap_SPI_MOSI[] = {
+     {PB_5_ALT0,  SPI_3, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF7_SPI3)}, // Connected to ULPI_D7
+     {PB_5_ALT1,  SPI_6, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF8_SPI6)}, // Connected to ULPI_D7
+     {PB_15,      SPI_2, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF5_SPI2)}, // Connected to PMOD\#8
+-    {PC_1,       SPI_2, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF5_SPI2)}, // Connected to SAI4_D1 (default: SB8 off/SB21 on), ETH_MDC (SB8 on/SB21 off)
++    {PC_1,       SPI_2, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF5_SPI2)}, // Connected to ETH_MDC/SAI4_D1
+     {PC_3,       SPI_2, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF5_SPI2)}, // Connected to PMOD\#2
+     {PC_12,      SPI_3, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF6_SPI3)}, // Connected to SDIO1_CK
+     {PD_6,       SPI_3, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF5_SPI3)},
+@@ -462,8 +447,8 @@ MBED_WEAK const PinMap PinMap_SPI_SCLK[] = {
+     {PB_10,      SPI_2, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF5_SPI2)}, // Connected to ULPI_D3
+     {PB_13,      SPI_2, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF5_SPI2)}, // Connected to ULPI_D6
+     {PC_10,      SPI_3, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF6_SPI3)}, // Connected to SDIO1_D2
+-    {PD_3,       SPI_2, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF5_SPI2)}, // Connected to PMOD\#18_DFSDM_CKOUT
+-    {PE_2,       SPI_4, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF5_SPI4)}, // Connected to SAI4_CK1 (default: R87 on/SB17 off), ETH_nINT (R87 off/SB17 on)
++    {PD_3,       SPI_2, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF5_SPI2)},
++    {PE_2,       SPI_4, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF5_SPI4)},
+     {PE_12,      SPI_4, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF5_SPI4)}, // Connected to FMC_D9
+     {PF_7,       SPI_5, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF5_SPI5)}, // Connected to QSPI_BK1_IO2
+     {PG_11,      SPI_1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF5_SPI1)}, // Connected to ETH_TX_EN
+@@ -483,7 +468,7 @@ MBED_WEAK const PinMap PinMap_SPI_SSEL[] = {
+     {PA_15_ALT0, SPI_3, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF6_SPI3)},
+     {PA_15_ALT1, SPI_6, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF7_SPI6)},
+     {PB_4,       SPI_2, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF7_SPI2)},
+-    {PB_9,       SPI_2, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF5_SPI2)}, // Connected to PMOD\#19_DFSDM-DATA7
++    {PB_9,       SPI_2, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF5_SPI2)},
+     {PB_12,      SPI_2, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF5_SPI2)}, // Connected to ULPI_D5
+     {PE_4,       SPI_4, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF5_SPI4)}, // Connected to SAI1_FS_A
+     {PE_11,      SPI_4, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF5_SPI4)}, // Connected to FMC_D8
+@@ -501,7 +486,7 @@ MBED_WEAK const PinMap PinMap_SPI_SSEL[] = {
+ MBED_WEAK const PinMap PinMap_CAN_RD[] = {
+     {PA_11,      CAN_1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF9_FDCAN1)}, // Connected to PMOD\#1
+     {PB_5,       CAN_2, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF9_FDCAN2)}, // Connected to ULPI_D7
+-    {PB_8,       CAN_1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF9_FDCAN1)}, // Connected to PMOD\#20_DFSDM-CK7
++    {PB_8,       CAN_1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF9_FDCAN1)},
+     {PB_12,      CAN_2, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF9_FDCAN2)}, // Connected to ULPI_D5
+     {PD_0,       CAN_1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF9_FDCAN1)}, // Connected to FMC_D2
+     {PH_14,      CAN_1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF9_FDCAN1)}, // Connected to FMC_D22
+@@ -512,7 +497,7 @@ MBED_WEAK const PinMap PinMap_CAN_RD[] = {
+ MBED_WEAK const PinMap PinMap_CAN_TD[] = {
+     {PA_12,      CAN_1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF9_FDCAN1)}, // Connected to SPI2_SCK
+     {PB_6,       CAN_2, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF9_FDCAN2)}, // Connected to HDMI_CEC
+-    {PB_9,       CAN_1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF9_FDCAN1)}, // Connected to PMOD\#19_DFSDM-DATA7
++    {PB_9,       CAN_1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF9_FDCAN1)},
+     {PB_13,      CAN_2, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF9_FDCAN2)}, // Connected to ULPI_D6
+     {PD_1,       CAN_1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF9_FDCAN1)}, // Connected to FMC_D3
+     {PH_13,      CAN_1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_NOPULL, GPIO_AF9_FDCAN1)}, // Connected to FMC_D21
+@@ -536,7 +521,7 @@ MBED_WEAK const PinMap PinMap_QSPI_DATA1[] = {
+ };
+ 
+ MBED_WEAK const PinMap PinMap_QSPI_DATA2[] = {
+-    {PE_2,      QSPI_1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF9_QUADSPI)},  // QUADSPI_BK1_IO2 // Connected to SAI4_CK1 (default: R87 on/SB17 off), ETH_nINT (R87 off/SB17 on)
++    {PE_2,      QSPI_1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF9_QUADSPI)},  // QUADSPI_BK1_IO2
+     {PF_7,      QSPI_1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF9_QUADSPI)},  // QUADSPI_BK1_IO2 // Connected to QSPI_BK1_IO2
+     {NC, NC, 0}
+ };
+@@ -582,18 +567,18 @@ MBED_WEAK const PinMap PinMap_USB_HS[] = {
+     {PB_14,     USB_HS, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF12_OTG2_FS)}, // USB_OTG_HS_DM // Connected to PMOD\#9
+     {PB_15,     USB_HS, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF12_OTG2_FS)}, // USB_OTG_HS_DP // Connected to PMOD\#8
+ #else /* MBED_CONF_TARGET_USB_SPEED */
+-    {PA_5,      USB_HS, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF10_OTG2_HS)}, // USB_OTG_HS_ULPI_CK // Connected to ULPI_CK
+-    {PC_0,      USB_HS, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF10_OTG2_HS)}, // USB_OTG_HS_ULPI_STP // Connected to ULPI_STP
+-    {PH_4,      USB_HS, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF10_OTG2_HS)}, // USB_OTG_HS_ULPI_NXT // Connected to ULPI_NXT
+-    {PI_11,     USB_HS, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF10_OTG2_HS)}, // USB_OTG_HS_ULPI_DIR // Connected to ULPI_DIR
+     {PA_3,      USB_HS, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF10_OTG2_HS)}, // USB_OTG_HS_ULPI_D0 // Connected to ULPI_D0
++    {PA_5,      USB_HS, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF10_OTG2_HS)}, // USB_OTG_HS_ULPI_CK // Connected to ULPI_CK
+     {PB_0,      USB_HS, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF10_OTG2_HS)}, // USB_OTG_HS_ULPI_D1 // Connected to ULPI_D1
+     {PB_1,      USB_HS, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF10_OTG2_HS)}, // USB_OTG_HS_ULPI_D2 // Connected to ULPI_D2
++    {PB_5,      USB_HS, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF10_OTG2_HS)}, // USB_OTG_HS_ULPI_D7 // Connected to ULPI_D7
+     {PB_10,     USB_HS, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF10_OTG2_HS)}, // USB_OTG_HS_ULPI_D3 // Connected to ULPI_D3
+     {PB_11,     USB_HS, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF10_OTG2_HS)}, // USB_OTG_HS_ULPI_D4 // Connected to ULPI_D4
+     {PB_12,     USB_HS, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF10_OTG2_HS)}, // USB_OTG_HS_ULPI_D5 // Connected to ULPI_D5
+     {PB_13,     USB_HS, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF10_OTG2_HS)}, // USB_OTG_HS_ULPI_D6 // Connected to ULPI_D6
+-    {PB_5,      USB_HS, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF10_OTG2_HS)}, // USB_OTG_HS_ULPI_D7 // Connected to ULPI_D7
++    {PC_0,      USB_HS, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF10_OTG2_HS)}, // USB_OTG_HS_ULPI_STP // Connected to ULPI_STP
++    {PH_4,      USB_HS, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF10_OTG2_HS)}, // USB_OTG_HS_ULPI_NXT // Connected to ULPI_NXT
++    {PI_11,     USB_HS, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF10_OTG2_HS)}, // USB_OTG_HS_ULPI_DIR // Connected to ULPI_DIR
+ #endif /* MBED_CONF_TARGET_USB_SPEED */
+     {NC, NC, 0}
+-};
+\ No newline at end of file
++};
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/PinNames.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/PinNames.h
+index 104b30e6af..f13b9efc35 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/PinNames.h
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/PinNames.h
+@@ -37,293 +37,274 @@
+ extern "C" {
+ #endif
+ 
++#define ALTC 0xF00
++
+ typedef enum {
+     ALT0  = 0x100,
+     ALT1  = 0x200,
+     ALT2  = 0x300,
+     ALT3  = 0x400,
+     ALT4  = 0x500,
+-    ALT6  = 0x700,
+-    ALTC  = 0x1000
+ } ALTx;
+ 
+ typedef enum {
+-    PA_0  = 0x00,
+-    PA_0_C = PA_0 | ALTC,
+-    PA_0_C_ALT0 = PA_0 | ALT0 | ALTC,
+-    PA_0_C_ALT1 = PA_0 | ALT1 | ALTC,
+-    PA_0_C_ALT2 = PA_0 | ALT2 | ALTC,
+-    PA_1  = 0x01,
+-    PA_1_ALT0 = PA_1 | ALT0,
+-    PA_1_C = PA_1 | ALTC,
+-    PA_1_C_ALT0 = PA_1 | ALT0 | ALTC,
+-    PA_2  = 0x02,
+-    PA_2_ALT0 = PA_2 | ALT0,
+-    PA_2_ALT1 = PA_2 | ALT1,
+-    PA_3  = 0x03,
+-    PA_3_ALT0 = PA_3 | ALT0,
+-    PA_3_ALT1 = PA_3 | ALT1,
+-    PA_4  = 0x04,
+-    PA_4_ALT0 = PA_4 | ALT0,
+-    PA_4_ALT1 = PA_4 | ALT1,
+-    PA_5  = 0x05,
+-    PA_5_ALT0 = PA_5 | ALT0,
+-    PA_5_ALT1 = PA_5 | ALT1,
+-    PA_5_ALT2 = PA_5 | ALT2,
+-    PA_6  = 0x06,
+-    PA_6_ALT0 = PA_6 | ALT0,
+-    PA_7  = 0x07,
+-    PA_7_ALT0 = PA_7 | ALT0,
+-    PA_7_ALT1 = PA_7 | ALT1,
+-    PA_7_ALT2 = PA_7 | ALT2,
+-    PA_8  = 0x08,
+-    PA_9  = 0x09,
+-    PA_9_ALT0 = PA_9 | ALT0,
+-    PA_10 = 0x0A,
+-    PA_10_ALT0 = PA_10 | ALT0,
+-    PA_11 = 0x0B,
+-    PA_11_ALT0 = PA_11 | ALT0,
+-    PA_12 = 0x0C,
+-    PA_12_ALT0 = PA_12 | ALT0,
+-    PA_13 = 0x0D,
+-    PA_14 = 0x0E,
+-    PA_15 = 0x0F,
+-    PA_15_ALT0 = PA_15 | ALT0,
+-    PA_15_ALT1 = PA_15 | ALT1,
+-
+-    PB_0  = 0x10,
+-    PB_0_ALT0 = PB_0 | ALT0,
+-    PB_0_ALT1 = PB_0 | ALT1,
+-    PB_0_ALT2 = PB_0 | ALT2,
+-    PB_1  = 0x11,
+-    PB_1_ALT0 = PB_1 | ALT0,
+-    PB_1_ALT1 = PB_1 | ALT1,
+-    PB_2  = 0x12,
+-    PB_3  = 0x13,
+-    PB_3_ALT0 = PB_3 | ALT0,
+-    PB_3_ALT1 = PB_3 | ALT1,
+-    PB_4  = 0x14,
+-    PB_4_ALT0 = PB_4 | ALT0,
+-    PB_4_ALT1 = PB_4 | ALT1,
+-    PB_5  = 0x15,
+-    PB_5_ALT0 = PB_5 | ALT0,
+-    PB_5_ALT1 = PB_5 | ALT1,
+-    PB_6  = 0x16,
+-    PB_6_ALT0 = PB_6 | ALT0,
+-    PB_6_ALT1 = PB_6 | ALT1,
+-    PB_7  = 0x17,
+-    PB_7_ALT0 = PB_7 | ALT0,
+-    PB_8  = 0x18,
+-    PB_8_ALT0 = PB_8 | ALT0,
+-    PB_9  = 0x19,
+-    PB_9_ALT0 = PB_9 | ALT0,
+-    PB_10 = 0x1A,
+-    PB_11 = 0x1B,
+-    PB_12 = 0x1C,
+-    PB_13 = 0x1D,
+-    PB_14 = 0x1E,
+-    PB_14_ALT0 = PB_14 | ALT0,
+-    PB_14_ALT1 = PB_14 | ALT1,
+-    PB_15 = 0x1F,
+-    PB_15_ALT0 = PB_15 | ALT0,
+-    PB_15_ALT1 = PB_15 | ALT1,
+-
+-    PC_0  = 0x20,
+-    PC_0_ALT0 = PC_0 | ALT0,
+-    PC_0_ALT1 = PC_0 | ALT1,
+-    PC_1  = 0x21,
+-    PC_1_ALT0 = PC_1 | ALT0,
+-    PC_1_ALT1 = PC_1 | ALT1,
+-    PC_1_ALT2 = PC_1 | ALT2,
+-    PC_1_ALT3 = PC_1 | ALT3,
+-    PC_1_ALT4 = PC_1 | ALT4,
+-    PC_2  = 0x22,
+-    PC_2_ALT0 = PC_2 | ALT0,
+-    PC_2_ALT1 = PC_2 | ALT1,
+-    PC_2_ALT2 = PC_2 | ALT2,
+-    PC_2_ALT3 = PC_2 | ALT3,
+-    PC_2_ALT4 = PC_2 | ALT4,
+-    PC_2_C  = PC_2 | ALTC,
+-    PC_2_C_ALT0 = PC_2 | ALT0 | ALTC,
+-    PC_3  = 0x23,
+-    PC_3_ALT0 = PC_3 | ALT0,
+-    PC_3_ALT1 = PC_3 | ALT1,
+-    PC_3_ALT2 = PC_3 | ALT2,
+-    PC_3_C  = PC_3 | ALTC,
+-    PC_4  = 0x24,
+-    PC_4_ALT0 = PC_4 | ALT0,
+-    PC_5  = 0x25,
+-    PC_5_ALT0 = PC_5 | ALT0,
+-    PC_5_ALT1 = PC_5 | ALT1,
+-    PC_5_ALT2 = PC_5 | ALT2,
+-    PC_6  = 0x26,
+-    PC_6_ALT0 = PC_6 | ALT0,
+-    PC_7  = 0x27,
+-    PC_7_ALT0 = PC_7 | ALT0,
+-    PC_8  = 0x28,
+-    PC_8_ALT0 = PC_8 | ALT0,
+-    PC_9  = 0x29,
+-    PC_9_ALT0 = PC_9 | ALT0,
+-    PC_10 = 0x2A,
+-    PC_10_ALT0 = PC_10 | ALT0,
+-    PC_11 = 0x2B,
+-    PC_11_ALT0 = PC_11 | ALT0,
+-    PC_12 = 0x2C,
+-    PC_13 = 0x2D,
+-    PC_14 = 0x2E,
+-    PC_15 = 0x2F,
+-
+-    PD_0  = 0x30,
+-    PD_1  = 0x31,
+-    PD_2  = 0x32,
+-    PD_3  = 0x33,
+-    PD_4  = 0x34,
+-    PD_5  = 0x35,
+-    PD_6  = 0x36,
+-    PD_7  = 0x37,
+-    PD_8  = 0x38,
+-    PD_9  = 0x39,
+-    PD_10 = 0x3A,
+-    PD_11 = 0x3B,
+-    PD_12 = 0x3C,
+-    PD_13 = 0x3D,
+-    PD_14 = 0x3E,
+-    PD_15 = 0x3F,
+-
+-    PE_0  = 0x40,
+-    PE_1  = 0x41,
+-    PE_2  = 0x42,
+-    PE_3  = 0x43,
+-    PE_4  = 0x44,
+-    PE_5  = 0x45,
+-    PE_6  = 0x46,
+-    PE_7  = 0x47,
+-    PE_8  = 0x48,
+-    PE_9  = 0x49,
+-    PE_10 = 0x4A,
+-    PE_11 = 0x4B,
+-    PE_12 = 0x4C,
+-    PE_13 = 0x4D,
+-    PE_14 = 0x4E,
+-    PE_15 = 0x4F,
+-
+-    PF_0  = 0x50,
+-    PF_1  = 0x51,
+-    PF_2  = 0x52,
+-    PF_3  = 0x53,
+-    PF_4  = 0x54,
+-    PF_4_ALT0 = PF_4 | ALT0,
+-    PF_5  = 0x55,
+-    PF_6  = 0x56,
+-    PF_6_ALT0 = PF_6 | ALT0,
+-    PF_7  = 0x57,
+-    PF_8  = 0x58,
+-    PF_8_ALT0 = PF_8 | ALT0,
+-    PF_9  = 0x59,
+-    PF_9_ALT0 = PF_9 | ALT0,
+-    PF_10 = 0x5A,
+-    PF_10_ALT0 = PF_10 | ALT0,
+-    PF_11 = 0x5B,
+-    PF_12 = 0x5C,
+-    PF_12_ALT0 = PF_12 | ALT0,
+-    PF_13 = 0x5D,
+-    PF_14 = 0x5E,
+-    PF_14_ALT0 = PF_14 | ALT0,
+-    PF_15 = 0x5F,
+-
+-    PG_0  = 0x60,
+-    PG_1  = 0x61,
+-    PG_2  = 0x62,
+-    PG_3  = 0x63,
+-    PG_4  = 0x64,
+-    PG_5  = 0x65,
+-    PG_6  = 0x66,
+-    PG_7  = 0x67,
+-    PG_8  = 0x68,
+-    PG_9  = 0x69,
+-    PG_10 = 0x6A,
+-    PG_11 = 0x6B,
+-    PG_12 = 0x6C,
+-    PG_13 = 0x6D,
+-    PG_14 = 0x6E,
+-    PG_15 = 0x6F,
+-
+-    PH_0  = 0x70,
+-    PH_1  = 0x71,
+-    PH_2  = 0x72,
+-    PH_3  = 0x73,
+-    PH_3_ALT0 = PH_3 | ALT0,
+-    PH_4  = 0x74,
+-    PH_4_ALT0 = PH_4 | ALT0,
+-    PH_5  = 0x75,
+-    PH_5_ALT0 = PH_5 | ALT0,
+-    PH_6  = 0x76,
+-    PH_7  = 0x77,
+-    PH_8  = 0x78,
+-    PH_9  = 0x79,
+-    PH_10 = 0x7A,
+-    PH_11 = 0x7B,
+-    PH_12 = 0x7C,
+-    PH_13 = 0x7D,
+-    PH_14 = 0x7E,
+-    PH_15 = 0x7F,
+-
+-    PI_0  = 0x80,
+-    PI_1  = 0x81,
+-    PI_2  = 0x82,
+-    PI_3  = 0x83,
+-    PI_4  = 0x84,
+-    PI_5  = 0x85,
+-    PI_6  = 0x86,
+-    PI_7  = 0x87,
+-    PI_8  = 0x88,
+-    PI_9  = 0x89,
+-    PI_10 = 0x8A,
+-    PI_11 = 0x8B,
+-    PI_12 = 0x8C,
+-    PI_13 = 0x8D,
+-    PI_14 = 0x8E,
+-    PI_15 = 0x8F,
+-
+-    PJ_0  = 0x90,
+-    PJ_1  = 0x91,
+-    PJ_2  = 0x92,
+-    PJ_3  = 0x93,
+-    PJ_4  = 0x94,
+-    PJ_5  = 0x95,
+-    PJ_6  = 0x96,
+-    PJ_7  = 0x97,
+-    PJ_8  = 0x98,
+-    PJ_8_ALT0 = PJ_8 | ALT0,
+-    PJ_9  = 0x99,
+-    PJ_9_ALT0 = PJ_9 | ALT0,
+-    PJ_10 = 0x9A,
+-    PJ_10_ALT0 = PJ_10 | ALT0,
+-    PJ_11 = 0x9B,
+-    PJ_11_ALT0 = PJ_11 | ALT0,
+-    PJ_12 = 0x9C,
+-    PJ_13 = 0x9D,
+-    PJ_14 = 0x9E,
+-    PJ_15 = 0x9F,
+ 
+-    PK_0  = 0xA0,
+-    PK_0_ALT0 = PK_0 | ALT0,
+-    PK_1  = 0xA1,
+-    PK_1_ALT0 = PK_1 | ALT0,
+-    PK_2  = 0xA2,
+-    PK_3  = 0xA3,
+-    PK_4  = 0xA4,
+-    PK_5  = 0xA5,
+-    PK_6  = 0xA6,
+-    PK_7  = 0xA7,
+-    PK_8  = 0xA8,
+-    PK_9  = 0xA9,
+-    PK_10 = 0xAA,
+-    PK_11 = 0xAB,
+-    PK_12 = 0xAC,
+-    PK_13 = 0xAD,
+-    PK_14 = 0xAE,
+-    PK_15 = 0xAF,
++    PA_0       = 0x00,
++    PA_0C      = PA_0  | ALTC, // dual pad
++    PA_0C_ALT0 = PA_0C | ALT0, // same pin used for alternate HW
++    PA_0C_ALT1 = PA_0C | ALT1, // same pin used for alternate HW
++    PA_0C_ALT2 = PA_0C | ALT2, // same pin used for alternate HW
++    PA_1       = 0x01,
++    PA_1C      = PA_1  | ALTC, // dual pad
++    PA_1C_ALT0 = PA_1C | ALT0, // same pin used for alternate HW
++    PA_1_ALT0  = PA_1 | ALT0, // same pin used for alternate HW
++    PA_2       = 0x02,
++    PA_2_ALT0  = PA_2 | ALT0, // same pin used for alternate HW
++    PA_3       = 0x03,
++    PA_3_ALT0  = PA_3 | ALT0, // same pin used for alternate HW
++    PA_4       = 0x04,
++    PA_4_ALT0  = PA_4 | ALT0, // same pin used for alternate HW
++    PA_4_ALT1  = PA_4 | ALT1, // same pin used for alternate HW
++    PA_5       = 0x05,
++    PA_5_ALT0  = PA_5 | ALT0, // same pin used for alternate HW
++    PA_5_ALT1  = PA_5 | ALT1, // same pin used for alternate HW
++    PA_5_ALT2  = PA_5 | ALT2, // same pin used for alternate HW
++    PA_6       = 0x06,
++    PA_6_ALT0  = PA_6 | ALT0, // same pin used for alternate HW
++    PA_7       = 0x07,
++    PA_7_ALT0  = PA_7 | ALT0, // same pin used for alternate HW
++    PA_7_ALT1  = PA_7 | ALT1, // same pin used for alternate HW
++    PA_7_ALT2  = PA_7 | ALT2, // same pin used for alternate HW
++    PA_8       = 0x08,
++    PA_9       = 0x09,
++    PA_9_ALT0  = PA_9 | ALT0, // same pin used for alternate HW
++    PA_10      = 0x0A,
++    PA_10_ALT0 = PA_10 | ALT0, // same pin used for alternate HW
++    PA_11      = 0x0B,
++    PA_11_ALT0 = PA_11 | ALT0, // same pin used for alternate HW
++    PA_12      = 0x0C,
++    PA_12_ALT0 = PA_12 | ALT0, // same pin used for alternate HW
++    PA_13      = 0x0D,
++    PA_14      = 0x0E,
++    PA_15      = 0x0F,
++    PA_15_ALT0 = PA_15 | ALT0, // same pin used for alternate HW
++    PA_15_ALT1 = PA_15 | ALT1, // same pin used for alternate HW
++    PB_0       = 0x10,
++    PB_0_ALT0  = PB_0 | ALT0, // same pin used for alternate HW
++    PB_0_ALT1  = PB_0 | ALT1, // same pin used for alternate HW
++    PB_0_ALT2  = PB_0 | ALT2, // same pin used for alternate HW
++    PB_1       = 0x11,
++    PB_1_ALT0  = PB_1 | ALT0, // same pin used for alternate HW
++    PB_1_ALT1  = PB_1 | ALT1, // same pin used for alternate HW
++    PB_2       = 0x12,
++    PB_3       = 0x13,
++    PB_3_ALT0  = PB_3 | ALT0, // same pin used for alternate HW
++    PB_3_ALT1  = PB_3 | ALT1, // same pin used for alternate HW
++    PB_4       = 0x14,
++    PB_4_ALT0  = PB_4 | ALT0, // same pin used for alternate HW
++    PB_4_ALT1  = PB_4 | ALT1, // same pin used for alternate HW
++    PB_5       = 0x15,
++    PB_5_ALT0  = PB_5 | ALT0, // same pin used for alternate HW
++    PB_5_ALT1  = PB_5 | ALT1, // same pin used for alternate HW
++    PB_6       = 0x16,
++    PB_6_ALT0  = PB_6 | ALT0, // same pin used for alternate HW
++    PB_6_ALT1  = PB_6 | ALT1, // same pin used for alternate HW
++    PB_7       = 0x17,
++    PB_7_ALT0  = PB_7 | ALT0, // same pin used for alternate HW
++    PB_8       = 0x18,
++    PB_8_ALT0  = PB_8 | ALT0, // same pin used for alternate HW
++    PB_9       = 0x19,
++    PB_9_ALT0  = PB_9 | ALT0, // same pin used for alternate HW
++    PB_10      = 0x1A,
++    PB_11      = 0x1B,
++    PB_12      = 0x1C,
++    PB_13      = 0x1D,
++    PB_14      = 0x1E,
++    PB_14_ALT0 = PB_14 | ALT0, // same pin used for alternate HW
++    PB_14_ALT1 = PB_14 | ALT1, // same pin used for alternate HW
++    PB_15      = 0x1F,
++    PB_15_ALT0 = PB_15 | ALT0, // same pin used for alternate HW
++    PB_15_ALT1 = PB_15 | ALT1, // same pin used for alternate HW
++    PC_0       = 0x20,
++    PC_0_ALT0  = PC_0 | ALT0, // same pin used for alternate HW
++    PC_0_ALT1  = PC_0 | ALT1, // same pin used for alternate HW
++    PC_1       = 0x21,
++    PC_1_ALT0  = PC_1 | ALT0, // same pin used for alternate HW
++    PC_1_ALT1  = PC_1 | ALT1, // same pin used for alternate HW
++    PC_1_ALT2  = PC_1 | ALT2, // same pin used for alternate HW
++    PC_1_ALT3  = PC_1 | ALT3, // same pin used for alternate HW
++    PC_1_ALT4  = PC_1 | ALT4, // same pin used for alternate HW
++    PC_2       = 0x22,
++    PC_2C      = PC_2  | ALTC, // dual pad
++    PC_2C_ALT0 = PC_2C | ALT0, // same pin used for alternate HW
++    PC_2_ALT0  = PC_2 | ALT0, // same pin used for alternate HW
++    PC_2_ALT1  = PC_2 | ALT1, // same pin used for alternate HW
++    PC_2_ALT2  = PC_2 | ALT2, // same pin used for alternate HW
++    PC_2_ALT3  = PC_2 | ALT3, // same pin used for alternate HW
++    PC_2_ALT4  = PC_2 | ALT4, // same pin used for alternate HW
++    PC_3       = 0x23,
++    PC_3C      = PC_3  | ALTC, // dual pad
++    PC_3_ALT0  = PC_3 | ALT0, // same pin used for alternate HW
++    PC_3_ALT1  = PC_3 | ALT1, // same pin used for alternate HW
++    PC_3_ALT2  = PC_3 | ALT2, // same pin used for alternate HW
++    PC_4       = 0x24,
++    PC_4_ALT0  = PC_4 | ALT0, // same pin used for alternate HW
++    PC_5       = 0x25,
++    PC_5_ALT0  = PC_5 | ALT0, // same pin used for alternate HW
++    PC_5_ALT1  = PC_5 | ALT1, // same pin used for alternate HW
++    PC_5_ALT2  = PC_5 | ALT2, // same pin used for alternate HW
++    PC_6       = 0x26,
++    PC_6_ALT0  = PC_6 | ALT0, // same pin used for alternate HW
++    PC_7       = 0x27,
++    PC_7_ALT0  = PC_7 | ALT0, // same pin used for alternate HW
++    PC_8       = 0x28,
++    PC_8_ALT0  = PC_8 | ALT0, // same pin used for alternate HW
++    PC_9       = 0x29,
++    PC_9_ALT0  = PC_9 | ALT0, // same pin used for alternate HW
++    PC_10      = 0x2A,
++    PC_10_ALT0 = PC_10 | ALT0, // same pin used for alternate HW
++    PC_11      = 0x2B,
++    PC_11_ALT0 = PC_11 | ALT0, // same pin used for alternate HW
++    PC_12      = 0x2C,
++    PC_13      = 0x2D,
++    PC_14      = 0x2E,
++    PC_15      = 0x2F,
++    PD_0       = 0x30,
++    PD_1       = 0x31,
++    PD_2       = 0x32,
++    PD_3       = 0x33,
++    PD_4       = 0x34,
++    PD_5       = 0x35,
++    PD_6       = 0x36,
++    PD_7       = 0x37,
++    PD_8       = 0x38,
++    PD_9       = 0x39,
++    PD_10      = 0x3A,
++    PD_11      = 0x3B,
++    PD_12      = 0x3C,
++    PD_13      = 0x3D,
++    PD_14      = 0x3E,
++    PD_15      = 0x3F,
++    PE_0       = 0x40,
++    PE_1       = 0x41,
++    PE_2       = 0x42,
++    PE_3       = 0x43,
++    PE_4       = 0x44,
++    PE_5       = 0x45,
++    PE_6       = 0x46,
++    PE_7       = 0x47,
++    PE_8       = 0x48,
++    PE_9       = 0x49,
++    PE_10      = 0x4A,
++    PE_11      = 0x4B,
++    PE_12      = 0x4C,
++    PE_13      = 0x4D,
++    PE_14      = 0x4E,
++    PE_15      = 0x4F,
++    PF_0       = 0x50,
++    PF_1       = 0x51,
++    PF_2       = 0x52,
++    PF_3       = 0x53,
++    PF_4       = 0x54,
++    PF_4_ALT0  = PF_4 | ALT0, // same pin used for alternate HW
++    PF_5       = 0x55,
++    PF_6       = 0x56,
++    PF_6_ALT0  = PF_6 | ALT0, // same pin used for alternate HW
++    PF_7       = 0x57,
++    PF_8       = 0x58,
++    PF_8_ALT0  = PF_8 | ALT0, // same pin used for alternate HW
++    PF_9       = 0x59,
++    PF_9_ALT0  = PF_9 | ALT0, // same pin used for alternate HW
++    PF_10      = 0x5A,
++    PF_10_ALT0 = PF_10 | ALT0, // same pin used for alternate HW
++    PF_11      = 0x5B,
++    PF_12      = 0x5C,
++    PF_12_ALT0 = PF_12 | ALT0, // same pin used for alternate HW
++    PF_13      = 0x5D,
++    PF_14      = 0x5E,
++    PF_14_ALT0 = PF_14 | ALT0, // same pin used for alternate HW
++    PF_15      = 0x5F,
++    PG_0       = 0x60,
++    PG_1       = 0x61,
++    PG_2       = 0x62,
++    PG_3       = 0x63,
++    PG_4       = 0x64,
++    PG_5       = 0x65,
++    PG_6       = 0x66,
++    PG_7       = 0x67,
++    PG_8       = 0x68,
++    PG_9       = 0x69,
++    PG_10      = 0x6A,
++    PG_11      = 0x6B,
++    PG_12      = 0x6C,
++    PG_13      = 0x6D,
++    PG_14      = 0x6E,
++    PG_15      = 0x6F,
++    PH_0       = 0x70,
++    PH_1       = 0x71,
++    PH_2       = 0x72,
++    PH_3       = 0x73,
++    PH_3_ALT0  = PH_3 | ALT0, // same pin used for alternate HW
++    PH_4       = 0x74,
++    PH_4_ALT0  = PH_4 | ALT0, // same pin used for alternate HW
++    PH_5       = 0x75,
++    PH_5_ALT0  = PH_5 | ALT0, // same pin used for alternate HW
++    PH_6       = 0x76,
++    PH_7       = 0x77,
++    PH_8       = 0x78,
++    PH_9       = 0x79,
++    PH_10      = 0x7A,
++    PH_11      = 0x7B,
++    PH_12      = 0x7C,
++    PH_13      = 0x7D,
++    PH_14      = 0x7E,
++    PH_15      = 0x7F,
++    PI_0       = 0x80,
++    PI_1       = 0x81,
++    PI_2       = 0x82,
++    PI_3       = 0x83,
++    PI_4       = 0x84,
++    PI_5       = 0x85,
++    PI_6       = 0x86,
++    PI_7       = 0x87,
++    PI_8       = 0x88,
++    PI_9       = 0x89,
++    PI_10      = 0x8A,
++    PI_11      = 0x8B,
++    PI_12      = 0x8C,
++    PI_13      = 0x8D,
++    PI_14      = 0x8E,
++    PI_15      = 0x8F,
++    PJ_0       = 0x90,
++    PJ_1       = 0x91,
++    PJ_2       = 0x92,
++    PJ_3       = 0x93,
++    PJ_4       = 0x94,
++    PJ_5       = 0x95,
++    PJ_6       = 0x96,
++    PJ_7       = 0x97,
++    PJ_8       = 0x98,
++    PJ_8_ALT0  = PJ_8 | ALT0, // same pin used for alternate HW
++    PJ_9       = 0x99,
++    PJ_9_ALT0  = PJ_9 | ALT0, // same pin used for alternate HW
++    PJ_10      = 0x9A,
++    PJ_10_ALT0 = PJ_10 | ALT0, // same pin used for alternate HW
++    PJ_11      = 0x9B,
++    PJ_11_ALT0 = PJ_11 | ALT0, // same pin used for alternate HW
++    PJ_12      = 0x9C,
++    PJ_13      = 0x9D,
++    PJ_14      = 0x9E,
++    PJ_15      = 0x9F,
++    PK_0       = 0xA0,
++    PK_0_ALT0  = PK_0 | ALT0, // same pin used for alternate HW
++    PK_1       = 0xA1,
++    PK_1_ALT0  = PK_1 | ALT0, // same pin used for alternate HW
++    PK_2       = 0xA2,
++    PK_3       = 0xA3,
++    PK_4       = 0xA4,
++    PK_5       = 0xA5,
++    PK_6       = 0xA6,
++    PK_7       = 0xA7,
+ 
+     WL_REG_ON = PJ_1,
+     WL_HOST_WAKE = PJ_5,
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/clocks.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/clocks.c
+deleted file mode 100644
+index 8fcc3dcfb9..0000000000
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/clocks.c
++++ /dev/null
+@@ -1,30 +0,0 @@
+-#include <stdbool.h>
+-#include "device/stm32h7xx_hal.h"
+-#include "device/stm32h7xx_hal_uart.h"
+-
+-extern bool isBetaBoard();
+-
+-void HAL_UART_MspInit(UART_HandleTypeDef *huart) {
+-
+-	RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
+-
+-    //printf("called HAL_UART_MspInit\n");
+-
+-	//PeriphClkInitStruct.PLL2.PLL2State = RCC_PLL_ON;
+-    //PeriphClkInitStruct.PLL2.PLL2Source = RCC_PLLSOURCE_HSE;
+-    if (isBetaBoard()) {
+-    	PeriphClkInitStruct.PLL2.PLL2M = 27;
+-    } else {
+-    	PeriphClkInitStruct.PLL2.PLL2M = 25;
+-    }
+-    PeriphClkInitStruct.PLL2.PLL2N = 200;
+-    PeriphClkInitStruct.PLL2.PLL2P = 2;
+-    PeriphClkInitStruct.PLL2.PLL2Q = 2;
+-    PeriphClkInitStruct.PLL2.PLL2R = 2;
+-
+-    PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_LPUART1 | RCC_PERIPHCLK_USART234578 | RCC_PERIPHCLK_USART16;
+-	PeriphClkInitStruct.Lpuart1ClockSelection = RCC_LPUART1CLKSOURCE_PLL2;
+-	PeriphClkInitStruct.Usart234578ClockSelection = RCC_USART234578CLKSOURCE_PLL2;
+-  	PeriphClkInitStruct.Usart16ClockSelection = RCC_USART16CLKSOURCE_PLL2;
+-    HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct);
+-};
+\ No newline at end of file
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/system_clock.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/system_clock_override.c
+similarity index 98%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/system_clock.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/system_clock_override.c
+index 4e58b5228b..9f83ada4c1 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/system_clock.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/system_clock_override.c
+@@ -266,3 +266,17 @@ uint8_t SetSysClock_PLL_HSI(void)
+     return 1; // OK
+ }
+ #endif /* ((CLOCK_SOURCE) & USE_PLL_HSI) */
++
++#if defined (CORE_CM4)
++void HSEM2_IRQHandler(void)
++{
++  HAL_HSEM_IRQHandler();
++}
++#endif
++
++#if defined (CORE_CM7)
++void HSEM1_IRQHandler(void)
++{
++  HAL_HSEM_IRQHandler();
++}
++#endif
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/system_stm32h7xx.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/system_stm32h7xx.c
+deleted file mode 100644
+index 93d92e958b..0000000000
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/system_stm32h7xx.c
++++ /dev/null
+@@ -1,391 +0,0 @@
+-/**
+-  ******************************************************************************
+-  * @file    system_stm32h7xx_dualcore_boot_cm4_cm7.c
+-  * @author  MCD Application Team
+-  * @brief   CMSIS Cortex-Mx Device Peripheral Access Layer System Source File.
+-  *          This provides system initialization template function is case of
+-  *          an application using a dual core STM32H7 device where
+-  *          Cortex-M7 and Cortex-M4 boot are enabled at the FLASH option bytes
+-  *
+-  *   This file provides two functions and one global variable to be called from
+-  *   user application:
+-  *      - SystemInit(): This function is called at startup just after reset and
+-  *                      before branch to main program. This call is made inside
+-  *                      the "startup_stm32h7xx.s" file.
+-  *
+-  *      - SystemCoreClock variable: Contains the core clock (HCLK), it can be used
+-  *                                  by the user application to setup the SysTick
+-  *                                  timer or configure other parameters.
+-  *
+-  *      - SystemCoreClockUpdate(): Updates the variables SystemD1Clock and SystemD2Clock
+-  *                                 and must be called whenever the core clock is changed
+-  *                                 during program execution.
+-  *
+-  *
+-  ******************************************************************************
+-  * @attention
+-  *
+-  * <h2><center>&copy; Copyright (c) 2017 STMicroelectronics.
+-  * All rights reserved.</center></h2>
+-  *
+-  * This software component is licensed by ST under BSD 3-Clause license,
+-  * the "License"; You may not use this file except in compliance with the
+-  * License. You may obtain a copy of the License at:
+-  *                        opensource.org/licenses/BSD-3-Clause
+-  *
+-  ******************************************************************************
+-  */
+-
+-/** @addtogroup CMSIS
+-  * @{
+-  */
+-
+-/** @addtogroup stm32h7xx_system
+-  * @{
+-  */
+-
+-/** @addtogroup STM32H7xx_System_Private_Includes
+-  * @{
+-  */
+-
+-#include "stm32h7xx.h"
+-#include <math.h>
+-#include "nvic_addr.h" // MBED PATCH for Bootloader
+-
+-#if !defined  (HSE_VALUE)
+-
+-#endif /* HSE_VALUE */
+-
+-#if !defined  (CSI_VALUE)
+-  #define CSI_VALUE    ((uint32_t)4000000) /*!< Value of the Internal oscillator in Hz*/
+-#endif /* CSI_VALUE */
+-
+-#if !defined  (HSI_VALUE)
+-  #define HSI_VALUE    ((uint32_t)64000000) /*!< Value of the Internal oscillator in Hz*/
+-#endif /* HSI_VALUE */
+-
+-
+-/**
+-  * @}
+-  */
+-
+-/** @addtogroup STM32H7xx_System_Private_TypesDefinitions
+-  * @{
+-  */
+-
+-/**
+-  * @}
+-  */
+-
+-/** @addtogroup STM32H7xx_System_Private_Defines
+-  * @{
+-  */
+-
+-/************************* Miscellaneous Configuration ************************/
+-/*!< Uncomment the following line if you need to relocate your vector Table in
+-     Internal SRAM. */
+-/* #define VECT_TAB_SRAM */
+-#define VECT_TAB_OFFSET  0x00000000UL /*!< Vector Table base offset field.
+-                                      This value must be a multiple of 0x200. */
+-/******************************************************************************/
+-
+-/**
+-  * @}
+-  */
+-
+-/** @addtogroup STM32H7xx_System_Private_Macros
+-  * @{
+-  */
+-
+-/**
+-  * @}
+-  */
+-
+-/** @addtogroup STM32H7xx_System_Private_Variables
+-  * @{
+-  */
+-  /* This variable is updated in three ways:
+-      1) by calling CMSIS function SystemCoreClockUpdate()
+-      2) by calling HAL API function HAL_RCC_GetHCLKFreq()
+-      3) each time HAL_RCC_ClockConfig() is called to configure the system clock frequency
+-         Note: If you use this function to configure the system clock; then there
+-               is no need to call the 2 first functions listed above, since SystemCoreClock
+-               variable is updated automatically.
+-  */
+-#if defined(CORE_CM7)
+-#define SystemCoreClock   SystemD1Clock
+-#elif defined(CORE_CM4)
+-#define SystemCoreClock   SystemD2Clock
+-#else
+-#error "Wrong core selection"
+-#endif
+-  uint32_t SystemD1Clock = 64000000;
+-  uint32_t SystemD2Clock = 64000000;
+-  const  uint8_t D1CorePrescTable[16] = {0, 0, 0, 0, 1, 2, 3, 4, 1, 2, 3, 4, 6, 7, 8, 9};
+-
+-/**
+-  * @}
+-  */
+-
+-/** @addtogroup STM32H7xx_System_Private_FunctionPrototypes
+-  * @{
+-  */
+-
+-/**
+-  * @}
+-  */
+-
+-/** @addtogroup STM32H7xx_System_Private_Functions
+-  * @{
+-  */
+-
+-/**
+-  * @brief  Setup the microcontroller system
+-  *         Initialize the FPU setting and  vector table location
+-  *         configuration.
+-  * @param  None
+-  * @retval None
+-  */
+-void SystemInit (void)
+-{
+-  /* FPU settings ------------------------------------------------------------*/
+-  #if (__FPU_PRESENT == 1) && (__FPU_USED == 1)
+-    SCB->CPACR |= ((3UL << (10*2))|(3UL << (11*2)));  /* set CP10 and CP11 Full Access */
+-  #endif
+-
+-    /*SEVONPEND enabled so that an interrupt coming from the CPU(n) interrupt signal is
+-     detectable by the CPU after a WFI/WFE instruction.*/
+- SCB->SCR |= SCB_SCR_SEVONPEND_Pos;
+-
+-#ifdef CORE_CM7
+-  /* Reset the RCC clock configuration to the default reset state ------------*/
+-  /* Set HSION bit */
+-  RCC->CR |= RCC_CR_HSION;
+-
+-  /* Reset CFGR register */
+-  RCC->CFGR = 0x00000000;
+-
+-  /* Reset HSEON, CSSON , CSION,RC48ON, CSIKERON PLL1ON, PLL2ON and PLL3ON bits */
+-  RCC->CR &= 0xEAF6ED7FU;
+-
+-  /* Reset D1CFGR register */
+-  RCC->D1CFGR = 0x00000000;
+-
+-  /* Reset D2CFGR register */
+-  RCC->D2CFGR = 0x00000000;
+-
+-  /* Reset D3CFGR register */
+-  RCC->D3CFGR = 0x00000000;
+-
+-  /* Reset PLLCKSELR register */
+-  RCC->PLLCKSELR = 0x00000000;
+-
+-  /* Reset PLLCFGR register */
+-  RCC->PLLCFGR = 0x00000000;
+-  /* Reset PLL1DIVR register */
+-  RCC->PLL1DIVR = 0x00000000;
+-  /* Reset PLL1FRACR register */
+-  RCC->PLL1FRACR = 0x00000000;
+-
+-  /* Reset PLL2DIVR register */
+-  RCC->PLL2DIVR = 0x00000000;
+-
+-  /* Reset PLL2FRACR register */
+-
+-  RCC->PLL2FRACR = 0x00000000;
+-  /* Reset PLL3DIVR register */
+-  RCC->PLL3DIVR = 0x00000000;
+-
+-  /* Reset PLL3FRACR register */
+-  RCC->PLL3FRACR = 0x00000000;
+-
+-  /* Reset HSEBYP bit */
+-  RCC->CR &= 0xFFFBFFFFU;
+-
+-  /* Disable all interrupts */
+-  RCC->CIER = 0x00000000;
+-
+-  /* Enable CortexM7 HSEM EXTI line (line 78)*/
+-  EXTI_D2->EMR3 |= 0x4000UL;
+-
+-
+-  if((DBGMCU->IDCODE & 0xFFFF0000U) < 0x20000000U)
+-  {
+-    /* if stm32h7 revY*/
+-    /* Change  the switch matrix read issuing capability to 1 for the AXI SRAM target (Target 7) */
+-    *((__IO uint32_t*)0x51008108) = 0x000000001U;
+-  }
+-
+-#endif /* CORE_CM7*/
+-
+-#ifdef CORE_CM4
+-
+-  /* Configure the Vector Table location add offset address ------------------*/
+-#ifdef VECT_TAB_SRAM
+-  SCB->VTOR = D2_AHBSRAM_BASE | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal SRAM */
+-#else
+-  SCB->VTOR = NVIC_FLASH_VECTOR_ADDRESS; /* Vector Table Relocation in Internal FLASH */ // MBED PATCH for Bootloader
+-#endif
+-
+-#else
+-#ifdef CORE_CM7
+-
+-  /* Configure the Vector Table location add offset address ------------------*/
+-#ifdef VECT_TAB_SRAM
+-  SCB->VTOR = D1_AXISRAM_BASE  | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal D1 AXI-RAM */
+-#else
+-  SCB->VTOR = NVIC_FLASH_VECTOR_ADDRESS; /* Vector Table Relocation in Internal FLASH */ // MBED PATCH for Bootloader
+-#endif
+-
+-#else
+-#error Please #define CORE_CM4 or CORE_CM7
+-#endif
+-#endif
+-
+-}
+-
+-#if defined (CORE_CM4)
+-void HSEM2_IRQHandler(void)
+-{
+-  HAL_HSEM_IRQHandler();
+-}
+-#endif
+-
+-#if defined (CORE_CM7)
+-void HSEM1_IRQHandler(void)
+-{
+-  HAL_HSEM_IRQHandler();
+-}
+-#endif
+-
+-/**
+-   * @brief  Update SystemD1Clock and SystemD2Clock variables according to Clock Register Values.
+-  *         The SystemCoreClock variable contains the core clock , it can
+-  *         be used by the user application to setup the SysTick timer or configure
+-  *         other parameters.
+-  *
+-  * @note   Each time the core clock changes, this function must be called
+-  *         to update SystemCoreClock variable value. Otherwise, any configuration
+-  *         based on this variable will be incorrect.
+-  *
+-  * @note   - The system frequency computed by this function is not the real
+-  *           frequency in the chip. It is calculated based on the predefined
+-  *           constant and the selected clock source:
+-  *
+-  *           - If SYSCLK source is CSI, SystemD1Clock will contain the CSI_VALUE(*)
+-  *           - If SYSCLK source is HSI, SystemD1Clock will contain the HSI_VALUE(**)
+-  *           - If SYSCLK source is HSE, SystemD1Clock will contain the HSE_VALUE(***)
+-  *           - If SYSCLK source is PLL, SystemD1Clock will contain the CSI_VALUE(*),
+-  *             HSI_VALUE(**) or HSE_VALUE(***) multiplied/divided by the PLL factors.
+-  *
+-  *         (*) CSI_VALUE is a constant defined in stm32h7xx_hal.h file (default value
+-  *             4 MHz) but the real value may vary depending on the variations
+-  *             in voltage and temperature.
+-  *         (**) HSI_VALUE is a constant defined in stm32h7xx_hal.h file (default value
+-  *             64 MHz) but the real value may vary depending on the variations
+-  *             in voltage and temperature.
+-  *
+-  *         (***)HSE_VALUE is a constant defined in stm32h7xx_hal.h file (default value
+-  *              25 MHz), user has to ensure that HSE_VALUE is same as the real
+-  *              frequency of the crystal used. Otherwise, this function may
+-  *              have wrong result.
+-  *
+-  *         - The result of this function could be not correct when using fractional
+-  *           value for HSE crystal.
+-  * @param  None
+-  * @retval None
+-  */
+-void SystemCoreClockUpdate (void)
+-{
+-  uint32_t pllp, pllsource, pllm, pllfracen, hsivalue, tmp;
+-  float_t fracn1, pllvco;
+-
+-  /* Get SYSCLK source -------------------------------------------------------*/
+-
+-  switch (RCC->CFGR & RCC_CFGR_SWS)
+-  {
+-  case RCC_CFGR_SWS_HSI:  /* HSI used as system clock source */
+-   SystemD1Clock = (uint32_t) (HSI_VALUE >> ((RCC->CR & RCC_CR_HSIDIV)>> 3));
+-
+-    break;
+-
+-  case RCC_CFGR_SWS_CSI:  /* CSI used as system clock  source */
+-    SystemD1Clock = CSI_VALUE;
+-    break;
+-
+-  case RCC_CFGR_SWS_HSE:  /* HSE used as system clock  source */
+-    SystemD1Clock = HSE_VALUE;
+-    break;
+-
+-  case RCC_CFGR_SWS_PLL1:  /* PLL1 used as system clock  source */
+-
+-
+-    /* PLL_VCO = (HSE_VALUE or HSI_VALUE or CSI_VALUE/ PLLM) * PLLN
+-    SYSCLK = PLL_VCO / PLLR
+-    */
+-    pllsource = (RCC->PLLCKSELR & RCC_PLLCKSELR_PLLSRC);
+-    pllm = ((RCC->PLLCKSELR & RCC_PLLCKSELR_DIVM1)>> 4)  ;
+-    pllfracen = ((RCC->PLLCFGR & RCC_PLLCFGR_PLL1FRACEN)>>RCC_PLLCFGR_PLL1FRACEN_Pos);
+-    fracn1 = (float_t)(uint32_t)(pllfracen* ((RCC->PLL1FRACR & RCC_PLL1FRACR_FRACN1)>> 3));
+-
+-    if (pllm != 0U)
+-    {
+-      switch (pllsource)
+-      {
+-        case RCC_PLLCKSELR_PLLSRC_HSI:  /* HSI used as PLL clock source */
+-
+-        hsivalue = (HSI_VALUE >> ((RCC->CR & RCC_CR_HSIDIV)>> 3)) ;
+-        pllvco = ( (float_t)hsivalue / (float_t)pllm) * ((float_t)(uint32_t)(RCC->PLL1DIVR & RCC_PLL1DIVR_N1) + (fracn1/(float_t)0x2000) +(float_t)1 );
+-
+-        break;
+-
+-        case RCC_PLLCKSELR_PLLSRC_CSI:  /* CSI used as PLL clock source */
+-          pllvco = ((float_t)CSI_VALUE / (float_t)pllm) * ((float_t)(uint32_t)(RCC->PLL1DIVR & RCC_PLL1DIVR_N1) + (fracn1/(float_t)0x2000) +(float_t)1 );
+-        break;
+-
+-        case RCC_PLLCKSELR_PLLSRC_HSE:  /* HSE used as PLL clock source */
+-          pllvco = ((float_t)HSE_VALUE / (float_t)pllm) * ((float_t)(uint32_t)(RCC->PLL1DIVR & RCC_PLL1DIVR_N1) + (fracn1/(float_t)0x2000) +(float_t)1 );
+-        break;
+-
+-      default:
+-          pllvco = ((float_t)CSI_VALUE / (float_t)pllm) * ((float_t)(uint32_t)(RCC->PLL1DIVR & RCC_PLL1DIVR_N1) + (fracn1/(float_t)0x2000) +(float_t)1 );
+-        break;
+-      }
+-      pllp = (((RCC->PLL1DIVR & RCC_PLL1DIVR_P1) >>9) + 1U ) ;
+-      SystemD1Clock =  (uint32_t)(float_t)(pllvco/(float_t)pllp);
+-    }
+-    else
+-    {
+-      SystemD1Clock = 0U;
+-    }
+-    break;
+-
+-  default:
+-    SystemD1Clock = CSI_VALUE;
+-    break;
+-  }
+-
+-  /* Compute SystemClock frequency --------------------------------------------------*/
+-  tmp = D1CorePrescTable[(RCC->D1CFGR & RCC_D1CFGR_D1CPRE)>> RCC_D1CFGR_D1CPRE_Pos];
+-
+-  /* SystemD1Clock frequency : CM7 CPU frequency  */
+-  SystemD1Clock >>= tmp;
+-
+-  /* SystemD2Clock frequency : CM4 CPU, AXI and AHBs Clock frequency  */
+-  SystemD2Clock = (SystemD1Clock >> ((D1CorePrescTable[(RCC->D1CFGR & RCC_D1CFGR_HPRE)>> RCC_D1CFGR_HPRE_Pos]) & 0x1FU));
+-
+-}
+-
+-
+-/**
+-  * @}
+-  */
+-
+-/**
+-  * @}
+-  */
+-
+-/**
+-  * @}
+-  */
+-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/system_clock.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/system_clock.c
+index f82dfb989b..83da6768d9 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/system_clock.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/system_clock.c
+@@ -62,7 +62,7 @@ uint8_t SetSysClock_PLL_HSI(void);
+   * @retval None
+   */
+ 
+-void SetSysClock(void)
++MBED_WEAK void SetSysClock(void)
+ {
+ #if ((CLOCK_SOURCE) & USE_PLL_HSE_EXTC)
+     /* 1- Try to start with HSE and external clock (MCO from STLink PCB part) */
+@@ -89,7 +89,7 @@ void SetSysClock(void)
+ /******************************************************************************/
+ /*            PLL (clocked by HSE) used as System clock source                */
+ /******************************************************************************/
+-uint8_t SetSysClock_PLL_HSE(uint8_t bypass)
++MBED_WEAK uint8_t SetSysClock_PLL_HSE(uint8_t bypass)
+ {
+     RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+     RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+@@ -163,7 +163,7 @@ uint8_t SetSysClock_PLL_HSE(uint8_t bypass)
+ /******************************************************************************/
+ /*            PLL (clocked by HSI) used as System clock source                */
+ /******************************************************************************/
+-uint8_t SetSysClock_PLL_HSI(void)
++MBED_WEAK uint8_t SetSysClock_PLL_HSI(void)
+ {
+     RCC_ClkInitTypeDef RCC_ClkInitStruct;
+     RCC_OscInitTypeDef RCC_OscInitStruct;
+-- 
+2.27.0
+
