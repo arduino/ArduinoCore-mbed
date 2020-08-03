@@ -136,7 +136,6 @@ public:
     */
     virtual bool is_valid_erase(mbed::bd_addr_t addr, bd_size_t size) const;
 
-
 private:
     // Device configuration
     mbed::FlashIAP _flash;
