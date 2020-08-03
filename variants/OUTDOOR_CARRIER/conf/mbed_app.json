@@ -1,0 +1,33 @@
+{
+	"macros": [
+		"MBED_HEAP_STATS_ENABLED=1",
+		"MBED_STACK_STATS_ENABLED=1",
+		"MBED_MEM_TRACING_ENABLED=1",
+		"NRFX_GPIOTE_CONFIG_NUM_OF_LOW_POWER_EVENTS=8",
+		"NRFX_WDT_ENABLED=1"
+	],
+	"target_overrides": {
+		"*": {
+			"target.printf_lib": "std",
+			"platform.stdio-buffered-serial": true,
+			"platform.stdio-baud-rate": 115200,
+			"platform.default-serial-baud-rate": 115200,
+			"platform.callback-nontrivial": true,
+			"rtos.main-thread-stack-size": 32768,
+			"target.mbed_app_start": "0x10000"
+		},
+		"ARDUINO_OUTDOOR_CARRIER": {
+			"sd.SPI_MOSI": "P0_20",
+			"sd.SPI_MISO": "P0_21",
+			"sd.SPI_CLK": "P0_19",
+			"sd.SPI_CS": "P1_12",
+			"spif-driver.SPI_MOSI": "P0_20",
+			"spif-driver.SPI_MISO": "P0_21",
+			"spif-driver.SPI_CLK": "P0_19",
+			"spif-driver.SPI_CS": "P0_17",
+			"storage.storage_type": "TDB_EXTERNAL",
+			"storage.default_kv": "kv",
+			"storage_tdb_external.blockdevice": "SPIF"
+		}
+	}
+}
