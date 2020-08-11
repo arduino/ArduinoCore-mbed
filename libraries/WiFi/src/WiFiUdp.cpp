@@ -43,10 +43,10 @@ uint8_t arduino::WiFiUDP::beginMulticast(IPAddress ip, uint16_t port) {
     if(begin(port) != 1){
         return 0;
     }
+    
+    SocketAddress socketAddress = WiFi.socketAddressFromIpAddress(ip, port);       
 
-    nsapi_addr_t multicastGroup = {NSAPI_IPv4, {ip[0], ip[1], ip[2], ip[3]}};       
-
-    if (_socket.join_multicast_group(SocketAddress(multicastGroup)) != NSAPI_ERROR_OK) {
+    if (_socket.join_multicast_group(socketAddress) != NSAPI_ERROR_OK) {
         printf("Error joining the multicast group\n");
         return 0;
     }
@@ -58,9 +58,8 @@ void arduino::WiFiUDP::stop() {
     _socket.close();    
 }
 
-int arduino::WiFiUDP::beginPacket(IPAddress ip, uint16_t port) {
-    nsapi_addr_t convertedIP = {NSAPI_IPv4, {ip[0], ip[1], ip[2], ip[3]}};   
-    _host = SocketAddress(convertedIP, port);
+int arduino::WiFiUDP::beginPacket(IPAddress ip, uint16_t port) {    
+    _host = WiFi.socketAddressFromIpAddress(ip, port);
     //If IP is null and port is 0 the initialization failed
     return (_host.get_ip_address() == nullptr && _host.get_port() == 0) ? 0 : 1;
 }
