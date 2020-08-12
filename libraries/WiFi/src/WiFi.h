@@ -311,7 +311,7 @@ private:
     void ensureDefaultAPNetworkConfiguration();
     bool isVisible(const char* ssid);
     arduino::IPAddress ipAddressFromSocketAddress(SocketAddress socketAddress);
-    SocketAddress socketAddressFromIpAddress(arduino::IPAddress ipAddress, uint16_t port);
+    SocketAddress socketAddressFromIpAddress(arduino::IPAddress ip, uint16_t port);
 };
 
 }

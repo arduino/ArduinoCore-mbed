@@ -15,7 +15,7 @@ arduino::IPAddress arduino::WiFiClass::ipAddressFromSocketAddress(SocketAddress 
     return IPAddress(address.bytes[0], address.bytes[1], address.bytes[2], address.bytes[3]);    
 }
 
-SocketAddress arduino::WiFiClass::socketAddressFromIpAddress(arduino::IPAddress ipAddress, uint16_t port) {
+SocketAddress arduino::WiFiClass::socketAddressFromIpAddress(arduino::IPAddress ip, uint16_t port) {
     nsapi_addr_t convertedIP = {NSAPI_IPv4, {ip[0], ip[1], ip[2], ip[3]}};    
     return SocketAddress(convertedIP, port);
 }
