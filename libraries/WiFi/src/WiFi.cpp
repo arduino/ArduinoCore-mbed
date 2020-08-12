@@ -202,6 +202,17 @@ uint8_t arduino::WiFiClass::status() {
     return _currentNetworkStatus;
 }
 
+int arduino::WiFiClass::hostByName(const char* aHostname, IPAddress& aResult){
+    SocketAddress socketAddress = SocketAddress();
+    nsapi_error_t returnCode = getNetwork()->gethostbyname(aHostname, &socketAddress);
+    nsapi_addr_t address = socketAddress.get_addr();
+    aResult[0] = address.bytes[0];
+    aResult[1] = address.bytes[1];
+    aResult[2] = address.bytes[2];
+    aResult[3] = address.bytes[3];    
+    return returnCode == NSAPI_ERROR_OK ? 1 : 0;
+}
+
 uint8_t arduino::WiFiClass::encryptionType() {
     return sec2enum(ap_list[connected_ap].get_security());
 }
