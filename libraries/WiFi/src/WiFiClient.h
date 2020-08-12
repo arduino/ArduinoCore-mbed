@@ -35,6 +35,7 @@ public:
   WiFiClient();
 
   uint8_t status();
+  int connect(SocketAddress socketAddress);
   int connect(IPAddress ip, uint16_t port);
   int connect(const char *host, uint16_t port);
   int connectSSL(IPAddress ip, uint16_t port);

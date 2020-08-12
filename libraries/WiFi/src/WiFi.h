@@ -290,6 +290,7 @@ public:
 
     friend class WiFiClient;
     friend class WiFiServer;
+    friend class WiFiUDP;
 
     NetworkInterface *getNetwork();
 
