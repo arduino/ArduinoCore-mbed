@@ -121,4 +121,6 @@ void _ontouch1200bps_();
 
 #define CRYPTO_WIRE		Wire1
 
+#define USB_MAX_POWER	(500)
+
 #endif //__PINS_ARDUINO__

@@ -257,6 +257,10 @@ const uint8_t *arduino::PluggableUSBDevice::string_iserial_desc()
 }
 #endif
 
+#ifndef USB_MAX_POWER
+#define USB_MAX_POWER (100)
+#endif
+
 const uint8_t *arduino::PluggableUSBDevice::configuration_desc(uint8_t index)
 {
     #define TOTAL_DESCRIPTOR_LENGTH 0xFFFF
@@ -271,7 +275,7 @@ const uint8_t *arduino::PluggableUSBDevice::configuration_desc(uint8_t index)
         0x01,                               // bConfigurationValue
         0x00,                               // iConfiguration
         C_RESERVED | C_SELF_POWERED,        // bmAttributes
-        C_POWER(100),                       // bMaxPower
+        C_POWER(USB_MAX_POWER),             // bMaxPower
     };
     memcpy(_config_descriptor, configuration_descriptor_temp, sizeof(configuration_descriptor_temp));
     int size = sizeof(configuration_descriptor_temp);
