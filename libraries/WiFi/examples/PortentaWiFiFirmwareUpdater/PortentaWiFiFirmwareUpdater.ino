@@ -2,6 +2,7 @@
 #include "MBRBlockDevice.h"
 #include "FATFileSystem.h"
 #include "wiced_resource.h"
+#include "certificates.h"
 
 QSPIFBlockDevice root(PD_11, PD_12, PF_7, PD_13,  PF_10, PG_6, QSPIF_POLARITY_MODE_1, 40000000);
 mbed::MBRBlockDevice wifi_data(&root, 1);
@@ -74,8 +75,20 @@ void setup() {
   int ret = fwrite(wifi_firmware_image_data, 421098, 1, fp);
   fclose(fp);
 
-  Serial.println(ret);
-  Serial.println(wifi_firmware_image.size);
+  fp = fopen("/wlan/cacert.pem", "wb");
+  ret = fwrite(cacert_pem, cacert_pem_len, 1, fp);
+  fclose(fp);
+
+  fp = fopen("/wlan/cacert.pem", "rb");
+  char buffer[128];
+  ret = fread(buffer, 1, 128, fp);
+  Serial.write(buffer, ret);
+  while (ret == 128) {
+    ret = fread(buffer, 1, 128, fp);
+    Serial.write(buffer, ret);
+  }
+  fclose(fp);
+
   Serial.println("Firmware and certificates updated!");
 }
 
