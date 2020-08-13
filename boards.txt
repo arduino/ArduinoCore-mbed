@@ -45,7 +45,7 @@ envie_m7.bootloader.tool=openocd
 envie_m7.bootloader.config=-f target/stm32h7x_dual_bank.cfg
 envie_m7.bootloader.programmer=-f interface/stlink.cfg
 envie_m7.bootloader.extra_action.preflash=stm32h7x option_write 0 0x01c 0xb86aaf0
-envie_m7.bootloader.file=PORTENTA_H7/portentah7_bootloader_mbed_hs.elf
+envie_m7.bootloader.file=PORTENTA_H7/portentah7_bootloader_mbed_hs_v2.elf
 
 ##############################################################
 
