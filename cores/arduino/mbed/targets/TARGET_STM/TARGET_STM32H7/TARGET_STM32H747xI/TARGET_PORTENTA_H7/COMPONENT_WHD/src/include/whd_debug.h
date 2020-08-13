@@ -36,7 +36,7 @@ extern "C"
 /* #define WPRINT_ENABLE_WHD_DEBUG */
 
 #define WHD_ENABLE_STATS
-/*#define WHD_LOGGING_BUFFER_ENABLE*/
+#define WHD_LOGGING_BUFFER_ENABLE
 
 #if defined (__GNUC__)
 #define WHD_TRIGGER_BREAKPOINT( ) do { __asm__ ("bkpt"); } while (0)
