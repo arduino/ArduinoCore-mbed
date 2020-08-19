@@ -22,6 +22,7 @@
 #include "Print.h"
 #include "drivers/I2C.h"
 #include "drivers/I2CSlave.h"
+#include "rtos.h"
 
 typedef void (*voidFuncPtrParamInt)(int);
 

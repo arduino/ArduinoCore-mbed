@@ -15,6 +15,11 @@ arduino::IPAddress arduino::WiFiClass::ipAddressFromSocketAddress(SocketAddress 
     return IPAddress(address.bytes[0], address.bytes[1], address.bytes[2], address.bytes[3]);    
 }
 
+SocketAddress arduino::WiFiClass::socketAddressFromIpAddress(arduino::IPAddress ip, uint16_t port) {
+    nsapi_addr_t convertedIP = {NSAPI_IPv4, {ip[0], ip[1], ip[2], ip[3]}};    
+    return SocketAddress(convertedIP, port);
+}
+
 int arduino::WiFiClass::begin(const char* ssid, const char *passphrase) {
     if (_ssid) free(_ssid);
 
@@ -195,6 +200,17 @@ int32_t arduino::WiFiClass::RSSI() {
 
 uint8_t arduino::WiFiClass::status() {    
     return _currentNetworkStatus;
+}
+
+int arduino::WiFiClass::hostByName(const char* aHostname, IPAddress& aResult){
+    SocketAddress socketAddress = SocketAddress();
+    nsapi_error_t returnCode = getNetwork()->gethostbyname(aHostname, &socketAddress);
+    nsapi_addr_t address = socketAddress.get_addr();
+    aResult[0] = address.bytes[0];
+    aResult[1] = address.bytes[1];
+    aResult[2] = address.bytes[2];
+    aResult[3] = address.bytes[3];    
+    return returnCode == NSAPI_ERROR_OK ? 1 : 0;
 }
 
 uint8_t arduino::WiFiClass::encryptionType() {

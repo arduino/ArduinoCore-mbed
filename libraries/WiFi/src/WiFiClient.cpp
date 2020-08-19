@@ -6,6 +6,10 @@ extern WiFiClass WiFi;
 #define WIFI_TCP_BUFFER_SIZE        1508
 #endif
 
+#ifndef SOCKET_TIMEOUT
+#define SOCKET_TIMEOUT 1000
+#endif
+
 arduino::WiFiClient::WiFiClient() {
 }
 
@@ -24,48 +28,51 @@ void arduino::WiFiClient::getStatus() {
     }
 }
 
-
-int arduino::WiFiClient::connect(IPAddress ip, uint16_t port) {
-}
-
-int arduino::WiFiClient::connect(const char *host, uint16_t port) {
+int arduino::WiFiClient::connect(SocketAddress socketAddress) {
 	if (sock == NULL) {
-		sock = new TCPSocket();
-		((TCPSocket*)sock)->open(WiFi.getNetwork());
+		sock = new TCPSocket();		
+		static_cast<TCPSocket*>(sock)->open(WiFi.getNetwork());
 	}
 	//sock->sigio(mbed::callback(this, &WiFiClient::getStatus));
 	//sock->set_blocking(false);
-	sock->set_timeout(1000);
-	SocketAddress addr(host, port);
-	WiFi.getNetwork()->gethostbyname(host, &addr);
-	int ret = ((TCPSocket*)sock)->connect(addr);
-	if (ret == 0) {
-		return 1;
-	} else {
-		return 0;
-	}
+	sock->set_timeout(SOCKET_TIMEOUT);		
+	nsapi_error_t returnCode = static_cast<TCPSocket*>(sock)->connect(socketAddress);
+	return returnCode == NSAPI_ERROR_OK ? 1 : 0;
 }
 
-int arduino::WiFiClient::connectSSL(IPAddress ip, uint16_t port) {
+int arduino::WiFiClient::connect(IPAddress ip, uint16_t port) {	
+	return connect(WiFi.socketAddressFromIpAddress(ip, port));
 }
 
-int arduino::WiFiClient::connectSSL(const char *host, uint16_t port) {
+int arduino::WiFiClient::connect(const char *host, uint16_t port) {
+	SocketAddress socketAddress = SocketAddress();
+	socketAddress.set_port(port);
+	WiFi.getNetwork()->gethostbyname(host, &socketAddress);
+	return connect(socketAddress);
+}
+
+int arduino::WiFiClient::connectSSL(SocketAddress socketAddress){
 	if (sock == NULL) {
 		sock = new TLSSocket();
-		((TLSSocket*)sock)->open(WiFi.getNetwork());
+		static_cast<TLSSocket*>(sock)->open(WiFi.getNetwork());
 	}
 	if (beforeConnect) {
 		beforeConnect();
 	}
-	sock->set_timeout(1000);
-	SocketAddress addr(host, port);
-	WiFi.getNetwork()->gethostbyname(host, &addr);
-	int ret = ((TLSSocket*)sock)->connect(addr);
-	if (ret == 0) {
-		return 1;
-	} else {
-		return 0;
-	}
+	sock->set_timeout(SOCKET_TIMEOUT);	
+	nsapi_error_t returnCode = static_cast<TLSSocket*>(sock)->connect(socketAddress);
+	return returnCode == NSAPI_ERROR_OK ? 1 : 0;
+}
+
+int arduino::WiFiClient::connectSSL(IPAddress ip, uint16_t port) {
+	return connectSSL(WiFi.socketAddressFromIpAddress(ip, port));
+}
+
+int arduino::WiFiClient::connectSSL(const char *host, uint16_t port) {
+	SocketAddress socketAddress = SocketAddress();
+	socketAddress.set_port(port);
+	WiFi.getNetwork()->gethostbyname(host, &socketAddress);
+	return connectSSL(socketAddress);
 }
 
 size_t arduino::WiFiClient::write(uint8_t c) {

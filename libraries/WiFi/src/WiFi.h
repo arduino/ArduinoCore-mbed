@@ -290,6 +290,7 @@ public:
 
     friend class WiFiClient;
     friend class WiFiServer;
+    friend class WiFiUDP;
 
     NetworkInterface *getNetwork();
 
@@ -311,6 +312,7 @@ private:
     void ensureDefaultAPNetworkConfiguration();
     bool isVisible(const char* ssid);
     arduino::IPAddress ipAddressFromSocketAddress(SocketAddress socketAddress);
+    SocketAddress socketAddressFromIpAddress(arduino::IPAddress ip, uint16_t port);
 };
 
 }
