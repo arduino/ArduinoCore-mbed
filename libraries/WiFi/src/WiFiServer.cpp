@@ -34,7 +34,12 @@ size_t arduino::WiFiServer::write(const uint8_t *buf, size_t size) {
 
 arduino::WiFiClient arduino::WiFiServer::available(uint8_t* status) {
 	WiFiClient ret;
-	TCPSocket* client = sock->accept();
-	ret.setSocket(client);
+	nsapi_error_t error;
+	TCPSocket* client = sock->accept(&error);
+	if (error != 0) {
+		ret.setSocket(NULL);
+	} else {
+		ret.setSocket(client);
+	}
 	return ret;
 }

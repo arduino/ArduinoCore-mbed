@@ -33,6 +33,9 @@ class WiFiClient : public arduino::Client {
 
 public:
   WiFiClient();
+  ~WiFiClient() {
+    stop();
+  }
 
   uint8_t status();
   int connect(IPAddress ip, uint16_t port);
