@@ -4,7 +4,7 @@
 
 bool arduino::WiFiClass::isVisible(const char* ssid) {
     for (int i=0; i<10; i++) {
-        if (strncmp(ap_list[i].get_ssid(), ssid, 32) == 0) {
+        if (strncmp(ap_list[i].get_ssid(), ssid, SSID_MAX_LENGTH) == 0) {
             connected_ap = i;
             return true;
         }
