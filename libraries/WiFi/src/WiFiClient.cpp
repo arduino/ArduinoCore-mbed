@@ -127,7 +127,6 @@ void arduino::WiFiClient::flush() {
 void arduino::WiFiClient::stop() {
 	if (sock != NULL) {
 		sock->close();
-		//delete[] sock;
 		sock = NULL;
 	}
 }

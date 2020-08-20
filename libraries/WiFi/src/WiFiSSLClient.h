@@ -37,6 +37,13 @@ public:
   int connect(const char* host, uint16_t port) {
     return connectSSL(host, port);
   }
+  void stop() {
+    if (sock != NULL) {
+      sock->close();
+      delete ((TLSSocket*)sock);
+      sock = NULL;
+    }
+  }
 
 private:
   int setRootCA() {
