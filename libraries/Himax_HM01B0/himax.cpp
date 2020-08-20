@@ -128,8 +128,8 @@ static regval_list_t himax_default_regs[] = {
     {AE_TARGET_MEAN, 0x3C},      //AE target mean          [Def: 0x3C]
     {AE_MIN_MEAN,    0x0A},      //AE min target mean      [Def: 0x0A]
 
-    {INTEGRATION_H,  0x00},      //Integration H           [Def: 0x01]
-    {INTEGRATION_L,  0x60},      //Integration L           [Def: 0x08]
+    {INTEGRATION_H,  0x01},      //Integration H           [Def: 0x01]
+    {INTEGRATION_L,  0x08},      //Integration L           [Def: 0x08]
     {ANALOG_GAIN,    0x00},      //Analog Global Gain      [Def: 0x00]
     {DAMPING_FACTOR, 0x20},      //Damping Factor          [Def: 0x20]
     {DIGITAL_GAIN_H, 0x01},      //Digital Gain High       [Def: 0x01]
@@ -162,7 +162,7 @@ static regval_list_t himax_default_regs[] = {
     {0x3059, 0x02},
     {0x3060, 0x00},
     //{0x0601, 0x01},
-    {IMG_ORIENTATION, 0x01}, // change the orientation
+    {IMG_ORIENTATION, 0x00},
     {0x0104, 0x01}
 };
 
@@ -197,25 +197,18 @@ static void           HIMAX_FrameRate         (void);
   * @{
   */
 
-mbed::I2C i2c(I2C_SDA_INTERNAL , I2C_SCL_INTERNAL);
 /**
  * @brief  Initializes the I2C interface.
  * @retval HIMAX status
  */
 uint8_t HIMAX_Open(void)
 {
-    printf("HIMAX_Open\n");
-    /* I2C1  Pin connected */
+    Wire.begin();
 
     printf("Model: %x:%x\n", HIMAX_RegRead(MODEL_ID_H), HIMAX_RegRead(MODEL_ID_L));
-    Serial.printf("Model: %x:%x\n", HIMAX_RegRead(MODEL_ID_H), HIMAX_RegRead(MODEL_ID_L));
-
-    printf("After WIRE.begin\n");
 
     HIMAX_Reset();
-    printf("After HIMAX_Reset\n");
     HIMAX_Boot();
-    printf("After HIMAX_Boot\n");
     //For debugging camera Configuration
     HIMAX_PrintReg();
 
@@ -243,7 +236,11 @@ static int HIMAX_RegWrite(uint16_t addr, uint8_t value)
     reg.reg_num = (addr_low << 8) | addr_high;
     reg.value = value;
 
-    return i2c.write(HIMAX_I2C_ADDR, (const char *)&reg, 3);
+    Wire.beginTransmission(HIMAX_I2C_ADDR);
+    Wire.write((const char *)&reg, 3);
+    int ret = Wire.endTransmission();
+
+    return ret;
 }
 
 /**
@@ -257,8 +254,16 @@ static uint8_t HIMAX_RegRead(uint16_t addr)
 
     reg.reg_num = (addr_low << 8) | addr_high;
 
-    i2c.write(HIMAX_I2C_ADDR, (const char *)&reg.reg_num, 2);
-    i2c.read(HIMAX_I2C_ADDR, (char*)&(reg.value), 1);
+    Wire.beginTransmission(HIMAX_I2C_ADDR);
+    Wire.write((const char *)&reg.reg_num, 2);
+    Wire.endTransmission(false);
+    int ret = Wire.requestFrom(HIMAX_I2C_ADDR, 1);
+    if (Wire.available()) {
+        reg.value = Wire.read();
+    }
+    while (Wire.available()) {
+        Wire.read();
+    }
     return reg.value;
 }
 
@@ -266,7 +271,7 @@ static uint8_t HIMAX_Reset()
 {
     do {
         HIMAX_RegWrite(SW_RESET, HIMAX_RESET);
-        wait_us(50);
+        delayMicroseconds(50);
     } while (HIMAX_RegRead(MODE_SELECT) != HIMAX_Standby);
 
     return 0;
@@ -277,7 +282,9 @@ static uint8_t HIMAX_Boot()
     uint32_t i;
 
     for(i = 0; i < (sizeof(himax_default_regs) / sizeof(regval_list_t)); i++) {
+        printf("%d\n", i);
         HIMAX_RegWrite(himax_default_regs[i].reg_num, himax_default_regs[i].value);
+        delayMicroseconds(50);
     }
 
     HIMAX_RegWrite(PCLK_POLARITY, (0x20 | PCLK_FALLING_EDGE));

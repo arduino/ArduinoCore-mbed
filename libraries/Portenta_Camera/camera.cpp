@@ -7,13 +7,8 @@
 #define LCD_FRAME_BUFFER                  0xC0000000 /* LCD Frame buffer of size 800x480 in ARGB8888 */
 #define CAMERA_FRAME_BUFFER               0xC0200000
 
-#define QVGA_RES_X	96
-#define QVGA_RES_Y	96
-
-#define CAM_W_RES       96
-#define CAM_H_RES       96
-#define CAM_PIXEL_IMAGE_SIZE (CAM_H_RES * CAM_W_RES)
-#define SKIP_FRAMES 10
+#define QVGA_RES_X	324
+#define QVGA_RES_Y	244
 
 #define ARGB8888_BYTE_PER_PIXEL  4
 
@@ -40,6 +35,8 @@ extern "C" {
 DCMI_HandleTypeDef  hdcmi_discovery;
 
 static uint32_t CameraCurrentResolution;
+
+void BSP_CAMERA_PwrUp(void);
 
 /**
   * @brief  Initializes the DCMI MSP.
@@ -199,7 +196,7 @@ uint8_t BSP_CAMERA_Init(uint32_t Resolution)
   phdcmi->Instance              = DCMI;
 
   /* Power up camera */
-  // BSP_CAMERA_PwrUp();
+  BSP_CAMERA_PwrUp();
   HIMAX_Open();
 
   /* DCMI Initialization */
@@ -215,12 +212,10 @@ uint8_t BSP_CAMERA_Init(uint32_t Resolution)
   */
 //HAL_StatusTypeDef HAL_DCMI_ConfigCrop(DCMI_HandleTypeDef *hdcmi, uint32_t X0, uint32_t Y0, uint32_t XSize, uint32_t YSize)
 
-/*
-      HAL_DCMI_ConfigCROP(phdcmi, (324 - 96) / 2, (244 - 96 / 2), 96, 96);
-      HAL_DCMI_EnableCROP(phdcmi);
-*/
+  HAL_DCMI_ConfigCROP(phdcmi, (QVGA_RES_X - CameraResX) / 2, (QVGA_RES_Y - CameraResY / 2), CameraResX, CameraResY);
+  HAL_DCMI_EnableCROP(phdcmi);
 
-  HAL_DCMI_DisableCROP(phdcmi);
+  //HAL_DCMI_DisableCROP(phdcmi);
 
   CameraCurrentResolution = Resolution;
 
@@ -305,6 +300,76 @@ uint8_t BSP_CAMERA_Stop(void)
   return status;
 }
 
+TIM_HandleTypeDef  TIMHandle  = {0};
+
+#define DCMI_TIM                (TIM1)
+#define DCMI_TIM_PIN            (GPIO_PIN_1)
+#define DCMI_TIM_PORT           (GPIOK)
+#define DCMI_TIM_AF             (GPIO_AF1_TIM1)
+#define DCMI_TIM_CHANNEL        (TIM_CHANNEL_1)
+#define DCMI_TIM_CLK_ENABLE()   __TIM1_CLK_ENABLE()
+#define DCMI_TIM_CLK_DISABLE()  __TIM1_CLK_DISABLE()
+#define DCMI_TIM_PCLK_FREQ()    HAL_RCC_GetPCLK2Freq()
+#define OMV_XCLK_FREQUENCY      (6000000)
+
+extern "C" {
+void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef *htim)
+{
+    if (htim->Instance == DCMI_TIM) {
+        /* Enable DCMI timer clock */
+        DCMI_TIM_CLK_ENABLE();
+
+        /* Timer GPIO configuration */
+        GPIO_InitTypeDef  GPIO_InitStructure;
+        GPIO_InitStructure.Pin       = DCMI_TIM_PIN;
+        GPIO_InitStructure.Pull      = GPIO_NOPULL;
+        GPIO_InitStructure.Speed     = GPIO_SPEED_HIGH;
+        GPIO_InitStructure.Mode      = GPIO_MODE_AF_PP;
+        GPIO_InitStructure.Alternate = DCMI_TIM_AF;
+        HAL_GPIO_Init(DCMI_TIM_PORT, &GPIO_InitStructure);
+    }
+}
+}
+
+static int extclk_config(int frequency)
+{
+    /* TCLK (PCLK * 2) */
+    int tclk = DCMI_TIM_PCLK_FREQ() * 2;
+
+    /* Period should be even */
+    int period = (tclk / frequency) - 1;
+
+    if (TIMHandle.Init.Period && (TIMHandle.Init.Period != period)) {
+        // __HAL_TIM_SET_AUTORELOAD sets TIMHandle.Init.Period...
+        __HAL_TIM_SET_AUTORELOAD(&TIMHandle, period);
+        __HAL_TIM_SET_COMPARE(&TIMHandle, DCMI_TIM_CHANNEL, period / 2);
+        return 0;
+    }
+
+    /* Timer base configuration */
+    TIMHandle.Instance           = DCMI_TIM;
+    TIMHandle.Init.Period        = period;
+    TIMHandle.Init.Prescaler     = TIM_ETRPRESCALER_DIV1;
+    TIMHandle.Init.CounterMode   = TIM_COUNTERMODE_UP;
+    TIMHandle.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+
+    /* Timer channel configuration */
+    TIM_OC_InitTypeDef TIMOCHandle;
+    TIMOCHandle.Pulse       = period / 2;
+    TIMOCHandle.OCMode      = TIM_OCMODE_PWM1;
+    TIMOCHandle.OCPolarity  = TIM_OCPOLARITY_HIGH;
+    TIMOCHandle.OCFastMode  = TIM_OCFAST_DISABLE;
+    TIMOCHandle.OCIdleState = TIM_OCIDLESTATE_RESET;
+
+    if ((HAL_TIM_PWM_Init(&TIMHandle) != HAL_OK)
+    || (HAL_TIM_PWM_ConfigChannel(&TIMHandle, &TIMOCHandle, DCMI_TIM_CHANNEL) != HAL_OK)
+    || (HAL_TIM_PWM_Start(&TIMHandle, DCMI_TIM_CHANNEL) != HAL_OK)) {
+        return -1;
+    }
+
+    return 0;
+}
+
 /**
   * @brief  CANERA power up
   * @retval None
@@ -313,21 +378,15 @@ void BSP_CAMERA_PwrUp(void)
 {
   GPIO_InitTypeDef gpio_init_structure;
 
-  /* Enable GPIO clock */
-  __HAL_RCC_GPIOJ_CLK_ENABLE();
+  mbed::DigitalOut* powerup = new mbed::DigitalOut(PC_13);
+  *powerup = 0;
+  delay(50);
+  *powerup = 1;
+  delay(50);
 
-  /*** Configure the GPIO ***/
-  /* Configure DCMI GPIO as alternate function */
-  gpio_init_structure.Pin       = GPIO_PIN_14;
-  gpio_init_structure.Mode      = GPIO_MODE_OUTPUT_PP;
-  gpio_init_structure.Pull      = GPIO_NOPULL;
-  gpio_init_structure.Speed     = GPIO_SPEED_FREQ_VERY_HIGH;
-  HAL_GPIO_Init(GPIOJ, &gpio_init_structure);
+  extclk_config(OMV_XCLK_FREQUENCY);
 
-  /* De-assert the camera POWER_DOWN pin (active high) */
-  HAL_GPIO_WritePin(GPIOJ, GPIO_PIN_14, GPIO_PIN_RESET);
-
-  HAL_Delay(3);     /* POWER_DOWN de-asserted during 3ms */
+  HAL_Delay(30);     /* POWER_DOWN de-asserted during 3ms */
 }
 
 /**
@@ -336,21 +395,7 @@ void BSP_CAMERA_PwrUp(void)
   */
 void BSP_CAMERA_PwrDown(void)
 {
-  GPIO_InitTypeDef gpio_init_structure;
-
-  /* Enable GPIO clock */
-  __HAL_RCC_GPIOJ_CLK_ENABLE();
-
-  /*** Configure the GPIO ***/
-  /* Configure DCMI GPIO as alternate function */
-  gpio_init_structure.Pin       = GPIO_PIN_14;
-  gpio_init_structure.Mode      = GPIO_MODE_OUTPUT_PP;
-  gpio_init_structure.Pull      = GPIO_NOPULL;
-  gpio_init_structure.Speed     = GPIO_SPEED_FREQ_VERY_HIGH;
-  HAL_GPIO_Init(GPIOJ, &gpio_init_structure);
-
-  /* Assert the camera POWER_DOWN pin (active high) */
-  HAL_GPIO_WritePin(GPIOJ, GPIO_PIN_14, GPIO_PIN_SET);
+  digitalWrite(PC_13, LOW);
 }
 
 /**
@@ -367,22 +412,22 @@ static uint32_t GetSize(uint32_t Resolution)
   {
   case CAMERA_R160x120:
     {
-      size =  0x2580;
+      size =  160 * 120;
     }
     break;
   case CAMERA_R320x240:
     {
-      size =  96 * 96;
+      size =  324 * 244;
     }
     break;
   case CAMERA_R480x272:
     {
-      size =  0xFF00;
+      size =  480 * 272;
     }
     break;
   case CAMERA_R640x480:
     {
-      size =  0x25800;
+      size =  640 * 480;
     }
     break;
   default:
@@ -479,8 +524,8 @@ void HAL_DCMI_ErrorCallback(DCMI_HandleTypeDef *hdcmi)
 
 int CameraClass::begin(int horizontalResolution, int verticalResolution)
 {  
-  CameraResX = QVGA_RES_X;
-  CameraResY = QVGA_RES_Y;
+  CameraResX = horizontalResolution;
+  CameraResY = verticalResolution;
 
   SDRAM.begin(LCD_FRAME_BUFFER);
 
@@ -508,21 +553,23 @@ int CameraClass::start(void)
 
 uint8_t* CameraClass::grab(void)
 {
-  HIMAX_Mode(HIMAX_Streaming);
+  //HIMAX_Mode(HIMAX_Streaming);
 
   /* Start the Camera Snapshot Capture */
-  BSP_CAMERA_ContinuousStart((uint8_t *)LCD_FRAME_BUFFER);
+  //BSP_CAMERA_ContinuousStart((uint8_t *)LCD_FRAME_BUFFER);
 
   /* Wait until camera frame is ready : DCMI Frame event */
   while(camera_frame_ready == 0)
   {
   }
+  return (uint8_t *)LCD_FRAME_BUFFER;
 }
 
 uint8_t* CameraClass::snapshot(void)
 {
-  printf("Start snapshot\n");
   HIMAX_Mode(HIMAX_Streaming);
+
+  BSP_CAMERA_Resume();
 
   /* Start the Camera Snapshot Capture */
   BSP_CAMERA_SnapshotStart((uint8_t *)LCD_FRAME_BUFFER);

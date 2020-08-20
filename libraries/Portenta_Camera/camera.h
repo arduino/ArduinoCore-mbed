@@ -1,5 +1,7 @@
 class CameraClass {
 public:
-	int begin();
-	int snapshot();
+	int begin(int horizontalResolution, int verticalResolution);
+	uint8_t* snapshot();
+	int start(void);
+	uint8_t* grab(void);
 };

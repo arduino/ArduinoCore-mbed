@@ -4,12 +4,13 @@
 
 #include "Arduino.h"
 #include "Wire.h"
+#include "mbed.h"
 
 #ifdef __cplusplus
  extern "C" {
 #endif
 
-#define HIMAX_I2C_ADDR                     0x48
+#define HIMAX_I2C_ADDR                     0x24
 
 #define QVGA_W                             (320)
 #define QVGA_H                             (240)
