@@ -33,10 +33,15 @@ class WiFiClient : public arduino::Client {
 
 public:
   WiFiClient();
+  ~WiFiClient() {
+    stop();
+  }
 
   uint8_t status();
+  int connect(SocketAddress socketAddress);
   int connect(IPAddress ip, uint16_t port);
   int connect(const char *host, uint16_t port);
+  int connectSSL(SocketAddress socketAddress);
   int connectSSL(IPAddress ip, uint16_t port);
   int connectSSL(const char *host, uint16_t port);
   size_t write(uint8_t);
