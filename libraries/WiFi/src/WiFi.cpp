@@ -1,5 +1,7 @@
 #include "WiFi.h"
 
+#define SSID_MAX_LENGTH 32
+
 bool arduino::WiFiClass::isVisible(const char* ssid) {
     for (int i=0; i<10; i++) {
         if (strncmp(ap_list[i].get_ssid(), ssid, 32) == 0) {
@@ -21,34 +23,22 @@ SocketAddress arduino::WiFiClass::socketAddressFromIpAddress(arduino::IPAddress 
 }
 
 int arduino::WiFiClass::begin(const char* ssid, const char *passphrase) {
-    if (_ssid) free(_ssid);
-
-    _ssid = (char*)malloc(33);
-    if (!_ssid) {
-        //tr_error("Could not allocate ssid buffer");
-        return WL_CONNECT_FAILED;
-    }
-
     if (wifi_if == nullptr) {
         //Q: What is the callback for?
         _initializerCallback();
         if(wifi_if == nullptr) return WL_CONNECT_FAILED;
-    }
-
-    memcpy(_ssid, ssid, 33);
-    // too long? break it off
-    if (strlen(ssid) > 32) _ssid[32] = 0;
+    }    
 
     scanNetworks();
     // use scan result to populate security field
-    if (!isVisible(_ssid)) {
+    if (!isVisible(ssid)) {
         _currentNetworkStatus = WL_CONNECT_FAILED;
         return _currentNetworkStatus;
     }
 
-    nsapi_error_t ret = wifi_if->connect(_ssid, passphrase, ap_list[connected_ap].get_security());
-
-    _currentNetworkStatus = ret == NSAPI_ERROR_OK ? WL_CONNECTED : WL_CONNECT_FAILED;
+    nsapi_error_t result = wifi_if->connect(ssid, passphrase, ap_list[connected_ap].get_security());
+    
+    _currentNetworkStatus = (result == NSAPI_ERROR_OK && setSSID(ssid)) ? WL_CONNECTED : WL_CONNECT_FAILED;
     return _currentNetworkStatus;
 }
 
@@ -59,16 +49,17 @@ int arduino::WiFiClass::beginAP(const char* ssid, const char *passphrase, uint8_
 #endif
 
     if (_softAP == NULL) {
-        return WL_CONNECT_FAILED;
+        return WL_AP_FAILED;
     }
 
     ensureDefaultAPNetworkConfiguration();
 
     //Set ap ssid, password and channel    
     static_cast<WhdSoftAPInterface*>(_softAP)->set_network(_ip, _netmask, _gateway);
-    nsapi_error_t ret = static_cast<WhdSoftAPInterface*>(_softAP)->start(ssid, passphrase, NSAPI_SECURITY_WPA2, channel, true /* dhcp server */, NULL, true /* cohexistance */);
-
-    return ret == NSAPI_ERROR_OK ? WL_AP_LISTENING : WL_CONNECT_FAILED;
+    nsapi_error_t result = static_cast<WhdSoftAPInterface*>(_softAP)->start(ssid, passphrase, NSAPI_SECURITY_WPA2, channel, true /* dhcp server */, NULL, true /* cohexistance */);
+    
+    _currentNetworkStatus = (result == NSAPI_ERROR_OK && setSSID(ssid)) ? WL_AP_LISTENING : WL_AP_FAILED;
+    return _currentNetworkStatus;
 }
 
 void arduino::WiFiClass::ensureDefaultAPNetworkConfiguration() {
@@ -134,6 +125,21 @@ void arduino::WiFiClass::setDNS(IPAddress dns_server1, IPAddress dns_server2){
 
 char* arduino::WiFiClass::SSID() {
     return _ssid;
+}
+
+int arduino::WiFiClass::setSSID(const char* ssid){
+    if (_ssid) free(_ssid);
+
+    _ssid = (char*)malloc(SSID_MAX_LENGTH + 1);
+    if (!_ssid) {
+        //tr_error("Could not allocate ssid buffer");
+        return 0;
+    }
+
+    memcpy(_ssid, ssid, SSID_MAX_LENGTH + 1);
+    // too long? break it off
+    if (strlen(ssid) > SSID_MAX_LENGTH) _ssid[SSID_MAX_LENGTH] = 0;
+    return 1;
 }
 
 static const char *sec2str(nsapi_security_t sec)
