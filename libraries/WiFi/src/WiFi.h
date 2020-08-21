@@ -308,7 +308,7 @@ private:
     voidPrtFuncPtr _initializerCallback;
     WiFiAccessPoint* ap_list = nullptr;
     uint8_t connected_ap;
-
+    int setSSID(const char* ssid);
     void ensureDefaultAPNetworkConfiguration();
     bool isVisible(const char* ssid);
     arduino::IPAddress ipAddressFromSocketAddress(SocketAddress socketAddress);

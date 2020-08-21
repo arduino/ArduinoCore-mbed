@@ -31,7 +31,9 @@ void arduino::WiFiClient::getStatus() {
 int arduino::WiFiClient::connect(SocketAddress socketAddress) {
 	if (sock == NULL) {
 		sock = new TCPSocket();		
-		static_cast<TCPSocket*>(sock)->open(WiFi.getNetwork());
+		if(static_cast<TCPSocket*>(sock)->open(WiFi.getNetwork()) != NSAPI_ERROR_OK){
+			return 0;
+		}
 	}
 	//sock->sigio(mbed::callback(this, &WiFiClient::getStatus));
 	//sock->set_blocking(false);
@@ -54,7 +56,9 @@ int arduino::WiFiClient::connect(const char *host, uint16_t port) {
 int arduino::WiFiClient::connectSSL(SocketAddress socketAddress){
 	if (sock == NULL) {
 		sock = new TLSSocket();
-		static_cast<TLSSocket*>(sock)->open(WiFi.getNetwork());
+		if(static_cast<TLSSocket*>(sock)->open(WiFi.getNetwork()) != NSAPI_ERROR_OK){
+			return 0;
+		}
 	}
 	if (beforeConnect) {
 		beforeConnect();
