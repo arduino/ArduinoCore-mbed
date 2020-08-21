@@ -96,8 +96,8 @@ do {} while(0U)
 #define  HOST_PORT_POWER_ON_FS() \
 do{}while(0)
 
-//#define RTOS_INTERRUPT_ENTER    core_util_critical_section_enter
-//#define RTOS_INTERRUPT_LEAVE    core_util_critical_section_exit
+#define RTOS_INTERRUPT_ENTER    core_util_critical_section_enter
+#define RTOS_INTERRUPT_LEAVE    core_util_critical_section_exit
 
 // init the stdio hardware
 void stdio_init(void);

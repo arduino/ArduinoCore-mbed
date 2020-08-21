@@ -718,9 +718,9 @@ int tusbh_device_deinit(tusbh_device_t* dev)
         }
     }
     
-    if(dev_root(dev)->cb_device_remove){
-        dev_root(dev)->cb_device_remove(dev);
-    }
+    //if(dev_root(dev)->cb_device_remove){
+    //    dev_root(dev)->cb_device_remove(dev);
+    //}
     
     for(uint8_t i=0;i<dev->interface_num;i++){
         

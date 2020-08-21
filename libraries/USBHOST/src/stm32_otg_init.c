@@ -259,7 +259,7 @@ void set_io_af_mode(GPIO_TypeDef* GPIO, uint8_t pin, uint8_t af)
   gpio_osc_init_structure.Pin = pin;
   gpio_osc_init_structure.Mode = GPIO_MODE_AF_PP;
   gpio_osc_init_structure.Pull = GPIO_NOPULL;
-  gpio_osc_init_structure.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  gpio_osc_init_structure.Speed = GPIO_SPEED_FREQ_HIGH;
   gpio_osc_init_structure.Alternate = af;
   HAL_GPIO_Init(GPIO, &gpio_osc_init_structure);
 #else

@@ -368,7 +368,7 @@ static int hub_data_xfered(tusbh_ep_info_t* ep)
                 TUSB_HUB_INFO("Connect\n");
                 tusbh_device_t* child = dev->children[port-1];
                 if(child){
-                    TUSB_HUB_INFO("aleary has a child\n");
+                    TUSB_HUB_INFO("already has a child\n");
                     tusbh_device_deinit(child);
                     dev->children[port-1] = 0;
                 }

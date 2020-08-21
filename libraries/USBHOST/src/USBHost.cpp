@@ -20,6 +20,7 @@ uint32_t USBHost::Init(uint8_t id, const tusbh_class_reg_t class_table[]) {
   if (id == USB_CORE_ID_HS) {
 
     get_usb_phy()->deinit();
+    mbed::DigitalOut otg(PJ_6, 1);
 
     _hs = tusb_get_host(USB_CORE_ID_HS);
     HOST_PORT_POWER_ON_HS();
