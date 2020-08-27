@@ -155,14 +155,14 @@ public:
     USBCDC *serial;
 };
 
-USBCDC::USBCDC(bool connect_blocking, uint16_t vendor_id, uint16_t product_id, uint16_t product_release)
-    : internal::PluggableUSBModule(2)
+USBCDC::USBCDC(bool connect_blocking, const char* name, uint16_t vendor_id, uint16_t product_id, uint16_t product_release)
+    : internal::PluggableUSBModule(2), extraDescriptor(name)
 {
     PluggableUSBD().plug(this);
 }
 
-USBCDC::USBCDC(USBPhy *phy, uint16_t vendor_id, uint16_t product_id, uint16_t product_release)
-    : internal::PluggableUSBModule(2)
+USBCDC::USBCDC(USBPhy *phy, const char* name, uint16_t vendor_id, uint16_t product_id, uint16_t product_release)
+    : internal::PluggableUSBModule(2), extraDescriptor(name)
 {
     PluggableUSBD().plug(this);
 }
@@ -492,12 +492,7 @@ void USBCDC::_receive_isr()
 
 const uint8_t *USBCDC::string_iinterface_desc()
 {
-    static const uint8_t stringIinterfaceDescriptor[] = {
-        0x08,
-        STRING_DESCRIPTOR,
-        'C', 0, 'D', 0, 'C', 0,
-    };
-    return stringIinterfaceDescriptor;
+    return (const uint8_t *)extraDescriptor;
 }
 
 const uint8_t *USBCDC::string_iproduct_desc()
@@ -546,7 +541,7 @@ const uint8_t *USBCDC::configuration_desc(uint8_t index)
         0x02,                   // bInterfaceClass
         0x02,                   // bInterfaceSubClass
         0x01,                   // bInterfaceProtocol
-        0,                      // iInterface
+        (extraDescriptor != NULL) ? 0x5 : 0x0, // iInterface
 
         // CDC Header Functional Descriptor, CDC Spec 5.2.3.1, Table 26
         5,                      // bFunctionLength

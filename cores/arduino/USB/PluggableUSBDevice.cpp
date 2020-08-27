@@ -209,22 +209,28 @@ const uint8_t *arduino::PluggableUSBDevice::device_desc()
     return device_descriptor;
 }
 
-const uint8_t *arduino::PluggableUSBDevice::string_iinterface_desc()
-{
-    static const uint8_t stringIinterfaceDescriptor[] = {
-        0x08,
-        STRING_DESCRIPTOR,
-        'U', 0, 'S', 0, 'B', 0,
-    };
-    return stringIinterfaceDescriptor;
-}
-
 static uint8_t TO_UNICODE(const char* string, uint8_t* where) {
     for (size_t i = 0; i < strlen(string); i++) {
         where[i*2] = string[i];
         where[i*2 + 1] = 0;
     }
     return strlen(string) * 2;
+}
+
+const uint8_t *arduino::PluggableUSBDevice::string_iinterface_desc()
+{
+    arduino::internal::PluggableUSBModule* node;
+    const char* iinterface_descriptor = NULL;
+    for (node = rootNode; node; node = node->next) {
+        iinterface_descriptor = (const char*)node->string_iinterface_desc();
+        if (iinterface_descriptor != NULL) {
+            break;
+        }
+    }
+    _config_iinterfacedescriptor[0] = 2;
+    _config_iinterfacedescriptor[1] = STRING_DESCRIPTOR;
+    _config_iinterfacedescriptor[0] += TO_UNICODE(iinterface_descriptor, &_config_iinterfacedescriptor[2]);
+    return _config_iinterfacedescriptor;
 }
 
 #ifdef BOARD_NAME

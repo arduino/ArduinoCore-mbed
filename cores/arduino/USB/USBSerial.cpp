@@ -45,8 +45,8 @@ void usbPortChanged(int baud, int bits, int parity, int stop) {
     }
 }
 
-USBSerial::USBSerial(bool connect_blocking, uint16_t vendor_id, uint16_t product_id, uint16_t product_release):
-    USBCDC(get_usb_phy(), vendor_id, product_id, product_release)
+USBSerial::USBSerial(bool connect_blocking, const char* name, uint16_t vendor_id, uint16_t product_id, uint16_t product_release):
+    USBCDC(get_usb_phy(), name, vendor_id, product_id, product_release)
 {
     _settings_changed_callback = 0;
 
@@ -56,7 +56,7 @@ USBSerial::USBSerial(bool connect_blocking, uint16_t vendor_id, uint16_t product
 }
 
 USBSerial::USBSerial(USBPhy *phy, uint16_t vendor_id, uint16_t product_id, uint16_t product_release):
-    USBCDC(phy, vendor_id, product_id, product_release)
+    USBCDC(phy, NULL, vendor_id, product_id, product_release)
 {
     _settings_changed_callback = 0;
 }

@@ -43,7 +43,7 @@ public:
     * @param product_id Your product_id
     * @param product_release Your product_release
     */
-    USBCDC(bool connect_blocking = true, uint16_t vendor_id = 0x1f00, uint16_t product_id = 0x2012, uint16_t product_release = 0x0001);
+    USBCDC(bool connect_blocking = true, const char* name = NULL, uint16_t vendor_id = 0x1f00, uint16_t product_id = 0x2012, uint16_t product_release = 0x0001);
 
     /**
     * Fully featured constructor
@@ -61,7 +61,7 @@ public:
     * @param product_id Your product_id
     * @param product_release Your product_release
     */
-    USBCDC(USBPhy *phy, uint16_t vendor_id, uint16_t product_id, uint16_t product_release);
+    USBCDC(USBPhy *phy, const char* name, uint16_t vendor_id, uint16_t product_id, uint16_t product_release);
 
     /**
      * Destroy this object
@@ -216,6 +216,8 @@ protected:
     uint8_t _rx_buffer[512];
     uint8_t *_rx_buf;
     uint32_t _rx_size;
+
+    const char* extraDescriptor;
 };
 }
 

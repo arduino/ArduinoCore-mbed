@@ -55,6 +55,7 @@ protected:
     virtual bool callback_set_configuration(uint8_t configuration);
     virtual void callback_set_interface(uint16_t interface, uint8_t alternate);
     virtual void init(EndpointResolver& resolver);
+    virtual const uint8_t *string_iinterface_desc();
 
     uint8_t pluggedInterface;
 
@@ -197,6 +198,7 @@ private:
     uint8_t _config_descriptor[400];
     uint8_t _config_iserial[64];
     uint8_t _config_iproductdescriptor[64];
+    uint8_t _config_iinterfacedescriptor[64];
 
     uint8_t lastIf;
     internal::PluggableUSBModule* rootNode;
