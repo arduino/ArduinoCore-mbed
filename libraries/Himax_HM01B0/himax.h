@@ -145,6 +145,7 @@ typedef struct regval_list_ {
 
 uint8_t HIMAX_Open(void);
 void HIMAX_Mode(uint8_t mode);
+void HIMAX_TestPattern(bool enable = true, bool walking = true);
 
 
 #ifdef __cplusplus

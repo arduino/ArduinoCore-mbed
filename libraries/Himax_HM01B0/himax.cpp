@@ -300,6 +300,15 @@ static void HIMAX_GrayScale(uint8_t value)
     HIMAX_RegWrite(BLC2_TGT, value);
 }
 
+void HIMAX_TestPattern(bool enable, bool walking)
+{
+    uint8_t reg = 0;
+    if (enable) {
+        reg = 1 | (walking ? (1 << 4) : 0);
+    }
+    HIMAX_RegWrite(0x0601,  reg );
+}
+
 static void HIMAX_FrameRate()
 {
     HIMAX_RegWrite( FRAME_LEN_LINES_H, 0x02);

@@ -588,5 +588,8 @@ uint8_t* CameraClass::snapshot(void)
   return (uint8_t *)LCD_FRAME_BUFFER;
 }
 
-
+void CameraClass::testPattern(bool walking)
+{
+  HIMAX_TestPattern(true, walking);
+}
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
