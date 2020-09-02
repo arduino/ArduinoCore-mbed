@@ -86,7 +86,8 @@ static void utox8(uint32_t val, uint8_t* s) {
 uint8_t getUniqueSerialNumber(uint8_t* name) {
   utox8(HAL_GetUIDw0(), &name[0]);
   utox8(HAL_GetUIDw1(), &name[16]);
-  return 32;
+  utox8(HAL_GetUIDw2(), &name[32]);
+  return 48;
 }
 
 void _ontouch1200bps_() {
