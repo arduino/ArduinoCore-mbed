@@ -39,6 +39,7 @@
 #include "mbed/drivers/PwmOut.h"
 #include "mbed/drivers/AnalogIn.h"
 #include "mbed/drivers/DigitalInOut.h"
+#include "mbed.h"
 #undef F
 #endif //__cplusplus
 
