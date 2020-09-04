@@ -693,7 +693,7 @@ void Platform_CommSendChar(int character)
 
 
 
-
+#ifdef STM32H747xx
 static const char g_memoryMapXml[] = "<?xml version=\"1.0\"?>"
                                      "<!DOCTYPE memory-map PUBLIC \"+//IDN gnu.org//DTD GDB Memory Map V1.0//EN\" \"http://sourceware.org/gdb/gdb-memory-map.dtd\">"
                                      "<memory-map>"
@@ -714,6 +714,17 @@ static const char g_memoryMapXml[] = "<?xml version=\"1.0\"?>"
                                      "<memory type=\"flash\" start=\"0x90000000\" length=\"0x10000000\"> <property name=\"blocksize\">0x200</property></memory>"
                                      "<memory type=\"ram\" start=\"0xc0000000\" length=\"0x800000\"> </memory>"
                                      "</memory-map>";
+#endif
+
+#ifdef NRF52840_XXAA
+static const char g_memoryMapXml[] = "<?xml version=\"1.0\"?>"
+                                     "<!DOCTYPE memory-map PUBLIC \"+//IDN gnu.org//DTD GDB Memory Map V1.0//EN\" \"http://sourceware.org/gdb/gdb-memory-map.dtd\">"
+                                     "<memory-map>"
+                                     "<memory type=\"flash\" start=\"0x00000000\" length=\"0x100000\"> <property name=\"blocksize\">0x1000</property></memory>"
+                                     "<memory type=\"ram\" start=\"0x20000000\" length=\"0x40000\"> </memory>"
+                                     "<memory type=\"ram\" start=\"0x00800000\" length=\"0x40000\"> </memory>"
+                                     "</memory-map>";
+#endif
 
 uint32_t Platform_GetDeviceMemoryMapXmlSize(void)
 {
