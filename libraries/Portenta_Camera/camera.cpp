@@ -180,7 +180,7 @@ uint32_t BSP_CAMERA_GetRotation(void)
 uint8_t BSP_CAMERA_Init(uint32_t Resolution)
 {
   DCMI_HandleTypeDef *phdcmi;
-  uint8_t status = 0;
+  uint8_t status = -1;
 
   /* Get the DCMI handle structure */
   phdcmi = &hdcmi_discovery;
@@ -197,7 +197,7 @@ uint8_t BSP_CAMERA_Init(uint32_t Resolution)
 
   /* Power up camera */
   BSP_CAMERA_PwrUp();
-  HIMAX_Open();
+  if (HIMAX_Open()!=0) return status;
 
   /* DCMI Initialization */
   BSP_CAMERA_MspInit(&hdcmi_discovery, NULL);
@@ -212,7 +212,7 @@ uint8_t BSP_CAMERA_Init(uint32_t Resolution)
   */
 //HAL_StatusTypeDef HAL_DCMI_ConfigCrop(DCMI_HandleTypeDef *hdcmi, uint32_t X0, uint32_t Y0, uint32_t XSize, uint32_t YSize)
 
-  HAL_DCMI_ConfigCROP(phdcmi, (QVGA_RES_X - CameraResX) / 2, (QVGA_RES_Y - CameraResY / 2), CameraResX, CameraResY);
+  HAL_DCMI_ConfigCROP(phdcmi, (QVGA_RES_X - CameraResX) / 2, (QVGA_RES_Y - CameraResY / 2), CameraResX-1, CameraResY-1);
   HAL_DCMI_EnableCROP(phdcmi);
 
   //HAL_DCMI_DisableCROP(phdcmi);
@@ -220,7 +220,7 @@ uint8_t BSP_CAMERA_Init(uint32_t Resolution)
   CameraCurrentResolution = Resolution;
 
   /* Return CAMERA_OK status */
-  status = 1;
+  status = 0;
 
   return status;
 }
@@ -532,24 +532,26 @@ int CameraClass::begin(int horizontalResolution, int verticalResolution)
 
   /*## Camera Initialization and capture start ############################*/
   /* Initialize the Camera in QVGA mode */
-  if(BSP_CAMERA_Init(CAMERA_R320x240) != 1)
+  if(BSP_CAMERA_Init(CAMERA_R320x240) != 0)
   {
-    return 0;
+    return -1;
   }
-
+  return 0;
 }
 
-int CameraClass::start(void)
+int CameraClass::start(uint32_t timeout)
 {
   HIMAX_Mode(HIMAX_Streaming);
 
   /* Start the Camera Snapshot Capture */
   BSP_CAMERA_ContinuousStart((uint8_t *)LCD_FRAME_BUFFER);
+  uint32_t time =millis();
 
   /* Wait until camera frame is ready : DCMI Frame event */
-  while(camera_frame_ready == 0)
+  while((camera_frame_ready == 0) && ((timeout+time)>millis()))
   {
   }
+  return camera_frame_ready ? 0: -1;
 }
 
 uint8_t* CameraClass::grab(void)

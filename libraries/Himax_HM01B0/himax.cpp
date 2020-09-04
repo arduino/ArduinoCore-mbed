@@ -205,12 +205,13 @@ uint8_t HIMAX_Open(void)
 {
     Wire.begin();
 
-    printf("Model: %x:%x\n", HIMAX_RegRead(MODEL_ID_H), HIMAX_RegRead(MODEL_ID_L));
+    //printf("Model: %x:%x\n", HIMAX_RegRead(MODEL_ID_H), HIMAX_RegRead(MODEL_ID_L));
 
-    HIMAX_Reset();
-    HIMAX_Boot();
+    if (HIMAX_Reset()!=0) return -1;
+    //HIMAX_Boot();
     //For debugging camera Configuration
-    HIMAX_PrintReg();
+    //HIMAX_PrintReg();
+    HAL_Delay(200);
 
     return 0;
 }
@@ -269,12 +270,13 @@ static uint8_t HIMAX_RegRead(uint16_t addr)
 
 static uint8_t HIMAX_Reset()
 {
+    uint32_t max_timeout=100;
     do {
         HIMAX_RegWrite(SW_RESET, HIMAX_RESET);
-        delayMicroseconds(50);
-    } while (HIMAX_RegRead(MODE_SELECT) != HIMAX_Standby);
+        delay(1);
+    } while (HIMAX_RegRead(MODE_SELECT) != HIMAX_Standby && ((--max_timeout)>0) );
 
-    return 0;
+    return max_timeout>0 ? 0: -1 ;
 }
 
 static uint8_t HIMAX_Boot()
@@ -282,9 +284,9 @@ static uint8_t HIMAX_Boot()
     uint32_t i;
 
     for(i = 0; i < (sizeof(himax_default_regs) / sizeof(regval_list_t)); i++) {
-        printf("%d\n", i);
+        //printf("%d\n", i);
         HIMAX_RegWrite(himax_default_regs[i].reg_num, himax_default_regs[i].value);
-        delayMicroseconds(50);
+        //delay(1);
     }
 
     HIMAX_RegWrite(PCLK_POLARITY, (0x20 | PCLK_FALLING_EDGE));
@@ -303,10 +305,22 @@ static void HIMAX_GrayScale(uint8_t value)
 void HIMAX_TestPattern(bool enable, bool walking)
 {
     uint8_t reg = 0;
+    HIMAX_RegWrite(PCLK_POLARITY, (0x20 | PCLK_FALLING_EDGE));
+    HIMAX_RegWrite(0x2100,  0 ); //AE 
+    HIMAX_RegWrite(0x1000,  0 ); //BLC 
+    HIMAX_RegWrite(0x1008,  0 ); //DPC 
+    HIMAX_RegWrite(0x0205,  0 ); //AGAIN 
+    HIMAX_RegWrite(0x020e,  1 ); //DGAINH 
+    HIMAX_RegWrite(0x020f,  0 ); //DGAINL 
+    
     if (enable) {
         reg = 1 | (walking ? (1 << 4) : 0);
     }
     HIMAX_RegWrite(0x0601,  reg );
+    HIMAX_RegWrite(0x0104,  1 ); //group hold 
+
+    HAL_Delay(100);
+
 }
 
 static void HIMAX_FrameRate()
