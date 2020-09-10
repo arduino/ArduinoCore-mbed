@@ -33,7 +33,8 @@
 #ifdef __cplusplus
 extern "C"{
 #endif
-#include "wiring_constants.h"
+// #include "wiring_constants.h"
+#include "api/Common.h"			// H7 equivalent
 typedef void (*voidFuncPtr)(void);
 
 

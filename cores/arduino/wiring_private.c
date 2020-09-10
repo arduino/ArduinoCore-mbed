@@ -1,10 +1,4 @@
 //** just starting suggestion at this point --- jcw - 9/10/20
-
-// This file is stubbed - will fix incompatibilies with Portenta
-// pinMode() calls need to be fixed for a start...
-///**XXX** - marks what needs to be fixed
-
-
 /*
   Copyright (c) 2015 Arduino LLC.  All right reserved.
 
@@ -24,16 +18,18 @@
 */
 
 #include "Arduino.h"
+#include "api/Common.h"
 #include "wiring_private.h"
 #include "WVariant.h"
+
 
 int pinPeripheral( uint32_t ulPin, EPioType ulPeripheral )
 {
   // Handle the case the pin isn't usable as PIO
-//**XXX*** STIB UNTIL FIXED ---  if ( g_APinDescription[ulPin].ulPinType == PIO_NOT_A_PIN )
-///  {
-///    return -1 ;
-///  }
+//  if ( g_APinDescription[ulPin].ulPinType == PIO_NOT_A_PIN )
+//  {
+//    return -1 ;
+//  }
 
   switch ( ulPeripheral )
   {
@@ -42,24 +38,24 @@ int pinPeripheral( uint32_t ulPin, EPioType ulPeripheral )
     case PIO_INPUT_PULLUP:
     case PIO_OUTPUT:
       // Disable peripheral muxing, done in pinMode
-//			PORT->Group[g_APinDescription[ulPin].ulPort].PINCFG[g_APinDescription[ulPin].ulPin].bit.PMUXEN = 0 ;
+//                      PORT->Group[g_APinDescription[ulPin].ulPort].PINCFG[g_APinDescription[ulPin].ulPin].bit.PMUXEN = 0 ;
 
       // Configure pin mode, if requested
       if ( ulPeripheral == PIO_INPUT )
       {
-///***XXX^^^ stub until fixed        pinMode( ulPin, INPUT ) ;
+        pin_mode( ulPin, INPUT ) ;	// pinMode( ulPin, INPUT ) ;
       }
       else
       {
         if ( ulPeripheral == PIO_INPUT_PULLUP )
         {
-///***XXX^^^ stub until fixed          pinMode( ulPin, INPUT_PULLUP ) ;
+          pin_mode( ulPin, INPUT_PULLUP ) ;
         }
         else
         {
           if ( ulPeripheral == PIO_OUTPUT )
           {
-///***XXX^^^ stub until fixed            pinMode( ulPin, OUTPUT ) ;
+           pin_mode( ulPin, OUTPUT ) ;
           }
           else
           {
@@ -94,7 +90,7 @@ int pinPeripheral( uint32_t ulPin, EPioType ulPeripheral )
                                                                     PORT_WRCONFIG_PINMASK( g_APinDescription[ulPin].ulPin - 16 ) ;
       }
 #else
-#if 0	 ///***XXX^^^ stub until fixed - should be #if 1 here <-   
+#if 0       
       if ( g_APinDescription[ulPin].ulPin & 1 ) // is pin odd?
       {
         uint32_t temp ;
@@ -114,7 +110,7 @@ int pinPeripheral( uint32_t ulPin, EPioType ulPeripheral )
         PORT->Group[g_APinDescription[ulPin].ulPort].PMUX[g_APinDescription[ulPin].ulPin >> 1].reg = temp|PORT_PMUX_PMUXE( ulPeripheral ) ;
         PORT->Group[g_APinDescription[ulPin].ulPort].PINCFG[g_APinDescription[ulPin].ulPin].reg |= PORT_PINCFG_PMUXEN ; // Enable port mux
       }
-#endif
+#endif      
 #endif
     break ;
 
