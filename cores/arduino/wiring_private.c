@@ -49,13 +49,13 @@ int pinPeripheral( uint32_t ulPin, EPioType ulPeripheral )
       {
         if ( ulPeripheral == PIO_INPUT_PULLUP )
         {
-          pin_mode( ulPin, INPUT_PULLUP ) ;
+          pin_mode( ulPin, INPUT_PULLUP ) ;    // pinMode( ulPin, INPUT_PULLUP ) ;
         }
         else
         {
           if ( ulPeripheral == PIO_OUTPUT )
           {
-           pin_mode( ulPin, OUTPUT ) ;
+           pin_mode( ulPin, OUTPUT ) ;		// pinMode( ulPin, OUTPUT ) ;
           }
           else
           {
