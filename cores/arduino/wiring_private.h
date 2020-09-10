@@ -1,3 +1,4 @@
+//** just starting suggestion at this point --- jcw - 9/10/20
 /*
   wiring_private.h
   Part of Arduino - http://www.arduino.cc/
@@ -23,6 +24,7 @@
 #ifndef WiringPrivate_h
 #define WiringPrivate_h
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdarg.h>
 
@@ -31,11 +33,14 @@
 #ifdef __cplusplus
 extern "C"{
 #endif
-
+#include "wiring_constants.h"
 typedef void (*voidFuncPtr)(void);
+
+
+int pinPeripheral( uint32_t ulPin, EPioType ulPeripheral );
 
 #ifdef __cplusplus
 } // extern "C"
 #endif
-
+// #include "HardwareSerial.h"
 #endif
