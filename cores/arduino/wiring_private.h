@@ -29,7 +29,7 @@
 #include <stdarg.h>
 
 #include "Arduino.h"
-
+#include "WVariant.h"
 #ifdef __cplusplus
 extern "C"{
 #endif
@@ -42,5 +42,5 @@ int pinPeripheral( uint32_t ulPin, EPioType ulPeripheral );
 #ifdef __cplusplus
 } // extern "C"
 #endif
-// #include "HardwareSerial.h"
+
 #endif

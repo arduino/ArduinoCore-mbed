@@ -42,10 +42,10 @@ extern "C"{
 #define SERIAL  0x0
 #define DISPLAY 0x1
 
-enum BitOrder {
-	LSBFIRST = 0,
-	MSBFIRST = 1
-};
+// enum BitOrder {
+//	LSBFIRST = 0,
+//	MSBFIRST = 1
+// };
 
 // moved to WInterrupts.h
 ////      LOW 0
