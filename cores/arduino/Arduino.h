@@ -127,19 +127,16 @@ extern analogin_config_t adcCurrentConfig;
 #endif
 
 #include "Serial.h"
+
 #if defined(SERIAL_CDC)
 #include "USB/PluggableUSBSerial.h"
 #define Serial SerialUSB
+#endif
+
 #define Serial1 _UART1_
 #define Serial2 _UART2_
 #define Serial3 _UART3_
 #define Serial4 _UART4_
-#else
-#define Serial  _UART1_
-#define Serial1 _UART2_
-#define Serial2 _UART3_
-#define Serial3 _UART4_
-#endif
 
 #include "overloads.h"
 #endif
