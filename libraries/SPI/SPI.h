@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Arduino.h"
+#include "api/HardwareSPI.h"
 #if !defined(ARDUINO_AS_MBED_LIBRARY)
 #include "drivers/SPIMaster.h"
 #else

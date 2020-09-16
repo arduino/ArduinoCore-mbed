@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Arduino.h"
+#include "api/HardwareI2C.h"
 #include "Print.h"
 #include "drivers/I2C.h"
 #include "drivers/I2CSlave.h"
