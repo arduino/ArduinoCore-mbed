@@ -34,6 +34,10 @@
 #include <Arduino.h>
 //#include <mbed.h>
 
+#if defined(STM32H747xx) && defined(CORE_CM4)
+// include RPC out of arduino namespace
+#include "RPC_internal.h"
+#endif
 
 namespace arduino {
 
@@ -76,6 +80,7 @@ public:
     virtual void attach(void (*pCallback)()) = 0;
 };
 
+#ifdef SERIAL_CDC
 // Use the SerialUSB interface to communicate with GDB.
 class UsbDebugCommInterface : public DebugCommInterface {
 public:
@@ -91,6 +96,25 @@ public:
 protected:
     arduino::USBSerial*  _pSerial;
 };
+#endif
+
+#if defined(STM32H747xx) && defined(CORE_CM4)
+// Use the RPC interface to communicate with GDB from M4 core
+class RPCDebugCommInterface : public DebugCommInterface {
+public:
+    RPCDebugCommInterface(arduino::RPC*);
+    virtual ~RPCDebugCommInterface();
+
+    virtual bool readable();
+    virtual bool writeable();
+    virtual uint8_t read();
+    virtual void write(uint8_t c);
+    virtual void attach(void (*pCallback)());
+
+protected:
+    arduino::RPC*  _pSerial;
+};
+#endif
 
 // Use one of the device's hardware UARTs to communicate with GDB.
 class UartDebugCommInterface : public DebugCommInterface {
