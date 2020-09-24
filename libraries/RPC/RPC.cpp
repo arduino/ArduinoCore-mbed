@@ -44,6 +44,11 @@ int RPC::rpmsg_recv_raw_callback(struct rpmsg_endpoint *ept, void *data,
   for (int i=0; i<len; i++) {
     rpc->rx_buffer.store_char(buf[i]);
   }
+  // call attached function
+  if (rpc->_rx) {
+    rpc->_rx.call();
+  }
+
   return 0;
 }
 

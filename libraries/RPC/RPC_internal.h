@@ -71,6 +71,13 @@ class RPC : public Stream, public rpc::detail::dispatcher {
 			return initialized;
 		}
 
+	    void attach(void (*fptr)(void))
+	    {
+	        if (fptr != NULL) {
+	            _rx = mbed::Callback<void()>(fptr);
+	        }
+	    }
+
 		template <typename... Args>
     	RPCLIB_MSGPACK::object_handle call(std::string const &func_name,
                                        Args... args) {
@@ -112,6 +119,7 @@ class RPC : public Stream, public rpc::detail::dispatcher {
 		rtos::Thread* eventThread;
 		rtos::Thread* dispatcherThread;
 		RPCLIB_MSGPACK::unpacker pac_;
+		mbed::Callback<void()> _rx;
 
 		//rpc::detail::response response;
 		RPCLIB_MSGPACK::object_handle call_result;
