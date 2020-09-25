@@ -107,9 +107,9 @@ int RPC::begin() {
     return 0;
   }
 
-  eventThread = new rtos::Thread(osPriorityNormal);
-  eventThread->start(callback(&eventQueue, &events::EventQueue::dispatch_forever));
-  ticker.attach(eventQueue.event(&OPENAMP_check_for_message), 0.02f);
+  //eventThread = new rtos::Thread(osPriorityNormal);
+  //eventThread->start(callback(&eventQueue, &events::EventQueue::dispatch_forever));
+  //ticker.attach(eventQueue.event(&OPENAMP_check_for_message), 0.01f);
 
   dispatcherThread = new rtos::Thread(osPriorityNormal);
   dispatcherThread->start(mbed::callback(this, &RPC::dispatch));
@@ -191,9 +191,9 @@ int RPC::begin() {
 	OPENAMP_send(&rp_endpoints[1], &message, sizeof(message));
 	OPENAMP_send(&rp_endpoints[2], &message, sizeof(message));
 
-	eventThread = new rtos::Thread(osPriorityNormal);
-	eventThread->start(callback(&eventQueue, &events::EventQueue::dispatch_forever));
-	ticker.attach(eventQueue.event(&OPENAMP_check_for_message), 0.005f);
+	//eventThread = new rtos::Thread(osPriorityNormal);
+	//eventThread->start(callback(&eventQueue, &events::EventQueue::dispatch_forever));
+	//ticker.attach(eventQueue.event(&OPENAMP_check_for_message), 0.01f);
 
 	dispatcherThread = new rtos::Thread(osPriorityNormal);
 	dispatcherThread->start(mbed::callback(this, &RPC::dispatch));
