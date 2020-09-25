@@ -99,8 +99,8 @@ PinDescription g_APinDescription[] = {
   { P0_30, NULL, NULL, NULL },     // 14 - SENSOR_INPUT_ADC - Analog
   
   // I2C 2 / Analogs
-  { P0_31, NULL, NULL, NULL },     // 15 - I2C_SDA_2        - Analog
-  { P0_2,  NULL, NULL, NULL },     // 16 - I2C_SCL_2        - Analog
+  { P0_31, NULL, NULL, NULL },     // 15 - I2C_SDA1        - Analog
+  { P0_2,  NULL, NULL, NULL },     // 16 - I2C_SCL1        - Analog
 
   // Power / Analogs 
   { P0_28, NULL, NULL, NULL },     // 17 - V_REF            - Analog

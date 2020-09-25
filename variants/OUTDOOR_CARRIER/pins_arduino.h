@@ -153,11 +153,11 @@ static const uint8_t MISO = PIN_SPI_MISO;
 static const uint8_t SCK  = PIN_SPI_SCK;
 
 // Wire
-#define PIN_WIRE_SDA        (23u)
-#define PIN_WIRE_SCL        (24u)
+#define PIN_WIRE_SDA        (27u)
+#define PIN_WIRE_SCL        (28u)
 
-#define PIN_WIRE_SDA1       (25u)
-#define PIN_WIRE_SCL1       (26u)
+#define PIN_WIRE_SDA1       (15u)
+#define PIN_WIRE_SCL1       (16u)
 
 // These serial port names are intended to allow libraries and architecture-neutral
 // sketches to automatically default to the correct port name for a particular type
