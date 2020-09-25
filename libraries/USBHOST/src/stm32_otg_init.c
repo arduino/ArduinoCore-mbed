@@ -388,7 +388,6 @@ static void tusb_otg_core_init(tusb_core_t* core)
     set_io_af_mode( OTG_HS_ULPI_CK );
     
     NVIC_SetPriority(OTG_HS_IRQn, 0);
-    NVIC_EnableIRQ(OTG_HS_IRQn);
     //NVIC_DisableIRQ(OTG_HS_IRQn);
 
     NVIC_SetVector(OTG_HS_IRQn, (uint32_t)&OTG_HS_IRQHandler);
@@ -432,8 +431,10 @@ static void tusb_otg_core_init(tusb_core_t* core)
     // only HS core has DMA feature
     USBx->GAHBCFG |= USB_OTG_GAHBCFG_HBSTLEN_2;
     USBx->GAHBCFG |= USB_OTG_GAHBCFG_DMAEN;
+    #ifdef CORE_CM7
     SCB_CleanInvalidateDCache();
     SCB_DisableDCache();
+    #endif
   }
 #endif
 }
@@ -658,6 +659,7 @@ void tusb_open_host(tusb_host_t* host)
   USBx->GUSBCFG |= USB_OTG_GUSBCFG_FHMOD;
   memset(&host->state, 0, (sizeof(tusb_host_t) -  (uint32_t) (&((tusb_host_t*)0)->state) ) );
   tusb_init_otg_host(host);
+  NVIC_EnableIRQ(OTG_HS_IRQn);
 }
 
 
