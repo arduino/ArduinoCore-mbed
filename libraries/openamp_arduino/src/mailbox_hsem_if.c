@@ -83,7 +83,9 @@ void HAL_HSEM_FreeCallback(uint32_t SemMask)
   HAL_HSEM_ActivateNotification(__HAL_HSEM_SEMID_TO_MASK(HSEM_ID_0));   
 #endif
 
+#ifdef CORE_CM7
   OPENAMP_check_for_message();
+#endif
 }
 
 /**
