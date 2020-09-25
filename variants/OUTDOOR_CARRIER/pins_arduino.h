@@ -114,14 +114,14 @@ extern "C" unsigned int PINCOUNT_fn();
 
 // Analog pins
 // -----------
-#define PIN_A0 (10u) // SENSOR_COMMON
-#define PIN_A1 (11u) // SENSOR_CALIB
-#define PIN_A2 (12u) // SENSOR_CAPTURE_A
+#define PIN_A0 (11u) // SENSOR_COMMON
+#define PIN_A1 (12u) // SENSOR_CALIB
+#define PIN_A2 (13u) // SENSOR_CAPTURE_A
 #define PIN_A3 (14u) // SENSOR_INPUT_ADC
-#define PIN_A4 (25u) // I2C_SDA_2
-#define PIN_A5 (26u) // I2C_SCL_2
-#define PIN_A6 (34u) // V_REF
-#define PIN_A7 (37u) // VBAT_PROBE
+#define PIN_A4 (15u) // I2C_SDA_2
+#define PIN_A5 (16u) // I2C_SCL_2
+#define PIN_A6 (17u) // V_REF
+#define PIN_A7 (18u) // VBAT_PROBE
 static const uint8_t A0  = PIN_A0;
 static const uint8_t A1  = PIN_A1;
 static const uint8_t A2  = PIN_A2;
