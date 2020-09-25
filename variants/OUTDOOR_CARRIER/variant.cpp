@@ -89,48 +89,53 @@ PinDescription g_APinDescription[] = {
   { P0_27, NULL, NULL, NULL },     // 8 - IRQ_CH5
   { P1_0,  NULL, NULL, NULL },     // 9 - IRQ_CH6
 
-  // Sensor 
-  { P0_5,  NULL, NULL, NULL },     // 10 - SENSOR_COMMON
-  { P0_3,  NULL, NULL, NULL },     // 11 - SENSOR_CALIB
-  { P0_4,  NULL, NULL, NULL },     // 12 - SENSOR_CAPTURE_A
-  { P0_9,  NULL, NULL, NULL },     // 13 - SENSOR_CAPTURE
-  { P0_30, NULL, NULL, NULL },     // 14 - SENSOR_INPUT_ADC
+  // Sensors
+  { P0_9,  NULL, NULL, NULL },     // 10 - SENSOR_CAPTURE
+
+  // Sensors / Analogs
+  { P0_5,  NULL, NULL, NULL },     // 11 - SENSOR_COMMON    - Analog
+  { P0_3,  NULL, NULL, NULL },     // 12 - SENSOR_CALIB     - Analog
+  { P0_4,  NULL, NULL, NULL },     // 13 - SENSOR_CAPTURE_A - Analog
+  { P0_30, NULL, NULL, NULL },     // 14 - SENSOR_INPUT_ADC - Analog
+  
+  // I2C 2 / Analogs
+  { P0_31, NULL, NULL, NULL },     // 15 - I2C_SDA_2        - Analog
+  { P0_2,  NULL, NULL, NULL },     // 16 - I2C_SCL_2        - Analog
+
+  // Power / Analogs 
+  { P0_28, NULL, NULL, NULL },     // 17 - V_REF            - Analog
+  { P0_29, NULL, NULL, NULL },     // 18 - VBAT_PROBE       - Analog
 
   // Pulse
-  { P1_8,  NULL, NULL, NULL },     // 15 - PULSE_DIRECTION
-  { P1_1,  NULL, NULL, NULL },     // 16 - PULSE_STROBE
+  { P1_8,  NULL, NULL, NULL },     // 19 - PULSE_DIRECTION
+  { P1_1,  NULL, NULL, NULL },     // 20 - PULSE_STROBE
   
   // MKR Connectors
-  { P1_2,  NULL, NULL, NULL },     // 17 - ON_MKR1
-  { P1_10, NULL, NULL, NULL },     // 18 - RXD_MKR1
-  { P1_11, NULL, NULL, NULL },     // 19 - TXD_MKR1
+  { P1_2,  NULL, NULL, NULL },     // 21 - ON_MKR1
+  { P1_10, NULL, NULL, NULL },     // 22 - RXD_MKR1
+  { P1_11, NULL, NULL, NULL },     // 23 - TXD_MKR1
 
-  { P1_3,  NULL, NULL, NULL },     // 20 - ON_MKR2
-  { P0_24, NULL, NULL, NULL },     // 21 - RXD_MKR2
-  { P0_25, NULL, NULL, NULL },     // 22 - TXD_MKR2
+  { P1_3,  NULL, NULL, NULL },     // 24 - ON_MKR2
+  { P0_24, NULL, NULL, NULL },     // 25 - RXD_MKR2
+  { P0_25, NULL, NULL, NULL },     // 26 - TXD_MKR2
   
   // I2C
-  { P1_9,  NULL, NULL, NULL },     // 23 - I2C_SDA
-  { P0_11, NULL, NULL, NULL },     // 24 - I2C_SCL
-  { P0_31, NULL, NULL, NULL },     // 25 - I2C_SDA_2
-  { P0_2,  NULL, NULL, NULL },     // 26 - I2C_SCL_2
-
+  { P1_9,  NULL, NULL, NULL },     // 27 - I2C_SDA
+  { P0_11, NULL, NULL, NULL },     // 28 - I2C_SCL
   // SD
-  { P1_12, NULL, NULL, NULL },     // 27 - SD_CS
+  { P1_12, NULL, NULL, NULL },     // 29 - SD_CS
 
   // QSPI
-  { P0_17, NULL, NULL, NULL },     // 28 - QSPIDCS
-  { P0_19, NULL, NULL, NULL },     // 29 - GPIOCLK / SD_CLK_SCK
-  { P0_20, NULL, NULL, NULL },     // 30 - QSPID0  / SD_CMD_MOSI
-  { P0_21, NULL, NULL, NULL },     // 31 - QSPID1  / SD_DAT0_MISO
-  { P0_22, NULL, NULL, NULL },     // 32 - QSPID2
-  { P0_23, NULL, NULL, NULL },     // 33 - QSPID3
+  { P0_17, NULL, NULL, NULL },     // 30 - QSPIDCS
+  { P0_19, NULL, NULL, NULL },     // 31 - GPIOCLK / SD_CLK_SCK
+  { P0_20, NULL, NULL, NULL },     // 32 - QSPID0  / SD_CMD_MOSI
+  { P0_21, NULL, NULL, NULL },     // 33 - QSPID1  / SD_DAT0_MISO
+  { P0_22, NULL, NULL, NULL },     // 34 - QSPID2
+  { P0_23, NULL, NULL, NULL },     // 35 - QSPID3
 
   // Power
-  { P0_28, NULL, NULL, NULL },     // 34 - V_REF
-  { P1_13, NULL, NULL, NULL },     // 35 - POWER_ON
-  { P0_7,  NULL, NULL, NULL },     // 36 - GATED_19V_ENABLE
-  { P0_29, NULL, NULL, NULL },     // 37 - VBAT_PROBE
+  { P1_13, NULL, NULL, NULL },     // 36 - POWER_ON
+  { P0_7,  NULL, NULL, NULL },     // 37 - GATED_19V_ENABLE
   { P0_10, NULL, NULL, NULL },     // 38 - GATED_VBAT_ENABLE
   { P0_12, NULL, NULL, NULL },     // 39 - GATED_3v3_ENABLE_N
 };
