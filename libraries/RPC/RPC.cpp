@@ -66,6 +66,18 @@ void RPC::new_service_cb(struct rpmsg_device *rdev, const char *name, uint32_t d
   }
 }
 
+osThreadId eventHandlerThreadId;
+
+void eventHandler() {
+  eventHandlerThreadId = osThreadGetId();
+  while (1) {
+    osEvent v = osSignalWait(0, osWaitForever);
+#ifdef CORE_CM4
+    delay(50);
+#endif
+    OPENAMP_check_for_message();
+  }
+}
 
 #ifdef CORE_CM4
 int RPC::begin() {
@@ -74,6 +86,9 @@ int RPC::begin() {
   __HAL_RCC_HSEM_CLK_ENABLE();
   /*HW semaphore Notification enable*/
   HAL_HSEM_ActivateNotification(__HAL_HSEM_SEMID_TO_MASK(HSEM_ID_0));
+
+  eventThread = new rtos::Thread(osPriorityHigh);
+  eventThread->start(&eventHandler);
 
   /* Inilitize OpenAmp and libmetal libraries */
   if (MX_OPENAMP_Init(RPMSG_REMOTE, NULL) !=  0) {
@@ -106,10 +121,6 @@ int RPC::begin() {
   {
     return 0;
   }
-
-  eventThread = new rtos::Thread(osPriorityNormal);
-  eventThread->start(callback(&eventQueue, &events::EventQueue::dispatch_forever));
-  ticker.attach(eventQueue.event(&OPENAMP_check_for_message), 0.01f);
 
   dispatcherThread = new rtos::Thread(osPriorityNormal);
   dispatcherThread->start(mbed::callback(this, &RPC::dispatch));
@@ -157,8 +168,8 @@ int RPC::begin() {
 	//HAL_SYSCFG_EnableCM4BOOT();
 	HAL_RCCEx_EnableBootCore(RCC_BOOT_C2);
 
-	/* Initialize the mailbox use notify the other core on new message */
-	MAILBOX_Init();
+	eventThread = new rtos::Thread(osPriorityHigh);
+	eventThread->start(&eventHandler);
 
 	/* Initialize OpenAmp and libmetal libraries */
 	if (MX_OPENAMP_Init(RPMSG_MASTER, new_service_cb) !=  HAL_OK) {
@@ -190,10 +201,6 @@ int RPC::begin() {
 	OPENAMP_send(&rp_endpoints[0], &message, sizeof(message));
 	OPENAMP_send(&rp_endpoints[1], &message, sizeof(message));
 	OPENAMP_send(&rp_endpoints[2], &message, sizeof(message));
-
-	//eventThread = new rtos::Thread(osPriorityNormal);
-	//eventThread->start(callback(&eventQueue, &events::EventQueue::dispatch_forever));
-	//ticker.attach(eventQueue.event(&OPENAMP_check_for_message), 0.01f);
 
 	dispatcherThread = new rtos::Thread(osPriorityNormal);
 	dispatcherThread->start(mbed::callback(this, &RPC::dispatch));
