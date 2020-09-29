@@ -54,6 +54,9 @@ extern "C" unsigned int PINCOUNT_fn();
 #define CMD_TRIAC_3 (2u)
 #define CMD_TRIAC_4 (3u)
 
+#define CMD_TRIAC_CLK (0u)
+#define CMD_TRIAC_DATA (1u)
+
 // IRQ Channels
 // ------------
 #define IRQ_CH1 (4u)
@@ -65,52 +68,52 @@ extern "C" unsigned int PINCOUNT_fn();
 
 // Sensors
 // -------
-#define SENSOR_COMMON (10u)
-#define SENSOR_CALIB (11u)
-#define SENSOR_CAPTURE_A (12u)
-#define SENSOR_CAPTURE (13u)
+#define SENSOR_CAPTURE (10u)
+#define SENSOR_COMMON (11u)
+#define SENSOR_CALIB (12u)
+#define SENSOR_CAPTURE_A (13u)
 #define SENSOR_INPUT_ADC (14u)
 
 // Pulse
 // -------
-#define PULSE_DIRECTION (15u)
-#define PULSE_STROBE (16u)
+#define PULSE_DIRECTION (19u)
+#define PULSE_STROBE (20u)
 
 // MKRs
 // ----
-#define ON_MKR1 (17u)
-#define RXD_MKR1 (18u)
-#define TXD_MKR1 (19u)
+#define ON_MKR1 (21u)
+#define RXD_MKR1 (22u)
+#define TXD_MKR1 (23u)
 
-#define ON_MKR2 (20u)
-#define RXD_MKR2 (21u)
-#define TXD_MKR2 (22u)
+#define ON_MKR2 (24u)
+#define RXD_MKR2 (25u)
+#define TXD_MKR2 (26u)
 
 
 // SD
 // --
-#define SD_CS (27u)
-#define SD_CLK (29u)
-#define SD_MOSI (30u)
-#define SD_MISO (31u)
+#define SD_CS (29u)
+#define SD_CLK (31u)
+#define SD_MOSI (32u)
+#define SD_MISO (33u)
 
 // QSPI
 // ----
-#define PIN_QSPIDCS (28u)
-#define PIN_GPIOCLK (29u)
-#define PIN_QSPID0 (30u)
-#define PIN_QSPID1 (31u)
-#define PIN_QSPID2 (32u)
-#define PIN_QSPID3 (33u)
+#define PIN_QSPIDCS (30u)
+#define PIN_GPIOCLK (31u)
+#define PIN_QSPID0 (32u)
+#define PIN_QSPID1 (33u)
+#define PIN_QSPID2 (34u)
+#define PIN_QSPID3 (35u)
 
 // Power
 // -----
-#define V_REF (34u)
-#define POWER_ON (35u)
-#define GATED_19V_ENABLE (36u)
-#define VBAT_PROBE (37u)
+#define V_REF (17u)
+#define VBAT_PROBE (18u)
+#define GATED_19V_ENABLE (37u)
 #define GATED_VBAT_ENABLE (38u)
 #define GATED_3V3_ENABLE_N (39u)
+#define POWER_ON (36u)
 
 // Analog pins
 // -----------
@@ -136,16 +139,16 @@ static const uint8_t A7  = PIN_A7;
  * Serial interfaces
  */
 // Serial (EDBG)
-#define PIN_SERIAL_RX (18u)
-#define PIN_SERIAL_TX (19u)
-#define PIN_SERIAL2_RX (21u)
-#define PIN_SERIAL2_TX (22u)
+#define PIN_SERIAL_RX (22u)
+#define PIN_SERIAL_TX (23u)
+#define PIN_SERIAL2_RX (25u)
+#define PIN_SERIAL2_TX (26u)
 
 // SPI
-#define PIN_SPI_MISO  (31u)
-#define PIN_SPI_MOSI  (30u)
-#define PIN_SPI_SCK   (29u)
-#define PIN_SPI_SS    (28u)
+#define PIN_SPI_MISO  (33u)
+#define PIN_SPI_MOSI  (32u)
+#define PIN_SPI_SCK   (31u)
+#define PIN_SPI_SS    (30u)
 
 static const uint8_t SS   = PIN_SPI_SS;
 static const uint8_t MOSI = PIN_SPI_MOSI;
