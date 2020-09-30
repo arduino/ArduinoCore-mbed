@@ -69,6 +69,9 @@ void initVariant() {
   pinMode(PK_6, OUTPUT);
   digitalWrite(PK_6, HIGH);
   fixup3V1Rail();
+  // Disable the FMC bank1 (enabled after reset)
+  // See https://github.com/STMicroelectronics/STM32CubeH7/blob/beced99ac090fece04d1e0eb6648b8075e156c6c/Projects/STM32H747I-DISCO/Applications/OpenAMP/OpenAMP_RTOS_PingPong/Common/Src/system_stm32h7xx.c#L215
+  FMC_Bank1_R->BTCR[0] = 0x000030D2;
 }
 
 #ifdef SERIAL_CDC
