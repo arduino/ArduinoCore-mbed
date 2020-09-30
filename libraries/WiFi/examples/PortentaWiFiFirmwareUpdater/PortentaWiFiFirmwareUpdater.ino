@@ -6,7 +6,6 @@
 
 QSPIFBlockDevice root(PD_11, PD_12, PF_7, PD_13,  PF_10, PG_6, QSPIF_POLARITY_MODE_1, 40000000);
 mbed::MBRBlockDevice wifi_data(&root, 1);
-mbed::MBRBlockDevice other_data(&root, 2);
 mbed::FATFileSystem wifi_data_fs("wlan");
 mbed::FATFileSystem other_data_fs("fs");
 
@@ -23,8 +22,8 @@ void setup() {
   Serial.begin(115200);
   while (!Serial);
 
-  mbed::MBRBlockDevice::partition(&root, 1, 0x0B, 0, 1024 * 1024 * 8);
-  mbed::MBRBlockDevice::partition(&root, 2, 0x0B, 1024 * 1024 * 8, 2048 * 1024 * 8);
+  mbed::MBRBlockDevice::partition(&root, 1, 0x0B, 0, 1024 * 1024);
+  // use space from 15.5MB to 16 MB for another fw, memory mapped
 
   int err =  wifi_data_fs.mount(&wifi_data);
   if (err) {
@@ -32,14 +31,6 @@ void setup() {
     // this should only happen on the first boot
     Serial.println("No filesystem found, formatting...");
     err = wifi_data_fs.reformat(&wifi_data);
-  }
-
-  err =  other_data_fs.mount(&other_data);
-  if (err) {
-    // Reformat if we can't mount the filesystem
-    // this should only happen on the first boot
-    Serial.println("No filesystem found, formatting... ");
-    err = other_data_fs.reformat(&other_data);
   }
 
   DIR *dir;
@@ -74,6 +65,8 @@ void setup() {
   FILE* fp = fopen("/wlan/4343WA1.BIN", "wb");
   int ret = fwrite(wifi_firmware_image_data, 421098, 1, fp);
   fclose(fp);
+
+  root.program(wifi_firmware_image_data, 15 * 1024 * 1024 + 1024 * 512, 421098);
 
   fp = fopen("/wlan/cacert.pem", "wb");
   ret = fwrite(cacert_pem, cacert_pem_len, 1, fp);

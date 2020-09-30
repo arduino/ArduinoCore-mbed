@@ -289,7 +289,7 @@ mbed::FATFileSystem wifi_data_fs("wlan");
 bool firmware_available = false;
 
 extern "C" bool wiced_filesystem_mount() {
-  mbed::MBRBlockDevice::partition(&root, 1, 0x0B, 0, 1024 * 1024 * 8);
+  mbed::MBRBlockDevice::partition(&root, 1, 0x0B, 0, 1024 * 1024);
   int err =  wifi_data_fs.mount(&wifi_data);
   if (err) {
     Serial.println("Failed to mount filesystem");
