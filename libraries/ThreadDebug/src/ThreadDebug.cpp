@@ -1188,10 +1188,10 @@ void UsbDebugCommInterface::attach(void (*pCallback)())
 
 #if defined(STM32H747xx) && defined(CORE_CM4)
 
-RPCDebugCommInterface::RPCDebugCommInterface(arduino::RPC* pSerial) :
+RPCDebugCommInterface::RPCDebugCommInterface(arduino::SerialRPCClass* pSerial) :
     _pSerial(pSerial)
 {
-    _pSerial->begin();
+    //_pSerial->begin();
 }
 
 RPCDebugCommInterface::~RPCDebugCommInterface()

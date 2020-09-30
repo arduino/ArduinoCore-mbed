@@ -36,7 +36,7 @@
 
 #if defined(STM32H747xx) && defined(CORE_CM4)
 // include RPC out of arduino namespace
-#include "RPC_internal.h"
+#include "SerialRPC.h"
 #endif
 
 namespace arduino {
@@ -102,7 +102,7 @@ protected:
 // Use the RPC interface to communicate with GDB from M4 core
 class RPCDebugCommInterface : public DebugCommInterface {
 public:
-    RPCDebugCommInterface(arduino::RPC*);
+    RPCDebugCommInterface(arduino::SerialRPCClass*);
     virtual ~RPCDebugCommInterface();
 
     virtual bool readable();
@@ -112,7 +112,7 @@ public:
     virtual void attach(void (*pCallback)());
 
 protected:
-    arduino::RPC*  _pSerial;
+    arduino::SerialRPCClass*  _pSerial;
 };
 #endif
 
