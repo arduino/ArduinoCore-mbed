@@ -157,7 +157,7 @@ extern int __OPENAMP_region_end__[];
 #define VRING_TX_ADDRESS        (SHM_START_ADDRESS + 0x400)
 #define VRING_BUFF_ADDRESS      (SHM_START_ADDRESS + 0x800)
 #define VRING_ALIGNMENT         4
-#define VRING_NUM_BUFFS         4   /* number of rpmsg buffers */
+#define VRING_NUM_BUFFS         16   /* number of rpmsg buffers */
 
 /* Fixed parameter */
 #define NUM_RESOURCE_ENTRIES    2
