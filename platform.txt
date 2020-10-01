@@ -5,7 +5,7 @@
 # https://github.com/arduino/Arduino/wiki/Arduino-IDE-1.5---3rd-party-Hardware-specification
 
 name=Arduino Mbed OS Boards (nRF52840 / STM32H747)
-version=1.2.2
+version=1.2.3
 
 # Compile variables
 # ------------------------
@@ -129,7 +129,7 @@ tools.openocd.bootloader.pattern="{path}/{cmd}" {bootloader.verbose} -s "{path}/
 #
 # BOSSA
 #
-tools.bossac.path={runtime.tools.bossac-1.9.1-arduino1.path}
+tools.bossac.path={runtime.tools.bossac-1.9.1-arduino2.path}
 tools.bossac.cmd=bossac
 tools.bossac.cmd.windows=bossac.exe
 
