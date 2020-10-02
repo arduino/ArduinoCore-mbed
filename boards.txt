@@ -1,44 +1,44 @@
 ##############################################################
 
-outdoor_carrier.name=Arduino Outdoor Carrier
-outdoor_carrier.build.core=arduino
-outdoor_carrier.build.crossprefix=arm-none-eabi-
-outdoor_carrier.build.compiler_path={runtime.tools.arm-none-eabi-gcc.path}/bin/
+edge_control.name=Arduino Edge Control
+edge_control.build.core=arduino
+edge_control.build.crossprefix=arm-none-eabi-
+edge_control.build.compiler_path={runtime.tools.arm-none-eabi-gcc.path}/bin/
 
-outdoor_carrier.build.variant=OUTDOOR_CARRIER
-outdoor_carrier.build.mcu=cortex-m4
-outdoor_carrier.build.extra_flags=
-outdoor_carrier.build.architecture=cortex-m4
-outdoor_carrier.build.fpu=fpv4-sp-d16
-outdoor_carrier.build.float-abi=softfp
-outdoor_carrier.build.board=OUTDOOR_CARRIER
-outdoor_carrier.build.ldscript=linker_script.ld
-outdoor_carrier.compiler.mbed.arch.define=-DARDUINO_ARCH_NRF52840
-outdoor_carrier.compiler.mbed.defines={build.variant.path}/defines.txt
-outdoor_carrier.compiler.mbed.ldflags={build.variant.path}/ldflags.txt
-outdoor_carrier.compiler.mbed.cflags={build.variant.path}/cflags.txt
-outdoor_carrier.compiler.mbed.cxxflags={build.variant.path}/cxxflags.txt
-outdoor_carrier.compiler.mbed.includes={build.variant.path}/includes.txt
-outdoor_carrier.compiler.mbed.extra_ldflags=-lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
-outdoor_carrier.compiler.mbed="{build.variant.path}/libs/libmbed.a" "{build.variant.path}/libs/libcc_310_core.a" "{build.variant.path}/libs/libcc_310_ext.a" "{build.variant.path}/libs/libcc_310_trng.a"
-outdoor_carrier.vid.0=0x2341
-outdoor_carrier.pid.0=0x005d
-outdoor_carrier.vid.1=0x2341
-outdoor_carrier.pid.1=0x805d
+edge_control.build.variant=EDGE_CONTROL
+edge_control.build.mcu=cortex-m4
+edge_control.build.extra_flags=
+edge_control.build.architecture=cortex-m4
+edge_control.build.fpu=fpv4-sp-d16
+edge_control.build.float-abi=softfp
+edge_control.build.board=EDGE_CONTROL
+edge_control.build.ldscript=linker_script.ld
+edge_control.compiler.mbed.arch.define=-DARDUINO_ARCH_NRF52840
+edge_control.compiler.mbed.defines={build.variant.path}/defines.txt
+edge_control.compiler.mbed.ldflags={build.variant.path}/ldflags.txt
+edge_control.compiler.mbed.cflags={build.variant.path}/cflags.txt
+edge_control.compiler.mbed.cxxflags={build.variant.path}/cxxflags.txt
+edge_control.compiler.mbed.includes={build.variant.path}/includes.txt
+edge_control.compiler.mbed.extra_ldflags=-lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
+edge_control.compiler.mbed="{build.variant.path}/libs/libmbed.a" "{build.variant.path}/libs/libcc_310_core.a" "{build.variant.path}/libs/libcc_310_ext.a" "{build.variant.path}/libs/libcc_310_trng.a"
+edge_control.vid.0=0x2341
+edge_control.pid.0=0x005d
+edge_control.vid.1=0x2341
+edge_control.pid.1=0x805d
 
-outdoor_carrier.upload.tool=bossac
-outdoor_carrier.upload.protocol=
-outdoor_carrier.upload.use_1200bps_touch=true
-outdoor_carrier.upload.wait_for_upload_port=true
-outdoor_carrier.upload.native_usb=true
-outdoor_carrier.upload.maximum_size=983040
-outdoor_carrier.upload.maximum_data_size=262144
+edge_control.upload.tool=bossac
+edge_control.upload.protocol=
+edge_control.upload.use_1200bps_touch=true
+edge_control.upload.wait_for_upload_port=true
+edge_control.upload.native_usb=true
+edge_control.upload.maximum_size=983040
+edge_control.upload.maximum_data_size=262144
 
-outdoor_carrier.bootloader.tool=openocd
-outdoor_carrier.bootloader.extra_action.preflash=echo INFO:removed_mass-erase
-outdoor_carrier.bootloader.config=-f target/nrf52.cfg
-outdoor_carrier.bootloader.programmer=-f interface/cmsis-dap.cfg
-outdoor_carrier.bootloader.file=outdoor_carrier/bootloader.hex
+edge_control.bootloader.tool=openocd
+edge_control.bootloader.extra_action.preflash=echo INFO:removed_mass-erase
+edge_control.bootloader.config=-f target/nrf52.cfg
+edge_control.bootloader.programmer=-f interface/cmsis-dap.cfg
+edge_control.bootloader.file=EDGE_CONTROL/bootloader.hex
 
 ##############################################################
 

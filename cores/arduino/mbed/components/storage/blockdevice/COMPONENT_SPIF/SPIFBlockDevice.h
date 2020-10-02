@@ -45,7 +45,7 @@
  */
 enum spif_bd_error {
     SPIF_BD_ERROR_OK                    = 0,     /*!< no error */
-    SPIF_BD_ERROR_DEVICE_ERROR          = -4001, /*!< device specific error -4001 */
+    SPIF_BD_ERROR_DEVICE_ERROR          = BD_ERROR_DEVICE_ERROR, /*!< device specific error -4001 */
     SPIF_BD_ERROR_PARSING_FAILED        = -4002, /* SFDP Parsing failed */
     SPIF_BD_ERROR_READY_FAILED          = -4003, /* Wait for Memory Ready failed */
     SPIF_BD_ERROR_WREN_FAILED           = -4004, /* Write Enable Failed */
@@ -280,7 +280,7 @@ private:
     mbed::sfdp_hdr_info _sfdp_info;
 
     unsigned int _page_size_bytes; // Page size - 256 Bytes default
-    mbed::bd_size_t _device_size_bytes;
+    bd_size_t _device_size_bytes;
 
     // Bus configuration
     unsigned int _address_size; // number of bytes for address
