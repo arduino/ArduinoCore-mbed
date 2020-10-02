@@ -38,13 +38,17 @@
 #define BLE_ROLE_CENTRAL                                                      1                                                                                                // set by library:ble
 #define BLE_ROLE_OBSERVER                                                     1                                                                                                // set by library:ble
 #define BLE_ROLE_PERIPHERAL                                                   1                                                                                                // set by library:ble
+#define BLE_SECURITY_DATABASE_FILESYSTEM                                      1                                                                                                // set by library:ble
+#define BLE_SECURITY_DATABASE_KVSTORE                                         0                                                                                                // set by library:ble
 #define BLE_SECURITY_DATABASE_MAX_ENTRIES                                     5                                                                                                // set by library:ble
+#define CHCI_TR_CUSTOM                                                        1                                                                                                // set by library:cordio-ll
 #define CHCI_TR_UART                                                          0                                                                                                // set by library:cordio-ll
 #define CORDIO_ZERO_COPY_HCI                                                  1                                                                                                // set by library:cordio-nordic-ll
 #define DM_CONN_MAX                                                           3                                                                                                // set by library:cordio
 #define DM_NUM_ADV_SETS                                                       3                                                                                                // set by library:cordio
 #define DM_NUM_PHYS                                                           3                                                                                                // set by library:cordio
 #define DM_SYNC_MAX                                                           1                                                                                                // set by library:cordio
+#define EATT_CONN_CHAN_MAX                                                    1                                                                                                // set by library:cordio
 #define L2C_COC_CHAN_MAX                                                      1                                                                                                // set by library:cordio
 #define L2C_COC_REG_MAX                                                       1                                                                                                // set by library:cordio
 #define LHCI_ENABLE_VS                                                        0                                                                                                // set by library:cordio-ll
