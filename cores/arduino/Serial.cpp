@@ -125,7 +125,7 @@ size_t UART::write(const uint8_t* c, size_t len) {
 	while (!_serial->writeable()) {}
 	_serial->set_blocking(true);
 	int ret = _serial->write(c, len);
-	return ret == -1 ? 0 : 1;
+	return ret == -1 ? 0 : len;
 }
 
 void UART::block_tx(int _a) {
