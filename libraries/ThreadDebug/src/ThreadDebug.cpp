@@ -71,10 +71,12 @@ static const char* g_threadNamesToIgnore[] = {
 #define EXC_RETURN_THREADMODE_MAINSTACK     0x9
 
 // Macro to make is easier to calculate array size.
+#undef ARRAY_SIZE
 #define ARRAY_SIZE(X) (sizeof(X)/sizeof(X[0]))
 
 // Assert routine that will dump error text to USB GDB connection before entering infinite loop. If user is logging MRI
 // remote communications then they will see the error text in the log before debug stub becomes unresponseive.
+#undef ASSERT
 #define ASSERT(X) \
     if (!(X)) { \
         Serial.print("Assertion Failed: "); \
