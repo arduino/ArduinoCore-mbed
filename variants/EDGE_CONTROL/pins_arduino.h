@@ -196,7 +196,7 @@ static const uint8_t SCK  = PIN_SPI_SCK;
 #define HAS_UNIQUE_ISERIAL_DESCRIPTOR
 #define BOARD_VENDORID		0x2341
 #define BOARD_PRODUCTID		0x805D
-#define BOARD_NAME			  "Arduino Outdoor Carrier"
+#define BOARD_NAME			  "Arduino Edge Control"
 
 #define DFU_MAGIC_SERIAL_ONLY_RESET   0xb0
 
