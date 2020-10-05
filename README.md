@@ -22,6 +22,13 @@ Remove the symlink to `api` you can find in  `$sketchbook/hardware/arduino/mbed/
 
 Open Arduino IDE; you should now see three new targets under `MBED boards` label
 
+You may also need to install ARM build tools if you see an error like the following when you attempt to build for one of the mbed-os enabled boards.
+```
+fork/exec /bin/arm-none-eabi-g++: no such file or directory
+```
+The missing ARM build tools can be installed by using the `Boards Manager` option in the Arduino IDE to add the `Arduino mbed-enabled Boards` board package.
+
+
 ## Adding an mbed target
 
 Adding a target is a mostly automatic procedure that involves running https://github.com/arduino/ArduinoCore-mbed/blob/master/mbed-os-to-arduino after setting `BOARDNAME` and `ARDUINOCORE` env variables.
