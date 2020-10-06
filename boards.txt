@@ -96,6 +96,11 @@ envie_m4.upload.maximum_size=1048576
 envie_m4.upload.maximum_data_size=294248
 
 envie_m4.debug.tool=gdb
+envie_m4.bootloader.tool=openocd
+envie_m4.bootloader.config=-f target/stm32h7x_dual_bank.cfg
+envie_m4.bootloader.programmer=-f interface/stlink.cfg
+envie_m4.bootloader.extra_action.preflash=stm32h7x option_write 0 0x01c 0xb86aaf0
+envie_m4.bootloader.file=PORTENTA_H7/portentah7_bootloader_mbed_hs_v2.elf
 
 ##############################################################
 

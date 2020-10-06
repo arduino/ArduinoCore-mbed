@@ -78,6 +78,7 @@ private:
 */
 
 //static FlashIAPBlockDeviceMutexFriendly bd(0x80000, 0x80000);
+#ifdef NRF52840_XXAA
 static FlashIAPBlockDevice bd(0x80000, 0x80000);
 
 void USBMSD::begin()
@@ -95,3 +96,5 @@ mbed::FATFileSystem& USBMSD::getFileSystem()
 }
 
 USBMSD MassStorage(&bd);
+
+#endif

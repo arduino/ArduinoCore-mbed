@@ -67,6 +67,11 @@
 /* Private variables ---------------------------------------------------------*/
 static uint32_t msg_received = RX_NO_MSG;
 
+void OPENAMP_check_for_message(void);
+
+#include "cmsis_os.h"
+extern osThreadId eventHandlerThreadId;
+
 /* Private functions ---------------------------------------------------------*/
 void HAL_HSEM_FreeCallback(uint32_t SemMask)
 {
@@ -79,7 +84,9 @@ void HAL_HSEM_FreeCallback(uint32_t SemMask)
 #endif
 #ifdef CORE_CM4
   HAL_HSEM_ActivateNotification(__HAL_HSEM_SEMID_TO_MASK(HSEM_ID_0));   
-#endif  
+#endif
+
+  osSignalSet(eventHandlerThreadId, 0x1);
 }
 
 /**

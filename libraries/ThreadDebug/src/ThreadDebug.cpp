@@ -699,9 +699,11 @@ void Platform_CommSendChar(int character)
 static const char g_memoryMapXml[] = "<?xml version=\"1.0\"?>"
                                      "<!DOCTYPE memory-map PUBLIC \"+//IDN gnu.org//DTD GDB Memory Map V1.0//EN\" \"http://sourceware.org/gdb/gdb-memory-map.dtd\">"
                                      "<memory-map>"
+#ifndef CORE_CM4
                                      "<memory type=\"ram\" start=\"0x00000000\" length=\"0x10000\"> </memory>"
-                                     "<memory type=\"flash\" start=\"0x08000000\" length=\"0x200000\"> <property name=\"blocksize\">0x20000</property></memory>"
                                      "<memory type=\"ram\" start=\"0x10000000\" length=\"0x48000\"> </memory>"
+#endif
+                                     "<memory type=\"flash\" start=\"0x08000000\" length=\"0x200000\"> <property name=\"blocksize\">0x20000</property></memory>"
                                      "<memory type=\"ram\" start=\"0x1ff00000\" length=\"0x20000\"> </memory>"
                                      "<memory type=\"ram\" start=\"0x20000000\" length=\"0x20000\"> </memory>"
                                      "<memory type=\"ram\" start=\"0x24000000\" length=\"0x80000\"> </memory>"
@@ -714,7 +716,9 @@ static const char g_memoryMapXml[] = "<?xml version=\"1.0\"?>"
                                      "<memory type=\"ram\" start=\"0x58026000\" length=\"0x800\"> </memory>"
                                      "<memory type=\"ram\" start=\"0x58027000\" length=\"0x400\"> </memory>"
                                      "<memory type=\"flash\" start=\"0x90000000\" length=\"0x10000000\"> <property name=\"blocksize\">0x200</property></memory>"
+#ifndef CORE_CM4
                                      "<memory type=\"ram\" start=\"0xc0000000\" length=\"0x800000\"> </memory>"
+#endif
                                      "</memory-map>";
 #endif
 
@@ -1147,8 +1151,7 @@ void UartDebugCommInterface::onReceivedData()
     }
 }
 
-
-
+#ifdef SERIAL_CDC
 UsbDebugCommInterface::UsbDebugCommInterface(arduino::USBSerial* pSerial) :
     _pSerial(pSerial)
 {
@@ -1183,3 +1186,43 @@ void UsbDebugCommInterface::attach(void (*pCallback)())
 {
     _pSerial->attach(pCallback);
 }
+#endif
+
+#if defined(STM32H747xx) && defined(CORE_CM4)
+
+RPCDebugCommInterface::RPCDebugCommInterface(arduino::SerialRPCClass* pSerial) :
+    _pSerial(pSerial)
+{
+    //_pSerial->begin();
+}
+
+RPCDebugCommInterface::~RPCDebugCommInterface()
+{
+}
+
+bool RPCDebugCommInterface::readable()
+{
+    return _pSerial->available() > 0;
+}
+
+bool RPCDebugCommInterface::writeable()
+{
+    // The USBSerial::write() method blocks until data is actually sent to the PC.
+    return true;
+}
+
+uint8_t RPCDebugCommInterface::read()
+{
+    return _pSerial->read();
+}
+
+void RPCDebugCommInterface::write(uint8_t c)
+{
+    _pSerial->write(c);
+}
+
+void RPCDebugCommInterface::attach(void (*pCallback)())
+{
+    _pSerial->attach(pCallback);
+}
+#endif

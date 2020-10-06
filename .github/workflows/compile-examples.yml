@@ -45,7 +45,7 @@ jobs:
             additional-sketch-paths: '"libraries/doom" "libraries/KernelDebug" "libraries/Portenta_SDCARD" "libraries/Portenta_System" "libraries/Portenta_Video" '
           - board:
               fqbn: arduino-beta:mbed:envie_m7
-            additional-sketch-paths: '"libraries/doom" "libraries/KernelDebug" "libraries/Portenta_Audio" "libraries/Portenta_SDCARD" "libraries/Portenta_System" "libraries/Portenta_Video" "libraries/ThreadDebug" "libraries/USBHOST"'
+            additional-sketch-paths: '"libraries/doom" "libraries/KernelDebug" "libraries/Portenta_SDCARD" "libraries/Portenta_System" "libraries/Portenta_Video" "libraries/ThreadDebug" "libraries/USBHOST"'
 
     steps:
       - name: Checkout repository
