@@ -73,6 +73,7 @@
 #define MBED_CONF_CORDIO_PREFERRED_TX_POWER                                   0                                                                                                // set by library:cordio
 #define MBED_CONF_CORDIO_ROUTE_UNHANDLED_COMMAND_COMPLETE_EVENTS              1                                                                                                // set by library:cordio
 #define MBED_CONF_CORDIO_RX_ACL_BUFFER_SIZE                                   70                                                                                               // set by library:cordio
+#define MBED_CONF_CY_PSOC6_WHD_PRESENT                                        1                                                                                                // set by library:cy_psoc6_whd
 #define MBED_CONF_DRIVERS_QSPI_CSN                                            QSPI_FLASH1_CSN                                                                                  // set by library:drivers
 #define MBED_CONF_DRIVERS_QSPI_IO0                                            QSPI_FLASH1_IO0                                                                                  // set by library:drivers
 #define MBED_CONF_DRIVERS_QSPI_IO1                                            QSPI_FLASH1_IO1                                                                                  // set by library:drivers
