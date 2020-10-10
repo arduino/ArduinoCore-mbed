@@ -4,28 +4,36 @@
 #define BOOTLOADER_ADDR   (0x8000000)
 mbed::FlashIAP flash;
 
-uint8_t* bootloader_data = (uint8_t*)(0x801F000);
+uint32_t bootloader_data_offset = 0x1F000;
+uint8_t* bootloader_data = (uint8_t*)(BOOTLOADER_ADDR + bootloader_data_offset);
 
-void setup() {
-  // put your setup code here, to run once:
+void setup() {  
   Serial.begin(115200);
   while (!Serial) {}
 
-  Serial.println("Validation: " + String(bootloader_data[0], HEX));
-  Serial.println("BL version: " + String(bootloader_data[1]));
-  Serial.println("Clock source: " + String(bootloader_data[2]));
-  Serial.println("USB Speed: " + String(bootloader_data[3]));
-  Serial.println("Ethernet: " + String(bootloader_data[4]));
-  Serial.println("Wifi: " + String(bootloader_data[5]));
-  Serial.println("RAM size: " + String(bootloader_data[6]));
-  Serial.println("QSPI size: " + String(bootloader_data[7]));
-  Serial.println("Video: " + String(bootloader_data[8]));
-  Serial.println("Crypto: " + String(bootloader_data[9]));
+  uint8_t currentBootloaderVersion = bootloader_data[1];
+  uint8_t availableBootloaderVersion = (envie_bootloader_mbed_bin + bootloader_data_offset)[1];
 
-  if (bootloader_data[1] < 15) {
-    Serial.println("New bootloader version available");
+  Serial.println("Magic Number (validation): " + String(bootloader_data[0], HEX));
+  Serial.println("Bootloader version: " + String(bootloader_data[1]));
+  Serial.println("Clock source: " + getClockSource(bootloader_data[2]));
+  Serial.println("USB Speed: " + getUSBSpeed(bootloader_data[3]));
+  Serial.println("Has Ethernet: " + String(bootloader_data[4] == 1 ? "Yes" : "No"));
+  Serial.println("Has WiFi module: " + String(bootloader_data[5] == 1 ? "Yes" : "No"));
+  Serial.println("RAM size: " + String(bootloader_data[6]) + " MB");
+  Serial.println("QSPI size: " + String(bootloader_data[7]) + " MB");
+  Serial.println("Has Video output: " + String(bootloader_data[8] == 1 ? "Yes" : "No"));
+  Serial.println("Has Crypto chip: " + String(bootloader_data[9] == 1 ? "Yes" : "No"));
+
+  if (availableBootloaderVersion > currentBootloaderVersion) {
+    Serial.print("\nA new bootloader version is available: v" + String(availableBootloaderVersion));
+    Serial.println(" (Your version: v" + String(currentBootloaderVersion) + ")");
+    Serial.println("Do you want to update the bootloader? Y/[n]");
+  } else {
+    Serial.println("The latest version of the bootloader is already installed (v" + String(availableBootloaderVersion) + ").");
+    Serial.println("Do you want to update the bootloader anyway? Y/[n]");
   }
-  Serial.println("Update bootloader? Y/[n]");
+  
   bool confirmation = false;
   while (confirmation == false) {
     if (Serial.available()) {
@@ -47,8 +55,31 @@ void setup() {
   }
 }
 
-void applyUpdate(uint32_t address)
-{
+String getUSBSpeed(uint8_t flag) {
+  switch (flag){
+  case 1:
+    return "USB 2.0/Hi-Speed (480 Mbps)";
+  case 2:
+    return "USB 1.1/Full-Speed (12 Mbps)";
+  default:
+    return "N/A";
+  }
+}
+
+String getClockSource(uint8_t flag) {
+  switch (flag){
+  case 0x8:
+    return "External oscillator";
+  case 0x4:
+    return "External crystal";
+  case 0x2: 
+    return "Internal clock"; 
+  default:
+    return "N/A";
+  }
+}
+
+void applyUpdate(uint32_t address) {
   long len = envie_bootloader_mbed_bin_len;
 
   flash.init();
@@ -99,6 +130,5 @@ void applyUpdate(uint32_t address)
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
   delay(1000);
 }
