@@ -15,7 +15,7 @@ void setup() {
   uint8_t availableBootloaderVersion = (envie_bootloader_mbed_bin + bootloader_data_offset)[1];
 
   Serial.println("Magic Number (validation): " + String(bootloader_data[0], HEX));
-  Serial.println("Bootloader version: " + String(bootloader_data[1]));
+  Serial.println("Bootloader version: " + String(currentBootloaderVersion));
   Serial.println("Clock source: " + getClockSource(bootloader_data[2]));
   Serial.println("USB Speed: " + getUSBSpeed(bootloader_data[3]));
   Serial.println("Has Ethernet: " + String(bootloader_data[4] == 1 ? "Yes" : "No"));
