@@ -29,8 +29,11 @@ void setup() {
     Serial.print("\nA new bootloader version is available: v" + String(availableBootloaderVersion));
     Serial.println(" (Your version: v" + String(currentBootloaderVersion) + ")");
     Serial.println("Do you want to update the bootloader? Y/[n]");
+  } else if(availableBootloaderVersion < currentBootloaderVersion){ 
+    Serial.println("\nA newer bootloader version is already installed: v" + String(currentBootloaderVersion));    
+    Serial.println("Do you want to downgrade the bootloader to v" + String(availableBootloaderVersion) + "? Y/[n]");
   } else {
-    Serial.println("The latest version of the bootloader is already installed (v" + String(availableBootloaderVersion) + ").");
+    Serial.println("\nThe latest version of the bootloader is already installed (v" + String(currentBootloaderVersion) + ").");
     Serial.println("Do you want to update the bootloader anyway? Y/[n]");
   }
   
