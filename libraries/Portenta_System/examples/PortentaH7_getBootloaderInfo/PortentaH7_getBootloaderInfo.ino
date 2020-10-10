@@ -38,7 +38,6 @@ String getClockSource(uint8_t flag) {
   default:
     return "N/A";
   }
-
 }
 
 void loop() {  
