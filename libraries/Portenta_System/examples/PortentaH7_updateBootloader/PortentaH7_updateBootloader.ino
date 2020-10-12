@@ -1,6 +1,10 @@
 #include "FlashIAP.h"
 #include "bootloader.h"
 
+#ifdef CORE_CM4
+  #define Serial Serial1
+#endif
+
 #define BOOTLOADER_ADDR   (0x8000000)
 mbed::FlashIAP flash;
 

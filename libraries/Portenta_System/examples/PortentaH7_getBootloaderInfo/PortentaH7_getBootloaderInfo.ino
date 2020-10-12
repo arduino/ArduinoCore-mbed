@@ -1,3 +1,7 @@
+#ifdef CORE_CM4
+  #define Serial Serial1
+#endif
+
 uint8_t* bootloader_data = (uint8_t*)(0x801F000);
 
 void setup() {  
