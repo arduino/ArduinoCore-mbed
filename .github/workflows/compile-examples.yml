@@ -22,10 +22,6 @@ jobs:
   compile-examples:
     runs-on: ubuntu-latest
 
-    env:
-      # sketch paths to compile (recursive) compatible with all boards
-      UNIVERSAL_SKETCH_PATHS: '"libraries/Scheduler"'
-
     strategy:
       fail-fast: false
 
@@ -39,13 +35,13 @@ jobs:
         include:
           - board:
               fqbn: arduino-beta:mbed:nano33ble
-            additional-sketch-paths: '"libraries/PDM" "libraries/ThreadDebug"'
+            additional-sketch-paths: '"libraries/PDM" "libraries/ThreadDebug" "libraries/Scheduler"'            
           - board:
               fqbn: arduino-beta:mbed:envie_m4
             additional-sketch-paths: '"libraries/doom" "libraries/KernelDebug" "libraries/Portenta_SDCARD" "libraries/Portenta_System" "libraries/Portenta_Video" '
           - board:
               fqbn: arduino-beta:mbed:envie_m7
-            additional-sketch-paths: '"libraries/doom" "libraries/KernelDebug" "libraries/Portenta_SDCARD" "libraries/Portenta_System" "libraries/Portenta_Video" "libraries/ThreadDebug" "libraries/USBHOST"'
+            additional-sketch-paths: '"libraries/doom" "libraries/KernelDebug" "libraries/Portenta_SDCARD" "libraries/Portenta_System" "libraries/Portenta_Video" "libraries/ThreadDebug" "libraries/USBHOST" "libraries/Scheduler"'
 
     steps:
       - name: Checkout repository
