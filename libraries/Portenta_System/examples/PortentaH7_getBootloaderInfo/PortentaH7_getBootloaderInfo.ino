@@ -30,15 +30,14 @@ String getUSBSpeed(uint8_t flag) {
 String getClockSource(uint8_t flag) {
   switch (flag){
   case 0x8:
-    return "External clock (ST Link MCO)";
+    return "External oscillator";
   case 0x4:
-    return "External xtal (X3 on board - not provided by default)";
+    return "External crystal";
   case 0x2: 
-    return "HSI internal clock"; 
+    return "Internal clock"; 
   default:
     return "N/A";
   }
-
 }
 
 void loop() {  
