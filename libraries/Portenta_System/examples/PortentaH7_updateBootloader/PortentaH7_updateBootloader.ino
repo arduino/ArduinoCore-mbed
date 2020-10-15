@@ -1,6 +1,10 @@
 #include "FlashIAP.h"
 #include "bootloader.h"
 
+#ifndef CORE_CM7  
+  #error Update the bootloader by uploading the sketch to the M7 core instead of the M4 core.
+#endif
+
 #define BOOTLOADER_ADDR   (0x8000000)
 mbed::FlashIAP flash;
 
