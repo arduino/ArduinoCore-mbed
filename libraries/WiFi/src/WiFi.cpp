@@ -282,6 +282,8 @@ unsigned long arduino::WiFiClass::getTime() {
 #include "MBRBlockDevice.h"
 #include "FATFileSystem.h"
 
+#define WIFI_FIRMWARE_PATH "/wlan/4343WA1.BIN"
+
 QSPIFBlockDevice root(PD_11, PD_12, PF_7, PD_13,  PF_10, PG_6, QSPIF_POLARITY_MODE_1, 40000000);
 mbed::MBRBlockDevice wifi_data(&root, 1);
 mbed::FATFileSystem wifi_data_fs("wlan");
@@ -292,7 +294,9 @@ extern "C" bool wiced_filesystem_mount() {
   mbed::MBRBlockDevice::partition(&root, 1, 0x0B, 0, 1024 * 1024);
   int err =  wifi_data_fs.mount(&wifi_data);
   if (err) {
-    Serial.println("Failed to mount filesystem");
+    Serial.println("Failed to mount the filesystem containing the WiFi firmware.");
+    Serial.println("Usually that means that the WiFi firmware has not been installed yet"
+                    " or was overwritten with another firmware.");
     goto error;
   }
 
@@ -302,7 +306,7 @@ extern "C" bool wiced_filesystem_mount() {
     /* print all the files and directories within directory */
     while ((ent = readdir(dir)) != NULL) {
       String fullname = "/wlan/" + String(ent->d_name);
-      if (fullname == "/wlan/4343WA1.BIN") {
+      if (fullname == WIFI_FIRMWARE_PATH) {
         closedir(dir);
         firmware_available = true;
         return true;
@@ -312,7 +316,7 @@ extern "C" bool wiced_filesystem_mount() {
     closedir(dir);
   }
 error:
-  Serial.println("Please run \"PortentaWiFiFirmwareUpdater\" sketch once");
+  Serial.println("Please run the \"PortentaWiFiFirmwareUpdater\" sketch once to install the WiFi firmware.");
   whd_print_logbuffer();
   while (1) {}
   return false;
