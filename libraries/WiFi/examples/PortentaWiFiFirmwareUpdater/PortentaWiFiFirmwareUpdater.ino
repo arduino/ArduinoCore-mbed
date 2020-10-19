@@ -4,6 +4,10 @@
 #include "wiced_resource.h"
 #include "certificates.h"
 
+#ifndef CORE_CM7  
+  #error Update the WiFi firmware by uploading the sketch to the M7 core instead of the M4 core.
+#endif
+
 QSPIFBlockDevice root(PD_11, PD_12, PF_7, PD_13,  PF_10, PG_6, QSPIF_POLARITY_MODE_1, 40000000);
 mbed::MBRBlockDevice wifi_data(&root, 1);
 mbed::FATFileSystem wifi_data_fs("wlan");
