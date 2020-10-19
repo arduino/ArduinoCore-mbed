@@ -42,7 +42,7 @@ jobs:
             additional-sketch-paths: '"libraries/PDM" "libraries/ThreadDebug"'
           - board:
               fqbn: arduino:mbed:envie_m4
-            additional-sketch-paths: '"libraries/doom" "libraries/KernelDebug" "libraries/Portenta_SDCARD" "libraries/Portenta_System" "libraries/Portenta_Video" '
+            additional-sketch-paths: '"libraries/doom" "libraries/KernelDebug" "libraries/Portenta_SDCARD" "libraries/Portenta_Video"'
           - board:
               fqbn: arduino:mbed:envie_m7
             additional-sketch-paths: '"libraries/doom" "libraries/KernelDebug" "libraries/Portenta_SDCARD" "libraries/Portenta_System" "libraries/Portenta_Video" "libraries/ThreadDebug" "libraries/USBHOST"'
