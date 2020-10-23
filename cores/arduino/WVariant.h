@@ -1,4 +1,3 @@
-//** just starting suggestion at this point --- jcw - 9/10/20
 /*
 Copyright (c) 2015 Arduino LLC.  All right reserved.
 
