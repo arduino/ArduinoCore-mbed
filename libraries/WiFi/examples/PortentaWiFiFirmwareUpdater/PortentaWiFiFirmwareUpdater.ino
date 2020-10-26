@@ -33,7 +33,10 @@ void setup() {
   if (err) {
     // Reformat if we can't mount the filesystem
     // this should only happen on the first boot
-    Serial.println("No filesystem found, formatting...");
+    Serial.println("No filesystem containing the WiFi firmware was found.");
+    Serial.println("Usually that means that the WiFi firmware has not been installed yet"
+                  " or was overwritten with another firmware.\n");
+    Serial.println("Formatting the filsystem to install the firmware and certificates...\n");
     err = wifi_data_fs.reformat(&wifi_data);
   }
 
@@ -43,10 +46,11 @@ void setup() {
   if ((dir = opendir("/wlan")) != NULL) {
     /* print all the files and directories within directory */
     while ((ent = readdir (dir)) != NULL) {
-      Serial.println(ent->d_name);
+      Serial.println("Searching for WiFi firmware file " + String(ent->d_name) + " ...");
       String fullname = "/wlan/" + String(ent->d_name);
       if (fullname == "/wlan/4343WA1.BIN") {
-        Serial.println("Firmware found! Force update? [Y/n]");
+        Serial.println("A WiFi firmware is already installed. "
+                       "Do you want to install the firmware anyway? Y/[n]");
         while (1) {
           if (Serial.available()) {
             int c = Serial.read();
@@ -86,7 +90,7 @@ void setup() {
   }
   fclose(fp);
 
-  Serial.println("Firmware and certificates updated!");
+  Serial.println("\nFirmware and certificates updated!");
 }
 
 void loop() {
