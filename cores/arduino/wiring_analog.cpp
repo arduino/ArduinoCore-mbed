@@ -73,7 +73,12 @@ void analogWrite(pin_size_t pin, int val)
     digitalPinToPwm(pin) = pwm;
     pwm->period_ms(2); //500Hz
   }
-  pwm->write(percent);
+  if (percent < 0) {
+    delete pwm;
+    digitalPinToPwm(pin) = NULL;
+  } else {
+    pwm->write(percent);
+  }
 }
 
 void analogWriteResolution(int bits)
