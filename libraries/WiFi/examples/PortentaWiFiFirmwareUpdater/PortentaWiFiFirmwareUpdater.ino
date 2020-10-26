@@ -36,7 +36,7 @@ void setup() {
     Serial.println("No filesystem containing the WiFi firmware was found.");
     Serial.println("Usually that means that the WiFi firmware has not been installed yet"
                   " or was overwritten with another firmware.\n");
-    Serial.println("Formatting the filsystem to install the firmware and certificates...\n");
+    Serial.println("Formatting the filesystem to install the firmware and certificates...\n");
     err = wifi_data_fs.reformat(&wifi_data);
   }
 
