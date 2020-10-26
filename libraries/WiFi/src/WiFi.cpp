@@ -110,12 +110,15 @@ void arduino::WiFiClass::end() {
 
 int arduino::WiFiClass::disconnect() {
     if (_softAP != nullptr) {
-        static_cast<WhdSoftAPInterface*>(_softAP)->unregister_event_handler();
-        return static_cast<WhdSoftAPInterface*>(_softAP)->stop();        
+        WhdSoftAPInterface* softAPInterface = static_cast<WhdSoftAPInterface*>(_softAP);
+        softAPInterface->unregister_event_handler();
+        _currentNetworkStatus = (softAPInterface->stop() == NSAPI_ERROR_OK ? WL_DISCONNECTED : WL_AP_FAILED);
     } else {
-        return wifi_if->disconnect();
+        wifi_if->disconnect();
+        _currentNetworkStatus = WL_DISCONNECTED;
     }
-    _currentNetworkStatus = WL_IDLE_STATUS;
+    
+    return _currentNetworkStatus;
 }
 
 void arduino::WiFiClass::config(arduino::IPAddress local_ip){    
