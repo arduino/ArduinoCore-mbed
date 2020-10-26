@@ -58,7 +58,7 @@ using namespace arduino;
 #define DEFAULT_CONFIGURATION (1)
 
 // max packet size
-#define MAX_PACKET  64
+#define MAX_PACKET  MSD_MAX_PACKET_SIZE
 
 // CSW Status
 enum Status {
@@ -68,49 +68,20 @@ enum Status {
 };
 
 USBMSD::USBMSD(mbed::BlockDevice *bd, bool connect_blocking, uint16_t vendor_id, uint16_t product_id, uint16_t product_release)
-    : arduino::internal::PluggableUSBModule(1),
+    : arduino::internal::PluggableUSBModule(1), _in_task(&_queue), _out_task(&_queue),
       _initialized(false), _media_removed(false), _bd(bd)
 {
     PluggableUSBD().plug(this);
 }
 
 USBMSD::USBMSD(USBPhy *phy, mbed::BlockDevice *bd, uint16_t vendor_id, uint16_t product_id, uint16_t product_release)
-    : arduino::internal::PluggableUSBModule(1),
+    : arduino::internal::PluggableUSBModule(1), _in_task(&_queue), _out_task(&_queue),
       _initialized(false), _media_removed(false), _bd(bd)
 {
     PluggableUSBD().plug(this);
 }
 
-static rtos::Thread _t(osPriorityHigh, 32 * 1024, NULL, "msd");
-
-struct disk_info {
-    uint64_t block;
-    uint8_t count;
-    mbed::BlockDevice *_bd;
-    uint8_t data[4096];
-};
-
-static rtos::Mail<struct disk_info, 16> mail_box;
-
-static int _writes_i = 0;
-
-static void write_chunk() {
-    while (true) {
-        osEvent evt = mail_box.get();
-        if (evt.status == osEventMail) {
-            struct disk_info *info = (struct disk_info*)evt.value.p;
-            mbed::bd_addr_t addr = info->block * info->_bd->get_erase_size();
-            mbed::bd_size_t size = info->count * info->_bd->get_erase_size();
-
-            int ret = info->_bd->erase(addr, size);
-            if (ret != 0) {
-                return;
-            }
-            ret = info->_bd->program(info->data, addr, size);
-            mail_box.free(info);
-        }
-    }
-}
+static rtos::Thread _t(osPriorityNormal, 32 * 1024, NULL, "msd");
 
 void USBMSD::init(EndpointResolver& resolver)
 {
@@ -131,7 +102,7 @@ void USBMSD::init(EndpointResolver& resolver)
     _page = NULL;
     connect();
 
-    _t.start(write_chunk);
+    _t.start(mbed::callback(this, &USBMSD::process));
 }
 
 USBMSD::~USBMSD()
@@ -212,6 +183,12 @@ void USBMSD::disconnect()
 
 void USBMSD::process()
 {
+    while (1) {
+        if (_initialized) {
+            _queue.dispatch();
+            //yield();
+        }
+    }
 }
 
 void USBMSD::attach(mbed::Callback<void()> cb)
@@ -228,27 +205,17 @@ int USBMSD::disk_read(uint8_t *data, uint64_t block, uint8_t count)
     // this operation must be executed in another thread
     mbed::bd_addr_t addr = block * _bd->get_erase_size();
     mbed::bd_size_t size = count * _bd->get_erase_size();
-    /*
-    return _bd->read(data, addr, size);
-    */
+#ifdef NRF52840_XXAA
     memcpy(data, (void*)(addr + 0x80000), size);
+#else
+    _bd->read(data, addr, size);
+#endif
     return 0;
 }
 
 int USBMSD::disk_write(const uint8_t *data, uint64_t block, uint8_t count)
 {
     // this operation must be executed in another thread
-    struct disk_info* info = mail_box.alloc();
-    if (info == NULL) {
-        return -1;
-    }
-    memcpy(info->data, data, _bd->get_erase_size());
-    info->block = block;
-    info->count = count;
-    info->_bd = _bd;
-    mail_box.put(info);
-    return 0;
-    /*
     mbed::bd_addr_t addr =  block * _bd->get_erase_size();
     mbed::bd_size_t size = count * _bd->get_erase_size();
     int ret = _bd->erase(addr, size);
@@ -257,7 +224,6 @@ int USBMSD::disk_write(const uint8_t *data, uint64_t block, uint8_t count)
     }
 
     return _bd->program(data, addr, size);
-    */
 }
 
 int USBMSD::disk_initialize()
@@ -283,12 +249,12 @@ int USBMSD::disk_status()
 
 void USBMSD::_isr_out()
 {
-    _out();
+    _out_task.call();
 }
 
 void USBMSD::_isr_in()
 {
-    _in();
+    _in_task.call();
 }
 
 void USBMSD::callback_state_change(USBDevice::DeviceState new_state)
@@ -415,24 +381,24 @@ const uint8_t *USBMSD::configuration_desc(uint8_t index)
 
 void USBMSD::_out()
 {
-    //_mutex.lock();
+    _mutex.lock();
 
     _bulk_out_size = read_finish(_bulk_out);
     _out_ready = true;
     _process();
 
-    //_mutex.unlock();
+    _mutex.unlock();
 }
 
 void USBMSD::_in()
 {
-    //_mutex.lock();
+    _mutex.lock();
 
     write_finish(_bulk_in);
     _in_ready = true;
     _process();
 
-    //_mutex.unlock();
+    _mutex.unlock();
 }
 
 void USBMSD::_reset()
