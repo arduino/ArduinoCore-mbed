@@ -58,6 +58,21 @@ int arduino::WiFiClass::beginAP(const char* ssid, const char *passphrase, uint8_
     static_cast<WhdSoftAPInterface*>(_softAP)->set_network(_ip, _netmask, _gateway);
     nsapi_error_t result = static_cast<WhdSoftAPInterface*>(_softAP)->start(ssid, passphrase, NSAPI_SECURITY_WPA2, channel, true /* dhcp server */, NULL, true /* cohexistance */);
     
+    static_cast<WhdSoftAPInterface*>(_softAP)->register_event_handler([](whd_interface_t ifp, const whd_event_header_t *event_header, const uint8_t *event_data, void *handler_user_data) -> void*{        
+
+        if(event_header->event_type == 8){ //8 = connect
+            WiFi._currentNetworkStatus = WL_AP_CONNECTED;
+            return nullptr;
+        }
+
+        if(event_header->event_type == 12){ //12 = disconnect
+            WiFi._currentNetworkStatus = WL_AP_LISTENING;
+            return nullptr;
+        }        
+
+        return nullptr;
+    });
+
     _currentNetworkStatus = (result == NSAPI_ERROR_OK && setSSID(ssid)) ? WL_AP_LISTENING : WL_AP_FAILED;
     return _currentNetworkStatus;
 }
@@ -80,10 +95,12 @@ void arduino::WiFiClass::end() {
 
 int arduino::WiFiClass::disconnect() {
     if (_softAP != nullptr) {
+        static_cast<WhdSoftAPInterface*>(_softAP)->unregister_event_handler();
         return static_cast<WhdSoftAPInterface*>(_softAP)->stop();        
     } else {
         return wifi_if->disconnect();
     }
+    _currentNetworkStatus = WL_IDLE_STATUS;
 }
 
 void arduino::WiFiClass::config(arduino::IPAddress local_ip){    

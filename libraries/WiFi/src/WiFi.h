@@ -303,7 +303,7 @@ private:
     SocketAddress _dnsServer1 = nullptr;
     SocketAddress _dnsServer2 = nullptr;
     char* _ssid = nullptr;
-    wl_status_t _currentNetworkStatus = WL_IDLE_STATUS;
+    volatile wl_status_t _currentNetworkStatus = WL_IDLE_STATUS;
     WiFiInterface* wifi_if = nullptr;
     voidPrtFuncPtr _initializerCallback;
     WiFiAccessPoint* ap_list = nullptr;
