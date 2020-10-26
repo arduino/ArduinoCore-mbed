@@ -71,8 +71,10 @@ int arduino::WiFiClass::beginAP(const char* ssid, const char *passphrase, uint8_
         }                
 
         // Default Event Handler
+        whd_driver_t whd_driver = ifp->whd_driver;
+        WHD_IOCTL_LOG_ADD_EVENT(whd_driver, event_header->event_type, event_header->flags, event_header->reason);
+        
         if ((event_header->event_type == (whd_event_num_t)WLC_E_LINK) || (event_header->event_type == WLC_E_IF)) {
-            whd_driver_t whd_driver = ifp->whd_driver;
             if (osSemaphoreGetCount(whd_driver->ap_info.whd_wifi_sleep_flag) < 1) {
                 osStatus_t result = osSemaphoreRelease(whd_driver->ap_info.whd_wifi_sleep_flag);
                 if (result != osOK) {
