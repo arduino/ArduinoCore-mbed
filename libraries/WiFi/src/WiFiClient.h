@@ -27,6 +27,10 @@
 #include "TLSSocket.h"
 #include "TCPSocket.h"
 
+#ifndef WIFI_RECEIVE_BUFFER_SIZE
+#define WIFI_RECEIVE_BUFFER_SIZE        256
+#endif
+
 namespace arduino {
 
 class WiFiClient : public arduino::Client {
@@ -78,11 +82,11 @@ protected:
 private:
   static uint16_t _srcport;
   Socket* sock;
-  RingBufferN<256> rxBuffer;
+  RingBufferN<WIFI_RECEIVE_BUFFER_SIZE> rxBuffer;
   uint8_t _status;
   mbed::Callback<int(void)> beforeConnect;
 
-  void getStatus();
+  void receiveData();
 };
 
 }
