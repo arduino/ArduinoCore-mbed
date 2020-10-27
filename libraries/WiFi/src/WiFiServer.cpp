@@ -28,7 +28,12 @@ void arduino::WiFiServer::begin() {
 	_socketState = SOCK_LISTEN;
 }
 
+void arduino::WiFiServer::end() {
+	if (_socket != NULL) {
+		_socket->close();
+		_socket = NULL;
 	}
+	_socketState = SOCK_CLOSED;
 }
 
 size_t arduino::WiFiServer::write(uint8_t c) {
