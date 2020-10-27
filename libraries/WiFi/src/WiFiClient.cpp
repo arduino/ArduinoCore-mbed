@@ -3,7 +3,7 @@
 extern WiFiClass WiFi;
 
 #ifndef SOCKET_TIMEOUT
-#define SOCKET_TIMEOUT 1000
+#define SOCKET_TIMEOUT 1500
 #endif
 
 arduino::WiFiClient::WiFiClient() {
