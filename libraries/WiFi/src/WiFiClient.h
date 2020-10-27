@@ -58,11 +58,11 @@ public:
   void stop();
   uint8_t connected();
   operator bool() {
-    return sock != NULL;
+    return _socket != NULL;
   }
 
-  void setSocket(Socket* _sock) {
-    sock = _sock;
+  void setSocket(Socket* sock) {
+    _socket = sock;
   }
 
   IPAddress remoteIP();
@@ -81,7 +81,7 @@ protected:
 
 private:
   static uint16_t _srcport;
-  Socket* sock;
+  Socket* _socket;
   RingBufferN<WIFI_RECEIVE_BUFFER_SIZE> rxBuffer;
   uint8_t _status;
   mbed::Callback<int(void)> beforeConnect;

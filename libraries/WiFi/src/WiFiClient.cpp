@@ -15,8 +15,8 @@ uint8_t arduino::WiFiClient::status() {
 
 void arduino::WiFiClient::receiveData() {
 	uint8_t data[WIFI_RECEIVE_BUFFER_SIZE];
-	sock->set_blocking(false);
-    int receivedBytes = sock->recv(data, rxBuffer.availableForStore());
+	_socket->set_blocking(false);
+    int receivedBytes = _socket->recv(data, rxBuffer.availableForStore());
 
     for (int i = 0; i < receivedBytes; ++i) {
       rxBuffer.store_char(data[i]);
@@ -27,16 +27,16 @@ void arduino::WiFiClient::receiveData() {
 }
 
 int arduino::WiFiClient::connect(SocketAddress socketAddress) {
-	if (sock == NULL) {
-		sock = new TCPSocket();		
-		if(static_cast<TCPSocket*>(sock)->open(WiFi.getNetwork()) != NSAPI_ERROR_OK){
+	if (_socket == NULL) {
+		_socket = new TCPSocket();		
+		if(static_cast<TCPSocket*>(_socket)->open(WiFi.getNetwork()) != NSAPI_ERROR_OK){
 			return 0;
 		}
 	}
 	//sock->sigio(mbed::callback(this, &WiFiClient::getStatus));
 	//sock->set_blocking(false);
-	sock->set_timeout(SOCKET_TIMEOUT);		
-	nsapi_error_t returnCode = static_cast<TCPSocket*>(sock)->connect(socketAddress);
+	_socket->set_timeout(SOCKET_TIMEOUT);		
+	nsapi_error_t returnCode = static_cast<TCPSocket*>(_socket)->connect(socketAddress);
 	return returnCode == NSAPI_ERROR_OK ? 1 : 0;
 }
 
@@ -52,17 +52,17 @@ int arduino::WiFiClient::connect(const char *host, uint16_t port) {
 }
 
 int arduino::WiFiClient::connectSSL(SocketAddress socketAddress){
-	if (sock == NULL) {
-		sock = new TLSSocket();
-		if(static_cast<TLSSocket*>(sock)->open(WiFi.getNetwork()) != NSAPI_ERROR_OK){
+	if (_socket == NULL) {
+		_socket = new TLSSocket();
+		if(static_cast<TLSSocket*>(_socket)->open(WiFi.getNetwork()) != NSAPI_ERROR_OK){
 			return 0;
 		}
 	}
 	if (beforeConnect) {
 		beforeConnect();
 	}
-	sock->set_timeout(SOCKET_TIMEOUT);	
-	nsapi_error_t returnCode = static_cast<TLSSocket*>(sock)->connect(socketAddress);
+	_socket->set_timeout(SOCKET_TIMEOUT);	
+	nsapi_error_t returnCode = static_cast<TLSSocket*>(_socket)->connect(socketAddress);
 	return returnCode == NSAPI_ERROR_OK ? 1 : 0;
 }
 
@@ -82,8 +82,8 @@ size_t arduino::WiFiClient::write(uint8_t c) {
 }
 
 size_t arduino::WiFiClient::write(const uint8_t *buf, size_t size) {
-	sock->set_timeout(SOCKET_TIMEOUT);
-	sock->send(buf, size);
+	_socket->set_timeout(SOCKET_TIMEOUT);
+	_socket->send(buf, size);
 }
 
 int arduino::WiFiClient::available() {
@@ -128,9 +128,9 @@ void arduino::WiFiClient::flush() {
 }
 
 void arduino::WiFiClient::stop() {
-	if (sock != NULL) {
-		sock->close();
-		sock = NULL;
+	if (_socket != NULL) {
+		_socket->close();
+		_socket = NULL;
 	}
 }
 

@@ -38,16 +38,16 @@ public:
     return connectSSL(host, port);
   }
   void stop() {
-    if (sock != NULL) {
-      sock->close();
-      delete ((TLSSocket*)sock);
-      sock = NULL;
+    if (_socket != NULL) {
+      _socket->close();
+      delete (static_cast<TLSSocket*>(_socket));
+      _socket = NULL;
     }
   }
 
 private:
   int setRootCA() {
-    return ((TLSSocket*)sock)->set_root_ca_cert("/wlan/", 0);
+    return (static_cast<TLSSocket*>(_socket)->set_root_ca_cert("/wlan/", 0));
   }
 };
 
