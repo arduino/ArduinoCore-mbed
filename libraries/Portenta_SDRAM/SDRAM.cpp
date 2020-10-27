@@ -24,8 +24,10 @@ int SDRAMClass::begin(uint32_t start_address) {
 		mpu_config_end();
 	}
 
-	printf("malloc_addblock: allocate %d bytes\n", SDRAM_END_ADDRESS - start_address);
-	malloc_addblock((void*)start_address, SDRAM_END_ADDRESS - start_address);
+	if (start_address) {
+		printf("malloc_addblock: allocate %d bytes\n", SDRAM_END_ADDRESS - start_address);
+		malloc_addblock((void*)start_address, SDRAM_END_ADDRESS - start_address);
+	}
 
 	return 1;
 }
