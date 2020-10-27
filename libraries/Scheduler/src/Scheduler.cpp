@@ -31,7 +31,7 @@ void SchedulerClass::startLoop(SchedulerTask task, uint32_t stackSize) {
 	while (threads[i] != NULL && i < MAX_THREADS_NUMBER) {
 		i++;
 	}
-	threads[i] = new rtos::Thread(stackSize);
+	threads[i] = new rtos::Thread(osPriorityNormal, stackSize);
 	threads[i]->start(mbed::callback(loophelper, task));
 }
 
@@ -40,7 +40,7 @@ void SchedulerClass::start(SchedulerTask task, uint32_t stackSize) {
 	while (threads[i] != NULL && i < MAX_THREADS_NUMBER) {
 		i++;
 	}
-	threads[i] = new rtos::Thread(stackSize);
+	threads[i] = new rtos::Thread(osPriorityNormal, stackSize);
 	threads[i]->start(task);
 }
 
@@ -49,7 +49,7 @@ void SchedulerClass::start(SchedulerParametricTask task, void *taskData, uint32_
 	while (threads[i] != NULL && i < MAX_THREADS_NUMBER) {
 		i++;
 	}
-	threads[i] = new rtos::Thread(stackSize);
+	threads[i] = new rtos::Thread(osPriorityNormal, stackSize);
 	threads[i]->start(mbed::callback(task, taskData));
 }
 
