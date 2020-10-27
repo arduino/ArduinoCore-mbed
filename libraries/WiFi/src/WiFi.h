@@ -310,6 +310,7 @@ private:
     uint8_t connected_ap;
     int setSSID(const char* ssid);
     void ensureDefaultAPNetworkConfiguration();
+    static void * handleAPEvents(whd_interface_t ifp, const whd_event_header_t *event_header, const uint8_t *event_data, void *handler_user_data);
     bool isVisible(const char* ssid);
     arduino::IPAddress ipAddressFromSocketAddress(SocketAddress socketAddress);
     SocketAddress socketAddressFromIpAddress(arduino::IPAddress ip, uint16_t port);
