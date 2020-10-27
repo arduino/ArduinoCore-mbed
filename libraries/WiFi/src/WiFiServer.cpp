@@ -7,6 +7,10 @@ extern WiFiClass WiFi;
 #define WIFI_TCP_BUFFER_SIZE        1508
 #endif
 
+#ifndef SOCKET_TIMEOUT
+#define SOCKET_TIMEOUT 1500
+#endif
+
 #define MAX_PENDING_CONNECTIONS 5
 
 arduino::WiFiServer::WiFiServer(uint16_t port) {
@@ -41,7 +45,7 @@ size_t arduino::WiFiServer::write(uint8_t c) {
 }
 
 size_t arduino::WiFiServer::write(const uint8_t *buf, size_t size) {
-	_socket->set_blocking(true);
+	_socket->set_timeout(SOCKET_TIMEOUT);
 	_socket->send(buf, size);
 }
 
