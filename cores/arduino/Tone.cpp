@@ -24,7 +24,7 @@ public:
     }
 
     void start(void) {
-        ticker.attach(mbed::callback(this, &Tone::toggle), 500ms / frequency );
+        ticker.attach(mbed::callback(this, &Tone::toggle), 500000us / frequency );
         if (duration != 0) {
             start_timeout();
         }
