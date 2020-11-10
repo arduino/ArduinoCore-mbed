@@ -21,10 +21,10 @@
 */
 
 #include "wiring_private.h"
-#include "mbed/drivers/LowPowerTimer.h"
-#include "mbed/drivers/Timer.h"
-#include "mbed/rtos/rtos.h"
-#include "mbed/platform/mbed_wait_api.h"
+#include "drivers/LowPowerTimer.h"
+#include "drivers/Timer.h"
+#include "rtos/rtos.h"
+#include "platform/mbed_wait_api.h"
 
 #if DEVICE_LPTICKER
 static mbed::LowPowerTimer t;

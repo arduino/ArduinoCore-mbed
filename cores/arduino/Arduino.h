@@ -35,10 +35,10 @@
 #define F Mbed_F
 #endif // !ARDUINO_AS_MBED_LIBRARY
 #include "mbed_config.h"
-#include "mbed/drivers/InterruptIn.h"
-#include "mbed/drivers/PwmOut.h"
-#include "mbed/drivers/AnalogIn.h"
-#include "mbed/drivers/DigitalInOut.h"
+#include "drivers/InterruptIn.h"
+#include "drivers/PwmOut.h"
+#include "drivers/AnalogIn.h"
+#include "drivers/DigitalInOut.h"
 #include "mbed.h"
 #undef F
 #endif //__cplusplus
