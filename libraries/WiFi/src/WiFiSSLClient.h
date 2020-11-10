@@ -47,7 +47,7 @@ public:
 
 private:
   int setRootCA() {
-    return ((TLSSocket*)sock)->set_root_ca_cert("/wlan/", 0);
+    return ((TLSSocket*)sock)->set_root_ca_cert_path("/wlan/");
   }
 };
 
