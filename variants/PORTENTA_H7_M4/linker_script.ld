@@ -1,14 +1,11 @@
-STACK_SIZE = 1024;
-M_CRASH_DATA_RAM_SIZE = 0x100;
 MEMORY
 {
-  RAM (xrw) : ORIGIN = 0x10000000 + 0x298, LENGTH = 288K - 0x298
-  OPENAMP_RSC_TAB (rwx) : ORIGIN = 0x38000000, LENGTH = 1K
-  OPEN_AMP_SHMEM (rwx) : ORIGIN = 0x38000400, LENGTH = 63K
-  FLASH (rx) : ORIGIN = 0x8100000, LENGTH = 0x100000
+    FLASH (rx) : ORIGIN = 0x8100000, LENGTH = 0x100000
+    RAM (rwx) : ORIGIN = 0x10000000 + (((166 * 4) + 7) & 0xFFFFFFF8), LENGTH = 0x48000 - (((166 * 4) + 7) & 0xFFFFFFF8)
+    RAM_D3 (xrw) : ORIGIN = 0x38000000, LENGTH = 64K
 }
- __OPENAMP_region_start__ = ORIGIN(OPEN_AMP_SHMEM);
- __OPENAMP_region_end__ = ORIGIN(OPEN_AMP_SHMEM) + LENGTH(OPEN_AMP_SHMEM);
+__OPENAMP_region_start__  = 0x38000400;
+__OPENAMP_region_end__ = 0x38000400 + LENGTH(RAM_D3);
 ENTRY(Reset_Handler)
 SECTIONS
 {
@@ -43,17 +40,6 @@ SECTIONS
     __exidx_end = .;
     __etext = .;
     _sidata = .;
-    .crash_data_ram :
-    {
-        . = ALIGN(8);
-        __CRASH_DATA_RAM__ = .;
-        __CRASH_DATA_RAM_START__ = .;
-        KEEP(*(.keep.crash_data_ram))
-        *(.m_crash_data_ram)
-        . += M_CRASH_DATA_RAM_SIZE;
-        . = ALIGN(8);
-        __CRASH_DATA_RAM_END__ = .;
-    } > RAM
     .data : AT (__etext)
     {
         __data_start__ = .;
@@ -79,6 +65,15 @@ SECTIONS
         __data_end__ = .;
         _edata = .;
     } > RAM
+    .uninitialized (NOLOAD):
+    {
+        . = ALIGN(32);
+        __uninitialized_start = .;
+        *(.uninitialized)
+        KEEP(*(.keep.uninitialized))
+        . = ALIGN(32);
+        __uninitialized_end = .;
+    } > RAM
     .bss :
     {
         . = ALIGN(8);
@@ -90,25 +85,25 @@ SECTIONS
         __bss_end__ = .;
         _ebss = .;
     } > RAM
+    .openamp_section (NOLOAD) : {
+         . = ABSOLUTE(0x38000000);
+         *(.resource_table)
+     } >RAM_D3  AT > FLASH
     .heap (COPY):
     {
         __end__ = .;
-        end = __end__;
+        PROVIDE(end = .);
         *(.heap*)
-        . = ORIGIN(RAM) + LENGTH(RAM) - STACK_SIZE;
+        . = ORIGIN(RAM) + LENGTH(RAM) - 0x400;
         __HeapLimit = .;
     } > RAM
-    .openamp_section (NOLOAD) : {
-        . = ABSOLUTE(0x38000000);
-        *(.resource_table)
-    } >OPENAMP_RSC_TAB AT > FLASH
     .stack_dummy (COPY):
     {
         *(.stack*)
     } > RAM
     __StackTop = ORIGIN(RAM) + LENGTH(RAM);
     _estack = __StackTop;
-    __StackLimit = __StackTop - STACK_SIZE;
+    __StackLimit = __StackTop - 0x400;
     PROVIDE(__stack = __StackTop);
     ASSERT(__StackLimit >= __HeapLimit, "region RAM overflowed with stack")
 }
