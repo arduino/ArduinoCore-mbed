@@ -22,13 +22,13 @@
 
 #include "Arduino.h"
 #include "pins_arduino.h"
-#include "mbed/drivers/AnalogIn.h"
+#include "drivers/AnalogIn.h"
 
 static int write_resolution = 8;
 static int read_resolution = 10;
 
 #if DEVICE_ANALOGOUT
-#include "mbed/drivers/AnalogOut.h"
+#include "drivers/AnalogOut.h"
 mbed::AnalogOut* dac = NULL;
 void analogWriteDAC(PinName pin, int val) {
   if (dac == NULL) {
