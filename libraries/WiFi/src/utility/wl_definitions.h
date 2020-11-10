@@ -46,16 +46,17 @@
 
 typedef enum {
 	WL_NO_SHIELD = 255,
-        WL_IDLE_STATUS = 0,
-        WL_NO_SSID_AVAIL,
-        WL_SCAN_COMPLETED,
-        WL_CONNECTED,
-        WL_CONNECT_FAILED,
-        WL_CONNECTION_LOST,
-        WL_DISCONNECTED,
-        WL_AP_LISTENING,
-        WL_AP_CONNECTED,
-        WL_AP_FAILED
+  WL_NO_MODULE = 255,
+  WL_IDLE_STATUS = 0,
+  WL_NO_SSID_AVAIL,
+  WL_SCAN_COMPLETED,
+  WL_CONNECTED,
+  WL_CONNECT_FAILED,
+  WL_CONNECTION_LOST,
+  WL_DISCONNECTED,
+  WL_AP_LISTENING,
+  WL_AP_CONNECTED,
+  WL_AP_FAILED
 } wl_status_t;
 
 /* Encryption modes */
@@ -65,8 +66,13 @@ enum wl_enc_type {  /* Values map to 802.11 encryption suites... */
         ENC_TYPE_CCMP = 4,
         /* ... except these two, 7 and 8 are reserved in 802.11-2007 */
         ENC_TYPE_NONE = 7,
+        ENC_TYPE_UNKNOWN = 9,
         ENC_TYPE_AUTO = 8
 };
 
+#if defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_PORTENTA_H7_M4)
+#include "whd_version.h"
+#define WIFI_FIRMWARE_LATEST_VERSION WHD_VERSION
+#endif
 
 #endif /* WL_DEFINITIONS_H_ */
