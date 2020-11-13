@@ -268,6 +268,7 @@ private:
 
     // Interrupt to thread deferral
     events::PolledQueue _queue;
+    rtos::EventFlags _data_available;
     events::Task<void()> _in_task;
     events::Task<void()> _out_task;
     mbed::Callback<void()> _reset_task;

@@ -185,6 +185,7 @@ void USBMSD::process()
 {
     while (1) {
         if (_initialized) {
+            _data_available.wait_any(0xFF, 10);
             _queue.dispatch();
             //yield();
         }
@@ -249,11 +250,13 @@ int USBMSD::disk_status()
 
 void USBMSD::_isr_out()
 {
+    _data_available.set(1);
     _out_task.call();
 }
 
 void USBMSD::_isr_in()
 {
+    _data_available.set(1);
     _in_task.call();
 }
 
