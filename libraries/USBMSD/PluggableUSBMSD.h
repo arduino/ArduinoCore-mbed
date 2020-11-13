@@ -19,6 +19,7 @@
 #define USBMSD_H
 
 /* These headers are included for child class. */
+#include "Arduino.h"
 #include "USBDescriptor.h"
 #include "USBDevice_Types.h"
 #include "platform/Callback.h"

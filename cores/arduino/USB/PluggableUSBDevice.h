@@ -18,6 +18,8 @@
 #ifndef PLUGGABLEUSBDEVICE_H
 #define PLUGGABLEUSBDEVICE_H
 
+#include "Arduino.h"
+
 /* These headers are included for child class. */
 #include "USBDescriptor.h"
 #include "USBDevice_Types.h"
