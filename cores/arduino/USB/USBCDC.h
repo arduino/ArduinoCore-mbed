@@ -26,6 +26,12 @@
 #include "OperationList.h"
 #include "PluggableUSBDevice.h"
 
+#if defined(MBED_CONF_TARGET_USB_SPEED) && (MBED_CONF_TARGET_USB_SPEED == USE_USB_OTG_HS)
+#define CDC_MAX_PACKET_SIZE    512
+#else
+#define CDC_MAX_PACKET_SIZE    64
+#endif
+
 class AsyncOp;
 
 namespace arduino {
@@ -209,13 +215,13 @@ protected:
 
     OperationList<AsyncWrite> _tx_list;
     bool _tx_in_progress;
-    uint8_t _tx_buffer[512];
+    uint8_t _tx_buffer[CDC_MAX_PACKET_SIZE];
     uint8_t *_tx_buf;
     uint32_t _tx_size;
 
     OperationList<AsyncRead> _rx_list;
     bool _rx_in_progress;
-    uint8_t _rx_buffer[512];
+    uint8_t _rx_buffer[CDC_MAX_PACKET_SIZE];
     uint8_t *_rx_buf;
     uint32_t _rx_size;
 

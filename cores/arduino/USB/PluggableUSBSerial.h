@@ -248,7 +248,13 @@ public:
         if (!connected()) {
             return 0;
         }
-        return send((uint8_t*)buf, size);
+        size_t sent = 0;
+        while (sent < size) {
+            size_t to_send = (size - sent) > CDC_MAX_PACKET_SIZE ? CDC_MAX_PACKET_SIZE : (size - sent);
+            send((uint8_t*)&buf[sent], to_send);
+            sent += to_send;
+        }
+        return sent;
     }
     using Print::write; // pull in write(str) and write(buf, size) from Print
 
