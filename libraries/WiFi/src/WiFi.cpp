@@ -44,22 +44,55 @@ int arduino::WiFiClass::begin(const char* ssid, const char *passphrase) {
 
 int arduino::WiFiClass::beginAP(const char* ssid, const char *passphrase, uint8_t channel) {
 
-#if defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_PORTENTA_H7_M4)
-    _softAP = WhdSoftAPInterface::get_default_instance();
-#endif
+    #if defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_PORTENTA_H7_M4)
+        _softAP = WhdSoftAPInterface::get_default_instance();
+    #endif
 
     if (_softAP == NULL) {
-        return WL_AP_FAILED;
+        return (_currentNetworkStatus = WL_AP_FAILED);
     }
 
     ensureDefaultAPNetworkConfiguration();
 
+    WhdSoftAPInterface* softAPInterface = static_cast<WhdSoftAPInterface*>(_softAP);
+
     //Set ap ssid, password and channel    
-    static_cast<WhdSoftAPInterface*>(_softAP)->set_network(_ip, _netmask, _gateway);
-    nsapi_error_t result = static_cast<WhdSoftAPInterface*>(_softAP)->start(ssid, passphrase, NSAPI_SECURITY_WPA2, channel, true /* dhcp server */, NULL, true /* cohexistance */);
+    softAPInterface->set_network(_ip, _netmask, _gateway);
+    nsapi_error_t result = softAPInterface->start(ssid, passphrase, NSAPI_SECURITY_WPA2, channel, true /* dhcp server */, NULL, true /* cohexistance */);
     
+    nsapi_error_t registrationResult;
+    softAPInterface->unregister_event_handler();
+    registrationResult = softAPInterface->register_event_handler(arduino::WiFiClass::handleAPEvents);
+
+    if (registrationResult != NSAPI_ERROR_OK) {
+        return (_currentNetworkStatus = WL_AP_FAILED);        
+    }
+
     _currentNetworkStatus = (result == NSAPI_ERROR_OK && setSSID(ssid)) ? WL_AP_LISTENING : WL_AP_FAILED;
     return _currentNetworkStatus;
+}
+
+void * arduino::WiFiClass::handleAPEvents(whd_interface_t ifp, const whd_event_header_t *event_header, const uint8_t *event_data, void *handler_user_data){
+    if(event_header->event_type == WLC_E_ASSOC_IND){
+        WiFi._currentNetworkStatus = WL_AP_CONNECTED;        
+    } else if(event_header->event_type == WLC_E_DISASSOC_IND){
+        WiFi._currentNetworkStatus = WL_AP_LISTENING;            
+    }                
+
+    // Default Event Handler
+    whd_driver_t whd_driver = ifp->whd_driver;
+    WHD_IOCTL_LOG_ADD_EVENT(whd_driver, event_header->event_type, event_header->flags, event_header->reason);
+    
+    if ((event_header->event_type == (whd_event_num_t)WLC_E_LINK) || (event_header->event_type == WLC_E_IF)) {
+        if (osSemaphoreGetCount(whd_driver->ap_info.whd_wifi_sleep_flag) < 1) {
+            osStatus_t result = osSemaphoreRelease(whd_driver->ap_info.whd_wifi_sleep_flag);
+            if (result != osOK) {
+                printf("Release whd_wifi_sleep_flag ERROR: %d", result);
+            }
+        }
+    }
+
+    return handler_user_data;    
 }
 
 void arduino::WiFiClass::ensureDefaultAPNetworkConfiguration() {
@@ -80,10 +113,15 @@ void arduino::WiFiClass::end() {
 
 int arduino::WiFiClass::disconnect() {
     if (_softAP != nullptr) {
-        return static_cast<WhdSoftAPInterface*>(_softAP)->stop();        
+        WhdSoftAPInterface* softAPInterface = static_cast<WhdSoftAPInterface*>(_softAP);
+        softAPInterface->unregister_event_handler();
+        _currentNetworkStatus = (softAPInterface->stop() == NSAPI_ERROR_OK ? WL_DISCONNECTED : WL_AP_FAILED);
     } else {
-        return wifi_if->disconnect();
+        wifi_if->disconnect();
+        _currentNetworkStatus = WL_DISCONNECTED;
     }
+    
+    return _currentNetworkStatus;
 }
 
 void arduino::WiFiClass::config(arduino::IPAddress local_ip){    
