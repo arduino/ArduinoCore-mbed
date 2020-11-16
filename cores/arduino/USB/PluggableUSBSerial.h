@@ -253,6 +253,8 @@ public:
     using Print::write; // pull in write(str) and write(buf, size) from Print
 
     operator bool() {
+        // call delay() to force rescheduing during while !Serial pattern
+        delay(1);
         return connected();
     }
 
