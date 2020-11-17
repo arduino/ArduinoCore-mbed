@@ -46,7 +46,7 @@
 
 
 #define TUSHH_ROOT_CHILD_COUNT   1
-#define TUSBH_MAX_CHILD          4
+#define TUSBH_MAX_CHILD          10
 #define TUSBH_MAX_CONFIG_LENGTH  256
 #define TUSBH_MAX_INTERFACE      8
 #define TUSBH_MAX_EP             4
