@@ -315,6 +315,16 @@
 #define MBED_CONF_PPP_IPV6_ENABLED                                            0                                                                                                // set by library:ppp
 #define MBED_CONF_PPP_MBED_EVENT_QUEUE                                        0                                                                                                // set by library:ppp
 #define MBED_CONF_PPP_THREAD_STACKSIZE                                        816                                                                                              // set by library:ppp
+#define MBED_CONF_QSPIF_QSPI_CSN                                              MBED_CONF_DRIVERS_QSPI_CSN                                                                       // set by library:qspif
+#define MBED_CONF_QSPIF_QSPI_FREQ                                             32000000                                                                                         // set by library:qspif[MCU_NRF52840]
+#define MBED_CONF_QSPIF_QSPI_IO0                                              MBED_CONF_DRIVERS_QSPI_IO0                                                                       // set by library:qspif
+#define MBED_CONF_QSPIF_QSPI_IO1                                              MBED_CONF_DRIVERS_QSPI_IO1                                                                       // set by library:qspif
+#define MBED_CONF_QSPIF_QSPI_IO2                                              MBED_CONF_DRIVERS_QSPI_IO2                                                                       // set by library:qspif
+#define MBED_CONF_QSPIF_QSPI_IO3                                              MBED_CONF_DRIVERS_QSPI_IO3                                                                       // set by library:qspif
+#define MBED_CONF_QSPIF_QSPI_MIN_PROG_SIZE                                    256                                                                                              // set by library:qspif[MCU_NRF52840]
+#define MBED_CONF_QSPIF_QSPI_MIN_READ_SIZE                                    4                                                                                                // set by library:qspif[MCU_NRF52840]
+#define MBED_CONF_QSPIF_QSPI_POLARITY_MODE                                    0                                                                                                // set by library:qspif
+#define MBED_CONF_QSPIF_QSPI_SCK                                              MBED_CONF_DRIVERS_QSPI_SCK                                                                       // set by library:qspif
 #define MBED_CONF_QUECTEL_BC95_BAUDRATE                                       9600                                                                                             // set by library:QUECTEL_BC95
 #define MBED_CONF_QUECTEL_BC95_PROVIDE_DEFAULT                                0                                                                                                // set by library:QUECTEL_BC95
 #define MBED_CONF_QUECTEL_BG96_BAUDRATE                                       115200                                                                                           // set by library:QUECTEL_BG96

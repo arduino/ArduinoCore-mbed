@@ -338,6 +338,7 @@
 -iwithprefixbefore/mbed/components/wifi
 -iwithprefixbefore/mbed/components/storage/blockdevice/COMPONENT_SPIF
 -iwithprefixbefore/mbed/components/storage/blockdevice/COMPONENT_SD
+-iwithprefixbefore/mbed/components/storage/blockdevice/COMPONENT_QSPIF
 -iwithprefixbefore/mbed/components/storage/blockdevice/COMPONENT_FLASHIAP/COMMON
 -iwithprefixbefore/mbed/components/storage/blockdevice/COMPONENT_FLASHIAP
 -iwithprefixbefore/mbed/components/802.15.4_RF/stm-s2lp-rf-driver/stm-s2lp-rf-driver
