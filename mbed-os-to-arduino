@@ -223,7 +223,7 @@ EOF
 patch_spi_h () {
 	echo -n "Patching SPI headers..."
 	mv "$ARDUINOCOREMBED"/drivers/include/drivers/SPI.h "$ARDUINOCOREMBED"/drivers/include/drivers/SPIMaster.h
-	for header in mbed.h connectivity/drivers/nfc/PN512/include/nfc/controllers/PN512SPITransportDriver.h storage/blockdevice/COMPONENT_SD/include/SD/SDBlockDevice.h; do
+	for header in mbed.h connectivity/drivers/nfc/PN512/include/nfc/controllers/PN512SPITransportDriver.h storage/blockdevice/COMPONENT_SPIF/include/SPIF/SPIFBlockDevice.h storage/blockdevice/COMPONENT_SD/include/SD/SDBlockDevice.h; do
 		sed -i.bak 's#drivers/SPI\.h#drivers/SPIMaster\.h#g' "$ARDUINOCOREMBED"/$header
 		rm "$ARDUINOCOREMBED"/$header.bak
 	done
