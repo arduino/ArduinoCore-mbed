@@ -36,6 +36,9 @@ int main(void)
 	init();
 	initVariant();
 
+	// we are never going to use getchar/scanf directly
+	mbed::mbed_file_handle(STDIN_FILENO)->enable_input(false);
+
 #if defined(SERIAL_CDC)
   PluggableUSBD().begin();
   SerialUSB.begin(115200);
