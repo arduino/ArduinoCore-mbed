@@ -1,6 +1,14 @@
 #include "USBHost.h"
 #include "USB251xB.h"
 
+static rtos::Thread t(osPriorityHigh);
+
+void USBHost::InternalTask() {
+  while (1) {
+    tusbh_msg_loop(mq);
+  }
+}
+
 uint32_t USBHost::Init(uint8_t id, const tusbh_class_reg_t class_table[]) {
 
   mq = tusbh_mq_create();
@@ -30,16 +38,20 @@ uint32_t USBHost::Init(uint8_t id, const tusbh_class_reg_t class_table[]) {
     tusb_host_init(_hs, &root_hs);
     tusb_open_host(_hs);
   }
+
+  t.start(mbed::callback(this, &USBHost::InternalTask));
 }
 
+
+
 uint32_t USBHost::Task() {
-	tusbh_msg_loop(mq);
+
 }
 
 extern "C" {
   // host need accurate delay
   void tusb_delay_ms(uint32_t ms)
   {
-    delayMicroseconds(ms*1000);
+    delay(ms);
   }
 }

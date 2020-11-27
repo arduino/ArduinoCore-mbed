@@ -27,6 +27,8 @@ public:
 	};
 
 private:
+
+	void InternalTask();
 	tusbh_msg_q_t* mq;
 	tusb_host_t* _fs;
 	tusb_host_t* _hs;

@@ -100,7 +100,7 @@ void setup()
 }
 
 void loop() {
-  usb.Task();
+  //usb.Task();
 }
 
 #define MOD_CTRL      (0x01 | 0x10)
