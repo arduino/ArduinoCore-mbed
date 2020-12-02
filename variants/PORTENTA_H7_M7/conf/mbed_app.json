@@ -2,17 +2,16 @@
   "target_overrides": {
     "*": {
       "target.printf_lib": "std",
-      "platform.stdio-buffered-serial": true,
+      "platform.stdio-buffered-serial": false,
       "platform.stdio-baud-rate": 115200,
       "platform.default-serial-baud-rate": 115200,
       "platform.callback-nontrivial": true,
+      "platform.all-stats-enabled": true,
+      "platform.memory-tracing-enabled": true,
       "rtos.main-thread-stack-size": 32768,
       "cordio.max-connections": 5,
       "target.mbed_app_start": "0x8040000",
       "target.macros_add": [
-        "MBED_HEAP_STATS_ENABLED=1",
-        "MBED_STACK_STATS_ENABLED=1",
-        "MBED_MEM_TRACING_ENABLED=1",
         "METAL_INTERNAL",
         "VIRTIO_MASTER_ONLY",
         "NO_ATOMIC_64_SUPPORT",
