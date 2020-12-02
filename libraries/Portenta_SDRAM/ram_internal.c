@@ -60,7 +60,7 @@ bool sdram_init(void) {
     static MDMA_HandleTypeDef mdma_handle;
     GPIO_InitTypeDef gpio_init_structure;
 
-    //FMC_SDRAM_Clock_Config();
+    FMC_SDRAM_Clock_Config();
 
     /* Enable FMC clock */
     __HAL_RCC_FMC_CLK_ENABLE();
