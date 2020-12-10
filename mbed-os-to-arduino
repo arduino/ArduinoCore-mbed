@@ -172,6 +172,19 @@ generate_flags () {
 		if [[ $ARDUINOVARIANT == *PORTENTA* ]]; then
 			echo "Patching '-fno-exceptions' flag for $ARDUINOVARIANT/${fl}flags.txt"
 			sed -i '/-fno-exceptions/d' "$ARDUINOVARIANT"/${fl}flags.txt
+			set +e
+			HAS_OPENAMP_SECTION=`grep openamp_section "$ARDUINOVARIANT"/linker_script.ld`
+			set -e
+			if [ x"$HAS_OPENAMP_SECTION" == x ]; then
+				echo "Adding OpenAMP section to $ARDUINOVARIANT/linker_script.ld"
+				OPENAMP_SECTION=".openamp_section (NOLOAD) : {\n \
+        . = ABSOLUTE(0x38000000);\n \
+        *(.resource_table)\n \
+    } >RAM_D3  AT > FLASH"
+				sed -i "s?.heap (COPY):?${OPENAMP_SECTION}\n    .heap (COPY):?g" $ARDUINOVARIANT/linker_script.ld
+				OPENAMP_REGIONS="__OPENAMP_region_start__  = 0x38000400;\n__OPENAMP_region_end__ = 0x38000400 + LENGTH(RAM_D3);"
+				sed -i "s?ENTRY(Reset_Handler)?${OPENAMP_REGIONS}\nENTRY(Reset_Handler)?g" $ARDUINOVARIANT/linker_script.ld
+			fi
 		fi
 	done
 	echo " done."
@@ -324,8 +337,8 @@ for VARIANT in ${!VARIANT_BOARDS[*]}; do
 	mbed_compile
 	generate_defines
 	generate_includes
-	generate_flags
 	generate_libs
+	generate_flags
 done
 
 copy_core_files
