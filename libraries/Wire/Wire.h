@@ -43,8 +43,8 @@ class MbedI2C : public HardwareI2C
     virtual uint8_t endTransmission(bool stopBit);
     virtual uint8_t endTransmission(void);
 
-    virtual uint8_t requestFrom(uint8_t address, size_t len, bool stopBit);
-    virtual uint8_t requestFrom(uint8_t address, size_t len);
+    virtual size_t requestFrom(uint8_t address, size_t len, bool stopBit);
+    virtual size_t requestFrom(uint8_t address, size_t len);
 
     virtual void onReceive(void(*)(int));
     virtual void onRequest(void(*)(void));
