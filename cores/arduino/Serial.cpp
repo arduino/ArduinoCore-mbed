@@ -75,6 +75,8 @@ void UART::begin(unsigned long baudrate, uint16_t config) {
 void UART::begin(unsigned long baudrate) {
 	if (_serial == NULL) {
 		_serial = new mbed::UnbufferedSerial(tx, rx, baudrate);
+	} else {
+		_serial->baud(baudrate);
 	}
 	if (rts != NC) {
 		_serial->set_flow_control(mbed::SerialBase::Flow::RTSCTS, rts, cts);
