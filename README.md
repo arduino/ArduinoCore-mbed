@@ -12,10 +12,10 @@ cd $sketchbook/hardware/arduino
 git clone git@github.com:arduino/ArduinoCore-mbed mbed
 ```
 
-Then clone https://github.com/arduino/ArduinoCore-API in a directory at your choice. Checkout `namespace_arduino` branch.
+Then clone https://github.com/arduino/ArduinoCore-API in a directory at your choice.
 
 ```bash
-git clone git@github.com:arduino/ArduinoCore-API -b namespace_arduino
+git clone git@github.com:arduino/ArduinoCore-API
 ```
 
 Remove the symlink to `api` you can find in  `$sketchbook/hardware/arduino/mbed/cores/arduino` and replace it with a symlink to `ArduinoCore-API/api`
