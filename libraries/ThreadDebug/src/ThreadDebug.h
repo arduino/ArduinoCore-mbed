@@ -32,7 +32,10 @@
 #pragma once
 
 #include <Arduino.h>
-//#include <mbed.h>
+#ifdef SERIAL_CDC
+#include <USB/PluggableUSBSerial.h>
+#endif
+#include "mbed.h"
 
 #if defined(STM32H747xx) && defined(CORE_CM4)
 // include RPC out of arduino namespace

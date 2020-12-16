@@ -20,6 +20,7 @@
 #define _PDM_H_INCLUDED
 
 #include <Arduino.h>
+#include <pinDefinitions.h>
 
 #include "utility/PDMDoubleBuffer.h"
 
