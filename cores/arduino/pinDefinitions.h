@@ -24,8 +24,14 @@ struct _AnalogPinDescription
 #define digitalPinToPwm(P)          (g_APinDescription[P].pwm)
 #define digitalPinToGpio(P)         (g_APinDescription[P].gpio)
 
+#ifdef __cplusplus__
+extern "C" {
+#endif
 inline PinName digitalPinToPinName(int P) {
 	return (P >= PINS_COUNT ? NC : g_APinDescription[P].name);
 };
+#ifdef __cplusplus__
+}
+#endif
 
 int PinNameToIndex(PinName P);

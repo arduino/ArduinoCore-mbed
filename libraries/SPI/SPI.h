@@ -20,11 +20,8 @@
 
 #include "Arduino.h"
 #include "api/HardwareSPI.h"
-#if !defined(ARDUINO_AS_MBED_LIBRARY)
-#include "drivers/SPIMaster.h"
-#else
-#include "drivers/SPI.h"
-#endif
+
+typedef struct _mbed_spi mbed_spi;
 
 namespace arduino {
 
@@ -51,7 +48,7 @@ public:
 
 private:
     SPISettings settings = SPISettings(0, MSBFIRST, SPI_MODE0);
-    mbed::SPI* dev;
+    _mbed_spi* dev;
     int _miso;
     int _mosi;
     int _sck;
