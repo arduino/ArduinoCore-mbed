@@ -127,7 +127,10 @@ void arduino::MbedI2C::receiveThd() {
 				if (onRequestCb != NULL) {
 					onRequestCb();
 				}
-				slave->write((const char *) txBuffer, usedTxBuffer);
+				if (usedTxBuffer != 0) {
+					slave->write((const char *) txBuffer, usedTxBuffer);
+					usedTxBuffer = 0;
+				}
 				slave->stop();
 				break;
 			case mbed::I2CSlave::WriteGeneral:
