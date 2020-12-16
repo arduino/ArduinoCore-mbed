@@ -21,6 +21,12 @@
 */
 
 #include "Arduino.h"
+#include "pinDefinitions.h"
+#include "Serial.h"
+#include "mbed/drivers/UnbufferedSerial.h"
+#if defined(SERIAL_CDC)
+#include "USB/PluggableUSBSerial.h"
+#endif
 
 #ifdef Serial
 #undef Serial
@@ -28,7 +34,17 @@
 
 using namespace arduino;
 
+struct _mbed_serial {
+	mbed::UnbufferedSerial* obj;
+};
+
 void UART::begin(unsigned long baudrate, uint16_t config) {
+
+#if defined(SERIAL_CDC)
+	if (is_usb) {
+		return;
+	}
+#endif
 	begin(baudrate);
 	int bits = 8;
 	mbed::SerialBase::Parity parity = mbed::SerialBase::None;
@@ -69,47 +85,80 @@ void UART::begin(unsigned long baudrate, uint16_t config) {
 			break;
 	}
 
-	_serial->format(bits, parity, stop_bits);
+	_serial->obj->format(bits, parity, stop_bits);
 }
 
 void UART::begin(unsigned long baudrate) {
+#if defined(SERIAL_CDC)
+	if (is_usb) {
+		return;
+	}
+#endif
 	if (_serial == NULL) {
-		_serial = new mbed::UnbufferedSerial(tx, rx, baudrate);
+		_serial = new mbed_serial;
+	}
+	if (_serial->obj == NULL) {
+		_serial->obj = new mbed::UnbufferedSerial(tx, rx, baudrate);
 	} else {
-		_serial->baud(baudrate);
+		_serial->obj->baud(baudrate);
 	}
 	if (rts != NC) {
-		_serial->set_flow_control(mbed::SerialBase::Flow::RTSCTS, rts, cts);
+		_serial->obj->set_flow_control(mbed::SerialBase::Flow::RTSCTS, rts, cts);
 	}
-	if (_serial != NULL) {
-		_serial->attach(mbed::callback(this, &UART::on_rx), mbed::SerialBase::RxIrq);
+	if (_serial->obj != NULL) {
+		_serial->obj->attach(mbed::callback(this, &UART::on_rx), mbed::SerialBase::RxIrq);
 	}
 }
 
 void UART::on_rx() {
-	while(_serial->readable()) {
+#if defined(SERIAL_CDC)
+	if (is_usb) {
+		return;
+	}
+#endif
+	while(_serial->obj->readable()) {
 		char c;
-		_serial->read(&c, 1);
+		_serial->obj->read(&c, 1);
 		rx_buffer.store_char(c);
 	}
 }
 
 void UART::end() {
-	if (_serial != NULL) {
-		delete _serial;
-		_serial = NULL;
+#if defined(SERIAL_CDC)
+	if (is_usb) {
+		return SerialUSB.end();
+	}
+#endif
+	if (_serial->obj != NULL) {
+		delete _serial->obj;
+		_serial->obj = NULL;
 	}
 }
 
 int UART::available() {
+#if defined(SERIAL_CDC)
+	if (is_usb) {
+		return SerialUSB.available();
+	}
+#endif
 	return rx_buffer.available();
 }
 
 int UART::peek() {
+#if defined(SERIAL_CDC)
+	if (is_usb) {
+		return SerialUSB.peek();
+	}
+#endif
 	return rx_buffer.peek();
 }
 
 int UART::read() {
+#if defined(SERIAL_CDC)
+	if (is_usb) {
+		return SerialUSB.read();
+	}
+#endif
 	return rx_buffer.read_char();
 }
 
@@ -118,15 +167,25 @@ void UART::flush() {
 }
 
 size_t UART::write(uint8_t c) {
-	while (!_serial->writeable()) {}
-	int ret = _serial->write(&c, 1);
+#if defined(SERIAL_CDC)
+	if (is_usb) {
+		return SerialUSB.write(c);
+	}
+#endif
+	while (!_serial->obj->writeable()) {}
+	int ret = _serial->obj->write(&c, 1);
 	return ret == -1 ? 0 : 1;
 }
 
 size_t UART::write(const uint8_t* c, size_t len) {
-	while (!_serial->writeable()) {}
-	_serial->set_blocking(true);
-	int ret = _serial->write(c, len);
+#if defined(SERIAL_CDC)
+	if (is_usb) {
+		return SerialUSB.write(c, len);
+	}
+#endif
+	while (!_serial->obj->writeable()) {}
+	_serial->obj->set_blocking(true);
+	int ret = _serial->obj->write(c, len);
 	return ret == -1 ? 0 : len;
 }
 
@@ -135,8 +194,17 @@ void UART::block_tx(int _a) {
 }
 
 UART::operator bool() {
+#if defined(SERIAL_CDC)
+	if (is_usb) {
+		return SerialUSB;
+	}
+#endif
 	return 1;
 }
+
+#if defined(SERIAL_CDC)
+UART _UART_USB_;
+#endif
 
 #if SERIAL_HOWMANY > 0
 

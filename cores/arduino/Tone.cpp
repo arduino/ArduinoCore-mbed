@@ -1,4 +1,5 @@
 #include "Arduino.h"
+#include "pinDefinitions.h"
 #include "mbed.h"
 
 using namespace std::chrono_literals;

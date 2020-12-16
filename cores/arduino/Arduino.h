@@ -35,11 +35,6 @@
 #define F Mbed_F
 #endif // !ARDUINO_AS_MBED_LIBRARY
 #include "mbed_config.h"
-#include "mbed/drivers/InterruptIn.h"
-#include "mbed/drivers/PwmOut.h"
-#include "mbed/drivers/AnalogIn.h"
-#include "mbed/drivers/DigitalInOut.h"
-#include "mbed.h"
 #undef F
 #endif //__cplusplus
 
@@ -91,28 +86,15 @@ void analogWriteResolution(int bits);
 
 #ifdef __cplusplus
 // Types used for the table below
-typedef struct _PinDescription
-{
-  PinName name;
-  mbed::InterruptIn* irq;
-  mbed::PwmOut* pwm;
-  mbed::DigitalInOut* gpio;
-} PinDescription ;
-
-typedef struct _AnalogPinDescription
-{
-  PinName name;
-  mbed::AnalogIn* adc;
-} AnalogPinDescription ;
-
-int PinNameToIndex(PinName P);
+typedef struct _PinDescription PinDescription;
+typedef struct _AnalogPinDescription AnalogPinDescription;
 
 // Pins table to be instantiated into variant.cpp
 extern PinDescription g_APinDescription[];
 extern AnalogPinDescription g_AAnalogPinDescription[];
 
 #ifdef ANALOG_CONFIG
-
+#include "hal/analogin_api.h"
 typedef enum _AnalogReferenceMode AnalogReferenceMode;
 void analogReference(uint8_t mode);
 /* nRF specific function to change analog acquisition time */
@@ -128,8 +110,7 @@ extern analogin_config_t adcCurrentConfig;
 
 #include "Serial.h"
 #if defined(SERIAL_CDC)
-#include "USB/PluggableUSBSerial.h"
-#define Serial SerialUSB
+#define Serial _UART_USB_
 #else
 #define Serial _UART1_
 #endif
