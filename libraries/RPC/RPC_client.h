@@ -1,4 +1,5 @@
 #include "Arduino.h"
+#include "mbed.h"
 #include "rpc/dispatcher.h"
 
 //forward declaration
