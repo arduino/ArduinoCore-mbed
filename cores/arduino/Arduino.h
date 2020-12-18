@@ -23,24 +23,8 @@
 #if !defined(Arduino_h) && !defined(ARDUINO_LIB_DISCOVERY_PHASE)
 #define Arduino_h
 
-#if defined(__cplusplus)
 #if !defined(ARDUINO_AS_MBED_LIBRARY)
-
 #include "pinmode_arduino.h"
-
-#ifdef F
-#define Arduino_F F
-#undef F
-#endif // F (mbed included after arduino.h)
-#define F Mbed_F
-#endif // !ARDUINO_AS_MBED_LIBRARY
-#include "mbed_config.h"
-#undef F
-#endif //__cplusplus
-
-#if defined(ARDUINO_AS_MBED_LIBRARY)
-#define PinMode ArduinoPinMode
-#define Arduino_F F
 #endif
 
 #include "api/ArduinoAPI.h"
