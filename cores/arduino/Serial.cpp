@@ -96,6 +96,7 @@ void UART::begin(unsigned long baudrate) {
 #endif
 	if (_serial == NULL) {
 		_serial = new mbed_serial;
+		_serial->obj = NULL;
 	}
 	if (_serial->obj == NULL) {
 		_serial->obj = new mbed::UnbufferedSerial(tx, rx, baudrate);
