@@ -337,7 +337,7 @@ done
 copy_core_files
 patch_mbed_h
 patch_spi_h
-patch_callback_h
+#patch_callback_h
 
 echo
 echo "[$(basename $0)] MbedOS core generation ended succesfully."

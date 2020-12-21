@@ -36,11 +36,6 @@
 #define MBED_CONF_PLATFORM_CALLBACK_NONTRIVIAL 1
 #endif
 
-#ifdef F
-#undef F
-#define F _F
-#endif
-
 namespace mbed {
 /** \addtogroup platform-public-api */
 /** @{*/
