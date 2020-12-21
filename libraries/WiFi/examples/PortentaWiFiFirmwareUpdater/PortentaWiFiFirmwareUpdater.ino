@@ -10,8 +10,9 @@
 
 QSPIFBlockDevice root(PD_11, PD_12, PF_7, PD_13,  PF_10, PG_6, QSPIF_POLARITY_MODE_1, 40000000);
 mbed::MBRBlockDevice wifi_data(&root, 1);
+mbed::MBRBlockDevice ota_data(&root, 2);
 mbed::FATFileSystem wifi_data_fs("wlan");
-mbed::FATFileSystem other_data_fs("fs");
+mbed::FATFileSystem ota_data_fs("fs");
 
 long getFileSize(FILE *fp) {
     fseek(fp, 0, SEEK_END);
@@ -27,6 +28,7 @@ void setup() {
   while (!Serial);
 
   mbed::MBRBlockDevice::partition(&root, 1, 0x0B, 0, 1024 * 1024);
+  mbed::MBRBlockDevice::partition(&root, 2, 0x0B, 1024 * 1024, 14 * 1024 * 1024);
   // use space from 15.5MB to 16 MB for another fw, memory mapped
 
   int err =  wifi_data_fs.mount(&wifi_data);
@@ -38,6 +40,14 @@ void setup() {
                   " or was overwritten with another firmware.\n");
     Serial.println("Formatting the filsystem to install the firmware and certificates...\n");
     err = wifi_data_fs.reformat(&wifi_data);
+  }
+
+  err =  ota_data_fs.mount(&ota_data);
+  if (err) {
+    // Reformat if we can't mount the filesystem
+    // this should only happen on the first boot
+    Serial.println("No filesystem for OTA firmware was found, creating");
+    err = ota_data_fs.reformat(&ota_data);
   }
 
   DIR *dir;
