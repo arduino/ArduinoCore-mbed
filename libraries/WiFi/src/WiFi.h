@@ -288,6 +288,8 @@ public:
     int ping(const String &hostname, uint8_t ttl = 128);
     int ping(IPAddress host, uint8_t ttl = 128);
 
+    int download(char* url, const char* target);
+
     friend class WiFiClient;
     friend class WiFiServer;
     friend class WiFiUDP;
