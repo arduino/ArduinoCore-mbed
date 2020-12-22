@@ -18,6 +18,7 @@
 #ifndef USB_HID_H
 #define USB_HID_H
 
+#include "Arduino.h"
 /* These headers are included for child class. */
 #include "USBDescriptor.h"
 #include "USBDevice.h"
