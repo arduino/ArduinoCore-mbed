@@ -388,6 +388,10 @@ void USBHID::callback_set_interface(uint16_t interface, uint8_t alternate)
     assert_locked();
 }
 
+uint8_t USBHID::getProductVersion()
+{
+    return 4;
+}
 
 const uint8_t *USBHID::string_iinterface_desc()
 {

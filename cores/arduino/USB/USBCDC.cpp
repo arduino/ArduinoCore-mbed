@@ -489,6 +489,11 @@ const uint8_t *USBCDC::string_iinterface_desc()
     return (const uint8_t *)extraDescriptor;
 }
 
+uint8_t USBCDC::getProductVersion()
+{
+    return 1;
+}
+
 const uint8_t *USBCDC::string_iproduct_desc()
 {
     static const uint8_t stringIproductDescriptor[] = {

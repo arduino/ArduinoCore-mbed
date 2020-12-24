@@ -282,6 +282,13 @@ private:
     // space for config descriptor
     uint8_t _configuration_descriptor[32];
 
+    /*
+    * Get string product version
+    *
+    * Every module must declare a different number
+    */
+    virtual uint8_t getProductVersion();
+
     virtual const uint8_t *string_iproduct_desc();
     virtual const uint8_t *string_iinterface_desc();
     virtual const uint8_t *configuration_desc(uint8_t index);

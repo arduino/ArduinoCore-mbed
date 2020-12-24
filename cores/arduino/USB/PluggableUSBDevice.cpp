@@ -95,6 +95,7 @@ bool arduino::PluggableUSBDevice::plug(internal::PluggableUSBModule*node)
 
     node->pluggedInterface = lastIf;
     lastIf += node->numInterfaces;
+    product_release += node->getProductVersion();
     return true;
 }
 

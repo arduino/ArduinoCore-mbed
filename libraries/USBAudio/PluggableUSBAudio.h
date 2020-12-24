@@ -274,6 +274,13 @@ protected:
     virtual const uint8_t *string_iinterface_desc();
     virtual const uint8_t *configuration_desc(uint8_t index);
 
+    /*
+    * Get string product version
+    *
+    * Every module must declare a different number
+    */
+    virtual uint8_t getProductVersion();
+
 private:
 
     class AsyncWrite;

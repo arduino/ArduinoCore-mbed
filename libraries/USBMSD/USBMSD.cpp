@@ -311,6 +311,10 @@ void USBMSD::callback_set_interface(uint16_t interface, uint8_t alternate)
     //complete_set_interface(success);
 }
 
+uint8_t USBMSD::getProductVersion()
+{
+    return 8;
+}
 
 const uint8_t *USBMSD::string_iinterface_desc()
 {

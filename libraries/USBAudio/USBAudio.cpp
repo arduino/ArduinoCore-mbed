@@ -588,6 +588,11 @@ const uint8_t *USBAudio::configuration_desc(uint8_t index)
     return _config_descriptor;
 }
 
+uint8_t USBAudio::getProductVersion()
+{
+    return 2;
+}
+
 const uint8_t *USBAudio::string_iinterface_desc()
 {
     static const uint8_t stringIinterfaceDescriptor[] = {

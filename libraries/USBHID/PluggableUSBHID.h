@@ -164,6 +164,13 @@ protected:
     virtual uint16_t report_desc_length();
 
     /*
+    * Get string product version
+    *
+    * Every module must declare a different number
+    */
+    virtual uint8_t getProductVersion();
+
+    /*
     * Get string product descriptor
     *
     * @returns pointer to the string product descriptor
