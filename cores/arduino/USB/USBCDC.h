@@ -145,6 +145,13 @@ protected:
     virtual const uint8_t *string_iproduct_desc();
 
     /*
+    * Get string product version
+    *
+    * Every module must declare a different number
+    */
+    virtual uint8_t getProductVersion();
+
+    /*
     * Get string interface descriptor
     *
     * @returns pointer to the string interface descriptor
