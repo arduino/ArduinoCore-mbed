@@ -4,11 +4,11 @@ The repository contains the Arduino APIs and IDE integration files targeting a g
 
 ## Installation
 
-Clone the repository in `$sketchbook/hardware/arduino`
+Clone the repository in `$sketchbook/hardware/arduino-git`
 
 ```bash
-mkdir -p $sketchbook/hardware/arduino
-cd $sketchbook/hardware/arduino
+mkdir -p $sketchbook/hardware/arduino-git
+cd $sketchbook/hardware/arduino-git
 git clone git@github.com:arduino/ArduinoCore-mbed mbed
 ```
 
