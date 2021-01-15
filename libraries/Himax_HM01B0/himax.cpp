@@ -157,7 +157,7 @@ static regval_list_t himax_default_regs[] = {
     {0x3010, 0x01}, // 324 x 244 pixel
     {0x0383, 0x01},
     {0x0387, 0x01},
-    {0x0390, 0x03},
+    {0x0390, 0x00},
     {0x3011, 0x70},
     {0x3059, 0x02},
     {0x3060, 0x00},
@@ -207,8 +207,11 @@ uint8_t HIMAX_Open(void)
 
     //printf("Model: %x:%x\n", HIMAX_RegRead(MODEL_ID_H), HIMAX_RegRead(MODEL_ID_L));
 
-    if (HIMAX_Reset()!=0) return -1;
-    //HIMAX_Boot();
+    if (HIMAX_Reset()!=0) {
+        return -1;
+    }
+
+    HIMAX_Boot();
     //For debugging camera Configuration
     //HIMAX_PrintReg();
     HAL_Delay(200);
@@ -284,13 +287,12 @@ static uint8_t HIMAX_Boot()
     uint32_t i;
 
     for(i = 0; i < (sizeof(himax_default_regs) / sizeof(regval_list_t)); i++) {
-        //printf("%d\n", i);
         HIMAX_RegWrite(himax_default_regs[i].reg_num, himax_default_regs[i].value);
-        //delay(1);
     }
 
     HIMAX_RegWrite(PCLK_POLARITY, (0x20 | PCLK_FALLING_EDGE));
 
+    HIMAX_RegWrite(MODE_SELECT, HIMAX_Standby);
     return 0;
 }
 
