@@ -144,7 +144,9 @@ typedef struct regval_list_ {
 } regval_list_t;
 
 uint8_t HIMAX_Open(void);
-void HIMAX_Mode(uint8_t mode);
+int HIMAX_Mode(uint8_t mode);
+int HIMAX_SetResolution(uint32_t resolution);
+int HIMAX_SetFramerate(uint32_t framerate);
 void HIMAX_TestPattern(bool enable = true, bool walking = true);
 
 
