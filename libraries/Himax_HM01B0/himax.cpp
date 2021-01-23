@@ -312,6 +312,49 @@ int HIMAX_SetFramerate(uint32_t framerate)
   return HIMAX_RegWrite(OSC_CLK_DIV, 0x08 | osc_div);
 }
 
+int HIMAX_EnableMD(bool enable)
+{
+  int ret = HIMAX_ClearMD();
+  if (enable) {
+    ret |= HIMAX_RegWrite(MD_CTRL, 0x03);
+  } else {
+    ret |= HIMAX_RegWrite(MD_CTRL, 0x30);
+  }
+  return ret;
+}
+
+int HIMAX_SetMDThreshold(uint32_t low, uint32_t high)
+{
+  int ret = 0;
+  ret |= HIMAX_RegWrite(MD_THL, low  & 0xff);
+  ret |= HIMAX_RegWrite(MD_THH, high & 0xff);
+  return ret;
+}
+
+int HIMAX_SetLROI(uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2)
+{
+  int ret = 0;
+  ret |= HIMAX_RegWrite(MD_LROI_X_START_H, (x1>>8));
+  ret |= HIMAX_RegWrite(MD_LROI_X_START_L, (x1&0xff));
+  ret |= HIMAX_RegWrite(MD_LROI_Y_START_H, (y1>>8));
+  ret |= HIMAX_RegWrite(MD_LROI_Y_START_L, (y1&0xff));
+  ret |= HIMAX_RegWrite(MD_LROI_X_END_H,   (x2>>8));
+  ret |= HIMAX_RegWrite(MD_LROI_X_END_L,   (x2&0xff));
+  ret |= HIMAX_RegWrite(MD_LROI_Y_END_H,   (y2>>8));
+  ret |= HIMAX_RegWrite(MD_LROI_Y_END_L,   (y2&0xff));
+  return ret;
+}
+
+int HIMAX_PollMD()
+{
+  return HIMAX_RegRead(MD_INTERRUPT);
+}
+
+int HIMAX_ClearMD()
+{
+  return HIMAX_RegWrite(I2C_CLEAR, 0x01);
+}
+
 /**
  * @brief  This function writes HIMAX camera registers.
  * @retval None

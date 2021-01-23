@@ -12,6 +12,7 @@ static const int CamRes[][2] = {
     {320, 240},
 };
 static __IO uint32_t camera_frame_ready = 0;
+static md_callback_t user_md_callback = NULL;
 
 /* DCMI DMA Stream definitions */
 #define CAMERA_DCMI_DMAx_CLK_ENABLE         __HAL_RCC_DMA2_CLK_ENABLE
@@ -349,8 +350,6 @@ static int extclk_config(int frequency)
   */
 void BSP_CAMERA_PwrUp(void)
 {
-  GPIO_InitTypeDef gpio_init_structure;
-
   mbed::DigitalOut* powerup = new mbed::DigitalOut(PC_13);
   *powerup = 0;
   delay(50);
@@ -452,6 +451,13 @@ void HAL_DCMI_ErrorCallback(DCMI_HandleTypeDef *hdcmi)
 
 }
 
+void CameraClass::HIMAXIrqHandler()
+{
+  if (user_md_callback) {
+    user_md_callback();
+  }
+}
+
 int CameraClass::begin(uint32_t resolution, uint32_t framerate)
 {  
   if (resolution >= CAMERA_RMAX) {
@@ -477,6 +483,7 @@ int CameraClass::begin(uint32_t resolution, uint32_t framerate)
     return -1;
   }
 
+  user_md_callback = NULL;
   this->initialized = true;
   this->resolution = resolution;
   return 0;
@@ -534,6 +541,74 @@ int CameraClass::standby(bool enable)
   } else {
     return HIMAX_Mode(HIMAX_Streaming);
   }
+}
+
+int CameraClass::setMDThreshold(uint32_t low, uint32_t high)
+{
+  if (this->initialized == false) {
+    return -1;
+  }
+  return HIMAX_SetMDThreshold(low, high);
+}
+
+int CameraClass::setMDWindow(uint32_t x, uint32_t y, uint32_t w, uint32_t h)
+{
+  uint32_t width, height;
+
+  if (this->initialized == false) {
+    return -1;
+  }
+
+  width = CamRes[this->resolution][0];
+  height= CamRes[this->resolution][1];
+
+  if (((x+w) > width) || ((y+h) > height)) {
+      return -1;
+  }
+  return HIMAX_SetLROI(x, y, x+w, y+h);
+}
+
+int CameraClass::enableMD(bool enable, md_callback_t callback)
+{
+  if (this->initialized == false) {
+    return -1;
+  }
+
+  this->md_irq.rise(0);
+
+  if (enable == false) {
+    user_md_callback = NULL;
+  } else {
+    user_md_callback = callback;
+    this->md_irq.rise(mbed::Callback<void()>(this, &CameraClass::HIMAXIrqHandler));
+    this->md_irq.enable_irq();
+  }
+
+  return HIMAX_EnableMD(enable);
+}
+
+int CameraClass::pollMD()
+{
+  int ret = 0;
+
+  if (this->initialized == false) {
+    return -1;
+  }
+
+  ret = HIMAX_PollMD();
+  if (ret == 1) {
+    HIMAX_ClearMD();
+  }
+  return ret;
+}
+
+int CameraClass::clearMDFlag()
+{
+  if (this->initialized == false) {
+    return -1;
+  }
+
+  return HIMAX_ClearMD();
 }
 
 int CameraClass::testPattern(bool walking)
