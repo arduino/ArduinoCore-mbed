@@ -4,11 +4,11 @@ The repository contains the Arduino APIs and IDE integration files targeting a g
 
 ## Installation
 
-Clone the repository in `$sketchbook/hardware/arduino`
+Clone the repository in `$sketchbook/hardware/arduino-git`
 
 ```bash
-mkdir -p $sketchbook/hardware/arduino
-cd $sketchbook/hardware/arduino
+mkdir -p $sketchbook/hardware/arduino-git
+cd $sketchbook/hardware/arduino-git
 git clone git@github.com:arduino/ArduinoCore-mbed mbed
 ```
 
@@ -34,7 +34,7 @@ The missing ARM build tools can be installed by using the `Boards Manager` optio
 Adding a target is a mostly automatic procedure that involves running https://github.com/arduino/ArduinoCore-mbed/blob/master/mbed-os-to-arduino after setting `BOARDNAME` and `ARDUINOCORE` env variables.
 Actions marked as TODO must be executed manually.
 
-**Minimum Example**: `./mbed-os-to-arduino -r /home/alex/projects/arduino/cores/mbed-os-h747 ENVIE_M7:ENVIE_M7`
+**Minimum Example**: `./mbed-os-to-arduino -r /home/alex/projects/arduino/cores/mbed-os-h747 PORTENTA_H7_M7:PORTENTA_H7_M7`
 
 ### How to build a debug version of the Arduino mbed libraries
 * Modify `mbed-os-to-arduino `
