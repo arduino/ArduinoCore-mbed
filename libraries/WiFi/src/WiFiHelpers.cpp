@@ -17,6 +17,7 @@
 #include "WiFi.h"
 #include "mbed.h"
 #include "utility/http_request.h"
+#include "utility/https_request.h"
 
 static FILE* target;
 
@@ -26,7 +27,13 @@ void body_callback(const char* data, uint32_t data_len) {
 
 int WiFiClass::download(char* url, const char* target_file) {
 	target = fopen(target_file, "wb");
-	HttpRequest* req = new HttpRequest(getNetwork(), HTTP_GET, url, &body_callback);
-	req->send(NULL, 0);
-	fclose(target);
+  HttpsRequest* req = new HttpsRequest(getNetwork(), nullptr, HTTP_GET, url, &body_callback);
+	if (req->send(NULL, 0) == NULL)
+  {
+    fclose(target);
+    return req->get_error();
+  }
+  int const size = ftell(target);
+  fclose(target);
+  return size;
 }

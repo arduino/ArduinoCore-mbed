@@ -49,16 +49,20 @@ public:
                  const char* ssl_ca_pem,
                  http_method method,
                  const char* url,
-                 Callback<void(const char *at, uint32_t length)> body_callback = 0)
+                 mbed::Callback<void(const char *at, uint32_t length)> body_callback = 0)
         : HttpRequestBase(NULL, body_callback)
     {
+        _error = 0;
+        _network = network;
+
         _parsed_url = new ParsedUrl(url);
         _request_builder = new HttpRequestBuilder(method, _parsed_url);
         _response = NULL;
 
         _socket = new TLSSocket();
         ((TLSSocket*)_socket)->open(network);
-        ((TLSSocket*)_socket)->set_root_ca_cert(ssl_ca_pem);
+        //((TLSSocket*)_socket)->set_root_ca_cert(ssl_ca_pem);
+        ((TLSSocket*)_socket)->set_root_ca_cert("/wlan/", 0);
         _we_created_socket = true;
     }
 
@@ -76,7 +80,7 @@ public:
     HttpsRequest(TLSSocket* socket,
                  http_method method,
                  const char* url,
-                 Callback<void(const char *at, uint32_t length)> body_callback = 0)
+                 mbed::Callback<void(const char *at, uint32_t length)> body_callback = 0)
         : HttpRequestBase(socket, body_callback)
     {
         _parsed_url = new ParsedUrl(url);
@@ -91,7 +95,10 @@ public:
 
 protected:
     virtual nsapi_error_t connect_socket(char *host, uint16_t port) {
-        return ((TLSSocket*)_socket)->connect(host, port);
+        SocketAddress socketAddress = SocketAddress();
+        socketAddress.set_port(port);
+        _network->gethostbyname(host, &socketAddress);
+        return ((TLSSocket*)_socket)->connect(socketAddress);
     }
 };
 
