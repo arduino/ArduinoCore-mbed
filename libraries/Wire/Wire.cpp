@@ -152,6 +152,10 @@ void arduino::MbedI2C::receiveThd() {
 				}
 				slave->stop();
 				break;
+		case mbed::I2CSlave::NoData:
+			//slave->stop();
+			yield();
+			break;
 		}
 	}
 }
