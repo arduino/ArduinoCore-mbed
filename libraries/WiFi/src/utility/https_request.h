@@ -61,8 +61,10 @@ public:
 
         _socket = new TLSSocket();
         ((TLSSocket*)_socket)->open(network);
-        //((TLSSocket*)_socket)->set_root_ca_cert(ssl_ca_pem);
-        ((TLSSocket*)_socket)->set_root_ca_cert("/wlan/", 0);
+        if (ssl_ca_pem)
+          ((TLSSocket*)_socket)->set_root_ca_cert(ssl_ca_pem);
+        else
+          ((TLSSocket*)_socket)->set_root_ca_cert("/wlan/", 0);
         _we_created_socket = true;
     }
 
