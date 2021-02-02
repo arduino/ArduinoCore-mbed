@@ -18,10 +18,9 @@ class CameraClass {
         int framerate(uint32_t framerate);
         int grab(uint8_t *buffer, uint32_t timeout=5000);
         int standby(bool enable);
-        int enableMD(bool enable, md_callback_t callback=NULL);
-        int setMDWindow(uint32_t x, uint32_t y, uint32_t w, uint32_t h);
-        int setMDThreshold(uint32_t low, uint32_t high);
-        int pollMD();
-        int clearMDFlag();
+        int motionDetection(bool enable, md_callback_t callback=NULL);
+        int motionDetectionWindow(uint32_t x, uint32_t y, uint32_t w, uint32_t h);
+        int motionDetectionThreshold(uint32_t low, uint32_t high);
+        int motionDetected();
         int testPattern(bool walking);
 };

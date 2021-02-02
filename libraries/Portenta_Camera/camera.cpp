@@ -543,7 +543,7 @@ int CameraClass::standby(bool enable)
   }
 }
 
-int CameraClass::setMDThreshold(uint32_t low, uint32_t high)
+int CameraClass::motionDetectionThreshold(uint32_t low, uint32_t high)
 {
   if (this->initialized == false) {
     return -1;
@@ -551,7 +551,7 @@ int CameraClass::setMDThreshold(uint32_t low, uint32_t high)
   return HIMAX_SetMDThreshold(low, high);
 }
 
-int CameraClass::setMDWindow(uint32_t x, uint32_t y, uint32_t w, uint32_t h)
+int CameraClass::motionDetectionWindow(uint32_t x, uint32_t y, uint32_t w, uint32_t h)
 {
   uint32_t width, height;
 
@@ -568,7 +568,7 @@ int CameraClass::setMDWindow(uint32_t x, uint32_t y, uint32_t w, uint32_t h)
   return HIMAX_SetLROI(x, y, x+w, y+h);
 }
 
-int CameraClass::enableMD(bool enable, md_callback_t callback)
+int CameraClass::motionDetection(bool enable, md_callback_t callback)
 {
   if (this->initialized == false) {
     return -1;
@@ -587,7 +587,7 @@ int CameraClass::enableMD(bool enable, md_callback_t callback)
   return HIMAX_EnableMD(enable);
 }
 
-int CameraClass::pollMD()
+int CameraClass::motionDetected()
 {
   int ret = 0;
 
@@ -600,15 +600,6 @@ int CameraClass::pollMD()
     HIMAX_ClearMD();
   }
   return ret;
-}
-
-int CameraClass::clearMDFlag()
-{
-  if (this->initialized == false) {
-    return -1;
-  }
-
-  return HIMAX_ClearMD();
 }
 
 int CameraClass::testPattern(bool walking)
