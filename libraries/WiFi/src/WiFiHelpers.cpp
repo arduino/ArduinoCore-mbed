@@ -17,16 +17,47 @@
 #include "WiFi.h"
 #include "mbed.h"
 #include "utility/http_request.h"
+#include "utility/https_request.h"
 
 static FILE* target;
 
-void body_callback(const char* data, uint32_t data_len) {
+void body_callback(const char* data, uint32_t data_len)
+{
 	fwrite(data, 1, data_len, target);
 }
 
-int WiFiClass::download(char* url, const char* target_file) {
+int WiFiClass::download(char* url, const char* target_file, bool const is_https)
+{
 	target = fopen(target_file, "wb");
-	HttpRequest* req = new HttpRequest(getNetwork(), HTTP_GET, url, &body_callback);
-	req->send(NULL, 0);
-	fclose(target);
+
+  HttpRequest  * req_http  = nullptr;
+  HttpsRequest * req_https = nullptr;
+  HttpResponse * rsp       = nullptr;
+
+  if (is_https)
+  {
+    req_https = new HttpsRequest(getNetwork(), nullptr, HTTP_GET, url, &body_callback);
+    rsp = req_https->send(NULL, 0);
+    if (rsp == NULL) {
+      fclose(target);
+      return req_https->get_error();
+    }
+  }
+  else
+  {
+    req_http = new HttpRequest(getNetwork(), HTTP_GET, url, &body_callback);
+    rsp = req_http->send(NULL, 0);
+    if (rsp == NULL) {
+      fclose(target);
+      return req_http->get_error();
+    }
+  }
+
+  while (!rsp->is_message_complete()) {
+    delay(10);
+  }
+
+  int const size = ftell(target);
+  fclose(target);
+  return size;
 }
