@@ -18,19 +18,22 @@ void setup() {
   // Init the cam QVGA, 30FPS
   cam.begin(CAMERA_R320x240, 60);
 
-  cam.setMDThreshold(100, 200);
-  cam.setMDWindow(0, 0, 320, 240);
-  cam.enableMD(true, on_motion);
+  cam.motionDetectionThreshold(100, 200);
+  cam.motionDetectionWindow(0, 0, 320, 240);
+  // The detection can also be enabled without any callback
+  cam.motionDetection(true, on_motion);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:  
+
   if (motion_detected) {
     Serial.printf("Motion Detected!\n");
     digitalWrite(LEDB, LOW);
     delay(500);
-    cam.clearMDFlag();
-    motion_detected =false;
+
+    // Clear the detection flag
+    cam.motionDetected();
+    motion_detected = false;
     digitalWrite(LEDB, HIGH);
   }
   delay(10);
