@@ -2,39 +2,26 @@
 #include "himax.h"
 #include "camera.h"
 #include "stm32h7xx_hal_dcmi.h"
-#include "SDRAM.h"
 
-#define LCD_FRAME_BUFFER                  0xC0000000 /* LCD Frame buffer of size 800x480 in ARGB8888 */
 #define CAMERA_FRAME_BUFFER               0xC0200000
-
-#define QVGA_RES_X	324
-#define QVGA_RES_Y	244
 
 #define ARGB8888_BYTE_PER_PIXEL  4
 
-static uint32_t   CameraResX = QVGA_RES_X;
-static uint32_t   CameraResY = QVGA_RES_Y;
-static uint32_t   LcdResX    = 0;
-static uint32_t   LcdResY    = 0;
+static const int CamRes[][2] = {
+    {160, 120},
+    {320, 240},
+};
+static __IO uint32_t camera_frame_ready = 0;
+static md_callback_t user_md_callback = NULL;
 
-__IO uint32_t camera_frame_ready = 0;
-__IO uint32_t lcd_frame_ready = 0;
- 
 /* DCMI DMA Stream definitions */
 #define CAMERA_DCMI_DMAx_CLK_ENABLE         __HAL_RCC_DMA2_CLK_ENABLE
 #define CAMERA_DCMI_DMAx_STREAM             DMA2_Stream3
 #define CAMERA_DCMI_DMAx_IRQ                DMA2_Stream3_IRQn 
 
-#define CAMERA_R160x120                 0x00   /* QQVGA Resolution                     */
-#define CAMERA_R320x240                 0x01   /* QVGA Resolution                      */
-#define CAMERA_R480x272                 0x02   /* 480x272 Resolution                   */
-#define CAMERA_R640x480                 0x03   /* VGA Resolution                       */  
-
 extern "C" {
 
 DCMI_HandleTypeDef  hdcmi_discovery;
-
-static uint32_t CameraCurrentResolution;
 
 void BSP_CAMERA_PwrUp(void);
 
@@ -92,11 +79,11 @@ void BSP_CAMERA_MspInit(DCMI_HandleTypeDef *hdcmi, void *Params)
   hdma_handler.Init.MemInc              = DMA_MINC_ENABLE;
   hdma_handler.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
   hdma_handler.Init.MemDataAlignment    = DMA_MDATAALIGN_WORD;
-  hdma_handler.Init.Mode                = DMA_CIRCULAR;
+  hdma_handler.Init.Mode                = DMA_NORMAL;
   hdma_handler.Init.Priority            = DMA_PRIORITY_HIGH;
   hdma_handler.Init.FIFOMode            = DMA_FIFOMODE_DISABLE;
   hdma_handler.Init.FIFOThreshold       = DMA_FIFO_THRESHOLD_FULL;
-  hdma_handler.Init.MemBurst            = DMA_MBURST_SINGLE;
+  hdma_handler.Init.MemBurst            = DMA_MBURST_INC4;
   hdma_handler.Init.PeriphBurst         = DMA_PBURST_SINGLE; 
 
   hdma_handler.Instance = CAMERA_DCMI_DMAx_STREAM;
@@ -141,10 +128,6 @@ void BSP_CAMERA_MspDeInit(DCMI_HandleTypeDef *hdcmi, void *Params)
      by surcharging this __weak function */
 }
 
-/** @defgroup STM32H747I_DISCOVERY_CAMERA_Private_FunctionPrototypes Private FunctionPrototypes
-  * @{
-  */
-static uint32_t GetSize(uint32_t Resolution);
 /**
   * @}
   */
@@ -192,7 +175,11 @@ uint8_t BSP_CAMERA_Init(uint32_t Resolution)
   phdcmi->Init.SynchroMode      = DCMI_SYNCHRO_HARDWARE;
   phdcmi->Init.VSPolarity       = DCMI_VSPOLARITY_LOW;
   phdcmi->Init.ExtendedDataMode = DCMI_EXTEND_DATA_8B;
-  phdcmi->Init.PCKPolarity      = DCMI_PCKPOLARITY_RISING;
+  phdcmi->Init.PCKPolarity      = DCMI_PCKPOLARITY_FALLING;
+  phdcmi->Init.ByteSelectMode   = DCMI_BSM_ALL;         // Capture all received bytes
+  phdcmi->Init.ByteSelectStart  = DCMI_OEBS_ODD;        // Ignored
+  phdcmi->Init.LineSelectMode   = DCMI_LSM_ALL;         // Capture all received lines
+  phdcmi->Init.LineSelectStart  = DCMI_OELS_ODD;        // Ignored
   phdcmi->Instance              = DCMI;
 
   /* Power up camera */
@@ -204,27 +191,22 @@ uint8_t BSP_CAMERA_Init(uint32_t Resolution)
   HAL_DCMI_Init(phdcmi);
 
   /*
-  * @param  YSize DCMI Line number
-  * @param  XSize DCMI Pixel per line
   * @param  X0    DCMI window X offset
   * @param  Y0    DCMI window Y offset
+  * @param  XSize DCMI Pixel per line
+  * @param  YSize DCMI Line number
   * @retval HAL status
   */
-//HAL_StatusTypeDef HAL_DCMI_ConfigCrop(DCMI_HandleTypeDef *hdcmi, uint32_t X0, uint32_t Y0, uint32_t XSize, uint32_t YSize)
-
-  HAL_DCMI_ConfigCROP(phdcmi, (QVGA_RES_X - CameraResX) / 2, (QVGA_RES_Y - CameraResY / 2), CameraResX-1, CameraResY-1);
   HAL_DCMI_EnableCROP(phdcmi);
+  HAL_DCMI_ConfigCROP(phdcmi, 0, 0, CamRes[Resolution][0] - 1, CamRes[Resolution][1] - 1);
 
-  //HAL_DCMI_DisableCROP(phdcmi);
-
-  CameraCurrentResolution = Resolution;
+  __HAL_DCMI_DISABLE_IT(&hdcmi_discovery, DCMI_IT_LINE);
 
   /* Return CAMERA_OK status */
   status = 0;
 
   return status;
 }
-
 
 /**
   * @brief  DeInitializes the camera.
@@ -240,25 +222,16 @@ uint8_t BSP_CAMERA_DeInit(void)
 }
 
 /**
-  * @brief  Starts the camera capture in continuous mode.
-  * @param  buff: pointer to the camera output buffer
-  * @retval None
-  */
-void BSP_CAMERA_ContinuousStart(uint8_t *buff)
-{
-  /* Start the camera capture */
-  HAL_DCMI_Start_DMA(&hdcmi_discovery, DCMI_MODE_CONTINUOUS, (uint32_t)buff, GetSize(CameraCurrentResolution));
-}
-
-/**
   * @brief  Starts the camera capture in snapshot mode.
   * @param  buff: pointer to the camera output buffer
   * @retval None
   */
-void BSP_CAMERA_SnapshotStart(uint8_t *buff)
+void BSP_CAMERA_SnapshotStart(uint8_t *buff, uint32_t framesize)
 {
+  __HAL_DCMI_ENABLE_IT(&hdcmi_discovery, DCMI_IT_FRAME);
+
   /* Start the camera capture */
-  HAL_DCMI_Start_DMA(&hdcmi_discovery, DCMI_MODE_SNAPSHOT, (uint32_t)buff, GetSize(CameraCurrentResolution));
+  HAL_DCMI_Start_DMA(&hdcmi_discovery, DCMI_MODE_SNAPSHOT, (uint32_t)buff, framesize / 4);
 }
 
 /**
@@ -333,8 +306,8 @@ void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef *htim)
 
 static int extclk_config(int frequency)
 {
-    /* TCLK (PCLK * 2) */
-    int tclk = DCMI_TIM_PCLK_FREQ() * 2;
+    /* TCLK (PCLK) */
+    int tclk = DCMI_TIM_PCLK_FREQ();
 
     /* Period should be even */
     int period = (tclk / frequency) - 1;
@@ -377,8 +350,6 @@ static int extclk_config(int frequency)
   */
 void BSP_CAMERA_PwrUp(void)
 {
-  GPIO_InitTypeDef gpio_init_structure;
-
   mbed::DigitalOut* powerup = new mbed::DigitalOut(PC_13);
   *powerup = 0;
   delay(50);
@@ -400,47 +371,6 @@ void BSP_CAMERA_PwrDown(void)
 }
 
 /**
-  * @brief  Get the capture size in pixels unit.
-  * @param  Resolution: the current resolution.
-  * @retval capture size in pixels unit.
-  */
-static uint32_t GetSize(uint32_t Resolution)
-{
-  uint32_t size = 0;
-
-  /* Get capture size */
-  switch (Resolution)
-  {
-  case CAMERA_R160x120:
-    {
-      size =  160 * 120;
-    }
-    break;
-  case CAMERA_R320x240:
-    {
-      size =  324 * 244;
-    }
-    break;
-  case CAMERA_R480x272:
-    {
-      size =  480 * 272;
-    }
-    break;
-  case CAMERA_R640x480:
-    {
-      size =  640 * 480;
-    }
-    break;
-  default:
-    {
-      break;
-    }
-  }
-
-  return size;
-}
-
-/**
   * @brief  Error callback.
   * @retval None
   */
@@ -452,7 +382,6 @@ void BSP_CAMERA_FrameEventCallback(void)
 {
   camera_frame_ready++;
 }
-
 
 void DMA2_Stream3_IRQHandler(void)
 {
@@ -522,77 +451,172 @@ void HAL_DCMI_ErrorCallback(DCMI_HandleTypeDef *hdcmi)
 
 }
 
+void CameraClass::HIMAXIrqHandler()
+{
+  if (user_md_callback) {
+    user_md_callback();
+  }
+}
 
-int CameraClass::begin(int horizontalResolution, int verticalResolution)
+int CameraClass::begin(uint32_t resolution, uint32_t framerate)
 {  
-  CameraResX = horizontalResolution;
-  CameraResY = verticalResolution;
-
-  SDRAM.begin(LCD_FRAME_BUFFER);
+  if (resolution >= CAMERA_RMAX) {
+    return -1;
+  }
 
   /*## Camera Initialization and capture start ############################*/
   /* Initialize the Camera in QVGA mode */
-  if(BSP_CAMERA_Init(CAMERA_R320x240) != 0)
+  if(BSP_CAMERA_Init(resolution) != 0)
   {
     return -1;
   }
+
+  if (HIMAX_SetResolution(resolution) != 0) {
+    return -1;
+  }
+
+  if (HIMAX_SetFramerate(framerate) != 0) {
+    return -1;
+  }
+
+  if (HIMAX_Mode(HIMAX_Streaming) != 0) {
+    return -1;
+  }
+
+  user_md_callback = NULL;
+  this->initialized = true;
+  this->resolution = resolution;
   return 0;
 }
 
-int CameraClass::start(uint32_t timeout)
+int CameraClass::framerate(uint32_t framerate)
 {
-  HIMAX_Mode(HIMAX_Streaming);
-
-  /* Start the Camera Snapshot Capture */
-  BSP_CAMERA_ContinuousStart((uint8_t *)LCD_FRAME_BUFFER);
-  uint32_t time =millis();
-
-  /* Wait until camera frame is ready : DCMI Frame event */
-  while((camera_frame_ready == 0) && ((timeout+time)>millis()))
-  {
+  if (this->initialized == false) {
+    return -1;
   }
-  return camera_frame_ready ? 0: -1;
+  return HIMAX_SetFramerate(framerate);
 }
 
-uint8_t* CameraClass::grab(void)
+int CameraClass::grab(uint8_t *buffer, uint32_t timeout)
 {
-  //HIMAX_Mode(HIMAX_Streaming);
-
-  /* Start the Camera Snapshot Capture */
-  //BSP_CAMERA_ContinuousStart((uint8_t *)LCD_FRAME_BUFFER);
-
-  /* Wait until camera frame is ready : DCMI Frame event */
-  while(camera_frame_ready == 0)
-  {
+  if (this->initialized == false) {
+    return -1;
   }
-  return (uint8_t *)LCD_FRAME_BUFFER;
-}
-
-uint8_t* CameraClass::snapshot(void)
-{
-  HIMAX_Mode(HIMAX_Streaming);
 
   BSP_CAMERA_Resume();
 
+  /* Frame size from resolution. */
+  uint32_t framesize = CamRes[this->resolution][0] * CamRes[this->resolution][1];
+
+  camera_frame_ready = 0;
+
   /* Start the Camera Snapshot Capture */
-  BSP_CAMERA_SnapshotStart((uint8_t *)LCD_FRAME_BUFFER);
+  BSP_CAMERA_SnapshotStart(buffer, framesize);
 
   /* Wait until camera frame is ready : DCMI Frame event */
-  while(camera_frame_ready == 0)
-  {
+  for (uint32_t start = millis(); camera_frame_ready == 0;) {
+    __WFI();
+    if ((millis() - start) > timeout) {
+      HAL_DMA_Abort(hdcmi_discovery.DMA_Handle);
+      return -1;
+    }
   }
-
-  HIMAX_Mode(HIMAX_Standby);
 
   /* Stop the camera to avoid having the DMA2D work in parallel of Display */
   /* which cause perturbation of LTDC                                      */
   BSP_CAMERA_Suspend();
 
-  return (uint8_t *)LCD_FRAME_BUFFER;
+  /* Invalidate buffer after DMA transfer */
+  SCB_InvalidateDCache_by_Addr((uint32_t*)buffer, framesize);
+
+  return 0;
 }
 
-void CameraClass::testPattern(bool walking)
+int CameraClass::standby(bool enable)
 {
+  if (this->initialized == false) {
+    return -1;
+  } else if (enable) {
+    return HIMAX_Mode(HIMAX_Standby);
+  } else {
+    return HIMAX_Mode(HIMAX_Streaming);
+  }
+}
+
+int CameraClass::setMDThreshold(uint32_t low, uint32_t high)
+{
+  if (this->initialized == false) {
+    return -1;
+  }
+  return HIMAX_SetMDThreshold(low, high);
+}
+
+int CameraClass::setMDWindow(uint32_t x, uint32_t y, uint32_t w, uint32_t h)
+{
+  uint32_t width, height;
+
+  if (this->initialized == false) {
+    return -1;
+  }
+
+  width = CamRes[this->resolution][0];
+  height= CamRes[this->resolution][1];
+
+  if (((x+w) > width) || ((y+h) > height)) {
+      return -1;
+  }
+  return HIMAX_SetLROI(x, y, x+w, y+h);
+}
+
+int CameraClass::enableMD(bool enable, md_callback_t callback)
+{
+  if (this->initialized == false) {
+    return -1;
+  }
+
+  this->md_irq.rise(0);
+
+  if (enable == false) {
+    user_md_callback = NULL;
+  } else {
+    user_md_callback = callback;
+    this->md_irq.rise(mbed::Callback<void()>(this, &CameraClass::HIMAXIrqHandler));
+    this->md_irq.enable_irq();
+  }
+
+  return HIMAX_EnableMD(enable);
+}
+
+int CameraClass::pollMD()
+{
+  int ret = 0;
+
+  if (this->initialized == false) {
+    return -1;
+  }
+
+  ret = HIMAX_PollMD();
+  if (ret == 1) {
+    HIMAX_ClearMD();
+  }
+  return ret;
+}
+
+int CameraClass::clearMDFlag()
+{
+  if (this->initialized == false) {
+    return -1;
+  }
+
+  return HIMAX_ClearMD();
+}
+
+int CameraClass::testPattern(bool walking)
+{
+  if (this->initialized == false) {
+    return -1;
+  }
   HIMAX_TestPattern(true, walking);
+  return 0;
 }
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

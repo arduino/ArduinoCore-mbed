@@ -104,6 +104,16 @@
 #define         MD_THM1             0x2159
 #define         MD_THM2             0x215A
 #define         MD_THL              0x215B
+#define         STATISTIC_CTRL      0x2000
+#define         MD_LROI_X_START_H   0x2011
+#define         MD_LROI_X_START_L   0x2012
+#define         MD_LROI_Y_START_H   0x2013
+#define         MD_LROI_Y_START_L   0x2014
+#define         MD_LROI_X_END_H     0x2015
+#define         MD_LROI_X_END_L     0x2016
+#define         MD_LROI_Y_END_H     0x2017
+#define         MD_LROI_Y_END_L     0x2018
+#define         MD_INTERRUPT        0x2160
 //  Sensor timing control
 #define         QVGA_WIN_EN         0x3010
 #define         SIX_BIT_MODE_EN     0x3011
@@ -144,7 +154,14 @@ typedef struct regval_list_ {
 } regval_list_t;
 
 uint8_t HIMAX_Open(void);
-void HIMAX_Mode(uint8_t mode);
+int HIMAX_Mode(uint8_t mode);
+int HIMAX_SetResolution(uint32_t resolution);
+int HIMAX_SetFramerate(uint32_t framerate);
+int HIMAX_EnableMD(bool enable);
+int HIMAX_SetMDThreshold(uint32_t low, uint32_t high);
+int HIMAX_SetLROI(uint32_t x, uint32_t y, uint32_t w, uint32_t h);
+int HIMAX_PollMD();
+int HIMAX_ClearMD();
 void HIMAX_TestPattern(bool enable = true, bool walking = true);
 
 

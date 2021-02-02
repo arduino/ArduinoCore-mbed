@@ -1,21 +1,22 @@
 #include "camera.h"
 
 CameraClass cam;
+uint8_t fb[320*240];
 
 void setup() {
 
-  Serial.begin(115200);
-  //while (!Serial);
+  Serial.begin(921600);
 
-  // put your setup code here, to run once:
-  cam.begin(324, 244);
-  cam.start();
-  //cam.testPattern(true);
+  // Init the cam QVGA, 30FPS
+  cam.begin(CAMERA_R320x240, 30);
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
   if (Serial) {
-    Serial.write(cam.grab(), 324 * 244);
+    // Grab frame and write to serial
+    if (cam.grab(fb) == 0) {
+       Serial.write(fb, 320*240);
+    }
   }
 }

@@ -50,6 +50,7 @@ memory mounted on GAPUINO board.
 
 /* Includes ------------------------------------------------------------------*/
 #include "himax.h"
+#include "camera.h"
 
 /** @addtogroup BSP
  * @{
@@ -77,93 +78,122 @@ memory mounted on GAPUINO board.
 /** @defgroup GAPUINO_HIMAX_Private_Variables I2C Private Variables
  * @{
  */
+#define HIMAX_LINE_LEN_PCK_QVGA     0x178
+#define HIMAX_FRAME_LENGTH_QVGA     0x104
+
+#define HIMAX_LINE_LEN_PCK_QQVGA    0x178
+#define HIMAX_FRAME_LENGTH_QQVGA    0x084
+
 static regval_list_t himax_default_regs[] = {
-    {BLC_TGT, 0x08},            //  BLC target :8  at 8 bit mode
-    {BLC2_TGT, 0x08},           //  BLI target :8  at 8 bit mode
-    {0x3044, 0x0A},             //  Increase CDS time for settling
-    {0x3045, 0x00},             //  Make symetric for cds_tg and rst_tg
-    {0x3047, 0x0A},             //  Increase CDS time for settling
-    {0x3050, 0xC0},             //  Make negative offset up to 4x
-    {0x3051, 0x42},
-    {0x3052, 0x50},
-    {0x3053, 0x00},
-    {0x3054, 0x03},             //  tuning sf sig clamping as lowest
-    {0x3055, 0xF7},             //  tuning dsun
-    {0x3056, 0xF8},             //  increase adc nonoverlap clk
-    {0x3057, 0x29},             //  increase adc pwr for missing code
-    {0x3058, 0x1F},             //  turn on dsun
-    {0x3059, 0x1E},
-    {0x3064, 0x00},
-    {0x3065, 0x04},             //  pad pull 0
+  {BLC_TGT,              0x08},          //  BLC target :8  at 8 bit mode
+  {BLC2_TGT,             0x08},          //  BLI target :8  at 8 bit mode
+  {0x3044,               0x0A},          //  Increase CDS time for settling
+  {0x3045,               0x00},          //  Make symetric for cds_tg and rst_tg
+  {0x3047,               0x0A},          //  Increase CDS time for settling
+  {0x3050,               0xC0},          //  Make negative offset up to 4x
+  {0x3051,               0x42},
+  {0x3052,               0x50},
+  {0x3053,               0x00},
+  {0x3054,               0x03},          //  tuning sf sig clamping as lowest
+  {0x3055,               0xF7},          //  tuning dsun
+  {0x3056,               0xF8},          //  increase adc nonoverlap clk
+  {0x3057,               0x29},          //  increase adc pwr for missing code
+  {0x3058,               0x1F},          //  turn on dsun
+  {0x3059,               0x1E},
+  {0x3064,               0x00},
+  {0x3065,               0x04},          //  pad pull 0
 
-    {BLC_CFG, 0x43},            //  BLC_on, IIR
+  {BLC_CFG,              0x43},          //  BLC_on, IIR
 
-    {0x1001, 0x43},             //  BLC dithering en
-    {0x1002, 0x43},             //  blc_darkpixel_thd
-    {0x0350, 0x00},             //  Dgain Control
-    {BLI_EN, 0x01},             //  BLI enable
-    {0x1003, 0x00},             //  BLI Target [Def: 0x20]
+  {0x1001,               0x43},          //  BLC dithering en
+  {0x1002,               0x43},          //  blc_darkpixel_thd
+  {0x0350,               0x7F},          //  Dgain Control
+  {BLI_EN,               0x01},          //  BLI enable
+  {0x1003,               0x00},          //  BLI Target [Def: 0x20]
 
-    {DPC_CTRL, 0x01},           //  DPC option 0: DPC off   1 : mono   3 : bayer1   5 : bayer2
-    {0x1009, 0xA0},             //  cluster hot pixel th
-    {0x100A, 0x60},             //  cluster cold pixel th
-    {SINGLE_THR_HOT, 0x90},     //  single hot pixel th
-    {SINGLE_THR_COLD, 0x40},    //  single cold pixel th
-    {0x1012, 0x00},             //  Sync. shift disable
-    {0x2000, 0x07},
-    {0x2003, 0x00},
-    {0x2004, 0x1C},
-    {0x2007, 0x00},
-    {0x2008, 0x58},
-    {0x200B, 0x00},
-    {0x200C, 0x7A},
-    {0x200F, 0x00},
-    {0x2010, 0xB8},
-    {0x2013, 0x00},
-    {0x2014, 0x58},
-    {0x2017, 0x00},
-    {0x2018, 0x9B},
+  {DPC_CTRL,             0x01},          //  DPC option 0: DPC off   1 : mono   3 : bayer1   5 : bayer2
+  {0x1009,               0xA0},          //  cluster hot pixel th
+  {0x100A,               0x60},          //  cluster cold pixel th
+  {SINGLE_THR_HOT,       0x90},          //  single hot pixel th
+  {SINGLE_THR_COLD,      0x40},          //  single cold pixel th
+  {0x1012,               0x00},          //  Sync. shift disable
+  {0x2000,               0x07},
+  {0x2003,               0x00},
+  {0x2004,               0x1C},
+  {0x2007,               0x00},
+  {0x2008,               0x58},
+  {0x200B,               0x00},
+  {0x200C,               0x7A},
+  {0x200F,               0x00},
+  {0x2010,               0xB8},
+  {0x2013,               0x00},
+  {0x2014,               0x58},
+  {0x2017,               0x00},
+  {0x2018,               0x9B},
 
-    {AE_CTRL,        0x01},      //Automatic Exposure
-    {AE_TARGET_MEAN, 0x3C},      //AE target mean          [Def: 0x3C]
-    {AE_MIN_MEAN,    0x0A},      //AE min target mean      [Def: 0x0A]
+  {AE_CTRL,              0x01},          //Automatic Exposure
+  {AE_TARGET_MEAN,       0x3C},          //AE target mean          [Def: 0x3C]
+  {AE_MIN_MEAN,          0x0A},          //AE min target mean      [Def: 0x0A]
+  {CONVERGE_IN_TH,       0x03},          //Converge in threshold   [Def: 0x03]
+  {CONVERGE_OUT_TH,      0x05},          //Converge out threshold  [Def: 0x05]
+  {MAX_INTG_H,           (HIMAX_FRAME_LENGTH_QVGA-2)>>8},          //Maximum INTG High Byte  [Def: 0x01]
+  {MAX_INTG_L,           (HIMAX_FRAME_LENGTH_QVGA-2)&0xFF},        //Maximum INTG Low Byte   [Def: 0x54]
+  {MAX_AGAIN_FULL,       0x03},          //Maximum Analog gain in full frame mode [Def: 0x03]
+  {MAX_AGAIN_BIN2,       0x04},          //Maximum Analog gain in bin2 mode       [Def: 0x04]
+  {MAX_DGAIN,            0xC0},
 
-    {INTEGRATION_H,  0x01},      //Integration H           [Def: 0x01]
-    {INTEGRATION_L,  0x08},      //Integration L           [Def: 0x08]
-    {ANALOG_GAIN,    0x00},      //Analog Global Gain      [Def: 0x00]
-    {DAMPING_FACTOR, 0x20},      //Damping Factor          [Def: 0x20]
-    {DIGITAL_GAIN_H, 0x01},      //Digital Gain High       [Def: 0x01]
-    {DIGITAL_GAIN_L, 0x00},      //Digital Gain Low        [Def: 0x00]
+  {INTEGRATION_H,        0x01},          //Integration H           [Def: 0x01]
+  {INTEGRATION_L,        0x08},          //Integration L           [Def: 0x08]
+  {ANALOG_GAIN,          0x00},          //Analog Global Gain      [Def: 0x00]
+  {DAMPING_FACTOR,       0x20},          //Damping Factor          [Def: 0x20]
+  {DIGITAL_GAIN_H,       0x01},          //Digital Gain High       [Def: 0x01]
+  {DIGITAL_GAIN_L,       0x00},          //Digital Gain Low        [Def: 0x00]
 
-    {CONVERGE_IN_TH,  0x03},     //Converge in threshold   [Def: 0x03]
-    {CONVERGE_OUT_TH, 0x05},     //Converge out threshold  [Def: 0x05]
-    {MAX_INTG_H,      0x01},     //Maximum INTG High Byte  [Def: 0x01]
-    {MAX_INTG_L,      0x54},     //Maximum INTG Low Byte   [Def: 0x54]
-    {MAX_AGAIN_FULL,  0x03},     //Maximum Analog gain in full frame mode [Def: 0x03]
-    {MAX_AGAIN_BIN2,  0x04},     //Maximum Analog gain in bin2 mode       [Def: 0x04]
+  {FS_CTRL,              0x00},          //Flicker Control
 
-    {0x210B, 0xC0},
-    {0x210E, 0x00}, //Flicker Control
-    {0x210F, 0x00},
-    {0x2110, 0x3C},
-    {0x2111, 0x00},
-    {0x2112, 0x32},
+  {FS_60HZ_H,            0x00},
+  {FS_60HZ_L,            0x3C},
+  {FS_50HZ_H,            0x00},
+  {FS_50HZ_L,            0x32},
 
-    {0x2150, 0x30},
-    {0x0340, 0x02},
-    {0x0341, 0x16},
-    {0x0342, 0x01},
-    {0x0343, 0x78},
-    {0x3010, 0x01}, // 324 x 244 pixel
-    {0x0383, 0x01},
-    {0x0387, 0x01},
-    {0x0390, 0x03},
-    {0x3011, 0x70},
-    {0x3059, 0x02},
-    {0x3060, 0x00},
-    //{0x0601, 0x01},
-    {IMG_ORIENTATION, 0x00},
-    {0x0104, 0x01}
+  {MD_CTRL,              0x30},
+  {FRAME_LEN_LINES_H,    HIMAX_FRAME_LENGTH_QVGA>>8},
+  {FRAME_LEN_LINES_L,    HIMAX_FRAME_LENGTH_QVGA&0xFF},
+  {LINE_LEN_PCK_H,       HIMAX_LINE_LEN_PCK_QVGA>>8},
+  {LINE_LEN_PCK_L,       HIMAX_LINE_LEN_PCK_QVGA&0xFF},
+  {QVGA_WIN_EN,          0x01},          // Enable QVGA window readout
+  {0x0383,               0x01},
+  {0x0387,               0x01},
+  {0x0390,               0x00},
+  {0x3011,               0x70},
+  {0x3059,               0x02},
+  {OSC_CLK_DIV,          0x0B},
+  {IMG_ORIENTATION,      0x00},          // change the orientation
+  {0x0104,               0x01},
+};
+
+static regval_list_t himax_qvga_regs[] = {
+  {0x0383,                0x01},
+  {0x0387,                0x01},
+  {0x0390,                0x00},
+  {MAX_INTG_H,            (HIMAX_FRAME_LENGTH_QVGA-2)>>8},
+  {MAX_INTG_L,            (HIMAX_FRAME_LENGTH_QVGA-2)&0xFF},
+  {FRAME_LEN_LINES_H,     (HIMAX_FRAME_LENGTH_QVGA>>8)},
+  {FRAME_LEN_LINES_L,     (HIMAX_FRAME_LENGTH_QVGA&0xFF)},
+  {LINE_LEN_PCK_H,        (HIMAX_LINE_LEN_PCK_QVGA>>8)},
+  {LINE_LEN_PCK_L,        (HIMAX_LINE_LEN_PCK_QVGA&0xFF)},
+};
+
+static regval_list_t himax_qqvga_regs[] = {
+  {0x0383,                0x03},
+  {0x0387,                0x03},
+  {0x0390,                0x03},
+  {MAX_INTG_H,            (HIMAX_FRAME_LENGTH_QQVGA-2)>>8},
+  {MAX_INTG_L,            (HIMAX_FRAME_LENGTH_QQVGA-2)&0xFF},
+  {FRAME_LEN_LINES_H,     (HIMAX_FRAME_LENGTH_QQVGA>>8)},
+  {FRAME_LEN_LINES_L,     (HIMAX_FRAME_LENGTH_QQVGA&0xFF)},
+  {LINE_LEN_PCK_H,        (HIMAX_LINE_LEN_PCK_QQVGA>>8)},
+  {LINE_LEN_PCK_L,        (HIMAX_LINE_LEN_PCK_QQVGA&0xFF)},
 };
 
 /* SPI transfer command sequence array */
@@ -207,8 +237,12 @@ uint8_t HIMAX_Open(void)
 
     //printf("Model: %x:%x\n", HIMAX_RegRead(MODEL_ID_H), HIMAX_RegRead(MODEL_ID_L));
 
-    if (HIMAX_Reset()!=0) return -1;
-    //HIMAX_Boot();
+    if (HIMAX_Reset()!=0) {
+        return -1;
+    }
+
+    HIMAX_Boot();
+
     //For debugging camera Configuration
     //HIMAX_PrintReg();
     HAL_Delay(200);
@@ -220,9 +254,105 @@ uint8_t HIMAX_Open(void)
  * @brief  This function selects HIMAX camera mode.
  * @retval None
  */
-void HIMAX_Mode(uint8_t mode)
+int HIMAX_Mode(uint8_t mode)
 {
-    HIMAX_RegWrite(MODE_SELECT, mode);
+  return HIMAX_RegWrite(MODE_SELECT, mode);
+}
+
+int HIMAX_SetResolution(uint32_t resolution)
+{
+  int ret = 0;
+  uint32_t regs_count = 0;
+  regval_list_t *regs = NULL;
+
+  switch (resolution) {
+    case CAMERA_R160x120:
+      regs = himax_qqvga_regs;
+      regs_count = sizeof(himax_qqvga_regs) / sizeof(regval_list_t);
+      break;
+    case CAMERA_R320x240:
+      regs = himax_qvga_regs;
+      regs_count = sizeof(himax_qvga_regs) / sizeof(regval_list_t);
+      break;
+    default:
+      return -1;
+  }
+
+  for(uint32_t i = 0; i < regs_count; i++) {
+    ret |= HIMAX_RegWrite(regs[i].reg_num, regs[i].value);
+  }
+
+  return ret;
+}
+
+int HIMAX_SetFramerate(uint32_t framerate)
+{
+  uint8_t osc_div = 0;
+  // binning is enabled for QQVGA
+  uint8_t binning = HIMAX_RegRead(BINNING_MODE) & 0x03;
+
+  switch (framerate) {
+    case 15:
+      osc_div = (binning) ? 0x00 : 0x01;
+      break;
+    case 30:
+      osc_div = (binning) ? 0x01 : 0x02;
+      break;
+    case 60:
+      osc_div = (binning) ? 0x02 : 0x03;
+      break;
+    case 120:
+      // Set to max FPS for QVGA and QQVGA.
+      osc_div = 0x03;
+      break;
+    default:
+      return -1;
+  }
+
+  return HIMAX_RegWrite(OSC_CLK_DIV, 0x08 | osc_div);
+}
+
+int HIMAX_EnableMD(bool enable)
+{
+  int ret = HIMAX_ClearMD();
+  if (enable) {
+    ret |= HIMAX_RegWrite(MD_CTRL, 0x03);
+  } else {
+    ret |= HIMAX_RegWrite(MD_CTRL, 0x30);
+  }
+  return ret;
+}
+
+int HIMAX_SetMDThreshold(uint32_t low, uint32_t high)
+{
+  int ret = 0;
+  ret |= HIMAX_RegWrite(MD_THL, low  & 0xff);
+  ret |= HIMAX_RegWrite(MD_THH, high & 0xff);
+  return ret;
+}
+
+int HIMAX_SetLROI(uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2)
+{
+  int ret = 0;
+  ret |= HIMAX_RegWrite(MD_LROI_X_START_H, (x1>>8));
+  ret |= HIMAX_RegWrite(MD_LROI_X_START_L, (x1&0xff));
+  ret |= HIMAX_RegWrite(MD_LROI_Y_START_H, (y1>>8));
+  ret |= HIMAX_RegWrite(MD_LROI_Y_START_L, (y1&0xff));
+  ret |= HIMAX_RegWrite(MD_LROI_X_END_H,   (x2>>8));
+  ret |= HIMAX_RegWrite(MD_LROI_X_END_L,   (x2&0xff));
+  ret |= HIMAX_RegWrite(MD_LROI_Y_END_H,   (y2>>8));
+  ret |= HIMAX_RegWrite(MD_LROI_Y_END_L,   (y2&0xff));
+  return ret;
+}
+
+int HIMAX_PollMD()
+{
+  return HIMAX_RegRead(MD_INTERRUPT);
+}
+
+int HIMAX_ClearMD()
+{
+  return HIMAX_RegWrite(I2C_CLEAR, 0x01);
 }
 
 /**
@@ -284,13 +414,12 @@ static uint8_t HIMAX_Boot()
     uint32_t i;
 
     for(i = 0; i < (sizeof(himax_default_regs) / sizeof(regval_list_t)); i++) {
-        //printf("%d\n", i);
         HIMAX_RegWrite(himax_default_regs[i].reg_num, himax_default_regs[i].value);
-        //delay(1);
     }
 
     HIMAX_RegWrite(PCLK_POLARITY, (0x20 | PCLK_FALLING_EDGE));
 
+    HIMAX_RegWrite(MODE_SELECT, HIMAX_Standby);
     return 0;
 }
 
