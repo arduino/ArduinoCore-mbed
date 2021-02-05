@@ -1,0 +1,25 @@
+From f163ede8c86e907ce9a7a07e1b2572cea48b6238 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Wed, 28 Oct 2020 15:26:21 +0100
+Subject: [PATCH 07/21] Portenta: enable certificates in filesystem
+
+---
+ targets/targets.json | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/targets/targets.json b/targets/targets.json
+index 756cf27e6b..da8d5d3041 100644
+--- a/targets/targets.json
++++ b/targets/targets.json
+@@ -3049,6 +3049,8 @@
+             }
+         },
+         "macros_add": [
++            "MBEDTLS_FS_IO",
++            "MBEDTLS_SHA1_C",
+             "CM4_BOOT_BY_APPLICATION",
+             "QSPI_NO_SAMPLE_SHIFT"
+         ],
+-- 
+2.30.0
+
