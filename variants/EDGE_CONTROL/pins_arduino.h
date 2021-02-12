@@ -181,6 +181,8 @@ static const uint8_t SCK  = PIN_SPI_SCK;
 #define SERIAL_PORT_MONITOR         SerialUSB
 #define SERIAL_PORT_HARDWARE        Serial1
 #define SERIAL_PORT_HARDWARE_OPEN   Serial1
+#define SERIAL_PORT_HARDWARE1       Serial2
+#define SERIAL_PORT_HARDWARE1_OPEN  Serial2
 
 #define SerialMKR1                  Serial1
 #define SerialMKR2                  Serial2
