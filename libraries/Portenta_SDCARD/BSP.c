@@ -104,7 +104,7 @@ uint8_t BSP_SD_Init(void)
   uSdHandle.Init.ClockDiv            = 6;
   uSdHandle.Init.ClockPowerSave      = SDMMC_CLOCK_POWER_SAVE_DISABLE;
   uSdHandle.Init.ClockEdge           = SDMMC_CLOCK_EDGE_RISING;
-  uSdHandle.Init.HardwareFlowControl = SDMMC_HARDWARE_FLOW_CONTROL_DISABLE;
+  uSdHandle.Init.HardwareFlowControl = SDMMC_HARDWARE_FLOW_CONTROL_ENABLE;
   uSdHandle.Init.BusWide             = SDMMC_BUS_WIDE_4B;
 
   /* Msp SD initialization */
