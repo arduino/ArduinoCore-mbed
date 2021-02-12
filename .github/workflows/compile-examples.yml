@@ -64,6 +64,7 @@ jobs:
       - name: Compile examples
         uses: arduino/actions/libraries/compile-examples@master
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           fqbn: ${{ matrix.board.fqbn }}
           platforms: |
             # Use Board Manager to install the latest release of Arduino mbed Boards to get the toolchain
