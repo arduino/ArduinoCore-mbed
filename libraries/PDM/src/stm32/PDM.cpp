@@ -104,7 +104,7 @@ int PDMClass::read(void* buffer, size_t size)
     for (int i = 0; i < size; i++) {
       ((uint16_t*)buffer)[i] = temp[i*2];
     }
-    return read;
+    return read/2;
   }
   int read = _doubleBuffer.read(buffer, size);
   return read;
