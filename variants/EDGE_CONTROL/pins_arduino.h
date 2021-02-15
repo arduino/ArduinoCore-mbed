@@ -92,10 +92,10 @@ extern "C" unsigned int PINCOUNT_fn();
 
 // SD
 // --
-#define SD_CS (29u)
-#define SD_CLK (31u)
-#define SD_MOSI (32u)
-#define SD_MISO (33u)
+#define PIN_SD_CS (29u)
+#define PIN_SD_CLK (31u)
+#define PIN_SD_MOSI (32u)
+#define PIN_SD_MISO (33u)
 
 // QSPI
 // ----
@@ -222,6 +222,11 @@ static const uint8_t SCK  = PIN_SPI_SCK;
 #define SPI_MOSI			(digitalPinToPinName(PIN_SPI_MOSI))
 #define SPI_SCK				(digitalPinToPinName(PIN_SPI_SCK))
 #define SPI_SS				(digitalPinToPinName(PIN_SPI_SS))
+
+#define SD_MISO			(digitalPinToPinName(PIN_SD_MISO))
+#define SD_MOSI			(digitalPinToPinName(PIN_SD_MOSI))
+#define SD_CLK			(digitalPinToPinName(PIN_SD_CLK))
+#define SD_CS				(digitalPinToPinName(PIN_SD_CS))
 
 #define digitalPinToPort(P)		(digitalPinToPinName(P)/32)
 
