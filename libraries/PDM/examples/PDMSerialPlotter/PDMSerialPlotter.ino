@@ -4,32 +4,35 @@
   Arduino IDE can be used to plot the audio data (Tools -> Serial Plotter)
 
   Circuit:
-  - Arduino Nano 33 BLE board
+  - Arduino Nano 33 BLE board or
+  - Arduino Portenta H7 board plus Portenta Vision Shield
 
   This example code is in the public domain.
 */
 
 #include <PDM.h>
 
-// buffer to read samples into, each sample is 16-bits
+// Buffer to read samples into, each sample is 16-bits
 short sampleBuffer[256];
 
-// number of samples read
+// Number of audio samples read
 volatile int samplesRead;
 
 void setup() {
   Serial.begin(9600);
   while (!Serial);
 
-  // configure the data receive callback
+  // Configure the data receive callback
   PDM.onReceive(onPDMdata);
 
-  // optionally set the gain, defaults to 20
+  // Optionally set the gain
+  // Defaults to 20 on the BLE Sense and -10 on the Portenta Vision Shield
   // PDM.setGain(30);
 
-  // initialize PDM with:
+  // Initialize PDM with:
   // - one channel (mono mode)
-  // - a 16 kHz sample rate
+  // - a 16 kHz sample rate for the Arduino Nano 33 BLE Sense
+  // - a 32 kHz or 64 kHz sample rate for the Arduino Portenta Vision Shield
   if (!PDM.begin(1, 16000)) {
     Serial.println("Failed to start PDM!");
     while (1);
@@ -37,24 +40,29 @@ void setup() {
 }
 
 void loop() {
-  // wait for samples to be read
+  // Wait for samples to be read
   if (samplesRead) {
 
-    // print samples to the serial monitor or plotter
+    // Print samples to the serial monitor or plotter
     for (int i = 0; i < samplesRead; i++) {
       Serial.println(sampleBuffer[i]);
     }
 
-    // clear the read count
+    // Clear the read count
     samplesRead = 0;
   }
 }
 
+/**
+ * Callback function to process the data from the PDM microphone.
+ * NOTE: This callback is executed as part of an ISR.
+ * Therefore using `Serial` to print messages inside this function isn't supported.
+ * */
 void onPDMdata() {
-  // query the number of bytes available
+  // Query the number of available bytes
   int bytesAvailable = PDM.available();
 
-  // read into the sample buffer
+  // Read into the sample buffer
   PDM.read(sampleBuffer, bytesAvailable);
 
   // 16-bit, 2 bytes per sample
