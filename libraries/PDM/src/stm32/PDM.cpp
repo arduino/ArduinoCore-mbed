@@ -23,15 +23,12 @@
 #ifdef TARGET_STM
 
 #include "PDM.h"
-#include "audio.h"
 #include "mbed.h"
+extern "C" {
+  #include "audio.h"
+}
 
-#define AUDIO_FREQUENCY           BSP_AUDIO_FREQUENCY_16K
-#define AUDIO_IN_PDM_BUFFER_SIZE  (uint32_t)(128)
-
-//ALIGN_32BYTES (uint16_t recordPDMBuf[AUDIO_IN_PDM_BUFFER_SIZE]) __attribute__((section(".OPEN_AMP_SHMEM")));
-// FIXME: need to add an entry for RAM_D3 to linker script
-uint16_t* recordPDMBuf = (uint16_t*)0x38000000;
+extern "C" uint16_t *g_pcmbuf;
 
 PDMClass::PDMClass(int dinPin, int clkPin, int pwrPin) :
   _dinPin(dinPin),
@@ -45,14 +42,10 @@ PDMClass::~PDMClass()
 {
 }
 
+static int gain_db = -1;
+static int _samplerate = -1;
+
 int PDMClass::begin(int channels, long sampleRate) {
-
-  _channels = channels;
-
-  // fixme: only works in stereo mode
-  channels = 2;
-
-  setBufferSize(AUDIO_IN_PDM_BUFFER_SIZE / 4 * channels);
 
   if (isBoardRev2()) {
     mbed::I2C i2c(PB_7, PB_6);
@@ -69,43 +62,36 @@ int PDMClass::begin(int channels, long sampleRate) {
     i2c.write(8 << 1, data, sizeof(data));
   }
 
-  BSP_AUDIO_IN_SelectInterface(AUDIO_IN_INTERFACE_PDM);
+  _channels = channels;
+  _samplerate = sampleRate;
 
-  /* Initialize audio IN at REC_FREQ*/
-  if (BSP_AUDIO_IN_InitEx(INPUT_DEVICE_DIGITAL_MIC, AUDIO_FREQUENCY, DEFAULT_AUDIO_IN_BIT_RESOLUTION, channels) != AUDIO_OK)
-  {
-    return 0;
+  if (gain_db == -1) {
+    gain_db = -10;
   }
 
-  /* Start the record */
-  BSP_AUDIO_IN_Record((uint16_t*)recordPDMBuf, AUDIO_IN_PDM_BUFFER_SIZE * channels);
+  //g_pcmbuf = (uint16_t*)_doubleBuffer.data();
+
+  py_audio_init(channels, sampleRate, gain_db, 0.9883f);
+
+  py_audio_start_streaming();
+
   return 1;
 }
 
 void PDMClass::end()
 {
+  py_audio_stop_streaming();
+  py_audio_deinit();
 }
 
 int PDMClass::available()
 {
   size_t avail = _doubleBuffer.available();
-  if (_channels == 1) {
-    return avail/2;
-  } else {
-    return avail;
-  }
+  return avail;
 }
 
 int PDMClass::read(void* buffer, size_t size)
 {
-  if (_channels == 1) {
-    uint16_t temp[size*2];
-    int read = _doubleBuffer.read(temp, size*2);
-    for (int i = 0; i < size; i++) {
-      ((uint16_t*)buffer)[i] = temp[i*2];
-    }
-    return read;
-  }
   int read = _doubleBuffer.read(buffer, size);
   return read;
 }
@@ -117,7 +103,9 @@ void PDMClass::onReceive(void(*function)(void))
 
 void PDMClass::setGain(int gain)
 {
-
+  gain_db = gain;
+  //end();
+  //begin(_channels, _samplerate);
 }
 
 void PDMClass::setBufferSize(int bufferSize)
@@ -127,47 +115,26 @@ void PDMClass::setBufferSize(int bufferSize)
 
 void PDMClass::IrqHandler(bool halftranfer)
 {
-
-  int start = halftranfer ? 0 : AUDIO_IN_PDM_BUFFER_SIZE;
-
-  if (BSP_AUDIO_IN_GetInterface() == AUDIO_IN_INTERFACE_PDM && _doubleBuffer.available() == 0) {
-
-    /* Invalidate Data Cache to get the updated content of the SRAM*/
-    SCB_InvalidateDCache_by_Addr((uint32_t *)&recordPDMBuf[start], AUDIO_IN_PDM_BUFFER_SIZE * 2);
-
-    //memcpy((uint16_t*)_doubleBuffer.data(), (uint16_t*)&recordPDMBuf[start], AUDIO_IN_PDM_BUFFER_SIZE/2);
-    BSP_AUDIO_IN_PDMToPCM((uint16_t*)&recordPDMBuf[start], (uint16_t*)_doubleBuffer.data());
-
-    /* Clean Data Cache to update the content of the SRAM */
-    SCB_CleanDCache_by_Addr((uint32_t*)_doubleBuffer.data(), AUDIO_IN_PDM_BUFFER_SIZE * 2);
-
+  if (_doubleBuffer.available() == 0) {
+    g_pcmbuf = (uint16_t*)_doubleBuffer.data();
+    audio_pendsv_callback();
     _doubleBuffer.swap(_doubleBuffer.availableForWrite());
   }
+
   if (_onReceive) {
       _onReceive();
   }
 }
 
 extern "C" {
-  /**
-      @brief Calculates the remaining file size and new position of the pointer.
-      @param  None
-      @retval None
-  */
-  __attribute__((__used__)) void BSP_AUDIO_IN_TransferComplete_CallBack(void)
-  {
-    PDM.IrqHandler(false);
-  }
+void PDMIrqHandler(bool halftranfer)
+{
+  PDM.IrqHandler(halftranfer);
+}
 
-  /**
-      @brief  Manages the DMA Half Transfer complete interrupt.
-      @param  None
-      @retval None
-  */
-  __attribute__((__used__)) void BSP_AUDIO_IN_HalfTransfer_CallBack(void)
-  {
-    PDM.IrqHandler(true);
-  }
+void PDMsetBufferSize(int size) {
+  PDM.setBufferSize(size);
+}
 }
 
 PDMClass PDM(0, 0, 0);

@@ -43,7 +43,7 @@ public:
   void swap(int length = 0);
 
 private:
-  uint8_t* _buffer[2];
+  uint8_t* _buffer[2] __attribute__((aligned (16)));
   int _size;
   volatile int _length[2];
   volatile int _readOffset[2];
