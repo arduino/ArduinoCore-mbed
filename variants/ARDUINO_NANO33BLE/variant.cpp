@@ -140,9 +140,8 @@ void initVariant() {
   pinMode(LED_PWR, OUTPUT);
   digitalWrite(LED_PWR, HIGH);
 
-  // Errata Nano33BLE - I2C pullup is on SWO line, need to disable TRACE
-  // was being enabled by nrfx_clock_anomaly_132
-  CoreDebug->DEMCR = 0;
+  // Errata Nano33BLE - I2C pullup is controlled by the SWO pin.
+  // Configure the TRACEMUX to disable routing SWO signal to pin.
   NRF_CLOCK->TRACECONFIG = 0;
 
   // FIXME: bootloader enables interrupt on COMPARE[0], which we don't handle
