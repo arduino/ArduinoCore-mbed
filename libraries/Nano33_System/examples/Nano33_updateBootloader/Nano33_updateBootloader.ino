@@ -2,11 +2,13 @@
 #include "MBR.h"
 #include "SoftDevice.h"
 #include "bootloader.h"
+#include "nrf_nvmc.h"
 
 #define MBR_ADDR              (0x0)
 #define SOFTDEVICE_ADDR       (0xA0000)
 #define BOOTLOADER_ADDR       (0xE0000)
 #define SOFTDEVICE_INFO_ADDR  (0xFF000)
+#define UICR_BOOT_ADDR        (0x10001014)
 
 const unsigned int magic = 0x5f27a93d;
 
@@ -33,6 +35,8 @@ void setup() {
           applyUpdate(SOFTDEVICE_ADDR);
           Serial.println("Flasing bootloader...");
           applyUpdate(BOOTLOADER_ADDR);
+          Serial.println("Write in UICR memory the address of the new bootloader...");
+          nrf_nvmc_write_word(UICR_BOOT_ADDR, BOOTLOADER_ADDR);
           flash.deinit();
           Serial.println("Bootloader update complete. You may now disconnect the board.");
           confirmation = true;
