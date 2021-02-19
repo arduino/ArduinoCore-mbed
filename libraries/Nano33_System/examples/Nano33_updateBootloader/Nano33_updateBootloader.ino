@@ -6,7 +6,7 @@
 #define MBR_ADDR              (0x0)
 #define SOFTDEVICE_ADDR       (0xA0000)
 #define BOOTLOADER_ADDR       (0xE0000)
-#define SOFTDEVICE_INFO_ADDR  (0xFFFF0)
+#define SOFTDEVICE_INFO_ADDR  (0xFF000)
 
 const unsigned int magic = 0x5f27a93d;
 
@@ -27,7 +27,7 @@ void setup() {
           flash.init();
           Serial.println("Flasing MBR...");
           applyUpdate(MBR_ADDR);
-          Serial.println("Storing SoftDevice length info at 0xF0000...");
+          Serial.println("Storing SoftDevice length info at 0xFF000...");
           writeSoftDeviceLen(SOFTDEVICE_INFO_ADDR);
           Serial.println("Flasing SoftDevice...");
           applyUpdate(SOFTDEVICE_ADDR);
@@ -36,6 +36,7 @@ void setup() {
           flash.deinit();
           Serial.println("Bootloader update complete. You may now disconnect the board.");
           confirmation = true;
+          NVIC_SystemReset();
           break;
         case 'n':
         case 'N':
