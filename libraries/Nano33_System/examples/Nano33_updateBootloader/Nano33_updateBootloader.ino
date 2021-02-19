@@ -53,8 +53,8 @@ void applyUpdate(uint32_t address) {
   long len = 0;
 
   const uint32_t page_size = flash.get_page_size();
-  Serial.print("Page size: ");
-  Serial.println(page_size);
+  //Serial.print("Page size: ");
+  //Serial.println(page_size);
   char *page_buffer = new char[page_size];
   uint32_t addr = address;
   if (addr == MBR_ADDR) {
@@ -65,8 +65,8 @@ void applyUpdate(uint32_t address) {
     len = nano33_bootloader_hex_len;
   }
   uint32_t sector_size = flash.get_sector_size(addr);
-  Serial.print("Sector size: ");
-  Serial.println(sector_size);
+  //Serial.print("Sector size: ");
+  //Serial.println(sector_size);
   uint32_t next_sector = addr + sector_size;
   bool sector_erased = false;
   size_t pages_flashed = 0;
@@ -101,6 +101,7 @@ void applyUpdate(uint32_t address) {
     Serial.println("Flashed " + String(percent_done) + "%");
 
   }
+  Serial.println();
 
   delete[] page_buffer;
 }
