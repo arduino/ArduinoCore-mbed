@@ -80,11 +80,11 @@ void applyUpdate(uint32_t address) {
       break;
     }
 
+    flash.erase(addr + pointer, sector_size);
+
     if ((len - pointer) < sector_size) {
       sector_size = len - pointer;
     }
-    
-    flash.erase(addr + pointer, sector_size);
 
     // Program page
     if (addr == MBR_ADDR) {
