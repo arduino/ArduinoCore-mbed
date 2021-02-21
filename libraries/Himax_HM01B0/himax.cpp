@@ -117,7 +117,7 @@ static regval_list_t himax_default_regs[] = {
   {SINGLE_THR_HOT,       0x90},          //  single hot pixel th
   {SINGLE_THR_COLD,      0x40},          //  single cold pixel th
   {0x1012,               0x00},          //  Sync. shift disable
-  {0x2000,               0x07},
+  {STATISTIC_CTRL,       0x07},          //  AE stat en | MD LROI stat en | magic
   {0x2003,               0x00},
   {0x2004,               0x1C},
   {0x2007,               0x00},
@@ -156,7 +156,7 @@ static regval_list_t himax_default_regs[] = {
   {FS_50HZ_H,            0x00},
   {FS_50HZ_L,            0x32},
 
-  {MD_CTRL,              0x30},
+  {MD_CTRL,              0x00},
   {FRAME_LEN_LINES_H,    HIMAX_FRAME_LENGTH_QVGA>>8},
   {FRAME_LEN_LINES_L,    HIMAX_FRAME_LENGTH_QVGA&0xFF},
   {LINE_LEN_PCK_H,       HIMAX_LINE_LEN_PCK_QVGA>>8},
@@ -315,20 +315,21 @@ int HIMAX_SetFramerate(uint32_t framerate)
 int HIMAX_EnableMD(bool enable)
 {
   int ret = HIMAX_ClearMD();
-  if (enable) {
-    ret |= HIMAX_RegWrite(MD_CTRL, 0x03);
-  } else {
-    ret |= HIMAX_RegWrite(MD_CTRL, 0x30);
-  }
+  ret |= HIMAX_RegWrite(MD_CTRL, enable ? 1:0);
   return ret;
 }
 
-int HIMAX_SetMDThreshold(uint32_t low, uint32_t high)
+int HIMAX_SetMDThreshold(uint32_t threshold)
 {
-  int ret = 0;
-  ret |= HIMAX_RegWrite(MD_THL, low  & 0xff);
-  ret |= HIMAX_RegWrite(MD_THH, high & 0xff);
-  return ret;
+  // Set motion detection threshold/sensitivity.
+  // The recommended threshold range is 0x03 to 0xF0.
+  //
+  // Motion is detected according to the following:
+  //    |MD_LROI_MEAN – MD_LROI_IIR_MEAN| > ( MD_LROI_MEAN * MD_THL / 64)
+  //
+  // In other words, motion is detected if the abs difference of the ROI mean and the
+  // average ROI mean of the last 8 or 16 frames is higher than (ROI mean * threshold / 64).
+  return HIMAX_RegWrite(MD_THL, (threshold < 3) ? 3 : (threshold > 0xF0) ? 0xF0 : threshold);
 }
 
 int HIMAX_SetLROI(uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2)

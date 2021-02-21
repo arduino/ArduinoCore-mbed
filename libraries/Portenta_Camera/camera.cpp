@@ -543,12 +543,12 @@ int CameraClass::standby(bool enable)
   }
 }
 
-int CameraClass::motionDetectionThreshold(uint32_t low, uint32_t high)
+int CameraClass::motionDetectionThreshold(uint32_t threshold)
 {
   if (this->initialized == false) {
     return -1;
   }
-  return HIMAX_SetMDThreshold(low, high);
+  return HIMAX_SetMDThreshold(threshold);
 }
 
 int CameraClass::motionDetectionWindow(uint32_t x, uint32_t y, uint32_t w, uint32_t h)

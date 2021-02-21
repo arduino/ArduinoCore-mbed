@@ -14,12 +14,17 @@ void setup() {
 
   pinMode(LEDB, OUTPUT);
   digitalWrite(LEDB, HIGH);
-  
-  // Init the cam QVGA, 30FPS
-  cam.begin(CAMERA_R320x240, 60);
 
-  cam.motionDetectionThreshold(100, 200);
+  // Init the cam QVGA, 30FPS
+  cam.begin(CAMERA_R320x240, 30);
+
+  // Set motion detection threshold (0 -> 255).
+  // The lower the threshold the higher the sensitivity.
+  cam.motionDetectionThreshold(0);
+
+  // Set motion detection window/ROI.
   cam.motionDetectionWindow(0, 0, 320, 240);
+
   // The detection can also be enabled without any callback
   cam.motionDetection(true, on_motion);
 }
