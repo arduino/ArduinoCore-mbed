@@ -16,7 +16,8 @@ Serial myPort;
 final int cameraWidth = 320;
 final int cameraHeight = 240;
 final int cameraBytesPerPixel = 1;
-final int bytesPerFrame = cameraWidth * cameraHeight * cameraBytesPerPixel;
+final int cameraPixelCount = cameraWidth * cameraHeight;
+final int bytesPerFrame = cameraPixelCount * cameraBytesPerPixel;
 
 PImage myImage;
 byte[] frameBuffer = new byte[bytesPerFrame];
@@ -30,13 +31,16 @@ void setup()
 
   // if you know the serial port name
   //myPort = new Serial(this, "COM5", 9600);                    // Windows
-  myPort = new Serial(this, "/dev/ttyACM0", 921600);            // Linux
-  //myPort = new Serial(this, "/dev/cu.usbmodem14401", 9600);     // Mac
+  //myPort = new Serial(this, "/dev/ttyACM0", 921600);            // Linux
+  myPort = new Serial(this, "/dev/cu.usbmodem14401", 9600);     // Mac
 
   // wait for full frame of bytes
   myPort.buffer(bytesPerFrame);  
 
   myImage = createImage(cameraWidth, cameraHeight, ALPHA);
+  
+  // Let the Arduino sketch know we're ready to receive data
+  myPort.write(1);
 }
 
 void draw()
@@ -63,7 +67,12 @@ void serialEvent(Serial myPort) {
 
     // set pixel color
     myImage .pixels[i++] = color(Byte.toUnsignedInt(p));
+    
+    // Let the Arduino sketch know we received all pixels
+    // and are ready for the next frame
+    if(i == cameraPixelCount){
+      myPort.write(1);
+    }
   }
- myImage.updatePixels();
-
+  myImage.updatePixels();
 }
