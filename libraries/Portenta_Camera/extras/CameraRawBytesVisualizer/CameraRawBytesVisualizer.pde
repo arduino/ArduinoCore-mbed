@@ -27,12 +27,12 @@ void setup()
   size(640, 480);
 
   // if you have only ONE serial port active
-  //myPort = new Serial(this, Serial.list()[0], 9600);          // if you have only ONE serial port active
+  //myPort = new Serial(this, Serial.list()[0], 921600);          // if you have only ONE serial port active
 
   // if you know the serial port name
-  //myPort = new Serial(this, "COM5", 9600);                    // Windows
+  //myPort = new Serial(this, "COM5", 921600);                    // Windows
   //myPort = new Serial(this, "/dev/ttyACM0", 921600);            // Linux
-  myPort = new Serial(this, "/dev/cu.usbmodem14401", 9600);     // Mac
+  myPort = new Serial(this, "/dev/cu.usbmodem14401", 921600);     // Mac
 
   // wait for full frame of bytes
   myPort.buffer(bytesPerFrame);  
