@@ -1,7 +1,6 @@
 #include "camera.h"
 
 CameraClass cam;
-uint8_t fb[320*240];
 bool motion_detected = false;
 
 void on_motion()
