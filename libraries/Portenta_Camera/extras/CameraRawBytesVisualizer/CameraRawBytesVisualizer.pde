@@ -22,8 +22,7 @@ final int bytesPerFrame = cameraPixelCount * cameraBytesPerPixel;
 PImage myImage;
 byte[] frameBuffer = new byte[bytesPerFrame];
 
-void setup()
-{
+void setup() {
   size(640, 480);
 
   // if you have only ONE serial port active
@@ -43,15 +42,14 @@ void setup()
   myPort.write(1);
 }
 
-void draw()
-{
+void draw() {
   PImage img = myImage.copy();
   img.resize(640, 480);
   image(img, 0, 0);
 }
 
 void serialEvent(Serial myPort) {
-  // read the saw bytes in
+  // read the received bytes
   myPort.readBytes(frameBuffer);
 
   // access raw bytes via byte buffer
@@ -62,17 +60,14 @@ void serialEvent(Serial myPort) {
 
   while (bb.hasRemaining()) {
     // read 16-bit pixel
-    byte p = bb.get();
-
+    byte pixelValue = bb.get();
 
     // set pixel color
-    myImage .pixels[i++] = color(Byte.toUnsignedInt(p));
-    
-    // Let the Arduino sketch know we received all pixels
-    // and are ready for the next frame
-    if(i == cameraPixelCount){
-      myPort.write(1);
-    }
+    myImage.pixels[i++] = color(Byte.toUnsignedInt(pixelValue));    
   }
+  
   myImage.updatePixels();
+  // Let the Arduino sketch know we received all pixels
+  // and are ready for the next frame
+  myPort.write(1);
 }
