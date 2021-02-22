@@ -497,7 +497,7 @@ int CameraClass::framerate(uint32_t framerate)
   return HIMAX_SetFramerate(framerate);
 }
 
-int CameraClass::grab(uint8_t *buffer, uint32_t timeout)
+bool CameraClass::grab(uint8_t *buffer, uint32_t timeout)
 {
   if (this->initialized == false) {
     return false;
