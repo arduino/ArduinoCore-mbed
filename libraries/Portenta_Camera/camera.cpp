@@ -500,7 +500,7 @@ int CameraClass::framerate(uint32_t framerate)
 int CameraClass::grab(uint8_t *buffer, uint32_t timeout)
 {
   if (this->initialized == false) {
-    return -1;
+    return false;
   }
 
   BSP_CAMERA_Resume();
@@ -518,7 +518,7 @@ int CameraClass::grab(uint8_t *buffer, uint32_t timeout)
     __WFI();
     if ((millis() - start) > timeout) {
       HAL_DMA_Abort(hdcmi_discovery.DMA_Handle);
-      return -1;
+      return false;
     }
   }
 
@@ -529,7 +529,7 @@ int CameraClass::grab(uint8_t *buffer, uint32_t timeout)
   /* Invalidate buffer after DMA transfer */
   SCB_InvalidateDCache_by_Addr((uint32_t*)buffer, framesize);
 
-  return 0;
+  return true;
 }
 
 int CameraClass::standby(bool enable)
