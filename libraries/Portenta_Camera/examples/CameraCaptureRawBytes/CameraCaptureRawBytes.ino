@@ -1,7 +1,7 @@
 #include "camera.h"
 
 CameraClass cam;
-uint8_t fb[320*240];
+uint8_t frameBuffer[320*240];
 
 void setup() {
 
@@ -15,8 +15,8 @@ void loop() {
   // put your main code here, to run repeatedly:
   if (Serial) {
     // Grab frame and write to serial
-    if (cam.grab(fb) == 0) {
-       Serial.write(fb, 320*240);
+    if (cam.grab(frameBuffer)) {
+       Serial.write(frameBuffer, 320*240);
     }
   }
 }

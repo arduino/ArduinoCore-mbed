@@ -1,12 +1,10 @@
 #include "camera.h"
 
 CameraClass cam;
-uint8_t fb[320*240];
-bool motion_detected = false;
+bool motionDetected = false;
 
-void on_motion()
-{
-  motion_detected = true;
+void onMotion() {
+  motionDetected = true;
 }
 
 void setup() {
@@ -21,19 +19,19 @@ void setup() {
   cam.motionDetectionThreshold(100, 200);
   cam.motionDetectionWindow(0, 0, 320, 240);
   // The detection can also be enabled without any callback
-  cam.motionDetection(true, on_motion);
+  cam.motionDetection(true, onMotion);
 }
 
 void loop() {
 
-  if (motion_detected) {
+  if (motionDetected) {
     Serial.printf("Motion Detected!\n");
     digitalWrite(LEDB, LOW);
     delay(500);
 
     // Clear the detection flag
     cam.motionDetected();
-    motion_detected = false;
+    motionDetected = false;
     digitalWrite(LEDB, HIGH);
   }
   delay(10);

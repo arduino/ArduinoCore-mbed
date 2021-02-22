@@ -16,7 +16,7 @@ class CameraClass {
         CameraClass(): initialized(false), md_irq(PC_15){}
         int begin(uint32_t resolution = CAMERA_R320x240, uint32_t framerate = 30);
         int framerate(uint32_t framerate);
-        int grab(uint8_t *buffer, uint32_t timeout=5000);
+        bool grab(uint8_t *buffer, uint32_t timeout=5000);
         int standby(bool enable);
         int motionDetection(bool enable, md_callback_t callback=NULL);
         int motionDetectionWindow(uint32_t x, uint32_t y, uint32_t w, uint32_t h);
