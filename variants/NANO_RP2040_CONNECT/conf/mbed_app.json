@@ -1,0 +1,14 @@
+{
+  "target_overrides": {
+    "*": {
+      "target.printf_lib": "std",
+      "platform.stdio-buffered-serial": false,
+      "platform.stdio-baud-rate": 115200,
+      "platform.default-serial-baud-rate": 115200,
+      "platform.callback-nontrivial": true,
+      "platform.all-stats-enabled": true,
+      "platform.memory-tracing-enabled": true,
+      "rtos.main-thread-stack-size": 32768
+    }
+  }
+}

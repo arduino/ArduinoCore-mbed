@@ -18,13 +18,13 @@ compiler.warning_flags.all=-Wall -Wextra
 
 compiler.path={build.compiler_path}
 compiler.c.cmd={build.crossprefix}gcc
-compiler.c.flags=-c {compiler.warning_flags} -Os -g -nostdlib "@{compiler.mbed.defines}" "@{compiler.mbed.cflags}" {compiler.mbed.arch.define} -MMD -mcpu={build.mcu} -mfloat-abi={build.float-abi} -mfpu={build.fpu}
+compiler.c.flags=-c {compiler.warning_flags} -Os -g -nostdlib "@{compiler.mbed.defines}" "@{compiler.mbed.cflags}" {compiler.mbed.arch.define} -MMD -mcpu={build.mcu} {build.float-abi} {build.fpu}
 compiler.c.elf.cmd={build.crossprefix}g++
 compiler.c.elf.flags=-Wl,--gc-sections {compiler.warning_flags} -Wl,--as-needed
 compiler.S.cmd={build.crossprefix}g++
-compiler.S.flags=-c -g -x assembler-with-cpp -Os -mcpu={build.mcu} -mfpu={build.fpu}
+compiler.S.flags=-c -g -x assembler-with-cpp -Os -mcpu={build.mcu} {build.fpu}
 compiler.cpp.cmd={build.crossprefix}g++
-compiler.cpp.flags=-c {compiler.warning_flags} -g -Os -nostdlib "@{compiler.mbed.defines}" "@{compiler.mbed.cxxflags}" {compiler.mbed.arch.define} -MMD -mcpu={build.mcu} -mfloat-abi={build.float-abi} -mfpu={build.fpu}
+compiler.cpp.flags=-c {compiler.warning_flags} -g -Os -nostdlib "@{compiler.mbed.defines}" "@{compiler.mbed.cxxflags}" {compiler.mbed.arch.define} -MMD -mcpu={build.mcu} {build.float-abi} {build.fpu}
 compiler.ar.cmd={build.crossprefix}ar
 compiler.ar.flags=rcs
 compiler.objcopy.cmd=
@@ -161,6 +161,20 @@ tools.dfu-util.cmd=dfu-util
 tools.dfu-util.upload.params.verbose=-d
 tools.dfu-util.upload.params.quiet=
 tools.dfu-util.upload.pattern="{path}/{cmd}" --device {upload.vid}:{upload.pid} -D "{build.path}/{build.project_name}.bin" -a{upload.interface} --dfuse-address={upload.address}:leave
+
+#
+# PICOTOOL
+#
+
+tools.picotool.path={runtime.platform.path}/tools/
+#tools.picotool.path={runtime.tools.picotool.path}
+tools.picotool.cmd.macosx=osx/wrapper.sh
+tools.picotool.cmd.linux=linux/wrapper.sh
+tools.picotool.cmd.windows=windows/wrapper.bat
+
+tools.picotool.upload.params.verbose=-d
+tools.picotool.upload.params.quiet=
+tools.picotool.upload.pattern="{path}/{cmd}" "{build.path}/{build.project_name}.elf"
 
 #
 # GDB (Debugger)

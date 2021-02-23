@@ -7,8 +7,8 @@ envie_m7.build.compiler_path={runtime.tools.arm-none-eabi-gcc.path}/bin/
 
 envie_m7.build.variant=PORTENTA_H7_M7
 envie_m7.build.mcu=cortex-m7
-envie_m7.build.fpu=fpv5-d16
-envie_m7.build.float-abi=softfp
+envie_m7.build.fpu=-mfpu=fpv5-d16
+envie_m7.build.float-abi=-mfloat-abi=softfp
 envie_m7.build.extra_flags=
 envie_m7.build.architecture=cortex-m7
 envie_m7.build.board=PORTENTA_H7_M7
@@ -63,8 +63,8 @@ envie_m4.build.compiler_path={runtime.tools.arm-none-eabi-gcc.path}/bin/
 
 envie_m4.build.variant=PORTENTA_H7_M4
 envie_m4.build.mcu=cortex-m4
-envie_m4.build.fpu=fpv4-sp-d16
-envie_m4.build.float-abi=softfp
+envie_m4.build.fpu=-mfpu=fpv4-sp-d16
+envie_m4.build.float-abi=-mfloat-abi=softfp
 envie_m4.build.extra_flags=
 envie_m4.build.architecture=cortex-m4
 envie_m4.build.board=PORTENTA_H7_M4
@@ -113,8 +113,8 @@ nano33ble.build.variant=ARDUINO_NANO33BLE
 nano33ble.build.mcu=cortex-m4
 nano33ble.build.extra_flags=
 nano33ble.build.architecture=cortex-m4
-nano33ble.build.fpu=fpv4-sp-d16
-nano33ble.build.float-abi=softfp
+nano33ble.build.fpu=-mfpu=fpv4-sp-d16
+nano33ble.build.float-abi=-mfloat-abi=softfp
 nano33ble.build.board=ARDUINO_NANO33BLE
 nano33ble.build.ldscript=linker_script.ld
 nano33ble.compiler.mbed.arch.define=-DARDUINO_ARCH_NRF52840
@@ -143,4 +143,45 @@ nano33ble.bootloader.extra_action.preflash=echo INFO:removed_mass-erase
 nano33ble.bootloader.config=-f target/nrf52.cfg
 nano33ble.bootloader.programmer=-f interface/cmsis-dap.cfg
 nano33ble.bootloader.file=nano33ble/bootloader.hex
+
+##############################################################
+
+nanorp2040connect.name=Arduino Nano RP2040 Connect
+nanorp2040connect.build.core=arduino
+nanorp2040connect.build.crossprefix=arm-none-eabi-
+nanorp2040connect.build.compiler_path={runtime.tools.arm-none-eabi-gcc.path}/bin/
+
+nanorp2040connect.build.variant=NANO_RP2040_CONNECT
+nanorp2040connect.build.mcu=cortex-m0plus
+nanorp2040connect.build.extra_flags=
+nanorp2040connect.build.fpu=
+nanorp2040connect.build.float-abi=
+nanorp2040connect.build.architecture=cortex-m0plus
+nanorp2040connect.build.board=NANO_RP2040_CONNECT
+nanorp2040connect.build.ldscript=linker_script.ld
+nanorp2040connect.compiler.mbed.arch.define=-DARDUINO_ARCH_RP2040
+nanorp2040connect.compiler.mbed.defines={build.variant.path}/defines.txt
+nanorp2040connect.compiler.mbed.ldflags={build.variant.path}/ldflags.txt
+nanorp2040connect.compiler.mbed.cflags={build.variant.path}/cflags.txt
+nanorp2040connect.compiler.mbed.cxxflags={build.variant.path}/cxxflags.txt
+nanorp2040connect.compiler.mbed.includes={build.variant.path}/includes.txt
+nanorp2040connect.compiler.mbed.extra_ldflags=-lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
+nanorp2040connect.compiler.mbed="{build.variant.path}/libs/libmbed.a"
+nanorp2040connect.vid.0=0x2341
+nanorp2040connect.pid.0=0x005e
+nanorp2040connect.vid.1=0x2341
+nanorp2040connect.pid.1=0x805e
+
+nanorp2040connect.upload.tool=picotool
+nanorp2040connect.upload.protocol=
+nanorp2040connect.upload.use_1200bps_touch=true
+nanorp2040connect.upload.wait_for_upload_port=false
+nanorp2040connect.upload.native_usb=true
+nanorp2040connect.upload.maximum_size=16777216
+nanorp2040connect.upload.maximum_data_size=270336
+
+nanorp2040connect.bootloader.tool=openocd
+nanorp2040connect.bootloader.config=-f target/rp2040.cfg
+nanorp2040connect.bootloader.programmer=-f interface/cmsis-dap.cfg
+nanorp2040connect.bootloader.file=nano33ble/bootloader.hex
 
