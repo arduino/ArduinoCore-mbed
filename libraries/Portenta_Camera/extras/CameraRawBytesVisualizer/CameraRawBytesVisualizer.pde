@@ -66,10 +66,15 @@ void serialEvent(Serial myPort) {
   // read the received bytes
   myPort.readBytes(frameBuffer);
 
-  // Access raw bytes via byte buffer and ensure
-  // proper endianness of the data for > 8 bit values.
+  // Access raw bytes via byte buffer  
   ByteBuffer bb = ByteBuffer.wrap(frameBuffer);
-  bb.order(ByteOrder.BIG_ENDIAN);
+  
+  /* 
+    Ensure proper endianness of the data for > 8 bit values.
+    When using > 8bit values uncomment the following line and
+    adjust the translation to the pixel color. 
+  */     
+  //bb.order(ByteOrder.BIG_ENDIAN);
 
   int i = 0;
 
