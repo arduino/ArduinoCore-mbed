@@ -48,6 +48,7 @@ void draw() {
   // Time out after 1.5 seconds and ask for new data
   if(millis() - lastUpdate > 1500) {
     println("Connection timed out.");
+    myPort.clear();
     myPort.write(1);
   }
   
