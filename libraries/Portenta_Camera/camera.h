@@ -1,3 +1,5 @@
+#include "Arduino.h"
+
 enum {
     CAMERA_R160x120 = 0x00,   /* QQVGA Resolution */
     CAMERA_R320x240 = 0x01,   /* QVGA Resolution  */
