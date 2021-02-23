@@ -22,6 +22,7 @@ final int bytesPerFrame = cameraPixelCount * cameraBytesPerPixel;
 PImage myImage;
 byte[] frameBuffer = new byte[bytesPerFrame];
 int lastUpdate = 0;
+boolean shouldRedraw = false;
 
 void setup() {
   size(640, 480);
@@ -44,13 +45,17 @@ void setup() {
 }
 
 void draw() {
-  PImage img = myImage.copy();
-  img.resize(640, 480);
-  image(img, 0, 0);
   // Time out after 1.5 seconds and ask for new data
   if(millis() - lastUpdate > 1500) {
     println("Connection timed out.");
     myPort.write(1);
+  }
+  
+  if(shouldRedraw){    
+    PImage img = myImage.copy();
+    img.resize(640, 480);
+    image(img, 0, 0);
+    shouldRedraw = false;
   }
 }
 
@@ -60,14 +65,15 @@ void serialEvent(Serial myPort) {
   // read the received bytes
   myPort.readBytes(frameBuffer);
 
-  // access raw bytes via byte buffer
+  // Access raw bytes via byte buffer and ensure
+  // proper endianness of the data for > 8 bit values.
   ByteBuffer bb = ByteBuffer.wrap(frameBuffer);
   bb.order(ByteOrder.BIG_ENDIAN);
 
   int i = 0;
 
   while (bb.hasRemaining()) {
-    // read 16-bit pixel
+    // read 8-bit pixel
     byte pixelValue = bb.get();
 
     // set pixel color
@@ -75,6 +81,10 @@ void serialEvent(Serial myPort) {
   }
   
   myImage.updatePixels();
+  
+  // Ensures that the new image data is drawn in the next draw loop
+  shouldRedraw = true;
+  
   // Let the Arduino sketch know we received all pixels
   // and are ready for the next frame
   myPort.write(1);
