@@ -157,7 +157,7 @@ generate_includes () {
 
 	cd mbed-os
 	cut -d'/' -f3- < "$ARDUINOVARIANT"/includes.txt | grep 'targets' \
-	| xargs -I{} find {} -maxdepth 1 -name '*.h' \
+	| xargs -I{} find {} -maxdepth 2 -name '*.h' \
 	| xargs -I{} cp --parent {} "$ARDUINOCOREMBED"/
 	cd -
 
