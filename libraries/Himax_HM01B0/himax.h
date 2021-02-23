@@ -158,7 +158,7 @@ int HIMAX_Mode(uint8_t mode);
 int HIMAX_SetResolution(uint32_t resolution);
 int HIMAX_SetFramerate(uint32_t framerate);
 int HIMAX_EnableMD(bool enable);
-int HIMAX_SetMDThreshold(uint32_t low, uint32_t high);
+int HIMAX_SetMDThreshold(uint32_t threshold);
 int HIMAX_SetLROI(uint32_t x, uint32_t y, uint32_t w, uint32_t h);
 int HIMAX_PollMD();
 int HIMAX_ClearMD();

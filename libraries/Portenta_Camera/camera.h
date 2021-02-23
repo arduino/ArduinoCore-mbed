@@ -20,7 +20,7 @@ class CameraClass {
         int standby(bool enable);
         int motionDetection(bool enable, md_callback_t callback=NULL);
         int motionDetectionWindow(uint32_t x, uint32_t y, uint32_t w, uint32_t h);
-        int motionDetectionThreshold(uint32_t low, uint32_t high);
+        int motionDetectionThreshold(uint32_t threshold);
         int motionDetected();
         int testPattern(bool walking);
 };
