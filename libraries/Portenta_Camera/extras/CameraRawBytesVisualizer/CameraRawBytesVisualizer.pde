@@ -21,6 +21,7 @@ final int bytesPerFrame = cameraPixelCount * cameraBytesPerPixel;
 
 PImage myImage;
 byte[] frameBuffer = new byte[bytesPerFrame];
+int lastUpdate = 0;
 
 void setup() {
   size(640, 480);
@@ -46,9 +47,16 @@ void draw() {
   PImage img = myImage.copy();
   img.resize(640, 480);
   image(img, 0, 0);
+  // Time out after 1.5 seconds and ask for new data
+  if(millis() - lastUpdate > 1500) {
+    println("Connection timed out.");
+    myPort.write(1);
+  }
 }
 
 void serialEvent(Serial myPort) {
+  lastUpdate = millis();
+  
   // read the received bytes
   myPort.readBytes(frameBuffer);
 
