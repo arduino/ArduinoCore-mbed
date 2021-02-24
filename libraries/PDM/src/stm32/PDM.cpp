@@ -71,11 +71,11 @@ int PDMClass::begin(int channels, long sampleRate) {
 
   //g_pcmbuf = (uint16_t*)_doubleBuffer.data();
 
-  py_audio_init(channels, sampleRate, gain_db, 0.9883f);
-
-  py_audio_start_streaming();
-
-  return 1;
+  if(py_audio_init(channels, sampleRate, gain_db, 0.9883f)) {
+    py_audio_start_streaming();
+    return 1;
+  }
+  return 0;
 }
 
 void PDMClass::end()
