@@ -29,6 +29,19 @@ static PDM_Filter_Config_t   PDM_FilterConfig[2];
 #define DMA_XFER_NONE   (0x00U)
 #define DMA_XFER_HALF   (0x01U)
 #define DMA_XFER_FULL   (0x04U)
+
+#define AUDIO_FREQUENCY_192K          ((uint32_t)192000)
+#define AUDIO_FREQUENCY_96K           ((uint32_t)96000)
+#define AUDIO_FREQUENCY_64K           ((uint32_t)64000)
+#define AUDIO_FREQUENCY_48K           ((uint32_t)48000)
+#define AUDIO_FREQUENCY_44K           ((uint32_t)44100)
+#define AUDIO_FREQUENCY_32K           ((uint32_t)32000)
+#define AUDIO_FREQUENCY_22K           ((uint32_t)22050)
+#define AUDIO_FREQUENCY_16K           ((uint32_t)16000)
+#define AUDIO_FREQUENCY_11K           ((uint32_t)11025)
+#define AUDIO_FREQUENCY_8K            ((uint32_t)8000)
+
+
 static volatile uint32_t xfer_status = 0;
 
 // BDMA can only access D3 SRAM4 memory.
@@ -70,15 +83,21 @@ static uint32_t get_decimation_factor(uint32_t decimation)
     }
 }
 
-#define AUDIO_FREQUENCY_192K          ((uint32_t)192000)
-#define AUDIO_FREQUENCY_96K           ((uint32_t)96000)
-#define AUDIO_FREQUENCY_48K           ((uint32_t)48000)
-#define AUDIO_FREQUENCY_44K           ((uint32_t)44100)
-#define AUDIO_FREQUENCY_32K           ((uint32_t)32000)
-#define AUDIO_FREQUENCY_22K           ((uint32_t)22050)
-#define AUDIO_FREQUENCY_16K           ((uint32_t)16000)
-#define AUDIO_FREQUENCY_11K           ((uint32_t)11025)
-#define AUDIO_FREQUENCY_8K            ((uint32_t)8000)  
+
+static uint8_t get_mck_div(uint32_t frequency)
+{
+    switch(frequency){
+        case AUDIO_FREQUENCY_8K:     return 48;  //SCK_x = sai_x_ker_ck/48 =  1024KHz  Ffs = SCK_x/64 =  16KHz stereo
+        case AUDIO_FREQUENCY_16K:    return 24;  //SCK_x = sai_x_ker_ck/24 =  2048KHz  Ffs = SCK_x/64 =  32KHz stereo
+        case AUDIO_FREQUENCY_32K:    return 12;  //SCK_x = sai_x_ker_ck/12 =  4096KHz  Ffs = SCK_x/64 =  64KHz stereo
+        case AUDIO_FREQUENCY_48K:    return  8;  //SCK_x = sai_x_ker_ck/8  =  6144KHz  Ffs = SCK_x/64 =  96KHz stereo
+        case AUDIO_FREQUENCY_64K:    return  6;  //SCK_x = sai_x_ker_ck/6  =  8192KHz  Ffs = SCK_x/64 = 128KHz stereo
+        case AUDIO_FREQUENCY_96K:    return  4;  //SCK_x = sai_x_ker_ck/4  = 12288KHz  Ffs = SCK_x/64 = 192KHz stereo
+        case AUDIO_FREQUENCY_192K:   return  2;  //SCK_x = sai_x_ker_ck/2  = 24576KHz  Ffs = SCK_x/64 = 384KHz stereo
+        default:                     return  0;  //Same as 1
+   }
+}
+
 
 // TODO: this needs to become a library function
 bool isBoardRev2() {
@@ -124,22 +143,26 @@ int py_audio_init(size_t g_channels, uint32_t frequency, int gain_db, float high
     /* SAI clock config:
      PLL2_VCO Input = HSE_VALUE/PLL2M = 1 Mhz
      PLL2_VCO Output = PLL2_VCO Input * PLL2N = 344 Mhz
-     SAI_CLK_x = PLL2_VCO Output/PLL2P = 344/7 = 49.142 Mhz */
-    rcc_ex_clk_init_struct.PeriphClockSelection = RCC_PERIPHCLK_SAI1;
-    rcc_ex_clk_init_struct.Sai1ClockSelection = RCC_SAI1CLKSOURCE_PLL2;
+     sai_x_ker_ck = PLL2_VCO Output/PLL2P = 344/7 = 49.142 Mhz */
+    rcc_ex_clk_init_struct.PeriphClockSelection = RCC_PERIPHCLK_SAI4A;
+    rcc_ex_clk_init_struct.Sai4AClockSelection = RCC_SAI4ACLKSOURCE_PLL2;
     rcc_ex_clk_init_struct.PLL2.PLL2P = 7;
     rcc_ex_clk_init_struct.PLL2.PLL2Q = 1;
     rcc_ex_clk_init_struct.PLL2.PLL2R = 1;
     rcc_ex_clk_init_struct.PLL2.PLL2N = 344;
-    rcc_ex_clk_init_struct.PLL2.PLL2M = 25;
-    rcc_ex_clk_init_struct.PeriphClockSelection = RCC_PERIPHCLK_SAI4A;
-    rcc_ex_clk_init_struct.Sai4AClockSelection = RCC_SAI4ACLKSOURCE_PLL2;
+    rcc_ex_clk_init_struct.PLL2.PLL2M = isBoardRev2() ? 25 : 27;
+
     HAL_RCCEx_PeriphCLKConfig(&rcc_ex_clk_init_struct);
 
     sai_init();
 
     // Sanity checks
-    if (frequency < 16000 || frequency > 128000) {
+    if ((frequency != AUDIO_FREQUENCY_8K) &&
+        (frequency != AUDIO_FREQUENCY_16K) &&
+        (frequency != AUDIO_FREQUENCY_32K) &&
+        (frequency != AUDIO_FREQUENCY_48K) &&
+        (frequency != AUDIO_FREQUENCY_64K) &&
+        (frequency != AUDIO_FREQUENCY_96K)){
         return 0;
     }
 
@@ -147,7 +170,7 @@ int py_audio_init(size_t g_channels, uint32_t frequency, int gain_db, float high
         return 0;
     }
 
-    uint32_t decimation_factor = AUDIO_SAI_FREQKHZ / (frequency / 1000);
+    uint32_t decimation_factor = 64; // Fixed decimation factor
     uint32_t decimation_factor_const = get_decimation_factor(decimation_factor);
     if (decimation_factor_const == 0) {
         return 0;
@@ -171,8 +194,8 @@ int py_audio_init(size_t g_channels, uint32_t frequency, int gain_db, float high
     hsai.Init.TriState               = SAI_OUTPUT_RELEASED;
 
     // The master clock output (MCLK_x) is disabled and the SAI clock
-    // is passed out to SCK_x bit clock. SCKx frequency = SAI_KER_CK / MCKDIV / 2
-    hsai.Init.Mckdiv                 = AUDIO_SAI_MCKDIV; //2.048MHz
+    // is passed out to SCK_x bit clock. SCKx frequency = SAI_KER_CK / MCKDIV
+    hsai.Init.Mckdiv                 = get_mck_div(frequency);
     hsai.Init.MckOutput              = SAI_MCK_OUTPUT_DISABLE;
     hsai.Init.MckOverSampling        = SAI_MCK_OVERSAMPLING_DISABLE;
 
@@ -314,7 +337,7 @@ void py_audio_start_streaming()
 
     // Start DMA transfer
     if (HAL_SAI_Receive_DMA(&hsai, (uint8_t*) PDM_BUFFER, PDM_BUFFER_SIZE / g_channels) != HAL_OK) {
-        
+
     }
 }
 
