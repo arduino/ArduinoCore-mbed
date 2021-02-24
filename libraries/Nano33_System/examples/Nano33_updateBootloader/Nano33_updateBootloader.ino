@@ -1,3 +1,30 @@
+/*
+ *  This sketch will allow to support SoftDevices on Nano 33 BLE.
+ *  To be able to support them, the bootloader needs to be updated.
+ *  Before uploading this sketch to the board, follow this procedure:
+ *
+ *  - Convert your SoftDevice binary to a SoftDevice.h .
+ *    The nRF5-SDK website provides a SoftDevice.hex, so run the following commands:
+ *
+ *      objcopy --input-target=ihex --output-target=binary --gap-fill 0xff SoftDevice.hex SoftDevice.bin
+ *      xxd -i SoftDevice.bin > SoftDevice.h
+ *
+ *  - Copy the content of the generated header file to SoftDevice.h
+ *
+ *  - Upload this sketch to a Nano33BLE and make your selection through the Serial monitor:
+ *    you can choose wheter to update only the SoftDevice or the full bootloader.
+ *    After completion, the board will reboot and enter the bootloader mode.
+ *
+ *  - Now you can upload your sketch.
+ *    You can upload a sketch that uses the SoftDevice at 0x26000, using the following bossac command
+ *
+ *      /path/to/bossac -d --port=yourPort --offset=0x16000 -U -i -e -w /path/to/sketch.bin -R
+ *
+ *    Or you can still upload a standard sketch from the IDE at 0x10000. This will of course overwrite the SoftDevice.
+ *    So if you want to run a SoftDevice-related sketch, always remember to upload this sketch before.
+ *
+ */
+
 #include "FlashIAP.h"
 #include "SoftDevice.h"
 #include "bootloader.h"
