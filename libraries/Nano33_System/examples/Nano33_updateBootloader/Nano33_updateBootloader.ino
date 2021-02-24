@@ -1,5 +1,4 @@
 #include "FlashIAP.h"
-#include "MBR.h"
 #include "SoftDevice.h"
 #include "bootloader.h"
 #include "nrf_nvmc.h"
@@ -17,7 +16,9 @@ mbed::FlashIAP flash;
 void setup() {  
   Serial.begin(115200);
   while (!Serial) {}
-  Serial.println("Do you want to update the bootloader? Y/[n]");
+  Serial.println("Do you want to update only the SoftDevice? Y/[n]");
+  Serial.println("Yes: upload only the binary of the DoftDevice");
+  Serial.println("No : upload the SoftDevice binary and update the bootloader to support SoftDevices")
   
   bool confirmation = false;
   while (confirmation == false) {
@@ -26,6 +27,18 @@ void setup() {
       switch (choice) {
         case 'y':
         case 'Y':
+          flash.init();
+          Serial.println("Storing SoftDevice length info at 0xFF000...");
+          writeSoftDeviceLen(SOFTDEVICE_INFO_ADDR);
+          Serial.println("Flasing SoftDevice...");
+          applyUpdate(SOFTDEVICE_ADDR);
+          flash.deinit();
+          Serial.println("SoftDevice update complete! The board is restarting...");
+          confirmation = true;
+          NVIC_SystemReset();
+          break;
+        case 'n':
+        case 'N':
           flash.init();
           Serial.println("Flasing MBR...");
           applyUpdate(MBR_ADDR);
@@ -38,13 +51,9 @@ void setup() {
           Serial.println("Write in UICR memory the address of the new bootloader...");
           nrf_nvmc_write_word(UICR_BOOT_ADDR, BOOTLOADER_ADDR);
           flash.deinit();
-          Serial.println("Bootloader update complete. You may now disconnect the board.");
+          Serial.println("SoftDevice + Bootloader update complete. The board is restarting...");
           confirmation = true;
           NVIC_SystemReset();
-          break;
-        case 'n':
-        case 'N':
-          confirmation = true;
           break;
         default:
           continue;
@@ -56,6 +65,9 @@ void setup() {
 
 void applyUpdate(uint32_t address) {
   long len = 0;
+  
+  uint32_t bin_pointer = 0;
+  uint32_t flash_pointer = 0;
 
   const uint32_t page_size = flash.get_page_size();
   //Serial.print("Page size: ");
@@ -63,46 +75,50 @@ void applyUpdate(uint32_t address) {
   char *page_buffer = new char[page_size];
   uint32_t addr = address;
   if (addr == MBR_ADDR) {
-    len = MBR_bin_len;
+    bin_pointer = 0;
+    len = 4096;
   } else if (addr == SOFTDEVICE_ADDR) {
-    len = Softdevice_bin_len;
+    //Skip the MBR
+    bin_pointer = 4096;
+    len = Softdevice_bin_len - 4096;
   } else if (addr == BOOTLOADER_ADDR) {
+    bin_pointer = 0;
     len = nano33_bootloader_hex_len;
   }
   uint32_t sector_size = flash.get_sector_size(addr);
-  //Serial.print("Sector size: ");
-  //Serial.println(sector_size);
   uint32_t next_sector = addr + sector_size;
   bool sector_erased = false;
   size_t pages_flashed = 0;
   uint32_t percent_done = 0;
-  
-  uint32_t pointer = 0;
 
   while (true) {
     
-    if (pointer >= len) {
+    if (flash_pointer >= len) {
       break;
     }
 
-    flash.erase(addr + pointer, sector_size);
+    flash.erase(addr + flash_pointer, sector_size);
 
-    if ((len - pointer) < sector_size) {
-      sector_size = len - pointer;
+    if ((len - flash_pointer) < sector_size) {
+      sector_size = len - flash_pointer;
     }
 
     // Program page
     if (addr == MBR_ADDR) {
-      flash.program(&MBR_bin[pointer], addr + pointer, sector_size);
+      flash.program(&Softdevice_bin[bin_pointer], addr + flash_pointer, sector_size);
     } else if (addr == SOFTDEVICE_ADDR) {
-      flash.program(&Softdevice_bin[pointer], addr + pointer, sector_size);
+      flash.program(&Softdevice_bin[bin_pointer], addr + flash_pointer, sector_size);
     } else if (addr == BOOTLOADER_ADDR) {
-      flash.program(&nano33_bootloader_hex[pointer], addr + pointer, sector_size);
+      flash.program(&nano33_bootloader_hex[bin_pointer], addr + flash_pointer, sector_size);
     }
-    
-    pointer = pointer + sector_size;
 
-    uint32_t percent_done = pointer * 100 / len;
+    Serial.print("Flash Address = ");
+    Serial.println(addr + flash_pointer, HEX);
+    
+    bin_pointer = bin_pointer + sector_size;
+    flash_pointer = flash_pointer + sector_size;
+
+    uint32_t percent_done = flash_pointer * 100 / len;
     Serial.println("Flashed " + String(percent_done) + "%");
 
   }
@@ -119,7 +135,8 @@ void writeSoftDeviceLen(uint32_t address) {
   //Write address where the SoftDevice binary has been written
   flash.program(&sd_addr, address + 4, 4);
   //Write SoftDevice binary length
-  flash.program(&Softdevice_bin_len, address + 8, 4);
+  unsigned int sd_len = Softdevice_bin_len - 4096;
+  flash.program(&sd_len, address + 8, 4);
 }
 
 void loop() {
