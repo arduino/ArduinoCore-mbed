@@ -166,15 +166,12 @@ tools.dfu-util.upload.pattern="{path}/{cmd}" --device {upload.vid}:{upload.pid} 
 # PICOTOOL
 #
 
-tools.picotool.path={runtime.platform.path}/tools/
-#tools.picotool.path={runtime.tools.picotool.path}
-tools.picotool.cmd.macosx=osx/wrapper.sh
-tools.picotool.cmd.linux=linux/wrapper.sh
-tools.picotool.cmd.windows=windows/wrapper.bat
+tools.picotool.path={runtime.tools.rp2040tools.path}
+tools.picotool.cmd=rp2040load
 
-tools.picotool.upload.params.verbose=-d
+tools.picotool.upload.params.verbose=-v
 tools.picotool.upload.params.quiet=
-tools.picotool.upload.pattern="{path}/{cmd}" "{build.path}/{build.project_name}.elf"
+tools.picotool.upload.pattern="{path}/{cmd}" {upload.verbose} -D "{build.path}/{build.project_name}.elf"
 
 #
 # GDB (Debugger)
