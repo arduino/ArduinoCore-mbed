@@ -22,7 +22,8 @@ static DMA_HandleTypeDef hdma_sai_rx;
 
 volatile uint16_t *g_pcmbuf = NULL;
 
-static int g_channels = AUDIO_SAI_NBR_CHANNELS;
+static int g_i_channels = AUDIO_SAI_NBR_CHANNELS;
+static int g_o_channels = AUDIO_SAI_NBR_CHANNELS;
 static PDM_Filter_Handler_t  PDM_FilterHandler[2];
 static PDM_Filter_Config_t   PDM_FilterConfig[2];
 
@@ -133,7 +134,7 @@ void sai_init()
     HAL_GPIO_Init(AUDIO_SAI_D1_PORT, &GPIO_InitStruct);
 }
 
-int py_audio_init(size_t g_channels, uint32_t frequency, int gain_db, float highpass)
+int py_audio_init(size_t channels, uint32_t frequency, int gain_db, float highpass)
 {
 
     RCC_PeriphCLKInitTypeDef rcc_ex_clk_init_struct;
@@ -166,8 +167,10 @@ int py_audio_init(size_t g_channels, uint32_t frequency, int gain_db, float high
         return 0;
     }
 
-    if (g_channels != 1 && g_channels != 2) {
+    if (channels != 1 && channels != 2) {
         return 0;
+    } else {
+        g_o_channels = channels;
     }
 
     uint32_t decimation_factor = 64; // Fixed decimation factor
@@ -175,12 +178,12 @@ int py_audio_init(size_t g_channels, uint32_t frequency, int gain_db, float high
     if (decimation_factor_const == 0) {
         return 0;
     }
-    uint32_t samples_per_channel = (PDM_BUFFER_SIZE * 8) / (decimation_factor * g_channels * 2); // Half a transfer
+    uint32_t samples_per_channel = (PDM_BUFFER_SIZE * 8) / (decimation_factor * g_i_channels * 2); // Half a transfer
 
     hsai.Instance                    = AUDIO_SAI;
     hsai.Init.Protocol               = SAI_FREE_PROTOCOL;
     hsai.Init.AudioMode              = SAI_MODEMASTER_RX;
-    hsai.Init.DataSize               = (g_channels == 1) ? SAI_DATASIZE_8 : SAI_DATASIZE_16;
+    hsai.Init.DataSize               = (g_i_channels == 1) ? SAI_DATASIZE_8 : SAI_DATASIZE_16;
     hsai.Init.FirstBit               = SAI_FIRSTBIT_LSB;
     hsai.Init.ClockStrobing          = SAI_CLOCKSTROBING_RISINGEDGE;
     hsai.Init.Synchro                = SAI_ASYNCHRONOUS;
@@ -189,7 +192,7 @@ int py_audio_init(size_t g_channels, uint32_t frequency, int gain_db, float high
     hsai.Init.FIFOThreshold          = SAI_FIFOTHRESHOLD_1QF;
     hsai.Init.SynchroExt             = SAI_SYNCEXT_DISABLE;
     hsai.Init.AudioFrequency         = SAI_AUDIO_FREQUENCY_MCKDIV;
-    hsai.Init.MonoStereoMode         = (g_channels == 1)  ? SAI_MONOMODE: SAI_STEREOMODE;
+    hsai.Init.MonoStereoMode         = (g_i_channels == 1)  ? SAI_MONOMODE: SAI_STEREOMODE;
     hsai.Init.CompandingMode         = SAI_NOCOMPANDING;
     hsai.Init.TriState               = SAI_OUTPUT_RELEASED;
 
@@ -212,8 +215,8 @@ int py_audio_init(size_t g_channels, uint32_t frequency, int gain_db, float high
 
     hsai.SlotInit.FirstBitOffset     = 0;
     hsai.SlotInit.SlotSize           = SAI_SLOTSIZE_DATASIZE;
-    hsai.SlotInit.SlotNumber         = (g_channels == 1) ? 2 : 1;
-    hsai.SlotInit.SlotActive         = (g_channels == 1) ? (SAI_SLOTACTIVE_0 | SAI_SLOTACTIVE_1) : SAI_SLOTACTIVE_0;
+    hsai.SlotInit.SlotNumber         = (g_i_channels == 1) ? 2 : 1;
+    hsai.SlotInit.SlotActive         = (g_i_channels == 1) ? (SAI_SLOTACTIVE_0 | SAI_SLOTACTIVE_1) : SAI_SLOTACTIVE_0;
 
     // Initialize the SAI
     HAL_SAI_DeInit(&hsai);
@@ -230,8 +233,8 @@ int py_audio_init(size_t g_channels, uint32_t frequency, int gain_db, float high
     hdma_sai_rx.Init.Direction           = DMA_PERIPH_TO_MEMORY;
     hdma_sai_rx.Init.PeriphInc           = DMA_PINC_DISABLE;
     hdma_sai_rx.Init.MemInc              = DMA_MINC_ENABLE;
-    hdma_sai_rx.Init.PeriphDataAlignment = (g_channels == 1) ? DMA_PDATAALIGN_BYTE : DMA_PDATAALIGN_HALFWORD;
-    hdma_sai_rx.Init.MemDataAlignment    = (g_channels == 1) ? DMA_MDATAALIGN_BYTE : DMA_MDATAALIGN_HALFWORD;
+    hdma_sai_rx.Init.PeriphDataAlignment = (g_i_channels == 1) ? DMA_PDATAALIGN_BYTE : DMA_PDATAALIGN_HALFWORD;
+    hdma_sai_rx.Init.MemDataAlignment    = (g_i_channels == 1) ? DMA_MDATAALIGN_BYTE : DMA_MDATAALIGN_HALFWORD;
     hdma_sai_rx.Init.Mode                = DMA_CIRCULAR;
     hdma_sai_rx.Init.Priority            = DMA_PRIORITY_HIGH;
     hdma_sai_rx.Init.FIFOMode            = DMA_FIFOMODE_ENABLE;
@@ -263,12 +266,12 @@ int py_audio_init(size_t g_channels, uint32_t frequency, int gain_db, float high
     __HAL_CRC_DR_RESET(&hcrc);
 
     // Configure PDM filters
-    for (int i=0; i<g_channels; i++) {
+    for (int i=0; i<g_i_channels; i++) {
         PDM_FilterHandler[i].bit_order  = PDM_FILTER_BIT_ORDER_MSB;
         PDM_FilterHandler[i].endianness = PDM_FILTER_ENDIANNESS_LE;
         PDM_FilterHandler[i].high_pass_tap = (uint32_t) (highpass * 2147483647U); // coff * (2^31-1)
-        PDM_FilterHandler[i].out_ptr_channels = g_channels;
-        PDM_FilterHandler[i].in_ptr_channels  = g_channels;
+        PDM_FilterHandler[i].out_ptr_channels = g_o_channels;
+        PDM_FilterHandler[i].in_ptr_channels  = g_i_channels;
         PDM_Filter_Init(&PDM_FilterHandler[i]);
 
         PDM_FilterConfig[i].mic_gain = gain_db;
@@ -277,7 +280,7 @@ int py_audio_init(size_t g_channels, uint32_t frequency, int gain_db, float high
         PDM_Filter_setConfig(&PDM_FilterHandler[i], &PDM_FilterConfig[i]);
     }
 
-    PDMsetBufferSize(samples_per_channel * g_channels * sizeof(int16_t));
+    PDMsetBufferSize(samples_per_channel * g_o_channels * sizeof(int16_t));
     //g_pcmbuf = malloc(samples_per_channel * g_channels * sizeof(int16_t));
 
     return 1;
@@ -303,7 +306,8 @@ void py_audio_deinit()
         hdma_sai_rx.Instance = NULL;
     }
 
-    g_channels = 0;
+    g_i_channels = 0;
+    g_o_channels = 0;
     //free(g_pcmbuf);
     g_pcmbuf = NULL;
 }
@@ -316,7 +320,7 @@ void audio_pendsv_callback(void)
         xfer_status &= ~(DMA_XFER_HALF);
 
         // Convert PDM samples to PCM.
-        for (int i=0; i<g_channels; i++) {
+        for (int i=0; i<g_i_channels; i++) {
             PDM_Filter(&((uint8_t*)PDM_BUFFER)[i], &((int16_t*)g_pcmbuf)[i], &PDM_FilterHandler[i]);
         }
     } else if ((xfer_status & DMA_XFER_FULL)) { // Check for transfer complete.
@@ -324,7 +328,7 @@ void audio_pendsv_callback(void)
         xfer_status &= ~(DMA_XFER_FULL);
 
         // Convert PDM samples to PCM.
-        for (int i=0; i<g_channels; i++) {
+        for (int i=0; i<g_i_channels; i++) {
             PDM_Filter(&((uint8_t*)PDM_BUFFER)[PDM_BUFFER_SIZE / 2 + i], &((int16_t*)g_pcmbuf)[i], &PDM_FilterHandler[i]);
         }
     }
@@ -336,7 +340,7 @@ void py_audio_start_streaming()
     xfer_status &= DMA_XFER_NONE;
 
     // Start DMA transfer
-    if (HAL_SAI_Receive_DMA(&hsai, (uint8_t*) PDM_BUFFER, PDM_BUFFER_SIZE / g_channels) != HAL_OK) {
+    if (HAL_SAI_Receive_DMA(&hsai, (uint8_t*) PDM_BUFFER, PDM_BUFFER_SIZE / g_i_channels) != HAL_OK) {
 
     }
 }
