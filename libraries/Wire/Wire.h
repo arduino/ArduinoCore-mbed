@@ -22,7 +22,9 @@
 #include "api/HardwareI2C.h"
 #include "Print.h"
 #include "drivers/I2C.h"
+#ifdef DEVICE_I2CSLAVE
 #include "drivers/I2CSlave.h"
+#endif
 #include "rtos.h"
 
 typedef void (*voidFuncPtrParamInt)(int);
@@ -34,7 +36,11 @@ class MbedI2C : public HardwareI2C
   public:
     MbedI2C(int sda, int scl);
     virtual void begin();
+    #ifndef DEVICE_I2CSLAVE
+    virtual void __attribute__ ((error("I2C Slave mode is not supported"))) begin(uint8_t address);
+    #else
     virtual void begin(uint8_t address);
+    #endif
     virtual void end();
 
     virtual void setClock(uint32_t freq);
@@ -71,8 +77,10 @@ private:
     uint32_t usedTxBuffer;
     voidFuncPtrParamInt onReceiveCb = NULL;
     voidFuncPtr onRequestCb = NULL;
+#ifdef DEVICE_I2CSLAVE
     rtos::Thread slave_th;
     void receiveThd();
+#endif
 };
 
 }

@@ -119,6 +119,7 @@ int arduino::MbedI2C::peek() {
 void arduino::MbedI2C::flush() {
 }
 
+#ifdef DEVICE_I2CSLAVE
 void arduino::MbedI2C::receiveThd() {
 	while (1) {
 		int i = slave->receive();
@@ -154,6 +155,7 @@ void arduino::MbedI2C::receiveThd() {
 		}
 	}
 }
+#endif
 
 void arduino::MbedI2C::onReceive(voidFuncPtrParamInt cb) {
 	onReceiveCb = cb;
