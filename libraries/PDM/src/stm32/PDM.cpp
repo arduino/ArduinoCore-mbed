@@ -66,7 +66,7 @@ int PDMClass::begin(int channels, long sampleRate) {
   _samplerate = sampleRate;
 
   if (gain_db == -1) {
-    gain_db = -10;
+    gain_db = 24;
   }
 
   //g_pcmbuf = (uint16_t*)_doubleBuffer.data();
