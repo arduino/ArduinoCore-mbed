@@ -264,9 +264,29 @@ public:
         return connected();
     }
 
+    uint32_t baud() {
+        return _baud;
+    }
+    uint8_t stopbits() {
+        return _stop;
+    }
+    uint8_t paritytype() {
+        return _parity;
+    }
+    uint8_t numbits() {
+        return _bits;
+    }
+    bool dtr() {
+        return _dtr;
+    }
+    bool rts() {
+        return _rts;
+    }
+
 private:
     RingBufferN<256> rx_buffer;
     rtos::Thread t;
+    int _baud, _bits, _parity, _stop;
 
     void onInterrupt() {
         while (rx_buffer.availableForStore() && _available()) {
@@ -283,6 +303,10 @@ protected:
         if (_settings_changed_callback) {
             _settings_changed_callback(baud, bits, parity, stop);
         }
+        this->_baud = baud;
+        this->_bits = bits;
+        this->_parity = parity;
+        this->_stop = stop;
     }
 
 private:

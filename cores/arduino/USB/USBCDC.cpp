@@ -235,6 +235,8 @@ uint32_t USBCDC::callback_request(const USBDevice::setup_packet_t *setup, USBDev
                 } else {
                     _change_terminal_connected(false);
                 }
+                this->_dtr = setup->wValue & CLS_DTR;
+                this->_rts = setup->wValue & CLS_RTS;
                 *result = USBDevice::Success;
                 break;
             default:

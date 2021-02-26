@@ -217,6 +217,8 @@ protected:
     uint8_t _cdc_new_line_coding[7];
     uint8_t _config_descriptor[75];
 
+    int _rts, _dtr;
+
     OperationList<AsyncWait> _connected_list;
     bool _terminal_connected;
 
