@@ -89,8 +89,11 @@ static uint8_t get_mck_div(uint32_t frequency)
 {
     switch(frequency){
         case AUDIO_FREQUENCY_8K:     return 48;  //SCK_x = sai_x_ker_ck/48 =  1024KHz  Ffs = SCK_x/64 =  16KHz stereo
+        case AUDIO_FREQUENCY_11K:    return  8;  //SCK_x = sai_x_ker_ck/8  =  1411KHz  Ffs = SCK_x/64 =  22KHz stereo
         case AUDIO_FREQUENCY_16K:    return 24;  //SCK_x = sai_x_ker_ck/24 =  2048KHz  Ffs = SCK_x/64 =  32KHz stereo
+        case AUDIO_FREQUENCY_22K:    return  4;  //SCK_x = sai_x_ker_ck/4  =  2822KHz  Ffs = SCK_x/64 =  44KHz stereo
         case AUDIO_FREQUENCY_32K:    return 12;  //SCK_x = sai_x_ker_ck/12 =  4096KHz  Ffs = SCK_x/64 =  64KHz stereo
+        case AUDIO_FREQUENCY_44K:    return  2;  //SCK_x = sai_x_ker_ck/2  =  5644KHz  Ffs = SCK_x/64 =  88KHz stereo
         case AUDIO_FREQUENCY_48K:    return  8;  //SCK_x = sai_x_ker_ck/8  =  6144KHz  Ffs = SCK_x/64 =  96KHz stereo
         case AUDIO_FREQUENCY_64K:    return  6;  //SCK_x = sai_x_ker_ck/6  =  8192KHz  Ffs = SCK_x/64 = 128KHz stereo
         case AUDIO_FREQUENCY_96K:    return  4;  //SCK_x = sai_x_ker_ck/4  = 12288KHz  Ffs = SCK_x/64 = 192KHz stereo
@@ -141,17 +144,33 @@ int py_audio_init(size_t channels, uint32_t frequency, int gain_db, float highpa
 
     HAL_RCCEx_GetPeriphCLKConfig(&rcc_ex_clk_init_struct);
 
-    /* SAI clock config:
-     PLL2_VCO Input = HSE_VALUE/PLL2M = 1 Mhz
-     PLL2_VCO Output = PLL2_VCO Input * PLL2N = 344 Mhz
-     sai_x_ker_ck = PLL2_VCO Output/PLL2P = 344/7 = 49.142 Mhz */
-    rcc_ex_clk_init_struct.PeriphClockSelection = RCC_PERIPHCLK_SAI4A;
-    rcc_ex_clk_init_struct.Sai4AClockSelection = RCC_SAI4ACLKSOURCE_PLL2;
-    rcc_ex_clk_init_struct.PLL2.PLL2P = 7;
-    rcc_ex_clk_init_struct.PLL2.PLL2Q = 1;
-    rcc_ex_clk_init_struct.PLL2.PLL2R = 1;
-    rcc_ex_clk_init_struct.PLL2.PLL2N = 344;
-    rcc_ex_clk_init_struct.PLL2.PLL2M = isBoardRev2() ? 25 : 27;
+    if((frequency == AUDIO_FREQUENCY_11K) || (frequency == AUDIO_FREQUENCY_22K) || (frequency == AUDIO_FREQUENCY_44K))
+    {
+        /* SAI clock config:
+        PLL2_VCO Input = HSE_VALUE/PLL2M = 1 Mhz
+        PLL2_VCO Output = PLL2_VCO Input * PLL2N = 429 Mhz
+        SAI_CLK_x = PLL2_VCO Output/PLL2P = 429/38 = 11.289 Mhz */
+        rcc_ex_clk_init_struct.PeriphClockSelection = RCC_PERIPHCLK_SAI4A;
+        rcc_ex_clk_init_struct.Sai4AClockSelection = RCC_SAI4ACLKSOURCE_PLL2;
+        rcc_ex_clk_init_struct.PLL2.PLL2P = 38;
+        rcc_ex_clk_init_struct.PLL2.PLL2Q = 1;
+        rcc_ex_clk_init_struct.PLL2.PLL2R = 1;
+        rcc_ex_clk_init_struct.PLL2.PLL2N = 429;
+        rcc_ex_clk_init_struct.PLL2.PLL2M = isBoardRev2() ? 25 : 27;
+
+    } else {
+        /* SAI clock config:
+        PLL2_VCO Input = HSE_VALUE/PLL2M = 1 Mhz
+        PLL2_VCO Output = PLL2_VCO Input * PLL2N = 344 Mhz
+        sai_x_ker_ck = PLL2_VCO Output/PLL2P = 344/7 = 49.142 Mhz */
+        rcc_ex_clk_init_struct.PeriphClockSelection = RCC_PERIPHCLK_SAI4A;
+        rcc_ex_clk_init_struct.Sai4AClockSelection = RCC_SAI4ACLKSOURCE_PLL2;
+        rcc_ex_clk_init_struct.PLL2.PLL2P = 7;
+        rcc_ex_clk_init_struct.PLL2.PLL2Q = 1;
+        rcc_ex_clk_init_struct.PLL2.PLL2R = 1;
+        rcc_ex_clk_init_struct.PLL2.PLL2N = 344;
+        rcc_ex_clk_init_struct.PLL2.PLL2M = isBoardRev2() ? 25 : 27;
+    }
 
     HAL_RCCEx_PeriphCLKConfig(&rcc_ex_clk_init_struct);
 
@@ -159,8 +178,11 @@ int py_audio_init(size_t channels, uint32_t frequency, int gain_db, float highpa
 
     // Sanity checks
     if ((frequency != AUDIO_FREQUENCY_8K) &&
+        (frequency != AUDIO_FREQUENCY_11K) &&
         (frequency != AUDIO_FREQUENCY_16K) &&
+        (frequency != AUDIO_FREQUENCY_22K) &&
         (frequency != AUDIO_FREQUENCY_32K) &&
+        (frequency != AUDIO_FREQUENCY_44K) &&
         (frequency != AUDIO_FREQUENCY_48K) &&
         (frequency != AUDIO_FREQUENCY_64K) &&
         (frequency != AUDIO_FREQUENCY_96K)){
