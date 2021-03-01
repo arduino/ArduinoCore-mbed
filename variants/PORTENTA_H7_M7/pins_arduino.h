@@ -1,5 +1,6 @@
 #pragma once
 #include <macros.h>
+#include "PeripheralPins.h"
 
 #ifndef __PINS_ARDUINO__
 #define __PINS_ARDUINO__
