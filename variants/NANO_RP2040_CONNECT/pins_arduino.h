@@ -57,13 +57,15 @@ static const uint8_t SCK  = PIN_SPI_SCK;
 #define PIN_WIRE_SDA        (18u)
 #define PIN_WIRE_SCL        (19u)
 
-#define SERIAL_HOWMANY		2
+#define SERIAL_HOWMANY		3
 #define SERIAL1_TX			(digitalPinToPinName(PIN_SERIAL_TX))
 #define SERIAL1_RX			(digitalPinToPinName(PIN_SERIAL_RX))
 #define SERIAL2_TX			(digitalPinToPinName(25))
 #define SERIAL2_RX			(digitalPinToPinName(26))
 #define SERIAL2_CTS			(digitalPinToPinName(27))
 #define SERIAL2_RTS			(digitalPinToPinName(28))
+#define SERIAL3_TX			(digitalPinToPinName(25))
+#define SERIAL3_RX			(digitalPinToPinName(26))
 
 #define SERIAL_CDC			1
 #define HAS_UNIQUE_ISERIAL_DESCRIPTOR
@@ -84,11 +86,11 @@ void _ontouch1200bps_();
 #define SPI_SCK1		(digitalPinToPinName(29))
 
 #define NINA_RESETN		(24u)
-#define SerialNina		Serial2
+#define SerialNina		Serial3
 #define SerialHCI		Serial2
 
-#define NINA_GPIOIRQ	(24u) // LEDG pin (GPIO26 on NINA)
-#define NINA_GPIO0		(11u) // real GPIO0 on NINA
+#define NINA_GPIOIRQ	(21u) // LEDG pin (GPIO26 on NINA)
+#define NINA_GPIO0		(28u) // real GPIO0 on NINA
 
 #define SPIWIFI_SS		(26u)
 #define SPIWIFI_ACK		(27u)

@@ -277,10 +277,10 @@ public:
         return _bits;
     }
     bool dtr() {
-        return _dtr;
+        return (_dtr != 0);
     }
     bool rts() {
-        return _rts;
+        return (_rts != 0);
     }
 
 private:
