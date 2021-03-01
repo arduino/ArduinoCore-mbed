@@ -85,12 +85,10 @@ void _ontouch1200bps_();
 
 #define NINA_RESETN		(24u)
 #define SerialNina		Serial2
+#define SerialHCI		Serial2
 
-#if __has_include (<WiFiNINA.h>)
-#define NINA_GPIO0		(21u) // LEDG pin (GPIO26 on NINA)
-#else
-#define NINA_GPIO0		(28u) // real GPIO0 on NINA
-#endif
+#define NINA_GPIOIRQ	(24u) // LEDG pin (GPIO26 on NINA)
+#define NINA_GPIO0		(11u) // real GPIO0 on NINA
 
 #define SPIWIFI_SS		(26u)
 #define SPIWIFI_ACK		(27u)
