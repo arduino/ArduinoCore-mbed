@@ -44,7 +44,7 @@ int arduino::WiFiClass::begin(const char* ssid, const char *passphrase) {
 
 int arduino::WiFiClass::beginAP(const char* ssid, const char *passphrase, uint8_t channel) {
 
-    #if defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_PORTENTA_H7_M4)
+    #if defined(COMPONENT_4343W)
         _softAP = WhdSoftAPInterface::get_default_instance();
     #endif
 
@@ -314,7 +314,7 @@ unsigned long arduino::WiFiClass::getTime() {
     return 0;
 }
 
-#if defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_PORTENTA_H7_M4)
+#if defined(COMPONENT_4343W)
 
 #include "QSPIFBlockDevice.h"
 #include "MBRBlockDevice.h"
