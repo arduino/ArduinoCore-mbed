@@ -12,8 +12,14 @@
 
 #include <PDM.h>
 
+// default number of output channels
+static const char channels = 1;
+
+// default PCM output frequency
+static const int frequency = 16000;
+
 // Buffer to read samples into, each sample is 16-bits
-short sampleBuffer[256];
+short sampleBuffer[512];
 
 // Number of audio samples read
 volatile int samplesRead;
@@ -33,7 +39,7 @@ void setup() {
   // - one channel (mono mode)
   // - a 16 kHz sample rate for the Arduino Nano 33 BLE Sense
   // - a 32 kHz or 64 kHz sample rate for the Arduino Portenta Vision Shield
-  if (!PDM.begin(1, 16000)) {
+  if (!PDM.begin(channels, frequency)) {
     Serial.println("Failed to start PDM!");
     while (1);
   }
@@ -45,6 +51,12 @@ void loop() {
 
     // Print samples to the serial monitor or plotter
     for (int i = 0; i < samplesRead; i++) {
+      if(channels == 2) {
+        Serial.print("L:");
+        Serial.print(sampleBuffer[i]);
+        Serial.print(" R:");
+        i++;
+      }
       Serial.println(sampleBuffer[i]);
     }
 
