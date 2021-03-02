@@ -38,6 +38,11 @@ static const uint8_t A3  = PIN_A3;
 */
 #define ADC_RESOLUTION 12
 
+// PDM Interfaces
+// ---------------
+#define PIN_PDM_CLK	 (7)
+#define PIN_PDM_DIN	 (6)
+
 // Serial
 #define PIN_SERIAL_RX (1ul)
 #define PIN_SERIAL_TX (0ul)
