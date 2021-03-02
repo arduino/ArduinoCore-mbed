@@ -363,6 +363,7 @@ struct display_timing {
 int anx7625_dp_start(uint8_t bus, const struct edid *edid, enum edid_modes mode = EDID_MODE_AUTO);
 int anx7625_dp_get_edid(uint8_t bus, struct edid *out);
 int anx7625_init(uint8_t bus);
+void anx7625_wait_hpd_event(uint8_t bus);
 int stm32_dsi_config(uint8_t bus, struct edid *edid, struct display_timing *dt);
 void stm32_BriefDisplay(void);
 void stm32_LCD_Clear(uint32_t color);

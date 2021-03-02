@@ -818,13 +818,13 @@ static int anx7625_hpd_change_detect(uint8_t bus)
 
 	ret = anx7625_reg_read(bus, RX_P0_ADDR, SYSTEM_STSTUS, &status);
 	if (ret < 0) {
-		ANXERROR("IO error: Failed to clear interrupt status.\n");
+		ANXERROR("IO error: Failed to read HPD_STATUS register.\n");
 		return ret;
 	}
 
 	if (status & HPD_STATUS) {
 		anx7625_start_dp_work(bus);
-		ANXINFO("HPD received 0x7e:0x45=%#x\n", status);
+		ANXINFO("HPD event received 0x7e:0x45=%#x\n", status);
 		return 1;
 	}
 	return 0;
@@ -1312,9 +1312,9 @@ int anx7625_dp_get_edid(uint8_t bus, struct edid *out)
 
 int anx7625_init(uint8_t bus)
 {
-	int retry_hpd_change = 500;
 	int retry_power_on = 3;
 
+	ANXINFO("Powering on anx7625...\n");
 	while (--retry_power_on) {
 		if (anx7625_power_on_init(bus) == 0)
 			break;
@@ -1323,16 +1323,18 @@ int anx7625_init(uint8_t bus)
 		ANXERROR("Failed to power on.\n");
 		return -1;
 	}
+	ANXINFO("Powering on anx7625 successfull.\n");
 
-	while (--retry_hpd_change) {
+	return 0;
+}
+
+void anx7625_wait_hpd_event(uint8_t bus)
+{
+	ANXINFO("Waiting for hdmi hot plug event...\n");
+	while (1) {
 		mdelay(10);
 		int detected = anx7625_hpd_change_detect(bus);
-		if (detected < 0)
-			return -1;
-		if (detected > 0)
-			return 0;
+		if (detected == 1)
+			break;
 	}
-
-	ANXERROR("Timed out to detect HPD change on bus %d.\n", bus);
-	return -1;
 }
