@@ -823,8 +823,8 @@ static int anx7625_hpd_change_detect(uint8_t bus)
 	}
 
 	if (status & HPD_STATUS) {
-		anx7625_start_dp_work(bus);
 		ANXINFO("HPD event received 0x7e:0x45=%#x\n", status);
+		anx7625_start_dp_work(bus);
 		return 1;
 	}
 	return 0;
