@@ -21,7 +21,6 @@
 //#include <timer.h>
 #include <string.h>
 #include <mbed/drivers/I2C.h>
-
 #include "anx7625.h"
 #include "video_modes.h"
 
