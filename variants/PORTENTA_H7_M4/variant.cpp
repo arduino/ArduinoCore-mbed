@@ -8,7 +8,8 @@ AnalogPinDescription g_AAnalogPinDescription[] = {
   { PC_3C,        NULL },    // A3    ADC3_INP1
   { PC_2_ALT0,    NULL },    // A4    ADC1_INP12
   { PC_3_ALT2,    NULL },    // A5    ADC2_INP13
-  { PA_4,         NULL }     // A6    ADC1_INP18
+  { PA_4,         NULL },    // A6    ADC1_INP18
+  { PA_6,         NULL }     // A7    ADC1_INP7
 };
 
 PinDescription g_APinDescription[] = {
@@ -39,6 +40,7 @@ PinDescription g_APinDescription[] = {
   { PC_2_ALT0,    NULL, NULL, NULL },    // A4    ADC1_INP12
   { PC_3_ALT0,    NULL, NULL, NULL },    // A5    ADC1_INP13
   { PA_4,         NULL, NULL, NULL },    // A6    ADC1_INP18
+  { PA_6,         NULL, NULL, NULL },    // A7    ADC1_INP7
 
   // LEDS
   { PK_5,         NULL, NULL, NULL },    // LEDR

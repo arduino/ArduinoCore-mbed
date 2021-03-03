@@ -18,11 +18,11 @@ extern PinName digitalPinToPinName(pin_size_t P);
 
 // LEDs
 // ----
-#define PIN_LED     (23u)
+#define PIN_LED     (24u)
 #define LED_BUILTIN PIN_LED
-#define LEDR        (22u)
-#define LEDG        (23u)
-#define LEDB        (24u)
+#define LEDR        (23u)
+#define LEDG        (24u)
+#define LEDB        (25u)
 
 // Analog pins
 // -----------
@@ -33,6 +33,8 @@ extern PinName digitalPinToPinName(pin_size_t P);
 #define PIN_A4 (19u)
 #define PIN_A5 (20u)
 #define PIN_A6 (21u)
+#define PIN_A7 (22u)
+
 static const uint8_t A0  = PIN_A0;
 static const uint8_t A1  = PIN_A1;
 static const uint8_t A2  = PIN_A2;
@@ -40,6 +42,7 @@ static const uint8_t A3  = PIN_A3;
 static const uint8_t A4  = PIN_A4;
 static const uint8_t A5  = PIN_A5;
 static const uint8_t A6  = PIN_A6;
+static const uint8_t A7  = PIN_A7;
 #define ADC_RESOLUTION 12
 
 // Digital pins
