@@ -37,7 +37,6 @@
 #include <string.h>
 #include <edid.h>
 //#include <vbe.h>
-
 #include <helpers.h>
 
 struct edid_context {
@@ -80,10 +79,8 @@ static struct {
 	unsigned int version[2];
 	unsigned int nonconformant;
 	unsigned int type;
-
 	unsigned int x_mm;
 	unsigned int y_mm;
-
 	unsigned int voltage;
 	unsigned int sync;
 
