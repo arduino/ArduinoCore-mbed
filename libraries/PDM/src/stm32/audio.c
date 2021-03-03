@@ -46,7 +46,8 @@ static PDM_Filter_Config_t   PDM_FilterConfig[2];
 static volatile uint32_t xfer_status = 0;
 
 // BDMA can only access D3 SRAM4 memory.
-int8_t* PDM_BUFFER = (uint16_t*)0x38000000;
+//int8_t* PDM_BUFFER = (uint16_t*)0x38000000;
+uint8_t PDM_BUFFER[PDM_BUFFER_SIZE] __attribute__ ((section(".pdm_buffer")));
 
 void PDMIrqHandler(bool halftranfer);
 void PDMsetBufferSize(int size);
