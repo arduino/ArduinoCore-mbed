@@ -28,7 +28,7 @@
 
 #define AUDIO_IN_IRQ_PREPRIO                ((uint32_t)0x0F)
 
-#define PDM_BUFFER_SIZE     (16384/2)
+#define PDM_BUFFER_SIZE     (1024)
 
 void py_audio_deinit();
 int py_audio_init(size_t g_channels, uint32_t frequency, int gain_db, float highpass);
