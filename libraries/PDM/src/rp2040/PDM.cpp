@@ -79,6 +79,9 @@ int PDMClass::begin(int channels, long sampleRate)
   uint offset = pio_add_program(pio, &pdm_pio_program);
   pdm_pio_program_init(pio, sm, offset, _clkPin, _dinPin, clkDiv);
 
+  // Wait for microphone 
+  delay(100);
+
   // Configure DMA for transferring PIO rx buffer to raw buffers
   dma_channel_config c = dma_channel_get_default_config(dmaChannel);
   channel_config_set_read_increment(&c, false);
