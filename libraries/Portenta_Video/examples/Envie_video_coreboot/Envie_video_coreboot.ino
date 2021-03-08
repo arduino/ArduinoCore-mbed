@@ -7,9 +7,13 @@ struct edid recognized_edid;
 
 mbed::DigitalOut video_on(PK_2);
 mbed::DigitalOut video_rst(PJ_3);
+mbed::DigitalOut otg_on(PJ_6);
 
 void setup() {
   // put your setup code here, to run once:
+  printf("OTG_ON = 1 -> VBUS OFF\n");
+  otg_on = 1;
+
   delay(1000);
   video_on = 1;
   delay(10);
@@ -30,6 +34,12 @@ void setup() {
   if(ret < 0) {
     printf("Cannot continue, anx7625 init failed.\n");
     while(1);
+  }
+
+  if(anx7625_is_power_provider(0)) {
+    printf("OTG_ON = 0 -> VBUS ON\n");
+    otg_on = 0;
+    delay(1000); // Wait for device to be stable
   }
 
   anx7625_wait_hpd_event(0);
