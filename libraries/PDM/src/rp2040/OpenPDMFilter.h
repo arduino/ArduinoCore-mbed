@@ -49,10 +49,10 @@
  * and RAM memory.
  * Note: Without Look-Up Table up to stereo@16KHz configuration is supported.
  */
-//#define USE_LUT
+#define USE_LUT
 
 #define SINCN            3
-#define DECIMATION_MAX 64
+#define DECIMATION_MAX 128
 
 //#define FILTER_GAIN     16
 extern uint16_t filterGain;

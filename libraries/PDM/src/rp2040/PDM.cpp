@@ -18,12 +18,15 @@ PIO pio = pio0;
 uint sm = 0;
 
 // raw buffers contain PDM data
-#define RAW_BUFFER_SIZE 256 // should be a multiple of 64 -> depends on the chosen filter
-uint8_t rawBuffer[2][RAW_BUFFER_SIZE];
+#define RAW_BUFFER_SIZE 1024 // should be a multiple of (decimation / 8)
+uint8_t rawBuffer0[RAW_BUFFER_SIZE];
+uint8_t rawBuffer1[RAW_BUFFER_SIZE];
+uint8_t* rawBuffer[2] = {rawBuffer0, rawBuffer1};
 volatile int rawBufferIndex = 0; 
 
+int decimation = 64;
+
 // final buffer is the one to be filled with PCM data
-volatile int finalBufferLength = 0;
 int16_t* volatile finalBuffer;
 
 // OpenPDM filter used to convert PDM into PCM
@@ -58,12 +61,21 @@ int PDMClass::begin(int channels, long sampleRate)
 
   // clear the final buffers
   _doubleBuffer.reset();
-  finalBufferLength = _doubleBuffer.availableForWrite() / sizeof(int16_t);
   finalBuffer = (int16_t*)_doubleBuffer.data();
   _doubleBuffer.swap(0);
 
+	/* Initialize Open PDM library */
+	filter.Fs = sampleRate;
+	filter.nSamples = 1; 
+	filter.LP_HZ = sampleRate/2;
+	filter.HP_HZ = 10;
+	filter.In_MicChannels = 1;
+	filter.Out_MicChannels = 1;
+	filter.Decimation = 64;
+	Open_PDM_Filter_Init(&filter);
+
   // Configure PIO state machine
-  float clkDiv = (float)clock_get_hz(clk_sys) / sampleRate / 64 / 2 / 2; 
+  float clkDiv = (float)clock_get_hz(clk_sys) / sampleRate / decimation / 2; 
   uint offset = pio_add_program(pio, &pdm_pio_program);
   pdm_pio_program_init(pio, sm, offset, _clkPin, _dinPin, clkDiv);
 
@@ -87,16 +99,6 @@ int PDMClass::begin(int channels, long sampleRate)
     RAW_BUFFER_SIZE, // Number of transfers
     true                // Start immediately
   );
-
-	/* Initialize Open PDM library */
-	filter.Fs = sampleRate;
-	filter.nSamples = 1; 
-	filter.LP_HZ = sampleRate/2;
-	filter.HP_HZ = 10;
-	filter.In_MicChannels = 1;
-	filter.Out_MicChannels = 1;
-	filter.Decimation = 64;
-	Open_PDM_Filter_Init(&filter);
 
   return 1;
 }
@@ -146,33 +148,23 @@ void PDMClass::IrqHandler(bool halftranfer)
   int shadowIndex = rawBufferIndex ^ 1;
   dma_channel_set_write_addr(dmaChannel, rawBuffer[shadowIndex], true);
 
-  bool buffSwap = false;
-  for (int i = 0; i <= (RAW_BUFFER_SIZE - sizeof(uint64_t)); i += sizeof(uint64_t)) {
-
-    // swap buffers if the current final buffer has been completely filled
-    if (finalBufferLength == 0 ) {
-      if (_doubleBuffer.available() == 0) {
-        finalBufferLength = _doubleBuffer.availableForWrite() / sizeof(int16_t);
-        finalBuffer = (int16_t*)_doubleBuffer.data();
-        _doubleBuffer.swap(_doubleBuffer.availableForWrite());
-        buffSwap = true;
-
-      } else {
-        // buffer overflow, stop
-        dma_channel_abort(dmaChannel);
-        return;
-      }
-    }
-
-    // fill final buffer with PCM samples
-    Open_PDM_Filter_64(&(rawBuffer[rawBufferIndex][i]), finalBuffer, filterGain, &filter);
-    finalBuffer++;
-    finalBufferLength--;
+  if (_doubleBuffer.available()) {
+    // buffer overflow, stop
+    return end();
   }
 
+  for (int i = 0; i <= (RAW_BUFFER_SIZE - sizeof(uint64_t)); i += sizeof(uint64_t)) {
+
+    // fill final buffer with PCM samples
+    Open_PDM_Filter_64(&rawBuffer[rawBufferIndex][i], finalBuffer, 1, &filter);
+    finalBuffer++;
+  }
+
+  finalBuffer = (int16_t*)_doubleBuffer.data();
+  _doubleBuffer.swap(RAW_BUFFER_SIZE/8*2);
   rawBufferIndex = shadowIndex;
 
-  if (buffSwap && _onReceive) {
+  if (_onReceive) {
     _onReceive();
   }
 }

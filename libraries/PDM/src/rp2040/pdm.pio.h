@@ -11,21 +11,19 @@
 // ------- //
 
 #define pdm_pio_wrap_target 0
-#define pdm_pio_wrap 3
+#define pdm_pio_wrap 1
 
 static const uint16_t pdm_pio_program_instructions[] = {
             //     .wrap_target
-    0x9060, //  0: push   iffull block    side 1     
-    0xb042, //  1: nop                    side 1     
-    0x4001, //  2: in     pins, 1         side 0     
-    0xa042, //  3: nop                    side 0     
+    0xb042, //  0: nop                    side 1     
+    0x4001, //  1: in     pins, 1         side 0     
             //     .wrap
 };
 
 #if !PICO_NO_HARDWARE
 static const struct pio_program pdm_pio_program = {
     .instructions = pdm_pio_program_instructions,
-    .length = 4,
+    .length = 2,
     .origin = -1,
 };
 
@@ -47,7 +45,7 @@ static inline void pdm_pio_program_init(PIO pio, uint sm, uint offset, uint clkP
   pio_sm_set_consecutive_pindirs(pio, sm, dataPin, 1, false);
   pio_sm_set_consecutive_pindirs(pio, sm, clkPin, 1, true);
   pio_sm_set_pins_with_mask(pio, sm, 0, (1u << clkPin) );
-  pio_gpio_init(pio, dataPin);
+  //pio_gpio_init(pio, dataPin);
   pio_gpio_init(pio, clkPin);
   pio_sm_init(pio, sm, offset, &c);
   pio_sm_set_enabled(pio, sm, true);
