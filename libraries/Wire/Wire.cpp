@@ -138,8 +138,8 @@ void arduino::MbedI2C::receiveThd() {
 				rxBuffer.clear();
 				char buf[16];
 				while (1) {
-					int c = slave->read(buf, sizeof(buf));
-					for (int i = 0; i < c; i++) {
+					size_t c = slave->read(buf, sizeof(buf));
+					for (size_t i = 0; i < c; i++) {
 						rxBuffer.store_char(uint8_t(buf[i]));
 					}
 					if (c <= sizeof(buf)) {
