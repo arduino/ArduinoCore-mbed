@@ -18,7 +18,7 @@ PIO pio = pio0;
 uint sm = 0;
 
 // raw buffers contain PDM data
-#define RAW_BUFFER_SIZE 1024 // should be a multiple of (decimation / 8)
+#define RAW_BUFFER_SIZE 512 // should be a multiple of (decimation / 8)
 uint8_t rawBuffer0[RAW_BUFFER_SIZE];
 uint8_t rawBuffer1[RAW_BUFFER_SIZE];
 uint8_t* rawBuffer[2] = {rawBuffer0, rawBuffer1};
@@ -62,16 +62,23 @@ int PDMClass::begin(int channels, long sampleRate)
   // clear the final buffers
   _doubleBuffer.reset();
   finalBuffer = (int16_t*)_doubleBuffer.data();
+  int finalBufferLength = _doubleBuffer.availableForWrite() / sizeof(int16_t);
   _doubleBuffer.swap(0);
+
+  int rawBufferLength = RAW_BUFFER_SIZE / (decimation / 8);
+  // Saturate number of samples. Remaining bytes are dropped.
+  if (rawBufferLength > finalBufferLength) {
+    rawBufferLength = finalBufferLength;
+  }
 
 	/* Initialize Open PDM library */
 	filter.Fs = sampleRate;
-	filter.nSamples = 1; 
+	filter.nSamples = rawBufferLength; 
 	filter.LP_HZ = sampleRate/2;
 	filter.HP_HZ = 10;
 	filter.In_MicChannels = 1;
 	filter.Out_MicChannels = 1;
-	filter.Decimation = 64;
+	filter.Decimation = decimation;
 	Open_PDM_Filter_Init(&filter);
 
   // Configure PIO state machine
@@ -156,15 +163,12 @@ void PDMClass::IrqHandler(bool halftranfer)
     return end();
   }
 
-  for (int i = 0; i <= (RAW_BUFFER_SIZE - sizeof(uint64_t)); i += sizeof(uint64_t)) {
+  // fill final buffer with PCM samples
+  Open_PDM_Filter_64(rawBuffer[rawBufferIndex], finalBuffer, 1, &filter);
 
-    // fill final buffer with PCM samples
-    Open_PDM_Filter_64(&rawBuffer[rawBufferIndex][i], finalBuffer, 1, &filter);
-    finalBuffer++;
-  }
-
+  // swap final buffer and raw buffers' indexes
   finalBuffer = (int16_t*)_doubleBuffer.data();
-  _doubleBuffer.swap(RAW_BUFFER_SIZE/8*2);
+  _doubleBuffer.swap(filter.nSamples * sizeof(int16_t));
   rawBufferIndex = shadowIndex;
 
   if (_onReceive) {
