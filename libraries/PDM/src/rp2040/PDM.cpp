@@ -152,6 +152,8 @@ void PDMClass::setBufferSize(int bufferSize)
 
 void PDMClass::IrqHandler(bool halftranfer)
 {
+  static int cutSamples = 100;
+
   // Clear the interrupt request.
   dma_hw->ints0 = 1u << dmaChannel; 
   // Restart dma pointing to the other buffer 
@@ -165,6 +167,11 @@ void PDMClass::IrqHandler(bool halftranfer)
 
   // fill final buffer with PCM samples
   Open_PDM_Filter_64(rawBuffer[rawBufferIndex], finalBuffer, 1, &filter);
+
+  if (cutSamples) {
+    memset(finalBuffer, 0, cutSamples);
+    cutSamples = 0;
+  }
 
   // swap final buffer and raw buffers' indexes
   finalBuffer = (int16_t*)_doubleBuffer.data();
