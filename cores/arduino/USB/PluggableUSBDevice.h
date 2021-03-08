@@ -58,7 +58,7 @@ protected:
     virtual void callback_set_interface(uint16_t interface, uint8_t alternate);
     virtual void init(EndpointResolver& resolver);
     virtual const uint8_t *string_iinterface_desc();
-    virtual uint8_t getProductVersion();
+    virtual uint8_t getProductVersion() = 0;
 
     uint8_t pluggedInterface;
 
