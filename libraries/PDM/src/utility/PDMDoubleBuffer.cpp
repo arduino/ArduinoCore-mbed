@@ -34,6 +34,7 @@ PDMDoubleBuffer::~PDMDoubleBuffer()
 void PDMDoubleBuffer::setSize(int size)
 {
   _size = size;
+  reset();
 }
 
 void PDMDoubleBuffer::reset()
