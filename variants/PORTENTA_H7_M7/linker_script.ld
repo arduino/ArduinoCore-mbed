@@ -7,7 +7,8 @@ MEMORY
   RAM (xrw) : ORIGIN = 0x24000000 + 0x298, LENGTH = 512K - 0x298
   RAM_D2 (xrw) : ORIGIN = 0x30000000, LENGTH = 288K
   OPENAMP_RSC_TAB (rwx) : ORIGIN = 0x38000000, LENGTH = 1K
-  OPEN_AMP_SHMEM (rwx) : ORIGIN = 0x38000400, LENGTH = 63K
+  OPEN_AMP_SHMEM (rwx) : ORIGIN = 0x38000400, LENGTH = 62K
+  PDM_MEM (xrw) : ORIGIN = 0x3800FC00, LENGTH = 1k
   FLASH (rx) : ORIGIN = 0x8040000, LENGTH = 0xc0000
 }
  __OPENAMP_region_start__ = ORIGIN(OPEN_AMP_SHMEM);
@@ -110,6 +111,10 @@ SECTIONS
         . = ABSOLUTE(0x38000000);
         *(.resource_table)
     } >OPENAMP_RSC_TAB AT > FLASH
+    .pdm_section (NOLOAD) : {
+        . = ABSOLUTE(0x3800FC00);
+        *(.pdm_buffer)
+    } > PDM_MEM
     .stack_dummy (COPY):
     {
         *(.stack*)
