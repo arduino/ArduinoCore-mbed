@@ -40,8 +40,8 @@ static const uint8_t A3  = PIN_A3;
 
 // PDM Interfaces
 // ---------------
-#define PIN_PDM_CLK	 (7)
-#define PIN_PDM_DIN	 (6)
+#define PIN_PDM_CLK	 (23)
+#define PIN_PDM_DIN	 (22)
 
 // Serial
 #define PIN_SERIAL_RX (1ul)
