@@ -540,7 +540,7 @@ const uint8_t *USBCDC::configuration_desc(uint8_t index)
         0x02,                   // bInterfaceClass
         0x02,                   // bInterfaceSubClass
         0x01,                   // bInterfaceProtocol
-        (extraDescriptor != NULL) ? 0x5 : 0x0, // iInterface
+        static_cast<uint8_t>((extraDescriptor != NULL) ? 0x5 : 0x0), // iInterface
 
         // CDC Header Functional Descriptor, CDC Spec 5.2.3.1, Table 26
         5,                      // bFunctionLength
