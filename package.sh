@@ -8,6 +8,7 @@ VARIANTS=("NANO_RP2040_CONNECT ARDUINO_NANO33BLE")
 FQBNS=("nanorp2040connect nano33ble")
 LIBRARIES=("PDM SPI Wire MRI USBHID USBMSD ThreadDebug Scheduler")
 BOOTLOADERS=("nano33ble")
+VERSION="1.5.0"
 
 # Remove mbed folder content
 rm -rf cores/arduino/mbed/*
@@ -51,6 +52,10 @@ done
 cd ..
 rm -rf bootloaders
 mv _bootloaders bootloaders
+
+#Patch title in platform.txt
+sed -i "s/Arduino Mbed OS Boards/Arduino Mbed OS $FLAVOUR Boards/g" platform.txt
+sed -i 's/9.9.9/$VERSION/g' platform.txt
 
 #Package! (remove .git, patches folders)
 cd ..
