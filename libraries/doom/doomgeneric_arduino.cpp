@@ -91,9 +91,6 @@ static void addKeyToQueue(int pressed, unsigned char keyCode)
 
 struct edid recognized_edid;
 
-mbed::DigitalOut video_on(PK_2);
-mbed::DigitalOut video_rst(PJ_3);
-
 uint32_t LCD_X_Size = 0, LCD_Y_Size = 0;
 DMA2D_HandleTypeDef    DMA2D_Handle;
 
@@ -169,23 +166,13 @@ void DG_Init()
 {
   int ret = -1;
 
-  while (ret < 0) {
-    video_on = 0;
-    delay(10);
-    video_rst = 0;
-    delay(100);
-
-    video_on = 1;
-    delay(100);
-    video_rst = 1;
-
-    ret = anx7625_init(0);
-    printf("after init\n");
-
-    if (ret < 0) {
-      printf("anx7625_init returned %d\n", ret);
-    }
+  ret = anx7625_init(0);
+  if(ret < 0) {
+    printf("Cannot continue, anx7625 init failed.\n");
+    while(1);
   }
+
+  anx7625_wait_hpd_event(0);
   anx7625_dp_get_edid(0, &recognized_edid);
   //edid_set_framebuffer_bits_per_pixel(&recognized_edid, 16, 0);
   //set_display_mode(&recognized_edid, EDID_MODE_720x480_60Hz);

@@ -32,7 +32,9 @@
 #define ANXDEBUG(format, ...) \
 		printk(BIOS_DEBUG, "%s: " format, __func__, ##__VA_ARGS__)
 
-
+mbed::DigitalOut video_on(PK_2);
+mbed::DigitalOut video_rst(PJ_3);
+mbed::DigitalOut otg_on(PJ_6);
 mbed::I2C i2cx(I2C_SDA_INTERNAL , I2C_SCL_INTERNAL);
 
 int i2c_writeb(uint8_t bus, uint8_t saddr, uint8_t offset, uint8_t val) {
@@ -1314,7 +1316,25 @@ int anx7625_init(uint8_t bus)
 {
 	int retry_power_on = 3;
 
+	ANXINFO("OTG_ON = 1 -> VBUS OFF\n");
+	otg_on = 1;
+
+	mdelay(1000);
+	video_on = 1;
+	mdelay(10);
+	video_rst = 1;
+	mdelay(10);
+
+	video_on = 0;
+	mdelay(10);
+	video_rst = 0;
+	mdelay(100);
+
 	ANXINFO("Powering on anx7625...\n");
+	video_on = 1;
+	mdelay(100);
+	video_rst = 1;
+
 	while (--retry_power_on) {
 		if (anx7625_power_on_init(bus) == 0)
 			break;
@@ -1325,6 +1345,13 @@ int anx7625_init(uint8_t bus)
 	}
 	ANXINFO("Powering on anx7625 successfull.\n");
 	mdelay(200); // Wait for anx7625 to be stable
+
+	if(anx7625_is_power_provider(0)) {
+		ANXINFO("OTG_ON = 0 -> VBUS ON\n");
+		otg_on = 0;
+		mdelay(1000); // Wait for powered device to be stable
+	}
+
 	return 0;
 }
 
