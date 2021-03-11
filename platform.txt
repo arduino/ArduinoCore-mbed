@@ -71,13 +71,13 @@ build.zip.pattern={recipe.size.pattern}
 # -----------------------
 
 ## Compile c files
-recipe.c.o.pattern="{compiler.path}{compiler.c.cmd}" {compiler.c.flags} -DARDUINO={runtime.ide.version} -DARDUINO_{build.board} -DARDUINO_ARCH_{build.arch} {build.library_discovery_phase_flag} {build.extra_flags} {compiler.c.extra_flags} "-I{build.core.path}/api/deprecated" {includes} "-iprefix{build.core.path}" "@{compiler.mbed.includes}" -o "{object_file}" "{source_file}"
+recipe.c.o.pattern="{compiler.path}{compiler.c.cmd}" {compiler.c.flags} -DARDUINO={runtime.ide.version} -DARDUINO_{build.board} -DARDUINO_ARCH_{build.arch} -DARDUINO_ARCH_MBED {build.library_discovery_phase_flag} {build.extra_flags} {compiler.c.extra_flags} "-I{build.core.path}/api/deprecated" {includes} "-iprefix{build.core.path}" "@{compiler.mbed.includes}" -o "{object_file}" "{source_file}"
 
 ## Compile c++ files
-recipe.cpp.o.pattern="{compiler.path}{compiler.cpp.cmd}" {compiler.cpp.flags} -DARDUINO={runtime.ide.version} -DARDUINO_{build.board} -DARDUINO_ARCH_{build.arch} {build.library_discovery_phase_flag} {includes} {build.extra_flags} {compiler.cpp.extra_flags} "-I{build.core.path}/api/deprecated" "-iprefix{build.core.path}" "@{compiler.mbed.includes}" "{source_file}" -o "{object_file}"
+recipe.cpp.o.pattern="{compiler.path}{compiler.cpp.cmd}" {compiler.cpp.flags} -DARDUINO={runtime.ide.version} -DARDUINO_{build.board} -DARDUINO_ARCH_{build.arch} -DARDUINO_ARCH_MBED {build.library_discovery_phase_flag} {includes} {build.extra_flags} {compiler.cpp.extra_flags} "-I{build.core.path}/api/deprecated" "-iprefix{build.core.path}" "@{compiler.mbed.includes}" "{source_file}" -o "{object_file}"
 
 ## Compile asm files
-recipe.S.o.pattern="{compiler.path}{compiler.S.cmd}" {compiler.S.flags} -DARDUINO={runtime.ide.version} -DARDUINO_{build.board} -DARDUINO_ARCH_{build.arch} {includes} {build.extra_flags} {compiler.cpp.extra_flags} "-I{build.core.path}/api/deprecated" "-iprefix{build.core.path}" "@{compiler.mbed.includes}" "{source_file}" -o "{object_file}"
+recipe.S.o.pattern="{compiler.path}{compiler.S.cmd}" {compiler.S.flags} -DARDUINO={runtime.ide.version} -DARDUINO_{build.board} -DARDUINO_ARCH_{build.arch} -DARDUINO_ARCH_MBED {includes} {build.extra_flags} {compiler.cpp.extra_flags} "-I{build.core.path}/api/deprecated" "-iprefix{build.core.path}" "@{compiler.mbed.includes}" "{source_file}" -o "{object_file}"
 
 ## Create archives
 recipe.ar.pattern="{compiler.path}{compiler.ar.cmd}" {compiler.ar.flags} {compiler.ar.extra_flags} "{archive_file_path}" "{object_file}"
