@@ -44,7 +44,7 @@
 #define CHCI_TR_CUSTOM                                                        1                                                                                                // set by library:cordio-ll
 #define CHCI_TR_UART                                                          0                                                                                                // set by library:cordio-ll
 #define CORDIO_ZERO_COPY_HCI                                                  1                                                                                                // set by library:cordio-nordic-ll
-#define DM_CONN_MAX                                                           3                                                                                                // set by library:cordio
+#define DM_CONN_MAX                                                           5                                                                                                // set by application[*]
 #define DM_NUM_ADV_SETS                                                       3                                                                                                // set by library:cordio
 #define DM_NUM_PHYS                                                           3                                                                                                // set by library:cordio
 #define DM_SYNC_MAX                                                           1                                                                                                // set by library:cordio
