@@ -1,0 +1,5 @@
+export FLAVOUR="pro"
+export VARIANTS=("PORTENTA_H7_M7 PORTENTA_H7_M4")
+export FQBNS=("envie_m7 envie_m4")
+export LIBRARIES=("doom MRI Portenta_SDRAM SPI WiFi ea_malloc openamp_arduino Portenta_System ThreadDebug Himax_HM01B0 PDM Portenta_Video USBAudio KernelDebug Portenta_Audio RPC USBHID Wire LittleVGL Portenta_Camera rpclib USBHOST mbed-memory-status Portenta_SDCARD Scheduler USBMSD")
+export BOOTLOADERS=("PORTENTA_H7")

@@ -1,0 +1,5 @@
+export FLAVOUR="nicla"
+export VARIANTS=("UNISENSE BORMIO")
+export FQBNS=("unisense bormio")
+export LIBRARIES=("SPI WiFi openamp_arduino Portenta_System ThreadDebug Himax_HM01B0 PDM USBAudio KernelDebug Portenta_Audio RPC USBHID Wire Portenta_Camera rpclib USBHOST mbed-memory-status Portenta_SDCARD Scheduler USBMSD")
+export BOOTLOADERS=("BORMIO")

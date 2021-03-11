@@ -1,0 +1,5 @@
+export FLAVOUR="makers"
+export VARIANTS=("NANO_RP2040_CONNECT ARDUINO_NANO33BLE")
+export FQBNS=("nanorp2040connect nano33ble")
+export LIBRARIES=("PDM SPI Wire MRI USBHID USBMSD ThreadDebug Scheduler")
+export BOOTLOADERS=("nano33ble")

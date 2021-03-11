@@ -1,14 +1,14 @@
 #!/bin/bash
 
 # The scope of this file is splitting the build into self consistent packages for distribution
+echo "========== Configuration ==============="
 
-# First target: makers
-FLAVOUR="makers"
-VARIANTS=("NANO_RP2040_CONNECT ARDUINO_NANO33BLE")
-FQBNS=("nanorp2040connect nano33ble")
-LIBRARIES=("PDM SPI Wire MRI USBHID USBMSD ThreadDebug Scheduler")
-BOOTLOADERS=("nano33ble")
-VERSION="1.5.0"
+source $1
+
+echo $VERSION
+echo $FLAVOUR
+echo $VARIANTS
+echo $FQBNS
 
 # Remove mbed folder content
 rm -rf cores/arduino/mbed/*
@@ -40,8 +40,12 @@ done
 mv _boards.txt boards.txt
 
 #Recompile mbed core, applying patches on origin/latest
-./mbed-os-to-arduino -b origin/latest -a NANO_RP2040_CONNECT:NANO_RP2040_CONNECT
-./mbed-os-to-arduino ARDUINO_NANO33BLE:ARDUINO_NANO33BLE
+set +e
+./mbed-os-to-arduino -b origin/latest -a NOPE:NOPE
+set -e
+for variant in $VARIANTS; do
+./mbed-os-to-arduino $variant:$variant
+done
 
 # Remove bootloaders not in $BOOTLOADERS list
 mkdir _bootloaders
@@ -59,5 +63,5 @@ sed -i 's/9.9.9/$VERSION/g' platform.txt
 
 #Package! (remove .git, patches folders)
 cd ..
-tar --exclude='*.git*' --exclude='*patches*' -cjhvf ArduinoCore-mbed-$FLAVOUR-$VERSION.tar.bz2 ArduinoCore-mbed
+tar --exclude='*.git*' --exclude='*patches*' -cjhf ArduinoCore-mbed-$FLAVOUR-$VERSION.tar.bz2 ArduinoCore-mbed
 cd -
