@@ -1,0 +1,25 @@
+From 1e2af1abb650e90fd45c25f5c1a4930752056475 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Thu, 11 Mar 2021 15:05:20 +0100
+Subject: [PATCH] PACKAGING: remove gdb exta information to slim library
+
+---
+ tools/profiles/develop.json | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tools/profiles/develop.json b/tools/profiles/develop.json
+index 21ba5c88d5..5995d276e4 100644
+--- a/tools/profiles/develop.json
++++ b/tools/profiles/develop.json
+@@ -5,7 +5,7 @@
+                    "-fmessage-length=0", "-fno-exceptions",
+                    "-ffunction-sections", "-fdata-sections", "-funsigned-char",
+                    "-MMD",
+-                   "-fomit-frame-pointer", "-Os", "-g", "-DMBED_TRAP_ERRORS_ENABLED=1"],
++                   "-fomit-frame-pointer", "-Os", "-DMBED_TRAP_ERRORS_ENABLED=1"],
+         "asm": ["-c", "-x", "assembler-with-cpp"],
+         "c": ["-c", "-std=gnu11"],
+         "cxx": ["-c", "-std=gnu++14", "-fno-rtti", "-Wvla"],
+-- 
+2.30.1
+
