@@ -1,0 +1,148 @@
+From cd518a017fdd9b1b9bd5651cb47aa04f99a6f6f8 Mon Sep 17 00:00:00 2001
+From: giulcioffi <g.cioffi@arduino.cc>
+Date: Thu, 25 Feb 2021 18:44:50 +0100
+Subject: [PATCH 51/67] RP2040: Start adding Flash support
+
+---
+ .../TARGET_RP2040/flash_api.c                 | 107 ++++++++++++++++++
+ targets/targets.json                          |   2 +
+ 2 files changed, 109 insertions(+)
+ create mode 100644 targets/TARGET_RASPBERRYPI/TARGET_RP2040/flash_api.c
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/flash_api.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/flash_api.c
+new file mode 100644
+index 0000000000..85e8f5c81f
+--- /dev/null
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/flash_api.c
+@@ -0,0 +1,107 @@
++/******************************************************************************
++ * INCLUDE
++ ******************************************************************************/
++
++#include "mbed_assert.h"
++#include "mbed_critical.h"
++#include "hal/flash_api.h"
++#include "flash.h"
++//#include "hal/lp_ticker_api.h"
++//#include "PeripheralPins.h"
++#include "PeripheralNames.h"
++
++/******************************************************************************
++ * CONSTANT
++ ******************************************************************************/
++
++
++
++/******************************************************************************
++ * FUNCTION DEFINITION
++ ******************************************************************************/
++
++int32_t flash_init(flash_t *obj)
++{
++    (void)(obj);
++
++    return 0;
++}
++
++int32_t flash_free(flash_t *obj)
++{
++    (void)(obj);
++
++    uint32_t address = 0;
++
++    for (int i = 0; i < PICO_FLASH_SIZE_BYTES/FLASH_SECTOR_SIZE; i++ ) {
++      flash_range_erase(address, FLASH_SECTOR_SIZE);
++      address = address + FLASH_SECTOR_SIZE;
++    }
++
++    return 0;
++}
++
++int32_t flash_erase_sector(flash_t *obj, uint32_t address)
++{
++    (void)(obj);
++
++    flash_range_erase(address, FLASH_SECTOR_SIZE);
++
++    return 0;
++}
++
++int32_t flash_read(flash_t *obj, uint32_t address, uint8_t *data, uint32_t size)
++{
++    (void)(obj);
++
++    for (int i = 0; i < size; i++) {
++        data = (const uint8_t *) (XIP_BASE + address + i);
++        data++;
++    }
++    return 0;
++}
++
++int32_t flash_program_page(flash_t *obj, uint32_t address, const uint8_t *data, uint32_t size)
++{
++    (void)(obj);
++
++    flash_range_program(address, data, size);
++
++    return 0;
++
++}
++
++uint32_t flash_get_size(const flash_t *obj)
++{
++    (void)(obj);
++
++    return PICO_FLASH_SIZE_BYTES;
++}
++
++uint32_t flash_get_sector_size(const flash_t *obj, uint32_t address)
++{
++    (void)(obj);
++
++    return FLASH_SECTOR_SIZE;
++}
++
++uint32_t flash_get_page_size(const flash_t *obj)
++{
++    (void)(obj);
++
++    return FLASH_PAGE_SIZE;
++}
++
++uint32_t flash_get_start_address(const flash_t *obj)
++{
++    return XIP_BASE;
++
++}
++
++uint8_t flash_get_erase_value(const flash_t *obj)
++{
++    (void)obj;
++
++    return 0xFF;
++
++}
+\ No newline at end of file
+diff --git a/targets/targets.json b/targets/targets.json
+index 561d2b8def..0ae0d4de74 100644
+--- a/targets/targets.json
++++ b/targets/targets.json
+@@ -7862,6 +7862,7 @@
+     },
+     "RP2040": {
+         "inherits": ["Target"],
++        "components_add": ["FLASHIAP"],
+         "core": "Cortex-M0+",
+         "supported_toolchains": ["GCC_ARM"],
+         "extra_labels": [
+@@ -7876,6 +7877,7 @@
+         },
+         "device_has": [
+             "ANALOGIN",
++            "FLASH",
+             "I2C",
+             "I2CSLAVE",
+             "INTERRUPTIN",
+-- 
+2.30.1
+

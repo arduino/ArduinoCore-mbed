@@ -1,0 +1,99 @@
+From 0ee91ff37683dfc7366d586fc892300b3dc3aedf Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Mon, 9 Nov 2020 13:52:28 +0100
+Subject: [PATCH 17/67] TLSSocketWrapper: add test for certificates stored in
+ filesystem
+
+---
+ .../tests/TESTS/netsocket/tls/main.cpp        |  3 ++
+ .../tests/TESTS/netsocket/tls/tls_tests.h     |  1 +
+ .../tls/tlssocket_cert_in_filesystem.cpp      | 50 +++++++++++++++++++
+ 3 files changed, 54 insertions(+)
+ create mode 100644 connectivity/netsocket/tests/TESTS/netsocket/tls/tlssocket_cert_in_filesystem.cpp
+
+diff --git a/connectivity/netsocket/tests/TESTS/netsocket/tls/main.cpp b/connectivity/netsocket/tests/TESTS/netsocket/tls/main.cpp
+index f6489a3d73..495178d54a 100644
+--- a/connectivity/netsocket/tests/TESTS/netsocket/tls/main.cpp
++++ b/connectivity/netsocket/tests/TESTS/netsocket/tls/main.cpp
+@@ -233,6 +233,9 @@ Case cases[] = {
+     Case("TLSSOCKET_SEND_REPEAT", TLSSOCKET_SEND_REPEAT),
+     Case("TLSSOCKET_SEND_TIMEOUT", TLSSOCKET_SEND_TIMEOUT),
+     Case("TLSSOCKET_NO_CERT", TLSSOCKET_NO_CERT),
++#if defined(MBEDTLS_SSL_CLI_C) && defined(MBEDTLS_FS_IO)
++    Case("TLSSOCKET_CERT_IN_FILESYSTEM", TLSSOCKET_CERT_IN_FILESYSTEM),
++#endif
+ //    Temporarily removing this test, as TLS library consumes too much memory
+ //    and we see frequent memory allocation failures on architectures with less
+ //    RAM such as DISCO_L475VG_IOT1A and NUCLEO_F207ZG (both have 128 kB RAM)
+diff --git a/connectivity/netsocket/tests/TESTS/netsocket/tls/tls_tests.h b/connectivity/netsocket/tests/TESTS/netsocket/tls/tls_tests.h
+index f0905fa8ec..57461683c8 100644
+--- a/connectivity/netsocket/tests/TESTS/netsocket/tls/tls_tests.h
++++ b/connectivity/netsocket/tests/TESTS/netsocket/tls/tls_tests.h
+@@ -89,6 +89,7 @@ void TLSSOCKET_SEND_UNCONNECTED();
+ void TLSSOCKET_SEND_CLOSED();
+ void TLSSOCKET_SEND_REPEAT();
+ void TLSSOCKET_NO_CERT();
++void TLSSOCKET_CERT_IN_FILESYSTEM();
+ void TLSSOCKET_SIMULTANEOUS();
+ void TLSSOCKET_SEND_TIMEOUT();
+ 
+diff --git a/connectivity/netsocket/tests/TESTS/netsocket/tls/tlssocket_cert_in_filesystem.cpp b/connectivity/netsocket/tests/TESTS/netsocket/tls/tlssocket_cert_in_filesystem.cpp
+new file mode 100644
+index 0000000000..cf3dff2e93
+--- /dev/null
++++ b/connectivity/netsocket/tests/TESTS/netsocket/tls/tlssocket_cert_in_filesystem.cpp
+@@ -0,0 +1,50 @@
++/*
++ * Copyright (c) 2020, Arduino SA, All Rights Reserved
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License"); you may
++ * not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ * http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++#include "mbed.h"
++#include "TLSSocket.h"
++#include "greentea-client/test_env.h"
++#include "unity/unity.h"
++#include "utest.h"
++#include "tls_tests.h"
++#include "HeapBlockDevice.h"
++#include "LittleFileSystem.h"
++
++using namespace utest::v1;
++
++void TLSSOCKET_CERT_IN_FILESYSTEM()
++{
++    SKIP_IF_TCP_UNSUPPORTED();
++
++    HeapBlockDevice bd(1024 * 10);
++    LittleFileSystem fs("fs");
++    TEST_ASSERT_EQUAL(0, fs.format(&bd));
++    TEST_ASSERT_EQUAL(0, fs.mount(&bd));
++
++    FILE *fp = fopen("/fs/certs.pem", "wb");
++    int ret = fwrite(tls_global::cert, strlen(tls_global::cert), 1, fp);
++    fclose(fp);
++
++    TLSSocket sock;
++    TEST_ASSERT_EQUAL(NSAPI_ERROR_OK, sock.open(NetworkInterface::get_default_instance()));
++    TEST_ASSERT_EQUAL(NSAPI_ERROR_OK, sock.set_root_ca_cert_path("/fs"));
++
++    SocketAddress a;
++    TEST_ASSERT_EQUAL(NSAPI_ERROR_OK, NetworkInterface::get_default_instance()->gethostbyname(ECHO_SERVER_ADDR, &a));
++    a.set_port(ECHO_SERVER_PORT_TLS);
++    TEST_ASSERT_EQUAL(NSAPI_ERROR_OK, sock.connect(a));
++}
+\ No newline at end of file
+-- 
+2.30.1
+

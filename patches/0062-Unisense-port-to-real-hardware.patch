@@ -1,0 +1,147 @@
+From e7c6ea8bec3fd5ebaabaab106abd999b0f244a9e Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Mon, 28 Dec 2020 12:39:09 +0100
+Subject: [PATCH 62/67] Unisense: port to real hardware
+
+---
+ .../blockdevice/COMPONENT_SPIF/mbed_lib.json  |  8 +-
+ .../TARGET_UNISENSE/PinNames.h                | 88 ++++++++-----------
+ 2 files changed, 39 insertions(+), 57 deletions(-)
+
+diff --git a/storage/blockdevice/COMPONENT_SPIF/mbed_lib.json b/storage/blockdevice/COMPONENT_SPIF/mbed_lib.json
+index 6b30934d64..e488ce91fc 100644
+--- a/storage/blockdevice/COMPONENT_SPIF/mbed_lib.json
++++ b/storage/blockdevice/COMPONENT_SPIF/mbed_lib.json
+@@ -69,10 +69,10 @@
+            "SPI_CS":   "SPI_CS1"
+        },
+        "UNISENSE": {
+-           "SPI_MOSI": "P0_13",
+-           "SPI_MISO": "P0_14",
+-           "SPI_CLK":  "P0_12",
+-           "SPI_CS":   "P0_5"
++           "SPI_MOSI": "SPI_PSELMOSI0",
++           "SPI_MISO": "SPI_PSELMISO0",
++           "SPI_CLK":  "SPI_PSELSCK0",
++           "SPI_CS":   "CS_FLASH"
+        }
+     }
+ }
+diff --git a/targets/TARGET_NORDIC/TARGET_NRF5x/TARGET_NRF52/TARGET_MCU_NRF52832/TARGET_UNISENSE/PinNames.h b/targets/TARGET_NORDIC/TARGET_NRF5x/TARGET_NRF52/TARGET_MCU_NRF52832/TARGET_UNISENSE/PinNames.h
+index c066def037..015c04256d 100644
+--- a/targets/TARGET_NORDIC/TARGET_NRF5x/TARGET_NRF52/TARGET_MCU_NRF52832/TARGET_UNISENSE/PinNames.h
++++ b/targets/TARGET_NORDIC/TARGET_NRF5x/TARGET_NRF52/TARGET_MCU_NRF52832/TARGET_UNISENSE/PinNames.h
+@@ -84,6 +84,9 @@ typedef enum {
+     p30 = 30,
+     p31 = 31,
+ 
++    // Not connected
++    NC = (int)0xFFFFFFFF,
++
+     P0_0  = p0,
+     P0_1  = p1,
+     P0_2  = p2,
+@@ -125,15 +128,24 @@ typedef enum {
+     LED3 = p11,
+     LED4 = p11,
+ 
+-    BUTTON1 = p13,
+-    BUTTON2 = p14,
+-    BUTTON3 = p15,
+-    BUTTON4 = p16,
++    INT_BQ = p18,
++    INT_BHI260 = p14,
++    BQ_CDN = p2,
++    INT_ESLOV = p19,
++    BHI_HOSTBOOT = p25,
++    RESET_BHI260 = p30,
++
++    BUTTON1 = INT_BQ,
++
++    GPIO0 = p24,
++    GPIO1 = p20,
++    GPIO2 = p9,
++    GPIO3 = p10,
+ 
+-    RX_PIN_NUMBER  = p30,
+-    TX_PIN_NUMBER  = p29,
+-    CTS_PIN_NUMBER = p28,
+-    RTS_PIN_NUMBER = p2,
++    RX_PIN_NUMBER  = p9,
++    TX_PIN_NUMBER  = p20,
++    CTS_PIN_NUMBER = NC,
++    RTS_PIN_NUMBER = NC,
+ 
+     // mBed interface Pins
+     USBTX = TX_PIN_NUMBER,
+@@ -143,52 +155,22 @@ typedef enum {
+     STDIO_UART_CTS = CTS_PIN_NUMBER,
+     STDIO_UART_RTS = RTS_PIN_NUMBER,
+ 
+-    SPI_PSELMOSI0 = p23,
+-    SPI_PSELMISO0 = p24,
+-    SPI_PSELSS0   = p22,
+-    SPI_PSELSCK0  = p25,
+-
+-    SPI_PSELMOSI1 = p12,
+-    SPI_PSELMISO1 = p13,
+-    SPI_PSELSS1   = p11,
+-    SPI_PSELSCK1  = p14,
+-
+-    SPIS_PSELMOSI = p12,
+-    SPIS_PSELMISO = p13,
+-    SPIS_PSELSS   = p11,
+-    SPIS_PSELSCK  = p14,
+-
+-    I2C_SDA0 = p26,
+-    I2C_SCL0 = p27,
+-
+-    D0 = p11,
+-    D1 = p12,
+-    D2 = p13,
+-    D3 = p14,
+-    D4 = p15,
+-    D5 = p16,
+-    D6 = p17,
+-    D7 = p18,
+-
+-    D8 = p19,
+-    D9 = p20,
+-    D10 = p22,
+-    D11 = p23,
+-    D12 = p24,
+-    D13 = p25,
+-
+-    D14 = p26,
+-    D15 = p27,
+-
+-    A0 = p3,
+-    A1 = p4,
+-    A2 = p28,
+-    A3 = p29,
+-    A4 = p30,
+-    A5 = p31,
++    SPI_PSELSCK0  = p3,
++    SPI_PSELMISO0 = p5,
++    SPI_PSELMOSI0 = p4,
++    SPI_PSELSS0   = p31,
++    CS_FLASH      = p26,
+ 
+-    // Not connected
+-    NC = (int)0xFFFFFFFF
++    SPI_PSELSS1   = p29,
++    SPI_PSELMISO1 = p28,
++    SPI_PSELMOSI1 = p27,
++    SPI_PSELSCK1  = p11,
++
++    I2C_SDA0 = p15,
++    I2C_SCL0 = p16,
++
++    I2C_SDA1 = p22,
++    I2C_SCL1 = p23,
+ } PinName;
+ 
+ typedef enum {
+-- 
+2.30.1
+

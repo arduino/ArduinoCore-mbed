@@ -1,0 +1,26 @@
+From 1cf25d2e5ac2b7fde956c1df9db8b1684c5bcba9 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Mon, 15 Feb 2021 12:24:50 +0100
+Subject: [PATCH 29/67] Mark .init section as KEEP to avoid getting removed by
+ linker
+
+---
+ .../TARGET_RP2040/TOOLCHAIN_GCC_ARM/memmap_default.ld           | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/TOOLCHAIN_GCC_ARM/memmap_default.ld b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/TOOLCHAIN_GCC_ARM/memmap_default.ld
+index 07d5812db1..fb2ff6d18a 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/TOOLCHAIN_GCC_ARM/memmap_default.ld
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/TOOLCHAIN_GCC_ARM/memmap_default.ld
+@@ -67,7 +67,7 @@ SECTIONS
+         /* TODO revisit this now memset/memcpy/float in ROM */
+         /* bit of a hack right now to exclude all floating point and time critical (e.g. memset, memcpy) code from
+          * FLASH ... we will include any thing excluded here in .data below by default */
+-        *(.init)
++        KEEP (*(.init))
+         *(EXCLUDE_FILE(*libgcc.a: *libc.a:*lib_a-mem*.o *libm.a:) .text*)
+         *(.fini)
+         /* Pull all c'tors into .text */
+-- 
+2.30.1
+

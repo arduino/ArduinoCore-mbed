@@ -1,0 +1,26 @@
+From 6d7251d6db8ad7ae8d15bd0a5f955b8bb67c333a Mon Sep 17 00:00:00 2001
+From: Alexander Entinger <cto@lxrobotics.com>
+Date: Mon, 15 Feb 2021 15:51:03 +0100
+Subject: [PATCH 31/67] Configure RP2040 mbed target to have SPI.
+
+---
+ targets/targets.json | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/targets/targets.json b/targets/targets.json
+index 50d06567e3..fcaf22db9d 100644
+--- a/targets/targets.json
++++ b/targets/targets.json
+@@ -7878,7 +7878,8 @@
+             "ANALOGIN",
+             "PORT_IN",
+             "PORT_OUT",
+-            "SERIAL"
++            "SERIAL",
++            "SPI"
+         ]
+     },
+     "NANO_RP2040_CONNECT": {
+-- 
+2.30.1
+

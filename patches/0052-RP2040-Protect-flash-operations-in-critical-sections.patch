@@ -1,0 +1,103 @@
+From 638364a57491636c54c5dd61beead0cfc45d6f86 Mon Sep 17 00:00:00 2001
+From: giulcioffi <g.cioffi@arduino.cc>
+Date: Wed, 3 Mar 2021 18:58:02 +0100
+Subject: [PATCH 52/67] RP2040: Protect flash operations in critical sections +
+ fix addresses
+
+---
+ .../TARGET_RP2040/flash_api.c                 | 31 ++++++++++---------
+ 1 file changed, 16 insertions(+), 15 deletions(-)
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/flash_api.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/flash_api.c
+index 85e8f5c81f..01f71958c5 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/flash_api.c
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/flash_api.c
+@@ -1,14 +1,12 @@
+ /******************************************************************************
+  * INCLUDE
+  ******************************************************************************/
++#if DEVICE_FLASH
+ 
+ #include "mbed_assert.h"
+ #include "mbed_critical.h"
+ #include "hal/flash_api.h"
+-#include "flash.h"
+-//#include "hal/lp_ticker_api.h"
+-//#include "PeripheralPins.h"
+-#include "PeripheralNames.h"
++#include "hardware/flash.h"
+ 
+ /******************************************************************************
+  * CONSTANT
+@@ -31,13 +29,6 @@ int32_t flash_free(flash_t *obj)
+ {
+     (void)(obj);
+ 
+-    uint32_t address = 0;
+-
+-    for (int i = 0; i < PICO_FLASH_SIZE_BYTES/FLASH_SECTOR_SIZE; i++ ) {
+-      flash_range_erase(address, FLASH_SECTOR_SIZE);
+-      address = address + FLASH_SECTOR_SIZE;
+-    }
+-
+     return 0;
+ }
+ 
+@@ -45,7 +36,11 @@ int32_t flash_erase_sector(flash_t *obj, uint32_t address)
+ {
+     (void)(obj);
+ 
++    address = address - XIP_BASE;
++
++    core_util_critical_section_enter();
+     flash_range_erase(address, FLASH_SECTOR_SIZE);
++    core_util_critical_section_exit();
+ 
+     return 0;
+ }
+@@ -54,9 +49,10 @@ int32_t flash_read(flash_t *obj, uint32_t address, uint8_t *data, uint32_t size)
+ {
+     (void)(obj);
+ 
++    const uint8_t *flash_target_contents = (const uint8_t *) (address);
++
+     for (int i = 0; i < size; i++) {
+-        data = (const uint8_t *) (XIP_BASE + address + i);
+-        data++;
++        data[i] = flash_target_contents[i];
+     }
+     return 0;
+ }
+@@ -65,7 +61,11 @@ int32_t flash_program_page(flash_t *obj, uint32_t address, const uint8_t *data,
+ {
+     (void)(obj);
+ 
++    address = address - XIP_BASE;
++
++    core_util_critical_section_enter();
+     flash_range_program(address, data, size);
++    core_util_critical_section_exit();
+ 
+     return 0;
+ 
+@@ -95,7 +95,6 @@ uint32_t flash_get_page_size(const flash_t *obj)
+ uint32_t flash_get_start_address(const flash_t *obj)
+ {
+     return XIP_BASE;
+-
+ }
+ 
+ uint8_t flash_get_erase_value(const flash_t *obj)
+@@ -104,4 +103,6 @@ uint8_t flash_get_erase_value(const flash_t *obj)
+ 
+     return 0xFF;
+ 
+-}
+\ No newline at end of file
++}
++
++#endif
+\ No newline at end of file
+-- 
+2.30.1
+

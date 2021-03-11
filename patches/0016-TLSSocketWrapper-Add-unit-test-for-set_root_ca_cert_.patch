@@ -1,0 +1,61 @@
+From a28280851892b4b57d8ae6fe6dd0b71a6eb42ed6 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Mon, 9 Nov 2020 13:34:18 +0100
+Subject: [PATCH 16/67] TLSSocketWrapper: Add unit test for
+ set_root_ca_cert_path
+
+---
+ .../test/coap-service/unittest/stub/mbedtls_stub.c          | 6 ++++++
+ .../netsocket/TLSSocketWrapper/test_TLSSocketWrapper.cpp    | 6 ++++++
+ .../UNITTESTS/netsocket/TLSSocketWrapper/tls_test_config.h  | 2 +-
+ 3 files changed, 13 insertions(+), 1 deletion(-)
+
+diff --git a/connectivity/nanostack/coap-service/test/coap-service/unittest/stub/mbedtls_stub.c b/connectivity/nanostack/coap-service/test/coap-service/unittest/stub/mbedtls_stub.c
+index 403ae9a57a..3d098b19fa 100644
+--- a/connectivity/nanostack/coap-service/test/coap-service/unittest/stub/mbedtls_stub.c
++++ b/connectivity/nanostack/coap-service/test/coap-service/unittest/stub/mbedtls_stub.c
+@@ -299,6 +299,12 @@ int mbedtls_x509_crt_parse(mbedtls_x509_crt *a, const unsigned char *b, size_t c
+     return mbedtls_stub.expected_int;
+ }
+ 
++int mbedtls_x509_crt_parse_path(mbedtls_x509_crt *a, const char *b)
++{
++    // means 5 valid certificates found
++    return 5;
++}
++
+ int mbedtls_x509_crt_info(char *buf, size_t size, const char *prefix,
+                           const mbedtls_x509_crt *crt)
+ {
+diff --git a/connectivity/netsocket/tests/UNITTESTS/netsocket/TLSSocketWrapper/test_TLSSocketWrapper.cpp b/connectivity/netsocket/tests/UNITTESTS/netsocket/TLSSocketWrapper/test_TLSSocketWrapper.cpp
+index 056317d7aa..4ab23334b2 100644
+--- a/connectivity/netsocket/tests/UNITTESTS/netsocket/TLSSocketWrapper/test_TLSSocketWrapper.cpp
++++ b/connectivity/netsocket/tests/UNITTESTS/netsocket/TLSSocketWrapper/test_TLSSocketWrapper.cpp
+@@ -399,6 +399,12 @@ TEST_F(TestTLSSocketWrapper, set_root_ca_cert_invalid)
+     EXPECT_EQ(wrapper->set_root_ca_cert(cert, strlen(cert)), NSAPI_ERROR_PARAMETER);
+ }
+ 
++TEST_F(TestTLSSocketWrapper, set_root_ca_cert_path)
++{
++    EXPECT_EQ(transport->open(&stack), NSAPI_ERROR_OK);
++    EXPECT_EQ(wrapper->set_root_ca_cert_path("/"), NSAPI_ERROR_OK);
++}
++
+ TEST_F(TestTLSSocketWrapper, set_client_cert_key)
+ {
+     EXPECT_EQ(wrapper->get_own_cert(), static_cast<mbedtls_x509_crt *>(NULL));
+diff --git a/connectivity/netsocket/tests/UNITTESTS/netsocket/TLSSocketWrapper/tls_test_config.h b/connectivity/netsocket/tests/UNITTESTS/netsocket/TLSSocketWrapper/tls_test_config.h
+index 4f9ce6b96c..ad2d3d8d44 100644
+--- a/connectivity/netsocket/tests/UNITTESTS/netsocket/TLSSocketWrapper/tls_test_config.h
++++ b/connectivity/netsocket/tests/UNITTESTS/netsocket/TLSSocketWrapper/tls_test_config.h
+@@ -19,6 +19,6 @@
+ #define UNITTESTS_FEATURES_NETSOCKET_TLSSOCKET_TLS_TEST_CONFIG_H_
+ 
+ #define MBEDTLS_SSL_CLI_C
+-
++#define MBEDTLS_FS_IO
+ 
+ #endif /* UNITTESTS_FEATURES_NETSOCKET_TLSSOCKET_TLS_TEST_CONFIG_H_ */
+-- 
+2.30.1
+

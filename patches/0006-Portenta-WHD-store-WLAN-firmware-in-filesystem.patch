@@ -1,0 +1,152 @@
+From 369f76700419dae4af5d284ac9ad4ae14eb43566 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Wed, 28 Oct 2020 15:15:24 +0100
+Subject: [PATCH 06/67] Portenta: WHD: store WLAN firmware in filesystem
+
+---
+ .../firmware/COMPONENT_4343W/4343WA1_bin.c    |  4 +-
+ .../resources/resource_imp/whd_resources.c    | 50 ++++---------------
+ .../COMPONENT_WHD/src/include/whd_debug.h     |  2 +-
+ 3 files changed, 14 insertions(+), 42 deletions(-)
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/resources/firmware/COMPONENT_4343W/4343WA1_bin.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/resources/firmware/COMPONENT_4343W/4343WA1_bin.c
+index ce756dcb02..e48960d5a6 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/resources/firmware/COMPONENT_4343W/4343WA1_bin.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/resources/firmware/COMPONENT_4343W/4343WA1_bin.c
+@@ -25489,5 +25489,5 @@ const unsigned char wifi_firmware_image_data[421098] = {
+         49, 45, 53, 97, 102, 99, 56, 99, 49, 101, 0, 254, 0, 68, 86, 73, 68,
+         32, 48, 49, 45, 101, 100, 48, 100, 55, 97, 53, 54
+ };
+-const resource_hnd_t wifi_firmware_image = { RESOURCE_IN_MEMORY, 421098, {.mem = { (const char *) wifi_firmware_image_data }}};
+-
++//const resource_hnd_t wifi_firmware_image = { RESOURCE_IN_MEMORY, 421098, {.mem = { (const char *) wifi_firmware_image_data }}};
++const resource_hnd_t wifi_firmware_image = { RESOURCE_IN_FILESYSTEM, 421098, {.fs = { 0, "/wlan/4343WA1.BIN" }}};
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/resources/resource_imp/whd_resources.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/resources/resource_imp/whd_resources.c
+index adb3e00cbc..8f703bb779 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/resources/resource_imp/whd_resources.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/resources/resource_imp/whd_resources.c
+@@ -68,14 +68,8 @@ resource_result_t resource_read(const resource_hnd_t *resource, uint32_t offset,
+ *               Variable Definitions
+ ******************************************************/
+ 
+-#ifdef WLAN_MFG_FIRMWARE
+-extern const resource_hnd_t wifi_mfg_firmware_image;
+-extern const resource_hnd_t wifi_mfg_firmware_clm_blob;
+-#else
+ extern const resource_hnd_t wifi_firmware_image;
+ extern const resource_hnd_t wifi_firmware_clm_blob;
+-#endif
+-
+ unsigned char r_buffer[BLOCK_BUFFER_SIZE];
+ 
+ #if defined(WHD_DYNAMIC_NVRAM)
+@@ -110,25 +104,22 @@ resource_result_t resource_read(const resource_hnd_t *resource, uint32_t offset,
+ #ifdef USES_RESOURCE_GENERIC_FILESYSTEM
+     else
+     {
+-        wiced_file_t file_handle;
+-        uint64_t size64;
+-        uint64_t maxsize64 =  maxsize;
+-        if (WICED_SUCCESS !=
+-            wiced_filesystem_file_open (&resource_fs_handle, &file_handle, resource->val.fs.filename,
+-                                        WICED_FILESYSTEM_OPEN_FOR_READ) )
++        int file_handle = -1;
++        if (WHD_SUCCESS !=
++            wiced_filesystem_file_open (&file_handle, resource->val.fs.filename) )
+         {
+-            return RESOURCE_FILE_OPEN_FAIL;
++            return WHD_BADARG;
+         }
+-        if (WICED_SUCCESS != wiced_filesystem_file_seek (&file_handle, (offset + resource->val.fs.offset), SEEK_SET) )
++        if (WHD_SUCCESS != wiced_filesystem_file_seek (&file_handle, (offset + resource->val.fs.offset)) )
+         {
+-            return RESOURCE_FILE_SEEK_FAIL;
++            wiced_filesystem_file_close (&file_handle);
++            return WHD_BADARG;
+         }
+-        if (WICED_SUCCESS != wiced_filesystem_file_read (&file_handle, buffer, maxsize64, &size64) )
++        if (WHD_SUCCESS != wiced_filesystem_file_read (&file_handle, buffer, *size, &size) )
+         {
+             wiced_filesystem_file_close (&file_handle);
+-            return RESOURCE_FILE_READ_FAIL;
++            return WHD_BADARG;
+         }
+-        *size = (uint32_t)size64;
+         wiced_filesystem_file_close (&file_handle);
+     }
+ #else
+@@ -178,14 +169,10 @@ uint32_t host_platform_resource_size(whd_driver_t whd_drv, whd_resource_type_t r
+             return ( whd_result_t )RESOURCE_UNSUPPORTED;
+         }
+         wiced_waf_app_get_size(&wifi_app, size_out);
+-#else
+-#ifdef WLAN_MFG_FIRMWARE
+-        *size_out = (uint32_t)resource_get_size(&wifi_mfg_firmware_image);
+ #else
+         *size_out = (uint32_t)resource_get_size(&wifi_firmware_image);
+-#endif /* WLAN_MFG_FIRMWARE */
+-#endif /* WIFI_FIRMWARE_IN_MULTI_APP */
+-#endif /* NO_WIFI_FIRMWARE */
++#endif
++#endif
+ 
+     }
+     else if (resource == WHD_RESOURCE_WLAN_NVRAM)
+@@ -194,11 +181,7 @@ uint32_t host_platform_resource_size(whd_driver_t whd_drv, whd_resource_type_t r
+     }
+     else
+     {
+-#ifdef WLAN_MFG_FIRMWARE
+-        *size_out = (uint32_t)resource_get_size(&wifi_mfg_firmware_clm_blob);
+-#else
+         *size_out = (uint32_t)resource_get_size(&wifi_firmware_clm_blob);
+-#endif /* WLAN_MFG_FIRMWARE */
+     }
+     return WHD_SUCCESS;
+ }
+@@ -225,13 +208,8 @@ uint32_t host_get_resource_block(whd_driver_t whd_drv, whd_resource_type_t type,
+ 
+     if (type == WHD_RESOURCE_WLAN_FIRMWARE)
+     {
+-#ifdef WLAN_MFG_FIRMWARE
+-        result = resource_read( (const resource_hnd_t *)&wifi_mfg_firmware_image, read_pos, block_size, size_out,
+-                                r_buffer );
+-#else
+         result = resource_read( (const resource_hnd_t *)&wifi_firmware_image, read_pos, block_size, size_out,
+                                 r_buffer );
+-#endif /* WLAN_MFG_FIRMWARE */
+         if (result != WHD_SUCCESS)
+         {
+             return result;
+@@ -261,15 +239,9 @@ uint32_t host_get_resource_block(whd_driver_t whd_drv, whd_resource_type_t type,
+     }
+     else
+     {
+-#ifdef WLAN_MFG_FIRMWARE
+-        result = resource_read( (const resource_hnd_t *)&wifi_mfg_firmware_clm_blob, read_pos, block_size,
+-                                size_out,
+-                                r_buffer );
+-#else
+         result = resource_read( (const resource_hnd_t *)&wifi_firmware_clm_blob, read_pos, block_size,
+                                 size_out,
+                                 r_buffer );
+-#endif /* WLAN_MFG_FIRMWARE */
+         if (result != WHD_SUCCESS)
+         {
+             return result;
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/src/include/whd_debug.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/src/include/whd_debug.h
+index 001245f9d3..9655e55ffe 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/src/include/whd_debug.h
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/src/include/whd_debug.h
+@@ -36,7 +36,7 @@ extern "C"
+ /* #define WPRINT_ENABLE_WHD_DEBUG */
+ 
+ #define WHD_ENABLE_STATS
+-/*#define WHD_LOGGING_BUFFER_ENABLE*/
++#define WHD_LOGGING_BUFFER_ENABLE
+ 
+ #if defined (__GNUC__)
+ #define WHD_TRIGGER_BREAKPOINT( ) do { __asm__ ("bkpt"); } while (0)
+-- 
+2.30.1
+

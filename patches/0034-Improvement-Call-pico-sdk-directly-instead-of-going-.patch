@@ -1,0 +1,26 @@
+From 4362eb08ee3e0546de9787c8026cc768bf24a5da Mon Sep 17 00:00:00 2001
+From: Alexander Entinger <cto@lxrobotics.com>
+Date: Tue, 16 Feb 2021 06:08:33 +0100
+Subject: [PATCH 34/67] Improvement: Call pico-sdk directly instead of going
+ via mbed SPI hal func.
+
+---
+ targets/TARGET_RASPBERRYPI/TARGET_RP2040/spi_api.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/spi_api.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/spi_api.c
+index 691f596448..9f1ddb5cc3 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/spi_api.c
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/spi_api.c
+@@ -80,7 +80,7 @@ int spi_master_write(spi_t *obj, int value)
+ {
+     uint8_t rx;
+     uint8_t const tx = (uint8_t)value;
+-    spi_master_block_write(obj, (const char *)&tx, sizeof(tx), (char *)&rx, sizeof(rx), ' ');
++    spi_write_read_blocking(obj->dev, &tx, &rx, sizeof(rx));
+     return rx;
+ }
+ 
+-- 
+2.30.1
+

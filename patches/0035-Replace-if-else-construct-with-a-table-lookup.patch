@@ -1,0 +1,54 @@
+From f8c2f508e13c69a8ee0eb4514633743e41bc0481 Mon Sep 17 00:00:00 2001
+From: Alexander Entinger <cto@lxrobotics.com>
+Date: Tue, 16 Feb 2021 06:11:19 +0100
+Subject: [PATCH 35/67] Replace if/else construct with a table lookup.
+
+---
+ .../TARGET_RP2040/spi_api.c                   | 30 +++++++++----------
+ 1 file changed, 14 insertions(+), 16 deletions(-)
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/spi_api.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/spi_api.c
+index 9f1ddb5cc3..a7cd637d4e 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/spi_api.c
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/spi_api.c
+@@ -50,23 +50,21 @@ void spi_format(spi_t *obj, int bits, int mode, int slave)
+     MBED_ASSERT((mode >= 0) && (mode <= 3));
+ 
+     /* Determine parameters for CPOL, CPHA */
+-    spi_cpol_t cpol;
+-    spi_cpha_t cpha;
+-    if        (mode == 0) {
+-        cpol = SPI_CPOL_0;
+-        cpha = SPI_CPHA_0;
+-    } else if (mode == 1) {
+-        cpol = SPI_CPOL_0;
+-        cpha = SPI_CPHA_1;
+-    } else if (mode == 2) {
+-        cpol = SPI_CPOL_1;
+-        cpha = SPI_CPHA_0;
+-    } else {
+-        cpol = SPI_CPOL_1;
+-        cpha = SPI_CPHA_1;
+-    }
++    typedef struct
++    {
++        spi_cpol_t cpol;
++        spi_cpha_t cpha;
++    } spi_mode_t;
++    spi_mode_t const SPI_MODE[4] =
++    {
++        {SPI_CPOL_0, SPI_CPHA_0}, /* MODE 0 */
++        {SPI_CPOL_0, SPI_CPHA_1}, /* MODE 1 */
++        {SPI_CPOL_1, SPI_CPHA_0}, /* MODE 2 */
++        {SPI_CPOL_1, SPI_CPHA_1}  /* MODE 3 */
++    };
++
+     /* Configure the SPI. */
+-    spi_set_format(obj->dev, bits, cpol, cpha, SPI_MSB_FIRST);
++    spi_set_format(obj->dev, bits, SPI_MODE[mode].cpol, SPI_MODE[mode].cpha, SPI_MSB_FIRST);
+     /* Set's the SPI up as slave if the value of slave is different from 0, e.g. a value of 1 or -1 set's this SPI up as a slave. */
+     spi_set_slave(obj->dev, slave != 0);
+ }
+-- 
+2.30.1
+

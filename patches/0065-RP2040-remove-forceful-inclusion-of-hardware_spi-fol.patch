@@ -1,0 +1,30 @@
+From a3452f552c873936c9ec968f8d0dbffc59a45d02 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Mon, 8 Mar 2021 17:14:27 +0100
+Subject: [PATCH 65/67] RP2040: remove forceful inclusion of hardware_spi
+ folder
+
+clashes on case insensitive filesystems
+---
+ targets/TARGET_RASPBERRYPI/TARGET_RP2040/.mbedignore             | 1 +
+ .../pico-sdk/rp2_common/hardware_spi/include/placeholder.h       | 0
+ 2 files changed, 1 insertion(+)
+ create mode 100644 targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_spi/include/placeholder.h
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/.mbedignore b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/.mbedignore
+index f0ee61c160..281e8ebce6 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/.mbedignore
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/.mbedignore
+@@ -18,4 +18,5 @@ pico-sdk/rp2_common/pico_standard_link/new_delete.cpp
+ pico-sdk/rp2_common/pico_standard_link/*.ld
+ pico-sdk/rp2_common/pico_unique_id/*
+ pico-sdk/rp2_common/hardware_divider/*
++pico-sdk/rp2_common/hardware_spi/include/hardware/*
+ pico-sdk/host/*
+\ No newline at end of file
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_spi/include/placeholder.h b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_spi/include/placeholder.h
+new file mode 100644
+index 0000000000..e69de29bb2
+-- 
+2.30.1
+

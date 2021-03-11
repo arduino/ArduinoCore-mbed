@@ -1,0 +1,90 @@
+From 9ff9911d012975a5999d06d306e5f5041a454d4b Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Thu, 11 Mar 2021 11:50:18 +0100
+Subject: [PATCH 66/67] STM32: USB: allow dynamic USB speed configuration based
+ on bootloader parameters
+
+---
+ targets/TARGET_STM/USBPhy_STM32.cpp | 38 ++++++++++++++++++++++++++---
+ 1 file changed, 34 insertions(+), 4 deletions(-)
+
+diff --git a/targets/TARGET_STM/USBPhy_STM32.cpp b/targets/TARGET_STM/USBPhy_STM32.cpp
+index 20eaa38278..060e8394ad 100644
+--- a/targets/TARGET_STM/USBPhy_STM32.cpp
++++ b/targets/TARGET_STM/USBPhy_STM32.cpp
+@@ -201,6 +201,16 @@ void USB_reenumerate()
+ }
+ #endif
+ 
++#ifdef USB_DYNAMIC_CONFIGURATION
++uint8_t getUSBSpeedFromBlootloader() {
++    // 1 -> USE_USB_OTG_HS
++    // 2 -> USE_USB_OTG_FS
++    // 3 -> USE_USB_OTG_HS_IN_FS
++    uint8_t* bootloader_data = (uint8_t*)(0x801F000);
++    return bootloader_data[3];
++}
++#endif
++
+ void USBPhyHw::init(USBPhyEvents *events)
+ {
+     const PinMap *map = NULL;
+@@ -224,7 +234,12 @@ void USBPhyHw::init(USBPhyEvents *events)
+     hpcd.Init.battery_charging_enable = DISABLE;
+ #endif
+ 
+-#if (MBED_CONF_TARGET_USB_SPEED == USE_USB_OTG_HS)
++#ifdef USB_DYNAMIC_CONFIGURATION
++    if (getUSBSpeedFromBlootloader() == 1) {
++#endif
++
++#if defined(USB_DYNAMIC_CONFIGURATION) || (MBED_CONF_TARGET_USB_SPEED == USE_USB_OTG_HS)
++
+     hpcd.Instance = USB_OTG_HS;
+     hpcd.Init.phy_itface = PCD_PHY_ULPI;
+     hpcd.Init.Sof_enable = 1;
+@@ -239,7 +254,12 @@ void USBPhyHw::init(USBPhyEvents *events)
+     __HAL_RCC_USB_OTG_HS_ULPI_CLK_SLEEP_ENABLE();
+     map = PinMap_USB_HS;
+ 
+-#elif (MBED_CONF_TARGET_USB_SPEED == USE_USB_HS_IN_FS)
++    #ifdef USB_DYNAMIC_CONFIGURATION
++    } if (getUSBSpeedFromBlootloader() == 3) {
++    #endif
++#endif
++
++#if defined(USB_DYNAMIC_CONFIGURATION) || (MBED_CONF_TARGET_USB_SPEED == USE_USB_HS_IN_FS)
+     hpcd.Instance = USB_OTG_HS;
+     hpcd.Init.phy_itface = USB_OTG_EMBEDDED_PHY;
+     hpcd.Init.Sof_enable = ENABLE;
+@@ -259,7 +279,12 @@ void USBPhyHw::init(USBPhyEvents *events)
+      
+     map = PinMap_USB_HS;
+ 
+-#elif (MBED_CONF_TARGET_USB_SPEED == USE_USB_OTG_FS)
++    #ifdef USB_DYNAMIC_CONFIGURATION
++    } if (getUSBSpeedFromBlootloader() == 2) {
++    #endif
++#endif
++
++#if defined(USB_DYNAMIC_CONFIGURATION) || (MBED_CONF_TARGET_USB_SPEED == USE_USB_OTG_FS)
+     hpcd.Instance = USB_OTG_FS;
+     hpcd.Init.phy_itface = PCD_PHY_EMBEDDED;
+     hpcd.Init.Sof_enable = 1;
+@@ -276,7 +301,12 @@ void USBPhyHw::init(USBPhyEvents *events)
+      
+     map = PinMap_USB_FS;
+ 
+-#elif (MBED_CONF_TARGET_USB_SPEED == USE_USB_NO_OTG)
++    #ifdef USB_DYNAMIC_CONFIGURATION
++    }
++    #endif
++#endif
++
++#if (MBED_CONF_TARGET_USB_SPEED == USE_USB_NO_OTG)
+     hpcd.Instance = USB;
+     hpcd.Init.phy_itface = PCD_PHY_EMBEDDED;
+     hpcd.Init.speed = PCD_SPEED_FULL;
+-- 
+2.30.1
+

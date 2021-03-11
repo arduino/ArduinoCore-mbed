@@ -1,0 +1,25 @@
+From 173f01e76fd5319c59d1bb2214825b748bfb0714 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Mon, 1 Mar 2021 13:12:40 +0100
+Subject: [PATCH 48/67] RP2040: use uart_putc_raw as putc()
+
+---
+ targets/TARGET_RASPBERRYPI/TARGET_RP2040/serial_api.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/serial_api.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/serial_api.c
+index d98ce56178..6a90e64323 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/serial_api.c
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/serial_api.c
+@@ -139,7 +139,7 @@ int serial_getc(serial_t *obj)
+ 
+ void serial_putc(serial_t *obj, int c)
+ {
+-    uart_putc(obj->dev, c);
++    uart_putc_raw(obj->dev, c);
+ }
+ 
+ int serial_readable(serial_t *obj)
+-- 
+2.30.1
+

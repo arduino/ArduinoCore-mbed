@@ -1,0 +1,269 @@
+From 210390aa78f4596fd6b162edb457423560d4981b Mon Sep 17 00:00:00 2001
+From: Alexander Entinger <cto@lxrobotics.com>
+Date: Mon, 15 Feb 2021 16:35:55 +0100
+Subject: [PATCH 33/67] Implementing mbed SPI API for RP2040 (WIP).
+
+---
+ .../TARGET_RP2040/PeripheralNames.h           |   6 +-
+ .../TARGET_RP2040/PeripheralPins.c            |  60 +++++-----
+ .../hardware_spi/include/hardware/spi.h       |   2 +-
+ .../pico-sdk/rp2_common/hardware_spi/spi.c    |   2 +-
+ .../TARGET_RP2040/spi_api.c                   | 113 ++++++++++++++++++
+ 5 files changed, 149 insertions(+), 34 deletions(-)
+ create mode 100644 targets/TARGET_RASPBERRYPI/TARGET_RP2040/spi_api.c
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/PeripheralNames.h b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/PeripheralNames.h
+index 67353ffe81..d56fba578d 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/PeripheralNames.h
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/PeripheralNames.h
+@@ -20,6 +20,8 @@
+ #include "cmsis.h"
+ #include "PinNames.h"
+ 
++#include "addressmap.h"
++
+ typedef enum {
+     UART_0 = 0,
+     UART_1,
+@@ -30,8 +32,8 @@ typedef enum {
+ } ADCName;
+ 
+ typedef enum {
+-    SPI_0 = 0,
+-    SPI_1
++    SPI_0 = SPI0_BASE,
++    SPI_1 = SPI1_BASE
+ } SPIName;
+ 
+ typedef enum {
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/PeripheralPins.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/PeripheralPins.c
+index 6ba3255565..af20c25143 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/PeripheralPins.c
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/PeripheralPins.c
+@@ -121,48 +121,48 @@ const PinMap PinMap_PWM_OUT[] = {
+ 
+ /************SPI***************/
+ const PinMap PinMap_SPI_MISO[] = {
+-    {p0,  SPI_0, (uint32_t) spi0},
+-    {p4,  SPI_0, (uint32_t) spi0},
+-    {p8,  SPI_1, (uint32_t) spi1},
+-    {p12, SPI_1, (uint32_t) spi1},
+-    {p16, SPI_0, (uint32_t) spi0},
+-    {p20, SPI_0, (uint32_t) spi0},
+-    {p24, SPI_1, (uint32_t) spi1},
+-    {p28, SPI_1, (uint32_t) spi1},
++    {p0,  SPI_0, 0},
++    {p4,  SPI_0, 0},
++    {p8,  SPI_1, 0},
++    {p12, SPI_1, 0},
++    {p16, SPI_0, 0},
++    {p20, SPI_0, 0},
++    {p24, SPI_1, 0},
++    {p28, SPI_1, 0},
+     {NC, NC, 0}
+ };
+ 
+ const PinMap PinMap_SPI_SSEL[] = {
+-    {p1,  SPI_0, (uint32_t) spi0},
+-    {p5,  SPI_0, (uint32_t) spi0},
+-    {p9,  SPI_1, (uint32_t) spi1},
+-    {p13, SPI_1, (uint32_t) spi1},
+-    {p17, SPI_0, (uint32_t) spi0},
+-    {p21, SPI_0, (uint32_t) spi0},
+-    {p25, SPI_1, (uint32_t) spi1},
+-    {p29, SPI_1, (uint32_t) spi1},
++    {p1,  SPI_0, 0},
++    {p5,  SPI_0, 0},
++    {p9,  SPI_1, 0},
++    {p13, SPI_1, 0},
++    {p17, SPI_0, 0},
++    {p21, SPI_0, 0},
++    {p25, SPI_1, 0},
++    {p29, SPI_1, 0},
+     {NC, NC, 0}
+ };
+ 
+ const PinMap PinMap_SPI_SCLK[] = {
+-    {p2,  SPI_0, (uint32_t) spi0},
+-    {p6,  SPI_0, (uint32_t) spi0},
+-    {p10, SPI_1, (uint32_t) spi1},
+-    {p14, SPI_1, (uint32_t) spi1},
+-    {p18, SPI_0, (uint32_t) spi0},
+-    {p22, SPI_0, (uint32_t) spi0},
+-    {p26, SPI_1, (uint32_t) spi1},
++    {p2,  SPI_0, 0},
++    {p6,  SPI_0, 0},
++    {p10, SPI_1, 0},
++    {p14, SPI_1, 0},
++    {p18, SPI_0, 0},
++    {p22, SPI_0, 0},
++    {p26, SPI_1, 0},
+     {NC, NC, 0}
+ };
+ 
+ const PinMap PinMap_SPI_MOSI[] = {
+-    {p3,  SPI_0, (uint32_t) spi0},
+-    {p7,  SPI_0, (uint32_t) spi0},
+-    {p11, SPI_1, (uint32_t) spi1},
+-    {p15, SPI_1, (uint32_t) spi1},
+-    {p19, SPI_0, (uint32_t) spi0},
+-    {p23, SPI_0, (uint32_t) spi0},
+-    {p27, SPI_1, (uint32_t) spi1},
++    {p3,  SPI_0, 0},
++    {p7,  SPI_0, 0},
++    {p11, SPI_1, 0},
++    {p15, SPI_1, 0},
++    {p19, SPI_0, 0},
++    {p23, SPI_0, 0},
++    {p27, SPI_1, 0},
+     {NC, NC, 0}
+ };
+ 
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_spi/include/hardware/spi.h b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_spi/include/hardware/spi.h
+index 3ee8736e0c..789efc6f0d 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_spi/include/hardware/spi.h
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_spi/include/hardware/spi.h
+@@ -86,7 +86,7 @@ typedef enum {
+  * and this function does not return any indication of this. You can use the \ref spi_set_baudrate function
+  * which will return the actual baudrate selected if this is important.
+  */
+-void spi_init(spi_inst_t *spi, uint baudrate);
++void _spi_init(spi_inst_t *spi, uint baudrate);
+ 
+ /*! \brief Deinitialise SPI instances
+  *  \ingroup hardware_spi
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_spi/spi.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_spi/spi.c
+index b0cad30755..1de19764e3 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_spi/spi.c
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_spi/spi.c
+@@ -18,7 +18,7 @@ static inline void spi_unreset(spi_inst_t *spi) {
+     unreset_block_wait(spi == spi0 ? RESETS_RESET_SPI0_BITS : RESETS_RESET_SPI1_BITS);
+ }
+ 
+-void spi_init(spi_inst_t *spi, uint baudrate) {
++void _spi_init(spi_inst_t *spi, uint baudrate) {
+     spi_reset(spi);
+     spi_unreset(spi);
+ 
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/spi_api.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/spi_api.c
+new file mode 100644
+index 0000000000..691f596448
+--- /dev/null
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/spi_api.c
+@@ -0,0 +1,113 @@
++/******************************************************************************
++ * INCLUDE
++ ******************************************************************************/
++
++#include "mbed_assert.h"
++#include "mbed_critical.h"
++#include "spi_api.h"
++#include "pinmap.h"
++#include "PeripheralPins.h"
++
++/******************************************************************************
++ * CONSTANT
++ ******************************************************************************/
++
++static unsigned int const SPI_MASTER_DEFAULT_BITRATE = 1000 * 1000; /* 1 MHz */
++
++/******************************************************************************
++ * FUNCTION DEFINITION
++ ******************************************************************************/
++
++void spi_init(spi_t *obj, PinName mosi, PinName miso, PinName sclk, PinName ssel)
++{
++    /* Obtain the pointer to the SPI hardware instance. */
++    spi_inst_t * dev_mosi = (spi_inst_t *)pinmap_peripheral(mosi, PinMap_SPI_MOSI);
++    spi_inst_t * dev_miso = (spi_inst_t *)pinmap_peripheral(miso, PinMap_SPI_MISO);
++    spi_inst_t * dev_sclk = (spi_inst_t *)pinmap_peripheral(sclk, PinMap_SPI_SCLK);
++    spi_inst_t * dev_ssel = (spi_inst_t *)pinmap_peripheral(ssel, PinMap_SPI_SSEL);
++
++    /* Check if in fact all pins point to the same SPI hardware instance. */
++    MBED_ASSERT(dev_mosi == dev_miso);
++    MBED_ASSERT(dev_miso == dev_sclk);
++    MBED_ASSERT(dev_sclk == dev_ssel);
++
++    /* Now that we know that all pins use the same SPI module we can save it. */
++    obj->dev = dev_mosi;
++
++    /* Configure GPIOs for SPI usage. */
++    gpio_set_function(mosi, GPIO_FUNC_SPI);
++    gpio_set_function(sclk, GPIO_FUNC_SPI);
++    gpio_set_function(miso, GPIO_FUNC_SPI);
++
++    /* Initialize SPI at 1 MHz bitrate */
++    _spi_init(obj->dev, SPI_MASTER_DEFAULT_BITRATE);
++}
++
++void spi_format(spi_t *obj, int bits, int mode, int slave)
++{
++    /* Doing some parameter sanity checks. */
++    MBED_ASSERT((bits >= 4) && (bits <= 16));
++    MBED_ASSERT((mode >= 0) && (mode <= 3));
++
++    /* Determine parameters for CPOL, CPHA */
++    spi_cpol_t cpol;
++    spi_cpha_t cpha;
++    if        (mode == 0) {
++        cpol = SPI_CPOL_0;
++        cpha = SPI_CPHA_0;
++    } else if (mode == 1) {
++        cpol = SPI_CPOL_0;
++        cpha = SPI_CPHA_1;
++    } else if (mode == 2) {
++        cpol = SPI_CPOL_1;
++        cpha = SPI_CPHA_0;
++    } else {
++        cpol = SPI_CPOL_1;
++        cpha = SPI_CPHA_1;
++    }
++    /* Configure the SPI. */
++    spi_set_format(obj->dev, bits, cpol, cpha, SPI_MSB_FIRST);
++    /* Set's the SPI up as slave if the value of slave is different from 0, e.g. a value of 1 or -1 set's this SPI up as a slave. */
++    spi_set_slave(obj->dev, slave != 0);
++}
++
++void spi_frequency(spi_t *obj, int hz)
++{
++    spi_set_baudrate(obj->dev, hz);
++}
++
++int spi_master_write(spi_t *obj, int value)
++{
++    uint8_t rx;
++    uint8_t const tx = (uint8_t)value;
++    spi_master_block_write(obj, (const char *)&tx, sizeof(tx), (char *)&rx, sizeof(rx), ' ');
++    return rx;
++}
++
++int spi_master_block_write(spi_t *obj, const char *tx_buffer, int tx_length, char *rx_buffer, int rx_length, char write_fill)
++{
++    /* The pico-sdk API does not support different length SPI buffers. */
++    MBED_ASSERT(tx_length == rx_length);
++    /* Perform the SPI transfer. */
++    return spi_write_read_blocking(obj->dev, (const uint8_t *)tx_buffer, (uint8_t *)rx_buffer, (size_t)tx_length);
++}
++
++const PinMap *spi_master_mosi_pinmap()
++{
++    return PinMap_SPI_MOSI;
++}
++
++const PinMap *spi_master_miso_pinmap()
++{
++    return PinMap_SPI_MISO;
++}
++
++const PinMap *spi_master_clk_pinmap()
++{
++    return PinMap_SPI_SCLK;
++}
++
++const PinMap *spi_master_cs_pinmap()
++{
++    return PinMap_SPI_SSEL;
++}
+-- 
+2.30.1
+

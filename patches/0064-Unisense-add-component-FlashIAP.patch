@@ -1,0 +1,26 @@
+From 1926c8ca429b0a7a1ec15fbbceb9ed609cf4e5fe Mon Sep 17 00:00:00 2001
+From: giulcioffi <g.cioffi@arduino.cc>
+Date: Tue, 12 Jan 2021 17:19:36 +0100
+Subject: [PATCH 64/67] Unisense: add component FlashIAP
+
+---
+ targets/targets.json | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/targets/targets.json b/targets/targets.json
+index 2c05d32282..dc2846579d 100644
+--- a/targets/targets.json
++++ b/targets/targets.json
+@@ -5869,6 +5869,9 @@
+     },
+     "UNISENSE": {
+         "inherits": ["MCU_NRF52832"],
++        "components_add": [
++            "FLASHIAP"
++        ],
+         "release_versions": ["5"],
+         "device_name": "nRF52832_xxAA",
+         "macros_add": [
+-- 
+2.30.1
+

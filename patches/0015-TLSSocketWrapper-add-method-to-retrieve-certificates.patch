@@ -1,0 +1,94 @@
+From c1edb81151f8188f3ec1d49ae12d7fe7ab6fe39b Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Mon, 9 Nov 2020 10:00:01 +0100
+Subject: [PATCH 15/67] TLSSocketWrapper: add method to retrieve certificates
+ from filesystem
+
+---
+ connectivity/mbedtls/source/x509_crt.c        |  4 +++
+ .../include/netsocket/TLSSocketWrapper.h      | 12 ++++++++
+ .../netsocket/source/TLSSocketWrapper.cpp     | 29 +++++++++++++++++++
+ 3 files changed, 45 insertions(+)
+
+diff --git a/connectivity/mbedtls/source/x509_crt.c b/connectivity/mbedtls/source/x509_crt.c
+index 71e9cec372..ffb4e0ccb1 100644
+--- a/connectivity/mbedtls/source/x509_crt.c
++++ b/connectivity/mbedtls/source/x509_crt.c
+@@ -74,7 +74,11 @@
+ #if !defined(_WIN32) || defined(EFIX64) || defined(EFI32)
+ #include <sys/types.h>
+ #include <sys/stat.h>
++#if defined(__MBED__)
++#include <platform/mbed_retarget.h>
++#else
+ #include <dirent.h>
++#endif /* __MBED__ */
+ #endif /* !_WIN32 || EFIX64 || EFI32 */
+ #endif
+ 
+diff --git a/connectivity/netsocket/include/netsocket/TLSSocketWrapper.h b/connectivity/netsocket/include/netsocket/TLSSocketWrapper.h
+index 8f6af7f8ed..cc120a07b7 100644
+--- a/connectivity/netsocket/include/netsocket/TLSSocketWrapper.h
++++ b/connectivity/netsocket/include/netsocket/TLSSocketWrapper.h
+@@ -116,6 +116,18 @@ public:
+      */
+     nsapi_error_t set_root_ca_cert(const char *root_ca_pem);
+ 
++    /** Sets the certification of Root CA.
++     *
++     * @note Must be called before calling connect()
++     *
++     * @param root_ca Path containing Root CA Certificate files in any Mbed TLS-supported format.
++     * @retval NSAPI_ERROR_OK on success.
++     * @retval NSAPI_ERROR_NO_MEMORY in case there is not enough memory to allocate certificate.
++     * @retval NSAPI_ERROR_PARAMETER in case the provided root_ca parameter failed parsing.
++     *
++     */
++    nsapi_error_t set_root_ca_cert_path(const char *root_ca);
++
+     /** Sets client certificate, and client private key.
+      *
+      * @param client_cert Client certification in PEM or DER format.
+diff --git a/connectivity/netsocket/source/TLSSocketWrapper.cpp b/connectivity/netsocket/source/TLSSocketWrapper.cpp
+index 2ff807d2f6..ec470c2917 100644
+--- a/connectivity/netsocket/source/TLSSocketWrapper.cpp
++++ b/connectivity/netsocket/source/TLSSocketWrapper.cpp
+@@ -121,6 +121,35 @@ nsapi_error_t TLSSocketWrapper::set_root_ca_cert(const char *root_ca_pem)
+     return set_root_ca_cert(root_ca_pem, strlen(root_ca_pem) + 1);
+ }
+ 
++nsapi_error_t TLSSocketWrapper::set_root_ca_cert_path(const char *root_ca)
++{
++#if !defined(MBEDTLS_X509_CRT_PARSE_C) || !defined(MBEDTLS_FS_IO)
++    return NSAPI_ERROR_UNSUPPORTED;
++#else
++    mbedtls_x509_crt *crt;
++
++    crt = new (std::nothrow) mbedtls_x509_crt;
++    if (!crt) {
++        return NSAPI_ERROR_NO_MEMORY;
++    }
++
++    mbedtls_x509_crt_init(crt);
++
++    /* Parse CA certification */
++    int ret = mbedtls_x509_crt_parse_path(crt, root_ca);
++    if (ret < 0) {
++        print_mbedtls_error("mbedtls_x509_crt_parse", ret);
++        mbedtls_x509_crt_free(crt);
++        delete crt;
++        return NSAPI_ERROR_PARAMETER;
++    }
++    set_ca_chain(crt);
++    _cacert_allocated = true;
++    return NSAPI_ERROR_OK;
++#endif
++}
++
++
+ nsapi_error_t TLSSocketWrapper::set_client_cert_key(const char *client_cert_pem, const char *client_private_key_pem)
+ {
+     return set_client_cert_key(client_cert_pem, strlen(client_cert_pem) + 1, client_private_key_pem, strlen(client_private_key_pem) + 1);
+-- 
+2.30.1
+

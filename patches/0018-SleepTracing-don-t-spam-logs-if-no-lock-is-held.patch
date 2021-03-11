@@ -1,0 +1,37 @@
+From ce4cdf777a93d2192106c0fc082d2c0ab44a4d87 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Fri, 27 Nov 2020 10:34:22 +0100
+Subject: [PATCH 18/67] SleepTracing: don't spam logs if no lock is held
+
+---
+ platform/source/mbed_power_mgmt.c | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/platform/source/mbed_power_mgmt.c b/platform/source/mbed_power_mgmt.c
+index 9d7724aea3..e6317356b9 100644
+--- a/platform/source/mbed_power_mgmt.c
++++ b/platform/source/mbed_power_mgmt.c
+@@ -138,7 +138,7 @@ static sleep_statistic_t *sleep_tracker_add(const char *const filename)
+ 
+ static void sleep_tracker_print_stats(void)
+ {
+-    mbed_error_printf("Sleep locks held:\r\n");
++    bool once = true;
+     for (int i = 0; i < STATISTIC_COUNT; ++i) {
+         if (sleep_stats[i].count == 0) {
+             continue;
+@@ -148,6 +148,11 @@ static void sleep_tracker_print_stats(void)
+             return;
+         }
+ 
++        if (once) {
++            mbed_error_printf("Sleep locks held:\r\n");
++            once = false;
++        }
++
+         mbed_error_printf("[id: %s, count: %u]\r\n", sleep_stats[i].identifier,
+                           sleep_stats[i].count);
+     }
+-- 
+2.30.1
+

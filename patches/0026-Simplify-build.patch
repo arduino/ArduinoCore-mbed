@@ -1,0 +1,98 @@
+From 59376053977aa47968545481f7f9694445c698f0 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Fri, 12 Feb 2021 14:30:57 +0100
+Subject: [PATCH 26/67] Simplify build
+
+---
+ .../TARGET_RP2040/objects.h                   | 20 +++++++++----------
+ .../rp2_common/pico_runtime/runtime.c         |  3 +--
+ targets/targets.json                          |  1 +
+ 3 files changed, 11 insertions(+), 13 deletions(-)
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/objects.h b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/objects.h
+index a8fb08ebae..ad3cca07b0 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/objects.h
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/objects.h
+@@ -17,10 +17,13 @@
+ #ifndef MBED_OBJECTS_H
+ #define MBED_OBJECTS_H
+ 
++#pragma GCC diagnostic push
++#pragma GCC diagnostic ignored "-Wtype-limits"
++#pragma GCC diagnostic ignored "-Wignored-qualifiers"
++
+ #ifdef __cplusplus
+ #include <stdint.h>
+ #include <cstddef>
+-namespace rpi {
+ extern "C" {
+ #endif
+ #include "pico.h"
+@@ -40,9 +43,10 @@ extern "C" {
+ #include "hardware/regs/addressmap.h"
+ #ifdef __cplusplus
+ }
+-}
+ #endif
+ 
++#pragma GCC diagnostic pop
++
+ #include "cmsis.h"
+ 
+ #include "PortNames.h"
+@@ -82,23 +86,17 @@ struct analogin_s {
+     uint8_t channel;
+ };
+ 
+-#ifdef __cplusplus
+-#define NAMESPACE_RPI rpi::
+-#else
+-#define NAMESPACE_RPI
+-#endif
+-
+ struct serial_s {
+-    NAMESPACE_RPI uart_inst_t * const uart;
++    uart_inst_t * const uart;
+     int index;
+ };
+ 
+ struct i2c_s {
+-    NAMESPACE_RPI i2c_inst_t * const *i2c;
++    i2c_inst_t * const *i2c;
+ };
+ 
+ struct spi_s {
+-    NAMESPACE_RPI spi_inst_t * const *spi;
++    spi_inst_t * const *spi;
+ };
+ 
+ struct flash_s {
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_runtime/runtime.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_runtime/runtime.c
+index 4ae876f5b9..bd11d8f80b 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_runtime/runtime.c
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_runtime/runtime.c
+@@ -141,8 +141,7 @@ void runtime_init(void) {
+ 
+     spin_locks_reset();
+     irq_init_priorities();
+-    // This calls malloc() which is forbidden in mbed before switching to thread context
+-    // alarm_pool_init_default();
++    alarm_pool_init_default();
+ 
+     // Start and end points of the constructor list,
+     // defined by the linker script.
+diff --git a/targets/targets.json b/targets/targets.json
+index 4539c3c59b..fccde0c0f6 100644
+--- a/targets/targets.json
++++ b/targets/targets.json
+@@ -7885,6 +7885,7 @@
+         "macros_add": [
+             "PICO_NO_BINARY_INFO=1",
+             "MBED_MPU_CUSTOM",
++            "PICO_TIME_DEFAULT_ALARM_POOL_DISABLED",
+             "PICO_ON_DEVICE=1"
+         ]
+     },
+-- 
+2.30.1
+

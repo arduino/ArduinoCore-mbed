@@ -1,0 +1,183 @@
+From 813c17a2eadfde8b4eff66dec0be38a6792c998e Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Wed, 28 Oct 2020 14:51:48 +0100
+Subject: [PATCH 08/67] CYW43XXX: make transport layer generic
+
+---
+ .../CyH4TransportDriver.cpp                   | 64 +++++++++----------
+ .../COMPONENT_CYW43XXX/CyH4TransportDriver.h  |  6 +-
+ 2 files changed, 32 insertions(+), 38 deletions(-)
+
+diff --git a/connectivity/drivers/ble/FEATURE_BLE/COMPONENT_CYW43XXX/CyH4TransportDriver.cpp b/connectivity/drivers/ble/FEATURE_BLE/COMPONENT_CYW43XXX/CyH4TransportDriver.cpp
+index 8b9639dac8..e5e67ea5bd 100644
+--- a/connectivity/drivers/ble/FEATURE_BLE/COMPONENT_CYW43XXX/CyH4TransportDriver.cpp
++++ b/connectivity/drivers/ble/FEATURE_BLE/COMPONENT_CYW43XXX/CyH4TransportDriver.cpp
+@@ -20,7 +20,6 @@
+ #include "CyH4TransportDriver.h"
+ #include "mbed_power_mgmt.h"
+ #include "drivers/InterruptIn.h"
+-#include "cybsp_types.h"
+ #include "Callback.h"
+ #include "rtos/ThisThread.h"
+ #include <chrono>
+@@ -31,9 +30,9 @@ namespace cypress_ble {
+ 
+ using namespace std::chrono_literals;
+ 
++
+ CyH4TransportDriver::CyH4TransportDriver(PinName tx, PinName rx, PinName cts, PinName rts, PinName bt_power_name, int baud, PinName bt_host_wake_name, PinName bt_device_wake_name, uint8_t host_wake_irq, uint8_t dev_wake_irq) :
+-    cts(cts), rts(rts),
+-    tx(tx), rx(rx),
++    uart(tx, rx), cts(cts), rts(rts),
+     bt_host_wake_name(bt_host_wake_name),
+     bt_device_wake_name(bt_device_wake_name),
+     bt_power(bt_power_name, PIN_OUTPUT, PullNone, 0),
+@@ -47,8 +46,8 @@ CyH4TransportDriver::CyH4TransportDriver(PinName tx, PinName rx, PinName cts, Pi
+     bt_host_wake_active = false;
+ }
+ 
+-CyH4TransportDriver::CyH4TransportDriver(PinName tx, PinName rx, PinName cts, PinName rts,  PinName bt_power_name, int baud) :
+-    cts(cts),
++CyH4TransportDriver::CyH4TransportDriver(PinName tx, PinName rx, PinName cts, PinName rts, PinName bt_power_name, int baud) :
++    uart(tx, rx), cts(cts),
+     rts(rts),
+     tx(tx), rx(rx),
+     bt_host_wake_name(NC),
+@@ -107,16 +106,15 @@ void CyH4TransportDriver::bt_host_wake_fall_irq_handler(void)
+     }
+ }
+ 
+-static void on_controller_irq(void *callback_arg, cyhal_uart_event_t event)
++void CyH4TransportDriver::on_controller_irq()
+ {
+-    (void)(event);
+-    cyhal_uart_t *uart_obj = (cyhal_uart_t *)callback_arg;
+     sleep_manager_lock_deep_sleep();
+ 
+-    while (cyhal_uart_readable(uart_obj)) {
++    while (uart.readable()) {
+         uint8_t char_received;
+-        cyhal_uart_getc(uart_obj, &char_received, 0);
+-        CyH4TransportDriver::on_data_received(&char_received, 1);
++        if (uart.read(&char_received, 1)) {
++            CordioHCITransportDriver::on_data_received(&char_received, 1);
++        }
+     }
+ 
+     sleep_manager_unlock_deep_sleep();
+@@ -129,14 +127,22 @@ void CyH4TransportDriver::initialize()
+     bt_power = 0;
+     rtos::ThisThread::sleep_for(1ms);
+ 
+-    cyhal_uart_init(&uart, tx, rx, NULL, NULL);
++    uart.format(
++        /* bits */ 8,
++        /* parity */ mbed::SerialBase::None,
++        /* stop bit */ 1
++    );
+ 
+-    const cyhal_uart_cfg_t uart_cfg = { .data_bits = 8, .stop_bits = 1, .parity = CYHAL_UART_PARITY_NONE, .rx_buffer = NULL, .rx_buffer_size = 0 };
+-    cyhal_uart_configure(&uart, &uart_cfg);
+-    cyhal_uart_set_flow_control(&uart, cts, rts);
+-    cyhal_uart_clear(&uart);
+-    cyhal_uart_register_callback(&uart, &on_controller_irq, &uart);
+-    cyhal_uart_enable_event(&uart, CYHAL_UART_IRQ_RX_NOT_EMPTY, CYHAL_ISR_PRIORITY_DEFAULT, true);
++    uart.set_flow_control(
++        /* flow */ mbed::SerialBase::RTSCTS,
++        /* rts */ rts,
++        /* cts */ cts
++    );
++
++    uart.attach(
++        mbed::callback(this, &CyH4TransportDriver::on_controller_irq),
++        mbed::SerialBase::RxIrq
++    );
+ 
+     bt_power = 1;
+ 
+@@ -160,17 +166,6 @@ void CyH4TransportDriver::initialize()
+ 
+ void CyH4TransportDriver::terminate()
+ {
+-    cyhal_uart_event_t enable_irq_event = (cyhal_uart_event_t)(CYHAL_UART_IRQ_RX_DONE
+-                                       | CYHAL_UART_IRQ_TX_DONE
+-                                       | CYHAL_UART_IRQ_RX_NOT_EMPTY
+-                                      );
+-
+-    cyhal_uart_enable_event(&uart,
+-                            enable_irq_event,
+-                            CYHAL_ISR_PRIORITY_DEFAULT,
+-                            false
+-                        );
+-
+     if(bt_host_wake.is_connected())
+     {
+ #if (defined(MBED_TICKLESS) && DEVICE_SLEEP && DEVICE_LPTICKER)
+@@ -182,7 +177,7 @@ void CyH4TransportDriver::terminate()
+ 
+     bt_power = 0; //BT_POWER is an output, should not be freed only set inactive
+ 
+-    cyhal_uart_free(&uart);
++    uart.close();
+ }
+ 
+ uint16_t CyH4TransportDriver::write(uint8_t type, uint16_t len, uint8_t *pData)
+@@ -194,11 +189,11 @@ uint16_t CyH4TransportDriver::write(uint8_t type, uint16_t len, uint8_t *pData)
+ 
+     while (i < len + 1) {
+         uint8_t to_write = i == 0 ? type : pData[i - 1];
+-        while (cyhal_uart_writable(&uart) == 0);
+-        cyhal_uart_putc(&uart, to_write);
++        while (uart.writeable() == 0);
++        uart.write(&to_write, 1);
+         ++i;
+     }
+-    while(cyhal_uart_is_tx_active(&uart));
++    while (uart.writeable() == 0);
+ 
+     deassert_bt_dev_wake();
+     sleep_manager_unlock_deep_sleep();
+@@ -234,8 +229,7 @@ void CyH4TransportDriver::deassert_bt_dev_wake()
+ 
+ void CyH4TransportDriver::update_uart_baud_rate(int baud)
+ {
+-    uint32_t ignore;
+-    cyhal_uart_set_baud(&uart, (uint32_t)baud, &ignore);
++    uart.baud((uint32_t)baud);
+ }
+ 
+ bool CyH4TransportDriver::get_enabled_powersave()
+diff --git a/connectivity/drivers/ble/FEATURE_BLE/COMPONENT_CYW43XXX/CyH4TransportDriver.h b/connectivity/drivers/ble/FEATURE_BLE/COMPONENT_CYW43XXX/CyH4TransportDriver.h
+index bac796b2ef..df9b085f12 100644
+--- a/connectivity/drivers/ble/FEATURE_BLE/COMPONENT_CYW43XXX/CyH4TransportDriver.h
++++ b/connectivity/drivers/ble/FEATURE_BLE/COMPONENT_CYW43XXX/CyH4TransportDriver.h
+@@ -24,7 +24,7 @@
+ #include "ble/driver/CordioHCITransportDriver.h"
+ #include "drivers/DigitalInOut.h"
+ #include "drivers/InterruptIn.h"
+-#include "cyhal_uart.h"
++#include "drivers/UnbufferedSerial.h"
+ 
+ namespace ble {
+ namespace vendor {
+@@ -81,6 +81,7 @@ public:
+ private:
+     void assert_bt_dev_wake();
+     void deassert_bt_dev_wake();
++    void on_controller_irq();
+ 
+     // Use HAL serial because Cypress UART is buffered.
+     // The PUTC function does not actually blocks until data is fully transmitted,
+@@ -89,8 +90,7 @@ private:
+     // However UART APIs does not prevent the BT radio from going to sleep.
+     // Use the HAL APIs to prevent the radio from going to sleep until UART transmition is complete.
+     // Mbed layer has no API that distinguish between data in HW buffer v.s. data already transmitted.
+-
+-    cyhal_uart_t uart;
++    mbed::UnbufferedSerial uart;
+     PinName cts;
+     PinName rts;
+     PinName tx;
+-- 
+2.30.1
+

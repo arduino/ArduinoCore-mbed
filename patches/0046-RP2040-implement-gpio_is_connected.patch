@@ -1,0 +1,24 @@
+From c8277e331680acf6445d0bea9bc4d04c675b8d32 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Fri, 26 Feb 2021 12:51:25 +0100
+Subject: [PATCH 46/67] RP2040: implement gpio_is_connected()
+
+---
+ targets/TARGET_RASPBERRYPI/TARGET_RP2040/gpio_api.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/gpio_api.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/gpio_api.c
+index 7f6131c972..3d09714881 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/gpio_api.c
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/gpio_api.c
+@@ -35,3 +35,6 @@ void gpio_dir(gpio_t *obj, PinDirection direction)
+     }
+ }
+ 
++int gpio_is_connected(const gpio_t *obj) {
++    return (obj->pin == NC ? 0 : 1);
++}
+\ No newline at end of file
+-- 
+2.30.1
+

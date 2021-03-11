@@ -1,0 +1,133 @@
+From 0c95ae0294c29718d8c13297603be7445796fcab Mon Sep 17 00:00:00 2001
+From: Alexander Entinger <cto@lxrobotics.com>
+Date: Mon, 15 Feb 2021 13:52:41 +0100
+Subject: [PATCH 30/67] Implementing mbed api analogin.
+
+---
+ .../TARGET_RP2040/PeripheralNames.h           |  5 +-
+ .../TARGET_RP2040/PeripheralPins.c            | 16 +++++-
+ .../TARGET_RP2040/analogin_api.c              | 57 +++++++++++++++++++
+ .../TARGET_RP2040/objects.h                   |  2 -
+ 4 files changed, 73 insertions(+), 7 deletions(-)
+ create mode 100644 targets/TARGET_RASPBERRYPI/TARGET_RP2040/analogin_api.c
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/PeripheralNames.h b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/PeripheralNames.h
+index 3d512ba87f..67353ffe81 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/PeripheralNames.h
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/PeripheralNames.h
+@@ -26,10 +26,7 @@ typedef enum {
+ } UARTName;
+ 
+ typedef enum {
+-    ADC0_0 = 26,
+-    ADC0_1,
+-    ADC0_2,
+-    ADC0_3
++    ADC0 = 0,
+ } ADCName;
+ 
+ typedef enum {
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/PeripheralPins.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/PeripheralPins.c
+index 67329993d4..6364d42a5c 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/PeripheralPins.c
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/PeripheralPins.c
+@@ -203,4 +203,18 @@ const PinMap PinMap_I2C_SCL[] = {
+     {p27, I2C_1, (uint32_t) i2c1},
+     {p29, I2C_0, (uint32_t) i2c0},
+     {NC, NC, 0}
+-};
+\ No newline at end of file
++};
++
++/************ADC***************/
++/* ADC inputs 0-3 are GPIOs 26-29, ADC input 4
++ * is the onboard temperature sensor.
++ */
++const PinMap PinMap_ADC[] = {
++    { A0,       ADC0, 0},
++    { A1,       ADC0, 1},
++    { A2,       ADC0, 2},
++    { A3,       ADC0, 3},
++    { ADC_TEMP, ADC0, 4},
++    { NC,       NC,   0}
++};
++
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/analogin_api.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/analogin_api.c
+new file mode 100644
+index 0000000000..4e95f4551f
+--- /dev/null
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/analogin_api.c
+@@ -0,0 +1,57 @@
++#include "mbed_assert.h"
++#include "analogin_api.h"
++#include "adc.h"
++#include "pinmap.h"
++#include "PeripheralPins.h"
++
++static float    const ADC_VREF_VOLTAGE     = 3.3f; /* 3.3V */
++static uint16_t const ADC_RESOLUTION_BITS   = 12;
++static float    const ADC_CONVERSION_FACTOR = ADC_VREF_VOLTAGE / (1 << ADC_RESOLUTION_BITS);
++
++void analogin_init(analogin_t *obj, PinName pin)
++{
++    /* Make sure pin is an analog pin we can use for ADC */
++    MBED_ASSERT((ADCName)pinmap_peripheral(pin, PinMap_ADC) != (ADCName)NC);
++
++    static bool is_adc_initialized = false;
++    /* Initialize the ADC the first time it is being used,
++     * but don't reinitialize it again afterwards.
++     */
++    if (!is_adc_initialized) 
++    {
++        adc_init();
++        is_adc_initialized = true;
++    }
++
++    /* Lookup the corresponding ADC channel for a given pin. */
++    obj->channel = pinmap_find_function(pin, PinMap_ADC);
++    /* Make sure GPIO is high-impedance, no pullups etc. */
++    adc_gpio_init(pin);
++    /* Check if the ADC channel we just configured belongs to the
++     * temperature sensor. If that's the case, enable the temperature
++     * sensor.
++     */
++    if (pin == ADC_TEMP)
++        adc_set_temp_sensor_enabled(true);
++}
++
++float analogin_read(analogin_t *obj)
++{
++    /* Read the raw 12-Bit value from the ADC. */
++    uint16_t const analog_in_raw = analogin_read_u16(obj);
++    /* Convert it to a voltage value. */
++    return (analog_in_raw * ADC_CONVERSION_FACTOR);
++}
++
++uint16_t analogin_read_u16(analogin_t *obj)
++{
++    /* Select the desired ADC input channel. */
++    adc_select_input(obj->channel);
++    /* Read the 16-Bit ADC value. */
++    return adc_read();
++}
++
++const PinMap *analogin_pinmap()
++{
++    return PinMap_ADC;
++}
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/objects.h b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/objects.h
+index b4dd9b6d1c..0c1a877f08 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/objects.h
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/objects.h
+@@ -80,8 +80,6 @@ struct port_s {
+ 
+ /* common objects */
+ struct analogin_s {
+-    ADCName adc;
+-    PinName pin;
+     uint8_t channel;
+ };
+ 
+-- 
+2.30.1
+

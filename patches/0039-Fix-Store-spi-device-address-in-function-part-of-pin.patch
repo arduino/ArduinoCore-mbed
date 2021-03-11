@@ -1,0 +1,169 @@
+From f544affe343b376e726be37745ea0e30a3b6c255 Mon Sep 17 00:00:00 2001
+From: Alexander Entinger <cto@lxrobotics.com>
+Date: Tue, 16 Feb 2021 15:39:55 +0100
+Subject: [PATCH 39/67] Fix: Store spi device address in 'function' part of pin
+ map (to be consistent with I2C).
+
+---
+ .../TARGET_RP2040/PeripheralNames.h           |  6 +-
+ .../TARGET_RP2040/PeripheralPins.c            | 60 +++++++++----------
+ .../TARGET_RP2040/spi_api.c                   | 28 ++++-----
+ 3 files changed, 46 insertions(+), 48 deletions(-)
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/PeripheralNames.h b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/PeripheralNames.h
+index d56fba578d..67353ffe81 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/PeripheralNames.h
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/PeripheralNames.h
+@@ -20,8 +20,6 @@
+ #include "cmsis.h"
+ #include "PinNames.h"
+ 
+-#include "addressmap.h"
+-
+ typedef enum {
+     UART_0 = 0,
+     UART_1,
+@@ -32,8 +30,8 @@ typedef enum {
+ } ADCName;
+ 
+ typedef enum {
+-    SPI_0 = SPI0_BASE,
+-    SPI_1 = SPI1_BASE
++    SPI_0 = 0,
++    SPI_1
+ } SPIName;
+ 
+ typedef enum {
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/PeripheralPins.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/PeripheralPins.c
+index af20c25143..6ba3255565 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/PeripheralPins.c
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/PeripheralPins.c
+@@ -121,48 +121,48 @@ const PinMap PinMap_PWM_OUT[] = {
+ 
+ /************SPI***************/
+ const PinMap PinMap_SPI_MISO[] = {
+-    {p0,  SPI_0, 0},
+-    {p4,  SPI_0, 0},
+-    {p8,  SPI_1, 0},
+-    {p12, SPI_1, 0},
+-    {p16, SPI_0, 0},
+-    {p20, SPI_0, 0},
+-    {p24, SPI_1, 0},
+-    {p28, SPI_1, 0},
++    {p0,  SPI_0, (uint32_t) spi0},
++    {p4,  SPI_0, (uint32_t) spi0},
++    {p8,  SPI_1, (uint32_t) spi1},
++    {p12, SPI_1, (uint32_t) spi1},
++    {p16, SPI_0, (uint32_t) spi0},
++    {p20, SPI_0, (uint32_t) spi0},
++    {p24, SPI_1, (uint32_t) spi1},
++    {p28, SPI_1, (uint32_t) spi1},
+     {NC, NC, 0}
+ };
+ 
+ const PinMap PinMap_SPI_SSEL[] = {
+-    {p1,  SPI_0, 0},
+-    {p5,  SPI_0, 0},
+-    {p9,  SPI_1, 0},
+-    {p13, SPI_1, 0},
+-    {p17, SPI_0, 0},
+-    {p21, SPI_0, 0},
+-    {p25, SPI_1, 0},
+-    {p29, SPI_1, 0},
++    {p1,  SPI_0, (uint32_t) spi0},
++    {p5,  SPI_0, (uint32_t) spi0},
++    {p9,  SPI_1, (uint32_t) spi1},
++    {p13, SPI_1, (uint32_t) spi1},
++    {p17, SPI_0, (uint32_t) spi0},
++    {p21, SPI_0, (uint32_t) spi0},
++    {p25, SPI_1, (uint32_t) spi1},
++    {p29, SPI_1, (uint32_t) spi1},
+     {NC, NC, 0}
+ };
+ 
+ const PinMap PinMap_SPI_SCLK[] = {
+-    {p2,  SPI_0, 0},
+-    {p6,  SPI_0, 0},
+-    {p10, SPI_1, 0},
+-    {p14, SPI_1, 0},
+-    {p18, SPI_0, 0},
+-    {p22, SPI_0, 0},
+-    {p26, SPI_1, 0},
++    {p2,  SPI_0, (uint32_t) spi0},
++    {p6,  SPI_0, (uint32_t) spi0},
++    {p10, SPI_1, (uint32_t) spi1},
++    {p14, SPI_1, (uint32_t) spi1},
++    {p18, SPI_0, (uint32_t) spi0},
++    {p22, SPI_0, (uint32_t) spi0},
++    {p26, SPI_1, (uint32_t) spi1},
+     {NC, NC, 0}
+ };
+ 
+ const PinMap PinMap_SPI_MOSI[] = {
+-    {p3,  SPI_0, 0},
+-    {p7,  SPI_0, 0},
+-    {p11, SPI_1, 0},
+-    {p15, SPI_1, 0},
+-    {p19, SPI_0, 0},
+-    {p23, SPI_0, 0},
+-    {p27, SPI_1, 0},
++    {p3,  SPI_0, (uint32_t) spi0},
++    {p7,  SPI_0, (uint32_t) spi0},
++    {p11, SPI_1, (uint32_t) spi1},
++    {p15, SPI_1, (uint32_t) spi1},
++    {p19, SPI_0, (uint32_t) spi0},
++    {p23, SPI_0, (uint32_t) spi0},
++    {p27, SPI_1, (uint32_t) spi1},
+     {NC, NC, 0}
+ };
+ 
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/spi_api.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/spi_api.c
+index a7cd637d4e..1cc6bfa0fb 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/spi_api.c
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/spi_api.c
+@@ -5,8 +5,8 @@
+ #include "mbed_assert.h"
+ #include "mbed_critical.h"
+ #include "spi_api.h"
+-#include "pinmap.h"
+ #include "PeripheralPins.h"
++#include "PeripheralNames.h"
+ 
+ /******************************************************************************
+  * CONSTANT
+@@ -20,19 +20,19 @@ static unsigned int const SPI_MASTER_DEFAULT_BITRATE = 1000 * 1000; /* 1 MHz */
+ 
+ void spi_init(spi_t *obj, PinName mosi, PinName miso, PinName sclk, PinName ssel)
+ {
+-    /* Obtain the pointer to the SPI hardware instance. */
+-    spi_inst_t * dev_mosi = (spi_inst_t *)pinmap_peripheral(mosi, PinMap_SPI_MOSI);
+-    spi_inst_t * dev_miso = (spi_inst_t *)pinmap_peripheral(miso, PinMap_SPI_MISO);
+-    spi_inst_t * dev_sclk = (spi_inst_t *)pinmap_peripheral(sclk, PinMap_SPI_SCLK);
+-    spi_inst_t * dev_ssel = (spi_inst_t *)pinmap_peripheral(ssel, PinMap_SPI_SSEL);
+-
+-    /* Check if in fact all pins point to the same SPI hardware instance. */
+-    MBED_ASSERT(dev_mosi == dev_miso);
+-    MBED_ASSERT(dev_miso == dev_sclk);
+-    MBED_ASSERT(dev_sclk == dev_ssel);
+-
+-    /* Now that we know that all pins use the same SPI module we can save it. */
+-    obj->dev = dev_mosi;
++    /* Check if all pins do in fact belong to the same SPI module. */
++    SPIName spi_mosi = (SPIName)pinmap_peripheral(mosi, PinMap_SPI_MOSI);
++    SPIName spi_miso = (SPIName)pinmap_peripheral(miso, PinMap_SPI_MISO);
++    SPIName spi_sclk = (SPIName)pinmap_peripheral(sclk, PinMap_SPI_SCLK);
++    SPIName spi_ssel = (SPIName)pinmap_peripheral(ssel, PinMap_SPI_SSEL);
++
++    MBED_ASSERT(spi_mosi == spi_miso);
++    MBED_ASSERT(spi_miso == spi_sclk);
++    MBED_ASSERT(spi_sclk == spi_ssel);
++    MBED_ASSERT(spi_ssel != (SPIName)NC);
++
++    /* Obtain pointer to the SPI module. */
++    obj->dev = (spi_inst_t *)pinmap_function(mosi, PinMap_SPI_MOSI);
+ 
+     /* Configure GPIOs for SPI usage. */
+     gpio_set_function(mosi, GPIO_FUNC_SPI);
+-- 
+2.30.1
+

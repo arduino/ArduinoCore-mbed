@@ -1,0 +1,173 @@
+From 2bff698cb140ab1887757d44432b55fa3d014b8d Mon Sep 17 00:00:00 2001
+From: giulcioffi <g.cioffi@arduino.cc>
+Date: Thu, 25 Feb 2021 12:44:31 +0100
+Subject: [PATCH 50/67] RP2040: [WIP] - Add I2C slave
+
+---
+ .../TARGET_RP2040/i2c_api.c                   | 106 +++++++++++++++++-
+ .../TARGET_RP2040/objects.h                   |   6 +
+ targets/targets.json                          |   1 +
+ 3 files changed, 112 insertions(+), 1 deletion(-)
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/i2c_api.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/i2c_api.c
+index 210279b3b0..478fff522c 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/i2c_api.c
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/i2c_api.c
+@@ -24,9 +24,20 @@ void i2c_init(i2c_t *obj, PinName sda, PinName scl)
+     I2CName const i2c_scl = (I2CName)pinmap_peripheral(scl, PinMap_I2C_SCL);
+     MBED_ASSERT(i2c_sda == i2c_scl);
+ 
++#if DEVICE_I2CSLAVE
++    /** was_slave is used to decide which driver call we need
++     * to use when uninitializing a given instance
++     */
++    obj->was_slave = false;
++    obj->is_slave = false;
++    obj->slave_addr = 0;
++#endif
++
+     /* Obtain the pointer to the I2C hardware instance. */
+     obj->dev = (i2c_inst_t *)pinmap_function(sda, PinMap_I2C_SDA);
+-    obj->baudrate = DEFAULT_I2C_BAUDRATE;
++    //obj->baudrate = DEFAULT_I2C_BAUDRATE;
++    //Call this function because if we are configuring a slave, we don't have to set the frequency
++    i2c_frequency(obj->dev, DEFAULT_I2C_BAUDRATE);
+ 
+     /* Initialize the I2C module. */
+     _i2c_init(obj->dev, obj->baudrate);
+@@ -42,6 +53,12 @@ void i2c_init(i2c_t *obj, PinName sda, PinName scl)
+ 
+ void i2c_frequency(i2c_t *obj, int hz)
+ {
++#if DEVICE_I2CSLAVE
++    /* Slaves automatically get frequency from master */
++    if(obj->is_slave) {
++    		return;
++    }
++#endif
+     obj->baudrate = i2c_set_baudrate(obj->dev, hz);
+ }
+ 
+@@ -86,3 +103,90 @@ const PinMap *i2c_master_scl_pinmap()
+ {
+     return PinMap_I2C_SCL;
+ }
++
++const PinMap *i2c_slave_sda_pinmap()
++{
++    return PinMap_I2C_SDA;
++}
++
++const PinMap *i2c_slave_scl_pinmap()
++{
++    return PinMap_I2C_SCL;
++}
++
++int i2c_stop(i2c_t *obj)
++{
++
++}
++
++#if DEVICE_I2CSLAVE
++
++/** Configure I2C as slave or master.
++ *  @param obj The I2C object
++ *  @param enable_slave Enable i2c hardware so you can receive events with ::i2c_slave_receive
++ *  @return non-zero if a value is available
++ */
++void i2c_slave_mode(i2c_t *obj, int enable_slave)
++{
++    /* Reconfigure this instance as an I2C slave */
++
++    /* Not configured yet, so this instance is and was a slave */
++    if(obj->dev == NULL) {
++    		obj->was_slave = enable_slave;
++    } else {
++        obj->was_slave = obj->is_slave;
++    }
++    obj->is_slave = enable_slave;
++}
++
++/** Check to see if the I2C slave has been addressed.
++ *  @param obj The I2C object
++ *  @return The status - 1 - read addresses, 2 - write to all slaves,
++ *         3 write addressed, 0 - the slave has not been addressed
++ */
++int i2c_slave_receive(i2c_t *obj)
++{
++
++}
++
++/** Configure I2C as slave or master.
++ *  @param obj The I2C object
++ *  @param data    The buffer for receiving
++ *  @param length  Number of bytes to read
++ *  @return non-zero if a value is available
++ */
++int i2c_slave_read(i2c_t *obj, char *data, int length)
++{
++    i2c_read_raw_blocking(obj->dev, (uint8_t *)data, (size_t)length);
++
++    return 1;
++}
++
++/** Configure I2C as slave or master.
++ *  @param obj The I2C object
++ *  @param data    The buffer for sending
++ *  @param length  Number of bytes to write
++ *  @return non-zero if a value is available
++ */
++int i2c_slave_write(i2c_t *obj, const char *data, int length)
++{
++    //Check if raw is okay or use write_blocking
++    i2c_write_raw_blocking(obj->dev, (const uint8_t *)data, (size_t)length);
++
++    return 1;
++}
++
++/** Configure I2C address.
++ *  @param obj     The I2C object
++ *  @param idx     Currently not used
++ *  @param address The address to be set
++ *  @param mask    Currently not used
++ */
++void i2c_slave_address(i2c_t *obj, int idx, uint32_t address, uint32_t mask)
++{
++    if (obj->is_slave) {
++        i2c_set_slave_mode(obj->dev, true, address);
++    }
++}
++
++#endif // DEVICE_I2CSLAVE
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/objects.h b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/objects.h
+index 5e5f2f0d6a..cdbd5655e6 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/objects.h
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/objects.h
+@@ -95,6 +95,12 @@ struct serial_s {
+ struct i2c_s {
+     i2c_inst_t * dev;
+     unsigned int baudrate;
++
++#if DEVICE_I2CSLAVE
++    bool was_slave;
++    bool is_slave;
++    uint8_t slave_addr;
++#endif
+ };
+ 
+ struct spi_s {
+diff --git a/targets/targets.json b/targets/targets.json
+index 286046c597..561d2b8def 100644
+--- a/targets/targets.json
++++ b/targets/targets.json
+@@ -7877,6 +7877,7 @@
+         "device_has": [
+             "ANALOGIN",
+             "I2C",
++            "I2CSLAVE",
+             "INTERRUPTIN",
+             "PORT_IN",
+             "PORT_OUT",
+-- 
+2.30.1
+

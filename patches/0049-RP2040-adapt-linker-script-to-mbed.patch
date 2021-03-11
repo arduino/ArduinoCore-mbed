@@ -1,0 +1,100 @@
+From 7b81a961e4c3f795c13432bbe9edd212e7aa5c39 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Fri, 5 Mar 2021 17:01:18 +0100
+Subject: [PATCH 49/67] RP2040: adapt linker script to mbed
+
+---
+ .../TOOLCHAIN_GCC_ARM/memmap_default.ld          | 16 ++++++++++++----
+ .../rp2_common/pico_standard_link/crt0.S         | 14 --------------
+ targets/targets.json                             |  1 -
+ 3 files changed, 12 insertions(+), 19 deletions(-)
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/TOOLCHAIN_GCC_ARM/memmap_default.ld b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/TOOLCHAIN_GCC_ARM/memmap_default.ld
+index fb2ff6d18a..d92bd42107 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/TOOLCHAIN_GCC_ARM/memmap_default.ld
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/TOOLCHAIN_GCC_ARM/memmap_default.ld
+@@ -21,6 +21,12 @@
+     __stack (== StackTop)
+ */
+ 
++#if !defined(MBED_CONF_TARGET_BOOT_STACK_SIZE)
++    /* This value is normally defined by the tools
++       to 0x1000 for bare metal and 0x400 for RTOS */
++    #define MBED_CONF_TARGET_BOOT_STACK_SIZE  0x400
++#endif
++
+ MEMORY
+ {
+     FLASH(rx) : ORIGIN = 0x10000000, LENGTH = 2048k
+@@ -208,8 +214,9 @@ SECTIONS
+     .heap (COPY):
+     {
+         __end__ = .;
+-        end = __end__;
++        PROVIDE(end = .);
+         *(.heap*)
++        . = ORIGIN(RAM) + LENGTH(RAM) - MBED_CONF_TARGET_BOOT_STACK_SIZE;
+         __HeapLimit = .;
+     } > RAM
+ 
+@@ -226,19 +233,20 @@ SECTIONS
+     {
+         *(.stack1*)
+     } > SCRATCH_X
++
+     .stack_dummy (COPY):
+     {
+         *(.stack*)
+-    } > SCRATCH_Y
++    } > RAM
+ 
+     .flash_end : {
+         __flash_binary_end = .;
+     } > FLASH
+ 
+     /* stack limit is poorly named, but historically is maximum heap ptr */
+-    __StackLimit = ORIGIN(RAM) + LENGTH(RAM);
++    __StackTop = ORIGIN(RAM) + LENGTH(RAM);
++    __StackLimit = __StackTop - MBED_CONF_TARGET_BOOT_STACK_SIZE;
+     __StackOneTop = ORIGIN(SCRATCH_X) + LENGTH(SCRATCH_X);
+-    __StackTop = ORIGIN(SCRATCH_Y) + LENGTH(SCRATCH_Y);
+     __StackOneBottom = __StackOneTop - SIZEOF(.stack1_dummy);
+     __StackBottom = __StackTop - SIZEOF(.stack_dummy);
+     PROVIDE(__stack = __StackTop);
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_standard_link/crt0.S b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_standard_link/crt0.S
+index 38de608634..3f90b95ee2 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_standard_link/crt0.S
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_standard_link/crt0.S
+@@ -313,17 +313,3 @@ __get_current_exception:
+     mrs  r0, ipsr
+     uxtb r0, r0
+     bx   lr
+-
+-// ----------------------------------------------------------------------------
+-// Stack/heap dummies to set size
+-
+-.section .stack
+-// align to allow for memory protection (although this alignment is pretty much ignored by linker script)
+-.align 5
+-    .equ StackSize, PICO_STACK_SIZE
+-.space StackSize
+-
+-.section .heap
+-.align 2
+-    .equ HeapSize, PICO_HEAP_SIZE
+-.space HeapSize
+diff --git a/targets/targets.json b/targets/targets.json
+index 214811daa7..286046c597 100644
+--- a/targets/targets.json
++++ b/targets/targets.json
+@@ -7891,7 +7891,6 @@
+     "NANO_RP2040_CONNECT": {
+         "inherits": ["RP2040"],
+         "macros_add": [
+-            "PICO_HEAP_SIZE=0x30000",
+             "PICO_NO_BINARY_INFO=1",
+             "MBED_MPU_CUSTOM",
+             "PICO_TIME_DEFAULT_ALARM_POOL_DISABLED",
+-- 
+2.30.1
+

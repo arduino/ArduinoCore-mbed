@@ -1,0 +1,360 @@
+From 61776b46e1be304e8beaa62704abbde159449761 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Tue, 2 Mar 2021 17:25:58 +0100
+Subject: [PATCH 22/67] Bormio: start fixing SDIO
+
+---
+ .../COMPONENT_WHD/interface/cyhal_sdio.c      | 73 +++++++++----------
+ .../COMPONENT_WHD/src/include/whd_debug.h     |  4 +-
+ .../TARGET_BORMIO/COMPONENT_WHD/whd_config.h  | 18 ++---
+ .../TARGET_BORMIO/PinNames.h                  | 12 +--
+ .../TARGET_BORMIO/system_clock_override.c     | 18 +++++
+ 5 files changed, 71 insertions(+), 54 deletions(-)
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_BORMIO/COMPONENT_WHD/interface/cyhal_sdio.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_BORMIO/COMPONENT_WHD/interface/cyhal_sdio.c
+index 13fa61536a..101bd09c65 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_BORMIO/COMPONENT_WHD/interface/cyhal_sdio.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_BORMIO/COMPONENT_WHD/interface/cyhal_sdio.c
+@@ -69,7 +69,7 @@ static int num=0;
+ #define SDIO_STA_CMDREND                SDMMC_STA_CMDREND
+ #define SDIO_STA_CMDSENT                SDMMC_STA_CMDSENT
+ #define SDIO_CMD_CMDTRANS               SDMMC_CMD_CMDTRANS
+-#define SDIO    SDMMC1  
++#define SDIO    SDMMC2
+ 
+ #else
+ #define SDIO_CMD_CMDTRANS               0
+@@ -131,9 +131,12 @@ cy_rslt_t cyhal_sdio_init(cyhal_sdio_t *obj, cyhal_gpio_t cmd, cyhal_gpio_t clk,
+ {
+   cy_rslt_t     ret= CY_RSLT_SUCCESS;
+   
++  __HAL_RCC_GPIOB_CLK_ENABLE();
+   __HAL_RCC_GPIOC_CLK_ENABLE();
+   __HAL_RCC_GPIOD_CLK_ENABLE();
+-  __HAL_RCC_SDMMC1_CLK_ENABLE();
++  __HAL_RCC_GPIOG_CLK_ENABLE();
++  __HAL_RCC_GPIOJ_CLK_ENABLE();
++  __HAL_RCC_SDMMC2_CLK_ENABLE();
+ 
+   HAL_GPIO_Init(PinConfig[cmd].port, &PinConfig[cmd].config);
+   HAL_GPIO_Init(PinConfig[clk].port, &PinConfig[clk].config);
+@@ -144,12 +147,12 @@ cy_rslt_t cyhal_sdio_init(cyhal_sdio_t *obj, cyhal_gpio_t cmd, cyhal_gpio_t clk,
+ 
+ #if defined(STM32H753xx)
+     /* Reset SDIO Block */
+-    SDMMC_PowerState_OFF( SDMMC1 );
+-    __HAL_RCC_SDMMC1_FORCE_RESET( );
+-    __HAL_RCC_SDMMC1_RELEASE_RESET( );
++    SDMMC_PowerState_OFF( SDMMC2 );
++    __HAL_RCC_SDMMC2_FORCE_RESET( );
++    __HAL_RCC_SDMMC2_RELEASE_RESET( );
+ 
+     /* Enable the SDIO Clock */
+-    __HAL_RCC_SDMMC1_CLK_ENABLE( );
++    __HAL_RCC_SDMMC2_CLK_ENABLE( );
+ #else
+     __HAL_RCC_SDIO_CLK_ENABLE();
+ #endif
+@@ -174,24 +177,24 @@ cy_rslt_t cyhal_sdio_init(cyhal_sdio_t *obj, cyhal_gpio_t cmd, cyhal_gpio_t clk,
+     sdio_init_structure.ClockPowerSave      = SDMMC_CLOCK_POWER_SAVE_DISABLE;
+     sdio_init_structure.BusWide             = SDMMC_BUS_WIDE_1B;
+     sdio_init_structure.HardwareFlowControl = SDMMC_HARDWARE_FLOW_CONTROL_DISABLE;
+-    ret                              = SDMMC_Init( SDMMC1, sdio_init_structure );
+-    ret                             |= SDMMC_PowerState_ON( SDMMC1 );
+-    ret                             |= SDMMC_SetSDMMCReadWaitMode( SDMMC1, SDMMC_READ_WAIT_MODE_CLK );
++    ret                              = SDMMC_Init( SDMMC2, sdio_init_structure );
++    ret                             |= SDMMC_PowerState_ON( SDMMC2 );
++    ret                             |= SDMMC_SetSDMMCReadWaitMode( SDMMC2, SDMMC_READ_WAIT_MODE_CLK );
+     if ( ret )
+     {
+         return ret;
+     }
+    
+     /* Clear all SDIO interrupts */
+-    SDMMC1->ICR = (uint32_t) 0xffffffff;
++    SDMMC2->ICR = (uint32_t) 0xffffffff;
+ 
+         /* Turn on SDIO IRQ */
+     /* Must be lower priority than the value of configMAX_SYSCALL_INTERRUPT_PRIORITY */
+     /* otherwise FreeRTOS will not be able to mask the interrupt */
+     /* keep in mind that ARMCM7 interrupt priority logic is inverted, the highest value */
+     /* is the lowest priority */
+-    HAL_NVIC_EnableIRQ( (IRQn_Type) SDMMC1_IRQn );
+-    HAL_NVIC_SetPriority(SDMMC1_IRQn, 5, 0);
++    HAL_NVIC_EnableIRQ( (IRQn_Type) SDMMC2_IRQn );
++    HAL_NVIC_SetPriority(SDMMC2_IRQn, 5, 0);
+ 
+     //printf("after enable sdio: %d\n", sdio_transfer_finished_semaphore);
+ 
+@@ -238,10 +241,6 @@ cy_rslt_t cyhal_sdio_init(cyhal_sdio_t *obj, cyhal_gpio_t cmd, cyhal_gpio_t clk,
+   HAL_NVIC_SetPriority(DMA2_Stream3_IRQn, 5, 0);
+ #endif
+ 
+-  
+-  
+-  
+-  
+   if (cy_rtos_init_semaphore(&sdio_transfer_finished_semaphore, 1, 0) != WHD_SUCCESS)
+   {
+     cy_rtos_deinit_semaphore(&sdio_transfer_finished_semaphore);
+@@ -250,7 +249,7 @@ cy_rslt_t cyhal_sdio_init(cyhal_sdio_t *obj, cyhal_gpio_t cmd, cyhal_gpio_t clk,
+ 
+   //printf("cy_rtos_init_semaphore: %d\n", sdio_transfer_finished_semaphore);
+ 
+-  return ret;
++  return CY_RSLT_SUCCESS;
+ }
+ 
+ 
+@@ -323,14 +322,14 @@ exit:
+        WPRINT_MACRO( ("SDIO->CLKCR %lx \n",SDIO->CLKCR) );
+        WPRINT_MACRO( ("result %lx \n", result) );
+        WPRINT_MACRO( ("cyhal_sdio_send_cmd %s\n",(result==0)? "Passed":"Failed") );
+-       while(1);
++       //while(1);
+      }
+   //  platform_mcu_powersave_enable();
+ #if !defined(STM32F412xG) && !defined(STM32H753xx)
+     SDIO->MASK = SDIO_MASK_SDIOITIE;
+ #endif
+ #if defined(STM32H753xx)
+-    SDMMC1->CMD = 0;
++    SDMMC2->CMD = 0;
+ #endif
+ 
+     //PRINTF("%d %s cmd 0x%x  arg 0x%x  resp 0x%x\n",num++,(direction!=CYHAL_READ)?"Write":"Read",command,argument,(response)?*response:0);
+@@ -357,7 +356,7 @@ cy_rslt_t sdio_enable_high_speed(void) {
+ #endif
+     sdio_init_structure.HardwareFlowControl = SDMMC_HARDWARE_FLOW_CONTROL_ENABLE;
+ 
+-    SDMMC_Init( SDMMC1, sdio_init_structure );
++    SDMMC_Init( SDMMC2, sdio_init_structure );
+     return CY_RSLT_SUCCESS;
+ }
+ #else
+@@ -485,8 +484,8 @@ static void sdio_prepare_data_transfer( cyhal_transfer_t direction, uint32_t blo
+ #endif
+     
+ #if defined (STM32H753xx)
+-    SDMMC1->IDMACTRL  = SDMMC_ENABLE_IDMA_SINGLE_BUFF;
+-    SDMMC1->IDMABASE0 = (uint32_t) dma_data_source;
++    SDMMC2->IDMACTRL  = SDMMC_ENABLE_IDMA_SINGLE_BUFF;
++    SDMMC2->IDMABASE0 = (uint32_t) dma_data_source;
+ #else
+     /* DMA2 Stream3 */
+     DMA2_Stream3->CR   = 0;
+@@ -504,7 +503,7 @@ void sdio_enable_bus_irq( void )
+ #if defined(STM32F412xG)
+     SDIO->MASK = SDIO_MASK_CMDRENDIE | SDIO_MASK_CMDSENTIE;
+ #elif defined (STM32H753xx)
+-    SDMMC1->MASK = SDMMC_IT_RXOVERR | SDMMC_IT_TXUNDERR | SDMMC_IT_DATAEND | SDMMC_IT_CMDREND | SDMMC_IT_CMDSENT;
++    SDMMC2->MASK = SDMMC_IT_RXOVERR | SDMMC_IT_TXUNDERR | SDMMC_IT_DATAEND | SDMMC_IT_CMDREND | SDMMC_IT_CMDSENT;
+ #else
+     SDIO->MASK = SDIO_MASK_SDIOITIE | SDIO_MASK_CMDRENDIE | SDIO_MASK_CMDSENTIE;
+ #endif
+@@ -539,7 +538,7 @@ cy_rslt_t cyhal_sdio_bulk_transfer(cyhal_sdio_t *obj, cyhal_transfer_t direction
+ restart:
+ 
+     sdio_transfer_failed=0;
+-    SDMMC1->ICR = (uint32_t) 0xFFFFFFFF;
++    SDMMC2->ICR = (uint32_t) 0xFFFFFFFF;
+     ++attempts;
+ 
+     /* Check if we've tried too many times */
+@@ -566,7 +565,7 @@ restart:
+       argument = arg.value;
+     }
+ 
+-    SDMMC1->CMD |= SDMMC_CMD_CMDTRANS;
++    SDMMC2->CMD |= SDMMC_CMD_CMDTRANS;
+     
+     /* Prepare the SDIO for a data transfer */
+     sdio_prepare_data_transfer( direction, block_size, (uint8_t*) data, (uint32_t) length );
+@@ -575,9 +574,9 @@ restart:
+ 
+     /* Send the command */
+     //PRINTF("%d bs=%d argument=%x\n",num++,block_size,argument);
+-    SDMMC1->ARG = argument;
++    SDMMC2->ARG = argument;
+     cmd = (uint32_t) ( SDIO_CMD_53 | SDMMC_RESPONSE_SHORT | SDMMC_WAIT_NO | SDMMC_CPSM_ENABLE | SDMMC_CMD_CMDTRANS );
+-    SDMMC1->CMD = cmd;
++    SDMMC2->CMD = cmd;
+     /* Wait for the whole transfer to complete */
+ 
+     //printf("cy_rtos_get_semaphore: %d\n", sdio_transfer_finished_semaphore);
+@@ -649,7 +648,7 @@ exit:
+ #endif
+ 
+ #if defined(STM32H753xx)
+-    SDMMC1->CMD = 0;
++    SDMMC2->CMD = 0;
+ #endif
+ 
+   //HAL_Delay(30);
+@@ -672,7 +671,7 @@ void cyhal_sdio_irq_enable(cyhal_sdio_t *obj, cyhal_sdio_irq_event_t event, bool
+ }
+ 
+ #if defined (STM32H753xx)
+-void SDMMC1_IRQHandler(void )
++void SDMMC2_IRQHandler(void )
+ {
+     uint32_t intstatus = SDIO->STA;
+   //  WWD_BUS_STATS_INCREMENT_VARIABLE( sdio_intrs );
+@@ -692,7 +691,7 @@ void SDMMC1_IRQHandler(void )
+     {
+         if ((intstatus & (SDMMC_STA_CMDREND | SDMMC_STA_CMDSENT)) != 0)
+         {
+-            if ( ( SDMMC1->RESP1 & 0x800 ) != 0 )
++            if ( ( SDMMC2->RESP1 & 0x800 ) != 0 )
+             {
+                 sdio_transfer_failed = irqstatus;
+                 //sdio_transfer_finished_var = true;
+@@ -700,14 +699,14 @@ void SDMMC1_IRQHandler(void )
+             }
+ 
+             /* Clear all command/response interrupts */
+-            SDMMC1->ICR = (SDMMC_STA_CMDREND | SDMMC_STA_CMDSENT);
++            SDMMC2->ICR = (SDMMC_STA_CMDREND | SDMMC_STA_CMDSENT);
+         }
+ 
+         /* Check whether the external interrupt was triggered */
+         if (intstatus & SDMMC_STA_SDIOIT)
+         {
+             /* Clear the interrupt */
+-            SDMMC1->ICR = SDMMC_STA_SDIOIT;
++            SDMMC2->ICR = SDMMC_STA_SDIOIT;
+             /* Mask interrupt, to be unmasked later by WICED WWD thread */
+             //SDMMC1->MASK &= ~(SDMMC_MASK_SDIOITIE);//VIKR (SDMMC_ICR_SDIOITC);
+             /* Inform WICED WWD thread */
+@@ -718,11 +717,11 @@ void SDMMC1_IRQHandler(void )
+ 
+         if (intstatus & SDMMC_STA_DATAEND)
+         {
+-            SDMMC1->ICR      = SDMMC_STA_DATAEND;
+-            SDMMC1->DLEN     = 0;
+-            SDMMC1->DCTRL    = SDMMC_DCTRL_SDIOEN;
+-            SDMMC1->IDMACTRL = SDMMC_DISABLE_IDMA;
+-            SDMMC1->CMD      = 0;
++            SDMMC2->ICR      = SDMMC_STA_DATAEND;
++            SDMMC2->DLEN     = 0;
++            SDMMC2->DCTRL    = SDMMC_DCTRL_SDIOEN;
++            SDMMC2->IDMACTRL = SDMMC_DISABLE_IDMA;
++            SDMMC2->CMD      = 0;
+             //sdio_transfer_finished_var = true;
+             cy_rtos_set_semaphore(&sdio_transfer_finished_semaphore, WHD_TRUE);
+         }
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_BORMIO/COMPONENT_WHD/src/include/whd_debug.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_BORMIO/COMPONENT_WHD/src/include/whd_debug.h
+index 9655e55ffe..fe955f1c29 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_BORMIO/COMPONENT_WHD/src/include/whd_debug.h
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_BORMIO/COMPONENT_WHD/src/include/whd_debug.h
+@@ -32,8 +32,8 @@ extern "C"
+ *                      Macros
+ ******************************************************/
+ #define WPRINT_ENABLE_WHD_ERROR
+-/* #define WPRINT_ENABLE_WHD_INFO */
+-/* #define WPRINT_ENABLE_WHD_DEBUG */
++#define WPRINT_ENABLE_WHD_INFO
++#define WPRINT_ENABLE_WHD_DEBUG
+ 
+ #define WHD_ENABLE_STATS
+ #define WHD_LOGGING_BUFFER_ENABLE
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_BORMIO/COMPONENT_WHD/whd_config.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_BORMIO/COMPONENT_WHD/whd_config.h
+index e56faf6f68..c0e890ac7f 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_BORMIO/COMPONENT_WHD/whd_config.h
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_BORMIO/COMPONENT_WHD/whd_config.h
+@@ -38,7 +38,7 @@
+ //#define CY_WHD_CONFIG_USE_SPI
+ 
+ /* Set Timeout for your platform */
+-#define WLAN_POWER_UP_DELAY_MS  		250
++#define WLAN_POWER_UP_DELAY_MS  		3000
+ #define SDIO_ENUMERATION_TIMEOUT_MS     500
+ 
+ #define USES_RESOURCE_GENERIC_FILESYSTEM
+@@ -48,16 +48,16 @@
+ #define BSP_LED3		{GPIOK,{.Pin= GPIO_PIN_7 , .Mode = GPIO_MODE_OUTPUT_PP , .Pull = GPIO_NOPULL , .Speed= GPIO_SPEED_FREQ_LOW}}
+ 
+ /* power pin */
+-#define WIFI_WL_REG_ON  	{GPIOJ,{.Pin= GPIO_PIN_1, .Mode = GPIO_MODE_OUTPUT_PP , .Pull = GPIO_NOPULL , .Speed= GPIO_SPEED_FREQ_LOW}}
++#define WIFI_WL_REG_ON  	{GPIOJ,{.Pin= GPIO_PIN_1, .Mode = GPIO_MODE_OUTPUT_PP , .Pull = GPIO_PULLUP , .Speed= GPIO_SPEED_FREQ_LOW}}
+ //#define WIFI_32K_CLK    	{GPIOA,{.Pin= GPIO_PIN_8, .Mode = GPIO_MODE_AF_PP , .Pull = GPIO_NOPULL , .Speed= GPIO_SPEED_FREQ_LOW , .Alternate = GPIO_AF0_MCO}}
+ 
+-#define WIFI_SDIO_CMD		{GPIOD,{.Pin= GPIO_PIN_2 , .Mode = GPIO_MODE_AF_PP , .Pull = GPIO_NOPULL , .Speed= GPIO_SPEED_FREQ_VERY_HIGH, .Alternate = GPIO_AF12_SDIO1}}
+-#define WIFI_SDIO_CLK  		{GPIOC,{.Pin= GPIO_PIN_12, .Mode = GPIO_MODE_AF_PP , .Pull = GPIO_NOPULL , .Speed= GPIO_SPEED_FREQ_VERY_HIGH, .Alternate = GPIO_AF12_SDIO1}}
+-#define WIFI_SDIO_D0		{GPIOC,{.Pin= GPIO_PIN_8 , .Mode = GPIO_MODE_AF_PP , .Pull = GPIO_NOPULL , .Speed= GPIO_SPEED_FREQ_VERY_HIGH, .Alternate = GPIO_AF12_SDIO1}}
+-#define WIFI_SDIO_D1		{GPIOC,{.Pin= GPIO_PIN_9 , .Mode = GPIO_MODE_AF_PP , .Pull = GPIO_NOPULL , .Speed= GPIO_SPEED_FREQ_VERY_HIGH, .Alternate = GPIO_AF12_SDIO1}}
+-#define WIFI_SDIO_D2		{GPIOC,{.Pin= GPIO_PIN_10, .Mode = GPIO_MODE_AF_PP , .Pull = GPIO_NOPULL , .Speed= GPIO_SPEED_FREQ_VERY_HIGH, .Alternate = GPIO_AF12_SDIO1}}
+-#define WIFI_SDIO_D3 		{GPIOC,{.Pin= GPIO_PIN_11, .Mode = GPIO_MODE_AF_PP , .Pull = GPIO_NOPULL , .Speed= GPIO_SPEED_FREQ_VERY_HIGH, .Alternate = GPIO_AF12_SDIO1}}
+-#define WIFI_SDIO_OOB_IRQ 	{GPIOJ,{.Pin= GPIO_PIN_5,  .Mode = GPIO_MODE_IT_FALLING , .Pull = GPIO_NOPULL , .Speed= GPIO_SPEED_FREQ_VERY_HIGH}}
++#define WIFI_SDIO_CMD		{GPIOD,{.Pin= GPIO_PIN_7 , .Mode = GPIO_MODE_AF_PP , .Pull = GPIO_PULLUP , .Speed= GPIO_SPEED_FREQ_VERY_HIGH, .Alternate = GPIO_AF11_SDIO2}}
++#define WIFI_SDIO_CLK  		{GPIOC,{.Pin= GPIO_PIN_1 , .Mode = GPIO_MODE_AF_PP , .Pull = GPIO_NOPULL , .Speed= GPIO_SPEED_FREQ_VERY_HIGH, .Alternate = GPIO_AF9_SDIO2}}
++#define WIFI_SDIO_D0		{GPIOB,{.Pin= GPIO_PIN_14, .Mode = GPIO_MODE_AF_PP , .Pull = GPIO_PULLUP , .Speed= GPIO_SPEED_FREQ_VERY_HIGH, .Alternate = GPIO_AF9_SDIO2}}
++#define WIFI_SDIO_D1		{GPIOB,{.Pin= GPIO_PIN_15, .Mode = GPIO_MODE_AF_PP , .Pull = GPIO_PULLUP , .Speed= GPIO_SPEED_FREQ_VERY_HIGH, .Alternate = GPIO_AF9_SDIO2}}
++#define WIFI_SDIO_D2		{GPIOG,{.Pin= GPIO_PIN_11, .Mode = GPIO_MODE_AF_PP , .Pull = GPIO_PULLUP , .Speed= GPIO_SPEED_FREQ_VERY_HIGH, .Alternate = GPIO_AF10_SDIO2}}
++#define WIFI_SDIO_D3 		{GPIOB,{.Pin= GPIO_PIN_4 , .Mode = GPIO_MODE_AF_PP , .Pull = GPIO_PULLUP , .Speed= GPIO_SPEED_FREQ_VERY_HIGH, .Alternate = GPIO_AF9_SDIO2}}
++#define WIFI_SDIO_OOB_IRQ 	{GPIOJ,{.Pin= GPIO_PIN_5 , .Mode = GPIO_MODE_IT_FALLING , .Pull = GPIO_PULLUP , .Speed= GPIO_SPEED_FREQ_VERY_HIGH}}
+ 
+ #ifndef CYHAL_NC_PIN_VALUE
+ #define CYHAL_NC_PIN_VALUE ( (cyhal_gpio_t)0xFFFFFFFF )
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_BORMIO/PinNames.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_BORMIO/PinNames.h
+index d985141744..7e00436471 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_BORMIO/PinNames.h
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_BORMIO/PinNames.h
+@@ -341,12 +341,12 @@ typedef enum {
+ 
+     WL_REG_ON = PJ_1,
+     WL_HOST_WAKE = PJ_5,
+-    WL_SDIO_0 = PC_8,
+-    WL_SDIO_1 = PC_9,
+-    WL_SDIO_2 = PC_10,
+-    WL_SDIO_3 = PC_11,
+-    WL_SDIO_CMD = PD_2,
+-    WL_SDIO_CLK = PC_12,
++    WL_SDIO_0 = PB_14,
++    WL_SDIO_1 = PB_15,
++    WL_SDIO_2 = PG_11,
++    WL_SDIO_3 = PB_4,
++    WL_SDIO_CMD = PD_7,
++    WL_SDIO_CLK = PC_1,
+ 
+     //Led mappings
+     LED_RED = PC_0,  //Red
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_BORMIO/system_clock_override.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_BORMIO/system_clock_override.c
+index 115500ed56..dc1663f4bb 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_BORMIO/system_clock_override.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_BORMIO/system_clock_override.c
+@@ -32,6 +32,7 @@
+ 
+ #include "stm32h7xx.h"
+ #include "mbed_error.h"
++#include <string.h>
+ 
+ // clock source is selected with CLOCK_SOURCE in json config
+ #define USE_PLL_HSE_EXTC     0x8  // Use external clock (ST Link MCO)
+@@ -213,6 +214,23 @@ uint8_t SetSysClock_PLL_HSI(void)
+     HAL_PWREx_EnableUSBVoltageDetector();
+ #endif
+ 
++    memset(&PeriphClkInitStruct, 0, sizeof(PeriphClkInitStruct));
++
++    PeriphClkInitStruct.PLL2.PLL2M = 32;
++    PeriphClkInitStruct.PLL2.PLL2N = 200;
++    PeriphClkInitStruct.PLL2.PLL2P = 2;
++    PeriphClkInitStruct.PLL2.PLL2Q = 4;
++    PeriphClkInitStruct.PLL2.PLL2R = 5;
++
++    PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_SDMMC | RCC_PERIPHCLK_LPUART1 | RCC_PERIPHCLK_USART234578 | RCC_PERIPHCLK_USART16;
++    PeriphClkInitStruct.Lpuart1ClockSelection = RCC_LPUART1CLKSOURCE_PLL2;
++    PeriphClkInitStruct.Usart234578ClockSelection = RCC_USART234578CLKSOURCE_PLL2;
++    PeriphClkInitStruct.Usart16ClockSelection = RCC_USART16CLKSOURCE_PLL2;
++    PeriphClkInitStruct.SdmmcClockSelection = RCC_SDMMCCLKSOURCE_PLL2;
++    if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK) {
++        return 0; // FAIL
++    }
++
+     return 1; // OK
+ }
+ #endif /* ((CLOCK_SOURCE) & USE_PLL_HSI) */
+-- 
+2.30.1
+

@@ -1,0 +1,28 @@
+From 7601f9519c69bf381c77f67b387527f849069c17 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Mon, 8 Mar 2021 11:17:31 +0100
+Subject: [PATCH 59/67] rp2040: SPI: check SS correctness only if declared
+
+---
+ targets/TARGET_RASPBERRYPI/TARGET_RP2040/spi_api.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/spi_api.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/spi_api.c
+index 1cc6bfa0fb..73129835fa 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/spi_api.c
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/spi_api.c
+@@ -28,8 +28,9 @@ void spi_init(spi_t *obj, PinName mosi, PinName miso, PinName sclk, PinName ssel
+ 
+     MBED_ASSERT(spi_mosi == spi_miso);
+     MBED_ASSERT(spi_miso == spi_sclk);
+-    MBED_ASSERT(spi_sclk == spi_ssel);
+-    MBED_ASSERT(spi_ssel != (SPIName)NC);
++    if (spi_ssel != (SPIName)NC) {
++        MBED_ASSERT(spi_sclk == spi_ssel);
++    }
+ 
+     /* Obtain pointer to the SPI module. */
+     obj->dev = (spi_inst_t *)pinmap_function(mosi, PinMap_SPI_MOSI);
+-- 
+2.30.1
+

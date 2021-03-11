@@ -1,0 +1,136 @@
+From 5f1065c304dc67db211a1cbec7930c9642859662 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Wed, 28 Oct 2020 16:42:41 +0100
+Subject: [PATCH 01/67] WHD: make independent from TARGET_Cypress
+
+---
+ .../COMPONENT_WHD/interface/CyDhcpServer.cpp                    | 0
+ .../{TARGET_Cypress => }/COMPONENT_WHD/interface/CyDhcpServer.h | 2 +-
+ .../COMPONENT_WHD/interface/WhdAccessPoint.cpp                  | 0
+ .../COMPONENT_WHD/interface/WhdAccessPoint.h                    | 0
+ .../COMPONENT_WHD/interface/WhdSTAInterface.cpp                 | 1 +
+ .../COMPONENT_WHD/interface/WhdSTAInterface.h                   | 0
+ .../COMPONENT_WHD/interface/WhdSoftAPInterface.cpp              | 0
+ .../COMPONENT_WHD/interface/WhdSoftAPInterface.h                | 0
+ .../{TARGET_Cypress => }/COMPONENT_WHD/interface/emac_eapol.h   | 0
+ .../{TARGET_Cypress => }/COMPONENT_WHD/interface/whd_emac.cpp   | 0
+ .../{TARGET_Cypress => }/COMPONENT_WHD/interface/whd_emac.h     | 0
+ .../COMPONENT_WHD/interface/whd_interface.cpp                   | 0
+ .../COMPONENT_WHD/interface/whd_interface.h                     | 0
+ .../{TARGET_Cypress => }/COMPONENT_WHD/network/whd_network.h    | 0
+ .../COMPONENT_WHD/utils/cydhcp_server_debug.cpp                 | 0
+ .../{TARGET_Cypress => }/COMPONENT_WHD/utils/cynetwork_utils.c  | 0
+ .../{TARGET_Cypress => }/COMPONENT_WHD/utils/cynetwork_utils.h  | 0
+ 17 files changed, 2 insertions(+), 1 deletion(-)
+ rename connectivity/drivers/emac/{TARGET_Cypress => }/COMPONENT_WHD/interface/CyDhcpServer.cpp (100%)
+ rename connectivity/drivers/emac/{TARGET_Cypress => }/COMPONENT_WHD/interface/CyDhcpServer.h (99%)
+ rename connectivity/drivers/emac/{TARGET_Cypress => }/COMPONENT_WHD/interface/WhdAccessPoint.cpp (100%)
+ rename connectivity/drivers/emac/{TARGET_Cypress => }/COMPONENT_WHD/interface/WhdAccessPoint.h (100%)
+ rename connectivity/drivers/emac/{TARGET_Cypress => }/COMPONENT_WHD/interface/WhdSTAInterface.cpp (99%)
+ rename connectivity/drivers/emac/{TARGET_Cypress => }/COMPONENT_WHD/interface/WhdSTAInterface.h (100%)
+ rename connectivity/drivers/emac/{TARGET_Cypress => }/COMPONENT_WHD/interface/WhdSoftAPInterface.cpp (100%)
+ rename connectivity/drivers/emac/{TARGET_Cypress => }/COMPONENT_WHD/interface/WhdSoftAPInterface.h (100%)
+ rename connectivity/drivers/emac/{TARGET_Cypress => }/COMPONENT_WHD/interface/emac_eapol.h (100%)
+ rename connectivity/drivers/emac/{TARGET_Cypress => }/COMPONENT_WHD/interface/whd_emac.cpp (100%)
+ rename connectivity/drivers/emac/{TARGET_Cypress => }/COMPONENT_WHD/interface/whd_emac.h (100%)
+ rename connectivity/drivers/emac/{TARGET_Cypress => }/COMPONENT_WHD/interface/whd_interface.cpp (100%)
+ rename connectivity/drivers/emac/{TARGET_Cypress => }/COMPONENT_WHD/interface/whd_interface.h (100%)
+ rename connectivity/drivers/emac/{TARGET_Cypress => }/COMPONENT_WHD/network/whd_network.h (100%)
+ rename connectivity/drivers/emac/{TARGET_Cypress => }/COMPONENT_WHD/utils/cydhcp_server_debug.cpp (100%)
+ rename connectivity/drivers/emac/{TARGET_Cypress => }/COMPONENT_WHD/utils/cynetwork_utils.c (100%)
+ rename connectivity/drivers/emac/{TARGET_Cypress => }/COMPONENT_WHD/utils/cynetwork_utils.h (100%)
+
+diff --git a/connectivity/drivers/emac/TARGET_Cypress/COMPONENT_WHD/interface/CyDhcpServer.cpp b/connectivity/drivers/emac/COMPONENT_WHD/interface/CyDhcpServer.cpp
+similarity index 100%
+rename from connectivity/drivers/emac/TARGET_Cypress/COMPONENT_WHD/interface/CyDhcpServer.cpp
+rename to connectivity/drivers/emac/COMPONENT_WHD/interface/CyDhcpServer.cpp
+diff --git a/connectivity/drivers/emac/TARGET_Cypress/COMPONENT_WHD/interface/CyDhcpServer.h b/connectivity/drivers/emac/COMPONENT_WHD/interface/CyDhcpServer.h
+similarity index 99%
+rename from connectivity/drivers/emac/TARGET_Cypress/COMPONENT_WHD/interface/CyDhcpServer.h
+rename to connectivity/drivers/emac/COMPONENT_WHD/interface/CyDhcpServer.h
+index b11d0317cd..fd22eaec47 100644
+--- a/connectivity/drivers/emac/TARGET_Cypress/COMPONENT_WHD/interface/CyDhcpServer.h
++++ b/connectivity/drivers/emac/COMPONENT_WHD/interface/CyDhcpServer.h
+@@ -100,7 +100,7 @@ private:
+     NetworkStack *_nstack = NULL;
+     NetworkInterface *_niface = NULL;
+     UDPSocket _socket;
+-    Thread _thread;
++    rtos::Thread _thread;
+     bool _running = false;
+ 
+     cy_ip_addr_t _available_addr;
+diff --git a/connectivity/drivers/emac/TARGET_Cypress/COMPONENT_WHD/interface/WhdAccessPoint.cpp b/connectivity/drivers/emac/COMPONENT_WHD/interface/WhdAccessPoint.cpp
+similarity index 100%
+rename from connectivity/drivers/emac/TARGET_Cypress/COMPONENT_WHD/interface/WhdAccessPoint.cpp
+rename to connectivity/drivers/emac/COMPONENT_WHD/interface/WhdAccessPoint.cpp
+diff --git a/connectivity/drivers/emac/TARGET_Cypress/COMPONENT_WHD/interface/WhdAccessPoint.h b/connectivity/drivers/emac/COMPONENT_WHD/interface/WhdAccessPoint.h
+similarity index 100%
+rename from connectivity/drivers/emac/TARGET_Cypress/COMPONENT_WHD/interface/WhdAccessPoint.h
+rename to connectivity/drivers/emac/COMPONENT_WHD/interface/WhdAccessPoint.h
+diff --git a/connectivity/drivers/emac/TARGET_Cypress/COMPONENT_WHD/interface/WhdSTAInterface.cpp b/connectivity/drivers/emac/COMPONENT_WHD/interface/WhdSTAInterface.cpp
+similarity index 99%
+rename from connectivity/drivers/emac/TARGET_Cypress/COMPONENT_WHD/interface/WhdSTAInterface.cpp
+rename to connectivity/drivers/emac/COMPONENT_WHD/interface/WhdSTAInterface.cpp
+index af14a7e2c4..6fec15adb0 100644
+--- a/connectivity/drivers/emac/TARGET_Cypress/COMPONENT_WHD/interface/WhdSTAInterface.cpp
++++ b/connectivity/drivers/emac/COMPONENT_WHD/interface/WhdSTAInterface.cpp
+@@ -27,6 +27,7 @@
+ #include "whd_emac.h"
+ #include "whd_wifi_api.h"
+ #include "whd_wlioctl.h"
++#include "cy_utils.h"
+ 
+ #define CMP_MAC( a, b )  (((((unsigned char*)a)[0])==(((unsigned char*)b)[0]))&& \
+                           ((((unsigned char*)a)[1])==(((unsigned char*)b)[1]))&& \
+diff --git a/connectivity/drivers/emac/TARGET_Cypress/COMPONENT_WHD/interface/WhdSTAInterface.h b/connectivity/drivers/emac/COMPONENT_WHD/interface/WhdSTAInterface.h
+similarity index 100%
+rename from connectivity/drivers/emac/TARGET_Cypress/COMPONENT_WHD/interface/WhdSTAInterface.h
+rename to connectivity/drivers/emac/COMPONENT_WHD/interface/WhdSTAInterface.h
+diff --git a/connectivity/drivers/emac/TARGET_Cypress/COMPONENT_WHD/interface/WhdSoftAPInterface.cpp b/connectivity/drivers/emac/COMPONENT_WHD/interface/WhdSoftAPInterface.cpp
+similarity index 100%
+rename from connectivity/drivers/emac/TARGET_Cypress/COMPONENT_WHD/interface/WhdSoftAPInterface.cpp
+rename to connectivity/drivers/emac/COMPONENT_WHD/interface/WhdSoftAPInterface.cpp
+diff --git a/connectivity/drivers/emac/TARGET_Cypress/COMPONENT_WHD/interface/WhdSoftAPInterface.h b/connectivity/drivers/emac/COMPONENT_WHD/interface/WhdSoftAPInterface.h
+similarity index 100%
+rename from connectivity/drivers/emac/TARGET_Cypress/COMPONENT_WHD/interface/WhdSoftAPInterface.h
+rename to connectivity/drivers/emac/COMPONENT_WHD/interface/WhdSoftAPInterface.h
+diff --git a/connectivity/drivers/emac/TARGET_Cypress/COMPONENT_WHD/interface/emac_eapol.h b/connectivity/drivers/emac/COMPONENT_WHD/interface/emac_eapol.h
+similarity index 100%
+rename from connectivity/drivers/emac/TARGET_Cypress/COMPONENT_WHD/interface/emac_eapol.h
+rename to connectivity/drivers/emac/COMPONENT_WHD/interface/emac_eapol.h
+diff --git a/connectivity/drivers/emac/TARGET_Cypress/COMPONENT_WHD/interface/whd_emac.cpp b/connectivity/drivers/emac/COMPONENT_WHD/interface/whd_emac.cpp
+similarity index 100%
+rename from connectivity/drivers/emac/TARGET_Cypress/COMPONENT_WHD/interface/whd_emac.cpp
+rename to connectivity/drivers/emac/COMPONENT_WHD/interface/whd_emac.cpp
+diff --git a/connectivity/drivers/emac/TARGET_Cypress/COMPONENT_WHD/interface/whd_emac.h b/connectivity/drivers/emac/COMPONENT_WHD/interface/whd_emac.h
+similarity index 100%
+rename from connectivity/drivers/emac/TARGET_Cypress/COMPONENT_WHD/interface/whd_emac.h
+rename to connectivity/drivers/emac/COMPONENT_WHD/interface/whd_emac.h
+diff --git a/connectivity/drivers/emac/TARGET_Cypress/COMPONENT_WHD/interface/whd_interface.cpp b/connectivity/drivers/emac/COMPONENT_WHD/interface/whd_interface.cpp
+similarity index 100%
+rename from connectivity/drivers/emac/TARGET_Cypress/COMPONENT_WHD/interface/whd_interface.cpp
+rename to connectivity/drivers/emac/COMPONENT_WHD/interface/whd_interface.cpp
+diff --git a/connectivity/drivers/emac/TARGET_Cypress/COMPONENT_WHD/interface/whd_interface.h b/connectivity/drivers/emac/COMPONENT_WHD/interface/whd_interface.h
+similarity index 100%
+rename from connectivity/drivers/emac/TARGET_Cypress/COMPONENT_WHD/interface/whd_interface.h
+rename to connectivity/drivers/emac/COMPONENT_WHD/interface/whd_interface.h
+diff --git a/connectivity/drivers/emac/TARGET_Cypress/COMPONENT_WHD/network/whd_network.h b/connectivity/drivers/emac/COMPONENT_WHD/network/whd_network.h
+similarity index 100%
+rename from connectivity/drivers/emac/TARGET_Cypress/COMPONENT_WHD/network/whd_network.h
+rename to connectivity/drivers/emac/COMPONENT_WHD/network/whd_network.h
+diff --git a/connectivity/drivers/emac/TARGET_Cypress/COMPONENT_WHD/utils/cydhcp_server_debug.cpp b/connectivity/drivers/emac/COMPONENT_WHD/utils/cydhcp_server_debug.cpp
+similarity index 100%
+rename from connectivity/drivers/emac/TARGET_Cypress/COMPONENT_WHD/utils/cydhcp_server_debug.cpp
+rename to connectivity/drivers/emac/COMPONENT_WHD/utils/cydhcp_server_debug.cpp
+diff --git a/connectivity/drivers/emac/TARGET_Cypress/COMPONENT_WHD/utils/cynetwork_utils.c b/connectivity/drivers/emac/COMPONENT_WHD/utils/cynetwork_utils.c
+similarity index 100%
+rename from connectivity/drivers/emac/TARGET_Cypress/COMPONENT_WHD/utils/cynetwork_utils.c
+rename to connectivity/drivers/emac/COMPONENT_WHD/utils/cynetwork_utils.c
+diff --git a/connectivity/drivers/emac/TARGET_Cypress/COMPONENT_WHD/utils/cynetwork_utils.h b/connectivity/drivers/emac/COMPONENT_WHD/utils/cynetwork_utils.h
+similarity index 100%
+rename from connectivity/drivers/emac/TARGET_Cypress/COMPONENT_WHD/utils/cynetwork_utils.h
+rename to connectivity/drivers/emac/COMPONENT_WHD/utils/cynetwork_utils.h
+-- 
+2.30.1
+

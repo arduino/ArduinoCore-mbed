@@ -1,0 +1,25 @@
+From 2430c80aa3b63fb8406bfedcd49ff0d0b39ec1a8 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Thu, 29 Oct 2020 13:30:40 +0100
+Subject: [PATCH 09/67] BLE: CYW43XXX: set default baud rate on init()
+
+---
+ .../ble/FEATURE_BLE/COMPONENT_CYW43XXX/CyH4TransportDriver.cpp  | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/connectivity/drivers/ble/FEATURE_BLE/COMPONENT_CYW43XXX/CyH4TransportDriver.cpp b/connectivity/drivers/ble/FEATURE_BLE/COMPONENT_CYW43XXX/CyH4TransportDriver.cpp
+index e5e67ea5bd..53d07dd80b 100644
+--- a/connectivity/drivers/ble/FEATURE_BLE/COMPONENT_CYW43XXX/CyH4TransportDriver.cpp
++++ b/connectivity/drivers/ble/FEATURE_BLE/COMPONENT_CYW43XXX/CyH4TransportDriver.cpp
+@@ -127,6 +127,8 @@ void CyH4TransportDriver::initialize()
+     bt_power = 0;
+     rtos::ThisThread::sleep_for(1ms);
+ 
++    uart.baud(DEF_BT_BAUD_RATE);
++
+     uart.format(
+         /* bits */ 8,
+         /* parity */ mbed::SerialBase::None,
+-- 
+2.30.1
+

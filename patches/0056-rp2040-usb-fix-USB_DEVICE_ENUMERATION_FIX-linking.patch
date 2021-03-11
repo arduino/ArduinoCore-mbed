@@ -1,0 +1,52 @@
+From 1c6f392e21cc823a909cd573f2630cdd23131410 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Mon, 8 Mar 2021 10:06:58 +0100
+Subject: [PATCH 56/67] rp2040: usb: fix USB_DEVICE_ENUMERATION_FIX linking
+
+---
+ .../TARGET_RASPBERRYPI/TARGET_RP2040/USBPhy_RP2040.cpp   | 9 +++++++++
+ targets/targets.json                                     | 1 +
+ 2 files changed, 10 insertions(+)
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/USBPhy_RP2040.cpp b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/USBPhy_RP2040.cpp
+index 2ef354035d..c88bdcc573 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/USBPhy_RP2040.cpp
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/USBPhy_RP2040.cpp
+@@ -16,6 +16,11 @@
+  */
+ 
+ #include "USBPhyHw.h"
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
+ // USB register definitions from pico-sdk
+ #include "hardware/regs/usb.h"
+ // USB hardware struct definitions from pico-sdk
+@@ -29,6 +34,10 @@
+ #include "rp2040_usb_device_enumeration.h"
+ #endif
+ 
++#ifdef __cplusplus
++}
++#endif
++
+ // These accessor functions are used to implement bit clear / bit sets through
+ // an atomic alias (this handles the state where both cores can access a register
+ // and cause a bit loss through a read-modify-write access)
+diff --git a/targets/targets.json b/targets/targets.json
+index 0ae0d4de74..efedc05169 100644
+--- a/targets/targets.json
++++ b/targets/targets.json
+@@ -7894,6 +7894,7 @@
+     "NANO_RP2040_CONNECT": {
+         "inherits": ["RP2040"],
+         "macros_add": [
++            "PICO_RP2040_USB_DEVICE_ENUMERATION_FIX=1",
+             "PICO_NO_BINARY_INFO=1",
+             "MBED_MPU_CUSTOM",
+             "PICO_TIME_DEFAULT_ALARM_POOL_DISABLED",
+-- 
+2.30.1
+

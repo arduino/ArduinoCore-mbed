@@ -1,0 +1,26 @@
+From f8e877906477430df3f031c1e7c66253a1184613 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Thu, 10 Dec 2020 19:39:01 +0100
+Subject: [PATCH 20/67] Initial: support Portenta Beta
+
+TODO: add 27mhz clock configuration
+---
+ targets/targets.json | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/targets/targets.json b/targets/targets.json
+index 13cf5f3ab9..4cce1a8102 100644
+--- a/targets/targets.json
++++ b/targets/targets.json
+@@ -3161,7 +3161,7 @@
+         "overrides": {
+             "system_power_supply": "PWR_SMPS_1V8_SUPPLIES_LDO",
+             "clock_source": "USE_PLL_HSE_EXTC",
+-            "lse_available": 1,
++            "lse_available": 0,
+             "lpticker_delay_ticks": 0,
+             "network-default-interface-type": "ETHERNET"
+         },
+-- 
+2.30.1
+

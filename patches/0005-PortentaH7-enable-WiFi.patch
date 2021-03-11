@@ -1,0 +1,28 @@
+From 172a61500d14d0214893a13c10492a206ac58559 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Wed, 28 Oct 2020 15:16:06 +0100
+Subject: [PATCH 05/67] PortentaH7: enable WiFi
+
+---
+ targets/targets.json | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/targets/targets.json b/targets/targets.json
+index be8753d3f3..cd89e70bea 100644
+--- a/targets/targets.json
++++ b/targets/targets.json
+@@ -3140,7 +3140,10 @@
+         ],
+         "detect_code": ["0813"],
+         "components_add": [
+-            "QSPIF"
++            "QSPIF",
++            "WHD",
++            "4343W",
++            "CYW43XXX"
+         ],
+         "device_has_add": [
+             "USBDEVICE",
+-- 
+2.30.1
+

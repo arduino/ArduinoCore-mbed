@@ -1,0 +1,26 @@
+From 912bf3cf47a5ab7e837f20da5110a69c40c1c59f Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Fri, 12 Feb 2021 13:29:58 +0100
+Subject: [PATCH 24/67] Add placeholder files for includes like pico/*.h
+
+---
+ .../TARGET_RP2040/pico-sdk/boards/include/placeholder.h           | 0
+ .../pico-sdk/common/pico_stdlib/include/placeholder.h             | 0
+ .../TARGET_RP2040/pico-sdk/common/pico_time/include/placeholder.h | 0
+ 3 files changed, 0 insertions(+), 0 deletions(-)
+ create mode 100644 targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/boards/include/placeholder.h
+ create mode 100644 targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/common/pico_stdlib/include/placeholder.h
+ create mode 100644 targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/common/pico_time/include/placeholder.h
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/boards/include/placeholder.h b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/boards/include/placeholder.h
+new file mode 100644
+index 0000000000..e69de29bb2
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/common/pico_stdlib/include/placeholder.h b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/common/pico_stdlib/include/placeholder.h
+new file mode 100644
+index 0000000000..e69de29bb2
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/common/pico_time/include/placeholder.h b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/common/pico_time/include/placeholder.h
+new file mode 100644
+index 0000000000..e69de29bb2
+-- 
+2.30.1
+

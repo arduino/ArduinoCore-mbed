@@ -1,0 +1,24 @@
+From 797e0556e005d9b2b479b81a800ccaf7bab31feb Mon Sep 17 00:00:00 2001
+From: Alexander Entinger <cto@lxrobotics.com>
+Date: Tue, 16 Feb 2021 06:29:59 +0100
+Subject: [PATCH 36/67] Indicate that RP2040 has an I2C peripheral.
+
+---
+ targets/targets.json | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/targets/targets.json b/targets/targets.json
+index fcaf22db9d..a9f4519035 100644
+--- a/targets/targets.json
++++ b/targets/targets.json
+@@ -7876,6 +7876,7 @@
+         },
+         "device_has": [
+             "ANALOGIN",
++            "I2C",
+             "PORT_IN",
+             "PORT_OUT",
+             "SERIAL",
+-- 
+2.30.1
+
