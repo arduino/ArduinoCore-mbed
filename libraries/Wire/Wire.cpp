@@ -124,6 +124,8 @@ void arduino::MbedI2C::flush() {
 void arduino::MbedI2C::receiveThd() {
 	while (1) {
 		int i = slave->receive();
+		int c = 0;
+		int buf_idx = 0;
 		switch (i) {
 			case mbed::I2CSlave::ReadAddressed:
 				if (onRequestCb != NULL) {
@@ -139,12 +141,11 @@ void arduino::MbedI2C::receiveThd() {
 			case mbed::I2CSlave::WriteAddressed:
 				rxBuffer.clear();
 				char buf[72];
-				while (1) {
-					size_t c = slave->read(buf, sizeof(buf));
-					for (size_t i = 0; i < c; i++) {
-						rxBuffer.store_char(uint8_t(buf[i]));
-					}
-					if (c <= sizeof(buf)) {
+				c = slave->read(buf, sizeof(buf));
+				for (buf_idx = 0; buf_idx < c; buf_idx++) {
+					if (rxBuffer.availableForStore()) {
+						rxBuffer.store_char(uint8_t(buf[buf_idx]));
+					} else {
 						break;
 					}
 				}
