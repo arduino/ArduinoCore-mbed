@@ -107,7 +107,9 @@ apply_patches () {
 	if [ "$APPLY_PATCHES" -eq 1 ]; then
 		echo -n "Applying patches..."
 		if [ -d "$MBED_CORE_LOCATION"/patches ]; then
-			find "$MBED_CORE_LOCATION"/patches/ -type f -exec patch -p1 -t -d mbed-os -i '{}' ';'
+			cd mbed-os
+			find "$MBED_CORE_LOCATION"/patches/ -type f -print0 | sort -z | xargs -t -0 -n1 git apply
+			cd -
 		fi
 		echo " done."
 	fi
