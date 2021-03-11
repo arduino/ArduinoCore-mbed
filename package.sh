@@ -3,16 +3,20 @@
 # The scope of this file is splitting the build into self consistent packages for distribution
 
 # First target: makers
-VARIANTS="NANO_RP2040_CONNECT ARDUINO_NANO33BLE"
-FQBNS=("nanorp2040connect" "nano33ble")
-LIBRARIES="PDM SPI Wire MRI USBHID USBMSD ThreadDebug Scheduler"
+FLAVOUR="makers"
+VARIANTS=("NANO_RP2040_CONNECT ARDUINO_NANO33BLE")
+FQBNS=("nanorp2040connect nano33ble")
+LIBRARIES=("PDM SPI Wire MRI USBHID USBMSD ThreadDebug Scheduler")
+BOOTLOADERS=("nano33ble")
 
 # Remove mbed folder content
 rm -rf cores/arduino/mbed/*
 # Remove libraries not in $LIBRARIES list
 mkdir _libraries
 cd libraries
-mv $LIBRARIES ../_libraries
+for library in $LIBRARIES; do
+mv $library ../_libraries
+done
 cd ..
 rm -rf libraries
 mv _libraries libraries
@@ -20,7 +24,9 @@ mv _libraries libraries
 # Remove variants not in $VARIANTS list
 mkdir _variants
 cd variants
-mv $VARIANTS ../_variants
+for variant in $VARIANTS; do
+mv $variant ../_variants
+done
 cd ..
 rm -rf variants
 mv _variants variants
@@ -36,4 +42,17 @@ mv _boards.txt boards.txt
 ./mbed-os-to-arduino -b origin/latest -a NANO_RP2040_CONNECT:NANO_RP2040_CONNECT
 ./mbed-os-to-arduino ARDUINO_NANO33BLE:ARDUINO_NANO33BLE
 
-#Package!
+# Remove bootloaders not in $BOOTLOADERS list
+mkdir _bootloaders
+cd bootloaders
+for bootloaders in $BOOTLOADERS; do
+mv $bootloaders ../_bootloaders
+done
+cd ..
+rm -rf bootloaders
+mv _bootloaders bootloaders
+
+#Package! (remove .git, patches folders)
+cd ..
+tar --exclude='*.git*' --exclude='*patches*' -cjhvf ArduinoCore-mbed-$FLAVOUR-$VERSION.tar.bz2 ArduinoCore-mbed
+cd -
