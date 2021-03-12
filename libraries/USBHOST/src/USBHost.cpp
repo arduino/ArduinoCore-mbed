@@ -3,6 +3,10 @@
 
 static rtos::Thread t(osPriorityHigh);
 
+static void USBHost::enableVbus(){
+  mbed::DigitalOut otg(PJ_6, 0); //Provide power to USB when powered through VIN
+}
+
 void USBHost::InternalTask() {
   while (1) {
     tusbh_msg_loop(mq);

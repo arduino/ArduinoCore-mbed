@@ -26,6 +26,8 @@ public:
 		return _hs;
 	};
 
+	static void enableVbus();
+
 private:
 
 	void InternalTask();
