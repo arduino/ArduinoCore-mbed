@@ -3,6 +3,10 @@
 
 static rtos::Thread t(osPriorityHigh);
 
+void USBHost::supplyPowerOnVBUS(bool enable){
+  mbed::DigitalOut otg(PJ_6, enable ? 0 : 1);
+}
+
 void USBHost::InternalTask() {
   while (1) {
     tusbh_msg_loop(mq);

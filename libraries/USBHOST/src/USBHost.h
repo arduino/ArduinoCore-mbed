@@ -26,6 +26,12 @@ public:
 		return _hs;
 	};
 
+	/**
+	 * Allows to provide power to USB devices on VBUS when powered through VIN.
+	 * @param enable A flag to indicate whether power is supplied on VBUS.
+	*/
+	void supplyPowerOnVBUS(bool enable);
+
 private:
 
 	void InternalTask();
