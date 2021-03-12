@@ -26,7 +26,7 @@ public:
 		return _hs;
 	};
 
-	static void enableVbus();
+	static void supplyPowerOnVBUS();
 
 private:
 
