@@ -1,0 +1,59 @@
+;
+;
+; Installs WinUsb
+;
+
+[Version]
+Signature   = "$Windows NT$"
+Class       = USBDevice
+ClassGUID   = {88BAE032-5A81-49f0-BC3D-A4FF138216D6}
+Provider    = %ManufacturerName%
+CatalogFile = nanorp2040connect.cat
+DriverVer   = 03/16/2021,10.48.00.000
+
+; ========== Manufacturer/Models sections ===========
+
+[Manufacturer]
+%ManufacturerName% = Standard,NTamd64
+
+[Standard.NTamd64]
+%DeviceName% =USB_Install, USB\VID_2E8A&PID_0003&MI_01
+
+; ========== Class definition ===========
+
+[ClassInstall32]
+AddReg = ClassInstall_AddReg
+
+[ClassInstall_AddReg]
+HKR,,,,%ClassName%
+HKR,,NoInstallClass,,1
+HKR,,IconPath,%REG_MULTI_SZ%,"%systemroot%\system32\setupapi.dll,-20"
+HKR,,LowerLogoVersion,,5.2
+
+; =================== Installation ===================
+
+[USB_Install]
+Include = winusb.inf
+Needs   = WINUSB.NT
+
+[USB_Install.Services]
+Include = winusb.inf
+Needs   = WINUSB.NT.Services
+
+[USB_Install.HW]
+AddReg=Dev_AddReg
+
+[Dev_AddReg]
+HKR,,DeviceInterfaceGUIDs,0x10000,"{51de5bfa-d59d-4f3e-9b36-0b4b210dd53f}"
+
+; [DestinationDirs]
+; If your INF needs to copy files, you must not use the DefaultDestDir directive here.  
+; You must explicitly reference all file-list-section names in this section.
+
+; =================== Strings ===================
+
+[Strings]
+ManufacturerName="Arduino"
+ClassName="Universal Serial Bus devices"
+DeviceName="Nano RP2040 Connect Picoboot IF"
+REG_MULTI_SZ = 0x00010000
