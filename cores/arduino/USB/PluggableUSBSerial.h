@@ -221,18 +221,27 @@ public:
     }
 
     int available(void) {
+        USBCDC::lock();
         onInterrupt();
-        return rx_buffer.available();
+        auto ret = rx_buffer.available();
+        USBCDC::unlock();
+        return ret;
     }
 
     int peek(void) {
+        USBCDC::lock();
         onInterrupt();
-        return rx_buffer.peek();
+        auto ret = rx_buffer.peek();
+        USBCDC::unlock();
+        return ret;
     }
 
     int read(void) {
+        USBCDC::lock();
         onInterrupt();
-        return rx_buffer.read_char();
+        auto ret = rx_buffer.read_char();
+        USBCDC::unlock();
+        return ret;
     }
 
     void flush(void) {}
