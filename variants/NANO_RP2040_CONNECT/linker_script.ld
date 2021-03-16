@@ -133,8 +133,9 @@ SECTIONS
     .heap (COPY):
     {
         __end__ = .;
-        end = __end__;
+        PROVIDE(end = .);
         *(.heap*)
+        . = ORIGIN(RAM) + LENGTH(RAM) - 0x400;
         __HeapLimit = .;
     } > RAM
     .stack1_dummy (COPY):
@@ -144,13 +145,13 @@ SECTIONS
     .stack_dummy (COPY):
     {
         *(.stack*)
-    } > SCRATCH_Y
+    } > RAM
     .flash_end : {
         __flash_binary_end = .;
     } > FLASH
-    __StackLimit = ORIGIN(RAM) + LENGTH(RAM);
+    __StackTop = ORIGIN(RAM) + LENGTH(RAM);
+    __StackLimit = __StackTop - 0x400;
     __StackOneTop = ORIGIN(SCRATCH_X) + LENGTH(SCRATCH_X);
-    __StackTop = ORIGIN(SCRATCH_Y) + LENGTH(SCRATCH_Y);
     __StackOneBottom = __StackOneTop - SIZEOF(.stack1_dummy);
     __StackBottom = __StackTop - SIZEOF(.stack_dummy);
     PROVIDE(__stack = __StackTop);

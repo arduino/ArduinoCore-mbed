@@ -21,7 +21,6 @@
 -fmessage-length=0
 -fomit-frame-pointer
 -funsigned-char
--g
 -mcpu=cortex-m7
 -mfloat-abi=softfp
 -mfpu=fpv5-d16
