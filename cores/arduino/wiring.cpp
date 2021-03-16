@@ -26,22 +26,26 @@
 #include "mbed/rtos/rtos.h"
 #include "mbed/platform/mbed_wait_api.h"
 
-#if DEVICE_LPTICKER
-static mbed::LowPowerTimer t;
-#else
-static mbed::Timer t;
-#endif
-
 using namespace std::chrono_literals;
 using namespace std::chrono;
 
+static mbed::Timer timer;
+
+#if DEVICE_LPTICKER
+  static mbed::LowPowerTimer lowPowerTimer;
+#else
+  // Fallback for devices which don't support
+  // a low power ticker.
+  static mbed::Timer& lowPowerTimer = timer;
+#endif
+
 unsigned long millis()
 {
-  return duration_cast<milliseconds>(t.elapsed_time()).count();
+  return duration_cast<milliseconds>(lowPowerTimer.elapsed_time()).count();
 }
 
 unsigned long micros() {
-  return t.elapsed_time().count();
+  return timer.elapsed_time().count();
 }
 
 void delay(unsigned long ms)
@@ -60,7 +64,8 @@ void delayMicroseconds(unsigned int us)
 
 void init()
 {
-  t.start();
+  timer.start();
+  lowPowerTimer.start();
 }
 
 void yield() {
