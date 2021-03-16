@@ -36,7 +36,7 @@ static mbed::Timer timer;
 #else
   // Fallback for devices which don't support
   // a low power ticker.
-  static mbed::Timer lowPowerTimer;
+  static mbed::Timer& lowPowerTimer = timer;
 #endif
 
 unsigned long millis()
