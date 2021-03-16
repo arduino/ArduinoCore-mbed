@@ -2,6 +2,7 @@
 
 #if defined(ARDUINO_ARCH_NRF52840)
 
+#include "mbed.h"
 #include <hal/nrf_timer.h>
 #include <hal/nrf_gpiote.h>
 #include <hal/nrf_gpio.h>

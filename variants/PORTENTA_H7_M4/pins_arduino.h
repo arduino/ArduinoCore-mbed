@@ -14,6 +14,8 @@ extern "C" bool isBetaBoard();
 #define NUM_ANALOG_INPUTS    (7u)
 #define NUM_ANALOG_OUTPUTS   (1u)
 
+extern PinName digitalPinToPinName(pin_size_t P);
+
 // LEDs
 // ----
 #define PIN_LED     (23u)

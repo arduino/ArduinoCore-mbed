@@ -23,18 +23,24 @@
 #include "api/RingBuffer.h"
 #include "Arduino.h"
 #include "api/HardwareSerial.h"
-#include "drivers/UnbufferedSerial.h"
+#include "PinNames.h"
 
 #ifdef __cplusplus
 
 #ifndef __ARDUINO_UART_IMPLEMENTATION__
 #define __ARDUINO_UART_IMPLEMENTATION__
 
+typedef struct _mbed_serial mbed_serial;
+typedef struct _mbed_usb_serial mbed_usb_serial;
+
 namespace arduino {
 
 class UART : public HardwareSerial {
 	public:
-		UART(int _tx, int _rx, int _rts, int _cts) : tx((PinName)_tx), rx((PinName)_rx), rts((PinName)_rts), cts((PinName)_cts) {};
+		UART(int tx, int rx, int rts, int cts) : _tx((PinName)tx), _rx((PinName)rx), _rts((PinName)rts), _cts((PinName)cts) {}
+		UART() {
+			is_usb = true;
+		}
 		void begin(unsigned long);
 		void begin(unsigned long baudrate, uint16_t config);
 		void end();
@@ -47,16 +53,27 @@ class UART : public HardwareSerial {
 		using Print::write; // pull in write(str) and write(buf, size) from Print
 		operator bool();
 
+#if defined(SERIAL_CDC)
+		uint32_t baud();
+		uint8_t stopbits();
+		uint8_t paritytype();
+		uint8_t numbits();
+		bool dtr();
+		bool rts();
+#endif
+
 	private:
 		void on_rx();
 		void block_tx(int);
 		bool _block;
 		// See https://github.com/ARMmbed/mbed-os/blob/f5b5989fc81c36233dbefffa1d023d1942468d42/targets/TARGET_NORDIC/TARGET_NRF5x/TARGET_NRF52/serial_api.c#L76
 		const size_t WRITE_BUFF_SZ = 32;
-		mbed::UnbufferedSerial* _serial = NULL;
-		PinName tx, rx, rts, cts;
+		mbed_serial* _serial = NULL;
+		mbed_usb_serial* _usb_serial = NULL;
+		PinName _tx, _rx, _rts, _cts;
 		RingBufferN<256> rx_buffer;
 		uint8_t intermediate_buf[4];
+		bool is_usb = false;
 };
 }
 
@@ -64,6 +81,7 @@ extern arduino::UART _UART1_;
 extern arduino::UART _UART2_;
 extern arduino::UART _UART3_;
 extern arduino::UART _UART4_;
+extern arduino::UART _UART_USB_;
 
 #endif
 #endif

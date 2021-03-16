@@ -40,6 +40,7 @@ extern "C" {
 #include <stdlib.h>
 
 #include "Arduino.h"
+#include "mbed.h"
 
 #ifdef TUSB_HAS_OS
 

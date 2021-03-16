@@ -21,6 +21,7 @@
 */
 
 #include "Wire.h"
+#include "pinDefinitions.h"
 
 arduino::MbedI2C::MbedI2C(int sda, int scl) : _sda(sda), _scl(scl), usedTxBuffer(0) {}
 

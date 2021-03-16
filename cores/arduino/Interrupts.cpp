@@ -17,6 +17,7 @@
 */
 
 #include "Arduino.h"
+#include "pinDefinitions.h"
 
 void detachInterrupt(PinName interruptNum) {
   pin_size_t idx = PinNameToIndex(interruptNum);

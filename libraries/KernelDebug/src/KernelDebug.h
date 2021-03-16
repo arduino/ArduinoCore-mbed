@@ -31,6 +31,7 @@
 #pragma once
 
 #include <mbed.h>
+#include <pinDefinitions.h>
 
 
 namespace arduino {

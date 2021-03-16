@@ -66,9 +66,9 @@ class MbedI2C : public HardwareI2C
 private:
 
 #ifdef DEVICE_I2CSLAVE
-    mbed::I2CSlave* slave;
+    mbed::I2CSlave* slave = NULL;
 #endif
-    mbed::I2C*      master;
+    mbed::I2C*      master = NULL;
     int _sda;
     int _scl;
     int _address;

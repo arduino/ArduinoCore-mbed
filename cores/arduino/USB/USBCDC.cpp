@@ -17,7 +17,6 @@
 
 
 #include "Arduino.h"
-#include "PeripheralPins.h"
 
 #if DEVICE_USBDEVICE && defined(SERIAL_CDC)
 

@@ -18,7 +18,7 @@
 */
 
 #include <Arduino.h>
-#include <USB/PluggableUSBDevice.h>
+#include <USB/PluggableUSBSerial.h>
 
 // Declared weak in Arduino.h to allow user redefinitions.
 int atexit(void (* /*func*/ )()) { return 0; }

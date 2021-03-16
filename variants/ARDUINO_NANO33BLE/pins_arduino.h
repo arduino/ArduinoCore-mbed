@@ -47,6 +47,8 @@ extern "C" unsigned int PINCOUNT_fn();
 #define NUM_ANALOG_INPUTS    (8u)
 #define NUM_ANALOG_OUTPUTS   (0u)
 
+extern PinName digitalPinToPinName(pin_size_t P);
+
 // LEDs
 // ----
 #define PIN_LED     (13u)

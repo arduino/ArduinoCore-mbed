@@ -1,4 +1,5 @@
 #include "Arduino.h"
+#include "pinDefinitions.h"
 
 RTC_HandleTypeDef RTCHandle;
 

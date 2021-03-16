@@ -21,13 +21,24 @@
 */
 
 #include "SPI.h"
+#include "pinDefinitions.h"
+#if !defined(ARDUINO_AS_MBED_LIBRARY)
+#include "drivers/SPIMaster.h"
+#else
+#include "drivers/SPI.h"
+#endif
+
+struct _mbed_spi {
+  mbed::SPI* obj;
+};
+
 
 arduino::MbedSPI::MbedSPI(int miso, int mosi, int sck) : _miso(miso), _mosi(mosi), _sck(sck) {
 }
 
 uint8_t arduino::MbedSPI::transfer(uint8_t data) {
     uint8_t ret;
-    dev->write((const char*)&data, 1, (char*)&ret, 1);
+    dev->obj->write((const char*)&data, 1, (char*)&ret, 1);
     return ret;
 }
 
@@ -47,7 +58,7 @@ uint16_t arduino::MbedSPI::transfer16(uint16_t data) {
 }
 
 void arduino::MbedSPI::transfer(void *buf, size_t count) {
-    dev->write((const char*)buf, count, (char*)buf, count);
+    dev->obj->write((const char*)buf, count, (char*)buf, count);
 }
 
 void arduino::MbedSPI::usingInterrupt(int interruptNumber) {
@@ -60,8 +71,8 @@ void arduino::MbedSPI::notUsingInterrupt(int interruptNumber) {
 
 void arduino::MbedSPI::beginTransaction(SPISettings settings) {
     if (settings != this->settings) {
-        dev->format(8, settings.getDataMode());
-        dev->frequency(settings.getClockFreq());
+        dev->obj->format(8, settings.getDataMode());
+        dev->obj->frequency(settings.getClockFreq());
         this->settings = settings;
     }
 }
@@ -79,12 +90,18 @@ void arduino::MbedSPI::detachInterrupt() {
 }
 
 void arduino::MbedSPI::begin() {
-    dev = new mbed::SPI((PinName)_mosi, (PinName)_miso, (PinName)_sck);
+    if (dev == NULL) {
+      dev = new mbed_spi;
+      dev->obj = NULL;
+    }
+    if (dev->obj == NULL) {
+      dev->obj = new mbed::SPI((PinName)_mosi, (PinName)_miso, (PinName)_sck);
+    }
 }
 
 void arduino::MbedSPI::end() {
-    if (dev != NULL) {
-        delete dev;
+    if (dev->obj != NULL) {
+        delete dev->obj;
     }
 }
 

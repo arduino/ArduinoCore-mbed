@@ -1,4 +1,5 @@
 #include "Arduino.h"
+#include "pinDefinitions.h"
 
 AnalogPinDescription g_AAnalogPinDescription[] = {
   { p26,        NULL },    // A0

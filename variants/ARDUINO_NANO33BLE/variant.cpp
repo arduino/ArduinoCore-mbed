@@ -1,4 +1,5 @@
 #include "Arduino.h"
+#include "pinDefinitions.h"
 
 /* wiring_analog variables definition */
 /* Flag to indicate whether the ADC config has been changed from the default one */

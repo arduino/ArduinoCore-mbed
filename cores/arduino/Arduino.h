@@ -23,34 +23,23 @@
 #if !defined(Arduino_h) && !defined(ARDUINO_LIB_DISCOVERY_PHASE)
 #define Arduino_h
 
-#if defined(__cplusplus)
 #if !defined(ARDUINO_AS_MBED_LIBRARY)
-
 #include "pinmode_arduino.h"
-
-#ifdef F
-#define Arduino_F F
-#undef F
-#endif // F (mbed included after arduino.h)
-#define F Mbed_F
-#endif // !ARDUINO_AS_MBED_LIBRARY
-#include "mbed_config.h"
-#include "drivers/InterruptIn.h"
-#include "drivers/PwmOut.h"
-#include "drivers/AnalogIn.h"
-#include "drivers/DigitalInOut.h"
-#include "mbed.h"
-#undef F
-#endif //__cplusplus
-
-#if defined(ARDUINO_AS_MBED_LIBRARY)
-#define PinMode ArduinoPinMode
-#define Arduino_F F
 #endif
 
 #include "api/ArduinoAPI.h"
 
 #if defined(__cplusplus)
+
+#undef F
+// C++11 F replacement declaration
+template <typename T1>
+auto F(T1&& A)
+  -> const arduino::__FlashStringHelper*
+{
+  return (const arduino::__FlashStringHelper*)A;
+}
+
 #if !defined(ARDUINO_AS_MBED_LIBRARY)
 using namespace arduino;
 #endif
@@ -91,28 +80,15 @@ void analogWriteResolution(int bits);
 
 #ifdef __cplusplus
 // Types used for the table below
-typedef struct _PinDescription
-{
-  PinName name;
-  mbed::InterruptIn* irq;
-  mbed::PwmOut* pwm;
-  mbed::DigitalInOut* gpio;
-} PinDescription ;
-
-typedef struct _AnalogPinDescription
-{
-  PinName name;
-  mbed::AnalogIn* adc;
-} AnalogPinDescription ;
-
-int PinNameToIndex(PinName P);
+typedef struct _PinDescription PinDescription;
+typedef struct _AnalogPinDescription AnalogPinDescription;
 
 // Pins table to be instantiated into variant.cpp
 extern PinDescription g_APinDescription[];
 extern AnalogPinDescription g_AAnalogPinDescription[];
 
 #ifdef ANALOG_CONFIG
-
+#include "hal/analogin_api.h"
 typedef enum _AnalogReferenceMode AnalogReferenceMode;
 void analogReference(uint8_t mode);
 /* nRF specific function to change analog acquisition time */
@@ -128,8 +104,7 @@ extern analogin_config_t adcCurrentConfig;
 
 #include "Serial.h"
 #if defined(SERIAL_CDC)
-#include "USB/PluggableUSBSerial.h"
-#define Serial SerialUSB
+#define Serial _UART_USB_
 #else
 #define Serial _UART1_
 #endif

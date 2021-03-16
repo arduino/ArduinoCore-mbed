@@ -22,7 +22,7 @@
 
 #include "Arduino.h"
 #include "pins_arduino.h"
-#include "drivers/AnalogIn.h"
+#include "pinDefinitions.h"
 
 static int write_resolution = 8;
 static int read_resolution = 10;
