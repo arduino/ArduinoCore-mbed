@@ -32,12 +32,12 @@ extern PinName digitalPinToPinName(pin_size_t P);
 #define PIN_A1 (15u)
 #define PIN_A2 (16u)
 #define PIN_A3 (17u)
-/*
+
 static const uint8_t A0  = PIN_A0;
 static const uint8_t A1  = PIN_A1;
 static const uint8_t A2  = PIN_A2;
 static const uint8_t A3  = PIN_A3;
-*/
+
 #define ADC_RESOLUTION 12
 
 // PDM Interfaces
