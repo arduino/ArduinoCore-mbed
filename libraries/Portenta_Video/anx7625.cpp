@@ -32,7 +32,9 @@
 #define ANXDEBUG(format, ...) \
 		printk(BIOS_DEBUG, "%s: " format, __func__, ##__VA_ARGS__)
 
-
+mbed::DigitalOut video_on(PK_2);
+mbed::DigitalOut video_rst(PJ_3);
+mbed::DigitalOut otg_on(PJ_6);
 mbed::I2C i2cx(I2C_SDA_INTERNAL , I2C_SCL_INTERNAL);
 
 int i2c_writeb(uint8_t bus, uint8_t saddr, uint8_t offset, uint8_t val) {
@@ -818,13 +820,13 @@ static int anx7625_hpd_change_detect(uint8_t bus)
 
 	ret = anx7625_reg_read(bus, RX_P0_ADDR, SYSTEM_STSTUS, &status);
 	if (ret < 0) {
-		ANXERROR("IO error: Failed to clear interrupt status.\n");
+		ANXERROR("IO error: Failed to read HPD_STATUS register.\n");
 		return ret;
 	}
 
 	if (status & HPD_STATUS) {
+		ANXINFO("HPD event received 0x7e:0x45=%#x\n", status);
 		anx7625_start_dp_work(bus);
-		ANXINFO("HPD received 0x7e:0x45=%#x\n", status);
 		return 1;
 	}
 	return 0;
@@ -1312,8 +1314,26 @@ int anx7625_dp_get_edid(uint8_t bus, struct edid *out)
 
 int anx7625_init(uint8_t bus)
 {
-	int retry_hpd_change = 500;
 	int retry_power_on = 3;
+
+	ANXINFO("OTG_ON = 1 -> VBUS OFF\n");
+	otg_on = 1;
+
+	mdelay(1000);
+	video_on = 1;
+	mdelay(10);
+	video_rst = 1;
+	mdelay(10);
+
+	video_on = 0;
+	mdelay(10);
+	video_rst = 0;
+	mdelay(100);
+
+	ANXINFO("Powering on anx7625...\n");
+	video_on = 1;
+	mdelay(100);
+	video_rst = 1;
 
 	while (--retry_power_on) {
 		if (anx7625_power_on_init(bus) == 0)
@@ -1323,16 +1343,117 @@ int anx7625_init(uint8_t bus)
 		ANXERROR("Failed to power on.\n");
 		return -1;
 	}
+	ANXINFO("Powering on anx7625 successfull.\n");
+	mdelay(200); // Wait for anx7625 to be stable
 
-	while (--retry_hpd_change) {
-		mdelay(10);
-		int detected = anx7625_hpd_change_detect(bus);
-		if (detected < 0)
-			return -1;
-		if (detected > 0)
-			return 0;
+	if(anx7625_is_power_provider(0)) {
+		ANXINFO("OTG_ON = 0 -> VBUS ON\n");
+		otg_on = 0;
+		mdelay(1000); // Wait for powered device to be stable
 	}
 
-	ANXERROR("Timed out to detect HPD change on bus %d.\n", bus);
-	return -1;
+	return 0;
+}
+
+void anx7625_wait_hpd_event(uint8_t bus)
+{
+	ANXINFO("Waiting for hdmi hot plug event...\n");
+	while (1) {
+		mdelay(10);
+		int detected = anx7625_hpd_change_detect(bus);
+		if (detected == 1)
+			break;
+	}
+}
+
+int anx7625_get_cc_status(uint8_t bus, uint8_t *cc_status)
+{
+	int ret = 0;
+	ret = anx7625_reg_read(bus, RX_P0_ADDR, NEW_CC_STATUS, cc_status); // 0x7e, 0x46
+	if (ret < 0) {
+		ANXERROR("Failed %s", __func__);
+		return ret;
+	}
+	switch (*cc_status & 0x0F) {
+	case 0:
+		ANXDEBUG("anx: CC1: SRC.Open\n"); break;
+	case 1:
+		ANXDEBUG("anx: CC1: SRC.Rd\n"); break;
+	case 2:
+		ANXDEBUG("anx: CC1: SRC.Ra\n"); break;
+	case 4:
+		ANXDEBUG("anx: CC1: SNK.default\n"); break;
+	case 8:
+		ANXDEBUG("anx: CC1: SNK.power.1.5\n"); break;
+	case 12:
+		ANXDEBUG("anx: CC1: SNK.power.3.0\n"); break;
+	default:
+		ANXDEBUG("anx: CC1: Reserved\n");
+	}
+	switch (*cc_status & 0xF0) {
+	case 0:
+		ANXDEBUG("anx: CC2: SRC.Open\n"); break;
+	case 1:
+		ANXDEBUG("anx: CC2: SRC.Rd\n"); break;
+	case 2:
+		ANXDEBUG("anx: CC2: SRC.Ra\n"); break;
+	case 4:
+		ANXDEBUG("anx: CC2: SNK.default\n"); break;
+	case 8:
+		ANXDEBUG("anx: CC2: SNK.power.1.5\n"); break;
+	case 12:
+		ANXDEBUG("anx: CC2: SNK.power.3.0\n"); break;
+	default:
+		ANXDEBUG("anx: CC2: Reserved\n");
+	}
+	return ret;
+}
+
+int anx7625_read_system_status(uint8_t bus, uint8_t *sys_status)
+{
+	int ret = 0;
+	ret = anx7625_reg_read(bus, RX_P0_ADDR, SYSTEM_STSTUS, sys_status); // 0x7e, 0x45
+	if (ret < 0) {
+		ANXERROR("Failed %s", __func__);
+		return ret;
+	}
+	if (*sys_status & (1<<2))
+		ANXDEBUG("anx: - VCONN status ON\n");
+	if (!(*sys_status & (1<<2)))
+		ANXDEBUG("anx: - VCONN status OFF\n");
+
+	if (*sys_status & (1<<3))
+		ANXDEBUG("anx: - VBUS power provider\n");
+	if (!(*sys_status & (1<<3)))
+		ANXDEBUG("anx: - VBUS power consumer\n");
+
+	if (*sys_status & (1<<5))
+		ANXDEBUG("anx: - Data Role: DFP\n");
+	if (!(*sys_status & (1<<5)))
+		ANXDEBUG("anx: - Data Role: UFP\n");
+
+	if (*sys_status & (1<<7))
+		ANXDEBUG("anx: - DP HPD high\n");
+	if (!(*sys_status & (1<<7)))
+		ANXDEBUG("anx: - DP HPD low\n");
+	return ret;
+}
+
+// This function is used to understand if we need to provide VBUS on USB-C
+// connector or not
+bool anx7625_is_power_provider(uint8_t bus)
+{
+	int ret = 0;
+	uint8_t sys_status = 0;
+	anx7625_read_system_status(bus, &sys_status);
+	if (ret < 0) {
+		ANXERROR("Failed %s", __func__);
+		return false; // Conservative
+	}
+	else {
+		if (sys_status & (1<<3))
+			return true;
+		else
+			return false;
+	}
 }

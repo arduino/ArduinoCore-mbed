@@ -68,10 +68,8 @@ extern "C" {
 #define INTR_SOFTWARE_INT (1<<3)
 #define INTR_RECEIVED_MSG (1<<5)
 
-#define SYSTEM_STSTUS 0x45
 #define INTERFACE_CHANGE_INT 0x44
 #define HPD_STATUS_CHANGE 0x80
-#define HPD_STATUS 0x80
 
 /******** END of I2C Address 0x58 ********/
 
@@ -199,6 +197,16 @@ extern "C" {
 #define AP_MIPI_RX_EN (1<<5) /* 1: MIPI RX input in  0: no RX in */
 #define AP_DISABLE_PD (1<<6)
 #define AP_DISABLE_DISPLAY (1<<7)
+
+#define SYSTEM_STSTUS		0x45
+#define VCONN_STATUS		(1<<2)
+#define VBUS_STATUS	        (1<<3)
+#define DATA_ROLE_STATUS	(1<<5)
+#define HPD_STATUS		    (1<<7)
+#define NEW_CC_STATUS		0x46
+
+/******** END of I2C Address 0x7e *********/
+
 /***************************************************************/
 /* Register definition of device address 0x84 */
 #define  MIPI_PHY_CONTROL_3            0x03
@@ -363,6 +371,10 @@ struct display_timing {
 int anx7625_dp_start(uint8_t bus, const struct edid *edid, enum edid_modes mode = EDID_MODE_AUTO);
 int anx7625_dp_get_edid(uint8_t bus, struct edid *out);
 int anx7625_init(uint8_t bus);
+void anx7625_wait_hpd_event(uint8_t bus);
+int anx7625_get_cc_status(uint8_t bus, uint8_t *cc_status);
+int anx7625_read_system_status(uint8_t bus, uint8_t *sys_status);
+bool anx7625_is_power_provider(uint8_t bus);
 int stm32_dsi_config(uint8_t bus, struct edid *edid, struct display_timing *dt);
 void stm32_BriefDisplay(void);
 void stm32_LCD_Clear(uint32_t color);
