@@ -10,8 +10,8 @@ AnalogPinDescription g_AAnalogPinDescription[] = {
 
 PinDescription g_APinDescription[] = {
   // D0 - D7
-  { p0,         NULL, NULL, NULL },    // D0
-  { p1,         NULL, NULL, NULL },    // D1
+  { p1,         NULL, NULL, NULL },    // D0
+  { p0,         NULL, NULL, NULL },    // D1
   { p25,        NULL, NULL, NULL },    // D2
   { p15,        NULL, NULL, NULL },    // D3
   { p16,        NULL, NULL, NULL },    // D4
