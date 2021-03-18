@@ -1,0 +1,14 @@
+-DMBED_BOOT_STACK_SIZE=1024
+-DXIP_ENABLE=1
+-Wl,--gc-sections
+-Wl,--wrap,_calloc_r
+-Wl,--wrap,_free_r
+-Wl,--wrap,_malloc_r
+-Wl,--wrap,_memalign_r
+-Wl,--wrap,_realloc_r
+-Wl,--wrap,atexit
+-Wl,--wrap,exit
+-Wl,--wrap,main
+-Wl,-n
+-mcpu=cortex-m0plus
+-mthumb
