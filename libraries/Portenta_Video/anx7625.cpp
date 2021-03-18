@@ -17,6 +17,7 @@
 //#include <delay.h>
 //#include <device/i2c_simple.h>
 #include <Arduino.h>
+#include <drivers/DigitalOut.h>
 //#include <gpio.h>
 //#include <timer.h>
 #include <string.h>
