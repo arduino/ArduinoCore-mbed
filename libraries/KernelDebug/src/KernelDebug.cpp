@@ -304,7 +304,7 @@ static const char g_memoryMapXml[] = "<?xml version=\"1.0\"?>"
                                      "<memory type=\"ram\" start=\"0x58026000\" length=\"0x800\"> </memory>"
                                      "<memory type=\"ram\" start=\"0x58027000\" length=\"0x400\"> </memory>"
                                      "<memory type=\"flash\" start=\"0x90000000\" length=\"0x10000000\"> <property name=\"blocksize\">0x200</property></memory>"
-                                     "<memory type=\"ram\" start=\"0xc0000000\" length=\"0x800000\"> </memory>"
+                                     "<memory type=\"ram\" start=\"0x60000000\" length=\"0x800000\"> </memory>"
                                      "</memory-map>";
 
 extern "C" uint32_t Platform_GetDeviceMemoryMapXmlSize(void)

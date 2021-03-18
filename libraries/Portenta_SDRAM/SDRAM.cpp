@@ -18,10 +18,47 @@ int SDRAMClass::begin(uint32_t start_address) {
 			then enable access/caching for the size used
 		*/
 
+        if (SDRAM_START_ADDRESS != 0xC0000000) {
+		    printf("remap ram to 0x60000000\n");
+            HAL_SetFMCMemorySwappingConfig(FMC_SWAPBMAP_SDRAM_SRAM);
+        }
+
+#if 0
+
+		printf("setup mpu\n");
+        #define MPU_SDRAM_EXEC_REGION_NUMBER  MPU_REGION_SDRAM1
+        #define MPU_SDRAM_REGION_TEX          (0x4 << MPU_RASR_TEX_Pos) /* Cached memory */
+        #define MPU_SDRAM_EXEC_REGION_SIZE    (22 << MPU_RASR_SIZE_Pos)  /* 2^(22+1) = 8Mo */
+        #define MPU_SDRAM_ACCESS_PERMSSION    (0x03UL << MPU_RASR_AP_Pos)
+        #define MPU_SDRAM_REGION_CACHABLE     (0x01UL << MPU_RASR_C_Pos)
+        #define MPU_SDRAM_REGION_BUFFERABLE   (0x01UL << MPU_RASR_B_Pos)
+
+        MPU->CTRL &= ~MPU_CTRL_ENABLE_Msk;
+	    /* Configure SDARM region as first region */
+	    MPU->RNR  = MPU_SDRAM_EXEC_REGION_NUMBER;
+	    /* Set MPU SDARM base address (0xD0000000) */
+        MPU->RBAR = SDRAM_START_ADDRESS;
+        /*
+            - Execute region: RASR[size] = 22  -> 2^(22+1) -> size 8MB
+            - Access permission:  Full access: RASR[AP] = 0b011
+            - Cached memory:  RASR[TEX] = 0b0100
+            - Disable the Execute Never option: to allow the code execution on SDRAM: RASR[XN] = 0
+                - Enable the region MPU: RASR[EN] = 1
+        */  	
+        MPU->RASR = (MPU_SDRAM_EXEC_REGION_SIZE | MPU_SDRAM_ACCESS_PERMSSION | MPU_SDRAM_REGION_TEX | \
+	             MPU_RASR_ENABLE_Msk | MPU_SDRAM_REGION_BUFFERABLE) & ~MPU_RASR_XN_Msk  ;
+  
+        /* Enable MPU and leave the predefined regions to default configuration */
+        MPU->CTRL |= MPU_CTRL_PRIVDEFENA_Msk |  MPU_CTRL_ENABLE_Msk;	
+#endif
+
+#if 0
 		mpu_config_start();
 		mpu_config_region(MPU_REGION_SDRAM1, SDRAM_START_ADDRESS, MPU_CONFIG_DISABLE(0x00, MPU_REGION_SIZE_512MB));
 		mpu_config_region(MPU_REGION_SDRAM2, SDRAM_START_ADDRESS, MPU_CONFIG_SDRAM(SDRAM_MPU_REGION_SIZE));
 		mpu_config_end();
+#endif
+
 	}
 
 	if (start_address) {

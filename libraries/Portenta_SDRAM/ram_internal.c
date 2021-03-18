@@ -44,7 +44,7 @@ static HAL_StatusTypeDef FMC_SDRAM_Clock_Config(void)
   RCC_PeriphCLKInitStruct.FmcClockSelection = RCC_FMCCLKSOURCE_PLL2;
   RCC_PeriphCLKInitStruct.PLL2.PLL2RGE = RCC_PLL1VCIRANGE_2;
   RCC_PeriphCLKInitStruct.PLL2.PLL2M = 5;
-  RCC_PeriphCLKInitStruct.PLL2.PLL2N = 200;
+  RCC_PeriphCLKInitStruct.PLL2.PLL2N = 160;
   RCC_PeriphCLKInitStruct.PLL2.PLL2FRACN = 0;
   RCC_PeriphCLKInitStruct.PLL2.PLL2P = 2;
   RCC_PeriphCLKInitStruct.PLL2.PLL2R = 4;
@@ -60,7 +60,7 @@ bool sdram_init(void) {
     static MDMA_HandleTypeDef mdma_handle;
     GPIO_InitTypeDef gpio_init_structure;
 
-    //FMC_SDRAM_Clock_Config();
+    FMC_SDRAM_Clock_Config();
 
     /* Enable FMC clock */
     __HAL_RCC_FMC_CLK_ENABLE();

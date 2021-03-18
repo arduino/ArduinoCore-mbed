@@ -82,8 +82,11 @@ recipe.S.o.pattern="{compiler.path}{compiler.S.cmd}" {compiler.S.flags} -DARDUIN
 ## Create archives
 recipe.ar.pattern="{compiler.path}{compiler.ar.cmd}" {compiler.ar.flags} {compiler.ar.extra_flags} "{archive_file_path}" "{object_file}"
 
+## Preprocess linker script
+recipe.hooks.linking.prelink.1.pattern="{compiler.path}{compiler.c.elf.cmd}" -E -P -x c {build.extra_flags} "{build.variant.path}/{build.ldscript}" -o {build.path}/{build.ldscript}
+
 ## Combine gc-sections, archives, and objects
-recipe.c.combine.pattern="{compiler.path}{compiler.c.elf.cmd}"  "-L{build.path}" {compiler.c.elf.flags} {compiler.c.elf.extra_flags} "@{compiler.mbed.ldflags}" "-T{build.variant.path}/{build.ldscript}" "-Wl,-Map,{build.path}/{build.project_name}.map" --specs=nosys.specs {compiler.ldflags} -o "{build.path}/{build.project_name}.elf" {object_files} -Wl,--whole-archive "{build.path}/{archive_file}" {compiler.mbed} -Wl,--no-whole-archive -Wl,--start-group {compiler.mbed.extra_ldflags} {compiler.libraries.ldflags} -Wl,--end-group
+recipe.c.combine.pattern="{compiler.path}{compiler.c.elf.cmd}"  "-L{build.path}" {compiler.c.elf.flags} {compiler.c.elf.extra_flags} {build.extra_flags} "@{compiler.mbed.ldflags}" "-T{build.path}/{build.ldscript}" "-Wl,-Map,{build.path}/{build.project_name}.map" --specs=nosys.specs {compiler.ldflags} -o "{build.path}/{build.project_name}.elf" {object_files} -Wl,--whole-archive "{build.path}/{archive_file}" {compiler.mbed} -Wl,--no-whole-archive -Wl,--start-group {compiler.mbed.extra_ldflags} {compiler.libraries.ldflags} -Wl,--end-group
 
 ## Create eeprom
 recipe.objcopy.eep.pattern=
