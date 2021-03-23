@@ -328,49 +328,58 @@ void arduino::WiFiClass::feedWatchdog()
 
 #if defined(COMPONENT_4343W)
 
-#include "QSPIFBlockDevice.h"
-#include "MBRBlockDevice.h"
-#include "FATFileSystem.h"
-
-#define WIFI_FIRMWARE_PATH "/wlan/4343WA1.BIN"
-
-QSPIFBlockDevice root(PD_11, PD_12, PF_7, PD_13,  PF_10, PG_6, QSPIF_POLARITY_MODE_1, 40000000);
-mbed::MBRBlockDevice wifi_data(&root, 1);
-mbed::FATFileSystem wifi_data_fs("wlan");
+#define WIFI_FIRMWARE_NAME "4343WA1.BIN"
 
 bool firmware_available = false;
+static std::string fullname;
 
-extern "C" bool wiced_filesystem_mount() {
-  mbed::MBRBlockDevice::partition(&root, 1, 0x0B, 0, 1024 * 1024);
-  int err =  wifi_data_fs.mount(&wifi_data);
-  if (err) {
+#include "wiced_filesystem.h"
+#include "resources.h"
+
+void wiced_filesystem_mount_error(void) {
     Serial.println("Failed to mount the filesystem containing the WiFi firmware.");
     Serial.println("Usually that means that the WiFi firmware has not been installed yet"
                     " or was overwritten with another firmware.");
-    goto error;
-  }
-
-  DIR *dir;
-  struct dirent *ent;
-  if ((dir = opendir("/wlan")) != NULL) {
-    /* print all the files and directories within directory */
-    while ((ent = readdir(dir)) != NULL) {
-      String fullname = "/wlan/" + String(ent->d_name);
-      if (fullname == WIFI_FIRMWARE_PATH) {
-        closedir(dir);
-        firmware_available = true;
-        return true;
-      }
-    }
-    Serial.println("File not found");
-    closedir(dir);
-  }
-error:
-  Serial.println("Please run the \"PortentaWiFiFirmwareUpdater\" sketch once to install the WiFi firmware.");
-  whd_print_logbuffer();
-  while (1) {}
-  return false;
+    whd_print_logbuffer();
+    while (1) {}
 }
+
+void wiced_filesystem_firmware_error(void) {
+    Serial.println("Please run the \"PortentaWiFiFirmwareUpdater\" sketch once to install the WiFi firmware.");
+    whd_print_logbuffer();
+    while (1) {}
+}
+
+wiced_result_t whd_firmware_check_hook(const char *mounted_name, int mount_err)
+{
+    DIR *dir;
+    struct dirent *ent;
+    std::string dir_name(mounted_name);
+    if(mount_err) {
+        wiced_filesystem_mount_error();
+    } else {
+        if ((dir = opendir(mounted_name)) != NULL) {
+            // print all the files and directories within directory
+            while ((ent = readdir(dir)) != NULL) {
+                fullname =  "/"+ dir_name + "/" + std::string(ent->d_name);
+                if (std::string(ent->d_name) == WIFI_FIRMWARE_NAME) {
+                    closedir(dir);
+                    firmware_available = true;
+                    // Update Mbed resource default mount point /wlan
+                    wifi_firmware_image.val.fs.filename = (const char*)fullname.c_str();
+                    //Serial.println(fullname.c_str());
+                    //Serial.println((char*)(wifi_firmware_image.val.fs.filename));
+                    return WICED_SUCCESS;
+                }
+            }
+            Serial.println("File not found");
+            closedir(dir);
+        }
+        wiced_filesystem_firmware_error();
+    }
+    return WICED_ERROR;
+}
+
 
 #include "whd_version.h"
 char* arduino::WiFiClass::firmwareVersion() {
