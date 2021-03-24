@@ -200,7 +200,7 @@ UART::operator bool() {
 		return SerialUSB;
 	}
 #endif
-	return 1;
+	return _serial != NULL && _serial->obj != NULL;
 }
 
 #if defined(SERIAL_CDC)
