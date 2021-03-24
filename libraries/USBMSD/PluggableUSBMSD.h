@@ -33,6 +33,7 @@
 #include "FATFileSystem.h"
 #include "Callback.h"
 #include "rtos/Thread.h"
+#include "rtos/EventFlags.h"
 
 #if defined(MBED_CONF_TARGET_USB_SPEED) && (MBED_CONF_TARGET_USB_SPEED == USE_USB_OTG_HS)
 #define MSD_MAX_PACKET_SIZE    512
