@@ -203,6 +203,15 @@ UART::operator bool() {
 	return _serial != NULL && _serial->obj != NULL;
 }
 
+UART::operator mbed::FileHandle*() {
+#if defined(SERIAL_CDC)
+	if (is_usb) {
+		return &SerialUSB;
+	}
+#endif
+}
+
+
 #if defined(SERIAL_CDC)
 	uint32_t UART::baud() {
 		if (is_usb) {
