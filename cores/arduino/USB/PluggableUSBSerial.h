@@ -325,6 +325,6 @@ private:
 };
 }
 
-extern arduino::USBSerial SerialUSB;
+extern arduino::USBSerial _SerialUSB;
 
 #endif

@@ -127,7 +127,7 @@ void UART::on_rx() {
 void UART::end() {
 #if defined(SERIAL_CDC)
 	if (is_usb) {
-		return SerialUSB.end();
+		return _SerialUSB.end();
 	}
 #endif
 	if (_serial->obj != NULL) {
@@ -139,7 +139,7 @@ void UART::end() {
 int UART::available() {
 #if defined(SERIAL_CDC)
 	if (is_usb) {
-		return SerialUSB.available();
+		return _SerialUSB.available();
 	}
 #endif
 	return rx_buffer.available();
@@ -148,7 +148,7 @@ int UART::available() {
 int UART::peek() {
 #if defined(SERIAL_CDC)
 	if (is_usb) {
-		return SerialUSB.peek();
+		return _SerialUSB.peek();
 	}
 #endif
 	return rx_buffer.peek();
@@ -157,7 +157,7 @@ int UART::peek() {
 int UART::read() {
 #if defined(SERIAL_CDC)
 	if (is_usb) {
-		return SerialUSB.read();
+		return _SerialUSB.read();
 	}
 #endif
 	return rx_buffer.read_char();
@@ -170,7 +170,7 @@ void UART::flush() {
 size_t UART::write(uint8_t c) {
 #if defined(SERIAL_CDC)
 	if (is_usb) {
-		return SerialUSB.write(c);
+		return _SerialUSB.write(c);
 	}
 #endif
 	while (!_serial->obj->writeable()) {}
@@ -181,7 +181,7 @@ size_t UART::write(uint8_t c) {
 size_t UART::write(const uint8_t* c, size_t len) {
 #if defined(SERIAL_CDC)
 	if (is_usb) {
-		return SerialUSB.write(c, len);
+		return _SerialUSB.write(c, len);
 	}
 #endif
 	while (!_serial->obj->writeable()) {}
@@ -197,7 +197,7 @@ void UART::block_tx(int _a) {
 UART::operator bool() {
 #if defined(SERIAL_CDC)
 	if (is_usb) {
-		return SerialUSB;
+		return _SerialUSB;
 	}
 #endif
 	return _serial != NULL && _serial->obj != NULL;
@@ -206,7 +206,7 @@ UART::operator bool() {
 UART::operator mbed::FileHandle*() {
 #if defined(SERIAL_CDC)
 	if (is_usb) {
-		return &SerialUSB;
+		return &_SerialUSB;
 	}
 #endif
 }
@@ -215,37 +215,37 @@ UART::operator mbed::FileHandle*() {
 #if defined(SERIAL_CDC)
 	uint32_t UART::baud() {
 		if (is_usb) {
-			return SerialUSB.baud();
+			return _SerialUSB.baud();
 		}
 		return 0;
 	}
 	uint8_t UART::stopbits() {
 		if (is_usb) {
-			return SerialUSB.stopbits();
+			return _SerialUSB.stopbits();
 		}
 		return 0;
 	}
 	uint8_t UART::paritytype() {
 		if (is_usb) {
-			return SerialUSB.paritytype();
+			return _SerialUSB.paritytype();
 		}
 		return 0;
 	}
 	uint8_t UART::numbits() {
 		if (is_usb) {
-			return SerialUSB.numbits();
+			return _SerialUSB.numbits();
 		}
 		return 0;
 	}
 	bool UART::dtr() {
 		if (is_usb) {
-			return SerialUSB.dtr();
+			return _SerialUSB.dtr();
 		}
 		return false;
 	}
 	bool UART::rts() {
 		if (is_usb) {
-			return SerialUSB.rts();
+			return _SerialUSB.rts();
 		}
 		return false;
 	}

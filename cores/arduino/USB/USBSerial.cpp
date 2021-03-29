@@ -30,7 +30,7 @@ static void waitForPortClose() {
     // wait for DTR be 0 (port closed) and timeout to be over
     long start = millis();
     static const int WAIT_TIMEOUT = 200;
-    while (SerialUSB.connected() || (millis() - start) < WAIT_TIMEOUT) {
+    while (_SerialUSB.connected() || (millis() - start) < WAIT_TIMEOUT) {
         // the delay is needed to handle other "concurrent" IRQ events
         delay(1);
     }
@@ -122,6 +122,6 @@ bool USBSerial::connected()
     return _terminal_connected;
 }
 
-USBSerial SerialUSB(false);
+USBSerial _SerialUSB(false);
 
 #endif
