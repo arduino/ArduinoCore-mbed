@@ -84,6 +84,10 @@ public:
 };
 
 #ifdef SERIAL_CDC
+
+#undef SerialUSB
+#define SerialUSB _SerialUSB
+
 // Use the SerialUSB interface to communicate with GDB.
 class UsbDebugCommInterface : public DebugCommInterface {
 public:
