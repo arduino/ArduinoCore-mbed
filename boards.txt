@@ -183,7 +183,6 @@ nanorp2040connect.upload.maximum_data_size=270336
 nanorp2040connect.bootloader.tool=openocd
 nanorp2040connect.bootloader.config=-f target/rp2040.cfg
 nanorp2040connect.bootloader.programmer=-f interface/cmsis-dap.cfg
-nanorp2040connect.bootloader.file=nano33ble/bootloader.hex
 
 ##############################################################
 
@@ -222,5 +221,4 @@ pico.upload.maximum_data_size=270336
 pico.bootloader.tool=openocd
 pico.bootloader.config=-f target/rp2040.cfg
 pico.bootloader.programmer=-f interface/cmsis-dap.cfg
-pico.bootloader.file=nano33ble/bootloader.hex
 

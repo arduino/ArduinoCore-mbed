@@ -38,7 +38,7 @@ mv _variants variants
 # Remove fqbns not in $FQBNS list
 touch _boards.txt
 for board in $FQBNS; do
-cat boards.txt | grep $board >> _boards.txt
+cat boards.txt | grep "$board\." >> _boards.txt
 done
 mv _boards.txt boards.txt
 
