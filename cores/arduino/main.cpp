@@ -41,7 +41,7 @@ int main(void)
 
 #if defined(SERIAL_CDC)
   PluggableUSBD().begin();
-  SerialUSB.begin(115200);
+  _SerialUSB.begin(115200);
 #endif
 
 	setup();
