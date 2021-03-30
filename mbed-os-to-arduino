@@ -192,6 +192,18 @@ generate_flags () {
 				sed -i "s?ENTRY(Reset_Handler)?${OPENAMP_REGIONS}\nENTRY(Reset_Handler)?g" $ARDUINOVARIANT/linker_script.ld
 			fi
 		fi
+		if [[ $ARDUINOVARIANT == *NANO_RP2040* ]]; then
+			set +e
+			HAS_2NDSTAGE_SECTION=`grep second_stage_ota "$ARDUINOVARIANT"/linker_script.ld`
+			set -e
+			if [ x"$HAS_2NDSTAGE_SECTION" == x ]; then
+				echo "Adding second stage bootloader section to Nano RP2040 Connect"
+				SECOND_STAGE_SECTION=".second_stage_ota : {\n \
+        KEEP (*(.second_stage_ota))\n \
+    } > FLASH"
+				sed -i "s?.flash_begin?${SECOND_STAGE_SECTION}\n    .flash_begin?g" $ARDUINOVARIANT/linker_script.ld
+			fi
+		fi
 	done
 	echo " done."
 }
