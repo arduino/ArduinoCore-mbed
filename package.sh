@@ -12,7 +12,10 @@ echo $FQBNS
 
 # Remove mbed folder content
 rm -rf cores/arduino/mbed/*
+
 # Remove libraries not in $LIBRARIES list
+if [ x$FLAVOUR != x ]; then
+
 mkdir _libraries
 cd libraries
 for library in $LIBRARIES; do
@@ -38,6 +41,8 @@ for board in $FQBNS; do
 cat boards.txt | grep $board >> _boards.txt
 done
 mv _boards.txt boards.txt
+
+fi
 
 #Recompile mbed core, applying patches on origin/latest
 set +e
