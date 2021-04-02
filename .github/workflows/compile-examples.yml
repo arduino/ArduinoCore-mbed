@@ -76,6 +76,7 @@ jobs:
           sketch-paths: "${{ env.UNIVERSAL_SKETCH_PATHS }} ${{ matrix.additional-sketch-paths }}"
           verbose: 'false'
           enable-size-deltas-report: true
+          sketches-report-path: ${{ env.SKETCHES_REPORTS_PATH }}
 
       - name: Save memory usage change report as artifact
         if: github.event_name == 'pull_request'
