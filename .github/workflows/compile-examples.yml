@@ -24,7 +24,8 @@ jobs:
 
     env:
       # sketch paths to compile (recursive) compatible with all boards
-      UNIVERSAL_SKETCH_PATHS: '"libraries/Scheduler"'
+      UNIVERSAL_SKETCH_PATHS: |
+        - libraries/Scheduler
       SKETCHES_REPORTS_PATH: sketches-reports
 
     strategy:
@@ -40,13 +41,27 @@ jobs:
         include:
           - board:
               fqbn: arduino:mbed:nano33ble
-            additional-sketch-paths: '"libraries/PDM" "libraries/ThreadDebug"'
+            additional-sketch-paths: |
+              - libraries/PDM
+              - libraries/ThreadDebug
           - board:
               fqbn: arduino:mbed:envie_m4
-            additional-sketch-paths: '"libraries/doom" "libraries/KernelDebug" "libraries/Portenta_SDCARD" "libraries/Portenta_Video"'
+            additional-sketch-paths: |
+              - libraries/doom
+              - libraries/KernelDebug
+              - libraries/Portenta_SDCARD
+              - libraries/Portenta_Video
           - board:
               fqbn: arduino:mbed:envie_m7
-            additional-sketch-paths: '"libraries/doom" "libraries/KernelDebug" "libraries/Portenta_SDCARD" "libraries/Portenta_System" "libraries/Portenta_Video" "libraries/ThreadDebug" "libraries/USBHOST" "libraries/WiFi"'
+            additional-sketch-paths: |
+              - libraries/doom
+              - libraries/KernelDebug
+              - libraries/Portenta_SDCARD
+              - libraries/Portenta_System
+              - libraries/Portenta_Video
+              - libraries/ThreadDebug
+              - libraries/USBHOST
+              - libraries/WiFi
 
     steps:
       - name: Checkout repository
@@ -73,9 +88,11 @@ jobs:
             # Overwrite the Board Manager installation with the local platform
             - source-path: "./"
               name: "arduino:mbed"
-          sketch-paths: "${{ env.UNIVERSAL_SKETCH_PATHS }} ${{ matrix.additional-sketch-paths }}"
+          sketch-paths: |
+            ${{ env.UNIVERSAL_SKETCH_PATHS }}
+            ${{ matrix.additional-sketch-paths }}
           verbose: 'false'
-          enable-size-deltas-report: true
+          enable-deltas-report: true
           sketches-report-path: ${{ env.SKETCHES_REPORTS_PATH }}
 
       - name: Save memory usage change report as artifact
