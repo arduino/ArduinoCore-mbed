@@ -1,22 +1,22 @@
-From 2d47254a0abf107208f828e58c1addf87326fd38 Mon Sep 17 00:00:00 2001
+From 84bec5f82386ea74b36e18b0b6051aa5b636713c Mon Sep 17 00:00:00 2001
 From: Giampaolo Mancini <giampaolo@trampolineup.com>
 Date: Wed, 8 Jan 2020 16:42:46 +0100
 Subject: [PATCH] Add support for Arduino Edge Control
 
 ---
- .../TARGET_EDGE_CONTROL/PinNames.h            | 207 ++++++++++++++++++
+ .../TARGET_EDGE_CONTROL/PinNames.h            | 209 ++++++++++++++++++
  .../TARGET_EDGE_CONTROL/device.h              |  38 ++++
  targets/targets.json                          |  13 ++
- 3 files changed, 258 insertions(+)
+ 3 files changed, 260 insertions(+)
  create mode 100644 targets/TARGET_NORDIC/TARGET_NRF5x/TARGET_NRF52/TARGET_MCU_NRF52840/TARGET_EDGE_CONTROL/PinNames.h
  create mode 100644 targets/TARGET_NORDIC/TARGET_NRF5x/TARGET_NRF52/TARGET_MCU_NRF52840/TARGET_EDGE_CONTROL/device.h
 
 diff --git a/targets/TARGET_NORDIC/TARGET_NRF5x/TARGET_NRF52/TARGET_MCU_NRF52840/TARGET_EDGE_CONTROL/PinNames.h b/targets/TARGET_NORDIC/TARGET_NRF5x/TARGET_NRF52/TARGET_MCU_NRF52840/TARGET_EDGE_CONTROL/PinNames.h
 new file mode 100644
-index 0000000000..afce410894
+index 0000000000..75cc07965f
 --- /dev/null
 +++ b/targets/TARGET_NORDIC/TARGET_NRF5x/TARGET_NRF52/TARGET_MCU_NRF52840/TARGET_EDGE_CONTROL/PinNames.h
-@@ -0,0 +1,207 @@
+@@ -0,0 +1,209 @@
 +/*
 + * Copyright (c) 2019 Arduino SA
 + *
@@ -162,6 +162,8 @@ index 0000000000..afce410894
 +    // mBed interface Pins
 +    CONSOLE_TX = TX_PIN_NUMBER,
 +    CONSOLE_RX = RX_PIN_NUMBER,
++    USBTX = TX_PIN_NUMBER,
++    USBRX = RX_PIN_NUMBER,
 +    STDIO_UART_TX = TX_PIN_NUMBER,
 +    STDIO_UART_RX = RX_PIN_NUMBER,
 +
