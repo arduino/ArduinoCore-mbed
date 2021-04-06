@@ -16,7 +16,7 @@
 			"rtos.main-thread-stack-size": 32768,
 			"target.mbed_app_start": "0x10000"
 		},
-		"ARDUINO_EDGE_CONTROL": {
+		"EDGE_CONTROL": {
 			"sd.SPI_MOSI": "P0_20",
 			"sd.SPI_MISO": "P0_21",
 			"sd.SPI_CLK": "P0_19",
