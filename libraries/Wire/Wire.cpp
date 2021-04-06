@@ -73,7 +73,7 @@ uint8_t arduino::MbedI2C::endTransmission(void) {
 	return endTransmission(true);
 }
 
-size_t arduino::MbedI2C::requestFrom(uint8_t address, size_t len, bool stopBit) {
+uint8_t arduino::MbedI2C::requestFrom(uint8_t address, size_t len, bool stopBit) {
 	char buf[256];
 	int ret = master->read(address << 1, buf, len, !stopBit);
 	if (ret != 0) {
@@ -85,7 +85,7 @@ size_t arduino::MbedI2C::requestFrom(uint8_t address, size_t len, bool stopBit) 
 	return len;
 }
 
-size_t arduino::MbedI2C::requestFrom(uint8_t address, size_t len) {
+uint8_t arduino::MbedI2C::requestFrom(uint8_t address, size_t len) {
 	return requestFrom(address, len, true);
 }
 
