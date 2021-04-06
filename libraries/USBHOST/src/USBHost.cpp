@@ -3,9 +3,9 @@
 
 static rtos::Thread t(osPriorityHigh);
 
-static void USBHost::supplyPowerOnVBUS(){
-  #if defined(ARDUINO_ARCH_STM32H747)
-    mbed::DigitalOut otg(PJ_6, 0); //Provide power to USB when powered through VIN
+void USBHost::supplyPowerOnVBUS(bool enable){
+  #if defined(ARDUINO_ARCH_STM32H747)    
+    mbed::DigitalOut otg(PJ_6, enable ? 0 : 1);
   #endif
 }
 
