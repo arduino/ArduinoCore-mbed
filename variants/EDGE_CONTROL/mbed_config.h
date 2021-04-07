@@ -69,7 +69,6 @@
 #define MBED_CONF_BLE_API_IMPLEMENTATION_MAX_CCCD_COUNT                         20                                                                                               // set by library:ble-api-implementation
 #define MBED_CONF_BLE_API_IMPLEMENTATION_MAX_CHARACTERISTIC_AUTHORISATION_COUNT 20                                                                                               // set by library:ble-api-implementation
 #define MBED_CONF_BLE_PRESENT                                                   1                                                                                                // set by library:ble
-#define MBED_CONF_BLE_TRACE_HUMAN_READABLE_ENUMS                                0                                                                                                // set by library:ble
 #define MBED_CONF_CELLULAR_CONTROL_PLANE_OPT                                    0                                                                                                // set by library:cellular
 #define MBED_CONF_CELLULAR_DEBUG_AT                                             0                                                                                                // set by library:cellular
 #define MBED_CONF_CELLULAR_MAX_CP_DATA_RECV_LEN                                 1358                                                                                             // set by library:cellular
@@ -95,8 +94,6 @@
 #define MBED_CONF_CORDIO_PREFERRED_TX_POWER                                     0                                                                                                // set by library:cordio
 #define MBED_CONF_CORDIO_ROUTE_UNHANDLED_COMMAND_COMPLETE_EVENTS                1                                                                                                // set by library:cordio
 #define MBED_CONF_CORDIO_RX_ACL_BUFFER_SIZE                                     70                                                                                               // set by library:cordio
-#define MBED_CONF_CORDIO_TRACE_HCI_PACKETS                                      0                                                                                                // set by library:cordio
-#define MBED_CONF_CORDIO_TRACE_PAL_ECHOES                                       0                                                                                                // set by library:cordio
 #define MBED_CONF_CRYPTOCELL310_PRESENT                                         1                                                                                                // set by library:cryptocell310
 #define MBED_CONF_DRIVERS_OSPI_CSN                                              OSPI_FLASH1_CSN                                                                                  // set by library:drivers
 #define MBED_CONF_DRIVERS_OSPI_DQS                                              OSPI_FLASH1_DQS                                                                                  // set by library:drivers
@@ -391,19 +388,19 @@
 #define MBED_CONF_SD_CRC_ENABLED                                                0                                                                                                // set by library:sd
 #define MBED_CONF_SD_FSFAT_SDCARD_INSTALLED                                     1                                                                                                // set by library:sd
 #define MBED_CONF_SD_INIT_FREQUENCY                                             100000                                                                                           // set by library:sd
-#define MBED_CONF_SD_SPI_CLK                                                    P0_19                                                                                            // set by application[ARDUINO_EDGE_CONTROL]
-#define MBED_CONF_SD_SPI_CS                                                     P1_12                                                                                            // set by application[ARDUINO_EDGE_CONTROL]
-#define MBED_CONF_SD_SPI_MISO                                                   P0_21                                                                                            // set by application[ARDUINO_EDGE_CONTROL]
-#define MBED_CONF_SD_SPI_MOSI                                                   P0_20                                                                                            // set by application[ARDUINO_EDGE_CONTROL]
+#define MBED_CONF_SD_SPI_CLK                                                    P0_19                                                                                            // set by application[EDGE_CONTROL]
+#define MBED_CONF_SD_SPI_CS                                                     P1_12                                                                                            // set by application[EDGE_CONTROL]
+#define MBED_CONF_SD_SPI_MISO                                                   P0_21                                                                                            // set by application[EDGE_CONTROL]
+#define MBED_CONF_SD_SPI_MOSI                                                   P0_20                                                                                            // set by application[EDGE_CONTROL]
 #define MBED_CONF_SD_TEST_BUFFER                                                8192                                                                                             // set by library:sd
 #define MBED_CONF_SD_TRX_FREQUENCY                                              1000000                                                                                          // set by library:sd
 #define MBED_CONF_SPIF_DRIVER_DEBUG                                             0                                                                                                // set by library:spif-driver
-#define MBED_CONF_SPIF_DRIVER_SPI_CLK                                           P0_19                                                                                            // set by application[ARDUINO_EDGE_CONTROL]
-#define MBED_CONF_SPIF_DRIVER_SPI_CS                                            P0_17                                                                                            // set by application[ARDUINO_EDGE_CONTROL]
+#define MBED_CONF_SPIF_DRIVER_SPI_CLK                                           P0_19                                                                                            // set by application[EDGE_CONTROL]
+#define MBED_CONF_SPIF_DRIVER_SPI_CS                                            P0_17                                                                                            // set by application[EDGE_CONTROL]
 #define MBED_CONF_SPIF_DRIVER_SPI_FREQ                                          40000000                                                                                         // set by library:spif-driver
-#define MBED_CONF_SPIF_DRIVER_SPI_MISO                                          P0_21                                                                                            // set by application[ARDUINO_EDGE_CONTROL]
-#define MBED_CONF_SPIF_DRIVER_SPI_MOSI                                          P0_20                                                                                            // set by application[ARDUINO_EDGE_CONTROL]
-#define MBED_CONF_STORAGE_DEFAULT_KV                                            kv                                                                                               // set by application[ARDUINO_EDGE_CONTROL]
+#define MBED_CONF_SPIF_DRIVER_SPI_MISO                                          P0_21                                                                                            // set by application[EDGE_CONTROL]
+#define MBED_CONF_SPIF_DRIVER_SPI_MOSI                                          P0_20                                                                                            // set by application[EDGE_CONTROL]
+#define MBED_CONF_STORAGE_DEFAULT_KV                                            kv                                                                                               // set by application[EDGE_CONTROL]
 #define MBED_CONF_STORAGE_FILESYSTEM_BLOCKDEVICE                                default                                                                                          // set by library:storage_filesystem
 #define MBED_CONF_STORAGE_FILESYSTEM_EXTERNAL_BASE_ADDRESS                      0                                                                                                // set by library:storage_filesystem
 #define MBED_CONF_STORAGE_FILESYSTEM_EXTERNAL_SIZE                              0                                                                                                // set by library:storage_filesystem
@@ -418,8 +415,8 @@
 #define MBED_CONF_STORAGE_FILESYSTEM_NO_RBP_FOLDER_PATH                         kvstore                                                                                          // set by library:storage_filesystem_no_rbp
 #define MBED_CONF_STORAGE_FILESYSTEM_NO_RBP_MOUNT_POINT                         kv                                                                                               // set by library:storage_filesystem_no_rbp
 #define MBED_CONF_STORAGE_FILESYSTEM_RBP_INTERNAL_SIZE                          0                                                                                                // set by library:storage_filesystem
-#define MBED_CONF_STORAGE_STORAGE_TYPE                                          TDB_EXTERNAL                                                                                     // set by application[ARDUINO_EDGE_CONTROL]
-#define MBED_CONF_STORAGE_TDB_EXTERNAL_BLOCKDEVICE                              SPIF                                                                                             // set by application[ARDUINO_EDGE_CONTROL]
+#define MBED_CONF_STORAGE_STORAGE_TYPE                                          TDB_EXTERNAL                                                                                     // set by application[EDGE_CONTROL]
+#define MBED_CONF_STORAGE_TDB_EXTERNAL_BLOCKDEVICE                              SPIF                                                                                             // set by application[EDGE_CONTROL]
 #define MBED_CONF_STORAGE_TDB_EXTERNAL_EXTERNAL_BASE_ADDRESS                    0                                                                                                // set by library:storage_tdb_external
 #define MBED_CONF_STORAGE_TDB_EXTERNAL_EXTERNAL_SIZE                            0                                                                                                // set by library:storage_tdb_external
 #define MBED_CONF_STORAGE_TDB_EXTERNAL_INTERNAL_BASE_ADDRESS                    0                                                                                                // set by library:storage_tdb_external
@@ -473,7 +470,6 @@
 #define QSPIF_SFDP_DATA_LEN                                                     128                                                                                              // set by target:MCU_NRF52840
 #define SEC_CCM_CFG                                                             1                                                                                                // set by library:cordio
 #define SMP_DB_MAX_DEVICES                                                      3                                                                                                // set by library:cordio
-#define WSF_TRACE_ENABLED                                                       0                                                                                                // set by library:cordio
 // Macros
 #define BB_CLK_RATE_HZ                                                          1000000                                                                                          // defined by library:cordio-nordic-ll
 #define INIT_BROADCASTER                                                                                                                                                         // defined by library:cordio-nordic-ll
