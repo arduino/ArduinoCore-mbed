@@ -13,13 +13,14 @@ diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/objects.h b/targets/TARGET
 index a8fb08ebae..ad3cca07b0 100644
 --- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/objects.h
 +++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/objects.h
-@@ -17,10 +17,13 @@
+@@ -17,10 +17,14 @@
  #ifndef MBED_OBJECTS_H
  #define MBED_OBJECTS_H
  
 +#pragma GCC diagnostic push
 +#pragma GCC diagnostic ignored "-Wtype-limits"
 +#pragma GCC diagnostic ignored "-Wignored-qualifiers"
++#pragma GCC diagnostic ignored "-Wunused-value"
 +
  #ifdef __cplusplus
  #include <stdint.h>
