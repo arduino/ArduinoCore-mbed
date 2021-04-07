@@ -32,7 +32,7 @@ void setup() {
 void loop() {
 
   if (motion_detected) {
-    Serial.printf("Motion Detected!\n");
+    Serial.println("Motion Detected!");
     digitalWrite(LEDB, LOW);
     delay(500);
 
