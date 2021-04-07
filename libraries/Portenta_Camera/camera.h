@@ -1,4 +1,4 @@
-#include "Arduino.h"
+#include "drivers/InterruptIn.h"
 
 enum {
     CAMERA_R160x120 = 0x00,   /* QQVGA Resolution */
