@@ -36,6 +36,7 @@ jobs:
           - fqbn: arduino:mbed:nano33ble
           - fqbn: arduino:mbed:envie_m4
           - fqbn: arduino:mbed:envie_m7
+          - fqbn: arduino:mbed:nanorp2040connect
 
         # compile only the examples compatible with each board
         include:
@@ -51,17 +52,25 @@ jobs:
               - libraries/KernelDebug
               - libraries/Portenta_SDCARD
               - libraries/Portenta_Video
+              - libraries/RPC
           - board:
               fqbn: arduino:mbed:envie_m7
             additional-sketch-paths: |
               - libraries/doom
               - libraries/KernelDebug
+              - libraries/Portenta_Camera/examples
               - libraries/Portenta_SDCARD
               - libraries/Portenta_System
               - libraries/Portenta_Video
+              - libraries/RPC
               - libraries/ThreadDebug
               - libraries/USBHOST
               - libraries/WiFi
+          - board:
+              fqbn: arduino:mbed:nanorp2040connect
+            additional-sketch-paths: |
+              - libraries/PDM
+              - ~/Arduino/libraries/WiFiNINA
 
     steps:
       - name: Checkout repository
@@ -82,6 +91,8 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           fqbn: ${{ matrix.board.fqbn }}
+          libraries: |
+            - name: WiFiNINA
           platforms: |
             # Use Board Manager to install the latest release of Arduino mbed Boards to get the toolchain
             - name: "arduino:mbed"
