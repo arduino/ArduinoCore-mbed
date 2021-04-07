@@ -209,6 +209,7 @@ UART::operator mbed::FileHandle*() {
 		return &_SerialUSB;
 	}
 #endif
+	return _serial->obj;
 }
 
 
