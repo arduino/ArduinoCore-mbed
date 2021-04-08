@@ -87,7 +87,7 @@ jobs:
         run: mv "$GITHUB_WORKSPACE/ArduinoCore-API/api" "$GITHUB_WORKSPACE/cores/arduino"   
 
       - name: Compile examples
-        uses: arduino/compile-sketches@main
+        uses: arduino/compile-sketches@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           fqbn: ${{ matrix.board.fqbn }}
