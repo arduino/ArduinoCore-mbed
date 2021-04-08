@@ -1,4 +1,4 @@
-export FLAVOUR="rp2040"
+export FLAVOUR="RP2040"
 export VARIANTS=("RASPBERRY_PI_PICO")
 export FQBNS=("pico")
 export LIBRARIES=("PDM SPI Wire MRI USBHID USBMSD ThreadDebug Scheduler")
