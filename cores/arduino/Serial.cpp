@@ -133,7 +133,10 @@ void UART::end() {
 	if (_serial->obj != NULL) {
 		delete _serial->obj;
 		_serial->obj = NULL;
+		delete _serial;
+		_serial = NULL;
 	}
+	rx_buffer.clear();
 }
 
 int UART::available() {
