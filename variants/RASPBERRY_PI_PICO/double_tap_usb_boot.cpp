@@ -3,11 +3,8 @@ extern "C" {
     #include "pico/time.h"
     #include "pico/bootrom.h"
 }
-
-// Allow user override of the LED mask
-#ifndef USB_BOOT_LED_ACTIVITY_MASK
-#define USB_BOOT_LED_ACTIVITY_MASK 1
-#endif
+#include "macros.h"
+#include "pins_arduino.h"
 
 // Doesn't make any sense for a RAM only binary
 #if !PICO_NO_FLASH
@@ -33,7 +30,7 @@ static void boot_double_tap_check() {
     }
 
     magic_location[0] = 0;
-    reset_usb_boot(USB_BOOT_LED_ACTIVITY_MASK, 0);
+    reset_usb_boot(1 << LED_BUILTIN, 0);
 }
 
 class DoubleTap {
