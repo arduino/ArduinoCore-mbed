@@ -71,15 +71,15 @@ int PDMClass::begin(int channels, long sampleRate)
     rawBufferLength = finalBufferLength;
   }
 
-	/* Initialize Open PDM library */
-	filter.Fs = sampleRate;
-	filter.nSamples = rawBufferLength; 
-	filter.LP_HZ = sampleRate/2;
-	filter.HP_HZ = 10;
-	filter.In_MicChannels = 1;
-	filter.Out_MicChannels = 1;
-	filter.Decimation = decimation;
-	Open_PDM_Filter_Init(&filter);
+  /* Initialize Open PDM library */
+  filter.Fs = sampleRate;
+  filter.nSamples = rawBufferLength;
+  filter.LP_HZ = sampleRate/2;
+  filter.HP_HZ = 10;
+  filter.In_MicChannels = 1;
+  filter.Out_MicChannels = 1;
+  filter.Decimation = decimation;
+  Open_PDM_Filter_Init(&filter);
 
   // Configure PIO state machine
   float clkDiv = (float)clock_get_hz(clk_sys) / sampleRate / decimation / 2; 
