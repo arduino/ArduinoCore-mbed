@@ -54,10 +54,6 @@
 #define SINCN            3
 #define DECIMATION_MAX 128
 
-//#define FILTER_GAIN     16
-extern uint16_t filterGain;
-
-
 #define HTONS(A) ((((uint16_t)(A) & 0xff00) >> 8) | \
                  (((uint16_t)(A) & 0x00ff) << 8))
 #define RoundDiv(a, b)    (((a)>0)?(((a)+(b)/2)/(b)):(((a)-(b)/2)/(b)))
@@ -84,6 +80,7 @@ typedef struct {
   uint16_t HP_ALFA;
   uint16_t bit[5];
   uint16_t byte;
+  uint16_t filterGain;
 } TPDMFilter_InitStruct;
 
 

@@ -309,6 +309,18 @@ int py_audio_init(size_t channels, uint32_t frequency, int gain_db, float highpa
     return 1;
 }
 
+void py_audio_gain_set(int gain_db)
+{
+    // Configure PDM filters
+    for (int i=0; i<g_i_channels; i++) {
+        PDM_FilterConfig[i].mic_gain = gain_db;
+        //This will be called only after init so PDM_FilterConfig structure is already filled
+        //PDM_FilterConfig[i].output_samples_number = samples_per_channel;
+        //PDM_FilterConfig[i].decimation_factor = decimation_factor_const;
+        PDM_Filter_setConfig(&PDM_FilterHandler[i], &PDM_FilterConfig[i]);
+    }
+}
+
 void py_audio_deinit()
 {
     // Stop SAI DMA.

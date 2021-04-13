@@ -34,7 +34,11 @@ PDMClass::PDMClass(int dinPin, int clkPin, int pwrPin) :
   _dinPin(dinPin),
   _clkPin(clkPin),
   _pwrPin(pwrPin),
-  _onReceive(NULL)
+  _onReceive(NULL),
+  _gain(-1),
+  _channels(-1),
+  _samplerate(-1),
+  _init(-1)
 {
 }
 
@@ -42,10 +46,7 @@ PDMClass::~PDMClass()
 {
 }
 
-static int gain_db = -1;
-static int _samplerate = -1;
-
-int PDMClass::begin(int channels, long sampleRate) {
+int PDMClass::begin(int channels, int sampleRate) {
 
   if (isBoardRev2()) {
     mbed::I2C i2c(PB_7, PB_6);
@@ -65,14 +66,13 @@ int PDMClass::begin(int channels, long sampleRate) {
   _channels = channels;
   _samplerate = sampleRate;
 
-  if (gain_db == -1) {
-    gain_db = 24;
+  if (_gain == -1) {
+    _gain = 24;
   }
 
-  //g_pcmbuf = (uint16_t*)_doubleBuffer.data();
-
-  if(py_audio_init(channels, sampleRate, gain_db, 0.9883f)) {
+  if(py_audio_init(channels, sampleRate, _gain, 0.9883f)) {
     py_audio_start_streaming();
+    _init = 1;
     return 1;
   }
   return 0;
@@ -103,9 +103,10 @@ void PDMClass::onReceive(void(*function)(void))
 
 void PDMClass::setGain(int gain)
 {
-  gain_db = gain;
-  //end();
-  //begin(_channels, _samplerate);
+  _gain = gain;
+  if(_init == 1) {
+    py_audio_gain_set(gain);
+  }
 }
 
 void PDMClass::setBufferSize(int bufferSize)

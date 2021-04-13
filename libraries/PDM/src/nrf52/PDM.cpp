@@ -39,7 +39,11 @@ PDMClass::PDMClass(int dinPin, int clkPin, int pwrPin) :
   _dinPin(dinPin),
   _clkPin(clkPin),
   _pwrPin(pwrPin),
-  _onReceive(NULL)
+  _onReceive(NULL),
+  _gain(-1),
+  _channels(-1),
+  _samplerate(-1),
+  _init(-1)
 {
 }
 
@@ -47,9 +51,10 @@ PDMClass::~PDMClass()
 {
 }
 
-int PDMClass::begin(int channels, long sampleRate)
+int PDMClass::begin(int channels, int sampleRate)
 {
   _channels = channels;
+  _samplerate = sampleRate;
 
   // Enable high frequency oscillator if not already enabled
   if (NRF_CLOCK->EVENTS_HFCLKSTARTED == 0) {
@@ -83,7 +88,10 @@ int PDMClass::begin(int channels, long sampleRate)
       return 0; // unsupported
   }
 
-  setGain(DEFAULT_PDM_GAIN);  
+  if(_gain == -1) {
+    _gain = DEFAULT_PDM_GAIN;
+  }
+  nrf_pdm_gain_set(_gain, _gain);
 
   // configure the I/O and mux
   pinMode(_clkPin, OUTPUT);
@@ -175,7 +183,8 @@ void PDMClass::onReceive(void(*function)(void))
 
 void PDMClass::setGain(int gain)
 {
-  nrf_pdm_gain_set(gain, gain);
+  _gain = gain;
+  nrf_pdm_gain_set(_gain, _gain);
 }
 
 void PDMClass::setBufferSize(int bufferSize)
