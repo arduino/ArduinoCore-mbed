@@ -1,3 +1,5 @@
+#ifdef USE_ARDUINO_PINOUT
+
 #include "drivers/InterruptIn.h"
 #include "drivers/PwmOut.h"
 #include "drivers/AnalogIn.h"
@@ -35,3 +37,5 @@ inline PinName digitalPinToPinName(pin_size_t P) {
 #endif
 
 int PinNameToIndex(PinName P);
+
+#endif
