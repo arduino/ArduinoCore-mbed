@@ -44,7 +44,7 @@ void setup() {
   Serial.begin(115200);
   while (!Serial) {}
   Serial.println("Do you want to update only the SoftDevice? Y/[n]");
-  Serial.println("Yes: upload only the binary of the DoftDevice");
+  Serial.println("Yes: upload only the binary of the SoftDevice");
   Serial.println("No : upload the SoftDevice binary and update the bootloader to support SoftDevices");
   
   bool confirmation = false;
