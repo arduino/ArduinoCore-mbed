@@ -70,7 +70,10 @@ int PDMClass::begin(int channels, int sampleRate) {
     _gain = 24;
   }
 
-  if(py_audio_init(channels, sampleRate, _gain, 0.9883f)) {
+  g_pcmbuf = (uint16_t*)_doubleBuffer.data();
+  _doubleBuffer.swap(0);
+
+  if(py_audio_init(channels, sampleRate, gain_db, 0.9883f)) {
     py_audio_start_streaming();
     _init = 1;
     return 1;
@@ -119,16 +122,24 @@ size_t PDMClass::getBufferSize()
   return _doubleBuffer.getSize();
 }
 
+#define HALF_TRANSFER_SIZE  (64*_channels)
+static int g_pcmbuf_size=0;
+
 void PDMClass::IrqHandler(bool halftranfer)
 {
-  if (_doubleBuffer.available() == 0) {
-    g_pcmbuf = (uint16_t*)_doubleBuffer.data();
+  if (g_pcmbuf_size < _doubleBuffer.getSize()) {
     audio_pendsv_callback();
-    _doubleBuffer.swap(_doubleBuffer.availableForWrite());
-  }
+    g_pcmbuf += (HALF_TRANSFER_SIZE/2);
+    g_pcmbuf_size += HALF_TRANSFER_SIZE;
 
-  if (_onReceive) {
-      _onReceive();
+    if(g_pcmbuf_size == _doubleBuffer.getSize()) {
+      _doubleBuffer.swap(g_pcmbuf_size);
+      g_pcmbuf = (uint16_t*)_doubleBuffer.data();
+      g_pcmbuf_size = 0;
+      if (_onReceive) {
+        _onReceive();
+      }
+    }
   }
 }
 
