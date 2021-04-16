@@ -29,6 +29,7 @@ class MbedSPI : public SPIClass
 {
 public:
     MbedSPI(int miso, int mosi, int sck);
+    MbedSPI(PinName miso, PinName mosi, PinName sck);
     virtual uint8_t transfer(uint8_t data);
     virtual uint16_t transfer16(uint16_t data);
     virtual void transfer(void *buf, size_t count);
@@ -49,9 +50,9 @@ public:
 private:
     SPISettings settings = SPISettings(0, MSBFIRST, SPI_MODE0);
     _mbed_spi* dev = NULL;
-    int _miso;
-    int _mosi;
-    int _sck;
+    PinName _miso;
+    PinName _mosi;
+    PinName _sck;
 };
 
 }
