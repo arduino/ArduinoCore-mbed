@@ -114,6 +114,11 @@ void PDMClass::setBufferSize(int bufferSize)
   _doubleBuffer.setSize(bufferSize);
 }
 
+size_t PDMClass::getBufferSize()
+{
+  return _doubleBuffer.getSize();
+}
+
 void PDMClass::IrqHandler(bool halftranfer)
 {
   if (_doubleBuffer.available() == 0) {
@@ -135,6 +140,10 @@ void PDMIrqHandler(bool halftranfer)
 
 void PDMsetBufferSize(int size) {
   PDM.setBufferSize(size);
+}
+
+size_t PDMgetBufferSize() {
+  return PDM.getBufferSize();
 }
 }
 

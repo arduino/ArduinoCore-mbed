@@ -37,6 +37,11 @@ void PDMDoubleBuffer::setSize(int size)
   reset();
 }
 
+size_t PDMDoubleBuffer::getSize()
+{
+  return _size;
+}
+
 void PDMDoubleBuffer::reset()
 {
   _buffer[0] = (uint8_t*)realloc(_buffer[0], _size);

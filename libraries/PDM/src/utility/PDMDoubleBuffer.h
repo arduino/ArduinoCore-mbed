@@ -31,6 +31,7 @@ public:
   virtual ~PDMDoubleBuffer();
 
   void setSize(int size);
+  size_t getSize();
 
   void reset();
 
