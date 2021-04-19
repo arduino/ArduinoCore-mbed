@@ -29,6 +29,7 @@ extern "C" {
 }
 
 extern "C" uint16_t *g_pcmbuf;
+static PDMClass *_instance = NULL;
 
 PDMClass::PDMClass(int dinPin, int clkPin, int pwrPin) :
   _dinPin(dinPin),
@@ -40,10 +41,12 @@ PDMClass::PDMClass(int dinPin, int clkPin, int pwrPin) :
   _samplerate(-1),
   _init(-1)
 {
+  _instance = this;
 }
 
 PDMClass::~PDMClass()
 {
+  _instance = NULL;
 }
 
 int PDMClass::begin(int channels, int sampleRate) {
@@ -146,15 +149,15 @@ void PDMClass::IrqHandler(bool halftranfer)
 extern "C" {
 void PDMIrqHandler(bool halftranfer)
 {
-  PDM.IrqHandler(halftranfer);
+  _instance->IrqHandler(halftranfer);
 }
 
 void PDMsetBufferSize(int size) {
-  PDM.setBufferSize(size);
+  _instance->setBufferSize(size);
 }
 
 size_t PDMgetBufferSize() {
-  return PDM.getBufferSize();
+  return _instance.getBufferSize();
 }
 }
 
