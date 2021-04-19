@@ -105,6 +105,9 @@ int PDMClass::read(void* buffer, size_t size)
 void PDMClass::onReceive(void(*function)(void))
 {
   _onReceive = function;
+  if(_instance != this) {
+    _instance = this;
+  }
 }
 
 void PDMClass::setGain(int gain)
