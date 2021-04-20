@@ -35,6 +35,7 @@ class MbedI2C : public HardwareI2C
 {
   public:
     MbedI2C(int sda, int scl);
+    MbedI2C(PinName sda, PinName scl);
     virtual void begin();
     #ifndef DEVICE_I2CSLAVE
     virtual void __attribute__ ((error("I2C Slave mode is not supported"))) begin(uint8_t address);
@@ -72,8 +73,8 @@ private:
     mbed::I2CSlave* slave = NULL;
 #endif
     mbed::I2C*      master = NULL;
-    int _sda;
-    int _scl;
+    PinName _sda;
+    PinName _scl;
     int _address;
     RingBufferN<256> rxBuffer;
     uint8_t txBuffer[256];

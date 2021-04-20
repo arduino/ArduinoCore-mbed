@@ -190,6 +190,84 @@ unsigned long pulseIn(PinName pin, PinStatus state, unsigned long timeout)
     return pulseTime; 
 }
 
+
+#elif defined(TARGET_RP2040)
+
+#include "pinDefinitions.h"
+
+unsigned long pulseIn(PinName pin, PinStatus state, unsigned long timeout)
+{
+    unsigned long startMicros = micros();
+
+    // wait for any previous pulse to end
+    while (gpio_get(pin) == state) {
+        tight_loop_contents();
+        if (micros() - startMicros > timeout)
+            return 0;
+    }
+
+    // wait for the pulse to start
+    while (gpio_get(pin) != state) {
+        tight_loop_contents();
+        if (micros() - startMicros > timeout)
+            return 0;
+    }
+
+    unsigned long start = micros();
+    // wait for the pulse to stop
+    while (gpio_get(pin) == state) {
+        tight_loop_contents();
+        if (micros() - startMicros > timeout)
+            return 0;
+    }
+    return micros() - start;
+}
+
+#elif defined(TARGET_STM32H7)
+
+extern "C" {
+    #include "gpio_api.h"
+    GPIO_TypeDef *Set_GPIO_Clock(uint32_t port_idx);
+}
+
+#include "pinDefinitions.h"
+
+unsigned long pulseIn(PinName pin, PinStatus state, unsigned long timeout)
+{
+
+    uint32_t port_index = STM_PORT(pin);
+    GPIO_TypeDef *gpio = Set_GPIO_Clock(port_index);
+
+    volatile uint32_t *reg_in = &gpio->IDR;
+    uint32_t mask = gpio_set(pin);
+
+    unsigned long startMicros = micros();
+
+    // wait for any previous pulse to end
+    while ((*reg_in & mask) == state) {
+        if (micros() - startMicros > timeout)
+            return 0;
+    }
+
+    // wait for the pulse to start
+    while ((*reg_in & mask) != state) {
+        if (micros() - startMicros > timeout)
+            return 0;
+    }
+
+    unsigned long start = micros();
+    // wait for the pulse to stop
+    while ((*reg_in & mask) == state) {
+        if (micros() - startMicros > timeout)
+            return 0;
+    }
+    return micros() - start;
+}
+
+#endif
+
+// generic, overloaded implementations
+
 unsigned long pulseIn(uint8_t pin, uint8_t state, unsigned long timeout)
 {
     return pulseIn(digitalPinToPinName(pin), (PinStatus)state, timeout);
@@ -204,5 +282,3 @@ unsigned long pulseInLong(PinName pin, PinStatus state, unsigned long timeout)
 {
     return pulseIn(pin, state, timeout);
 }
-
-#endif

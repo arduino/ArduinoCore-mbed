@@ -33,7 +33,13 @@ struct _mbed_spi {
 };
 
 
-arduino::MbedSPI::MbedSPI(int miso, int mosi, int sck) : _miso(miso), _mosi(mosi), _sck(sck) {
+arduino::MbedSPI::MbedSPI(int miso, int mosi, int sck) :
+  _miso(digitalPinToPinName(miso)), _mosi(digitalPinToPinName(mosi)), _sck(digitalPinToPinName(sck)) {
+
+}
+
+arduino::MbedSPI::MbedSPI(PinName miso, PinName mosi, PinName sck) : _miso(miso), _mosi(mosi), _sck(sck) {
+
 }
 
 uint8_t arduino::MbedSPI::transfer(uint8_t data) {
@@ -95,7 +101,7 @@ void arduino::MbedSPI::begin() {
       dev->obj = NULL;
     }
     if (dev->obj == NULL) {
-      dev->obj = new mbed::SPI((PinName)_mosi, (PinName)_miso, (PinName)_sck);
+      dev->obj = new mbed::SPI(_mosi, _miso, _sck);
     }
 }
 
