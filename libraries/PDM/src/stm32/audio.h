@@ -32,6 +32,7 @@
 
 void py_audio_deinit();
 int py_audio_init(size_t g_channels, uint32_t frequency, int gain_db, float highpass);
+void py_audio_gain_set(int gain_db);
 void audio_pendsv_callback(void);
 void py_audio_start_streaming();
 void py_audio_stop_streaming();

@@ -193,7 +193,7 @@ void Open_PDM_Filter_Init(TPDMFilter_InitStruct *Param)
   }
 
   sub_const = sum >> 1;
-  div_const = sub_const * Param->MaxVolume / 32768 / filterGain;
+  div_const = sub_const * Param->MaxVolume / 32768 / Param->filterGain;
   div_const = (div_const == 0 ? 1 : div_const);
 
 #ifdef USE_LUT

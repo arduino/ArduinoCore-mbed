@@ -30,7 +30,7 @@ public:
   PDMClass(int dinPin, int clkPin, int pwrPin);
   virtual ~PDMClass();
 
-  int begin(int channels, long sampleRate);
+  int begin(int channels, int sampleRate);
   void end();
 
   virtual int available();
@@ -38,6 +38,8 @@ public:
 
   void onReceive(void(*)(void));
 
+  //PORTENTA_H7 min -12 max 51
+  //NANO 33 BLE SENSe min 0 max 80
   void setGain(int gain);
   void setBufferSize(int bufferSize);
 
@@ -50,7 +52,11 @@ private:
   int _pwrPin;
 
   int _channels;
-  
+  int _samplerate;
+
+  int _gain;
+  int _init;
+
   PDMDoubleBuffer _doubleBuffer;
   
   void (*_onReceive)(void);

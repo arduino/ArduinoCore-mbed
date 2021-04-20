@@ -32,8 +32,6 @@ int16_t* volatile finalBuffer;
 // OpenPDM filter used to convert PDM into PCM
 #define FILTER_GAIN     16
 TPDMFilter_InitStruct filter;
-uint16_t filterGain = FILTER_GAIN;
-
 
 extern "C" {
   __attribute__((__used__)) void dmaHandler(void)
@@ -47,7 +45,11 @@ PDMClass::PDMClass(int dinPin, int clkPin, int pwrPin) :
   _dinPin(dinPin),
   _clkPin(clkPin),
   _pwrPin(pwrPin),
-  _onReceive(NULL)
+  _onReceive(NULL),
+  _gain(-1),
+  _channels(-1),
+  _samplerate(-1),
+  _init(-1)
 {
 }
 
@@ -55,7 +57,7 @@ PDMClass::~PDMClass()
 {
 }
 
-int PDMClass::begin(int channels, long sampleRate)
+int PDMClass::begin(int channels, int sampleRate)
 {
   //_channels = channels; // only one channel available
 
@@ -71,15 +73,19 @@ int PDMClass::begin(int channels, long sampleRate)
     rawBufferLength = finalBufferLength;
   }
 
-	/* Initialize Open PDM library */
-	filter.Fs = sampleRate;
-	filter.nSamples = rawBufferLength; 
-	filter.LP_HZ = sampleRate/2;
-	filter.HP_HZ = 10;
-	filter.In_MicChannels = 1;
-	filter.Out_MicChannels = 1;
-	filter.Decimation = decimation;
-	Open_PDM_Filter_Init(&filter);
+  /* Initialize Open PDM library */
+  filter.Fs = sampleRate;
+  filter.nSamples = rawBufferLength;
+  filter.LP_HZ = sampleRate/2;
+  filter.HP_HZ = 10;
+  filter.In_MicChannels = 1;
+  filter.Out_MicChannels = 1;
+  filter.Decimation = decimation;
+  if(_gain == -1) {
+    _gain = FILTER_GAIN;
+  }
+  filter.filterGain = _gain;
+  Open_PDM_Filter_Init(&filter);
 
   // Configure PIO state machine
   float clkDiv = (float)clock_get_hz(clk_sys) / sampleRate / decimation / 2; 
@@ -109,6 +115,8 @@ int PDMClass::begin(int channels, long sampleRate)
     RAW_BUFFER_SIZE, // Number of transfers
     true                // Start immediately
   );
+
+  _init = 1;
 
   return 1;
 }
@@ -142,7 +150,11 @@ void PDMClass::onReceive(void(*function)(void))
 
 void PDMClass::setGain(int gain)
 {
-  filterGain = gain;
+  _gain = gain;
+  if(_init == 1) {
+    filter.filterGain = _gain;
+    Open_PDM_Filter_Init(&filter);
+  }
 }
 
 void PDMClass::setBufferSize(int bufferSize)
