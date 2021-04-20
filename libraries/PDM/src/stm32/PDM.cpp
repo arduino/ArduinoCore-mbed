@@ -29,6 +29,7 @@ extern "C" {
 }
 
 extern "C" uint16_t *g_pcmbuf;
+static PDMClass *_instance = NULL;
 
 PDMClass::PDMClass(int dinPin, int clkPin, int pwrPin) :
   _dinPin(dinPin),
@@ -40,10 +41,12 @@ PDMClass::PDMClass(int dinPin, int clkPin, int pwrPin) :
   _samplerate(-1),
   _init(-1)
 {
+  _instance = this;
 }
 
 PDMClass::~PDMClass()
 {
+  _instance = NULL;
 }
 
 int PDMClass::begin(int channels, int sampleRate) {
@@ -61,6 +64,10 @@ int PDMClass::begin(int channels, int sampleRate) {
     data[0] = 0x35;
     data[1] = 0xF;
     i2c.write(8 << 1, data, sizeof(data));
+  }
+
+  if(_instance != this) {
+    return 0;
   }
 
   _channels = channels;
@@ -102,6 +109,9 @@ int PDMClass::read(void* buffer, size_t size)
 void PDMClass::onReceive(void(*function)(void))
 {
   _onReceive = function;
+  if(_instance != this) {
+    _instance = this;
+  }
 }
 
 void PDMClass::setGain(int gain)
@@ -146,15 +156,15 @@ void PDMClass::IrqHandler(bool halftranfer)
 extern "C" {
 void PDMIrqHandler(bool halftranfer)
 {
-  PDM.IrqHandler(halftranfer);
+  _instance->IrqHandler(halftranfer);
 }
 
 void PDMsetBufferSize(int size) {
-  PDM.setBufferSize(size);
+  _instance->setBufferSize(size);
 }
 
 size_t PDMgetBufferSize() {
-  return PDM.getBufferSize();
+  return _instance.getBufferSize();
 }
 }
 

@@ -59,7 +59,7 @@ private:
   int _init;
 
   PDMDoubleBuffer _doubleBuffer;
-  
+
   void (*_onReceive)(void);
 };
 
