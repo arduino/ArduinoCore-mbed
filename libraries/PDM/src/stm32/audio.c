@@ -303,8 +303,11 @@ int py_audio_init(size_t channels, uint32_t frequency, int gain_db, float highpa
         PDM_Filter_setConfig(&PDM_FilterHandler[i], &PDM_FilterConfig[i]);
     }
 
-    PDMsetBufferSize(samples_per_channel * g_o_channels * sizeof(int16_t));
-    //g_pcmbuf = malloc(samples_per_channel * g_channels * sizeof(int16_t));
+    uint32_t min_buff_size = samples_per_channel * g_o_channels * sizeof(int16_t);
+    uint32_t buff_size = PDMgetBufferSize();
+    if(buff_size < min_buff_size) {
+      PDMsetBufferSize(min_buff_size);
+    }
 
     return 1;
 }

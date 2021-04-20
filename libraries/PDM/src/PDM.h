@@ -42,6 +42,7 @@ public:
   //NANO 33 BLE SENSe min 0 max 80
   void setGain(int gain);
   void setBufferSize(int bufferSize);
+  size_t getBufferSize();
 
 // private:
   void IrqHandler(bool halftranfer);
