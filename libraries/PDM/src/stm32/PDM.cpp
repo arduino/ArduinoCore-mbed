@@ -66,6 +66,10 @@ int PDMClass::begin(int channels, int sampleRate) {
     i2c.write(8 << 1, data, sizeof(data));
   }
 
+  if(_instance != this) {
+    return 0;
+  }
+
   _channels = channels;
   _samplerate = sampleRate;
 
