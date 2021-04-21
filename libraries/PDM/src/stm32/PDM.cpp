@@ -164,7 +164,7 @@ void PDMsetBufferSize(int size) {
 }
 
 size_t PDMgetBufferSize() {
-  return _instance.getBufferSize();
+  return _instance->getBufferSize();
 }
 }
 
