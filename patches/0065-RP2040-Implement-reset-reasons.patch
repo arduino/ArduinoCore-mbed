@@ -1,0 +1,67 @@
+From ab607f7cd460b3fb6558c7e3455f751ccd4b29f2 Mon Sep 17 00:00:00 2001
+From: giulcioffi <g.cioffi@arduino.cc>
+Date: Mon, 15 Mar 2021 17:52:09 +0100
+Subject: [PATCH 65/74] RP2040: Implement reset reasons
+
+---
+ .../TARGET_RP2040/reset_reason.c              | 33 +++++++++++++++++++
+ targets/targets.json                          |  3 +-
+ 2 files changed, 35 insertions(+), 1 deletion(-)
+ create mode 100644 targets/TARGET_RASPBERRYPI/TARGET_RP2040/reset_reason.c
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/reset_reason.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/reset_reason.c
+new file mode 100644
+index 0000000000..7e511078c5
+--- /dev/null
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/reset_reason.c
+@@ -0,0 +1,33 @@
++#include "reset_reason_api.h"
++#include "hardware/watchdog.h"
++
++#ifdef DEVICE_RESET_REASON
++
++#include "structs/resets.h"
++
++reset_reason_t hal_reset_reason_get(void)
++{
++    if (watchdog_caused_reboot()) {
++      return RESET_REASON_WATCHDOG;
++    } else {
++      return RESET_REASON_PIN_RESET;
++    }
++
++    return RESET_REASON_UNKNOWN;
++}
++
++
++uint32_t hal_reset_reason_get_raw(void)
++{
++    return resets_hw->reset;
++}
++
++
++void hal_reset_reason_clear(void)
++{
++    for (int i = 1; i < 25; i++) {
++      hw_clear_bits(&resets_hw->reset, i);
++    }
++}
++
++#endif // DEVICE_RESET_REASON
+diff --git a/targets/targets.json b/targets/targets.json
+index af4c44c653..2081b37254 100644
+--- a/targets/targets.json
++++ b/targets/targets.json
+@@ -8016,7 +8016,8 @@
+             "SPI",
+             "USTICKER",
+             "WATCHDOG",
+-            "USBDEVICE"
++            "USBDEVICE",
++            "RESET_REASON"
+         ]
+     },
+     "NANO_RP2040_CONNECT": {
+-- 
+2.31.1
+

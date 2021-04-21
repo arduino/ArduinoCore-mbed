@@ -1,0 +1,25 @@
+From 90c94a03c3ead1ce361440a44913b47e38f7be09 Mon Sep 17 00:00:00 2001
+From: giulcioffi <g.cioffi@arduino.cc>
+Date: Wed, 2 Dec 2020 11:05:34 +0100
+Subject: [PATCH 63/67] Fix missing 'mbed' namespace error in SPIFBlockDevice
+
+---
+ .../blockdevice/COMPONENT_SPIF/include/SPIF/SPIFBlockDevice.h   | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/storage/blockdevice/COMPONENT_SPIF/include/SPIF/SPIFBlockDevice.h b/storage/blockdevice/COMPONENT_SPIF/include/SPIF/SPIFBlockDevice.h
+index 13b7bfd851..c68c457536 100644
+--- a/storage/blockdevice/COMPONENT_SPIF/include/SPIF/SPIFBlockDevice.h
++++ b/storage/blockdevice/COMPONENT_SPIF/include/SPIF/SPIFBlockDevice.h
+@@ -45,7 +45,7 @@
+  */
+ enum spif_bd_error {
+     SPIF_BD_ERROR_OK                    = 0,     /*!< no error */
+-    SPIF_BD_ERROR_DEVICE_ERROR          = BD_ERROR_DEVICE_ERROR, /*!< device specific error -4001 */
++    SPIF_BD_ERROR_DEVICE_ERROR          = mbed::BD_ERROR_DEVICE_ERROR, /*!< device specific error -4001 */
+     SPIF_BD_ERROR_PARSING_FAILED        = -4002, /* SFDP Parsing failed */
+     SPIF_BD_ERROR_READY_FAILED          = -4003, /* Wait for Memory Ready failed */
+     SPIF_BD_ERROR_WREN_FAILED           = -4004, /* Write Enable Failed */
+-- 
+2.30.1
+
