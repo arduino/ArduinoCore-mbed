@@ -64,7 +64,7 @@ mv _bootloaders bootloaders
 
 #Patch title in platform.txt
 sed -i "s/Arduino Mbed OS Boards/Arduino Mbed OS ${FLAVOUR^} Boards/g" platform.txt
-sed -i 's/9.9.9/$VERSION/g' platform.txt
+sed -i "s/9.9.9/$VERSION/g" platform.txt
 
 BASE_FOLDER=`basename $PWD`
 
