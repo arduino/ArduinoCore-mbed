@@ -80,7 +80,7 @@ int PDMClass::begin(int channels, int sampleRate) {
   g_pcmbuf = (uint16_t*)_doubleBuffer.data();
   _doubleBuffer.swap(0);
 
-  if(py_audio_init(channels, sampleRate, gain_db, 0.9883f)) {
+  if(py_audio_init(channels, sampleRate, _gain, 0.9883f)) {
     py_audio_start_streaming();
     _init = 1;
     return 1;
@@ -164,7 +164,7 @@ void PDMsetBufferSize(int size) {
 }
 
 size_t PDMgetBufferSize() {
-  return _instance.getBufferSize();
+  return _instance->getBufferSize();
 }
 }
 
