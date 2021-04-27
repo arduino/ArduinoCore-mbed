@@ -1,6 +1,6 @@
 #include "EthernetUdp.h"
 
-extern arduino::EthernetClass WiFi;
+extern arduino::EthernetClass Ethernet;
 
 #ifndef ETHERNET_UDP_BUFFER_SIZE
 #define ETHERNET_UDP_BUFFER_SIZE        508

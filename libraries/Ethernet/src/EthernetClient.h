@@ -80,6 +80,7 @@ private:
   RingBufferN<256> rxBuffer;
   uint8_t _status;
   mbed::Callback<int(void)> beforeConnect;
+  SocketAddress address;
 
   void getStatus();
 };

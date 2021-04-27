@@ -37,7 +37,8 @@ int arduino::WiFiClient::connect(SocketAddress socketAddress) {
 	}
 	//sock->sigio(mbed::callback(this, &WiFiClient::getStatus));
 	//sock->set_blocking(false);
-	sock->set_timeout(SOCKET_TIMEOUT);		
+	address = socketAddress;
+	sock->set_timeout(SOCKET_TIMEOUT);
 	nsapi_error_t returnCode = static_cast<TCPSocket*>(sock)->connect(socketAddress);
 	return returnCode == NSAPI_ERROR_OK ? 1 : 0;
 }
@@ -140,7 +141,7 @@ uint8_t arduino::WiFiClient::connected() {
 }
 
 IPAddress arduino::WiFiClient::remoteIP() {
-	return IPAddress((uint32_t)0);
+	return WiFi.ipAddressFromSocketAddress(address);
 }
 
 uint16_t arduino::WiFiClient::remotePort() {
