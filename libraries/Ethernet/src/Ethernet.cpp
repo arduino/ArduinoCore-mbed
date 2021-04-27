@@ -27,7 +27,7 @@ int arduino::EthernetClass::begin(uint8_t *mac, unsigned long timeout, unsigned 
     	delay(10);
     }
 
-    return (linkStatus() != LinkON ? 1 : 0);
+    return (linkStatus() == LinkON ? 1 : 0);
 }
 
 void arduino::EthernetClass::end() {
