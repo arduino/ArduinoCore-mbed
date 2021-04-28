@@ -130,7 +130,7 @@ void UART::end() {
 		return _SerialUSB.end();
 	}
 #endif
-	if (_serial->obj != NULL) {
+	if (_serial != NULL && _serial->obj != NULL) {
 		delete _serial->obj;
 		_serial->obj = NULL;
 		delete _serial;
