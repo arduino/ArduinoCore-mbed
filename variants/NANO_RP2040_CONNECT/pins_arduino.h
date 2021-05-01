@@ -96,8 +96,8 @@ void _ontouch1200bps_();
 #define SerialNina		Serial3
 #define SerialHCI		Serial2
 
-#define NINA_GPIOIRQ	(21u) // LEDG pin (GPIO26 on NINA)
-#define NINA_GPIO0		(28u) // real GPIO0 on NINA
+//#define NINA_GPIOIRQ	(21u) // LEDG pin (GPIO26 on NINA)
+#define NINA_GPIO0		(20u) // real GPIO0 on NINA
 
 #define SPIWIFI_SS		(26u)
 #define SPIWIFI_ACK		(27u)

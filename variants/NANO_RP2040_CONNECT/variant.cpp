@@ -39,8 +39,8 @@ PinDescription g_APinDescription[] = {
   { p13,        NULL, NULL, NULL },    // A5 / SCL  -> D19
 
   // Internal pins - D20 - D23
-  { p2,         NULL, NULL, NULL },    // LEDR / IMU IRQ1 / to NINA
-  { p24,        NULL, NULL, NULL },    // LEDG / IMU IRQ2 / to NINA
+  { p2,         NULL, NULL, NULL },    // GPIO0
+  { p24,        NULL, NULL, NULL },    // IMU IRQ
   { p22,        NULL, NULL, NULL },    // PDM DATA IN
   { p23,        NULL, NULL, NULL },    // PDM CLOCK
 
