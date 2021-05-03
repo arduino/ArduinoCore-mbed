@@ -22,9 +22,9 @@ extern PinName digitalPinToPinName(pin_size_t P);
 // ----
 #define PIN_LED     (13u)
 #define LED_BUILTIN PIN_LED
-#define LEDR        (20u)
-#define LEDG        (21u)
-#define LEDB        (13u)
+//#define LEDR        (20u)
+//#define LEDG        (21u)
+//#define LEDB        (13u)
 
 // Analog pins
 // -----------
@@ -119,5 +119,9 @@ void _ontouch1200bps_();
 #define CRYPTO_WIRE		Wire
 
 #define USB_MAX_POWER	(500)
+
+#ifdef __cplusplus
+#include "nina_pins.h"
+#endif
 
 #endif //__PINS_ARDUINO__
