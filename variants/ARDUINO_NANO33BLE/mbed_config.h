@@ -68,6 +68,7 @@
 #define MBED_CONF_BLE_API_IMPLEMENTATION_MAX_CCCD_COUNT                         20                                                                                               // set by library:ble-api-implementation
 #define MBED_CONF_BLE_API_IMPLEMENTATION_MAX_CHARACTERISTIC_AUTHORISATION_COUNT 20                                                                                               // set by library:ble-api-implementation
 #define MBED_CONF_BLE_PRESENT                                                   1                                                                                                // set by library:ble
+#define MBED_CONF_BLE_TRACE_HUMAN_READABLE_ENUMS                                0                                                                                                // set by library:ble
 #define MBED_CONF_CELLULAR_CONTROL_PLANE_OPT                                    0                                                                                                // set by library:cellular
 #define MBED_CONF_CELLULAR_DEBUG_AT                                             0                                                                                                // set by library:cellular
 #define MBED_CONF_CELLULAR_MAX_CP_DATA_RECV_LEN                                 1358                                                                                             // set by library:cellular
@@ -93,6 +94,8 @@
 #define MBED_CONF_CORDIO_PREFERRED_TX_POWER                                     0                                                                                                // set by library:cordio
 #define MBED_CONF_CORDIO_ROUTE_UNHANDLED_COMMAND_COMPLETE_EVENTS                1                                                                                                // set by library:cordio
 #define MBED_CONF_CORDIO_RX_ACL_BUFFER_SIZE                                     70                                                                                               // set by library:cordio
+#define MBED_CONF_CORDIO_TRACE_HCI_PACKETS                                      0                                                                                                // set by library:cordio
+#define MBED_CONF_CORDIO_TRACE_PAL_ECHOES                                       0                                                                                                // set by library:cordio
 #define MBED_CONF_CRYPTOCELL310_PRESENT                                         1                                                                                                // set by library:cryptocell310
 #define MBED_CONF_DRIVERS_OSPI_CSN                                              OSPI_FLASH1_CSN                                                                                  // set by library:drivers
 #define MBED_CONF_DRIVERS_OSPI_DQS                                              OSPI_FLASH1_DQS                                                                                  // set by library:drivers
@@ -360,6 +363,7 @@
 #define QSPIF_SFDP_DATA_LEN                                                     128                                                                                              // set by target:MCU_NRF52840
 #define SEC_CCM_CFG                                                             1                                                                                                // set by library:cordio
 #define SMP_DB_MAX_DEVICES                                                      3                                                                                                // set by library:cordio
+#define WSF_TRACE_ENABLED                                                       0                                                                                                // set by library:cordio
 // Macros
 #define BB_CLK_RATE_HZ                                                          1000000                                                                                          // defined by library:cordio-nordic-ll
 #define INIT_BROADCASTER                                                                                                                                                         // defined by library:cordio-nordic-ll

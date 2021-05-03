@@ -69,6 +69,7 @@
 #define MBED_CONF_BLE_API_IMPLEMENTATION_MAX_CCCD_COUNT                         20                                                                                               // set by library:ble-api-implementation
 #define MBED_CONF_BLE_API_IMPLEMENTATION_MAX_CHARACTERISTIC_AUTHORISATION_COUNT 20                                                                                               // set by library:ble-api-implementation
 #define MBED_CONF_BLE_PRESENT                                                   1                                                                                                // set by library:ble
+#define MBED_CONF_BLE_TRACE_HUMAN_READABLE_ENUMS                                0                                                                                                // set by library:ble
 #define MBED_CONF_CELLULAR_CONTROL_PLANE_OPT                                    0                                                                                                // set by library:cellular
 #define MBED_CONF_CELLULAR_DEBUG_AT                                             0                                                                                                // set by library:cellular
 #define MBED_CONF_CELLULAR_MAX_CP_DATA_RECV_LEN                                 1358                                                                                             // set by library:cellular
@@ -81,6 +82,8 @@
 #define MBED_CONF_CORDIO_PREFERRED_TX_POWER                                     0                                                                                                // set by library:cordio
 #define MBED_CONF_CORDIO_ROUTE_UNHANDLED_COMMAND_COMPLETE_EVENTS                1                                                                                                // set by library:cordio
 #define MBED_CONF_CORDIO_RX_ACL_BUFFER_SIZE                                     70                                                                                               // set by library:cordio
+#define MBED_CONF_CORDIO_TRACE_HCI_PACKETS                                      0                                                                                                // set by library:cordio
+#define MBED_CONF_CORDIO_TRACE_PAL_ECHOES                                       0                                                                                                // set by library:cordio
 #define MBED_CONF_CY_PSOC6_WHD_PRESENT                                          1                                                                                                // set by library:cy_psoc6_whd
 #define MBED_CONF_DRIVERS_OSPI_CSN                                              OSPI_FLASH1_CSN                                                                                  // set by library:drivers
 #define MBED_CONF_DRIVERS_OSPI_DQS                                              OSPI_FLASH1_DQS                                                                                  // set by library:drivers
@@ -372,6 +375,7 @@
 #define MBED_CONF_TARGET_LSE_DRIVE_LOAD_LEVEL                                   RCC_LSEDRIVE_LOW                                                                                 // set by target:MCU_STM32H7
 #define MBED_CONF_TARGET_MPU_ROM_END                                            0x0fffffff                                                                                       // set by target:Target
 #define MBED_CONF_TARGET_NETWORK_DEFAULT_INTERFACE_TYPE                         ETHERNET                                                                                         // set by target:PORTENTA_H7
+#define MBED_CONF_TARGET_RTC_CLOCK_SOURCE                                       USE_RTC_CLK_LSE_OR_LSI                                                                           // set by target:MCU_STM32
 #define MBED_CONF_TARGET_SYSTEM_POWER_SUPPLY                                    PWR_SMPS_1V8_SUPPLIES_LDO                                                                        // set by target:PORTENTA_H7
 #define MBED_CONF_TARGET_TICKLESS_FROM_US_TICKER                                0                                                                                                // set by target:Target
 #define MBED_CONF_TARGET_USB_SPEED                                              USE_USB_OTG_FS                                                                                   // set by application[*]
@@ -407,6 +411,7 @@
 #define PPP_DEBUG                                                               0                                                                                                // set by library:ppp
 #define SEC_CCM_CFG                                                             1                                                                                                // set by library:cordio
 #define SMP_DB_MAX_DEVICES                                                      3                                                                                                // set by library:cordio
+#define WSF_TRACE_ENABLED                                                       0                                                                                                // set by library:cordio
 // Macros
 #define MBEDTLS_CIPHER_MODE_CTR                                                                                                                                                  // defined by library:SecureStore
 #define NSAPI_PPP_AVAILABLE                                                     (MBED_CONF_PPP_ENABLED || MBED_CONF_LWIP_PPP_ENABLED)                                            // defined by library:ppp

@@ -68,6 +68,7 @@
 -iwithprefixbefore/mbed/connectivity/FEATURE_BLE/libraries/cordio_stack/wsf/include
 -iwithprefixbefore/mbed/connectivity/FEATURE_BLE/libraries/cordio_stack/wsf/include/util
 -iwithprefixbefore/mbed/connectivity/FEATURE_BLE/source
+-iwithprefixbefore/mbed/connectivity/FEATURE_BLE/source/common
 -iwithprefixbefore/mbed/connectivity/FEATURE_BLE/source/cordio
 -iwithprefixbefore/mbed/connectivity/FEATURE_BLE/source/cordio/source
 -iwithprefixbefore/mbed/connectivity/FEATURE_BLE/source/cordio/stack_adaptation
@@ -175,6 +176,7 @@
 -iwithprefixbefore/mbed/drivers/device_key/include/device_key
 -iwithprefixbefore/mbed/drivers/include
 -iwithprefixbefore/mbed/drivers/include/drivers
+-iwithprefixbefore/mbed/drivers/include/drivers/interfaces
 -iwithprefixbefore/mbed/drivers/usb
 -iwithprefixbefore/mbed/drivers/usb/include
 -iwithprefixbefore/mbed/drivers/usb/include/usb

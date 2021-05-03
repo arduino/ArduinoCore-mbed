@@ -113,6 +113,7 @@
 -iwithprefixbefore/mbed/drivers/device_key/include/device_key
 -iwithprefixbefore/mbed/drivers/include
 -iwithprefixbefore/mbed/drivers/include/drivers
+-iwithprefixbefore/mbed/drivers/include/drivers/interfaces
 -iwithprefixbefore/mbed/drivers/usb
 -iwithprefixbefore/mbed/drivers/usb/include
 -iwithprefixbefore/mbed/drivers/usb/include/usb
