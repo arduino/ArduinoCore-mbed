@@ -80,7 +80,7 @@ uint8_t getUniqueSerialNumber(uint8_t* name) {
 }
 
 void _ontouch1200bps_() {
-  reset_usb_boot(1 << digitalPinToPinName(LED_BUILTIN), 1);
+  reset_usb_boot(1 << digitalPinToPinName(LED_BUILTIN), 0);
 }
 
 #endif
