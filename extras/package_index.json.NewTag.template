@@ -13,6 +13,7 @@
           "name": "[DEPRECATED - Please install standalone packages] Arduino Mbed OS Boards",
           "architecture": "mbed",
           "version": "%%VERSION%%",
+          "deprecated": true,
           "category": "Arduino",
           "url": "http://downloads.arduino.cc/cores/staging/%%FILENAME%%",
           "archiveFileName": "%%FILENAME%%",
@@ -27,6 +28,9 @@
             },
             {
               "name": "Arduino Nano 33 BLE Sense"
+            },
+            {
+              "name": "Arduino Nano RP2040 Connect"
             },
             {
               "name": "Arduino Portenta H7"
