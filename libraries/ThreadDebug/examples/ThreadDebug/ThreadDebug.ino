@@ -1,4 +1,5 @@
-/* This example demonstrates how to include the ThreadMRI library which allows debugging of the Portenta H7 with GDB via a serial interface.
+/* This example demonstrates how to include the ThreadMRI library which allows debugging of the Portenta H7 and Nano 33 BLE [Sense] 
+   with GDB via a serial interface.
 
    To connect to the target, launch gdb with the following parameters
 
