@@ -1,7 +1,11 @@
 /*
  Multiple Blinks
 
- Demonstrates the use of the Scheduler library for the Arduino Nano 33 BLE
+ Demonstrates the use of the Scheduler library for the boards:
+ 
+ - Arduino Nano 33 BLE, or
+ - Arduino Portenta H7, or
+ - Arduino Nano RP2040 Connect
 
  Hardware required :
  * None (LEDs are already conencted to RGB LED)
