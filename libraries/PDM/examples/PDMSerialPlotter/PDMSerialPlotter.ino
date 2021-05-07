@@ -4,7 +4,8 @@
   Arduino IDE can be used to plot the audio data (Tools -> Serial Plotter)
 
   Circuit:
-  - Arduino Nano 33 BLE board or
+  - Arduino Nano 33 BLE board, or
+  - Arduino Nano RP2040 Connect, or
   - Arduino Portenta H7 board plus Portenta Vision Shield
 
   This example code is in the public domain.
