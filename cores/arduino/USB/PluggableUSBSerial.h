@@ -294,7 +294,7 @@ public:
 
 private:
     RingBufferN<256> rx_buffer;
-    rtos::Thread t;
+    rtos::Thread* t;
     int _baud, _bits, _parity, _stop;
 
     void onInterrupt() {
