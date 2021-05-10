@@ -104,13 +104,13 @@ void USBSerial::data_rx()
     }
 }
 
-uint8_t USBSerial::_available()
+uint32_t USBSerial::_available()
 {
     USBCDC::lock();
 
-    uint8_t size = 0;
+    uint32_t size = 0;
     if (!_rx_in_progress) {
-        size = _rx_size > 0xFF ? 0xFF : _rx_size;
+        size = _rx_size > CDC_MAX_PACKET_SIZE ? CDC_MAX_PACKET_SIZE : _rx_size;
     }
 
     USBCDC::unlock();

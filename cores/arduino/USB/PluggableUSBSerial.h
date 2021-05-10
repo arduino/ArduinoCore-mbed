@@ -115,7 +115,7 @@ public:
     *
     * @returns the number of bytes available
     */
-    uint8_t _available();
+    uint32_t _available();
 
     /**
     * Check if the terminal is connected.
