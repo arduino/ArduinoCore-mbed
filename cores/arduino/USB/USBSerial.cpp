@@ -72,6 +72,7 @@ void USBSerial::begin(unsigned long) {
     this->attach(::mbed::callback(this, &USBSerial::onInterrupt));
     t = new rtos::Thread(osPriorityNormal, 256, nullptr, "USBevt");
     t->start(waitForPortClose);
+    onInterrupt();
 }
 
 int USBSerial::_putc(int c)

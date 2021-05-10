@@ -298,8 +298,16 @@ private:
     int _baud, _bits, _parity, _stop;
 
     void onInterrupt() {
-        while (rx_buffer.availableForStore() && _available()) {
-            rx_buffer.store_char(_getc());
+        uint8_t buf[256];
+        int howMany = _available();
+        uint32_t toRead;
+        if (howMany > rx_buffer.availableForStore()) {
+            howMany = rx_buffer.availableForStore();
+        }
+        receive_nb(buf, howMany, &toRead);
+        while (rx_buffer.availableForStore() && toRead > 0) {
+            rx_buffer.store_char(buf[howMany-toRead]);
+            toRead --;
         }
     }
 
