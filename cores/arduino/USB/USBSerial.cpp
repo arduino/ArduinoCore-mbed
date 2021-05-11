@@ -26,7 +26,11 @@
 
 using namespace arduino;
 
+static rtos::EventFlags event;
+
 static void waitForPortClose() {
+
+    event.wait_any(0xFF);
     // wait for DTR be 0 (port closed) and timeout to be over
     long start = millis();
     static const int WAIT_TIMEOUT = 200;
@@ -37,11 +41,9 @@ static void waitForPortClose() {
     _ontouch1200bps_();
 }
 
-static events::EventQueue queue(2 * EVENTS_EVENT_SIZE);
-
 void usbPortChanged(int baud, int bits, int parity, int stop) {
     if (baud == 1200) {
-        queue.call(waitForPortClose);
+        event.set(1);
     }
 }
 
@@ -68,7 +70,9 @@ USBSerial::~USBSerial()
 void USBSerial::begin(unsigned long) {
     this->attach(usbPortChanged);
     this->attach(::mbed::callback(this, &USBSerial::onInterrupt));
-    t.start(callback(&queue, &::events::EventQueue::dispatch_forever));
+    t = new rtos::Thread(osPriorityNormal, 256, nullptr, "USBevt");
+    t->start(waitForPortClose);
+    onInterrupt();
 }
 
 int USBSerial::_putc(int c)
@@ -104,13 +108,13 @@ void USBSerial::data_rx()
     }
 }
 
-uint8_t USBSerial::_available()
+uint32_t USBSerial::_available()
 {
     USBCDC::lock();
 
-    uint8_t size = 0;
+    uint32_t size = 0;
     if (!_rx_in_progress) {
-        size = _rx_size > 0xFF ? 0xFF : _rx_size;
+        size = _rx_size > CDC_MAX_PACKET_SIZE ? CDC_MAX_PACKET_SIZE : _rx_size;
     }
 
     USBCDC::unlock();
