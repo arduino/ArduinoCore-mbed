@@ -64,7 +64,7 @@ public:
         if (ssl_ca_pem)
           ((TLSSocket*)_socket)->set_root_ca_cert(ssl_ca_pem);
         else
-          ((TLSSocket*)_socket)->set_root_ca_cert("/wlan/", 0);
+          ((TLSSocket*)_socket)->set_root_ca_cert_path("/wlan/");
         _we_created_socket = true;
     }
 
