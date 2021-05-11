@@ -171,6 +171,8 @@ nano33ble.vid.0=0x2341
 nano33ble.pid.0=0x005a
 nano33ble.vid.1=0x2341
 nano33ble.pid.1=0x805a
+nano33ble.vid.2=0x2341
+nano33ble.pid.2=0x015a
 
 nano33ble.upload.tool=bossac
 nano33ble.upload.protocol=
