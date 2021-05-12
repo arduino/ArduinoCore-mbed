@@ -98,10 +98,10 @@ void updateBootloader(){
   
   flash.init();
   
-  Serial.println("Flasing MBR...");
+  Serial.println("Flashing MBR...");
   applyUpdate(MBR_ADDR, MBR_bin, MBR_bin_len);
 
-  Serial.println("Flasing bootloader...");
+  Serial.println("Flashing bootloader...");
   applyUpdate(BOOTLOADER_ADDR, nano33_bootloader_hex, nano33_bootloader_hex_len);
 
   Serial.print("Bootloader 32bit CRC is: ");
@@ -114,19 +114,16 @@ void updateBootloader(){
   flash.deinit();
 
   Serial.println();
-  Serial.println("Bootloader update successfully completed!");
+  Serial.println("Bootloader update successfully completed!\n");
 }
 
 void updateSoftDevice(){
   flash.init();
 
-  Serial.println("Correct booloader found!");
-  Serial.println();
-  
   Serial.println("Storing SoftDevice length info at 0xFF000...");
   writeSoftDeviceLen(SOFTDEVICE_INFO_ADDR);
   
-  Serial.println("Flasing SoftDevice...");
+  Serial.println("Flashing SoftDevice...");
   applyUpdate(SOFTDEVICE_ADDR, Softdevice_bin, Softdevice_bin_len - 4096, 4096);
 
   flash.deinit();
@@ -155,6 +152,8 @@ void setup() {
       updateSoftDevice();
     }
   }
+
+  Serial.println("Done. You may now disconnect the board.");
 }
 
 uint32_t getTargetBootloaderCrc() {
