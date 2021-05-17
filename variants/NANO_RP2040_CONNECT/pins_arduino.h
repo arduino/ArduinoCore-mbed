@@ -45,6 +45,9 @@ static const uint8_t A3  = PIN_A3;
 #define PIN_PDM_CLK	 (23)
 #define PIN_PDM_DIN	 (22)
 
+// IMU MLC Interrupt
+#define INT_IMU      (21)
+
 // Serial
 #define PIN_SERIAL_RX (0ul)
 #define PIN_SERIAL_TX (1ul)
