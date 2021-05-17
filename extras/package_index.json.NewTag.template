@@ -46,7 +46,7 @@
             {
               "packager": "arduino",
               "name": "openocd",
-              "version": "0.11.0-arduino1"
+              "version": "0.11.0-arduino2"
             },
             {
               "packager": "arduino",
@@ -91,7 +91,7 @@
             {
               "packager": "arduino",
               "name": "openocd",
-              "version": "0.11.0-arduino1"
+              "version": "0.11.0-arduino2"
             },
             {
               "packager": "arduino",
@@ -142,7 +142,7 @@
             {
               "packager": "arduino",
               "name": "openocd",
-              "version": "0.11.0-arduino1"
+              "version": "0.11.0-arduino2"
             },
             {
               "packager": "arduino",
@@ -187,7 +187,7 @@
             {
               "packager": "arduino",
               "name": "openocd",
-              "version": "0.11.0-arduino1"
+              "version": "0.11.0-arduino2"
             },
             {
               "packager": "arduino",
@@ -222,7 +222,7 @@
             {
               "packager": "arduino",
               "name": "openocd",
-              "version": "0.11.0-arduino1"
+              "version": "0.11.0-arduino2"
             },
             {
               "packager": "arduino",

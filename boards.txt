@@ -3,7 +3,7 @@
 edge_control.name=Arduino Edge Control
 edge_control.build.core=arduino
 edge_control.build.crossprefix=arm-none-eabi-
-edge_control.build.compiler_path={runtime.tools.arm-none-eabi-gcc.path}/bin/
+edge_control.build.compiler_path={runtime.tools.arm-none-eabi-gcc-7-2017q4.path}/bin/
 
 edge_control.build.variant=EDGE_CONTROL
 edge_control.build.mcu=cortex-m4
@@ -45,7 +45,7 @@ edge_control.bootloader.file=EDGE_CONTROL/bootloader.hex
 envie_m7.name=Arduino Portenta H7 (M7 core)
 envie_m7.build.core=arduino
 envie_m7.build.crossprefix=arm-none-eabi-
-envie_m7.build.compiler_path={runtime.tools.arm-none-eabi-gcc.path}/bin/
+envie_m7.build.compiler_path={runtime.tools.arm-none-eabi-gcc-7-2017q4.path}/bin/
 
 envie_m7.build.variant=PORTENTA_H7_M7
 envie_m7.build.mcu=cortex-m7
@@ -101,7 +101,7 @@ envie_m7_thread_debug.build.board=PORTENTA_H7_M7
 envie_m4.name=Arduino Portenta H7 (M4 core)
 envie_m4.build.core=arduino
 envie_m4.build.crossprefix=arm-none-eabi-
-envie_m4.build.compiler_path={runtime.tools.arm-none-eabi-gcc.path}/bin/
+envie_m4.build.compiler_path={runtime.tools.arm-none-eabi-gcc-7-2017q4.path}/bin/
 
 envie_m4.build.variant=PORTENTA_H7_M4
 envie_m4.build.mcu=cortex-m4
@@ -149,7 +149,7 @@ envie_m4.bootloader.file=PORTENTA_H7/portentah7_bootloader_mbed_hs_v2.elf
 nano33ble.name=Arduino Nano 33 BLE
 nano33ble.build.core=arduino
 nano33ble.build.crossprefix=arm-none-eabi-
-nano33ble.build.compiler_path={runtime.tools.arm-none-eabi-gcc.path}/bin/
+nano33ble.build.compiler_path={runtime.tools.arm-none-eabi-gcc-7-2017q4.path}/bin/
 
 nano33ble.build.variant=ARDUINO_NANO33BLE
 nano33ble.build.mcu=cortex-m4
@@ -193,7 +193,7 @@ nano33ble.bootloader.file=nano33ble/bootloader.hex
 nanorp2040connect.name=Arduino Nano RP2040 Connect
 nanorp2040connect.build.core=arduino
 nanorp2040connect.build.crossprefix=arm-none-eabi-
-nanorp2040connect.build.compiler_path={runtime.tools.arm-none-eabi-gcc.path}/bin/
+nanorp2040connect.build.compiler_path={runtime.tools.arm-none-eabi-gcc-7-2017q4.path}/bin/
 
 nanorp2040connect.build.variant=NANO_RP2040_CONNECT
 nanorp2040connect.build.mcu=cortex-m0plus
@@ -233,7 +233,7 @@ nanorp2040connect.bootloader.programmer=-f interface/cmsis-dap.cfg
 pico.name=Raspberry Pi Pico
 pico.build.core=arduino
 pico.build.crossprefix=arm-none-eabi-
-pico.build.compiler_path={runtime.tools.arm-none-eabi-gcc.path}/bin/
+pico.build.compiler_path={runtime.tools.arm-none-eabi-gcc-7-2017q4.path}/bin/
 
 pico.build.variant=RASPBERRY_PI_PICO
 pico.build.mcu=cortex-m0plus
