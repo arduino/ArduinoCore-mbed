@@ -1,3 +1,5 @@
+#pragma once
+
 #include "WiFiNINA.h"
 
 class SFU {
