@@ -33,7 +33,7 @@ void setup() {
   PDM.onReceive(onPDMdata);
 
   // Optionally set the gain
-  // Defaults to 20 on the BLE Sense and -10 on the Portenta Vision Shield
+  // Defaults to 20 on the BLE Sense and 24 on the Portenta Vision Shield
   // PDM.setGain(30);
 
   // Initialize PDM with:
