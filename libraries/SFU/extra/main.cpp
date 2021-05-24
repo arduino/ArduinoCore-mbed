@@ -9,14 +9,15 @@
 #define FULL_UPDATE_FILE_PATH   "/" SD_MOUNT_PATH "/" MBED_CONF_APP_UPDATE_FILE
 
 #define POST_APPLICATION_ADDR   0x10000
+#define VERSION                 1
 
 #if !defined(POST_APPLICATION_ADDR)
 #error "target.restrict_size must be set for your target in mbed_app.json"
 #endif
 
 //Pin order: MOSI, MISO, SCK, CS
-//FlashIAPBlockDevice sd(XIP_BASE + 0xF00000, 0x100000);
-FlashIAPBlockDevice sd(XIP_BASE + 0x100000, 0x100000);
+FlashIAPBlockDevice sd(XIP_BASE + 0xF00000, 0x100000);
+//FlashIAPBlockDevice sd(XIP_BASE + 0x100000, 0x100000);
 FATFileSystem fs(SD_MOUNT_PATH);
 FlashIAP flash;
 
