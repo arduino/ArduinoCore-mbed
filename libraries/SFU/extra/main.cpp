@@ -1,3 +1,6 @@
+#define _GNU_SOURCE
+#include <string.h>
+
 #include "mbed.h"
 #include "FlashIAPBlockDevice.h"
 #include "FATFileSystem.h"
@@ -21,6 +24,8 @@ void apply_update(FILE *file, uint32_t address);
 
 int main()
 {
+    printf("SFU version %d\r\n", VERSION);
+
     FILE *file;
     sd.init();
     int err = fs.mount(&sd);
@@ -57,12 +62,35 @@ void apply_update(FILE *file, uint32_t address)
     // Skip the first POST_APPLICATION_ADDR bytes
     long len = ftell(file) - POST_APPLICATION_ADDR;
     printf("Firmware size is %ld bytes\r\n", len);
-    fseek(file, POST_APPLICATION_ADDR, SEEK_SET);
+
+    if (len < 0) {
+        return;
+    }
 
     flash.init();
 
     const uint32_t page_size = flash.get_page_size();
     char *page_buffer = new char[page_size];
+
+    fseek(file, 0, SEEK_SET);
+    int size_read = 0;
+    while (size_read < POST_APPLICATION_ADDR) {
+        memset(page_buffer, 0, sizeof(char) * page_size);
+        size_read += fread(page_buffer, 1, page_size, file);
+        if (memmem((const char*)page_buffer, page_size, "SFU version", 11) != NULL) {
+            printf("Signature string found\n");
+            break;
+        }
+    }
+    if (size_read >= POST_APPLICATION_ADDR) {
+        printf("OTA binary does not contain SFU, won't flash it\n");
+        delete[] page_buffer;
+        flash.deinit();
+        return;
+    }
+
+    fseek(file, POST_APPLICATION_ADDR, SEEK_SET);
+
     uint32_t addr = address;
     uint32_t next_sector = addr + flash.get_sector_size(addr);
     bool sector_erased = false;
