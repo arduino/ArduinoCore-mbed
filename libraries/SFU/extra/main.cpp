@@ -7,6 +7,7 @@
 
 #define SD_MOUNT_PATH           "ota"
 #define FULL_UPDATE_FILE_PATH   "/" SD_MOUNT_PATH "/" MBED_CONF_APP_UPDATE_FILE
+#define FULL_UPDATE_FILE_PATH_COMPRESSED   FULL_UPDATE_FILE_PATH ".LZSS"
 
 #define POST_APPLICATION_ADDR   0x10000
 #define VERSION                 1
@@ -22,6 +23,9 @@ FATFileSystem fs(SD_MOUNT_PATH);
 FlashIAP flash;
 
 void apply_update(FILE *file, uint32_t address);
+int verify_and_decompress(FILE *file);
+int verify(FILE* update_file);
+int decompress_and_flash(FILE* update_file, FlashIAP* flash, size_t offset);
 
 int main()
 {
@@ -32,6 +36,22 @@ int main()
     int err = fs.mount(&sd);
     if (err != 0) {
         printf("No partition found\r\n");
+        goto boot;
+    }
+
+    file = fopen(FULL_UPDATE_FILE_PATH_COMPRESSED, "rb");
+    if (file != NULL) {
+
+        printf("Compressed firmware update found\r\n");
+
+        int err = verify_and_decompress(file);
+
+        fclose(file);
+        remove(FULL_UPDATE_FILE_PATH_COMPRESSED);
+        if (err != 0) {
+            /* TODO */
+            printf("Error while decompressing or flashing, erase the entire flash to enter ROM loader\n");
+        }
         goto boot;
     }
 
@@ -55,6 +75,16 @@ boot:
     printf("Starting application\r\n");
 
     mbed_start_application(XIP_BASE + POST_APPLICATION_ADDR + 0x100);
+}
+
+int verify_and_decompress(FILE* file) {
+    int err = verify(file);
+    if (err != 0) {
+        printf("Error during verification\n");
+        return err;
+    }
+    err = decompress_and_flash(file, &flash, POST_APPLICATION_ADDR);
+    return err;
 }
 
 void apply_update(FILE *file, uint32_t address)
