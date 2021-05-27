@@ -38,7 +38,8 @@ namespace arduino {
 
 class UART : public HardwareSerial {
 	public:
-		UART(int tx, int rx, int rts, int cts) : _tx((PinName)tx), _rx((PinName)rx), _rts((PinName)rts), _cts((PinName)cts) {}
+		UART(int tx, int rx, int rts = -1, int cts = -1);
+		UART(PinName tx, PinName rx, PinName rts = NC, PinName cts = NC) : _tx(tx), _rx(rx), _rts(rts), _cts(cts) {}
 		UART() {
 			is_usb = true;
 		}
