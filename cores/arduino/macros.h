@@ -25,7 +25,6 @@
 
 #include <Arduino.h>
 #include <PinNames.h>
-#include <platform/FileHandle.h>
 
 // this is needed for backwards compatibility
 #define digitalPinToInterrupt(P)    (P)
@@ -38,6 +37,9 @@
 
 #endif
 
+#ifdef __cplusplus
+#include <platform/FileHandle.h>
+
 #define REDIRECT_STDOUT_TO(stream)    namespace mbed { \
                                         FileHandle *mbed_override_console(int fd) { \
                                         return static_cast<mbed::FileHandle*>(stream); \
@@ -46,3 +48,5 @@
                                         return static_cast<mbed::FileHandle*>(stream); \
                                        } \
                                       }
+
+#endif //__cplusplus

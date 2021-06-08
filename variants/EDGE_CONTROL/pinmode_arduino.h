@@ -44,6 +44,9 @@ typedef enum {
     INPUT_PULLDOWN = TempINPUT_PULLDOWN
 } PinMode;
 
+#if defined(__cplusplus)
+
 /* Redeclare Common.h functions with the updated PinMode */
 void pinMode(pin_size_t pinNumber, PinMode pinMode);
 
+#endif
