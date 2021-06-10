@@ -314,6 +314,18 @@ unsigned long arduino::WiFiClass::getTime() {
     return 0;
 }
 
+void arduino::WiFiClass::setFeedWatchdogFunc(voidPrtFuncPtr func)
+{
+  _feed_watchdog_func = func;
+}
+
+void arduino::WiFiClass::feedWatchdog()
+{
+  if (_feed_watchdog_func)
+	_feed_watchdog_func();
+}
+
+
 #if defined(COMPONENT_4343W)
 
 #include "QSPIFBlockDevice.h"

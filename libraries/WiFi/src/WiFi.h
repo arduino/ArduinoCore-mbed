@@ -296,6 +296,9 @@ public:
 
     NetworkInterface *getNetwork();
 
+    void setFeedWatchdogFunc(voidPrtFuncPtr func);
+    void feedWatchdog();
+
 private:
 
     EMACInterface* _softAP = nullptr;
@@ -316,6 +319,7 @@ private:
     bool isVisible(const char* ssid);
     arduino::IPAddress ipAddressFromSocketAddress(SocketAddress socketAddress);
     SocketAddress socketAddressFromIpAddress(arduino::IPAddress ip, uint16_t port);
+    voidPrtFuncPtr _feed_watchdog_func = 0;
 };
 
 }
