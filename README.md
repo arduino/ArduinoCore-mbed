@@ -43,7 +43,9 @@ To install ARM build tools, use the `Boards Manager` option in the Arduino IDE t
 Adding a target is a mostly automatic procedure that involves running https://github.com/arduino/ArduinoCore-mbed/blob/master/mbed-os-to-arduino after setting the `BOARDNAME` and `ARDUINOCORE` env variables.
 Actions marked as TODO must be executed manually.
 
-**Minimum Example**: ```cd $sketchbook/hardware/arduino-git/mbed
+**Minimum Example**:
+```
+cd $sketchbook/hardware/arduino-git/mbed
 ./mbed-os-to-arduino -r /home/alex/projects/arduino/cores/mbed-os-h747 PORTENTA_H7_M7:PORTENTA_H7_M7
 ```
 
@@ -66,5 +68,4 @@ mbed_compile () {
 You can use this core as a standard mbed library; all APIs are under `arduino` namespace (so they must be called like `arduino::digitalWrite()` )
 
 The opposite is working as well; from any sketch you can call mbed APIs by prepending `mbed::` namespace.
-
 
