@@ -49,6 +49,8 @@ extern "C" {
 #define DEFAULT_AP_CHANNEL 6
 #endif
 
+#define WIFI_HAS_FEED_WATCHDOG_FUNC
+
 namespace arduino {
 
 typedef void* (*voidPrtFuncPtr)(void);
