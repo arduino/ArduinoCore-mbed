@@ -49,7 +49,7 @@ extern "C" {
 #define DEFAULT_AP_CHANNEL 6
 #endif
 
-#define WIFI_HAS_FEED_WATCHDOG_FUNC
+#define ARDUINO_PORTENTA_H7_WIFI_HAS_FEED_WATCHDOG_FUNC
 
 namespace arduino {
 
