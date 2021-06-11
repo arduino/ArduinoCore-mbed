@@ -54,6 +54,7 @@ extern "C" {
 namespace arduino {
 
 typedef void* (*voidPrtFuncPtr)(void);
+typedef void (*ArduinoPortentaH7WiFiFeedWatchdogFuncPtr)(void);
 
 class WiFiClass
 {
@@ -298,7 +299,7 @@ public:
 
     NetworkInterface *getNetwork();
 
-    void setFeedWatchdogFunc(voidPrtFuncPtr func);
+    void setFeedWatchdogFunc(ArduinoPortentaH7WiFiFeedWatchdogFuncPtr func);
     void feedWatchdog();
 
 private:
@@ -321,7 +322,7 @@ private:
     bool isVisible(const char* ssid);
     arduino::IPAddress ipAddressFromSocketAddress(SocketAddress socketAddress);
     SocketAddress socketAddressFromIpAddress(arduino::IPAddress ip, uint16_t port);
-    voidPrtFuncPtr _feed_watchdog_func = 0;
+    ArduinoPortentaH7WiFiFeedWatchdogFuncPtr _feed_watchdog_func = 0;
 };
 
 }

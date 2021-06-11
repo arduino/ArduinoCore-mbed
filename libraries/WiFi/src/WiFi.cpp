@@ -314,7 +314,7 @@ unsigned long arduino::WiFiClass::getTime() {
     return 0;
 }
 
-void arduino::WiFiClass::setFeedWatchdogFunc(voidPrtFuncPtr func)
+void arduino::WiFiClass::setFeedWatchdogFunc(ArduinoPortentaH7WiFiFeedWatchdogFuncPtr func)
 {
   _feed_watchdog_func = func;
 }
