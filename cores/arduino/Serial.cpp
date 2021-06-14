@@ -38,6 +38,21 @@ struct _mbed_serial {
 	mbed::UnbufferedSerial* obj;
 };
 
+UART::UART(int tx, int rx, int rts, int cts) {
+	_tx = digitalPinToPinName(tx);
+	_rx = digitalPinToPinName(rx);
+	if (rts >= 0) {
+		_rts = digitalPinToPinName(rts);
+	} else {
+		_rts = NC;
+	}
+	if (cts >= 0) {
+		_cts = digitalPinToPinName(cts);
+	} else {
+		_cts = NC;
+	}
+}
+
 void UART::begin(unsigned long baudrate, uint16_t config) {
 
 #if defined(SERIAL_CDC)
