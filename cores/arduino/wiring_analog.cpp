@@ -136,3 +136,8 @@ void analogReadResolution(int bits)
 {
   read_resolution = bits;
 }
+
+int getAnalogReadResolution()
+{
+  return read_resolution;
+}
