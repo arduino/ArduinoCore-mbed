@@ -293,6 +293,7 @@
 #define MBED_LFS_READ_SIZE                                                64                                                                                               // set by library:littlefs
 #define MBED_MEM_TRACING_ENABLED                                          1                                                                                                // set by application[*]
 #define MBED_STACK_DUMP_ENABLED                                           0                                                                                                // set by library:platform
+#define MBED_TRACE_COLOR_THEME                                            0                                                                                                // set by library:mbed-trace
 #define MEM_ALLOC                                                         malloc                                                                                           // set by library:mbed-trace
 #define MEM_FREE                                                          free                                                                                             // set by library:mbed-trace
 #define PPP_DEBUG                                                         0                                                                                                // set by library:ppp
