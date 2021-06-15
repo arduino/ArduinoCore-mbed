@@ -49,9 +49,12 @@ extern "C" {
 #define DEFAULT_AP_CHANNEL 6
 #endif
 
+#define ARDUINO_PORTENTA_H7_WIFI_HAS_FEED_WATCHDOG_FUNC
+
 namespace arduino {
 
 typedef void* (*voidPrtFuncPtr)(void);
+typedef void (*ArduinoPortentaH7WiFiFeedWatchdogFuncPtr)(void);
 
 class WiFiClass
 {
@@ -296,6 +299,9 @@ public:
 
     NetworkInterface *getNetwork();
 
+    void setFeedWatchdogFunc(ArduinoPortentaH7WiFiFeedWatchdogFuncPtr func);
+    void feedWatchdog();
+
 private:
 
     EMACInterface* _softAP = nullptr;
@@ -316,6 +322,7 @@ private:
     bool isVisible(const char* ssid);
     arduino::IPAddress ipAddressFromSocketAddress(SocketAddress socketAddress);
     SocketAddress socketAddressFromIpAddress(arduino::IPAddress ip, uint16_t port);
+    ArduinoPortentaH7WiFiFeedWatchdogFuncPtr _feed_watchdog_func = 0;
 };
 
 }

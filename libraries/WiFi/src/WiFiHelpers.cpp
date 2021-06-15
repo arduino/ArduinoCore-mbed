@@ -23,6 +23,7 @@ static FILE* target;
 
 void body_callback(const char* data, uint32_t data_len)
 {
+	WiFi.feedWatchdog();
 	fwrite(data, 1, data_len, target);
 }
 
