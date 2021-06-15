@@ -10,6 +10,8 @@
       "platform.memory-tracing-enabled": true,
       "rtos.main-thread-stack-size": 32768,
       "cordio.max-connections": 5,
+      "cellular.debug-at": true,
+      "mbed-trace.enable": true,
       "target.mbed_app_start": "0x8040000",
       "target.macros_add": [
         "USB_DYNAMIC_CONFIGURATION",
