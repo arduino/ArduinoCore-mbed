@@ -24,7 +24,7 @@ uint8_t rawBuffer1[RAW_BUFFER_SIZE];
 uint8_t* rawBuffer[2] = {rawBuffer0, rawBuffer1};
 volatile int rawBufferIndex = 0; 
 
-int decimation = 64;
+int decimation = 128;
 
 // final buffer is the one to be filled with PCM data
 int16_t* volatile finalBuffer;
@@ -178,7 +178,7 @@ void PDMClass::IrqHandler(bool halftranfer)
   }
 
   // fill final buffer with PCM samples
-  Open_PDM_Filter_64(rawBuffer[rawBufferIndex], finalBuffer, 1, &filter);
+  Open_PDM_Filter_128(rawBuffer[rawBufferIndex], finalBuffer, 1, &filter);
 
   if (cutSamples) {
     memset(finalBuffer, 0, cutSamples);
