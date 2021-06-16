@@ -25,9 +25,22 @@
 // Include Scheduler since we want to manage multiple tasks.
 #include <Scheduler.h>
 
+// On Nano RP2040 Connect, RGB leds are connected to the wifi module
+// The user APIs are the same, but we can't convert to int, so use defines
+#if defined(ARDUINO_NANO_RP2040_CONNECT)
+
+#include "WiFiNINA.h"
+#define led1  LEDR
+#define led2  LEDG
+#define led3  LEDB
+
+#else
+
 int led1 = LEDR;
 int led2 = LEDG;
 int led3 = LEDB;
+
+#endif
 
 void setup() {
   Serial.begin(9600);
