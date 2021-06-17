@@ -33,7 +33,7 @@ extern "C" {
 
 #include "netsocket/NetworkInterface.h"
 
-#if defined(COMPONENT_4343W)
+#if defined(COMPONENT_4343W_FS)
 #include "WhdSoftAPInterface.h"
 #endif
 

@@ -44,7 +44,7 @@ int arduino::WiFiClass::begin(const char* ssid, const char *passphrase) {
 
 int arduino::WiFiClass::beginAP(const char* ssid, const char *passphrase, uint8_t channel) {
 
-    #if defined(COMPONENT_4343W)
+    #if defined(COMPONENT_4343W_FS)
         _softAP = WhdSoftAPInterface::get_default_instance();
     #endif
 
@@ -326,7 +326,7 @@ void arduino::WiFiClass::feedWatchdog()
 }
 
 
-#if defined(COMPONENT_4343W)
+#if defined(COMPONENT_4343W_FS)
 
 #define WIFI_FIRMWARE_NAME "4343WA1.BIN"
 
