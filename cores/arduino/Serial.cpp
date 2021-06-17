@@ -132,10 +132,12 @@ void UART::on_rx() {
 		return;
 	}
 #endif
-	while(_serial->obj->readable()) {
+	while(_serial->obj->readable() && rx_buffer.availableForStore()) {
 		char c;
+		core_util_critical_section_enter();
 		_serial->obj->read(&c, 1);
 		rx_buffer.store_char(c);
+		core_util_critical_section_exit();
 	}
 }
 
@@ -160,7 +162,10 @@ int UART::available() {
 		return _SerialUSB.available();
 	}
 #endif
-	return rx_buffer.available();
+	core_util_critical_section_enter();
+	int c = rx_buffer.available();
+	core_util_critical_section_exit();
+	return c;
 }
 
 int UART::peek() {
@@ -169,7 +174,10 @@ int UART::peek() {
 		return _SerialUSB.peek();
 	}
 #endif
-	return rx_buffer.peek();
+	core_util_critical_section_enter();
+	int c = rx_buffer.peek();
+	core_util_critical_section_exit();
+	return c;
 }
 
 int UART::read() {
@@ -178,7 +186,10 @@ int UART::read() {
 		return _SerialUSB.read();
 	}
 #endif
-	return rx_buffer.read_char();
+	core_util_critical_section_enter();
+	int c = rx_buffer.read_char();
+	core_util_critical_section_exit();
+	return c;
 }
 
 void UART::flush() {
