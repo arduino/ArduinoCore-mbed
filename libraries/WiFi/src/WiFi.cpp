@@ -328,10 +328,9 @@ void arduino::WiFiClass::feedWatchdog()
 
 #if defined(COMPONENT_4343W_FS)
 
-#define WIFI_FIRMWARE_NAME "4343WA1.BIN"
+#define WIFI_FIRMWARE_PATH "/wlan/4343WA1.BIN"
 
 bool firmware_available = false;
-static std::string fullname;
 
 #include "wiced_filesystem.h"
 #include "resources.h"
@@ -354,21 +353,17 @@ wiced_result_t whd_firmware_check_hook(const char *mounted_name, int mount_err)
 {
     DIR *dir;
     struct dirent *ent;
-    std::string dir_name(mounted_name);
+    String dir_name(mounted_name);
     if(mount_err) {
         wiced_filesystem_mount_error();
     } else {
         if ((dir = opendir(mounted_name)) != NULL) {
             // print all the files and directories within directory
             while ((ent = readdir(dir)) != NULL) {
-                fullname =  "/"+ dir_name + "/" + std::string(ent->d_name);
-                if (std::string(ent->d_name) == WIFI_FIRMWARE_NAME) {
+                String fullname =  "/" + dir_name + "/" + String(ent->d_name);
+                if (fullname == WIFI_FIRMWARE_PATH) {
                     closedir(dir);
                     firmware_available = true;
-                    // Update Mbed resource default mount point /wlan
-                    wifi_firmware_image.val.fs.filename = (const char*)fullname.c_str();
-                    //Serial.println(fullname.c_str());
-                    //Serial.println((char*)(wifi_firmware_image.val.fs.filename));
                     return WICED_SUCCESS;
                 }
             }
