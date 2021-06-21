@@ -1,0 +1,113 @@
+From 29ba6b20bc0d3dc8ce05a6ba39fd3726e55dda9f Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Thu, 6 May 2021 14:16:48 +0200
+Subject: [PATCH 09/87] Portenta split wiced_filesystem.h to avoid cpp
+ BlockDevice inclusion from Cypress layer
+
+---
+ .../COMPONENT_WHD/port/wiced_bd.h             | 49 +++++++++++++++++++
+ .../COMPONENT_WHD/port/wiced_filesystem.cpp   |  1 +
+ .../COMPONENT_WHD/port/wiced_filesystem.h     | 12 -----
+ 3 files changed, 50 insertions(+), 12 deletions(-)
+ create mode 100644 targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/wiced_bd.h
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/wiced_bd.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/wiced_bd.h
+new file mode 100644
+index 0000000000..578b2d9e4e
+--- /dev/null
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/wiced_bd.h
+@@ -0,0 +1,49 @@
++/*
++ * Copyright 2020 Arduino SA
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *     http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++/** @file
++ *  Provides wiced fs porting to generic mbed APIs
++ */
++
++#pragma once
++
++#include "whd_config.h"
++#include "BlockDevice.h"
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++/******************************************************
++ *                 Type Definitions
++ ******************************************************/
++
++/**
++ * Mount the physical device
++ *
++ * This assumes that the device is ready to read/write immediately.
++ *
++ * @param[in]  device        - physical media to init
++ * @param[out] fs_handle_out - Receives the filesystem handle.
++ *
++ * @return WICED_SUCCESS on success
++ */
++wiced_result_t wiced_filesystem_mount(mbed::BlockDevice *device, wiced_filesystem_handle_type_t fs_type, wiced_filesystem_t *fs_handle_out, const char *mounted_name);
++
++#ifdef __cplusplus
++} /*extern "C" */
++#endif
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/wiced_filesystem.cpp b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/wiced_filesystem.cpp
+index 73f8bec95e..bb2df01ba3 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/wiced_filesystem.cpp
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/wiced_filesystem.cpp
+@@ -26,6 +26,7 @@
+ #include "sockets.h"
+ #include "resources.h"
+ #include "wiced_filesystem.h"
++#include "wiced_bd.h"
+ #include "QSPIFBlockDevice.h"
+ #include "MBRBlockDevice.h"
+ #include "FATFileSystem.h"
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/wiced_filesystem.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/wiced_filesystem.h
+index 2b71ff6cfe..a65aa3c148 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/wiced_filesystem.h
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/wiced_filesystem.h
+@@ -22,7 +22,6 @@
+ #pragma once
+ 
+ #include "whd_config.h"
+-#include "BlockDevice.h"
+ 
+ #ifdef __cplusplus
+ extern "C" {
+@@ -82,17 +81,6 @@ typedef int wiced_filesystem_handle_type_t;
+  */
+ wiced_result_t wiced_filesystem_init(void);
+ 
+-/**
+- * Mount the physical device
+- *
+- * This assumes that the device is ready to read/write immediately.
+- *
+- * @param[in]  device        - physical media to init
+- * @param[out] fs_handle_out - Receives the filesystem handle.
+- *
+- * @return WICED_SUCCESS on success
+- */
+-wiced_result_t wiced_filesystem_mount(mbed::BlockDevice *device, wiced_filesystem_handle_type_t fs_type, wiced_filesystem_t *fs_handle_out, const char *mounted_name);
+ /**
+  * Open a file for reading or writing
+  *
+-- 
+2.30.2
+

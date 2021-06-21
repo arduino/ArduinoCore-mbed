@@ -1,0 +1,38 @@
+From 37740590c792a2053cf53a40b92af9148f1f5eb0 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Mon, 17 May 2021 11:16:35 +0200
+Subject: [PATCH 14/87] Portenta cycfg.h add missing license header
+
+---
+ .../COMPONENT_WHD/port/cycfg.h                | 20 +++++++++++++++++++
+ 1 file changed, 20 insertions(+)
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/cycfg.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/cycfg.h
+index e69de29bb2..7a3dee0ca9 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/cycfg.h
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/cycfg.h
+@@ -0,0 +1,20 @@
++/*
++ * Copyright 2020 Arduino SA
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *     http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++/** @file
++ *  Empty file to be compliant with Cypress COMPONENT_WHD
++ */
+\ No newline at end of file
+-- 
+2.30.2
+

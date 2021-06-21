@@ -1,0 +1,133 @@
+From 759c35492e3b5d511022ac65e95f9b6a1cf1273b Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Thu, 17 Jun 2021 16:35:56 +0200
+Subject: [PATCH 86/87] RP2040: us_ticker: fix missing interrupts after 32bit
+ wrap
+
+---
+ .../rp2_common/hardware_timer/timer.c         | 54 +++++--------------
+ .../TARGET_RP2040/us_ticker.c                 | 21 +++++---
+ 2 files changed, 28 insertions(+), 47 deletions(-)
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_timer/timer.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_timer/timer.c
+index 76d5f9038a..0ca2ba13f6 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_timer/timer.c
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_timer/timer.c
+@@ -110,14 +110,9 @@ static void hardware_alarm_irq_handler() {
+     if (timer_callbacks_pending & (1u << alarm_num)) {
+         // Now check whether we have a timer event to handle that isn't already obsolete (this could happen if we
+         // were already in the IRQ handler before someone else changed the timer setup
+-        if (timer_hw->timerawh >= target_hi[alarm_num]) {
+-            // we have reached the right high word as well as low word value
+-            callback = alarm_callbacks[alarm_num];
+-            timer_callbacks_pending &= ~(1u << alarm_num);
+-        } else {
+-            // try again in 2^32 us
+-            timer_hw->alarm[alarm_num] = timer_hw->alarm[alarm_num]; // re-arm the timer
+-        }
++        // we have reached the right high word as well as low word value
++        callback = alarm_callbacks[alarm_num];
++        timer_callbacks_pending &= ~(1u << alarm_num);
+     }
+ 
+     spin_unlock(lock, save);
+@@ -158,39 +153,16 @@ bool hardware_alarm_set_target(uint alarm_num, absolute_time_t target) {
+     bool missed;
+     uint64_t now = time_us_64();
+     uint64_t t = to_us_since_boot(target);
+-    if (now >= t) {
+-        missed = true;
+-    } else {
+-        missed = false;
+-
+-        // 1) actually set the hardware timer
+-        spin_lock_t *lock = spin_lock_instance(PICO_SPINLOCK_ID_TIMER);
+-        uint32_t save = spin_lock_blocking(lock);
+-        timer_hw->intr = 1u << alarm_num;
+-        timer_callbacks_pending |= 1u << alarm_num;
+-        timer_hw->alarm[alarm_num] = (uint32_t) t;
+-        // Set the alarm. Writing time should arm it
+-        target_hi[alarm_num] = t >> 32u;
+-
+-        // 2) check for races
+-        if (!(timer_hw->armed & 1u << alarm_num)) {
+-            // not armed, so has already fired .. IRQ must be pending (we are still under lock)
+-            assert(timer_hw->ints & 1u << alarm_num);
+-        } else {
+-            if (time_us_64() >= t) {
+-                // ok well it is time now; the irq isn't being handled yet because of the spin lock
+-                // however the other core might be in the IRQ handler itself about to do a callback
+-                // we do the firing ourselves (and indicate to the IRQ handler if any that it shouldn't
+-                missed = true;
+-                // disarm the timer
+-                timer_hw->armed = 1u << alarm_num;
+-                timer_hw->intr = 1u << alarm_num; // clear the IRQ too
+-                // and set flag in case we're already in the IRQ handler waiting on the spinlock (on the other core)
+-                timer_callbacks_pending &= ~(1u << alarm_num);
+-            }
+-        }
+-        spin_unlock(lock, save);
+-    }
++
++    // 1) actually set the hardware timer
++    spin_lock_t *lock = spin_lock_instance(PICO_SPINLOCK_ID_TIMER);
++    uint32_t save = spin_lock_blocking(lock);
++    timer_hw->intr = 1u << alarm_num;
++    timer_callbacks_pending |= 1u << alarm_num;
++    // Set the alarm. Writing time should arm it
++    timer_hw->alarm[alarm_num] = (uint32_t) t;
++
++    spin_unlock(lock, save);
+     return missed;
+ }
+ 
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/us_ticker.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/us_ticker.c
+index 00edf82830..45206cb84d 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/us_ticker.c
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/us_ticker.c
+@@ -53,11 +53,18 @@ const ticker_info_t* us_ticker_get_info()
+     return &info;
+ }
+ 
+-const uint8_t alarm_num = 0;
++static const uint8_t alarm_num = 0;
++
++static void us_ticker_irq_handler_internal(uint alarm_src) {
++    if (alarm_num == alarm_src) {
++        us_ticker_irq_handler();
++    }
++}
+ 
+ void us_ticker_init(void)
+ {
+-    hardware_alarm_set_callback(alarm_num, us_ticker_irq_handler);
++    hardware_alarm_claim(alarm_num);
++    hardware_alarm_set_callback(alarm_num, us_ticker_irq_handler_internal);
+ }
+ 
+ uint32_t us_ticker_read()
+@@ -67,10 +74,11 @@ uint32_t us_ticker_read()
+ 
+ void us_ticker_set_interrupt(timestamp_t timestamp)
+ {
+-    core_util_critical_section_enter();
+-    absolute_time_t target = {timestamp};
+-    hardware_alarm_set_target(alarm_num, target);
+-    core_util_critical_section_exit();
++    // this implementation handles the 32bit wrap transparently by ignoring the upper register :)
++    // needs a patch at sdk level, which has no side effect since mbed cannot set a timeout bigger than 32bit (~4295 seconds)
++    // TODO: rewrite me without using the sdk so further updates will be easier
++    absolute_time_t target = { timestamp };
++    bool ret = hardware_alarm_set_target(alarm_num, target);
+ }
+ 
+ void us_ticker_fire_interrupt(void)
+@@ -90,4 +98,5 @@ void us_ticker_clear_interrupt(void)
+ 
+ void us_ticker_free(void)
+ {
++    hardware_alarm_unclaim(alarm_num);
+ }
+-- 
+2.30.2
+
