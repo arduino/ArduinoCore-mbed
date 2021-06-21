@@ -1,0 +1,41 @@
+From 79b39d27987e7b6e138a63281454ca56df7a6dfb Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Thu, 17 Jun 2021 12:44:49 +0200
+Subject: [PATCH 16/87] Portenta Add cyhal_system.h placeholder to build with
+ new cypress assets
+
+---
+ .../COMPONENT_WHD/port/cyhal_system.h         | 20 +++++++++++++++++++
+ 1 file changed, 20 insertions(+)
+ create mode 100644 targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/cyhal_system.h
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/cyhal_system.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/cyhal_system.h
+new file mode 100644
+index 0000000000..7a3dee0ca9
+--- /dev/null
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/cyhal_system.h
+@@ -0,0 +1,20 @@
++/*
++ * Copyright 2020 Arduino SA
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *     http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++/** @file
++ *  Empty file to be compliant with Cypress COMPONENT_WHD
++ */
+\ No newline at end of file
+-- 
+2.30.2
+
