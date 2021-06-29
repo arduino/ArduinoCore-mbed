@@ -6,7 +6,7 @@
 *
 ********************************************************************************
 * \copyright
-* Copyright 2019 Cypress Semiconductor Corporation
+* Copyright 2019-2020 Cypress Semiconductor Corporation
 * SPDX-License-Identifier: Apache-2.0
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,9 +37,9 @@ extern "C"
 /******************************************************
 *                 Constants
 ******************************************************/
-#define CY_RTOS_MIN_STACK_SIZE      300                     /** Minimum stack size */
+#define CY_RTOS_MIN_STACK_SIZE      300                     /** Minimum stack size in bytes */
 #define CY_RTOS_ALIGNMENT           0x00000008UL            /** Minimum alignment for RTOS objects */
-#define CY_RTOS_ALIGNMENT_MASK      0x00000007UL            /** Mask for checking the alignement of crated RTOS objects */
+#define CY_RTOS_ALIGNMENT_MASK      0x00000007UL            /** Mask for checking the alignment of created RTOS objects */
 
 
 /******************************************************
@@ -66,7 +66,7 @@ typedef osSemaphoreId_t cy_semaphore_t;                /** CMSIS definition of a
 typedef osEventFlagsId_t cy_event_t;                   /** CMSIS definition of an event */
 typedef osMessageQueueId_t cy_queue_t;                 /** CMSIS definition of a message queue */
 typedef osTimerId_t cy_timer_t;                        /** CMSIS definition of a timer */
-typedef uint32_t cy_timer_callback_arg_t;              /** Argument passed to the timer callback function */
+typedef void * cy_timer_callback_arg_t;                /** Argument passed to the timer callback function */
 typedef uint32_t cy_time_t;                            /** Time in milliseconds */
 typedef osStatus_t cy_rtos_error_t;                    /** CMSIS definition of a error status */
 

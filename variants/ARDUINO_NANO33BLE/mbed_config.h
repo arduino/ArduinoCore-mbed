@@ -35,6 +35,7 @@
 #define BLE_FEATURE_SIGNING                                                     1                                                                                                // set by library:ble
 #define BLE_FEATURE_WHITELIST                                                   1                                                                                                // set by library:ble
 #define BLE_GAP_HOST_BASED_PRIVATE_ADDRESS_RESOLUTION                           0                                                                                                // set by library:ble[MCU_NRF52840]
+#define BLE_GAP_HOST_MAX_OUTSTANDING_ADVERTISING_START_COMMANDS                 4                                                                                                // set by library:ble
 #define BLE_GAP_HOST_PRIVACY_RESOLVED_CACHE_SIZE                                16                                                                                               // set by library:ble
 #define BLE_GAP_MAX_ADVERTISING_REPORTS_PENDING_ADDRESS_RESOLUTION              16                                                                                               // set by library:ble
 #define BLE_GAP_MAX_ADVERTISING_SETS                                            15                                                                                               // set by library:ble
@@ -248,6 +249,7 @@
 #define MBED_CONF_NORDIC_NRF_LF_CLOCK_CALIB_MODE_CONFIG                         0                                                                                                // set by target:MCU_NRF52840
 #define MBED_CONF_NORDIC_NRF_LF_CLOCK_CALIB_TIMER_INTERVAL                      16                                                                                               // set by target:MCU_NRF52840
 #define MBED_CONF_NORDIC_NRF_LF_CLOCK_SRC                                       NRF_LF_SRC_XTAL                                                                                  // set by target:MCU_NRF52840
+#define MBED_CONF_NSAPI_ADD_EVENT_LISTENER_RETURN_CHANGE                        0                                                                                                // set by library:nsapi
 #define MBED_CONF_NSAPI_DEFAULT_MESH_TYPE                                       THREAD                                                                                           // set by library:nsapi
 #define MBED_CONF_NSAPI_DEFAULT_STACK                                           LWIP                                                                                             // set by library:nsapi
 #define MBED_CONF_NSAPI_DEFAULT_WIFI_SECURITY                                   NONE                                                                                             // set by library:nsapi
@@ -357,6 +359,7 @@
 #define MBED_LFS_PROG_SIZE                                                      64                                                                                               // set by library:littlefs
 #define MBED_LFS_READ_SIZE                                                      64                                                                                               // set by library:littlefs
 #define MBED_STACK_DUMP_ENABLED                                                 0                                                                                                // set by library:platform
+#define MBED_TRACE_COLOR_THEME                                                  0                                                                                                // set by library:mbed-trace
 #define MEM_ALLOC                                                               malloc                                                                                           // set by library:mbed-trace
 #define MEM_FREE                                                                free                                                                                             // set by library:mbed-trace
 #define PPP_DEBUG                                                               0                                                                                                // set by library:ppp
