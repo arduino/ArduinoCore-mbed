@@ -75,6 +75,7 @@ int PDMClass::begin(int channels, int sampleRate)
 
   /* Initialize Open PDM library */
   filter.Fs = sampleRate;
+  filter.MaxVolume = 1;
   filter.nSamples = rawBufferLength;
   filter.LP_HZ = sampleRate/2;
   filter.HP_HZ = 10;
