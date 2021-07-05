@@ -34,7 +34,7 @@ int arduino::EthernetClass::begin(uint8_t *mac, IPAddress ip) {
     IPAddress dns = ip;
 	dns[3] = 1;
 
-    auto ret = begin(ip, dns);
+    auto ret = begin(mac, ip, dns);
     return ret;
 }
 
@@ -42,13 +42,13 @@ int arduino::EthernetClass::begin(uint8_t *mac, IPAddress ip, IPAddress dns) {
     IPAddress gateway = ip;
 	gateway[3] = 1;
     
-    auto ret = begin(ip, dns, gateway);
+    auto ret = begin(mac, ip, dns, gateway);
     return ret;
 }
 
 int arduino::EthernetClass::begin(uint8_t *mac, IPAddress ip, IPAddress dns, IPAddress gateway) {
     IPAddress subnet(255, 255, 255, 0);
-    auto ret = begin(ip, dns, gateway, subnet);
+    auto ret = begin(mac, ip, dns, gateway, subnet);
     return ret;
 }
 
