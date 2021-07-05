@@ -19,14 +19,9 @@
  */
 
 #include <SPI.h>
+#include <PortentaEthernet.h>
 #include <Ethernet.h>
 #include <EthernetUdp.h>
-
-// Enter a MAC address for your controller below.
-// Newer Ethernet shields have a MAC address printed on a sticker on the shield
-byte mac[] = {
-  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED
-};
 
 unsigned int localPort = 8888;       // local port to listen for UDP packets
 
@@ -40,13 +35,6 @@ byte packetBuffer[NTP_PACKET_SIZE]; //buffer to hold incoming and outgoing packe
 EthernetUDP Udp;
 
 void setup() {
-  // You can use Ethernet.init(pin) to configure the CS pin
-  //Ethernet.init(10);  // Most Arduino shields
-  //Ethernet.init(5);   // MKR ETH shield
-  //Ethernet.init(0);   // Teensy 2.0
-  //Ethernet.init(20);  // Teensy++ 2.0
-  //Ethernet.init(15);  // ESP8266 with Adafruit Featherwing Ethernet
-  //Ethernet.init(33);  // ESP32 with Adafruit Featherwing Ethernet
 
   // Open serial communications and wait for port to open:
   Serial.begin(9600);
@@ -55,7 +43,7 @@ void setup() {
   }
 
   // start Ethernet and UDP
-  if (Ethernet.begin(mac) == 0) {
+  if (Ethernet.begin() == 0) {
     Serial.println("Failed to configure Ethernet using DHCP");
     // Check for Ethernet hardware present
     if (Ethernet.hardwareStatus() == EthernetNoHardware) {
@@ -72,6 +60,10 @@ void setup() {
 }
 
 void loop() {
+  if (Ethernet.status() != 0) {
+    Serial.println(Ethernet.status());
+    connectEth();
+  }
   sendNTPpacket(timeServer); // send an NTP packet to a time server
 
   // wait to see if a reply is available
@@ -119,7 +111,6 @@ void loop() {
   }
   // wait ten seconds before asking for the time again
   delay(10000);
-  Ethernet.maintain();
 }
 
 // send an NTP request to the time server at the given address
@@ -145,7 +136,30 @@ void sendNTPpacket(const char * address) {
   Udp.endPacket();
 }
 
-
+void connectEth()
+{
+    // start the Ethernet connection:
+  Serial.println("Initialize Ethernet with DHCP:");
+  if (Ethernet.begin(nullptr) == 0) {
+    Serial.println("Failed to configure Ethernet using DHCP");
+    // Check for Ethernet hardware present
+    if (Ethernet.hardwareStatus() == EthernetNoHardware) {
+      Serial.println("Ethernet shield was not found.  Sorry, can't run without hardware. :(");
+      while (true) {
+        delay(1); // do nothing, no point running without Ethernet hardware
+      }
+    }
+    if (Ethernet.linkStatus() == LinkOFF) {
+      Serial.println("Ethernet cable is not connected.");
+    }
+  } else {
+    Serial.print("  DHCP assigned IP ");
+    Serial.println(Ethernet.localIP());
+  }
+  
+  Serial.println("You're connected to the network");
+  Serial.println();
+}
 
 
 

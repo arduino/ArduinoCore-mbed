@@ -23,16 +23,12 @@
  by Tom Igoe
  */
 
+#include <PortentaEthernet.h>
 #include <Ethernet.h>
 // the sensor communicates using SPI, so include the library:
 #include <SPI.h>
 
 
-// assign a MAC address for the Ethernet controller.
-// fill in your address here:
-byte mac[] = {
-  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED
-};
 // assign an IP address for the controller:
 IPAddress ip(192, 168, 1, 20);
 
@@ -58,19 +54,12 @@ long pressure = 0;
 long lastReadingTime = 0;
 
 void setup() {
-  // You can use Ethernet.init(pin) to configure the CS pin
-  //Ethernet.init(10);  // Most Arduino shields
-  //Ethernet.init(5);   // MKR ETH shield
-  //Ethernet.init(0);   // Teensy 2.0
-  //Ethernet.init(20);  // Teensy++ 2.0
-  //Ethernet.init(15);  // ESP8266 with Adafruit Featherwing Ethernet
-  //Ethernet.init(33);  // ESP32 with Adafruit Featherwing Ethernet
 
   // start the SPI library:
   SPI.begin();
 
   // start the Ethernet connection
-  Ethernet.begin(mac, ip);
+  Ethernet.begin(ip);
 
   // Open serial communications and wait for port to open:
   Serial.begin(9600);
