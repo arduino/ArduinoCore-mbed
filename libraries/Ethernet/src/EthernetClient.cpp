@@ -4,21 +4,31 @@
 #define SOCKET_TIMEOUT 1000
 #endif
 
-arduino::EthernetClient::EthernetClient() {
+arduino::EthernetClient::EthernetClient()
+: _status(false)
+{
 }
 
 uint8_t arduino::EthernetClient::status() {
 	return _status;
 }
 
+void arduino::EthernetClient::setSocket(Socket* _sock) {
+    sock = _sock;
+    _status = true;
+}
+
 void arduino::EthernetClient::getStatus() {
+	if (sock == nullptr)
+		return;
+
     uint8_t data[256];
     int ret = sock->recv(data, rxBuffer.availableForStore());
     for (int i = 0; i < ret; i++) {
       rxBuffer.store_char(data[i]);
     }
     if (ret < 0 && ret != NSAPI_ERROR_WOULD_BLOCK) {
-        _status = LinkOFF;
+        _status = false;
     }
 }
 
@@ -34,7 +44,10 @@ int arduino::EthernetClient::connect(SocketAddress socketAddress) {
 	address = socketAddress;
 	sock->set_timeout(SOCKET_TIMEOUT);		
 	nsapi_error_t returnCode = static_cast<TCPSocket*>(sock)->connect(socketAddress);
-	return returnCode == NSAPI_ERROR_OK ? 1 : 0;
+	auto ret = returnCode == NSAPI_ERROR_OK ? 1 : 0;
+	if (ret)
+		_status = true;
+	return ret;
 }
 
 int arduino::EthernetClient::connect(IPAddress ip, uint16_t port) {	
@@ -127,11 +140,12 @@ void arduino::EthernetClient::stop() {
 	if (sock != NULL) {
 		sock->close();
 		sock = NULL;
+		_status = false;
 	}
 }
 
 uint8_t arduino::EthernetClient::connected() {
-	return _status != LinkOFF;
+	return _status == true;
 }
 
 IPAddress arduino::EthernetClient::remoteIP() {
