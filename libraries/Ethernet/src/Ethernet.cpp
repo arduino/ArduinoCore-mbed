@@ -30,9 +30,37 @@ int arduino::EthernetClass::begin(uint8_t *mac, unsigned long timeout, unsigned 
     return (linkStatus() == LinkON ? 1 : 0);
 }
 
-int arduino::EthernetClass::begin() {
+int arduino::EthernetClass::begin(uint8_t *mac, IPAddress ip) {
+    IPAddress dns = ip;
+	dns[3] = 1;
+
+    auto ret = begin(ip, dns);
+    return ret;
+}
+
+int arduino::EthernetClass::begin(uint8_t *mac, IPAddress ip, IPAddress dns) {
+    IPAddress gateway = ip;
+	gateway[3] = 1;
+    
+    auto ret = begin(ip, dns, gateway);
+    return ret;
+}
+
+int arduino::EthernetClass::begin(uint8_t *mac, IPAddress ip, IPAddress dns, IPAddress gateway) {
+    IPAddress subnet(255, 255, 255, 0);
+    auto ret = begin(ip, dns, gateway, subnet);
+    return ret;
+}
+
+int arduino::EthernetClass::begin(uint8_t *mac, IPAddress ip, IPAddress dns, IPAddress gateway, IPAddress subnet) {
+    config(ip, dns, gateway, subnet);
+
+    eth_if->set_dhcp(false);
     eth_if->set_network(_ip, _netmask, _gateway);
-    eth_if->connect();
+    eth_if->add_dns_server(_dnsServer1, nullptr);
+
+    auto ret = begin(mac);
+    return ret;
 }
 
 void arduino::EthernetClass::end() {
