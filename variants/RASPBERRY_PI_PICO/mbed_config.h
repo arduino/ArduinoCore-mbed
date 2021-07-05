@@ -185,6 +185,7 @@
 #define MBED_CONF_MCR20A_PROVIDE_DEFAULT                                  0                                                                                                // set by library:mcr20a
 #define MBED_CONF_NANOSTACK_LIBSERVICE_NSDYNMEM_TRACKER_ENABLED           0                                                                                                // set by library:nanostack-libservice
 #define MBED_CONF_NANOSTACK_LIBSERVICE_PRESENT                            1                                                                                                // set by library:nanostack-libservice
+#define MBED_CONF_NSAPI_ADD_EVENT_LISTENER_RETURN_CHANGE                  0                                                                                                // set by library:nsapi
 #define MBED_CONF_NSAPI_DEFAULT_MESH_TYPE                                 THREAD                                                                                           // set by library:nsapi
 #define MBED_CONF_NSAPI_DEFAULT_STACK                                     LWIP                                                                                             // set by library:nsapi
 #define MBED_CONF_NSAPI_DEFAULT_WIFI_SECURITY                             NONE                                                                                             // set by library:nsapi
@@ -293,6 +294,7 @@
 #define MBED_LFS_READ_SIZE                                                64                                                                                               // set by library:littlefs
 #define MBED_MEM_TRACING_ENABLED                                          1                                                                                                // set by application[*]
 #define MBED_STACK_DUMP_ENABLED                                           0                                                                                                // set by library:platform
+#define MBED_TRACE_COLOR_THEME                                            0                                                                                                // set by library:mbed-trace
 #define MEM_ALLOC                                                         malloc                                                                                           // set by library:mbed-trace
 #define MEM_FREE                                                          free                                                                                             // set by library:mbed-trace
 #define PPP_DEBUG                                                         0                                                                                                // set by library:ppp

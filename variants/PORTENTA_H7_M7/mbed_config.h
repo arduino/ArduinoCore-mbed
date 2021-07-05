@@ -35,6 +35,7 @@
 #define BLE_FEATURE_SIGNING                                                     1                                                                                                // set by library:ble
 #define BLE_FEATURE_WHITELIST                                                   1                                                                                                // set by library:ble
 #define BLE_GAP_HOST_BASED_PRIVATE_ADDRESS_RESOLUTION                           1                                                                                                // set by library:ble
+#define BLE_GAP_HOST_MAX_OUTSTANDING_ADVERTISING_START_COMMANDS                 4                                                                                                // set by library:ble
 #define BLE_GAP_HOST_PRIVACY_RESOLVED_CACHE_SIZE                                16                                                                                               // set by library:ble
 #define BLE_GAP_MAX_ADVERTISING_REPORTS_PENDING_ADDRESS_RESOLUTION              16                                                                                               // set by library:ble
 #define BLE_GAP_MAX_ADVERTISING_SETS                                            15                                                                                               // set by library:ble
@@ -84,6 +85,7 @@
 #define MBED_CONF_CORDIO_RX_ACL_BUFFER_SIZE                                     70                                                                                               // set by library:cordio
 #define MBED_CONF_CORDIO_TRACE_HCI_PACKETS                                      0                                                                                                // set by library:cordio
 #define MBED_CONF_CORDIO_TRACE_PAL_ECHOES                                       0                                                                                                // set by library:cordio
+#define MBED_CONF_CY_PSOC6_COMMON_NETWORK_PRESENT                               1                                                                                                // set by library:cy_psoc6_common_network
 #define MBED_CONF_CY_PSOC6_WHD_PRESENT                                          1                                                                                                // set by library:cy_psoc6_whd
 #define MBED_CONF_DRIVERS_OSPI_CSN                                              OSPI_FLASH1_CSN                                                                                  // set by library:drivers
 #define MBED_CONF_DRIVERS_OSPI_DQS                                              OSPI_FLASH1_DQS                                                                                  // set by library:drivers
@@ -237,6 +239,7 @@
 #define MBED_CONF_MCR20A_PROVIDE_DEFAULT                                        0                                                                                                // set by library:mcr20a
 #define MBED_CONF_NANOSTACK_LIBSERVICE_NSDYNMEM_TRACKER_ENABLED                 0                                                                                                // set by library:nanostack-libservice
 #define MBED_CONF_NANOSTACK_LIBSERVICE_PRESENT                                  1                                                                                                // set by library:nanostack-libservice
+#define MBED_CONF_NSAPI_ADD_EVENT_LISTENER_RETURN_CHANGE                        0                                                                                                // set by library:nsapi
 #define MBED_CONF_NSAPI_DEFAULT_MESH_TYPE                                       THREAD                                                                                           // set by library:nsapi
 #define MBED_CONF_NSAPI_DEFAULT_STACK                                           LWIP                                                                                             // set by library:nsapi
 #define MBED_CONF_NSAPI_DEFAULT_WIFI_SECURITY                                   NONE                                                                                             // set by library:nsapi
@@ -407,6 +410,7 @@
 #define MBED_LFS_READ_SIZE                                                      64                                                                                               // set by library:littlefs
 #define MBED_MEM_TRACING_ENABLED                                                1                                                                                                // set by application[*]
 #define MBED_STACK_DUMP_ENABLED                                                 0                                                                                                // set by library:platform
+#define MBED_TRACE_COLOR_THEME                                                  0                                                                                                // set by library:mbed-trace
 #define MEM_ALLOC                                                               malloc                                                                                           // set by library:mbed-trace
 #define MEM_FREE                                                                free                                                                                             // set by library:mbed-trace
 #define PPP_DEBUG                                                               0                                                                                                // set by library:ppp

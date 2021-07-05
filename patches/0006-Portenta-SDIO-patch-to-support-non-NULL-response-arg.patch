@@ -1,0 +1,26 @@
+From 23e0957e4b60ecde3e5a3631ae9ff08865c93252 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Mon, 3 May 2021 17:20:58 +0200
+Subject: [PATCH 06/87] Portenta SDIO patch to support non NULL response
+ arguments
+
+---
+ .../TARGET_PORTENTA_H7/COMPONENT_WHD/port/cyhal_sdio.c          | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/cyhal_sdio.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/cyhal_sdio.c
+index abf8b1d707..34aa5498e1 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/cyhal_sdio.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/cyhal_sdio.c
+@@ -338,7 +338,7 @@ restart:
+     do {
+         temp_sta = SDIO->STA;
+         loop_count--;
+-        if (loop_count == 0 || ((response != NULL) && ((temp_sta & SDIO_ERROR_MASK) != 0))) {
++        if (loop_count == 0 /*|| ((response != NULL) && ((temp_sta & SDIO_ERROR_MASK) != 0))*/) {
+             WPRINT_WHD_DEBUG(("Restart single access loop count %ld  stat %lx\n", loop_count, temp_sta));
+             HAL_Delay(10U);
+             goto restart;
+-- 
+2.30.2
+

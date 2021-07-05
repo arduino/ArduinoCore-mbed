@@ -1,0 +1,25 @@
+From 4dee9b891983ec204e503848a55926798acbc52a Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Mon, 14 Jun 2021 10:37:40 +0200
+Subject: [PATCH 15/87] Portenta Fix ARMClang build
+
+---
+ .../TARGET_PORTENTA_H7/COMPONENT_WHD/port/wiced_filesystem.cpp  | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/wiced_filesystem.cpp b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/wiced_filesystem.cpp
+index 340b13437e..b6de4ece12 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/wiced_filesystem.cpp
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/wiced_filesystem.cpp
+@@ -22,7 +22,7 @@
+ #include <stddef.h>
+ #include <stdio.h>
+ #include <stdbool.h>
+-#include <string.h>
++#include <string>
+ #include "sockets.h"
+ #include "resources.h"
+ #include "wiced_filesystem.h"
+-- 
+2.30.2
+

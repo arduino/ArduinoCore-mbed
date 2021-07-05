@@ -1,0 +1,24 @@
+From 56aa5d27d55047b7ad56975db4ee7d830c9291c9 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Mon, 3 May 2021 14:32:33 +0200
+Subject: [PATCH 78/87] RP2040: silence nasty warning
+
+---
+ targets/TARGET_RASPBERRYPI/TARGET_RP2040/objects.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/objects.h b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/objects.h
+index cdbd5655e6..280f166d4d 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/objects.h
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/objects.h
+@@ -20,6 +20,7 @@
+ #pragma GCC diagnostic push
+ #pragma GCC diagnostic ignored "-Wtype-limits"
+ #pragma GCC diagnostic ignored "-Wignored-qualifiers"
++#pragma GCC diagnostic ignored "-Wunused-value"
+ 
+ #ifdef __cplusplus
+ #include <stdint.h>
+-- 
+2.30.2
+

@@ -34,6 +34,12 @@
 #include "pinmap.h"
 #include "PeripheralNames.h"
 
+//*** GPIO ***
+#if GPIO_PINMAP_READY
+/* If this macro is defined, then PinMap_GPIO is present in PeripheralPins.c */
+extern const PinMap PinMap_GPIO[];
+#endif
+
 //*** ADC ***
 #if DEVICE_ANALOGIN
 extern const PinMap PinMap_ADC[];
@@ -54,6 +60,7 @@ extern const PinMap PinMap_I2C_SCL[];
 //*** PWM ***
 #if DEVICE_PWMOUT
 extern const PinMap PinMap_PWM[];
+extern const PinMap PinMap_PWM_HRTIM[];
 #endif
 
 //*** SERIAL ***
@@ -110,6 +117,13 @@ extern const PinMap PinMap_OSPI_SSEL[];
 #define USE_USB_OTG_FS   1
 #define USE_USB_OTG_HS   2
 #define USE_USB_HS_IN_FS 3
+
+// HRTIM channels
+#define CHA              0
+#define CHB              1
+#define CHC              2
+#define CHD              3
+#define CHE              4
 
 #if DEVICE_USBDEVICE
 extern const PinMap PinMap_USB_HS[];

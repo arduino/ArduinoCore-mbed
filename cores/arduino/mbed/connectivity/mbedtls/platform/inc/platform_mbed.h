@@ -21,7 +21,7 @@
 #ifndef __PLATFORM_MBED__H__
 #define __PLATFORM_MBED__H__
 
-#if (defined(FEATURE_PSA) && defined(MBEDTLS_ENTROPY_NV_SEED))
+#if (defined(FEATURE_EXPERIMENTAL_API) && defined(FEATURE_PSA) && defined(MBEDTLS_ENTROPY_NV_SEED))
 
 #include "default_random_seed.h"
 
@@ -40,7 +40,9 @@
 #endif  // (defined(FEATURE_PSA) && defined(MBEDTLS_ENTROPY_NV_SEED))
 
 #if DEVICE_TRNG
+#if !defined(MBEDTLS_ENTROPY_HARDWARE_ALT)
 #define MBEDTLS_ENTROPY_HARDWARE_ALT
+#endif
 #endif
 
 #if defined(MBEDTLS_CONFIG_HW_SUPPORT)
