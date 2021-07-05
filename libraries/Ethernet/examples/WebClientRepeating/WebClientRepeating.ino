@@ -23,13 +23,9 @@
  */
 
 #include <SPI.h>
+#include <PortentaEthernet.h>
 #include <Ethernet.h>
 
-// assign a MAC address for the ethernet controller.
-// fill in your address here:
-byte mac[] = {
-  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED
-};
 // Set the static IP address to use if the DHCP fails to assign
 IPAddress ip(192, 168, 0, 177);
 IPAddress myDns(192, 168, 0, 1);
@@ -44,13 +40,7 @@ unsigned long lastConnectionTime = 0;           // last time you connected to th
 const unsigned long postingInterval = 10*1000;  // delay between updates, in milliseconds
 
 void setup() {
-  // You can use Ethernet.init(pin) to configure the CS pin
-  //Ethernet.init(10);  // Most Arduino shields
-  //Ethernet.init(5);   // MKR ETH shield
-  //Ethernet.init(0);   // Teensy 2.0
-  //Ethernet.init(20);  // Teensy++ 2.0
-  //Ethernet.init(15);  // ESP8266 with Adafruit Featherwing Ethernet
-  //Ethernet.init(33);  // ESP32 with Adafruit Featherwing Ethernet
+
 
   // start serial port:
   Serial.begin(9600);
@@ -60,7 +50,7 @@ void setup() {
 
   // start the Ethernet connection:
   Serial.println("Initialize Ethernet with DHCP:");
-  if (Ethernet.begin(mac) == 0) {
+  if (Ethernet.begin() == 0) {
     Serial.println("Failed to configure Ethernet using DHCP");
     // Check for Ethernet hardware present
     if (Ethernet.hardwareStatus() == EthernetNoHardware) {
@@ -73,7 +63,7 @@ void setup() {
       Serial.println("Ethernet cable is not connected.");
     }
     // try to congifure using IP address instead of DHCP:
-    Ethernet.begin(mac, ip, myDns);
+    Ethernet.begin(ip, myDns);
     Serial.print("My IP address: ");
     Serial.println(Ethernet.localIP());
   } else {
