@@ -57,21 +57,21 @@ public:
 
     EthernetClass(voidPrtFuncPtr _cb) : _initializerCallback(_cb) {};
 
-    int begin(uint8_t *mac = nullptr , unsigned long timeout = 60000, unsigned long responseTimeout = 4000);
-    // int begin(unsigned long timeout = 60000, unsigned long responseTimeout = 4000) { return begin(nullptr, timeout, responseTimeout); };
+    int begin(uint8_t *mac, unsigned long timeout = 60000, unsigned long responseTimeout = 4000);
+    int begin();
 	int maintain();
 	EthernetLinkStatus linkStatus();
 	EthernetHardwareStatus hardwareStatus();
 
 	// Manaul configuration
-	void begin(uint8_t *mac, IPAddress ip) {}
-	void begin(uint8_t *mac, IPAddress ip, IPAddress dns) {}
-	void begin(uint8_t *mac, IPAddress ip, IPAddress dns, IPAddress gateway) {}
-	void begin(uint8_t *mac, IPAddress ip, IPAddress dns, IPAddress gateway, IPAddress subnet) {}
-	void begin(IPAddress ip) {}
-	void begin(IPAddress ip, IPAddress dns) {}
-	void begin(IPAddress ip, IPAddress dns, IPAddress gateway) {}
-	void begin(IPAddress ip, IPAddress dns, IPAddress gateway, IPAddress subnet) {}
+	int begin(uint8_t *mac, IPAddress ip) {}
+	int begin(uint8_t *mac, IPAddress ip, IPAddress dns) {}
+	int begin(uint8_t *mac, IPAddress ip, IPAddress dns, IPAddress gateway) {}
+	int begin(uint8_t *mac, IPAddress ip, IPAddress dns, IPAddress gateway, IPAddress subnet) {}
+	// void begin(uint8_t *mac, IPAddress ip) {}
+	// void begin(uint8_t *mac, IPAddress ip, IPAddress dns) {}
+	// void begin(uint8_t *mac, IPAddress ip, IPAddress dns, IPAddress gateway) {}
+	// void begin(uint8_t *mac, IPAddress ip, IPAddress dns, IPAddress gateway, IPAddress subnet) {}
 	void init(uint8_t sspin = 10);
 
 	void MACAddress(uint8_t *mac_address);

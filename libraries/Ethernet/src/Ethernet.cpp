@@ -30,6 +30,11 @@ int arduino::EthernetClass::begin(uint8_t *mac, unsigned long timeout, unsigned 
     return (linkStatus() == LinkON ? 1 : 0);
 }
 
+int arduino::EthernetClass::begin() {
+    eth_if->set_network(_ip, _netmask, _gateway);
+    eth_if->connect();
+}
+
 void arduino::EthernetClass::end() {
     disconnect();
 }
