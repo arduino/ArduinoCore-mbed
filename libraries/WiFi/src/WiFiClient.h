@@ -79,7 +79,7 @@ private:
   static uint16_t _srcport;
   Socket* sock;
   RingBufferN<256> rxBuffer;
-  uint8_t _status;
+  bool _status;
   mbed::Callback<int(void)> beforeConnect;
   SocketAddress address;
 
