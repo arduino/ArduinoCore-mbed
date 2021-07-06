@@ -19,8 +19,10 @@ void arduino::EthernetClient::setSocket(Socket* _sock) {
 }
 
 void arduino::EthernetClient::getStatus() {
-	if (sock == nullptr)
+	if (sock == nullptr) {
+		_status = false;
 		return;
+	}
 
     uint8_t data[256];
     int ret = sock->recv(data, rxBuffer.availableForStore());
@@ -33,7 +35,7 @@ void arduino::EthernetClient::getStatus() {
 }
 
 int arduino::EthernetClient::connect(SocketAddress socketAddress) {
-	if (sock == NULL) {
+	if (sock == nullptr) {
 		sock = new TCPSocket();		
 		if(static_cast<TCPSocket*>(sock)->open(Ethernet.getNetwork()) != NSAPI_ERROR_OK){
 			return 0;
@@ -62,7 +64,7 @@ int arduino::EthernetClient::connect(const char *host, uint16_t port) {
 }
 
 int arduino::EthernetClient::connectSSL(SocketAddress socketAddress){
-	if (sock == NULL) {
+	if (sock == nullptr) {
 		sock = new TLSSocket();
 		if(static_cast<TLSSocket*>(sock)->open(Ethernet.getNetwork()) != NSAPI_ERROR_OK){
 			return 0;
@@ -88,11 +90,17 @@ int arduino::EthernetClient::connectSSL(const char *host, uint16_t port) {
 }
 
 size_t arduino::EthernetClient::write(uint8_t c) {
-	sock->send(&c, 1);
+	if (sock == nullptr)
+		return -1;
+	auto ret = sock->send(&c, 1);
+	return ret;
 }
 
 size_t arduino::EthernetClient::write(const uint8_t *buf, size_t size) {
-	sock->send(buf, size);
+	if (sock == nullptr)
+		return -1;
+	auto ret = sock->send(buf, size);
+	return ret;
 }
 
 int arduino::EthernetClient::available() {
@@ -137,15 +145,16 @@ void arduino::EthernetClient::flush() {
 }
 
 void arduino::EthernetClient::stop() {
-	if (sock != NULL) {
+	if (sock != nullptr) {
 		sock->close();
-		sock = NULL;
-		_status = false;
+		sock = nullptr;
 	}
+	_status = false;
 }
 
 uint8_t arduino::EthernetClient::connected() {
-	return _status == true;
+	getStatus();
+	return _status;
 }
 
 IPAddress arduino::EthernetClient::remoteIP() {
