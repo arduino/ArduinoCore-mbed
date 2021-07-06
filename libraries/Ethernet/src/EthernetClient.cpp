@@ -46,8 +46,15 @@ int arduino::EthernetClient::connect(SocketAddress socketAddress) {
 	address = socketAddress;
 	sock->set_timeout(SOCKET_TIMEOUT);		
 	nsapi_error_t returnCode = static_cast<TCPSocket*>(sock)->connect(socketAddress);
-	auto ret = returnCode == NSAPI_ERROR_OK ? 1 : 0;
-	if (ret)
+	int ret = 0;
+	switch (returnCode) {
+	case NSAPI_ERROR_IS_CONNECTED:
+	case NSAPI_ERROR_OK: {
+		ret = 1;
+		break;
+	}
+	}
+	if (ret == 1)
 		_status = true;
 	return ret;
 }
@@ -75,7 +82,18 @@ int arduino::EthernetClient::connectSSL(SocketAddress socketAddress){
 	}
 	sock->set_timeout(SOCKET_TIMEOUT);	
 	nsapi_error_t returnCode = static_cast<TLSSocket*>(sock)->connect(socketAddress);
-	return returnCode == NSAPI_ERROR_OK ? 1 : 0;
+	int ret = 0;
+	switch (returnCode) {
+	case NSAPI_ERROR_IS_CONNECTED:
+	case NSAPI_ERROR_OK: {
+		ret = 1;
+		break;
+	}
+	}
+	if (ret == 1)
+		_status = true;
+
+	return ret;
 }
 
 int arduino::EthernetClient::connectSSL(IPAddress ip, uint16_t port) {
