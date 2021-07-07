@@ -31,9 +31,15 @@ class WiFiClient;
 class WiFiServer : public arduino::Server {
 private:
   uint16_t _port;
-  TCPSocket* sock;
+  TCPSocket* sock = nullptr;
 public:
   WiFiServer(uint16_t);
+  virtual ~WiFiServer() {
+    if (sock) {
+      delete sock;
+      sock = nullptr;
+    }
+  }
   arduino::WiFiClient available(uint8_t* status = NULL);
   void begin();
   virtual size_t write(uint8_t);

@@ -33,7 +33,7 @@ class WiFiClient : public arduino::Client {
 
 public:
   WiFiClient();
-  ~WiFiClient() {
+  virtual ~WiFiClient() {
     stop();
   }
 
