@@ -3,10 +3,6 @@
 
 extern WiFiClass WiFi;
 
-#ifndef WIFI_TCP_BUFFER_SIZE
-#define WIFI_TCP_BUFFER_SIZE        1508
-#endif
-
 arduino::WiFiServer::WiFiServer(uint16_t port) {
 	_port = port;
 }
@@ -23,6 +19,7 @@ void arduino::WiFiServer::begin() {
 	if (sock) {
 		sock->bind(_port);
 		sock->listen(5);
+		sock->set_blocking(false);
 	}
 }
 
@@ -52,6 +49,8 @@ arduino::WiFiClient arduino::WiFiServer::available(uint8_t* status) {
 	if(status != nullptr) {
 		*status = error == NSAPI_ERROR_OK ? 1 : 0;
 	}
-	client.setSocket(clientSocket);
+	if (error == NSAPI_ERROR_OK) {
+		client.setSocket(clientSocket);
+	}
 	return client;
 }
