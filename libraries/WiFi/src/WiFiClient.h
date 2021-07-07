@@ -26,6 +26,11 @@
 #include "api/IPAddress.h"
 #include "TLSSocket.h"
 #include "TCPSocket.h"
+#include "rtos.h"
+
+#ifndef SOCKET_BUFFER_SIZE
+#define SOCKET_BUFFER_SIZE        256
+#endif
 
 namespace arduino {
 
@@ -33,6 +38,21 @@ class WiFiClient : public arduino::Client {
 
 public:
   WiFiClient();
+  WiFiClient(WiFiClient* orig) {
+    /*
+    this->reader_th = orig->reader_th;
+    this->event = orig->event;
+    this->mutex = orig->mutex;
+    this->sock = orig->sock;
+    this->_status = orig->_status;
+    this->rxBuffer = orig->rxBuffer;
+    */
+    this->sock = orig->sock;
+    orig->borrowed_socket = true;
+    orig->stop();
+    this->setSocket(orig->sock);
+  }
+
   virtual ~WiFiClient() {
     stop();
   }
@@ -54,12 +74,11 @@ public:
   void stop();
   uint8_t connected();
   operator bool() {
-    return sock != NULL;
+    return sock != nullptr;
   }
 
-  void setSocket(Socket* _sock) {
-    sock = _sock;
-  }
+  void setSocket(Socket* _sock);
+  void configureSocket(Socket* _s);
 
   IPAddress remoteIP();
   uint16_t remotePort();
@@ -76,13 +95,19 @@ protected:
   }
 
 private:
-  static uint16_t _srcport;
-  Socket* sock;
-  RingBufferN<256> rxBuffer;
-  bool _status;
+  Socket* sock = nullptr;
+  RingBufferN<SOCKET_BUFFER_SIZE> rxBuffer;
+  bool _status = false;
+  bool borrowed_socket = false;
+  bool _own_socket = false;
+  bool closing = false;
   mbed::Callback<int(void)> beforeConnect;
   SocketAddress address;
+  rtos::Thread* reader_th = nullptr;
+  rtos::EventFlags* event = nullptr;
+  rtos::Mutex* mutex = nullptr;
 
+  void readSocket();
   void getStatus();
 };
 
