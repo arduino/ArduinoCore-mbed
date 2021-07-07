@@ -274,3 +274,46 @@ pico.bootloader.tool=openocd
 pico.bootloader.config=-f target/rp2040.cfg
 pico.bootloader.programmer=-f interface/cmsis-dap.cfg
 
+##############################################################
+
+nicla_sense.name=Nicla Sense ME
+nicla_sense.build.core=arduino
+nicla_sense.build.crossprefix=arm-none-eabi-
+nicla_sense.build.compiler_path={runtime.tools.arm-none-eabi-gcc.path}/bin/
+
+nicla_sense.build.variant=NICLA
+nicla_sense.build.mcu=cortex-m4
+nicla_sense.build.extra_flags=
+nicla_sense.build.architecture=cortex-m4
+nicla_sense.build.fpu=-mfpu=fpv4-sp-d16
+nicla_sense.build.float-abi=-mfloat-abi=softfp
+nicla_sense.build.board=NICLA
+nicla_sense.build.ldscript=linker_script.ld
+nicla_sense.compiler.mbed.arch.define=-DARDUINO_ARCH_NRF52832
+nicla_sense.compiler.mbed.defines={build.variant.path}/defines.txt
+nicla_sense.compiler.mbed.ldflags={build.variant.path}/ldflags.txt
+nicla_sense.compiler.mbed.cflags={build.variant.path}/cflags.txt
+nicla_sense.compiler.mbed.cxxflags={build.variant.path}/cxxflags.txt
+nicla_sense.compiler.mbed.includes={build.variant.path}/includes.txt
+nicla_sense.compiler.mbed.extra_ldflags=-lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
+nicla_sense.compiler.mbed="{build.variant.path}/libs/libmbed.a"
+nicla_sense.vid.0=0x2341
+nicla_sense.pid.0=0x0060
+
+nicla_sense.upload.tool=openocd
+nicla_sense.upload.protocol=
+nicla_sense.upload.config=-f target/nrf52.cfg
+nicla_sense.upload.programmer=-f interface/cmsis-dap.cfg
+nicla_sense.upload.transport=-c "transport select swd; adapter speed 1000"
+nicla_sense.upload.use_1200bps_touch=false
+nicla_sense.upload.wait_for_upload_port=true
+nicla_sense.upload.native_usb=true
+nicla_sense.upload.maximum_size=527616
+nicla_sense.upload.maximum_data_size=64288
+
+nicla_sense.bootloader.tool=openocd
+nicla_sense.bootloader.extra_action.preflash=echo INFO:removed_mass-erase
+nicla_sense.bootloader.config=-f target/nrf52.cfg
+nicla_sense.bootloader.programmer=-f interface/cmsis-dap.cfg
+nicla_sense.bootloader.file=NICLA/bootloader.hex
+

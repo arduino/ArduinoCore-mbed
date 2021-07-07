@@ -1,0 +1,41 @@
+{
+  "macros": [
+    "MBED_HEAP_STATS_ENABLED=1",
+    "MBED_STACK_STATS_ENABLED=1",
+    "MBED_MEM_TRACING_ENABLED=1",
+    "NRFX_GPIOTE_CONFIG_NUM_OF_LOW_POWER_EVENTS=8"
+  ],
+  "target_overrides": {
+    "*": {
+      "target.printf_lib": "minimal-printf",
+      "platform.minimal-printf-enable-floating-point": true,
+      "platform.stdio-buffered-serial": false,
+      "platform.stdio-baud-rate": 115200,
+      "platform.default-serial-baud-rate": 115200,
+      "platform.callback-nontrivial": true,
+      "rtos.main-thread-stack-size": 3072,
+      "rtos.thread-stack-size": 1024,
+      "rtos.idle-thread-stack-size": 512,
+      "target.mbed_app_start": "0x10000",
+      "target.components_add" : ["SPIF"],
+      "cordio.max-connections": 1,
+      "ble.ble-role-central": false,
+      "ble.ble-role-observer": true,
+      "ble.ble-gap-max-advertising-sets": 1,
+      "ble.ble-gap-host-max-advertising-start-commands": 1,
+      "ble.ble-gap-host-privacy-resolved-cache-size": 1,
+      "ble.ble-feature-gatt-client": false,
+      "ble.ble-feature-security": false,
+      "ble.ble-feature-secure-connections": false,
+      "ble.ble-feature-signing": false,
+      "ble.ble-feature-whitelist": false,
+      "ble.ble-feature-privacy": false,
+      "ble.ble-feature-periodic-advertising": false,
+      "ble.ble-security-database-filesystem": false,
+      "ble.ble-security-database-kvstore": false,
+      "ble.ble-gap-host-based-private-address-resolution": false,
+      "ble.ble-gap-max-advertising-reports-pending-address-resolution": false,
+      "target.macros_remove": ["CONFIG_GPIO_AS_PINRESET"]
+    }
+  }
+}

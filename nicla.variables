@@ -1,0 +1,5 @@
+export FLAVOUR="nicla"
+export VARIANTS=("NICLA")
+export FQBNS=("nicla_sense")
+export LIBRARIES=("SPI Wire Scheduler Nicla_System")
+export BOOTLOADERS=("NICLA")

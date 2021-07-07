@@ -1,6 +1,6 @@
 #include "Arduino.h"
 
-#if defined(ARDUINO_ARCH_NRF52840)
+#if defined(ARDUINO_ARCH_NRF52840) || defined(TARGET_NICLA)
 
 #include "mbed.h"
 #include <hal/nrf_timer.h>
@@ -263,6 +263,7 @@ unsigned long pulseIn(PinName pin, PinStatus state, unsigned long timeout)
     }
     return micros() - start;
 }
+
 
 #endif
 
