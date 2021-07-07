@@ -23,10 +23,7 @@
 #if !defined(Arduino_h) && !defined(ARDUINO_LIB_DISCOVERY_PHASE)
 #define Arduino_h
 
-#if !defined(ARDUINO_AS_MBED_LIBRARY)
 #include "pinmode_arduino.h"
-#endif
-
 #include "api/ArduinoAPI.h"
 
 #if defined(__cplusplus)

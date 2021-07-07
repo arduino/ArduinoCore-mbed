@@ -30,9 +30,8 @@
 */
 #pragma once
 
-#include <mbed.h>
 #include <pinDefinitions.h>
-
+#include <mbed.h>
 
 namespace arduino {
 

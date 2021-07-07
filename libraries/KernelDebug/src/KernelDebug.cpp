@@ -17,6 +17,7 @@
 #include <MRI.h>
 #include <cmsis_os2.h>
 #include <rtx_os.h>
+#include "Arduino.h"
 #include "KernelDebug.h"
 
 // Put armv7-m module into handler mode before including its header and source code.

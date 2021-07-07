@@ -1,0 +1,2 @@
+#define PINS_COUNT 255
+#define NUM_ANALOG_INPUTS	4
