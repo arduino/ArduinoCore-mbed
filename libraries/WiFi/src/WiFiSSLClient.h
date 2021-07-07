@@ -30,6 +30,9 @@ class WiFiSSLClient : public arduino::WiFiClient {
 
 public:
   WiFiSSLClient();
+  virtual ~WiFiSSLClient() {
+    stop();
+  }
 
   int connect(IPAddress ip, uint16_t port) {
     return connectSSL(ip, port);

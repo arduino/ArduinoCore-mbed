@@ -33,6 +33,7 @@ void arduino::WiFiClient::getStatus() {
     if (ret < 0 && ret != NSAPI_ERROR_WOULD_BLOCK) {
         _status = false;
     }
+    _status = true;
 }
 
 int arduino::WiFiClient::connect(SocketAddress socketAddress) {
@@ -111,14 +112,14 @@ int arduino::WiFiClient::connectSSL(const char *host, uint16_t port) {
 
 size_t arduino::WiFiClient::write(uint8_t c) {
 	if (sock == nullptr)
-		return -1;
+		return 0;
 	auto ret = sock->send(&c, 1);
 	return ret;
 }
 
 size_t arduino::WiFiClient::write(const uint8_t *buf, size_t size) {
 	if (sock == nullptr)
-		return -1;
+		return 0;
 
 	auto ret = sock->send(buf, size);
 	return ret;
