@@ -28,6 +28,7 @@ edge_control.pid.1=0x805d
 
 edge_control.upload.tool=bossac
 edge_control.upload.protocol=
+edge_control.upload.transport=
 edge_control.upload.use_1200bps_touch=true
 edge_control.upload.wait_for_upload_port=true
 edge_control.upload.native_usb=true
@@ -72,6 +73,7 @@ envie_m7.pid.2=0x045b
 
 envie_m7.upload.tool=dfu-util
 envie_m7.upload.protocol=
+envie_m7.upload.transport=
 envie_m7.upload.vid=0x2341
 envie_m7.upload.pid=0x035b
 envie_m7.upload.address=0x08040000
@@ -129,6 +131,7 @@ envie_m4.upload.tool=dfu-util
 envie_m4.upload.vid=0x2341
 envie_m4.upload.pid=0x035b
 envie_m4.upload.protocol=
+envie_m4.upload.transport=
 envie_m4.upload.address=0x08100000
 envie_m4.upload.interface=0
 envie_m4.upload.use_1200bps_touch=true
@@ -176,6 +179,7 @@ nano33ble.pid.2=0x015a
 
 nano33ble.upload.tool=bossac
 nano33ble.upload.protocol=
+nano33ble.upload.transport=
 nano33ble.upload.use_1200bps_touch=true
 nano33ble.upload.wait_for_upload_port=true
 nano33ble.upload.native_usb=true
@@ -220,6 +224,7 @@ nanorp2040connect.pid.2=0x015e
 
 nanorp2040connect.upload.tool=picotool
 nanorp2040connect.upload.protocol=
+nanorp2040connect.upload.transport=
 nanorp2040connect.upload.use_1200bps_touch=true
 nanorp2040connect.upload.wait_for_upload_port=false
 nanorp2040connect.upload.native_usb=true
@@ -258,6 +263,7 @@ pico.pid.0=0x00C0
 
 pico.upload.tool=picotool
 pico.upload.protocol=
+pico.upload.transport=
 pico.upload.use_1200bps_touch=true
 pico.upload.wait_for_upload_port=false
 pico.upload.native_usb=true
