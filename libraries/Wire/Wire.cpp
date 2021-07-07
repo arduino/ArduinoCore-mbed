@@ -23,9 +23,9 @@
 #include "Wire.h"
 #include "pinDefinitions.h"
 
-arduino::MbedI2C::MbedI2C(int sda, int scl) : _sda(digitalPinToPinName(sda)), _scl(digitalPinToPinName(scl)), usedTxBuffer(0) {}
+arduino::MbedI2C::MbedI2C(int sda, int scl) : _sda(digitalPinToPinName(sda)), _scl(digitalPinToPinName(scl)), usedTxBuffer(0), slave_th(osPriorityNormal, 2048, nullptr, "I2CSlave") {}
 
-arduino::MbedI2C::MbedI2C(PinName sda, PinName scl) : _sda(sda), _scl(scl), usedTxBuffer(0) {}
+arduino::MbedI2C::MbedI2C(PinName sda, PinName scl) : _sda(sda), _scl(scl), usedTxBuffer(0), slave_th(osPriorityNormal, 2048, nullptr, "I2CSlave") {}
 
 void arduino::MbedI2C::begin() {
 	master = new mbed::I2C(_sda, _scl);
@@ -150,7 +150,7 @@ void arduino::MbedI2C::receiveThd() {
 			case mbed::I2CSlave::WriteGeneral:
 			case mbed::I2CSlave::WriteAddressed:
 				rxBuffer.clear();
-				char buf[72];
+				char buf[240];
 				c = slave->read(buf, sizeof(buf));
 				for (buf_idx = 0; buf_idx < c; buf_idx++) {
 					if (rxBuffer.availableForStore()) {
@@ -185,5 +185,5 @@ void arduino::MbedI2C::onRequest(voidFuncPtr cb) {
 arduino::MbedI2C Wire(I2C_SDA, I2C_SCL);
 #endif
 #if WIRE_HOWMANY > 1
-arduino::MbedI2C Wire1(I2C_SDA1, I2C_SCL1);;
+arduino::MbedI2C Wire1(I2C_SDA1, I2C_SCL1);
 #endif
