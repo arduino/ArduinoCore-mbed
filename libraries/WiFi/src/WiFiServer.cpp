@@ -1,43 +1,4 @@
 #include "WiFiServer.h"
-#include "WiFiClient.h"
-
-extern WiFiClass WiFi;
-
-arduino::WiFiServer::WiFiServer(uint16_t port) {
-	_port = port;
-}
-
-uint8_t arduino::WiFiServer::status() {
-	return 0;
-}
-
-void arduino::WiFiServer::begin() {
-	if (sock == nullptr) {
-		sock = new TCPSocket();
-		((TCPSocket*)sock)->open(WiFi.getNetwork());
-	}
-	if (sock) {
-		sock->bind(_port);
-		sock->listen(5);
-		sock->set_blocking(false);
-	}
-}
-
-size_t arduino::WiFiServer::write(uint8_t c) {
-	if (sock) {
-		sock->send(&c, 1);
-		return 1;
-	}
-	return 0;
-}
-
-size_t arduino::WiFiServer::write(const uint8_t *buf, size_t size) {
-	if (sock) {
-		sock->send(buf, size);
-		return size;
-	}
-	return 0;
-}
 
 arduino::WiFiClient arduino::WiFiServer::available(uint8_t* status) {
 	WiFiClient client;

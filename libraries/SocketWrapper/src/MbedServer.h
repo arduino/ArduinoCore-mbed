@@ -31,15 +31,15 @@ namespace arduino {
 class MbedClient;
 
 class MbedServer : public arduino::Server {
-private:
-  uint16_t _port;
-  TCPSocket* sock = nullptr;
 
 protected:
   virtual NetworkInterface *getNetwork() = 0;
+  TCPSocket* sock = nullptr;
+  uint16_t _port;
 
 public:
-  MbedServer(uint16_t);
+  MbedServer(uint16_t port) : _port(port) {};
+
   virtual ~MbedServer() {
     if (sock) {
       delete sock;
@@ -50,6 +50,8 @@ public:
   virtual size_t write(uint8_t);
   virtual size_t write(const uint8_t *buf, size_t size);
   uint8_t status();
+
+  //virtual MbedClient available(uint8_t* status) = 0;
 
   using Print::write;
 
