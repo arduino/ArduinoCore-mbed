@@ -80,6 +80,10 @@ public:
 
     int download(char* url, const char* target, bool const is_https = false);
 
+    int hostByName(const char* aHostname, IPAddress& aResult);
+
+    uint8_t* macAddress(uint8_t* mac);
+
     friend class MbedUDP;
     friend class MbedServer;
     friend class MbedClient;

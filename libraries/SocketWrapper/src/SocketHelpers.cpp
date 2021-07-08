@@ -25,6 +25,29 @@ void body_callback(const char* data, uint32_t data_len)
 	fwrite(data, 1, data_len, target);
 }
 
+uint8_t* arduino::MbedSocketClass::macAddress(uint8_t* mac) {
+    const char *mac_str = getNetwork()->get_mac_address();
+    for( int b = 0; b < 6; b++ )
+    {
+        uint32_t tmp;
+        sscanf( &mac_str[b * 2 + (b)], "%02x", &tmp) ;
+        mac[5-b] = (uint8_t)tmp ;
+    }
+    //sscanf(mac_str, "%02hhx:%02hhx:%02hhx:%02hhx:%02hhx:%02hhx", &mac[5], &mac[4], &mac[3], &mac[2], &mac[1], &mac[0]);
+    return mac;
+}
+
+int arduino::MbedSocketClass::hostByName(const char* aHostname, IPAddress& aResult){
+    SocketAddress socketAddress = SocketAddress();
+    nsapi_error_t returnCode = getNetwork()->gethostbyname(aHostname, &socketAddress);
+    nsapi_addr_t address = socketAddress.get_addr();
+    aResult[0] = address.bytes[0];
+    aResult[1] = address.bytes[1];
+    aResult[2] = address.bytes[2];
+    aResult[3] = address.bytes[3];    
+    return returnCode == NSAPI_ERROR_OK ? 1 : 0;
+}
+
 arduino::IPAddress arduino::MbedSocketClass::localIP() {    
     SocketAddress ip;
     NetworkInterface *interface = getNetwork();

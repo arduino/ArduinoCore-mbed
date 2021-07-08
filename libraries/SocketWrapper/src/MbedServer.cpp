@@ -1,10 +1,6 @@
 #include "MbedServer.h"
 #include "MbedClient.h"
 
-arduino::MbedServer::MbedServer(uint16_t port) {
-	_port = port;
-}
-
 uint8_t arduino::MbedServer::status() {
 	return 0;
 }

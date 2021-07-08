@@ -18,35 +18,20 @@
 #define wifiserver_h
 
 #include "WiFi.h"
-#include "api/Print.h"
-#include "api/Client.h"
-#include "api/IPAddress.h"
-#include "TLSSocket.h"
-#include "TCPSocket.h"
+#include "MbedServer.h"
+#include "WiFiClient.h"
 
 namespace arduino {
 
 class WiFiClient;
 
-class WiFiServer : public arduino::Server {
-private:
-  uint16_t _port;
-  TCPSocket* sock = nullptr;
-public:
-  WiFiServer(uint16_t);
-  virtual ~WiFiServer() {
-    if (sock) {
-      delete sock;
-      sock = nullptr;
+class WiFiServer : public MbedServer {
+    NetworkInterface *getNetwork() {
+      return WiFi.getNetwork();
     }
-  }
-  arduino::WiFiClient available(uint8_t* status = NULL);
-  void begin();
-  virtual size_t write(uint8_t);
-  virtual size_t write(const uint8_t *buf, size_t size);
-  uint8_t status();
-
-  using Print::write;
+public:
+    WiFiServer(uint16_t port) : MbedServer(port) {}
+    WiFiClient available(uint8_t* status = nullptr);
 };
 
 }

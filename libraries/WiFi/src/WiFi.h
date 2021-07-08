@@ -24,10 +24,7 @@ extern "C" {
 	#include "utility/wl_types.h"
 }
 
-#include "Arduino.h"
-#include "api/IPAddress.h"
-
-#include "netsocket/NetworkInterface.h"
+#include "SocketHelpers.h"
 
 #if defined(COMPONENT_4343W_FS)
 #include "WhdSoftAPInterface.h"
@@ -52,7 +49,7 @@ namespace arduino {
 typedef void* (*voidPrtFuncPtr)(void);
 typedef void (*ArduinoPortentaH7WiFiFeedWatchdogFuncPtr)(void);
 
-class WiFiClass
+class WiFiClass : public MbedSocketClass
 {
 public:
     static int16_t 	_state[MAX_SOCK_NUM];
@@ -63,15 +60,9 @@ public:
     WiFiClass(voidPrtFuncPtr _cb) : _initializerCallback(_cb) {};
 
     /*
-     * Get the first socket available
-     */
-    static uint8_t getSocket();
-
-    /*
      * Get firmware version
      */
     static char* firmwareVersion();
-
 
     /* Start Wifi connection for OPEN networks
      *
@@ -100,57 +91,6 @@ public:
 
     int beginAP(const char *ssid, const char* passphrase, uint8_t channel = DEFAULT_AP_CHANNEL);
 
-    /* Change Ip configuration settings disabling the dhcp client
-        *
-        * param local_ip: 	Static ip configuration
-        */
-    void config(IPAddress local_ip);
-    
-    /* Change Ip configuration settings disabling the dhcp client
-        *
-        * param local_ip: 	Static ip configuration as string
-        */
-    void config(const char *local_ip);
-
-    /* Change Ip configuration settings disabling the dhcp client
-        *
-        * param local_ip: 	Static ip configuration
-	* param dns_server:     IP configuration for DNS server 1
-        */
-    void config(IPAddress local_ip, IPAddress dns_server);
-
-    /* Change Ip configuration settings disabling the dhcp client
-        *
-        * param local_ip: 	Static ip configuration
-	* param dns_server:     IP configuration for DNS server 1
-        * param gateway : 	Static gateway configuration
-        */
-    void config(IPAddress local_ip, IPAddress dns_server, IPAddress gateway);
-
-    /* Change Ip configuration settings disabling the dhcp client
-        *
-        * param local_ip: 	Static ip configuration
-	* param dns_server:     IP configuration for DNS server 1
-        * param gateway: 	Static gateway configuration
-        * param subnet:		Static Subnet mask
-        */
-    void config(IPAddress local_ip, IPAddress dns_server, IPAddress gateway, IPAddress subnet);
-
-    /* Change DNS Ip configuration
-     *
-     * param dns_server1: ip configuration for DNS server 1
-     */
-    void setDNS(IPAddress dns_server1);
-
-    /* Change DNS Ip configuration
-     *
-     * param dns_server1: ip configuration for DNS server 1
-     * param dns_server2: ip configuration for DNS server 2
-     *
-     */
-    void setDNS(IPAddress dns_server1, IPAddress dns_server2);
-
-
     /* Set the hostname used for DHCP requests
      *
      * param name: hostname to set
@@ -173,27 +113,6 @@ public:
      * return: pointer to uint8_t array with length WL_MAC_ADDR_LENGTH
      */
     uint8_t* macAddress(uint8_t* mac);
-
-    /*
-     * Get the interface IP address.
-     *
-     * return: Ip address value
-     */
-    IPAddress localIP();
-
-    /*
-     * Get the interface subnet mask address.
-     *
-     * return: subnet mask address value
-     */
-    IPAddress subnetMask();
-
-    /*
-     * Get the gateway ip address.
-     *
-     * return: gateway ip address value
-     */
-   IPAddress gatewayIP();
 
     /*
      * Return the current SSID associated with the network
@@ -269,15 +188,6 @@ public:
      */
     uint8_t status();
 
-    /*
-     * Resolve the given hostname to an IP address.
-     * param aHostname: Name to be resolved
-     * param aResult: IPAddress structure to store the returned IP address
-     * result: 1 if aIPAddrString was successfully converted to an IP address,
-     *          else error code
-     */
-    int hostByName(const char* aHostname, IPAddress& aResult);
-
     unsigned long getTime();
 
     void lowPowerMode();
@@ -301,11 +211,6 @@ public:
 private:
 
     EMACInterface* _softAP = nullptr;
-    SocketAddress _ip = nullptr;
-    SocketAddress _gateway = nullptr;
-    SocketAddress _netmask = nullptr;
-    SocketAddress _dnsServer1 = nullptr;
-    SocketAddress _dnsServer2 = nullptr;
     char* _ssid = nullptr;
     volatile wl_status_t _currentNetworkStatus = WL_IDLE_STATUS;
     WiFiInterface* wifi_if = nullptr;
@@ -316,13 +221,15 @@ private:
     void ensureDefaultAPNetworkConfiguration();
     static void * handleAPEvents(whd_interface_t ifp, const whd_event_header_t *event_header, const uint8_t *event_data, void *handler_user_data);
     bool isVisible(const char* ssid);
-    arduino::IPAddress ipAddressFromSocketAddress(SocketAddress socketAddress);
-    SocketAddress socketAddressFromIpAddress(arduino::IPAddress ip, uint16_t port);
     ArduinoPortentaH7WiFiFeedWatchdogFuncPtr _feed_watchdog_func = 0;
 };
 
 }
 
 extern WiFiClass WiFi;
+
+#include "WiFiClient.h"
+#include "WiFiServer.h"
+#include "WiFiUdp.h"
 
 #endif
