@@ -29,9 +29,6 @@ class EthernetClient : public MbedClient {
     NetworkInterface *getNetwork() {
       return Ethernet.getNetwork();
     }
-public:
-    EthernetClient(EthernetClient* orig) : MbedClient(orig) {}
-    EthernetClient() : MbedClient() {}
 };
 
 }

@@ -41,11 +41,12 @@ public:
   MbedClient();
 
   // Find something better to save the socket, this is nwither copy nor move constructor
-  MbedClient(MbedClient* orig) {
-    this->sock = orig->sock;
-    orig->borrowed_socket = true;
-    orig->stop();
-    this->setSocket(orig->sock);
+  MbedClient(const MbedClient& orig) {
+    auto _sock = orig.sock;
+    auto _m = (MbedClient*)&orig;
+    _m->borrowed_socket = true;
+    _m->stop();
+    this->setSocket(_sock);
   }
 
   virtual ~MbedClient() {

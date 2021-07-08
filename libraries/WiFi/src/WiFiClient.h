@@ -29,9 +29,6 @@ class WiFiClient : public MbedClient {
     NetworkInterface *getNetwork() {
       return WiFi.getNetwork();
     }
-public:
-    WiFiClient(WiFiClient* orig) : MbedClient(orig) {}
-    WiFiClient() : MbedClient() {}
 };
 
 }
