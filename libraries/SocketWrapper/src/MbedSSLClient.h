@@ -1,6 +1,6 @@
 /*
-  WiFiClient.cpp - Library for Arduino Wifi shield.
-  Copyright (c) 2011-2014 Arduino LLC.  All right reserved.
+  WiFiSSLClient.cpp - Library for Arduino Wifi shield.
+  Copyright (c) 2011-2014 Arduino.  All right reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -17,20 +17,36 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef wificlient_h
-#define wificlient_h
+#ifndef MBEDSSLCLIENT_H
+#define MBEDSSLCLIENT_H
 
-#include "WiFi.h"
 #include "MbedClient.h"
+
+extern const char CA_CERTIFICATES[];
 
 namespace arduino {
 
-class WiFiClient : public MbedClient {
-    NetworkInterface *getNetwork() {
-      return WiFi.getNetwork();
-    }
+class MbedSSLClient : public arduino::MbedClient {
+
+public:
+  MbedSSLClient();
+  virtual ~MbedSSLClient() {
+    stop();
+  }
+
+  int connect(IPAddress ip, uint16_t port) {
+    return connectSSL(ip, port);
+  }
+  int connect(const char* host, uint16_t port) {
+    return connectSSL(host, port);
+  }
+
+private:
+  int setRootCA() {
+    return ((TLSSocket*)sock)->set_root_ca_cert_path("/wlan/");
+  }
 };
 
 }
 
-#endif
+#endif /* MBEDSSLCLIENT_H */
