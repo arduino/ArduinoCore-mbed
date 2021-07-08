@@ -23,10 +23,8 @@
 #define ethernet_h_
 
 #include "Arduino.h"
+#include "SocketHelpers.h"
 #include "api/IPAddress.h"
-#include "EthernetClient.h"
-#include "EthernetServer.h"
-#include "EthernetUdp.h"
 
 #include "netsocket/NetworkInterface.h"
 #include "EthernetInterface.h"
@@ -46,7 +44,7 @@ namespace arduino {
 
 typedef void* (*voidPrtFuncPtr)(void);
 
-class EthernetClass {
+class EthernetClass : public MbedSocketClass {
 
 public:
 	// Initialise the Ethernet shield to use the provided MAC address and
@@ -74,26 +72,13 @@ public:
 	void init(uint8_t sspin = 10);
 
 	void MACAddress(uint8_t *mac_address);
-    uint8_t* macAddress(uint8_t* mac);
-	IPAddress localIP();
-	IPAddress subnetMask();
-	IPAddress gatewayIP();
-	IPAddress dnsServerIP() { return ipAddressFromSocketAddress(_dnsServer1); }
 
-    void config(IPAddress local_ip);
-    void config(const char *local_ip);
-    void config(IPAddress local_ip, IPAddress dns_server);
-    void config(IPAddress local_ip, IPAddress dns_server, IPAddress gateway);
-    void config(IPAddress local_ip, IPAddress dns_server, IPAddress gateway, IPAddress subnet);
-    void setDNS(IPAddress dns_server1);
-    void setDNS(IPAddress dns_server1, IPAddress dns_server2);
     void setHostname(const char* name);
 
     int disconnect(void);
     void end(void);
 
     uint8_t status();
-    int hostByName(const char* aHostname, IPAddress& aResult);
     unsigned long getTime();
 
 	void setMACAddress(const uint8_t *mac_address);
@@ -110,15 +95,17 @@ public:
 
     NetworkInterface *getNetwork();
 
-private:
-
-	volatile EthernetLinkStatus _currentNetworkStatus = Unknown;
-	EthernetInterface net;
+protected:
     SocketAddress _ip = nullptr;
     SocketAddress _gateway = nullptr;
     SocketAddress _netmask = nullptr;
     SocketAddress _dnsServer1 = nullptr;
     SocketAddress _dnsServer2 = nullptr;
+
+private:
+
+	volatile EthernetLinkStatus _currentNetworkStatus = Unknown;
+	EthernetInterface net;
     EthernetInterface* eth_if = &net;
     voidPrtFuncPtr _initializerCallback;
     arduino::IPAddress ipAddressFromSocketAddress(SocketAddress socketAddress);
@@ -128,5 +115,9 @@ private:
 }
 
 extern arduino::EthernetClass Ethernet;
+
+#include "EthernetClient.h"
+#include "EthernetServer.h"
+#include "EthernetUdp.h"
 
 #endif
