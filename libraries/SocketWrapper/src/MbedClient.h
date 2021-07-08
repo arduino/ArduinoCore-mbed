@@ -39,11 +39,13 @@ class MbedClient : public arduino::Client {
 
 public:
   MbedClient();
-  MbedClient(MbedClient&& orig) {
-    this->sock = orig.sock;
-    orig.borrowed_socket = true;
-    orig.stop();
-    this->setSocket(orig.sock);
+
+  // Find something better to save the socket, this is nwither copy nor move constructor
+  MbedClient(MbedClient* orig) {
+    this->sock = orig->sock;
+    orig->borrowed_socket = true;
+    orig->stop();
+    this->setSocket(orig->sock);
   }
 
   virtual ~MbedClient() {
