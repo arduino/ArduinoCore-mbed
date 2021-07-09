@@ -116,7 +116,7 @@ protected:
 
   voidFuncPtr _feed_watchdog_func = nullptr;
 
-  static FILE* download_target;
+  FILE* download_target;
 
   void body_callback(const char* data, uint32_t data_len);
 
