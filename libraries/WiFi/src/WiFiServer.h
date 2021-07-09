@@ -26,12 +26,14 @@ namespace arduino {
 class WiFiClient;
 
 class WiFiServer : public MbedServer {
-    NetworkInterface *getNetwork() {
-      return WiFi.getNetwork();
-    }
+  NetworkInterface* getNetwork() {
+    return WiFi.getNetwork();
+  }
+
 public:
-    WiFiServer(uint16_t port) : MbedServer(port) {}
-    WiFiClient available(uint8_t* status = nullptr);
+  WiFiServer(uint16_t port)
+    : MbedServer(port) {}
+  WiFiClient available(uint8_t* status = nullptr);
 };
 
 }

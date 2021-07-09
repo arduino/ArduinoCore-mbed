@@ -20,8 +20,8 @@
 #include <inttypes.h>
 
 extern "C" {
-	#include "utility/wl_definitions.h"
-	#include "utility/wl_types.h"
+#include "utility/wl_definitions.h"
+#include "utility/wl_types.h"
 }
 
 #include "SocketHelpers.h"
@@ -48,26 +48,26 @@ namespace arduino {
 
 typedef void* (*voidPrtFuncPtr)(void);
 
-class WiFiClass : public MbedSocketClass
-{
+class WiFiClass : public MbedSocketClass {
 public:
-    static int16_t 	_state[MAX_SOCK_NUM];
-    static uint16_t _server_port[MAX_SOCK_NUM];
+  static int16_t _state[MAX_SOCK_NUM];
+  static uint16_t _server_port[MAX_SOCK_NUM];
 
-    WiFiClass(WiFiInterface* _if) : wifi_if(_if) {};
+  WiFiClass(WiFiInterface* _if)
+    : wifi_if(_if){};
 
-    /*
+  /*
      * Get firmware version
      */
-    static const char* firmwareVersion();
+  static const char* firmwareVersion();
 
-    /* Start Wifi connection for OPEN networks
+  /* Start Wifi connection for OPEN networks
      *
      * param ssid: Pointer to the SSID string.
      */
-    int begin(const char* ssid);
+  int begin(const char* ssid);
 
-    /* Start Wifi connection with WEP encryption.
+  /* Start Wifi connection with WEP encryption.
      * Configure a key into the device. The key type (WEP-40, WEP-104)
      * is determined by the size of the key (5 bytes for WEP-40, 13 bytes for WEP-104).
      *
@@ -75,145 +75,144 @@ public:
      * param key_idx: The key index to set. Valid values are 0-3.
      * param key: Key input buffer.
      */
-    int begin(const char* ssid, uint8_t key_idx, const char* key);
+  int begin(const char* ssid, uint8_t key_idx, const char* key);
 
-    /* Start Wifi connection with passphrase
+  /* Start Wifi connection with passphrase
      * the most secure supported mode will be automatically selected
      *
      * param ssid: Pointer to the SSID string.
      * param passphrase: Passphrase. Valid characters in a passphrase
      *        must be between ASCII 32-126 (decimal).
      */
-    int begin(const char* ssid, const char *passphrase);
+  int begin(const char* ssid, const char* passphrase);
 
-    int beginAP(const char *ssid, const char* passphrase, uint8_t channel = DEFAULT_AP_CHANNEL);
+  int beginAP(const char* ssid, const char* passphrase, uint8_t channel = DEFAULT_AP_CHANNEL);
 
-    /* Set the hostname used for DHCP requests
+  /* Set the hostname used for DHCP requests
      *
      * param name: hostname to set
      *
      */
-    void setHostname(const char* name);
+  void setHostname(const char* name);
 
-    /*
+  /*
      * Disconnect from the network
      *
      * return: one value of wl_status_t enum
      */
-    int disconnect(void);
+  int disconnect(void);
 
-    void end(void);
+  void end(void);
 
-    /*
+  /*
      * Get the interface MAC address.
      *
      * return: pointer to uint8_t array with length WL_MAC_ADDR_LENGTH
      */
-    uint8_t* macAddress(uint8_t* mac);
+  uint8_t* macAddress(uint8_t* mac);
 
-    /*
+  /*
      * Return the current SSID associated with the network
      *
      * return: ssid string
      */
-    char* SSID();
+  char* SSID();
 
-    /*
+  /*
       * Return the current BSSID associated with the network.
       * It is the MAC address of the Access Point
       *
       * return: pointer to uint8_t array with length WL_MAC_ADDR_LENGTH
       */
-    uint8_t* BSSID(uint8_t* bssid);
+  uint8_t* BSSID(uint8_t* bssid);
 
-    /*
+  /*
       * Return the current RSSI /Received Signal Strength in dBm)
       * associated with the network
       *
       * return: signed value
       */
-    int32_t RSSI();
+  int32_t RSSI();
 
-    /*
+  /*
       * Return the Encryption Type associated with the network
       *
       * return: one value of wl_enc_type enum
       */
-    uint8_t	encryptionType();
+  uint8_t encryptionType();
 
-    /*
+  /*
      * Start scan WiFi networks available
      *
      * return: Number of discovered networks
      */
-    int8_t scanNetworks();
+  int8_t scanNetworks();
 
-    /*
+  /*
      * Return the SSID discovered during the network scan.
      *
      * param networkItem: specify from which network item want to get the information
 	 *
      * return: ssid string of the specified item on the networks scanned list
      */
-    char*	SSID(uint8_t networkItem);
+  char* SSID(uint8_t networkItem);
 
-    /*
+  /*
      * Return the encryption type of the networks discovered during the scanNetworks
      *
      * param networkItem: specify from which network item want to get the information
 	 *
      * return: encryption type (enum wl_enc_type) of the specified item on the networks scanned list
      */
-    uint8_t	encryptionType(uint8_t networkItem);
+  uint8_t encryptionType(uint8_t networkItem);
 
-    uint8_t* BSSID(uint8_t networkItem, uint8_t* bssid);
-    uint8_t channel(uint8_t networkItem);
+  uint8_t* BSSID(uint8_t networkItem, uint8_t* bssid);
+  uint8_t channel(uint8_t networkItem);
 
-    /*
+  /*
      * Return the RSSI of the networks discovered during the scanNetworks
      *
      * param networkItem: specify from which network item want to get the information
 	 *
      * return: signed value of RSSI of the specified item on the networks scanned list
      */
-    int32_t RSSI(uint8_t networkItem);
+  int32_t RSSI(uint8_t networkItem);
 
-    /*
+  /*
      * Return Connection status.
      *
      * return: one of the value defined in wl_status_t
      */
-    uint8_t status();
+  uint8_t status();
 
-    unsigned long getTime();
+  unsigned long getTime();
 
-    void lowPowerMode();
-    void noLowPowerMode();
+  void lowPowerMode();
+  void noLowPowerMode();
 
-    int ping(const char* hostname, uint8_t ttl = 128);
-    int ping(const String &hostname, uint8_t ttl = 128);
-    int ping(IPAddress host, uint8_t ttl = 128);
+  int ping(const char* hostname, uint8_t ttl = 128);
+  int ping(const String& hostname, uint8_t ttl = 128);
+  int ping(IPAddress host, uint8_t ttl = 128);
 
-    int download(char* url, const char* target, bool const is_https = false);
+  int download(char* url, const char* target, bool const is_https = false);
 
-    friend class WiFiClient;
-    friend class WiFiServer;
-    friend class WiFiUDP;
+  friend class WiFiClient;
+  friend class WiFiServer;
+  friend class WiFiUDP;
 
-    NetworkInterface *getNetwork();
+  NetworkInterface* getNetwork();
 
 private:
-
-    EMACInterface* _softAP = nullptr;
-    char* _ssid = nullptr;
-    volatile wl_status_t _currentNetworkStatus = WL_IDLE_STATUS;
-    WiFiInterface* wifi_if = nullptr;
-    WiFiAccessPoint* ap_list = nullptr;
-    uint8_t connected_ap;
-    int setSSID(const char* ssid);
-    void ensureDefaultAPNetworkConfiguration();
-    static void * handleAPEvents(whd_interface_t ifp, const whd_event_header_t *event_header, const uint8_t *event_data, void *handler_user_data);
-    bool isVisible(const char* ssid);
+  EMACInterface* _softAP = nullptr;
+  char* _ssid = nullptr;
+  volatile wl_status_t _currentNetworkStatus = WL_IDLE_STATUS;
+  WiFiInterface* wifi_if = nullptr;
+  WiFiAccessPoint* ap_list = nullptr;
+  uint8_t connected_ap;
+  int setSSID(const char* ssid);
+  void ensureDefaultAPNetworkConfiguration();
+  static void* handleAPEvents(whd_interface_t ifp, const whd_event_header_t* event_header, const uint8_t* event_data, void* handler_user_data);
+  bool isVisible(const char* ssid);
 };
 
 }

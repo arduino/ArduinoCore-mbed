@@ -26,9 +26,9 @@
 namespace arduino {
 
 class WiFiClient : public MbedClient {
-    NetworkInterface *getNetwork() {
-      return WiFi.getNetwork();
-    }
+  NetworkInterface *getNetwork() {
+    return WiFi.getNetwork();
+  }
 };
 
 }

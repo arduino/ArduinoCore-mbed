@@ -34,11 +34,12 @@ class MbedServer : public arduino::Server {
 
 protected:
   virtual NetworkInterface *getNetwork() = 0;
-  TCPSocket* sock = nullptr;
+  TCPSocket *sock = nullptr;
   uint16_t _port;
 
 public:
-  MbedServer(uint16_t port) : _port(port) {};
+  MbedServer(uint16_t port)
+    : _port(port){};
 
   virtual ~MbedServer() {
     if (sock) {

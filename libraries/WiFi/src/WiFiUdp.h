@@ -26,9 +26,9 @@
 namespace arduino {
 
 class WiFiUDP : public MbedUDP {
-    NetworkInterface *getNetwork() {
-      return WiFi.getNetwork();
-    }
+  NetworkInterface *getNetwork() {
+    return WiFi.getNetwork();
+  }
 };
 
 }

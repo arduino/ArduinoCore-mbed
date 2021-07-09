@@ -26,9 +26,9 @@
 namespace arduino {
 
 class EthernetClient : public MbedClient {
-    NetworkInterface *getNetwork() {
-      return Ethernet.getNetwork();
-    }
+  NetworkInterface *getNetwork() {
+    return Ethernet.getNetwork();
+  }
 };
 
 }

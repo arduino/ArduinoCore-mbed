@@ -26,9 +26,9 @@
 namespace arduino {
 
 class EthernetUDP : public MbedUDP {
-    NetworkInterface *getNetwork() {
-      return Ethernet.getNetwork();
-    }
+  NetworkInterface *getNetwork() {
+    return Ethernet.getNetwork();
+  }
 };
 
 }

@@ -25,103 +25,103 @@ namespace arduino {
 class MbedSocketClass {
 
 public:
-    void config(IPAddress local_ip);
-    
-    /* Change Ip configuration settings disabling the dhcp client
+  void config(IPAddress local_ip);
+
+  /* Change Ip configuration settings disabling the dhcp client
         *
         * param local_ip: 	Static ip configuration as string
         */
-    void config(const char *local_ip);
+  void config(const char* local_ip);
 
-    /* Change Ip configuration settings disabling the dhcp client
+  /* Change Ip configuration settings disabling the dhcp client
         *
         * param local_ip: 	Static ip configuration
 		* param dns_server:     IP configuration for DNS server 1
         */
-    void config(IPAddress local_ip, IPAddress dns_server);
+  void config(IPAddress local_ip, IPAddress dns_server);
 
-    /* Change Ip configuration settings disabling the dhcp client
+  /* Change Ip configuration settings disabling the dhcp client
         *
         * param local_ip: 	Static ip configuration
 		* param dns_server:     IP configuration for DNS server 1
         * param gateway : 	Static gateway configuration
         */
-    void config(IPAddress local_ip, IPAddress dns_server, IPAddress gateway);
+  void config(IPAddress local_ip, IPAddress dns_server, IPAddress gateway);
 
-    /* Change Ip configuration settings disabling the dhcp client
+  /* Change Ip configuration settings disabling the dhcp client
         *
         * param local_ip: 	Static ip configuration
 		* param dns_server:     IP configuration for DNS server 1
         * param gateway: 	Static gateway configuration
         * param subnet:		Static Subnet mask
         */
-    void config(IPAddress local_ip, IPAddress dns_server, IPAddress gateway, IPAddress subnet);
+  void config(IPAddress local_ip, IPAddress dns_server, IPAddress gateway, IPAddress subnet);
 
-    /* Change DNS Ip configuration
+  /* Change DNS Ip configuration
      *
      * param dns_server1: ip configuration for DNS server 1
      */
-    void setDNS(IPAddress dns_server1);
+  void setDNS(IPAddress dns_server1);
 
-    /* Change DNS Ip configuration
+  /* Change DNS Ip configuration
      *
      * param dns_server1: ip configuration for DNS server 1
      * param dns_server2: ip configuration for DNS server 2
      *
      */
-    void setDNS(IPAddress dns_server1, IPAddress dns_server2);
+  void setDNS(IPAddress dns_server1, IPAddress dns_server2);
 
-    /*
+  /*
      * Get the interface IP address.
      *
      * return: Ip address value
      */
-    IPAddress localIP();
+  IPAddress localIP();
 
-    /*
+  /*
      * Get the interface subnet mask address.
      *
      * return: subnet mask address value
      */
-    IPAddress subnetMask();
+  IPAddress subnetMask();
 
-    /*
+  /*
      * Get the gateway ip address.
      *
      * return: gateway ip address value
      */
-    IPAddress gatewayIP();
+  IPAddress gatewayIP();
 
-    virtual NetworkInterface *getNetwork() = 0;
+  virtual NetworkInterface* getNetwork() = 0;
 
-    int download(char* url, const char* target, bool const is_https = false);
+  int download(char* url, const char* target, bool const is_https = false);
 
-    int hostByName(const char* aHostname, IPAddress& aResult);
+  int hostByName(const char* aHostname, IPAddress& aResult);
 
-    uint8_t* macAddress(uint8_t* mac);
+  uint8_t* macAddress(uint8_t* mac);
 
-	void setFeedWatchdogFunc(voidFuncPtr func);
-	void feedWatchdog();
+  void setFeedWatchdogFunc(voidFuncPtr func);
+  void feedWatchdog();
 
-    friend class MbedUDP;
-    friend class MbedServer;
-    friend class MbedClient;
+  friend class MbedUDP;
+  friend class MbedServer;
+  friend class MbedClient;
 
 protected:
-	SocketAddress _ip = nullptr;
-    SocketAddress _gateway = nullptr;
-    SocketAddress _netmask = nullptr;
-    SocketAddress _dnsServer1 = nullptr;
-    SocketAddress _dnsServer2 = nullptr;
+  SocketAddress _ip = nullptr;
+  SocketAddress _gateway = nullptr;
+  SocketAddress _netmask = nullptr;
+  SocketAddress _dnsServer1 = nullptr;
+  SocketAddress _dnsServer2 = nullptr;
 
-    voidFuncPtr _feed_watchdog_func = nullptr;
+  voidFuncPtr _feed_watchdog_func = nullptr;
 
-    static FILE* download_target;
+  static FILE* download_target;
 
-	void body_callback(const char* data, uint32_t data_len);
+  void body_callback(const char* data, uint32_t data_len);
 
-    static arduino::IPAddress ipAddressFromSocketAddress(SocketAddress socketAddress);
-    static SocketAddress socketAddressFromIpAddress(arduino::IPAddress ip, uint16_t port);
+  static arduino::IPAddress ipAddressFromSocketAddress(SocketAddress socketAddress);
+  static SocketAddress socketAddressFromIpAddress(arduino::IPAddress ip, uint16_t port);
 };
 
 using SocketHelpers = MbedSocketClass;
