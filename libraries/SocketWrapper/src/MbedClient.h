@@ -30,7 +30,7 @@
 #include "rtos.h"
 
 #ifndef SOCKET_BUFFER_SIZE
-#define SOCKET_BUFFER_SIZE        256
+#define SOCKET_BUFFER_SIZE 256
 #endif
 
 namespace arduino {
@@ -40,7 +40,7 @@ class MbedClient : public arduino::Client {
 public:
   MbedClient();
 
-  // Copy constructor, to be used when a Client returned by server.available() 
+  // Copy constructor, to be used when a Client returned by server.available()
   // needs to "survive" event if it goes out of scope
   // Sample usage: Client* new_client = new Client(existing_client)
   MbedClient(const MbedClient& orig) {
@@ -58,15 +58,15 @@ public:
   uint8_t status();
   int connect(SocketAddress socketAddress);
   int connect(IPAddress ip, uint16_t port);
-  int connect(const char *host, uint16_t port);
+  int connect(const char* host, uint16_t port);
   int connectSSL(SocketAddress socketAddress);
   int connectSSL(IPAddress ip, uint16_t port);
-  int connectSSL(const char *host, uint16_t port);
+  int connectSSL(const char* host, uint16_t port);
   size_t write(uint8_t);
-  size_t write(const uint8_t *buf, size_t size);
+  size_t write(const uint8_t* buf, size_t size);
   int available();
   int read();
-  int read(uint8_t *buf, size_t size);
+  int read(uint8_t* buf, size_t size);
   int peek();
   void flush();
   void stop();
@@ -88,8 +88,7 @@ public:
   using Print::write;
 
 protected:
-
-  virtual NetworkInterface *getNetwork() = 0;
+  virtual NetworkInterface* getNetwork() = 0;
   Socket* sock = nullptr;
 
   void onBeforeConnect(mbed::Callback<int(void)> cb) {

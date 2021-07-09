@@ -30,86 +30,97 @@
 #include "EthernetInterface.h"
 
 enum EthernetLinkStatus {
-	Unknown,
-	LinkON,
-	LinkOFF
+  Unknown,
+  LinkON,
+  LinkOFF
 };
 
 enum EthernetHardwareStatus {
-	EthernetNoHardware,
-	EthernetMbed = 6
+  EthernetNoHardware,
+  EthernetMbed = 6
 };
 
 namespace arduino {
 
-typedef void* (*voidPrtFuncPtr)(void);
+typedef void *(*voidPrtFuncPtr)(void);
 
 class EthernetClass : public MbedSocketClass {
 
 public:
-	// Initialise the Ethernet shield to use the provided MAC address and
-	// gain the rest of the configuration through DHCP.
-	// Returns 0 if the DHCP configuration failed, and 1 if it succeeded
-    EthernetClass(EthernetInterface* _if) : eth_if(_if) {};
-    EthernetClass() {};
+  // Initialise the Ethernet shield to use the provided MAC address and
+  // gain the rest of the configuration through DHCP.
+  // Returns 0 if the DHCP configuration failed, and 1 if it succeeded
+  EthernetClass(EthernetInterface *_if)
+    : eth_if(_if){};
+  EthernetClass(){};
 
-    EthernetClass(voidPrtFuncPtr _cb) : _initializerCallback(_cb) {};
+  EthernetClass(voidPrtFuncPtr _cb)
+    : _initializerCallback(_cb){};
 
-    int begin(uint8_t *mac = nullptr, unsigned long timeout = 60000, unsigned long responseTimeout = 4000);
-	EthernetLinkStatus linkStatus();
-	EthernetHardwareStatus hardwareStatus();
+  int begin(uint8_t *mac = nullptr, unsigned long timeout = 60000, unsigned long responseTimeout = 4000);
+  EthernetLinkStatus linkStatus();
+  EthernetHardwareStatus hardwareStatus();
 
-	// Manual configuration
-	int begin(uint8_t *mac, IPAddress ip);
-	int begin(uint8_t *mac, IPAddress ip, IPAddress dns);
-	int begin(uint8_t *mac, IPAddress ip, IPAddress dns, IPAddress gateway);
-	int begin(uint8_t *mac, IPAddress ip, IPAddress dns, IPAddress gateway, IPAddress subnet);
+  // Manual configuration
+  int begin(uint8_t *mac, IPAddress ip);
+  int begin(uint8_t *mac, IPAddress ip, IPAddress dns);
+  int begin(uint8_t *mac, IPAddress ip, IPAddress dns, IPAddress gateway);
+  int begin(uint8_t *mac, IPAddress ip, IPAddress dns, IPAddress gateway, IPAddress subnet);
 
-	int begin(IPAddress ip) { return begin(nullptr, ip); }
-	int begin(IPAddress ip, IPAddress dns) { return begin(nullptr, ip, dns); }
-	int begin(IPAddress ip, IPAddress dns, IPAddress gateway) { return begin(nullptr, ip, dns, gateway); }
-	int begin(IPAddress ip, IPAddress dns, IPAddress gateway, IPAddress subnet) {return begin(nullptr, ip, dns, gateway, subnet); }
-	void init(uint8_t sspin = 10);
+  int begin(IPAddress ip) {
+    return begin(nullptr, ip);
+  }
+  int begin(IPAddress ip, IPAddress dns) {
+    return begin(nullptr, ip, dns);
+  }
+  int begin(IPAddress ip, IPAddress dns, IPAddress gateway) {
+    return begin(nullptr, ip, dns, gateway);
+  }
+  int begin(IPAddress ip, IPAddress dns, IPAddress gateway, IPAddress subnet) {
+    return begin(nullptr, ip, dns, gateway, subnet);
+  }
+  void init(uint8_t sspin = 10);
 
-	void MACAddress(uint8_t *mac_address);
+  void MACAddress(uint8_t *mac_address);
 
-    void setHostname(const char* name);
+  void setHostname(const char *name);
 
-    int disconnect(void);
-    void end(void);
+  int disconnect(void);
+  void end(void);
 
-    uint8_t status();
-    unsigned long getTime();
+  uint8_t status();
+  unsigned long getTime();
 
-	void setMACAddress(const uint8_t *mac_address);
-	void setLocalIP(const IPAddress local_ip);
-	void setSubnetMask(const IPAddress subnet);
-	void setGatewayIP(const IPAddress gateway);
-	void setDnsServerIP(const IPAddress dns_server) { _dnsServer1 = socketAddressFromIpAddress(dns_server, 0); }
-	void setRetransmissionTimeout(uint16_t milliseconds);
-	void setRetransmissionCount(uint8_t num);
+  void setMACAddress(const uint8_t *mac_address);
+  void setLocalIP(const IPAddress local_ip);
+  void setSubnetMask(const IPAddress subnet);
+  void setGatewayIP(const IPAddress gateway);
+  void setDnsServerIP(const IPAddress dns_server) {
+    _dnsServer1 = socketAddressFromIpAddress(dns_server, 0);
+  }
+  void setRetransmissionTimeout(uint16_t milliseconds);
+  void setRetransmissionCount(uint8_t num);
 
-    friend class EthernetClient;
-    friend class EthernetServer;
-    friend class EthernetUDP;
+  friend class EthernetClient;
+  friend class EthernetServer;
+  friend class EthernetUDP;
 
-    NetworkInterface *getNetwork();
+  NetworkInterface *getNetwork();
 
 protected:
-    SocketAddress _ip = nullptr;
-    SocketAddress _gateway = nullptr;
-    SocketAddress _netmask = nullptr;
-    SocketAddress _dnsServer1 = nullptr;
-    SocketAddress _dnsServer2 = nullptr;
+  SocketAddress _ip = nullptr;
+  SocketAddress _gateway = nullptr;
+  SocketAddress _netmask = nullptr;
+  SocketAddress _dnsServer1 = nullptr;
+  SocketAddress _dnsServer2 = nullptr;
 
 private:
-
-	volatile EthernetLinkStatus _currentNetworkStatus = Unknown;
-	EthernetInterface net;
-    EthernetInterface* eth_if = &net;
-    voidPrtFuncPtr _initializerCallback;
-    arduino::IPAddress ipAddressFromSocketAddress(SocketAddress socketAddress);
-    SocketAddress socketAddressFromIpAddress(arduino::IPAddress ip, uint16_t port);
+  volatile EthernetLinkStatus _currentNetworkStatus = Unknown;
+  EthernetInterface net;
+  EthernetInterface *eth_if = &net;
+  voidPrtFuncPtr _initializerCallback;
+  arduino::IPAddress ipAddressFromSocketAddress(SocketAddress socketAddress);
+  SocketAddress socketAddressFromIpAddress(arduino::IPAddress ip, uint16_t port);
 };
 
 }

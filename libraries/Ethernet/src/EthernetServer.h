@@ -26,12 +26,14 @@ namespace arduino {
 class EthernetClient;
 
 class EthernetServer : public MbedServer {
-    NetworkInterface *getNetwork() {
-      return Ethernet.getNetwork();
-    }
+  NetworkInterface* getNetwork() {
+    return Ethernet.getNetwork();
+  }
+
 public:
-    EthernetServer(uint16_t port) : MbedServer(port) {}
-    EthernetClient available(uint8_t* status = nullptr);
+  EthernetServer(uint16_t port)
+    : MbedServer(port) {}
+  EthernetClient available(uint8_t* status = nullptr);
 };
 
 }

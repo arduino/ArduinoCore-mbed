@@ -33,9 +33,9 @@ namespace arduino {
 
 class MbedUDP : public UDP {
 private:
-  UDPSocket _socket;  // Mbed OS socket
-  SocketAddress _host;  // Host to be used to send data  
-  SocketAddress _remoteHost; // Remote host that sent incoming packets
+  UDPSocket _socket;          // Mbed OS socket
+  SocketAddress _host;        // Host to be used to send data
+  SocketAddress _remoteHost;  // Remote host that sent incoming packets
 
   uint8_t* _packet_buffer;  // Raw packet buffer (contains data we got from the UDPSocket)
 
@@ -45,14 +45,14 @@ private:
   size_t _current_packet_size;
 
 protected:
-  virtual NetworkInterface *getNetwork() = 0;
+  virtual NetworkInterface* getNetwork() = 0;
 
 public:
   MbedUDP();  // Constructor
   ~MbedUDP();
-  virtual uint8_t begin(uint16_t);	// initialize, start listening on specified port. Returns 1 if successful, 0 if there are no sockets available to use
+  virtual uint8_t begin(uint16_t);                      // initialize, start listening on specified port. Returns 1 if successful, 0 if there are no sockets available to use
   virtual uint8_t beginMulticast(IPAddress, uint16_t);  // initialize, start listening on specified multicast IP address and port. Returns 1 if successful, 0 if there are no sockets available to use
-  virtual void stop();  // Finish with the UDP socket
+  virtual void stop();                                  // Finish with the UDP socket
 
   // Sending UDP packets
 
@@ -61,14 +61,14 @@ public:
   virtual int beginPacket(IPAddress ip, uint16_t port);
   // Start building up a packet to send to the remote host specific in host and port
   // Returns 1 if successful, 0 if there was a problem resolving the hostname or port
-  virtual int beginPacket(const char *host, uint16_t port);
+  virtual int beginPacket(const char* host, uint16_t port);
   // Finish off this packet and send it
   // Returns 1 if the packet was sent successfully, 0 if there was an error
   virtual int endPacket();
   // Write a single byte into the packet
   virtual size_t write(uint8_t);
   // Write size bytes from buffer into the packet
-  virtual size_t write(const uint8_t *buffer, size_t size);
+  virtual size_t write(const uint8_t* buffer, size_t size);
 
   using Print::write;
 
@@ -84,10 +84,12 @@ public:
   virtual int read(unsigned char* buffer, size_t len);
   // Read up to len characters from the current packet and place them into buffer
   // Returns the number of characters read, or 0 if none are available
-  virtual int read(char* buffer, size_t len) { return read((unsigned char*)buffer, len); };
+  virtual int read(char* buffer, size_t len) {
+    return read((unsigned char*)buffer, len);
+  };
   // Return the next byte from the current packet without moving on to the next byte
   virtual int peek();
-  virtual void flush();	// Finish reading the current packet
+  virtual void flush();  // Finish reading the current packet
 
   // Return the IP address of the host who sent the current incoming packet
   virtual IPAddress remoteIP();

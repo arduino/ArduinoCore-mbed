@@ -2,35 +2,35 @@
 #include "MbedClient.h"
 
 uint8_t arduino::MbedServer::status() {
-	return 0;
+  return 0;
 }
 
 void arduino::MbedServer::begin() {
-	if (sock == nullptr) {
-		sock = new TCPSocket();
-		((TCPSocket*)sock)->open(getNetwork());
-	}
-	if (sock) {
-		sock->bind(_port);
-		sock->listen(5);
-		sock->set_blocking(false);
-	}
+  if (sock == nullptr) {
+    sock = new TCPSocket();
+    ((TCPSocket *)sock)->open(getNetwork());
+  }
+  if (sock) {
+    sock->bind(_port);
+    sock->listen(5);
+    sock->set_blocking(false);
+  }
 }
 
 size_t arduino::MbedServer::write(uint8_t c) {
-	if (sock) {
-		sock->send(&c, 1);
-		return 1;
-	}
-	return 0;
+  if (sock) {
+    sock->send(&c, 1);
+    return 1;
+  }
+  return 0;
 }
 
 size_t arduino::MbedServer::write(const uint8_t *buf, size_t size) {
-	if (sock) {
-		sock->send(buf, size);
-		return size;
-	}
-	return 0;
+  if (sock) {
+    sock->send(buf, size);
+    return size;
+  }
+  return 0;
 }
 
 
