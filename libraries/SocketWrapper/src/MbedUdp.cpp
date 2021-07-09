@@ -31,7 +31,8 @@ uint8_t arduino::MbedUDP::begin(uint16_t port) {
     return 0;
   }
 
-  _socket.set_timeout(1000);
+  _socket.set_blocking(false);
+  _socket.set_timeout(0);
 
   return 1;
 }
