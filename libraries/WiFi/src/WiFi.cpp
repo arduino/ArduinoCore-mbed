@@ -14,10 +14,8 @@ bool arduino::WiFiClass::isVisible(const char* ssid) {
 
 int arduino::WiFiClass::begin(const char* ssid, const char *passphrase) {
     if (wifi_if == nullptr) {
-        //Q: What is the callback for?
-        _initializerCallback();
-        if(wifi_if == nullptr) return WL_CONNECT_FAILED;
-    }    
+        return 0;
+    }
 
     scanNetworks();
     // use scan result to populate security field
@@ -39,7 +37,8 @@ int arduino::WiFiClass::beginAP(const char* ssid, const char *passphrase, uint8_
     #endif
 
     if (_softAP == NULL) {
-        return (_currentNetworkStatus = WL_AP_FAILED);
+        _currentNetworkStatus = WL_AP_FAILED;
+        return _currentNetworkStatus;
     }
 
     ensureDefaultAPNetworkConfiguration();
@@ -55,7 +54,8 @@ int arduino::WiFiClass::beginAP(const char* ssid, const char *passphrase, uint8_
     registrationResult = softAPInterface->register_event_handler(arduino::WiFiClass::handleAPEvents);
 
     if (registrationResult != NSAPI_ERROR_OK) {
-        return (_currentNetworkStatus = WL_AP_FAILED);        
+        _currentNetworkStatus = WL_AP_FAILED;
+        return _currentNetworkStatus;
     }
 
     _currentNetworkStatus = (result == NSAPI_ERROR_OK && setSSID(ssid)) ? WL_AP_LISTENING : WL_AP_FAILED;
@@ -133,25 +133,6 @@ int arduino::WiFiClass::setSSID(const char* ssid){
     return 1;
 }
 
-static const char *sec2str(nsapi_security_t sec)
-{
-    switch (sec) {
-        case NSAPI_SECURITY_NONE:
-            return "None";
-        case NSAPI_SECURITY_WEP:
-            return "WEP";
-        case NSAPI_SECURITY_WPA:
-            return "WPA";
-        case NSAPI_SECURITY_WPA2:
-            return "WPA2";
-        case NSAPI_SECURITY_WPA_WPA2:
-            return "WPA/WPA2";
-        case NSAPI_SECURITY_UNKNOWN:
-        default:
-            return "Unknown";
-    }
-}
-
 static uint8_t sec2enum(nsapi_security_t sec)
 {
     switch (sec) {
@@ -223,18 +204,6 @@ unsigned long arduino::WiFiClass::getTime() {
     return 0;
 }
 
-void arduino::WiFiClass::setFeedWatchdogFunc(ArduinoPortentaH7WiFiFeedWatchdogFuncPtr func)
-{
-  _feed_watchdog_func = func;
-}
-
-void arduino::WiFiClass::feedWatchdog()
-{
-  if (_feed_watchdog_func)
-	_feed_watchdog_func();
-}
-
-
 #if defined(COMPONENT_4343W_FS)
 
 #define WIFI_FIRMWARE_PATH "/wlan/4343WA1.BIN"
@@ -286,7 +255,7 @@ wiced_result_t whd_firmware_check_hook(const char *mounted_name, int mount_err)
 
 
 #include "whd_version.h"
-char* arduino::WiFiClass::firmwareVersion() {
+const char* arduino::WiFiClass::firmwareVersion() {
     if (firmware_available) {
         return WHD_VERSION;
     } else {

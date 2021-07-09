@@ -255,7 +255,7 @@ private:
 
     nsapi_size_or_error_t send_buffer(char* buffer, uint32_t buffer_size) {
         nsapi_size_or_error_t total_send_count = 0;
-        while (total_send_count < buffer_size) {
+        while ((uint32_t)total_send_count < buffer_size) {
 
             // get a slice of the buffer
             char *buffer_slice = buffer + total_send_count;
@@ -299,7 +299,7 @@ private:
 
             // Pass the chunk into the http_parser
             uint32_t nparsed = parser.execute((const char*)recv_buffer, recv_ret);
-            if (nparsed != recv_ret) {
+            if (nparsed != (uint32_t)recv_ret) {
                 // printf("Parsing failed... parsed %d bytes, received %d bytes\n", nparsed, recv_ret);
                 _error = -2101;
                 free(recv_buffer);

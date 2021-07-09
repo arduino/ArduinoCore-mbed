@@ -1,36 +1,11 @@
-/*
-  WiFi.h - Library for Arduino Wifi shield.
-  Copyright (c) 2011-2014 Arduino LLC.  All right reserved.
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*/
-
 #include "SocketHelpers.h"
-#include "utility/http_request.h"
-#include "utility/https_request.h"
-
-static FILE* target;
-
-void body_callback(const char* data, uint32_t data_len)
-{
-	fwrite(data, 1, data_len, target);
-}
 
 uint8_t* arduino::MbedSocketClass::macAddress(uint8_t* mac) {
     const char *mac_str = getNetwork()->get_mac_address();
     for( int b = 0; b < 6; b++ )
     {
         uint32_t tmp;
-        sscanf( &mac_str[b * 2 + (b)], "%02x", &tmp) ;
+        sscanf( &mac_str[b * 2 + (b)], "%02x", (unsigned int*)&tmp) ;
         mac[5-b] = (uint8_t)tmp ;
     }
     //sscanf(mac_str, "%02hhx:%02hhx:%02hhx:%02hhx:%02hhx:%02hhx", &mac[5], &mac[4], &mac[3], &mac[2], &mac[1], &mac[0]);
@@ -116,9 +91,32 @@ SocketAddress arduino::MbedSocketClass::socketAddressFromIpAddress(arduino::IPAd
     return SocketAddress(convertedIP, port);
 }
 
+
+// Download helper
+
+#include "utility/http_request.h"
+#include "utility/https_request.h"
+
+void MbedSocketClass::setFeedWatchdogFunc(voidFuncPtr func)
+{
+  _feed_watchdog_func = func;
+}
+
+void MbedSocketClass::feedWatchdog()
+{
+  if (_feed_watchdog_func)
+    _feed_watchdog_func();
+}
+
+void MbedSocketClass::body_callback(const char* data, uint32_t data_len)
+{
+  feedWatchdog();
+  fwrite(data, 1, data_len, download_target);
+}
+
 int MbedSocketClass::download(char* url, const char* target_file, bool const is_https)
 {
-	target = fopen(target_file, "wb");
+	download_target = fopen(target_file, "wb");
 
   HttpRequest  * req_http  = nullptr;
   HttpsRequest * req_https = nullptr;
@@ -126,19 +124,19 @@ int MbedSocketClass::download(char* url, const char* target_file, bool const is_
 
   if (is_https)
   {
-    req_https = new HttpsRequest(getNetwork(), nullptr, HTTP_GET, url, &body_callback);
+    req_https = new HttpsRequest(getNetwork(), nullptr, HTTP_GET, url, mbed::callback(this, &MbedSocketClass::body_callback));
     rsp = req_https->send(NULL, 0);
     if (rsp == NULL) {
-      fclose(target);
+      fclose(download_target);
       return req_https->get_error();
     }
   }
   else
   {
-    req_http = new HttpRequest(getNetwork(), HTTP_GET, url, &body_callback);
+    req_http = new HttpRequest(getNetwork(), HTTP_GET, url, mbed::callback(this, &MbedSocketClass::body_callback));
     rsp = req_http->send(NULL, 0);
     if (rsp == NULL) {
-      fclose(target);
+      fclose(download_target);
       return req_http->get_error();
     }
   }
@@ -147,7 +145,7 @@ int MbedSocketClass::download(char* url, const char* target_file, bool const is_
     delay(10);
   }
 
-  int const size = ftell(target);
-  fclose(target);
+  int const size = ftell(download_target);
+  fclose(download_target);
   return size;
 }

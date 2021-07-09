@@ -1,6 +1,6 @@
 /*
-  WiFiSSLClient.cpp - Library for Arduino Wifi shield.
-  Copyright (c) 2011-2014 Arduino.  All right reserved.
+  MbedSSLClient.cpp - SSLClient implementation using mbed Sockets
+  Copyright (c) 2021 Arduino SA.  All right reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public

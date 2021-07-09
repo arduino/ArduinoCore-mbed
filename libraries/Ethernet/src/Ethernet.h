@@ -1,5 +1,5 @@
 /* Copyright 2018 Paul Stoffregen
- * Copyright 2020 Arduino SA
+ * Copyright 2020-2021 Arduino SA
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this
  * software and associated documentation files (the "Software"), to deal in the Software

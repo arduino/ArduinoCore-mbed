@@ -1,6 +1,5 @@
 #include "MbedClient.h"
 
-
 #ifndef SOCKET_TIMEOUT
 #define SOCKET_TIMEOUT 1500
 #endif
