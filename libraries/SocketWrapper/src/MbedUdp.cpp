@@ -76,13 +76,20 @@ int arduino::MbedUDP::endPacket() {
 
 // Write a single byte into the packet
 size_t arduino::MbedUDP::write(uint8_t byte) {
-  uint8_t buffer[1] = { byte };
-  return _socket.sendto(_host, buffer, 1);
+  return write(&byte, 1);
 }
 
 // Write size bytes from buffer into the packet
 size_t arduino::MbedUDP::write(const uint8_t *buffer, size_t size) {
-  return _socket.sendto(_host, buffer, size);
+  _socket.set_blocking(true);
+  _socket.set_timeout(1000);
+  nsapi_size_or_error_t ret = _socket.sendto(_host, buffer, size);
+  _socket.set_blocking(false);
+  _socket.set_timeout(0);
+  if (ret < 0) {
+    return 0;
+  }
+  return size;
 }
 
 int arduino::MbedUDP::parsePacket() {
