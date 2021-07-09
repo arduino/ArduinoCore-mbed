@@ -167,7 +167,7 @@ int arduino::MbedUDP::read(unsigned char* buffer, size_t len) {
         }
     }
 
-    if (len > max_bytes) len = max_bytes;
+    if (len > (size_t)max_bytes) len = max_bytes;
 
     // copy to target buffer
     memcpy(buffer, _current_packet, len);

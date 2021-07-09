@@ -11,7 +11,7 @@ int arduino::EthernetClass::begin(uint8_t *mac, unsigned long timeout, unsigned 
 
     unsigned long start = millis();
     eth_if->set_blocking(false);
-    nsapi_error_t result = eth_if->connect();
+    eth_if->connect();
 
     while ((millis() - start < timeout) && (linkStatus() != LinkON)) {
     	delay(10);
@@ -68,6 +68,7 @@ EthernetHardwareStatus arduino::EthernetClass::hardwareStatus() {
 
 int arduino::EthernetClass::disconnect() {
     eth_if->disconnect();
+    return 1;
 }
 
 

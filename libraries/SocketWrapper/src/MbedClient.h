@@ -1,5 +1,5 @@
 /*
-  MbedClient.h - Library for Arduino Wifi shield.
+  MbedClient.h - Client implementation using mbed Sockets
   Copyright (c) 2021 Arduino LLC.  All right reserved.
 
   This library is free software; you can redistribute it and/or
@@ -40,7 +40,9 @@ class MbedClient : public arduino::Client {
 public:
   MbedClient();
 
-  // Find something better to save the socket, this is nwither copy nor move constructor
+  // Copy constructor, to be used when a Client returned by server.available() 
+  // needs to "survive" event if it goes out of scope
+  // Sample usage: Client* new_client = new Client(existing_client)
   MbedClient(const MbedClient& orig) {
     auto _sock = orig.sock;
     auto _m = (MbedClient*)&orig;

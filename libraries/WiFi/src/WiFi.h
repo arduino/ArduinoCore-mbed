@@ -1,6 +1,6 @@
 /*
-  WiFi.h - Library for Arduino Wifi shield.
-  Copyright (c) 2011-2014 Arduino LLC.  All right reserved.
+  WiFi.h - Library for Wifi on mbed platforms.
+  Copyright (c) 2011-2021 Arduino LLC.  All right reserved.
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
@@ -47,7 +47,6 @@ extern "C" {
 namespace arduino {
 
 typedef void* (*voidPrtFuncPtr)(void);
-typedef void (*ArduinoPortentaH7WiFiFeedWatchdogFuncPtr)(void);
 
 class WiFiClass : public MbedSocketClass
 {
@@ -57,12 +56,10 @@ public:
 
     WiFiClass(WiFiInterface* _if) : wifi_if(_if) {};
 
-    WiFiClass(voidPrtFuncPtr _cb) : _initializerCallback(_cb) {};
-
     /*
      * Get firmware version
      */
-    static char* firmwareVersion();
+    static const char* firmwareVersion();
 
     /* Start Wifi connection for OPEN networks
      *
@@ -205,23 +202,18 @@ public:
 
     NetworkInterface *getNetwork();
 
-    void setFeedWatchdogFunc(ArduinoPortentaH7WiFiFeedWatchdogFuncPtr func);
-    void feedWatchdog();
-
 private:
 
     EMACInterface* _softAP = nullptr;
     char* _ssid = nullptr;
     volatile wl_status_t _currentNetworkStatus = WL_IDLE_STATUS;
     WiFiInterface* wifi_if = nullptr;
-    voidPrtFuncPtr _initializerCallback;
     WiFiAccessPoint* ap_list = nullptr;
     uint8_t connected_ap;
     int setSSID(const char* ssid);
     void ensureDefaultAPNetworkConfiguration();
     static void * handleAPEvents(whd_interface_t ifp, const whd_event_header_t *event_header, const uint8_t *event_data, void *handler_user_data);
     bool isVisible(const char* ssid);
-    ArduinoPortentaH7WiFiFeedWatchdogFuncPtr _feed_watchdog_func = 0;
 };
 
 }
