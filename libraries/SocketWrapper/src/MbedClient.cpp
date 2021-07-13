@@ -200,6 +200,7 @@ int arduino::MbedClient::available() {
 int arduino::MbedClient::read() {
   mutex->lock();
   if (!available()) {
+    mutex->unlock();
     return -1;
   }
 
@@ -213,6 +214,7 @@ int arduino::MbedClient::read(uint8_t *data, size_t len) {
   int avail = available();
 
   if (!avail) {
+    mutex->unlock();
     return -1;
   }
 
