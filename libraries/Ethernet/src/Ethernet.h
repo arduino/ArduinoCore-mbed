@@ -107,13 +107,6 @@ public:
 
   NetworkInterface *getNetwork();
 
-protected:
-  SocketAddress _ip = nullptr;
-  SocketAddress _gateway = nullptr;
-  SocketAddress _netmask = nullptr;
-  SocketAddress _dnsServer1 = nullptr;
-  SocketAddress _dnsServer2 = nullptr;
-
 private:
   volatile EthernetLinkStatus _currentNetworkStatus = Unknown;
   EthernetInterface net;
