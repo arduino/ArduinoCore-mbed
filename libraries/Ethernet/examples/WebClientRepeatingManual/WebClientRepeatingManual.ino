@@ -72,7 +72,7 @@ void setup()
     Serial.print("My IP address: ");
     Serial.println(Ethernet.localIP());
     Serial.print("My Gateway IP address: ");
-    Serial.println(Ethernet.dnsServerIP());
+    Serial.println(Ethernet.gatewayIP());
     Serial.print("My DNS Server IP address: ");
     Serial.println(Ethernet.dnsServerIP());
     // give the Ethernet shield a second to initialize:
