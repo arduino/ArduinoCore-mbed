@@ -1,0 +1,26 @@
+From 93ab77ae4ecaa7dc42a206a92c0fa15dc5e4d479 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Mon, 12 Jul 2021 22:10:50 +0200
+Subject: [PATCH] STM32 Fix i2c_compute_timing() API
+
+---
+ targets/TARGET_STM/i2c_api.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/targets/TARGET_STM/i2c_api.c b/targets/TARGET_STM/i2c_api.c
+index 27b7f8027f..dd56a335fe 100644
+--- a/targets/TARGET_STM/i2c_api.c
++++ b/targets/TARGET_STM/i2c_api.c
+@@ -1707,6 +1707,9 @@ uint32_t i2c_compute_timing(uint32_t clock_src_freq, uint32_t i2c_freq)
+     uint32_t speed;
+     uint32_t idx;
+ 
++    /* Reset valid timing count at the beginning of each new computation */
++    I2c_valid_timing_nbr = 0;
++
+     if ((clock_src_freq != 0U) && (i2c_freq != 0U)) {
+         for (speed = 0 ; speed <= (uint32_t)I2C_SPEED_FREQ_FAST_PLUS ; speed++) {
+             if ((i2c_freq >= I2C_Charac[speed].freq_min) &&
+-- 
+2.32.0
+
