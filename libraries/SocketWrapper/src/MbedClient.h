@@ -36,6 +36,15 @@
 namespace arduino {
 
 class MbedClient : public arduino::Client {
+private:
+  // Helper for copy constructor and assignment operator
+  void copyClient(const MbedClient& orig) {
+    auto _sock = orig.sock;
+    auto _m = (MbedClient*)&orig;
+    _m->borrowed_socket = true;
+    _m->stop();
+    this->setSocket(_sock);
+  }
 
 public:
   MbedClient();
@@ -44,12 +53,13 @@ public:
   // needs to "survive" event if it goes out of scope
   // Sample usage: Client* new_client = new Client(existing_client)
   MbedClient(const MbedClient& orig) {
-    auto _sock = orig.sock;
-    auto _m = (MbedClient*)&orig;
-    _m->borrowed_socket = true;
-    _m->stop();
-    this->setSocket(_sock);
+    copyClient(orig);
   }
+
+  MbedClient& operator=(const MbedClient& orig) {
+    copyClient(orig);
+    return *this;
+  }  
 
   virtual ~MbedClient() {
     stop();
@@ -76,6 +86,9 @@ public:
   }
 
   void setSocket(Socket* _sock);
+  Socket* getSocket() { return sock; };
+  RingBufferN<SOCKET_BUFFER_SIZE> *getRxBuffer() { return &rxBuffer; };
+
   void configureSocket(Socket* _s);
 
   IPAddress remoteIP();
