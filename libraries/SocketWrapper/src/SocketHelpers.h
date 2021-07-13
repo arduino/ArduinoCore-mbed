@@ -92,6 +92,13 @@ public:
      */
   IPAddress gatewayIP();
 
+  /*
+     * Get the DNS Server ip address.
+     *
+     * return: DNS Server ip address value
+     */
+  IPAddress dnsServerIP();
+
   virtual NetworkInterface* getNetwork() = 0;
 
   int download(char* url, const char* target, bool const is_https = false);
