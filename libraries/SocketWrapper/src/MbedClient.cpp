@@ -5,7 +5,8 @@
 #endif
 
 arduino::MbedClient::MbedClient()
-  : _status(false) {
+  : _status(false),
+    _timeout(SOCKET_TIMEOUT) {
 }
 
 uint8_t arduino::MbedClient::status() {
@@ -52,9 +53,9 @@ void arduino::MbedClient::setSocket(Socket *_sock) {
 }
 
 void arduino::MbedClient::configureSocket(Socket *_s) {
-  _s->set_timeout(0);
+  _s->set_timeout(SOCKET_TIMEOUT);
   _s->set_blocking(false);
-
+  
   if (event == nullptr) {
     event = new rtos::EventFlags;
   }
@@ -279,4 +280,8 @@ IPAddress arduino::MbedClient::remoteIP() {
 
 uint16_t arduino::MbedClient::remotePort() {
   return 0;
+}
+
+void arduino::MbedClient::setTimeout(unsigned long timeout) {
+  _timeout = timeout;
 }
