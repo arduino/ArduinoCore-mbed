@@ -94,6 +94,8 @@ public:
   IPAddress remoteIP();
   uint16_t remotePort();
 
+  void setTimeout(unsigned long timeout);
+
   friend class MbedServer;
   friend class MbedSSLClient;
   friend class MbedSocketClass;
@@ -119,6 +121,7 @@ private:
   rtos::Thread* reader_th = nullptr;
   rtos::EventFlags* event = nullptr;
   rtos::Mutex* mutex = nullptr;
+  unsigned long _timeout;
 
   void readSocket();
   void getStatus();
