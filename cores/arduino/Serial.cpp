@@ -193,7 +193,7 @@ int UART::read() {
 }
 
 void UART::flush() {
-
+	while(!_serial->obj->writeable());
 }
 
 size_t UART::write(uint8_t c) {
