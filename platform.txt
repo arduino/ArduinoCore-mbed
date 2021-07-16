@@ -122,9 +122,11 @@ tools.openocd.erase.params.verbose=-d2
 tools.openocd.erase.params.quiet=-d0
 tools.openocd.erase.pattern=
 
+### WIP!::: this needs to be double-checked to make sure all is OK with the jlink addition:
+
 tools.openocd.bootloader.params.verbose=-d2
 tools.openocd.bootloader.params.quiet=-d0
-tools.openocd.bootloader.pattern="{path}/{cmd}" {bootloader.verbose} -s "{path}/share/openocd/scripts/" {bootloader.programmer} {bootloader.config} -c "telnet_port disabled; init; reset init; halt; adapter speed 10000; {bootloader.extra_action.preflash}; program {{runtime.platform.path}/bootloaders/{bootloader.file}}; reset run; shutdown"
+tools.openocd.bootloader.pattern="{path}/{cmd}" {bootloader.verbose} -s "{path}/share/openocd/scripts/" {bootloader.programmer} {bootloader.config} -c "telnet_port disabled; init; reset init; halt; adapter speed 10000; transport select swd; {bootloader.extra_action.preflash}; program {{runtime.platform.path}/bootloaders/{bootloader.file}}; reset run; shutdown"
 
 #
 # BOSSA

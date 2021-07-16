@@ -11,3 +11,10 @@ stlink.protocol=
 stlink.program.protocol=
 stlink.program.tool=openocd
 stlink.program.extra_params=
+
+jlink.name=SEGGER JLINK
+jlink.communication=USB
+jlink.protocol=
+jlink.program.protocol=swd
+jlink.program.tool=openocd
+jlink.program.extra_params=

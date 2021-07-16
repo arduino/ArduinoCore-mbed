@@ -66,7 +66,9 @@ int arduino::WiFiUDP::beginPacket(IPAddress ip, uint16_t port) {
 
 int arduino::WiFiUDP::beginPacket(const char *host, uint16_t port) {     
     _host = SocketAddress(host, port);
+
     WiFi.getNetwork()->gethostbyname(host, &_host);
+
     //If IP is null and port is 0 the initialization failed
     return (_host.get_ip_address() == nullptr && _host.get_port() == 0) ? 0 : 1;
 }
