@@ -19,6 +19,8 @@ namespace nicla {
 
   bool begin()
   {
+    pinMode(P0_10, OUTPUT);
+    digitalWrite(P0_10, HIGH);
     Wire1.begin();
 #ifndef NO_NEED_FOR_WATCHDOG_THREAD
   static rtos::Thread th(osPriorityHigh, 1024, nullptr, "ping_thread");
