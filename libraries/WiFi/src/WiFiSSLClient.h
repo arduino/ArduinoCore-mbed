@@ -1,6 +1,6 @@
 /*
-  WiFiSSLClient.cpp - Library for Arduino Wifi shield.
-  Copyright (c) 2011-2014 Arduino.  All right reserved.
+  WiFiSSLClient.h
+  Copyright (c) 2021 Arduino SA.  All right reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -30,19 +30,15 @@ class WiFiSSLClient : public arduino::WiFiClient {
 
 public:
   WiFiSSLClient();
+  virtual ~WiFiSSLClient() {
+    stop();
+  }
 
   int connect(IPAddress ip, uint16_t port) {
     return connectSSL(ip, port);
   }
   int connect(const char* host, uint16_t port) {
     return connectSSL(host, port);
-  }
-  void stop() {
-    if (sock != NULL) {
-      sock->close();
-      delete ((TLSSocket*)sock);
-      sock = NULL;
-    }
   }
 
 private:

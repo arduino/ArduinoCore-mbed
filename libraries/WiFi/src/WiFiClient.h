@@ -1,6 +1,6 @@
 /*
-  WiFiClient.cpp - Library for Arduino Wifi shield.
-  Copyright (c) 2011-2014 Arduino LLC.  All right reserved.
+  WiFiClient.h
+  Copyright (c) 2021 Arduino SA.  All right reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -21,69 +21,14 @@
 #define wificlient_h
 
 #include "WiFi.h"
-#include "api/Print.h"
-#include "api/Client.h"
-#include "api/IPAddress.h"
-#include "TLSSocket.h"
-#include "TCPSocket.h"
+#include "MbedClient.h"
 
 namespace arduino {
 
-class WiFiClient : public arduino::Client {
-
-public:
-  WiFiClient();
-  ~WiFiClient() {
-    stop();
+class WiFiClient : public MbedClient {
+  NetworkInterface *getNetwork() {
+    return WiFi.getNetwork();
   }
-
-  uint8_t status();
-  int connect(SocketAddress socketAddress);
-  int connect(IPAddress ip, uint16_t port);
-  int connect(const char *host, uint16_t port);
-  int connectSSL(SocketAddress socketAddress);
-  int connectSSL(IPAddress ip, uint16_t port);
-  int connectSSL(const char *host, uint16_t port);
-  size_t write(uint8_t);
-  size_t write(const uint8_t *buf, size_t size);
-  int available();
-  int read();
-  int read(uint8_t *buf, size_t size);
-  int peek();
-  void flush();
-  void stop();
-  uint8_t connected();
-  operator bool() {
-    return sock != NULL;
-  }
-
-  void setSocket(Socket* _sock) {
-    sock = _sock;
-  }
-
-  IPAddress remoteIP();
-  uint16_t remotePort();
-
-  friend class WiFiServer;
-  friend class WiFiSSLClient;
-
-  using Print::write;
-
-protected:
-
-  void onBeforeConnect(mbed::Callback<int(void)> cb) {
-    beforeConnect = cb;
-  }
-
-private:
-  static uint16_t _srcport;
-  Socket* sock;
-  RingBufferN<256> rxBuffer;
-  uint8_t _status;
-  mbed::Callback<int(void)> beforeConnect;
-  SocketAddress address;
-
-  void getStatus();
 };
 
 }

@@ -1,6 +1,6 @@
 /*
-  WiFiServer.h - Library for Arduino Wifi shield.
-  Copyright (c) 2011-2014 Arduino LLC.  All right reserved.
+  WiFiServer.h
+  Copyright (c) 2021 Arduino SA.  All right reserved.
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
@@ -18,29 +18,22 @@
 #define wifiserver_h
 
 #include "WiFi.h"
-#include "api/Print.h"
-#include "api/Client.h"
-#include "api/IPAddress.h"
-#include "TLSSocket.h"
-#include "TCPSocket.h"
+#include "MbedServer.h"
+#include "WiFiClient.h"
 
 namespace arduino {
 
 class WiFiClient;
 
-class WiFiServer : public arduino::Server {
-private:
-  uint16_t _port;
-  TCPSocket* sock;
-public:
-  WiFiServer(uint16_t);
-  arduino::WiFiClient available(uint8_t* status = NULL);
-  void begin();
-  virtual size_t write(uint8_t);
-  virtual size_t write(const uint8_t *buf, size_t size);
-  uint8_t status();
+class WiFiServer : public MbedServer {
+  NetworkInterface* getNetwork() {
+    return WiFi.getNetwork();
+  }
 
-  using Print::write;
+public:
+  WiFiServer(uint16_t port)
+    : MbedServer(port) {}
+  WiFiClient available(uint8_t* status = nullptr);
 };
 
 }
