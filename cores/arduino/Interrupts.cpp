@@ -53,6 +53,8 @@ void attachInterrupt(PinName interruptNum, voidFuncPtr func, PinStatus mode) {
   attachInterruptParam(interruptNum, (voidFuncPtrParam)func, mode, NULL);
 }
 
+uint8_t _pinMode[NUM_DIGITAL_PINS];
+
 void attachInterruptParam(pin_size_t interruptNum, voidFuncPtrParam func, PinStatus mode, void* param) {
   if (interruptNum >= PINS_COUNT) {
     return;
@@ -76,6 +78,11 @@ void attachInterruptParam(pin_size_t interruptNum, voidFuncPtrParam func, PinSta
       pinMode(interruptNum, INPUT_PULLDOWN);
     } else {
       pinMode(interruptNum, INPUT);
+    }
+  } else {
+    // Restore the original pull
+    if (_pinMode[interruptNum] != OUTPUT) {
+      pinMode(interruptNum, _pinMode[interruptNum]);
     }
   }
 }
