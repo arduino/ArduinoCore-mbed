@@ -10,6 +10,7 @@
 static const int CamRes[][2] = {
     {160, 120},
     {320, 240},
+    {320, 320},
 };
 static __IO uint32_t camera_frame_ready = 0;
 static md_callback_t user_md_callback = NULL;
@@ -460,7 +461,7 @@ void CameraClass::HIMAXIrqHandler()
 
 int CameraClass::begin(uint32_t resolution, uint32_t framerate)
 {  
-  if (resolution >= CAMERA_RMAX) {
+  if (resolution > CAMERA_RMAX) {
     return -1;
   }
 

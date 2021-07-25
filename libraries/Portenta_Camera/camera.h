@@ -1,9 +1,9 @@
 #include "drivers/InterruptIn.h"
 
 enum {
-    CAMERA_R160x120 = 0x00,   /* QQVGA Resolution */
-    CAMERA_R320x240 = 0x01,   /* QVGA Resolution  */
-    CAMERA_RMAX
+    CAMERA_R160x120 = 0x00,   /* QQVGA Resolution   */
+    CAMERA_R320x240 = 0x01,   /* QVGA Resolution    */
+    CAMERA_RMAX     = 0x02    /* 320x320 Resolution */
 };
 
 typedef void (*md_callback_t)();
