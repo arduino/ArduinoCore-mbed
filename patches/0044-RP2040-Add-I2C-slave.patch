@@ -1,0 +1,273 @@
+From 70cc5e1df48d30a032e01112173f13986f8e9d39 Mon Sep 17 00:00:00 2001
+From: giulcioffi <g.cioffi@arduino.cc>
+Date: Thu, 25 Feb 2021 12:44:31 +0100
+Subject: [PATCH 44/75] RP2040: Add I2C slave
+
+---
+ .../TARGET_RP2040/i2c_api.c                   | 145 +++++++++++++++++-
+ .../TARGET_RP2040/objects.h                   |   6 +
+ .../hardware_i2c/include/hardware/i2c.h       |  30 +++-
+ targets/targets.json                          |   1 +
+ 4 files changed, 177 insertions(+), 5 deletions(-)
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/i2c_api.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/i2c_api.c
+index ae9f0c0fd3..9d7510bedf 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/i2c_api.c
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/i2c_api.c
+@@ -6,6 +6,23 @@
+ #include "i2c_api.h"
+ #include "pinmap.h"
+ #include "PeripheralPins.h"
++#include "objects.h"
++#include "stdio.h"
++
++/******************************************************************************
++ * DEFINE
++ ******************************************************************************/
++
++#if 1
++#define DEBUG_PRINTF(...) printf(__VA_ARGS__)
++#else
++#define DEBUG_PRINTF(...)
++#endif
++
++#define NoData         0 // the slave has not been addressed
++#define ReadAddressed  1 // the master has requested a read from this slave (slave = transmitter)
++#define WriteGeneral   2 // the master is writing to all slave
++#define WriteAddressed 3 // the master is writing to this slave (slave = receiver)
+ 
+ /******************************************************************************
+  * CONST
+@@ -24,12 +41,23 @@ void i2c_init(i2c_t *obj, PinName sda, PinName scl)
+     I2CName const i2c_scl = (I2CName)pinmap_peripheral(scl, PinMap_I2C_SCL);
+     MBED_ASSERT(i2c_sda == i2c_scl);
+ 
++#if DEVICE_I2CSLAVE
++    /** was_slave is used to decide which driver call we need
++     * to use when uninitializing a given instance
++     */
++    obj->was_slave = false;
++    obj->is_slave = false;
++    obj->slave_addr = 0;
++#endif
++
+     /* Obtain the pointer to the I2C hardware instance. */
+     obj->dev = (i2c_inst_t *)pinmap_function(sda, PinMap_I2C_SDA);
+-    obj->baudrate = DEFAULT_I2C_BAUDRATE;
++    //obj->baudrate = DEFAULT_I2C_BAUDRATE;
++    //Call this function because if we are configuring a slave, we don't have to set the frequency
++    //i2c_frequency(obj->dev, DEFAULT_I2C_BAUDRATE);
+ 
+     /* Initialize the I2C module. */
+-    _i2c_init(obj->dev, obj->baudrate);
++    _i2c_init(obj->dev, DEFAULT_I2C_BAUDRATE);
+ 
+     /* Configure GPIO for I2C as alternate function. */
+     gpio_set_function(sda, GPIO_FUNC_I2C);
+@@ -42,6 +70,14 @@ void i2c_init(i2c_t *obj, PinName sda, PinName scl)
+ 
+ void i2c_frequency(i2c_t *obj, int hz)
+ {
++    DEBUG_PRINTF("obj->is_slave: %d\r\n", obj->is_slave);
++
++#if DEVICE_I2CSLAVE
++    /* Slaves automatically get frequency from master */
++    if(obj->is_slave) {
++    		return;
++    }
++#endif
+     obj->baudrate = i2c_set_baudrate(obj->dev, hz);
+ }
+ 
+@@ -95,3 +131,108 @@ const PinMap *i2c_master_scl_pinmap()
+ {
+     return PinMap_I2C_SCL;
+ }
++
++const PinMap *i2c_slave_sda_pinmap()
++{
++    return PinMap_I2C_SDA;
++}
++
++const PinMap *i2c_slave_scl_pinmap()
++{
++    return PinMap_I2C_SCL;
++}
++
++int i2c_stop(i2c_t *obj)
++{
++
++}
++
++#if DEVICE_I2CSLAVE
++
++/** Configure I2C as slave or master.
++ *  @param obj The I2C object
++ *  @param enable_slave Enable i2c hardware so you can receive events with ::i2c_slave_receive
++ *  @return non-zero if a value is available
++ */
++void i2c_slave_mode(i2c_t *obj, int enable_slave)
++{
++    DEBUG_PRINTF("i2c_slave_mode: %p, %d\r\n", obj, enable_slave);
++
++    obj->is_slave = enable_slave;
++}
++
++/** Check to see if the I2C slave has been addressed.
++ *  @param obj The I2C object
++ *  @return The status - 1 - read addressed, 2 - write to all slaves,
++ *         3 write addressed, 0 - the slave has not been addressed
++ */
++int i2c_slave_receive(i2c_t *obj)
++{
++    int retValue = NoData;
++
++    int rd_req = (obj->dev->hw->raw_intr_stat & I2C_IC_RAW_INTR_STAT_RD_REQ_BITS) >> 5;
++
++    if (rd_req == I2C_IC_RAW_INTR_STAT_RD_REQ_VALUE_ACTIVE) {
++        DEBUG_PRINTF("Read addressed\r\n");
++        return ReadAddressed;
++    }
++
++    int wr_req = (obj->dev->hw->status & I2C_IC_STATUS_RFNE_BITS) >> 3;
++
++    if (wr_req == I2C_IC_STATUS_RFNE_VALUE_NOT_EMPTY) {
++        DEBUG_PRINTF("Write addressed\r\n");
++        return WriteAddressed;
++    }
++
++    return (retValue);
++}
++
++/** Configure I2C as slave or master.
++ *  @param obj The I2C objecti2c_get_read_availableread
++ *  @return non-zero if a value is available
++ */
++int i2c_slave_read(i2c_t *obj, char *data, int length)
++{
++    size_t read_len = i2c_read_raw_blocking(obj->dev, (uint8_t *)data, length);
++
++    DEBUG_PRINTF("i2c_slave read %d bytes\r\n", read_len);
++
++    return read_len;
++}
++
++/** Configure I2C as slave or master.
++ *  @param obj The I2C object
++ *  @param data    The buffer for sending
++ *  @param length  Number of bytes to write
++ *  @return non-zero if a value is available
++ */
++int i2c_slave_write(i2c_t *obj, const char *data, int length)
++{
++    DEBUG_PRINTF("i2c_slave_write\r\n");
++
++    i2c_write_raw_blocking(obj->dev, (const uint8_t *)data, (size_t)length);
++
++    //Clear interrupt
++    int clear_read_req = i2c_get_hw(obj->dev)->clr_rd_req;
++    DEBUG_PRINTF("clear_read_req: %d\n", clear_read_req);
++
++    return length;
++}
++
++/** Configure I2C address.
++ *  @param obj     The I2C object
++ *  @param idx     Currently not used
++ *  @param address The address to be set
++ *  @param mask    Currently not used
++ */
++void i2c_slave_address(i2c_t *obj, int idx, uint32_t address, uint32_t mask)
++{
++    if (obj->is_slave) {
++        DEBUG_PRINTF("i2c_slave_address: %p, %d, %d, %d\r\n", obj, idx, address, mask);
++
++        obj->slave_addr = (uint8_t)(address >> 1);
++        i2c_set_slave_mode(obj->dev, true, obj->slave_addr);
++    }
++}
++
++#endif // DEVICE_I2CSLAVE
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/objects.h b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/objects.h
+index 5e5f2f0d6a..cdbd5655e6 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/objects.h
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/objects.h
+@@ -95,6 +95,12 @@ struct serial_s {
+ struct i2c_s {
+     i2c_inst_t * dev;
+     unsigned int baudrate;
++
++#if DEVICE_I2CSLAVE
++    bool was_slave;
++    bool is_slave;
++    uint8_t slave_addr;
++#endif
+ };
+ 
+ struct spi_s {
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_i2c/include/hardware/i2c.h b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_i2c/include/hardware/i2c.h
+index ead7bf1b1b..2b5dca7798 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_i2c/include/hardware/i2c.h
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_i2c/include/hardware/i2c.h
+@@ -10,6 +10,7 @@
+ #include "pico.h"
+ #include "pico/time.h"
+ #include "hardware/structs/i2c.h"
++#include "stdio.h"
+ 
+ // PICO_CONFIG: PARAM_ASSERTIONS_ENABLED_I2C, Enable/disable assertions in the I2C module, type=bool, default=0, group=hardware_i2c
+ #ifndef PARAM_ASSERTIONS_ENABLED_I2C
+@@ -289,12 +290,35 @@ static inline void i2c_write_raw_blocking(i2c_inst_t *i2c, const uint8_t *src, s
+  * Reads directly from the I2C RX FIFO which us mainly useful for
+  * slave-mode operation.
+  */
+-static inline void i2c_read_raw_blocking(i2c_inst_t *i2c, uint8_t *dst, size_t len) {
++static inline size_t i2c_read_raw_blocking(i2c_inst_t *i2c, uint8_t *dst, size_t len) {
++
++    size_t bytes_read = 0;
++
+     for (size_t i = 0; i < len; ++i) {
+-        while (!i2c_get_read_available(i2c))
++
++        while (!i2c_get_read_available(i2c)) {
+             tight_loop_contents();
+-        *dst++ = i2c_get_hw(i2c)->data_cmd;
++        }
++
++        *dst = i2c_get_hw(i2c)->data_cmd;
++        bytes_read++;
++
++        //printf("dst %d ,", *dst);
++
++        //Check stop condition
++        int stop = (i2c->hw->raw_intr_stat & 0x00000200) >> 9;
++        if (stop && !i2c_get_read_available(i2c)) {
++            //Clear stop
++            int clear_stop = i2c_get_hw(i2c)->clr_stop_det;
++            printf("clear_stop reg: %d\n", clear_stop);
++            break;
++        } else {
++            *dst++;
++        }
++
+     }
++
++   return bytes_read;
+ }
+ 
+ #ifdef __cplusplus
+diff --git a/targets/targets.json b/targets/targets.json
+index 178f833195..ac7a66ed7b 100644
+--- a/targets/targets.json
++++ b/targets/targets.json
+@@ -8444,6 +8444,7 @@
+             "ANALOGIN",
+             "FLASH",
+             "I2C",
++            "I2CSLAVE",
+             "INTERRUPTIN",
+             "PORT_IN",
+             "PORT_OUT",
+-- 
+2.32.0
+

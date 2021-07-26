@@ -1,0 +1,193 @@
+From 9654b3856ffb5c5b53785f5d559cc7506f8658c5 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Mon, 3 May 2021 14:33:02 +0200
+Subject: [PATCH 60/75] RP2040: start fixing CMake files for mbed cli 2
+
+---
+ targets/TARGET_RASPBERRYPI/CMakeLists.txt     | 17 ++--
+ .../TARGET_RP2040/CMakeLists.txt              | 85 +++++++++++++++++--
+ .../TARGET_NANO_RP2040_CONNECT/CMakeLists.txt | 21 +++++
+ .../TARGET_RASPBERRY_PI_PICO/CMakeLists.txt   | 21 +++++
+ 4 files changed, 130 insertions(+), 14 deletions(-)
+ create mode 100644 targets/TARGET_RASPBERRYPI/TARGET_RP2040/TARGET_NANO_RP2040_CONNECT/CMakeLists.txt
+ create mode 100644 targets/TARGET_RASPBERRYPI/TARGET_RP2040/TARGET_RASPBERRY_PI_PICO/CMakeLists.txt
+
+diff --git a/targets/TARGET_RASPBERRYPI/CMakeLists.txt b/targets/TARGET_RASPBERRYPI/CMakeLists.txt
+index 3ba15e7d89..e526ad5115 100644
+--- a/targets/TARGET_RASPBERRYPI/CMakeLists.txt
++++ b/targets/TARGET_RASPBERRYPI/CMakeLists.txt
+@@ -1,11 +1,18 @@
+-# Copyright (c) 2020 ARM Limited. All rights reserved.
++# Copyright (c) 2020-2021 ARM Limited. All rights reserved.
+ # SPDX-License-Identifier: Apache-2.0
+ 
+-if("RPI2010" IN_LIST MBED_TARGET_LABELS)
+-  add_subdirectory(TARGET_RPI2040)
+-endif()
++add_subdirectory(TARGET_RP2040 EXCLUDE_FROM_ALL)
+ 
+-target_include_directories(mbed-core
++add_library(mbed-raspberrypi INTERFACE)
++
++target_include_directories(mbed-raspberrypi
+     INTERFACE
+         .
+ )
++
++target_sources(mbed-raspberrypi
++    INTERFACE
++    	.
++)
++
++target_link_libraries(mbed-raspberrypi INTERFACE mbed-cmsis-cortex-m)
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/CMakeLists.txt b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/CMakeLists.txt
+index 9dc9297048..4fadf6091e 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/CMakeLists.txt
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/CMakeLists.txt
+@@ -1,12 +1,79 @@
+ # Copyright (c) 2020 ARM Limited. All rights reserved.
+ # SPDX-License-Identifier: Apache-2.0
+ 
+-if("NANO_RP2040_CONNECT" IN_LIST MBED_TARGET_LABELS)
+-    target_include_directories(mbed-core
+-        INTERFACE
+-            TARGET_NANO_RP2040_CONNECT
+-    )
+-endif()
+-
+-add_subdirectory(rp2_common)
+-add_subdirectory(rp2040)
+\ No newline at end of file
++add_subdirectory(TARGET_NANO_RP2040_CONNECT EXCLUDE_FROM_ALL)
++add_subdirectory(TARGET_RASPBERRY_PI_PICO EXCLUDE_FROM_ALL)
++
++add_library(mbed-rp2040 INTERFACE)
++
++target_include_directories(mbed-rp2040
++    INTERFACE
++        pico-sdk/rp2_common/hardware_adc/include
++        pico-sdk/rp2_common/hardware_gpio/include
++        pico-sdk/rp2_common/hardware_resets/include
++        pico-sdk/rp2_common/hardware_pwm/include
++        pico-sdk/rp2_common/hardware_base/include
++        pico-sdk/rp2_common/hardware_uart/include
++        pico-sdk/rp2_common/hardware_spi/include
++        pico-sdk/rp2_common/hardware_i2c/include
++        pico-sdk/rp2_common/hardware_irq/include
++        pico-sdk/rp2_common/hardware_flash/include
++        pico-sdk/rp2_common/hardware_clocks/include
++        pico-sdk/rp2_common/hardware_rtc/include
++        pico-sdk/rp2_common/hardware_watchdog/include
++        pico-sdk/rp2_common/hardware_timer/include
++        pico-sdk/rp2_common/hardware_pll/include
++        pico-sdk/rp2_common/hardware_sync/include
++        pico-sdk/rp2_common/hardware_xosc/include
++        pico-sdk/rp2_common/pico_platform/include
++        pico-sdk/rp2_common/pico_fix/rp2040_usb_device_enumeration/include/pico/fix
++        pico-sdk/rp2_common/pico_bootrom/include
++        pico-sdk/rp2_common/hardware_claim/include
++        pico-sdk/rp2040/hardware_structs/include
++        pico-sdk/rp2040/hardware_regs/include
++        pico-sdk/common/pico_sync/include
++        pico-sdk/common/pico_time/include
++        pico-sdk/common/pico_base/include
++        pico-sdk/common/pico_binary_info/include
++        pico-sdk/common/pico_util/include
++        pico-sdk/boards/include
++        pico-sdk/generated
++        .
++)
++
++target_sources(mbed-rp2040
++    INTERFACE
++        analogin_api.c
++        flash_api.c
++        gpio_api.c
++        i2c_api.c
++        lp_ticker.c
++        mbed_overrides.c
++        PeripheralPins.c
++        pwmout_api.c
++        reset_reason.c
++        serial_api.c
++        spi_api.c
++        us_ticker.c
++        USBPhy_RP2040.cpp
++        watchdog_api.c
++        pico-sdk/rp2_common/pico_standard_link/crt0.S
++        pico-sdk/rp2_common/hardware_flash/flash.c
++        pico-sdk/rp2_common/hardware_uart/uart.c
++        pico-sdk/rp2_common/hardware_spi/spi.c
++        pico-sdk/rp2_common/hardware_gpio/gpio.c
++        pico-sdk/rp2_common/hardware_xosc/xosc.c
++        pico-sdk/rp2_common/hardware_irq/irq.c
++        pico-sdk/rp2_common/hardware_pll/pll.c
++        pico-sdk/rp2_common/hardware_watchdog/watchdog.c
++        pico-sdk/rp2_common/hardware_clocks/clocks.c
++        pico-sdk/rp2_common/hardware_sync/sync.c
++        pico-sdk/rp2_common/pico_bootrom/bootrom.c
++        pico-sdk/rp2_common/pico_runtime/runtime.c
++        pico-sdk/rp2_common/pico_platform/platform.c
++        pico-sdk/common/pico_sync/mutex.c
++        pico-sdk/common/pico_time/time.c
++        pico-sdk/common/pico_sync/lock_core.c
++)
++
++target_link_libraries(mbed-rp2040 INTERFACE mbed-raspberrypi)
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/TARGET_NANO_RP2040_CONNECT/CMakeLists.txt b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/TARGET_NANO_RP2040_CONNECT/CMakeLists.txt
+new file mode 100644
+index 0000000000..0917dfe122
+--- /dev/null
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/TARGET_NANO_RP2040_CONNECT/CMakeLists.txt
+@@ -0,0 +1,21 @@
++# Copyright (c) 2020 ARM Limited. All rights reserved.
++# SPDX-License-Identifier: Apache-2.0
++
++set(LINKER_FILE ../TOOLCHAIN_GCC_ARM/memmap_default.ld)
++
++add_library(mbed-nano-rp2040-connect INTERFACE)
++
++target_sources(mbed-nano-rp2040-connect
++    INTERFACE
++        board.c
++        bs2_default_padded_checksummed.S
++)
++
++target_include_directories(mbed-nano-rp2040-connect
++    INTERFACE
++        .
++)
++
++mbed_set_linker_script(mbed-nano-rp2040-connect ${CMAKE_CURRENT_SOURCE_DIR}/${LINKER_FILE})
++
++target_link_libraries(mbed-nano-rp2040-connect INTERFACE mbed-rp2040)
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/TARGET_RASPBERRY_PI_PICO/CMakeLists.txt b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/TARGET_RASPBERRY_PI_PICO/CMakeLists.txt
+new file mode 100644
+index 0000000000..5df188f681
+--- /dev/null
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/TARGET_RASPBERRY_PI_PICO/CMakeLists.txt
+@@ -0,0 +1,21 @@
++# Copyright (c) 2020 ARM Limited. All rights reserved.
++# SPDX-License-Identifier: Apache-2.0
++
++set(LINKER_FILE ../TOOLCHAIN_GCC_ARM/memmap_default.ld)
++
++add_library(mbed-raspberrypi-pico INTERFACE)
++
++target_sources(mbed-raspberrypi-pico
++    INTERFACE
++        board.c
++        bs2_default_padded_checksummed.S
++)
++
++target_include_directories(mbed-raspberrypi-pico
++    INTERFACE
++        .
++)
++
++mbed_set_linker_script(mbed-raspberrypi-pico ${CMAKE_CURRENT_SOURCE_DIR}/${LINKER_FILE})
++
++target_link_libraries(mbed-raspberrypi-pico INTERFACE mbed-rp2040)
+-- 
+2.32.0
+
