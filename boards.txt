@@ -215,6 +215,8 @@ nanorp2040connect.vid.0=0x2341
 nanorp2040connect.pid.0=0x005e
 nanorp2040connect.vid.1=0x2341
 nanorp2040connect.pid.1=0x805e
+nanorp2040connect.vid.2=0x2341
+nanorp2040connect.pid.2=0x015e
 
 nanorp2040connect.upload.tool=picotool
 nanorp2040connect.upload.protocol=
