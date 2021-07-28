@@ -3,7 +3,7 @@
 enum {
     CAMERA_R160x120 = 0x00,   /* QQVGA Resolution   */
     CAMERA_R320x240 = 0x01,   /* QVGA Resolution    */
-    CAMERA_R320x320 = 0x02,    /* 320x320 Resolution */
+    CAMERA_R320x320 = 0x02,   /* 320x320 Resolution */
     CAMERA_RMAX
 };
 

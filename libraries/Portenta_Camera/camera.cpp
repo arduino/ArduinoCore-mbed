@@ -461,7 +461,7 @@ void CameraClass::HIMAXIrqHandler()
 
 int CameraClass::begin(uint32_t resolution, uint32_t framerate)
 {  
-  if (resolution > CAMERA_RMAX) {
+  if (resolution >= CAMERA_RMAX) {
     return -1;
   }
 
