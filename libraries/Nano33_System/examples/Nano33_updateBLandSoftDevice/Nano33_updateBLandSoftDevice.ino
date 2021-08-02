@@ -47,16 +47,15 @@
 #define BOOTLOADER_ADDR       (0xE0000)
 #define UICR_BOOT_ADDR        (0x10001014)
 
-#define BOOTLOADER_CRC         0xCB51658F
 #define BOOTLOADER_SIZE        nano33_bootloader_hex_len
 const unsigned int magic = 0x5f27a93d;
 
 mbed::FlashIAP flash;
 
 bool hasLatestBootloader(){
-  //Compute bootloader CRC32
-  uint32_t crc32 = getCurrentBootloaderCrc();
-  return crc32 == BOOTLOADER_CRC;
+  //Check if the CRC32 of the flashed bootloader
+  //matches the CRC32 of the provided bootloader binary
+  return getCurrentBootloaderCrc() == getTargetBootloaderCrc();
 }
 
 bool getUserConfirmation(){
