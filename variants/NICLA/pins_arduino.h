@@ -58,6 +58,13 @@ extern PinName digitalPinToPinName(pin_size_t P);
 #define PIN_SPI_SCK   (9u)
 #define PIN_SPI_SS    (6u)
 
+// Wire
+#define PIN_WIRE_SDA        (p22)
+#define PIN_WIRE_SCL        (p23)
+
+#define PIN_WIRE_SDA1       (p15)
+#define PIN_WIRE_SCL1       (p16)
+
 // Analog pins
 // -----------
 #define PIN_A0 (10u)
