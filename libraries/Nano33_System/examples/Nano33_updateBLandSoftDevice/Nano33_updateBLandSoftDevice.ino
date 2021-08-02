@@ -47,7 +47,7 @@
 #define BOOTLOADER_ADDR       (0xE0000)
 #define UICR_BOOT_ADDR        (0x10001014)
 
-#define BOOTLOADER_CRC         0x5E797B91
+#define BOOTLOADER_CRC         0xCB51658F
 #define BOOTLOADER_SIZE        nano33_bootloader_hex_len
 const unsigned int magic = 0x5f27a93d;
 
