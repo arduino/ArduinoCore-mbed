@@ -101,6 +101,7 @@ void setup() {
   fclose(fp);
 
   Serial.println("\nFirmware and certificates updated!");
+  Serial.println("It's now safe to reboot or disconnect your board.");
 }
 
 void loop() {
