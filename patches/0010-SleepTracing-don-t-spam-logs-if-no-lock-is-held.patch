@@ -1,7 +1,7 @@
-From 9222b635884af252d735f55e1e93e83e223abdeb Mon Sep 17 00:00:00 2001
+From 8a5e5361f847ae869145e0eb1aaf24ea2fe22622 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Fri, 27 Nov 2020 10:34:22 +0100
-Subject: [PATCH 10/75] SleepTracing: don't spam logs if no lock is held
+Subject: [PATCH 010/101] SleepTracing: don't spam logs if no lock is held
 
 ---
  platform/source/mbed_power_mgmt.c | 7 ++++++-
@@ -33,5 +33,5 @@ index 9d7724aea3..e6317356b9 100644
                            sleep_stats[i].count);
      }
 -- 
-2.32.0
+2.33.0
 

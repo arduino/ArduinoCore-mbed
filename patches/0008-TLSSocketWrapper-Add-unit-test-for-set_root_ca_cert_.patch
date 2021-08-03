@@ -1,7 +1,7 @@
-From 4978e73d4624550d67c6f93396ca63d3af6a7ad6 Mon Sep 17 00:00:00 2001
+From 142d7cc33f1d158f63110f43b231d96f1df48c84 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Mon, 9 Nov 2020 13:34:18 +0100
-Subject: [PATCH 08/75] TLSSocketWrapper: Add unit test for
+Subject: [PATCH 008/101] TLSSocketWrapper: Add unit test for
  set_root_ca_cert_path
 
 ---
@@ -57,5 +57,5 @@ index 4f9ce6b96c..ad2d3d8d44 100644
  
  #endif /* UNITTESTS_FEATURES_NETSOCKET_TLSSOCKET_TLS_TEST_CONFIG_H_ */
 -- 
-2.32.0
+2.33.0
 

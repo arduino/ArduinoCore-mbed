@@ -1,0 +1,32 @@
+From 8126408fccdaf72476fb6d399f3dfe83c468d36a Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Mon, 2 Aug 2021 10:34:57 +0200
+Subject: [PATCH 069/101] RP2040: Add weak aliases for ISR handlers
+
+Fixes baremetal build
+---
+ .../pico-sdk/rp2_common/pico_standard_link/crt0.S         | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_standard_link/crt0.S b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_standard_link/crt0.S
+index 3f90b95ee2..97af458711 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_standard_link/crt0.S
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_standard_link/crt0.S
+@@ -89,10 +89,10 @@ __vectors:
+ // these are separated out for clarity
+ decl_isr_bkpt isr_invalid
+ decl_isr_bkpt isr_nmi
+-decl_isr_bkpt isr_hardfault
+-decl_isr_bkpt isr_svcall
+-decl_isr_bkpt isr_pendsv
+-decl_isr_bkpt isr_systick
++decl_isr_bkpt HardFault_Handler
++decl_isr_bkpt SVC_Handler
++decl_isr_bkpt PendSV_Handler
++decl_isr_bkpt SysTick_Handler
+ 
+ .macro decl_isr name
+ .weak \name
+-- 
+2.33.0
+

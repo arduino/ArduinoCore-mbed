@@ -1,17 +1,17 @@
-From fc6aab06bd42e14ea2317f0f44de28ad62113e4b Mon Sep 17 00:00:00 2001
+From 57f0717adab139ab5bd9ea6e5fa9c2c63ebe584b Mon Sep 17 00:00:00 2001
 From: Paolo Calao <paolo.calao@gmail.com>
 Date: Thu, 29 Oct 2020 15:40:32 +0100
-Subject: [PATCH 06/75] portentaH7: Change BLE public address
+Subject: [PATCH 006/101] portentaH7: Change BLE public address
 
 ---
  .../ble/FEATURE_BLE/COMPONENT_CYW43XXX/HCIDriver.cpp  | 11 +++++++++++
  1 file changed, 11 insertions(+)
 
 diff --git a/connectivity/drivers/ble/FEATURE_BLE/COMPONENT_CYW43XXX/HCIDriver.cpp b/connectivity/drivers/ble/FEATURE_BLE/COMPONENT_CYW43XXX/HCIDriver.cpp
-index 1e339546e5..5486af2b11 100644
+index 957e37594b..ff389c9f81 100644
 --- a/connectivity/drivers/ble/FEATURE_BLE/COMPONENT_CYW43XXX/HCIDriver.cpp
 +++ b/connectivity/drivers/ble/FEATURE_BLE/COMPONENT_CYW43XXX/HCIDriver.cpp
-@@ -387,6 +387,16 @@ private:
+@@ -378,6 +378,16 @@ private:
  #endif /* BT_UART_NO_3M_SUPPORT */
      }
  
@@ -28,7 +28,7 @@ index 1e339546e5..5486af2b11 100644
      void send_service_pack_command(void)
      {
          uint16_t cmd_len = service_pack_ptr[service_pack_index + 2];
-@@ -394,6 +404,7 @@ private:
+@@ -385,6 +395,7 @@ private:
          uint8_t *pBuf = hciCmdAlloc(cmd_opcode, cmd_len);
          if (pBuf) {
              memcpy(pBuf + HCI_CMD_HDR_LEN, service_pack_ptr + service_pack_index + HCI_CMD_HDR_LEN, cmd_len);
@@ -37,5 +37,5 @@ index 1e339546e5..5486af2b11 100644
          } else {
          }
 -- 
-2.32.0
+2.33.0
 

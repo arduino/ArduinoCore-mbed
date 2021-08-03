@@ -1,17 +1,17 @@
-From c5438137b7166fb553b70ba780e0bade1ba316b7 Mon Sep 17 00:00:00 2001
+From e8f9a313ab21cb53e19160cd805b05078cf1db4e Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Wed, 28 Oct 2020 15:26:21 +0100
-Subject: [PATCH 02/75] Portenta: enable certificates in filesystem
+Subject: [PATCH 002/101] Portenta: enable certificates in filesystem
 
 ---
  targets/targets.json | 2 ++
  1 file changed, 2 insertions(+)
 
 diff --git a/targets/targets.json b/targets/targets.json
-index 55d9c35a59..16d4ee1895 100644
+index f45b0de8af..9cd0535638 100644
 --- a/targets/targets.json
 +++ b/targets/targets.json
-@@ -3181,6 +3181,8 @@
+@@ -3185,6 +3185,8 @@
              }
          },
          "macros_add": [
@@ -21,5 +21,5 @@ index 55d9c35a59..16d4ee1895 100644
              "QSPI_NO_SAMPLE_SHIFT",
              "CYW43XXX_UNBUFFERED_UART"
 -- 
-2.32.0
+2.33.0
 
