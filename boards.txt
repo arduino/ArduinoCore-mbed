@@ -279,7 +279,7 @@ pico.bootloader.programmer=-f interface/cmsis-dap.cfg
 nicla_sense.name=Nicla Sense ME
 nicla_sense.build.core=arduino
 nicla_sense.build.crossprefix=arm-none-eabi-
-nicla_sense.build.compiler_path={runtime.tools.arm-none-eabi-gcc.path}/bin/
+nicla_sense.build.compiler_path={runtime.tools.arm-none-eabi-gcc-7-2017q4.path}/bin/
 
 nicla_sense.build.variant=NICLA
 nicla_sense.build.mcu=cortex-m4
