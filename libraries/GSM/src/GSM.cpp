@@ -5,13 +5,14 @@
 
 #define MAXRETRY 3
 
+
 mbed::CellularDevice *mbed::CellularDevice::get_default_instance()
 {
-  static BufferedSerial serial(MBED_CONF_GEMALTO_CINTERION_TX, MBED_CONF_GEMALTO_CINTERION_RX, 115200);
+  static mbed::BufferedSerial serial(MBED_CONF_GEMALTO_CINTERION_TX, MBED_CONF_GEMALTO_CINTERION_RX, 115200);
 #if defined(MBED_CONF_GEMALTO_CINTERION_RTS) && defined(MBED_CONF_GEMALTO_CINTERION_CTS)
-  serial.set_flow_control(mbed::SerialBase::RTSCTS, MBED_CONF_GEMALTO_CINTERION_RTS, MBED_CONF_GEMALTO_CINTERION_CTS);
+  serial.set_flow_control(mbed::SerialBase::RTSCTS_SW, MBED_CONF_GEMALTO_CINTERION_RTS, MBED_CONF_GEMALTO_CINTERION_CTS);
 #endif
-  static GEMALTO_CINTERION device(&serial);
+  static mbed::GEMALTO_CINTERION device(&serial);
   return &device;
 }
 
@@ -22,7 +23,6 @@ int arduino::GSMClass::begin(const char* pin, const char* apn, const char* usern
   }
 
   static mbed::DigitalOut on(PJ_7, 1);
-  static mbed::DigitalOut rts(MBED_CONF_GEMALTO_CINTERION_RTS, 0);
 
   _context->set_sim_pin(pin);
 
@@ -39,7 +39,7 @@ int arduino::GSMClass::begin(const char* pin, const char* apn, const char* usern
 
   _context->set_access_technology(rat);
 
-  uint8_t connect_status = NSAPI_ERROR_AUTH_FAILURE;
+  int connect_status = NSAPI_ERROR_AUTH_FAILURE;
   uint8_t retryCount = 0;
   while(connect_status != NSAPI_ERROR_OK && retryCount < MAXRETRY) {
 
@@ -60,7 +60,7 @@ int arduino::GSMClass::begin(const char* pin, const char* apn, const char* usern
 
   }
 
-  return connect_status;
+  return connect_status == NSAPI_ERROR_OK ? 1 : 0;
 }
 
 void arduino::GSMClass::end() {
@@ -68,7 +68,7 @@ void arduino::GSMClass::end() {
 }
 
 int arduino::GSMClass::disconnect() {
-
+  return 0;
 }
 
 unsigned long arduino::GSMClass::getTime()
