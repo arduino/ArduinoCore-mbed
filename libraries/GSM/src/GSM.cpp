@@ -9,9 +9,7 @@
 mbed::CellularDevice *mbed::CellularDevice::get_default_instance()
 {
   static mbed::BufferedSerial serial(MBED_CONF_GEMALTO_CINTERION_TX, MBED_CONF_GEMALTO_CINTERION_RX, 115200);
-#if defined(MBED_CONF_GEMALTO_CINTERION_RTS) && defined(MBED_CONF_GEMALTO_CINTERION_CTS)
-  serial.set_flow_control(mbed::SerialBase::RTSCTS_SW, MBED_CONF_GEMALTO_CINTERION_RTS, MBED_CONF_GEMALTO_CINTERION_CTS);
-#endif
+  serial.set_flow_control(mbed::SerialBase::RTSCTS_SW, MBED_CONF_GEMALTO_CINTERION_CTS, NC);
   static mbed::GEMALTO_CINTERION device(&serial);
   return &device;
 }
@@ -22,7 +20,8 @@ int arduino::GSMClass::begin(const char* pin, const char* apn, const char* usern
     return 0;
   }
 
-  static mbed::DigitalOut on(PJ_7, 1);
+  pinMode(PJ_7, INPUT_PULLDOWN);
+  static mbed::DigitalOut rts(MBED_CONF_GEMALTO_CINTERION_RTS, 0);
 
   _context->set_sim_pin(pin);
 
