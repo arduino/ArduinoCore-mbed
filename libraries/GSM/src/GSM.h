@@ -74,7 +74,7 @@ public:
 
   bool setTime(unsigned long const epoch, int const timezone = 0);
 
-  void debug(void);
+  void debug(Stream& stream);
 
   int ping(const char* hostname, uint8_t ttl = 128);
   int ping(const String& hostname, uint8_t ttl = 128);

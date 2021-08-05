@@ -47,14 +47,14 @@ int arduino::GSMClass::begin(const char* pin, const char* apn, const char* usern
     retryCount++;
 
     if (connect_status == NSAPI_ERROR_AUTH_FAILURE) {
-      printf("Authentication Failure. Exiting application.\n");
+      tr_info("Authentication Failure. Exiting application.\n");
     } else if (connect_status == NSAPI_ERROR_OK || connect_status == NSAPI_ERROR_IS_CONNECTED) {
       connect_status = NSAPI_ERROR_OK;
-      printf("Connection Established.\n");
+      tr_info("Connection Established.\n");
     } else if (retryCount > 2) {
-      printf("Fatal connection failure: %d\n", connect_status);
+      tr_info("Fatal connection failure: %d\n", connect_status);
     } else {
-      printf("Couldn't connect, will retry...\n");
+      tr_info("Couldn't connect, will retry...\n");
       continue;
     }
 
@@ -107,23 +107,29 @@ static char* trace_time(size_t ss)
     return time_st;
 }
 
+static Stream* trace_stream = nullptr;
+static void arduino_print(const char* c) {
+  if (trace_stream) {
+    trace_stream->println(c);
+  }
+}
 
-void arduino::GSMClass::debug() {
-
-#ifndef CELLULAR_DEMO_TRACING_H_
-#define CELLULAR_DEMO_TRACING_H_
+void arduino::GSMClass::debug(Stream& stream) {
 
 #if MBED_CONF_MBED_TRACE_ENABLE
 
-    mbed_trace_init();
-    mbed_trace_prefix_function_set( &trace_time );
+  mbed_trace_init();
 
-    mbed_trace_mutex_wait_function_set(trace_wait);
-    mbed_trace_mutex_release_function_set(trace_release);
+  trace_stream = &stream;
+  mbed_trace_print_function_set(arduino_print);
+  mbed_trace_prefix_function_set( &trace_time );
 
-    mbed_cellular_trace::mutex_wait_function_set(trace_wait);
-    mbed_cellular_trace::mutex_release_function_set(trace_release);
-#endif
+  mbed_trace_mutex_wait_function_set(trace_wait);
+  mbed_trace_mutex_release_function_set(trace_release);
+
+  mbed_cellular_trace::mutex_wait_function_set(trace_wait);
+  mbed_cellular_trace::mutex_release_function_set(trace_release);
+
 #endif
 
 }
