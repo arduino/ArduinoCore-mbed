@@ -12,6 +12,7 @@
       "cordio.max-connections": 5,
       "cellular.debug-at": true,
       "cellular.offload-dns-queries": true,
+      "cellular.at-handler-buffer-size": 512,
       "mbed-trace.enable": true,
       "target.mbed_app_start": "0x8040000",
       "target.macros_add": [
