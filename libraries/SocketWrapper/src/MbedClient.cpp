@@ -6,7 +6,7 @@
 
 arduino::MbedClient::MbedClient()
   : _status(false),
-    _timeout(SOCKET_TIMEOUT) {
+    _timeout(0) {
 }
 
 uint8_t arduino::MbedClient::status() {
@@ -19,10 +19,12 @@ void arduino::MbedClient::readSocket() {
     uint8_t data[SOCKET_BUFFER_SIZE];
     int ret = NSAPI_ERROR_WOULD_BLOCK;
     do {
-      mutex->lock();
       if (rxBuffer.availableForStore() == 0) {
         yield();
+        delay(100);
+        continue;
       }
+      mutex->lock();
       if (sock == nullptr || (closing && borrowed_socket)) {
         goto cleanup;
       }
@@ -30,16 +32,21 @@ void arduino::MbedClient::readSocket() {
       if (ret < 0 && ret != NSAPI_ERROR_WOULD_BLOCK) {
         goto cleanup;
       }
+      if (ret == NSAPI_ERROR_WOULD_BLOCK || ret == 0) {
+        yield();
+        delay(100);
+        mutex->unlock();
+        continue;
+      }
       for (int i = 0; i < ret; i++) {
         rxBuffer.store_char(data[i]);
       }
-      _status = true;
       mutex->unlock();
+      _status = true;
     } while (ret == NSAPI_ERROR_WOULD_BLOCK || ret > 0);
   }
 cleanup:
   _status = false;
-  mutex->unlock();
   return;
 }
 
@@ -53,7 +60,7 @@ void arduino::MbedClient::setSocket(Socket *_sock) {
 }
 
 void arduino::MbedClient::configureSocket(Socket *_s) {
-  _s->set_timeout(SOCKET_TIMEOUT);
+  _s->set_timeout(_timeout);
   _s->set_blocking(false);
   
   if (event == nullptr) {

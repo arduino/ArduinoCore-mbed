@@ -87,7 +87,6 @@ public:
 
   void setSocket(Socket* _sock);
   Socket* getSocket() { return sock; };
-  RingBufferN<SOCKET_BUFFER_SIZE> *getRxBuffer() { return &rxBuffer; };
 
   void configureSocket(Socket* _s);
 
