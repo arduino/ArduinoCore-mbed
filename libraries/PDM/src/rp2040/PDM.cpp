@@ -3,6 +3,7 @@
 #include "Arduino.h"
 #include "PDM.h"
 #include "OpenPDMFilter.h"
+#include "mbed_interface.h"
 
 extern "C" {
 #include "hardware/pio.h"
@@ -66,6 +67,18 @@ int PDMClass::begin(int channels, int sampleRate)
   finalBuffer = (int16_t*)_doubleBuffer.data();
   int finalBufferLength = _doubleBuffer.availableForWrite() / sizeof(int16_t);
   _doubleBuffer.swap(0);
+
+  // The mic accepts an input clock from 1.2 to 3.25 Mhz
+  // Setup the decimation factor accordingly
+  if ((sampleRate * decimation * 2) > 3250000) {
+    decimation = 64;
+  }
+
+  // Sanity check, abort if still over 3.25Mhz
+  if ((sampleRate * decimation * 2) > 3250000) {
+    mbed_error_printf("Sample rate too high, the mic would glitch\n");
+    mbed_die();
+  }
 
   int rawBufferLength = RAW_BUFFER_SIZE / (decimation / 8);
   // Saturate number of samples. Remaining bytes are dropped.
@@ -179,7 +192,11 @@ void PDMClass::IrqHandler(bool halftranfer)
   }
 
   // fill final buffer with PCM samples
-  Open_PDM_Filter_128(rawBuffer[rawBufferIndex], finalBuffer, 1, &filter);
+  if (filter.Decimation == 128) {
+    Open_PDM_Filter_128(rawBuffer[rawBufferIndex], finalBuffer, 1, &filter);
+  } else {
+    Open_PDM_Filter_64(rawBuffer[rawBufferIndex], finalBuffer, 1, &filter);
+  }
 
   if (cutSamples) {
     memset(finalBuffer, 0, cutSamples);
