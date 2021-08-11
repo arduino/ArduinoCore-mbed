@@ -2,6 +2,9 @@
 
 #include "mbed.h"
 #include "CellularLog.h"
+#include "CellularContext.h"
+#include "CellularInterface.h"
+#include "GEMALTO_CINTERION_CellularStack.h"
 
 #define MAXRETRY 3
 
@@ -15,13 +18,18 @@ mbed::CellularDevice *mbed::CellularDevice::get_default_instance()
 }
 
 int arduino::GSMClass::begin(const char* pin, const char* apn, const char* username, const char* password, RadioAccessTechnologyType rat) {
-  if (gsm_if == nullptr) {
-    printf("Invalid gsm_if\n");
+
+  _context = mbed::CellularContext::get_default_instance();
+
+  if (_context == nullptr) {
+    printf("Invalid context\n");
     return 0;
   }
 
   pinMode(PJ_7, INPUT_PULLDOWN);
   static mbed::DigitalOut rts(MBED_CONF_GEMALTO_CINTERION_RTS, 0);
+
+  _device = _context->get_device();
 
   _context->set_sim_pin(pin);
 
@@ -134,7 +142,7 @@ void arduino::GSMClass::debug(Stream& stream) {
 }
 
 NetworkInterface* arduino::GSMClass::getNetwork() {
-  return gsm_if;
+  return _context;
 }
 
-arduino::GSMClass GSM(mbed::CellularContext::get_default_instance());
+arduino::GSMClass GSM;

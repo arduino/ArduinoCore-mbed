@@ -40,11 +40,8 @@ typedef void* (*voidPrtFuncPtr)(void);
 class GSMClass : public MbedSocketClass {
 public:
 
-  GSMClass(NetworkInterface* _if)
-    : _rat(CATNB),
-      gsm_if(_if),
-      _context((mbed::CellularContext*)gsm_if),
-      _device(((mbed::CellularContext*)gsm_if)->get_device()) {}
+  GSMClass()
+    : _rat(CATNB) {}
 
   /* Start GSM connection.
      * Configure the credentials into the device.
