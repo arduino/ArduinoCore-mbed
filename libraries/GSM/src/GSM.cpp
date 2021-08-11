@@ -74,6 +74,10 @@ void arduino::GSMClass::end() {
 
 }
 
+void arduino::GSMClass::startGNSS(mbed::Callback<void(char*)> gnss_cb) {
+  (static_cast<mbed::GEMALTO_CINTERION_CellularStack*>(_context->get_stack()))->startGNSS(gnss_cb);
+}
+
 int arduino::GSMClass::disconnect() {
   return 0;
 }

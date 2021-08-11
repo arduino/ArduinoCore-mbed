@@ -73,6 +73,8 @@ public:
 
   void debug(Stream& stream);
 
+  void startGNSS(mbed::Callback<void(char*)> gnss_cb);
+
   int ping(const char* hostname, uint8_t ttl = 128);
   int ping(const String& hostname, uint8_t ttl = 128);
   int ping(IPAddress host, uint8_t ttl = 128);
