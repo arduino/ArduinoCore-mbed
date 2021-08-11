@@ -99,6 +99,7 @@ void arduino::WiFiClass::ensureDefaultAPNetworkConfiguration() {
 
 void arduino::WiFiClass::end() {
   disconnect();
+  _softAP = nullptr;
 }
 
 int arduino::WiFiClass::disconnect() {
