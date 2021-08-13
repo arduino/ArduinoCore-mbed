@@ -18,6 +18,7 @@
 //#include <device/i2c_simple.h>
 #include <Arduino.h>
 #include <drivers/DigitalOut.h>
+#include <drivers/DigitalInOut.h>
 //#include <gpio.h>
 //#include <timer.h>
 #include <string.h>
@@ -33,9 +34,9 @@
 #define ANXDEBUG(format, ...) \
 		printk(BIOS_DEBUG, "%s: " format, __func__, ##__VA_ARGS__)
 
-mbed::DigitalOut video_on(PK_2);
-mbed::DigitalOut video_rst(PJ_3);
-mbed::DigitalOut otg_on(PJ_6);
+mbed::DigitalOut video_on(PK_2, 0);
+mbed::DigitalOut video_rst(PJ_3, 0);
+mbed::DigitalInOut otg_on(PJ_6, PIN_INPUT, PullUp, 0);
 mbed::I2C i2cx(I2C_SDA_INTERNAL , I2C_SCL_INTERNAL);
 
 int i2c_writeb(uint8_t bus, uint8_t saddr, uint8_t offset, uint8_t val) {
@@ -1318,23 +1319,19 @@ int anx7625_init(uint8_t bus)
 	int retry_power_on = 3;
 
 	ANXINFO("OTG_ON = 1 -> VBUS OFF\n");
-	otg_on = 1;
-
-	mdelay(1000);
-	video_on = 1;
-	mdelay(10);
-	video_rst = 1;
-	mdelay(10);
-
-	video_on = 0;
-	mdelay(10);
-	video_rst = 0;
-	mdelay(100);
+	if (otg_on != 0) {
+		otg_on.output();
+		otg_on = 1;
+	} else {
+		ANXERROR("Cannot disable VBUS, someone is actively driving OTG_ON (PJ_6, USB_HS ID Pin)\n");
+	}
+	mdelay(1000); // @TODO: wait for VBUS to discharge (VBUS is activated during bootloader, can be removed when fixed)
 
 	ANXINFO("Powering on anx7625...\n");
 	video_on = 1;
-	mdelay(100);
+	mdelay(10);
 	video_rst = 1;
+	mdelay(10);
 
 	while (--retry_power_on) {
 		if (anx7625_power_on_init(bus) == 0)
@@ -1349,7 +1346,7 @@ int anx7625_init(uint8_t bus)
 
 	if(anx7625_is_power_provider(0)) {
 		ANXINFO("OTG_ON = 0 -> VBUS ON\n");
-		otg_on = 0;
+		otg_on = 0; // If the pin is still input this has not effect
 		mdelay(1000); // Wait for powered device to be stable
 	}
 
@@ -1391,7 +1388,7 @@ int anx7625_get_cc_status(uint8_t bus, uint8_t *cc_status)
 	default:
 		ANXDEBUG("anx: CC1: Reserved\n");
 	}
-	switch (*cc_status & 0xF0) {
+	switch ((*cc_status >> 4) & 0x0F) {
 	case 0:
 		ANXDEBUG("anx: CC2: SRC.Open\n"); break;
 	case 1:
