@@ -43,16 +43,25 @@ edge_control.bootloader.file=EDGE_CONTROL/bootloader.hex
 
 ##############################################################
 
+menu.split=Flash split
+
 envie_m7.name=Arduino Portenta H7 (M7 core)
 envie_m7.build.core=arduino
 envie_m7.build.crossprefix=arm-none-eabi-
 envie_m7.build.compiler_path={runtime.tools.arm-none-eabi-gcc-7-2017q4.path}/bin/
+
+envie_m7.menu.split.50_50=1MB M7 + 1MB M4
+envie_m7.menu.split.75_25=1.5MB M7 + 0.5MB M4
+envie_m7.menu.split.100_0=2MB M7 + M4 in SDRAM
 
 envie_m7.build.variant=PORTENTA_H7_M7
 envie_m7.build.mcu=cortex-m7
 envie_m7.build.fpu=-mfpu=fpv5-d16
 envie_m7.build.float-abi=-mfloat-abi=softfp
 envie_m7.build.extra_flags=
+envie_m7.menu.split.50_50.build.extra_ldflags=-DCM4_BINARY_START=0x08100000
+envie_m7.menu.split.75_25.build.extra_ldflags=-DCM4_BINARY_START=0x08180000
+envie_m7.menu.split.100_0.build.extra_ldflags=-DCM4_BINARY_START=0x60000000
 envie_m7.build.architecture=cortex-m7
 envie_m7.build.board=PORTENTA_H7_M7
 envie_m7.build.ldscript=linker_script.ld
@@ -81,7 +90,9 @@ envie_m7.upload.interface=0
 envie_m7.upload.use_1200bps_touch=true
 envie_m7.upload.wait_for_upload_port=true
 envie_m7.upload.native_usb=true
-envie_m7.upload.maximum_size=786432
+envie_m7.menu.split.50_50.upload.maximum_size=786432
+envie_m7.menu.split.75_25.upload.maximum_size=1441792
+envie_m7.menu.split.100_0.upload.maximum_size=1966080
 envie_m7.upload.maximum_data_size=523624
 
 envie_m7.debug.tool=gdb
@@ -105,11 +116,18 @@ envie_m4.build.core=arduino
 envie_m4.build.crossprefix=arm-none-eabi-
 envie_m4.build.compiler_path={runtime.tools.arm-none-eabi-gcc-7-2017q4.path}/bin/
 
+envie_m4.menu.split.50_50=1MB M7 + 1MB M4
+envie_m4.menu.split.75_25=1.5MB M7 + 0.5MB M4
+envie_m4.menu.split.100_0=2MB M7 + M4 in SDRAM
+
 envie_m4.build.variant=PORTENTA_H7_M4
 envie_m4.build.mcu=cortex-m4
 envie_m4.build.fpu=-mfpu=fpv4-sp-d16
 envie_m4.build.float-abi=-mfloat-abi=softfp
 envie_m4.build.extra_flags=
+envie_m4.menu.split.50_50.build.extra_ldflags=-DCM4_BINARY_START=0x08100000 -DCM4_BINARY_END=0x08200000
+envie_m4.menu.split.75_25.build.extra_ldflags=-DCM4_BINARY_START=0x08180000 -DCM4_BINARY_END=0x08200000
+envie_m4.menu.split.100_0.build.extra_ldflags=-DCM4_BINARY_START=0x60000000 -DCM4_BINARY_END=0x60040000 -DCM4_RAM_END=0x60080000
 envie_m4.build.architecture=cortex-m4
 envie_m4.build.board=PORTENTA_H7_M4
 envie_m4.build.ldscript=linker_script.ld
@@ -132,12 +150,17 @@ envie_m4.upload.vid=0x2341
 envie_m4.upload.pid=0x035b
 envie_m4.upload.protocol=
 envie_m4.upload.transport=
-envie_m4.upload.address=0x08100000
 envie_m4.upload.interface=0
 envie_m4.upload.use_1200bps_touch=true
 envie_m4.upload.wait_for_upload_port=true
 envie_m4.upload.native_usb=true
-envie_m4.upload.maximum_size=1048576
+envie_m4.menu.split.50_50.upload.address=0x08100000
+envie_m4.menu.split.75_25.upload.address=0x08180000
+#make loading the M4 in this way fail - the user needs to provide a file via mass storage or similar interfaces
+envie_m4.menu.split.100_0.upload.address=
+envie_m4.menu.split.50_50.upload.maximum_size=1048576
+envie_m4.menu.split.75_25.upload.maximum_size=524288
+envie_m4.menu.split.100_0.upload.maximum_size=524288
 envie_m4.upload.maximum_data_size=294248
 
 envie_m4.debug.tool=gdb

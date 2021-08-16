@@ -191,6 +191,10 @@ generate_flags () {
 				OPENAMP_REGIONS="__OPENAMP_region_start__  = 0x38000400;\n__OPENAMP_region_end__ = 0x38000400 + LENGTH(RAM_D3) - 1K;"
 				sed -i "s?ENTRY(Reset_Handler)?${OPENAMP_REGIONS}\nENTRY(Reset_Handler)?g" $ARDUINOVARIANT/linker_script.ld
 			fi
+			echo "Patching linker scripts"
+			sed -i 's/0x8100000/CM4_BINARY_START/g' "$ARDUINOVARIANT"/linker_script.ld
+			sed -i 's/LENGTH = 0x100000/LENGTH = CM4_BINARY_END - CM4_BINARY_START/g' "$ARDUINOVARIANT"/linker_script.ld
+			sed -i 's/LENGTH = 0xc0000/LENGTH = CM4_BINARY_START - 0x8040000/g' "$ARDUINOVARIANT"/linker_script.ld
 		fi
 		if [[ $ARDUINOVARIANT == *NANO_RP2040* ]]; then
 			set +e

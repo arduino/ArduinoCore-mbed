@@ -11,6 +11,7 @@
       "rtos.main-thread-stack-size": 32768,
       "cordio.max-connections": 5,
       "target.macros_add": [
+        "NO_VTOR_RELOCATE",
         "METAL_INTERNAL",
         "VIRTIO_SLAVE_ONLY",
         "NO_ATOMIC_64_SUPPORT",
