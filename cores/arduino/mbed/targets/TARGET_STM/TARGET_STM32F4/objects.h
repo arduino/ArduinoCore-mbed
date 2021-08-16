@@ -141,6 +141,7 @@ struct analogin_s {
 #if DEVICE_ANALOGOUT
 struct dac_s {
     DACName dac;
+    PinName pin;
     uint32_t channel;
     DAC_HandleTypeDef handle;
 };
@@ -157,6 +158,7 @@ struct can_s {
     CAN_HandleTypeDef CanHandle;
     int index;
     int hz;
+    int rxIrqEnabled;
 };
 #endif
 

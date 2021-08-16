@@ -102,19 +102,8 @@ typedef struct
     void *empty;
 } cyhal_spi_t;
 
-
-#include "whd_debug.h"
-
-#if defined(WPRINT_ENABLE_WHD_ERROR) || defined(WPRINT_ENABLE_WHD_INFO) || defined(WPRINT_ENABLE_WHD_DEBUG)
-/** \} group_hal_hw_types_data_structures */
-#define PRINTF(...)   do { \
-                      (void) printf(__VA_ARGS__); \
-                      } while (0)
-#else
-#define PRINTF(...)
-#endif
-
 #include "whd_config.h"
+#include "whd_debug.h"
 
 #if defined(__cplusplus)
 }

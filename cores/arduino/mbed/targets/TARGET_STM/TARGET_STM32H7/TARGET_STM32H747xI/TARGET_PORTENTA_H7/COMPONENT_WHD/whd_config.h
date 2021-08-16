@@ -26,6 +26,9 @@
 #include "stm32h7xx_hal.h"
 #include <stdint.h>
 
+/* disable WPRINT_MACRO */
+#define WHD_PRINT_DISABLE
+
 /* please define your configuration , either SDIO or SPI */
 #define CY_WHD_CONFIG_USE_SDIO
 //#define CY_WHD_CONFIG_USE_SPI

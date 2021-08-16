@@ -71,6 +71,7 @@
 #define MBED_CONF_BLE_API_IMPLEMENTATION_MAX_CHARACTERISTIC_AUTHORISATION_COUNT 20                                                                                               // set by library:ble-api-implementation
 #define MBED_CONF_BLE_PRESENT                                                   1                                                                                                // set by library:ble
 #define MBED_CONF_BLE_TRACE_HUMAN_READABLE_ENUMS                                0                                                                                                // set by library:ble
+#define MBED_CONF_CELLULAR_AT_HANDLER_BUFFER_SIZE                               32                                                                                               // set by library:cellular
 #define MBED_CONF_CELLULAR_CONTROL_PLANE_OPT                                    0                                                                                                // set by library:cellular
 #define MBED_CONF_CELLULAR_DEBUG_AT                                             0                                                                                                // set by library:cellular
 #define MBED_CONF_CELLULAR_MAX_CP_DATA_RECV_LEN                                 1358                                                                                             // set by library:cellular
@@ -368,6 +369,7 @@
 #define MBED_CONF_TARGET_DEEP_SLEEP_LATENCY                                     4                                                                                                // set by target:MCU_STM32
 #define MBED_CONF_TARGET_DEFAULT_ADC_VREF                                       NAN                                                                                              // set by target:Target
 #define MBED_CONF_TARGET_GPIO_RESET_AT_INIT                                     0                                                                                                // set by target:MCU_STM32
+#define MBED_CONF_TARGET_I2C_TIMING_VALUE_ALGO                                  1                                                                                                // set by target:PORTENTA_H7
 #define MBED_CONF_TARGET_INIT_US_TICKER_AT_BOOT                                 1                                                                                                // set by target:MCU_STM32
 #define MBED_CONF_TARGET_INTERNAL_FLASH_UNIFORM_SECTORS                         1                                                                                                // set by target:Target
 #define MBED_CONF_TARGET_LPTICKER_LPTIM                                         1                                                                                                // set by target:MCU_STM32H7
