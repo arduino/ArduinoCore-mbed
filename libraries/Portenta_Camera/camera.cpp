@@ -3,7 +3,7 @@
 #include "camera.h"
 #include "stm32h7xx_hal_dcmi.h"
 
-#define CAMERA_FRAME_BUFFER               0xC0200000
+#define CAMERA_FRAME_BUFFER               SDRAM_START_ADDRESS + 0x200000
 
 #define ARGB8888_BYTE_PER_PIXEL  4
 

@@ -928,8 +928,10 @@ static void stm32_LayerInit(uint16_t LayerIndex, uint32_t FB_Address)
 	HAL_LTDC_ConfigLayer(&ltdc, &Layercfg, LayerIndex);
 }
 
+#include "SDRAM.h"
+
 #define BYTES_PER_PIXEL		2
-#define FB_BASE_ADDRESS 	((uint32_t)0xC0000000)
+#define FB_BASE_ADDRESS 	((uint32_t)SDRAM_START_ADDRESS)
 #define FB_ADDRESS_0 		(FB_BASE_ADDRESS)
 #define FB_ADDRESS_1 		(FB_BASE_ADDRESS + (lcd_x_size * lcd_y_size * BYTES_PER_PIXEL))
 

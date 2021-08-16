@@ -270,4 +270,51 @@ void _ontouch1200bps_() {
   NVIC_SystemReset();
 }
 
+#include "stm32h7xx_ll_system.h"
+
+void bootM4() {
+
+#if 0
+  // This address need to be in range 0x10000000-0x3FFF0000 to be usable by the M4 as a trampoline
+  uint32_t  __attribute__((aligned(0x10000))) trampoline[2];
+  static const uint32_t RAM_BASE_FOR_TRAMPOLINE = (uint32_t)&trampoline[0];
+
+#if 0
+
+  // This snippet MUST be executed BEFORE calling bootM4()
+  // The only purpose it to fread() a file into CM4_BINARY_START location
+
+  SDRAM.begin(0);
+
+  // Copy M4 firmware to SDRAM
+  FILE* fw = fopen("/fs/fw.bin", "r");
+  if (fw == NULL) {
+    while (1) {
+      Serial.println("Please copy a firmware for M4 core in the PORTENTA mass storage");
+      delay(100);
+    }
+  }
+  fread((uint8_t*)CM4_BINARY_START, getFileSize(fw), 1, fw);
+  fclose(fw);
+#endif
+
+  // We need to call this in case we want to use BACKUP_SRAM as trampoline
+  HAL_PWR_EnableBkUpAccess();
+
+  // Copy first 2 words of the firmware in trampoline location
+  memcpy((void*)RAM_BASE_FOR_TRAMPOLINE, (void*)CM4_BINARY_START, 8);
+
+  SCB_CleanDCache();
+
+  // Set CM4_BOOT0 address
+  // This actually writes a flash register and thus is persistent across reboots
+  // RAM_BASE_FOR_TRAMPOLINE must be aligned to 0x10000 barrier
+  LL_SYSCFG_SetCM4BootAddress0(RAM_BASE_FOR_TRAMPOLINE >> 16);
+#else
+  // Classic boot, just set the address and we are ready to go
+  LL_SYSCFG_SetCM4BootAddress0(CM4_BINARY_START >> 16);
+  LL_RCC_ForceCM4Boot();
+#endif
+}
+
 #endif

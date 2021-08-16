@@ -44,7 +44,7 @@ static HAL_StatusTypeDef FMC_SDRAM_Clock_Config(void)
   RCC_PeriphCLKInitStruct.FmcClockSelection = RCC_FMCCLKSOURCE_PLL2;
   RCC_PeriphCLKInitStruct.PLL2.PLL2RGE = RCC_PLL1VCIRANGE_2;
   RCC_PeriphCLKInitStruct.PLL2.PLL2M = 5;
-  RCC_PeriphCLKInitStruct.PLL2.PLL2N = 200;
+  RCC_PeriphCLKInitStruct.PLL2.PLL2N = 160;
   RCC_PeriphCLKInitStruct.PLL2.PLL2FRACN = 0;
   RCC_PeriphCLKInitStruct.PLL2.PLL2P = 2;
   RCC_PeriphCLKInitStruct.PLL2.PLL2R = 4;

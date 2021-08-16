@@ -166,7 +166,7 @@ int RPC::begin() {
 
 	//resource_table_load_from_flash();
 	//HAL_SYSCFG_EnableCM4BOOT();
-	HAL_RCCEx_EnableBootCore(RCC_BOOT_C2);
+	bootM4();
 
 	eventThread = new rtos::Thread(osPriorityHigh);
 	eventThread->start(&eventHandler);

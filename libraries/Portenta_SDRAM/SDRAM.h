@@ -4,8 +4,8 @@
 
 #include "Arduino.h"
 
-#define SDRAM_END_ADDRESS			(0xC0800000)
-#define SDRAM_START_ADDRESS			(0xC0000000)
+#define SDRAM_END_ADDRESS			(0x60800000)
+#define SDRAM_START_ADDRESS			(0x60000000)
 
 class SDRAMClass {
 public:
