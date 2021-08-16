@@ -78,6 +78,9 @@ memory mounted on GAPUINO board.
 /** @defgroup GAPUINO_HIMAX_Private_Variables I2C Private Variables
  * @{
  */
+#define HIMAX_LINE_LEN_PCK_FULL     0x178
+#define HIMAX_FRAME_LENGTH_FULL     0x109
+
 #define HIMAX_LINE_LEN_PCK_QVGA     0x178
 #define HIMAX_FRAME_LENGTH_QVGA     0x104
 
@@ -170,6 +173,20 @@ static regval_list_t himax_default_regs[] = {
   {OSC_CLK_DIV,          0x0B},
   {IMG_ORIENTATION,      0x00},          // change the orientation
   {0x0104,               0x01},
+};
+
+static regval_list_t himax_full_regs[] = { // 'full' resolution is 320x320
+    {0x0383,                0x01},
+    {0x0387,                0x01},
+    {0x0390,                0x00},
+    {QVGA_WIN_EN,           0x00},	      // Disable QVGA window readout
+    {MAX_INTG_H,            (HIMAX_FRAME_LENGTH_FULL-2)>>8},
+    {MAX_INTG_L,            (HIMAX_FRAME_LENGTH_FULL-2)&0xFF},
+    {FRAME_LEN_LINES_H,     (HIMAX_FRAME_LENGTH_FULL>>8)},
+    {FRAME_LEN_LINES_L,     (HIMAX_FRAME_LENGTH_FULL&0xFF)},
+    {LINE_LEN_PCK_H,        (HIMAX_FRAME_LENGTH_FULL>>8)},
+    {LINE_LEN_PCK_L,        (HIMAX_FRAME_LENGTH_FULL&0xFF)},
+    {GRP_PARAM_HOLD,        0x01},
 };
 
 static regval_list_t himax_qvga_regs[] = {
@@ -274,6 +291,10 @@ int HIMAX_SetResolution(uint32_t resolution)
       regs = himax_qvga_regs;
       regs_count = sizeof(himax_qvga_regs) / sizeof(regval_list_t);
       break;
+    case CAMERA_R320x320:
+      regs = himax_full_regs;
+      regs_count = sizeof(himax_full_regs) / sizeof(regval_list_t);
+      break;  
     default:
       return -1;
   }
