@@ -8,16 +8,27 @@
 #include <mbed.h>
 #include <I2C.h>
 
-namespace nicla {
+class nicla {
 
-  bool begin();
-  bool enable3V3LDO();
-  bool enable1V8LDO();
-  bool disableLDO();
-  uint8_t readLDOreg();
+public:
+  static bool begin();
+  static bool enable3V3LDO();
+  static bool enable1V8LDO();
+  static bool disableLDO();
 
   static RGBled leds;
+  static BQ25120A _pmic;
 
-}
+  friend class RGBled;
+  friend class BQ25120A;
+  friend class Arduino_BHY2;
+
+private:
+  static void pingI2CThd();
+  static void enableCD();
+  static void disableCD();
+  static uint8_t readLDOreg();
+  static rtos::Mutex i2c_mutex;
+};
 
 #endif
