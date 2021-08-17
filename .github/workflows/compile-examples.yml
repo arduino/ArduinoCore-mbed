@@ -37,6 +37,7 @@ jobs:
           - fqbn: arduino:mbed:envie_m4
           - fqbn: arduino:mbed:envie_m7
           - fqbn: arduino:mbed:nanorp2040connect
+          - fqbn: arduino:mbed:nicla_sense
 
         # compile only the examples compatible with each board
         include:
@@ -72,6 +73,10 @@ jobs:
             additional-sketch-paths: |
               - libraries/PDM
               - ~/Arduino/libraries/WiFiNINA
+          - board:
+              fqbn: arduino:mbed:nicla_sense
+            additional-sketch-paths: |
+              - libraries/Nicla_System
 
     steps:
       - name: Checkout repository
