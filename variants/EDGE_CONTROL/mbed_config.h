@@ -159,6 +159,8 @@
 #define MBED_CONF_FAT_CHAN_FF_NORTC_MDAY                                        1                                                                                                // set by library:fat_chan
 #define MBED_CONF_FAT_CHAN_FF_NORTC_MON                                         1                                                                                                // set by library:fat_chan
 #define MBED_CONF_FAT_CHAN_FF_NORTC_YEAR                                        2017                                                                                             // set by library:fat_chan
+#define MBED_CONF_FAT_CHAN_FF_PRINT_FLOAT                                       0                                                                                                // set by library:fat_chan
+#define MBED_CONF_FAT_CHAN_FF_PRINT_LLI                                         0                                                                                                // set by library:fat_chan
 #define MBED_CONF_FAT_CHAN_FF_SFN_BUF                                           12                                                                                               // set by library:fat_chan
 #define MBED_CONF_FAT_CHAN_FF_STRF_ENCODE                                       3                                                                                                // set by library:fat_chan
 #define MBED_CONF_FAT_CHAN_FF_STR_VOLUME_ID                                     0                                                                                                // set by library:fat_chan
@@ -303,6 +305,7 @@
 #define MBED_CONF_QSPIF_QSPI_POLARITY_MODE                                      0                                                                                                // set by library:qspif
 #define MBED_CONF_QSPIF_QSPI_SCK                                                MBED_CONF_DRIVERS_QSPI_SCK                                                                       // set by library:qspif
 #define MBED_CONF_RTOS_API_PRESENT                                              1                                                                                                // set by library:rtos-api
+#define MBED_CONF_RTOS_ENABLE_ALL_RTX_EVENTS                                    0                                                                                                // set by library:rtos
 #define MBED_CONF_RTOS_EVFLAGS_NUM                                              0                                                                                                // set by library:rtos
 #define MBED_CONF_RTOS_IDLE_THREAD_STACK_SIZE                                   512                                                                                              // set by library:rtos
 #define MBED_CONF_RTOS_IDLE_THREAD_STACK_SIZE_DEBUG_EXTRA                       0                                                                                                // set by library:rtos

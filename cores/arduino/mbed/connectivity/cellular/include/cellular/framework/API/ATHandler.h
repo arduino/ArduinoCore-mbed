@@ -352,8 +352,15 @@ public:
      *
      *  @param str input buffer to be converted to hex ascii
      *  @param size of the input param str
+     *  @param quote_string if true it will add the double-quote character at beginning and end of string
      */
-    void write_hex_string(const char *str, size_t size);
+    void write_hex_string(const char *str, size_t size, bool quote_string = true);
+
+    /** Get the error detected during read_int()
+     *
+     *  @return the latest negative integer error got from read_int().
+     */
+    int32_t get_last_read_error();
 
     /** Reads as string and converts result to integer. Supports only non-negative integers.
      *
@@ -637,6 +644,7 @@ private: //Member variables
     rtos::Kernel::Clock::time_point _start_time;
     // eventqueue event id
     int _event_id;
+    int32_t _last_read_error;
 
     char _cmd_buffer[MBED_CONF_CELLULAR_AT_HANDLER_BUFFER_SIZE];
 };

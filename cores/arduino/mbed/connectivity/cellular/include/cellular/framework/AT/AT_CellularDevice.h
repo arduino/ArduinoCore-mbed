@@ -98,6 +98,12 @@ public:
 
     virtual void set_timeout(int timeout);
 
+    virtual unsigned long get_time();
+
+    virtual unsigned long get_local_time();
+
+    virtual bool set_time(unsigned long const epoch, int const timezone = 0);
+
     virtual void modem_debug_on(bool on);
 
     virtual nsapi_error_t init();
@@ -184,6 +190,7 @@ protected:
 private:
     void urc_nw_deact();
     void urc_pdn_deact();
+    nsapi_error_t set_authomatic_time_zone_update();
 
 protected:
     ATHandler _at;

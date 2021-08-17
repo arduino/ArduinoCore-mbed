@@ -342,6 +342,12 @@ public: //Pure virtual functions
      */
     virtual void set_timeout(int timeout) = 0;
 
+    virtual unsigned long get_time() = 0;
+
+    virtual unsigned long get_local_time() = 0;
+
+    virtual bool set_time(unsigned long const epoch, int const timezone = 0) = 0;
+
 
 public: //Common functions
 

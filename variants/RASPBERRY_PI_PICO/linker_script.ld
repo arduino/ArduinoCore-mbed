@@ -25,7 +25,6 @@ SECTIONS
         __binary_info_header_end = .;
         KEEP (*(.reset))
         KEEP (*(.init))
-        *(EXCLUDE_FILE(*libgcc.a: *libc.a:*lib_a-mem*.o *libm.a:) .text*)
         *(.fini)
         *crtbegin.o(.ctors)
         *crtbegin?.o(.ctors)
@@ -41,7 +40,6 @@ SECTIONS
         . = ALIGN(4);
     } > FLASH
     .rodata : {
-        *(EXCLUDE_FILE(*libgcc.a: *libc.a:*lib_a-mem*.o *libm.a:) .rodata*)
         . = ALIGN(4);
         *(SORT_BY_ALIGNMENT(SORT_BY_NAME(.flashdata*)))
         . = ALIGN(4);
@@ -73,9 +71,6 @@ SECTIONS
         __data_start__ = .;
         *(vtable)
         *(.time_critical*)
-        *(.text*)
-        . = ALIGN(4);
-        *(.rodata*)
         . = ALIGN(4);
         *(.data*)
         . = ALIGN(4);

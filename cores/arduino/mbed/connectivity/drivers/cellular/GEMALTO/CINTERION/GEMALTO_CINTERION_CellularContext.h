@@ -25,11 +25,15 @@ class GEMALTO_CINTERION_CellularContext: public AT_CellularContext {
 public:
     GEMALTO_CINTERION_CellularContext(ATHandler &at, CellularDevice *device, const char *apn, bool cp_req = false, bool nonip_req = false);
     virtual ~GEMALTO_CINTERION_CellularContext();
+    virtual nsapi_error_t connect(const char *sim_pin, const char *apn = 0, const char *uname = 0,
+                                  const char *pwd = 0);
+    virtual bool get_context();
 
 protected:
 #if !NSAPI_PPP_AVAILABLE
     virtual NetworkStack *get_stack();
 #endif // NSAPI_PPP_AVAILABLE
+    virtual nsapi_error_t do_user_authentication();
 };
 
 } /* namespace mbed */

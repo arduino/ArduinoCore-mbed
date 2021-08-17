@@ -46,9 +46,9 @@ public:
      * Initialize the transport driver.
      *
      */
-	CyH4TransportDriver(PinName tx, PinName rx, PinName cts, PinName rts, PinName bt_power_name, int baud, PinName bt_host_wake_name, PinName bt_device_wake_name,
-                            uint8_t host_wake_irq = 0, uint8_t dev_wake_irq = 0);
-        CyH4TransportDriver(PinName tx, PinName rx, PinName cts, PinName rts,  PinName bt_power_name, int baud);
+    CyH4TransportDriver(PinName tx, PinName rx, PinName cts, PinName rts, PinName bt_power_name, int baud, PinName bt_host_wake_name, PinName bt_device_wake_name,
+                        uint8_t host_wake_irq = 0, uint8_t dev_wake_irq = 0);
+    CyH4TransportDriver(PinName tx, PinName rx, PinName cts, PinName rts,  PinName bt_power_name, int baud);
 
     /**
      * Destructor
@@ -123,8 +123,6 @@ private:
     bool     enabled_powersave;
     uint8_t  host_wake_irq_event;
     uint8_t  dev_wake_irq_event;
-
-    bool     holding_deep_sleep_lock;
 };
 
 } // namespace cypress
