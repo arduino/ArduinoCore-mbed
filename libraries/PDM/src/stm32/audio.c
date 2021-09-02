@@ -194,6 +194,7 @@ int py_audio_init(size_t channels, uint32_t frequency, int gain_db, float highpa
         return 0;
     } else {
         g_o_channels = channels;
+        g_i_channels = AUDIO_SAI_NBR_CHANNELS;
     }
 
     uint32_t decimation_factor = 64; // Fixed decimation factor
@@ -344,8 +345,8 @@ void py_audio_deinit()
         hdma_sai_rx.Instance = NULL;
     }
 
-    g_i_channels = 0;
-    g_o_channels = 0;
+    g_i_channels = AUDIO_SAI_NBR_CHANNELS;
+    g_o_channels = AUDIO_SAI_NBR_CHANNELS;
     //free(g_pcmbuf);
     g_pcmbuf = NULL;
 }
