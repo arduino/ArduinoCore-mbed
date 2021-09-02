@@ -139,6 +139,8 @@ void PDMClass::end()
 {
   dma_channel_abort(dmaChannel);
   pinMode(_clkPin, INPUT);
+  decimation = 128;
+  rawBufferIndex = 0;
 }
 
 int PDMClass::available()
