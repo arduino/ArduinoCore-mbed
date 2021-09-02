@@ -18,6 +18,9 @@ uint dmaChannel = 0;
 PIO pio = pio0;
 uint sm = 0;
 
+// PIO program offset
+static uint offset;
+
 // raw buffers contain PDM data
 #define RAW_BUFFER_SIZE 512 // should be a multiple of (decimation / 8)
 uint8_t rawBuffer0[RAW_BUFFER_SIZE];
@@ -103,8 +106,13 @@ int PDMClass::begin(int channels, int sampleRate)
 
   // Configure PIO state machine
   float clkDiv = (float)clock_get_hz(clk_sys) / sampleRate / decimation / 2; 
-  uint offset = pio_add_program(pio, &pdm_pio_program);
-  pdm_pio_program_init(pio, sm, offset, _clkPin, _dinPin, clkDiv);
+  if(pio_can_add_program(pio, &pdm_pio_program)) {
+    offset = pio_add_program(pio, &pdm_pio_program);
+    pdm_pio_program_init(pio, sm, offset, _clkPin, _dinPin, clkDiv);
+  } else {
+    mbed_error_printf("Cannot load pio program\n");
+    mbed_die();
+  }
 
   // Wait for microphone 
   delay(100);
@@ -137,10 +145,12 @@ int PDMClass::begin(int channels, int sampleRate)
 
 void PDMClass::end()
 {
+  pio_remove_program(pio, &pdm_pio_program, offset);
   dma_channel_abort(dmaChannel);
   pinMode(_clkPin, INPUT);
   decimation = 128;
   rawBufferIndex = 0;
+  offset = 0;
 }
 
 int PDMClass::available()
