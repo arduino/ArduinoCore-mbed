@@ -4,50 +4,45 @@
 RTC_HandleTypeDef RTCHandle;
 
 AnalogPinDescription g_AAnalogPinDescription[] = {
-  { PA_0C,        NULL },    // A0    ADC2_INP0
-  { PA_1C,        NULL },    // A1    ADC2_INP1
-  { PC_2C,        NULL },    // A2    ADC3_INP0
-  { PC_3C,        NULL },    // A3    ADC3_INP1
-  { PC_2_ALT0,    NULL },    // A4    ADC1_INP12
-  { PC_3_ALT2,    NULL },    // A5    ADC2_INP13
-  { PA_4,         NULL },    // A6    ADC1_INP18
-  { PA_6,         NULL }     // A7    ADC1_INP7
+  { PC_4,         NULL },    // A0    ADC2_INP0
+  { PF_13,        NULL },    // A1    ADC2_INP1
+  { PF_3 ,        NULL }     // A2    ADC3_INP0
 };
 
 PinDescription g_APinDescription[] = {
   // D0 - D7
-  { PH_15,        NULL, NULL, NULL },    // D0
-  { PK_1,         NULL, NULL, NULL },    // D1
-  { PJ_11,        NULL, NULL, NULL },    // D2
-  { PG_7,         NULL, NULL, NULL },    // D3
+  { PG_12,        NULL, NULL, NULL },    // D0
+  { PA_9,         NULL, NULL, NULL },    // D1  TX
+  { PA_10,        NULL, NULL, NULL },    // D2  RX
+  { PG_1,         NULL, NULL, NULL },    // D3
   { PC_7,         NULL, NULL, NULL },    // D4
   { PC_6,         NULL, NULL, NULL },    // D5
-  { PA_8,         NULL, NULL, NULL },    // D6
-  { PI_0,         NULL, NULL, NULL },    // D7
+  { PF_6,         NULL, NULL, NULL },    // SPI_SS1
+  { PE_11,        NULL, NULL, NULL },    // SPI_SS
 
   // D8 - D14
-  { PC_3,         NULL, NULL, NULL },    // D8
-  { PI_1,         NULL, NULL, NULL },    // D9
-  { PC_2,         NULL, NULL, NULL },    // D10
-  { PH_8,         NULL, NULL, NULL },    // D11
-  { PH_7,         NULL, NULL, NULL },    // D12
-  { PA_10,        NULL, NULL, NULL },    // D13
-  { PA_9,         NULL, NULL, NULL },    // D14
+  { PE_14,        NULL, NULL, NULL },    // SPI_COPI
+  { PE_12,        NULL, NULL, NULL },    // SPI_SCK
+  { PE_13,        NULL, NULL, NULL },    // SPI_CIPO
+  { PB_9,         NULL, NULL, NULL },    // SDA
+  { PB_8,         NULL, NULL, NULL },    // SCL
+  { PF_0,         NULL, NULL, NULL },    // SDA2
+  { PF_1,         NULL, NULL, NULL },    // SCL2
 
   // A0 - A6
-  { PA_0C,        NULL, NULL, NULL },    // A0    ADC2_INP0
-  { PA_1C,        NULL, NULL, NULL },    // A1    ADC2_INP1
-  { PC_2C,        NULL, NULL, NULL },    // A2    ADC3_INP0
-  { PC_3C,        NULL, NULL, NULL },    // A3    ADC3_INP1
-  { PC_2_ALT0,    NULL, NULL, NULL },    // A4    ADC1_INP12
-  { PC_3_ALT0,    NULL, NULL, NULL },    // A5    ADC1_INP13
-  { PA_4,         NULL, NULL, NULL },    // A6    ADC1_INP18
-  { PA_6,         NULL, NULL, NULL },    // A7    ADC1_INP7
+  { PC_4,         NULL, NULL, NULL },    // A0    ADC2_INP0
+  { PF_13,        NULL, NULL, NULL },    // A1    ADC2_INP1
+  { PF_3,         NULL, NULL, NULL },    // A2    ADC3_INP0
+  { PC_9,         NULL, NULL, NULL },    // SDA3
+  { PA_8,         NULL, NULL, NULL },    // SCL3
+  { PF_11,        NULL, NULL, NULL },    // SPI_COPI1
+  { PF_7,         NULL, NULL, NULL },    // SPI_SCK1
+  { PF_8,         NULL, NULL, NULL },    // SPI_CIPO1
 
   // LEDS
-  { PK_5,         NULL, NULL, NULL },    // LEDR
-  { PK_6,         NULL, NULL, NULL },    // LEDG
-  { PK_7,         NULL, NULL, NULL },    // LEDB
+  { PE_3,         NULL, NULL, NULL },    // LEDR
+  { PC_13,        NULL, NULL, NULL },    // LEDG
+  { PF_4,         NULL, NULL, NULL },    // LEDB
 
   { PA_0,         NULL, NULL, NULL },
   { PA_1,         NULL, NULL, NULL },
