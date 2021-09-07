@@ -73,9 +73,20 @@ int arduino::GSMClass::begin(const char* pin, const char* apn, const char* usern
 void arduino::GSMClass::end() {
 
 }
+void arduino::GSMClass::beginGNSS(mbed::Callback<void(char*)> gnss_cb) {
+  (static_cast<mbed::GEMALTO_CINTERION_CellularStack*>(_context->get_stack()))->beginGNSS(gnss_cb);
+}
 
-void arduino::GSMClass::startGNSS(mbed::Callback<void(char*)> gnss_cb) {
-  (static_cast<mbed::GEMALTO_CINTERION_CellularStack*>(_context->get_stack()))->startGNSS(gnss_cb);
+void arduino::GSMClass::endGNSS() {
+  (static_cast<mbed::GEMALTO_CINTERION_CellularStack*>(_context->get_stack()))->endGNSS();
+}
+
+void arduino::GSMClass::startGNSS() {
+  (static_cast<mbed::GEMALTO_CINTERION_CellularStack*>(_context->get_stack()))->startGNSS();
+}
+
+void arduino::GSMClass::stopGNSS() {
+  (static_cast<mbed::GEMALTO_CINTERION_CellularStack*>(_context->get_stack()))->stopGNSS();
 }
 
 int arduino::GSMClass::disconnect() {

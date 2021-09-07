@@ -72,9 +72,10 @@ public:
   bool setTime(unsigned long const epoch, int const timezone = 0);
 
   void debug(Stream& stream);
-
-  void startGNSS(mbed::Callback<void(char*)> gnss_cb);
-
+  void beginGNSS(mbed::Callback<void(char*)> gnss_cb);
+  void endGNSS();
+  void startGNSS();
+  void stopGNSS();
   int ping(const char* hostname, uint8_t ttl = 128);
   int ping(const String& hostname, uint8_t ttl = 128);
   int ping(IPAddress host, uint8_t ttl = 128);
