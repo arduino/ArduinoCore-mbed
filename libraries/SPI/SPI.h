@@ -63,6 +63,9 @@ private:
 extern arduino::MbedSPI SPI;
 #endif
 #if SPI_HOWMANY > 1
+#ifdef SPI1
+#undef SPI1
+#endif
 extern arduino::MbedSPI SPI1;
 #endif
 
