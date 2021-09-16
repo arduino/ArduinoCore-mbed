@@ -12,7 +12,6 @@
       "cordio.max-connections": 5,
       "target.mbed_app_start": "0x8040000",
       "target.macros_add": [
-        "USB_DYNAMIC_CONFIGURATION",
         "METAL_INTERNAL",
         "VIRTIO_MASTER_ONLY",
         "NO_ATOMIC_64_SUPPORT",
