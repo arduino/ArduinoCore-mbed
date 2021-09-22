@@ -37,6 +37,8 @@ mv _variants variants
 
 # Remove fqbns not in $FQBNS list
 touch _boards.txt
+# Save all menus (will not be displayed if unused)
+cat boards.txt | grep "^menu\." >> _boards.txt
 for board in $FQBNS; do
 cat boards.txt | grep "$board\." >> _boards.txt
 done
