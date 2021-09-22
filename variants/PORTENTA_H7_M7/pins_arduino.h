@@ -95,6 +95,14 @@ static const uint8_t MOSI = PIN_SPI_MOSI;
 static const uint8_t MISO = PIN_SPI_MISO;
 static const uint8_t SCK  = PIN_SPI_SCK;
 
+// QSPI
+#define QSPI_SO0        PD_11
+#define QSPI_SO1        PD_12
+#define QSPI_SO2        PF_7
+#define QSPI_SO3        PD_13
+#define QSPI_SCK        PF_10
+#define QSPI_CS         PG_6
+
 // Wire
 #define PIN_WIRE_SDA        (11u)
 #define PIN_WIRE_SCL        (12u)

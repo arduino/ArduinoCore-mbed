@@ -87,6 +87,14 @@ static const uint8_t MOSI = PIN_SPI_MOSI;
 static const uint8_t MISO = PIN_SPI_MISO;
 static const uint8_t SCK  = PIN_SPI_SCK;
 
+// QSPI
+#define QSPI_SO0        PD_11
+#define QSPI_SO1        PF_9
+#define QSPI_SO2        PE_2
+#define QSPI_SO3        PD_13
+#define QSPI_SCK        PF_10
+#define QSPI_CS         PG_6
+
 // Wire
 #define PIN_WIRE_SDA        (11u)
 #define PIN_WIRE_SCL        (12u)
@@ -116,10 +124,12 @@ void _ontouch1200bps_();
 #define I2C_SDA				(digitalPinToPinName(PIN_WIRE_SDA))
 #define I2C_SCL				(digitalPinToPinName(PIN_WIRE_SCL))
 
-//#define I2C_SDA_INTERNAL	(PB_7)
-//#define I2C_SCL_INTERNAL	(PB_6)
-#define I2C_SDA1			(13u)
-#define I2C_SCL1			(14u)
+#define I2C_SDA_INTERNAL	(PF_0)
+#define I2C_SCL_INTERNAL	(PF_1)
+#define I2C_SDA1			I2C_SDA_INTERNAL
+#define I2C_SCL1			I2C_SCL_INTERNAL
+//#define I2C_SDA1			(13u)
+//#define I2C_SCL1			(14u)
 
 #define I2C_SDA3			(18u)
 #define I2C_SCL3			(19u)
