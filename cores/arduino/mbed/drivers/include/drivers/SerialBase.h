@@ -26,9 +26,6 @@
 #include "platform/mbed_toolchain.h"
 #include "platform/NonCopyable.h"
 
-#include "drivers/DigitalOut.h"
-#include "drivers/DigitalIn.h"
-
 #if DEVICE_SERIAL_ASYNCH
 #include "platform/CThunk.h"
 #include "hal/dma_api.h"
@@ -74,8 +71,7 @@ public:
         Disabled = 0,
         RTS,
         CTS,
-        RTSCTS,
-        RTSCTS_SW
+        RTSCTS
     };
 
     /** Set the transmission format used by the serial port
@@ -330,11 +326,8 @@ protected:
     Flow                           _flow_type = Disabled;
     PinName                        _flow1 = NC;
     PinName                        _flow2 = NC;
-    DigitalIn* _cts_pin;
-    DigitalOut* _rts_pin;
     const serial_fc_pinmap_t       *_static_pinmap_fc = NULL;
     void (SerialBase::*_set_flow_control_sp_func)(Flow, const serial_fc_pinmap_t &) = NULL;
-    bool sw_flow_control = false;
 #endif
 
 #endif
