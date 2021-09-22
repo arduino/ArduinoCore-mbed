@@ -1,3 +1,5 @@
+#ifdef CORE_CM7
+
 #include "SDRAM.h"
 #include "QSPIFBlockDevice.h"
 #include "MBRBlockDevice.h"
@@ -57,3 +59,27 @@ void loop() {
   // put your main code here, to run repeatedly:
   delay(10000);
 }
+
+#elif defined(CORE_CM4)
+
+#warning "Compiling a Blink, change the delay or the colour and then copy the .bin into PORTENTA mass storage as fw.bin"
+
+int led = LEDB;
+int delay_ms = 1000;
+
+void setup() {
+  pinMode(led, OUTPUT);
+}
+
+void loop() {
+  digitalWrite(led, HIGH);
+  delay(delay_ms);
+  digitalWrite(led, LOW);
+  delay(delay_ms);
+}
+
+#else
+
+#error Wrong target selected
+
+#endif
