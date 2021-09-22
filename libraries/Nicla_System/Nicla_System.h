@@ -23,6 +23,8 @@ public:
   friend class BQ25120A;
   friend class Arduino_BHY2;
 
+  static bool started;
+
 private:
   static void pingI2CThd();
   static void enableCD();

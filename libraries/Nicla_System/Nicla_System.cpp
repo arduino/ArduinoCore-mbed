@@ -12,6 +12,7 @@
 RGBled nicla::leds;
 BQ25120A nicla::_pmic;
 rtos::Mutex nicla::i2c_mutex;
+bool nicla::started = false;
 
 void nicla::pingI2CThd() {
   while(1) {
@@ -30,6 +31,7 @@ bool nicla::begin()
   static rtos::Thread th(osPriorityHigh, 1024, nullptr, "ping_thread");
   th.start(&nicla::pingI2CThd);
 #endif
+  started = true;
 }
 
 void nicla::enableCD()
@@ -108,4 +110,40 @@ uint8_t nicla::readLDOreg()
   uint8_t ldo_reg = _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_LDO_CTRL);
   disableCD();
   return ldo_reg;
+}
+
+I2CLed  LEDR(red);
+I2CLed  LEDG(green);
+I2CLed  LEDB(blue);
+I2CLed  LED_BUILTIN(white);
+
+void pinMode(I2CLed pin, PinMode mode)
+{
+  if (!nicla::started) {
+    nicla::begin();
+    nicla::leds.begin();
+    nicla::leds.setColor(off);
+  }
+}
+
+void digitalWrite(I2CLed pin, PinStatus value)
+{
+  switch (pin.get()) {
+    case red:
+      nicla::leds.setColorRed(value == LOW ? 0 : 0xFF);
+      break;
+    case blue:
+      nicla::leds.setColorBlue(value == LOW ? 0 : 0xFF);
+      break;
+    case green:
+      nicla::leds.setColorGreen(value == LOW ? 0 : 0xFF);
+      break;
+    case white:
+      if (value == LOW) {
+        nicla::leds.setColor(0, 0, 0);
+      } else {
+        nicla::leds.setColor(0xFF, 0xFF, 0xFF);
+      }
+      break;
+  }
 }

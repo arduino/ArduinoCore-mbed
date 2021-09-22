@@ -34,6 +34,15 @@
 #define led2  LEDG
 #define led3  LEDB
 
+// On Nicla Sense ME, RGB leds are connected via an I2C module
+// The user APIs are the same, but we can't convert to int, so use defines
+#elif defined(ARDUINO_NICLA)
+
+#include "Nicla_System.h"
+#define led1  LEDR
+#define led2  LEDG
+#define led3  LEDB
+
 #else
 
 int led1 = LEDR;

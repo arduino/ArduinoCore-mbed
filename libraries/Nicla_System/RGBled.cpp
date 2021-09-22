@@ -71,18 +71,32 @@ void RGBled::setColor(RGBColors color)
   _red = 0x20;
   }
 
-  setColor(_blue, _green, _red);
+  setColor(_red, _green, _blue);
 
 }
 
-void RGBled::setColor(uint8_t blue, uint8_t green, uint8_t red)
+void RGBled::setColorBlue(uint8_t blue) {
+  writeByte(IS31FL3194_ADDRESS, IS31FL3194_OUT1, blue >> scale_factor);
+  writeByte(IS31FL3194_ADDRESS, IS31FL3194_COLOR_UPDATE, 0xC5);
+}
+
+void RGBled::setColorRed(uint8_t red) {
+  writeByte(IS31FL3194_ADDRESS, IS31FL3194_OUT3, red  >> scale_factor);
+  writeByte(IS31FL3194_ADDRESS, IS31FL3194_COLOR_UPDATE, 0xC5);
+}
+
+void RGBled::setColorGreen(uint8_t green) {
+  writeByte(IS31FL3194_ADDRESS, IS31FL3194_OUT2, green >> scale_factor);
+  writeByte(IS31FL3194_ADDRESS, IS31FL3194_COLOR_UPDATE, 0xC5);
+}
+
+void RGBled::setColor(uint8_t red, uint8_t green, uint8_t blue)
 {
   // set rgb led current
-  writeByte(IS31FL3194_ADDRESS, IS31FL3194_OUT1, blue); //maximum current
-  writeByte(IS31FL3194_ADDRESS, IS31FL3194_OUT2, green);
-  writeByte(IS31FL3194_ADDRESS, IS31FL3194_OUT3, red);
+  writeByte(IS31FL3194_ADDRESS, IS31FL3194_OUT1, blue >> scale_factor); //maximum current
+  writeByte(IS31FL3194_ADDRESS, IS31FL3194_OUT2, green >> scale_factor);
+  writeByte(IS31FL3194_ADDRESS, IS31FL3194_OUT3, red >> scale_factor);
   writeByte(IS31FL3194_ADDRESS, IS31FL3194_COLOR_UPDATE, 0xC5); // write to color update register for changes to take effect
-
 }
 
 // Read the Chip ID register, this is a good test of communication
@@ -141,7 +155,7 @@ void RGBled::writeByte(uint8_t address, uint8_t subAddress, uint8_t data)
 uint8_t RGBled::readByte(uint8_t address, uint8_t subAddress)
 {
   nicla::i2c_mutex.lock();
-  char response = 0xFF;
+  //char response = 0xFF;
   Wire1.beginTransmission(address);
   Wire1.write(subAddress);
   Wire1.endTransmission(false);

@@ -139,4 +139,34 @@ static const uint8_t SCK  = PIN_SPI_SCK;
 uint8_t getUniqueSerialNumber(uint8_t* name);
 void _ontouch1200bps_();
 
+#if __has_include("Nicla_System.h")
+#  define NICLA_SYSTEM_ATTRIBUTE
+#else
+#  define NICLA_SYSTEM_ATTRIBUTE __attribute__ ((error("Please include Nicla_System.h to use this pin")))
+#endif
+
+class I2CLed {
+public:
+  I2CLed(int _pin) : pin(_pin) {};
+  int get() {
+    return pin;
+  };
+  bool operator== (I2CLed const & other) const {
+    return pin == other.pin;
+  }
+  //operator int() = delete;
+  __attribute__ ((error("Change me to a #define"))) operator int();
+private:
+  int pin;
+};
+
+extern I2CLed  LEDR;
+extern I2CLed  LEDG;
+extern I2CLed  LEDB;
+extern I2CLed  LED_BUILTIN;
+
+void      NICLA_SYSTEM_ATTRIBUTE pinMode     (I2CLed pin, PinMode mode);
+PinStatus NICLA_SYSTEM_ATTRIBUTE digitalRead (I2CLed pin);
+void      NICLA_SYSTEM_ATTRIBUTE digitalWrite(I2CLed pin, PinStatus value);
+
 #endif //__PINS_ARDUINO__

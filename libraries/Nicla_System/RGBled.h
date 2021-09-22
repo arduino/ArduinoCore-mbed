@@ -132,7 +132,8 @@ enum RGBColors {
   blue = 3,
   yellow = 4,
   magenta = 5,
-  cyan = 6
+  cyan = 6,
+  white = 7
 };
 
 /*
@@ -156,7 +157,30 @@ public:
   void begin();
   void end();
   void setColor(RGBColors color);
-  void setColor(uint8_t blue, uint8_t green, uint8_t red);
+  void setColor(uint8_t red, uint8_t green, uint8_t blue);
+
+  void setColorBlue(uint8_t blue = 0xFF);
+  void setColorRed(uint8_t red = 0xFF);
+  void setColorGreen(uint8_t green = 0xFF);
+
+  /* intensity from 1 (lowest) to 8 (full) */
+  void setIntensity(uint8_t power) {
+    scale_factor = 8 - power;
+    if (scale_factor < 0) {
+      scale_factor = 0;
+    }
+    /*
+    if (power > 8) {
+      writeByte(IS31FL3194_ADDRESS, IS31FL3194_CURRENT_BAND, 0x15);
+    }
+    if (power > 16) {
+      writeByte(IS31FL3194_ADDRESS, IS31FL3194_CURRENT_BAND, 0x2A);
+    }
+    if (power > 32) {
+      writeByte(IS31FL3194_ADDRESS, IS31FL3194_CURRENT_BAND, 0x3F);
+    }
+    */
+  }
 
 private:
   void init();
@@ -173,6 +197,7 @@ private:
   uint8_t _green;
   uint8_t _red;
 
+  int8_t scale_factor = 4;
 };
 
 #endif
