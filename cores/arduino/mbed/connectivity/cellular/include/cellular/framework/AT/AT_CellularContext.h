@@ -47,7 +47,6 @@ public:
     virtual nsapi_error_t connect(const char *sim_pin, const char *apn = 0, const char *uname = 0,
                                   const char *pwd = 0);
     virtual void set_credentials(const char *apn, const char *uname = 0, const char *pwd = 0);
-    virtual void set_access_technology(RadioAccessTechnologyType rat = CATM1);
 
 // from CellularContext
     virtual nsapi_error_t get_pdpcontext_params(pdpContextList_t &params_list);
@@ -108,8 +107,6 @@ protected:
      *  @return     NIDD context text, e.g. Non-IP or NONIP
      */
     virtual const char *get_nonip_context_type_str();
-    virtual void enable_access_technology();
-    virtual void set_cid(int cid);
 
 private:
 #if NSAPI_PPP_AVAILABLE
@@ -126,6 +123,7 @@ private:
     nsapi_error_t check_operation(nsapi_error_t err, ContextOperation op);
     void ciot_opt_cb(mbed::CellularNetwork::CIoT_Supported_Opt ciot_opt);
     virtual void do_connect_with_retry();
+    void set_cid(int cid);
 
 private:
     ContextOperation _current_op;
@@ -134,7 +132,6 @@ private:
 
     PinName _dcd_pin;
     bool _active_high;
-    RadioAccessTechnologyType _rat;
 
 protected:
     char _found_apn[MAX_APN_LENGTH];
