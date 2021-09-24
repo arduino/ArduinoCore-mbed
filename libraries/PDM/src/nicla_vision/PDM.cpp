@@ -20,7 +20,7 @@
   Boston, MA  02111-1307  USA
 */
 
-#ifdef TARGET_STM
+#ifdef ARDUINO_NICLA_VISION
 
 #include "PDM.h"
 #include "mbed.h"
@@ -39,8 +39,7 @@ PDMClass::PDMClass(int dinPin, int clkPin, int pwrPin) :
   _gain(-1),
   _channels(-1),
   _samplerate(-1),
-  _init(-1),
-  _cutSamples(4)
+  _init(-1)
 {
   _instance = this;
 }
@@ -51,22 +50,6 @@ PDMClass::~PDMClass()
 }
 
 int PDMClass::begin(int channels, int sampleRate) {
-
-  if (isBoardRev2()) {
-    mbed::I2C i2c(PB_7, PB_6);
-    char data[2];
-
-    // SW2 to 3.3V (SW2_VOLT)
-    data[0] = 0x3B;
-    data[1] = 0xF;
-    i2c.write(8 << 1, data, sizeof(data));
-
-    // SW1 to 3.0V (SW1_VOLT)
-    data[0] = 0x35;
-    data[1] = 0xF;
-    i2c.write(8 << 1, data, sizeof(data));
-  }
-
   if(_instance != this) {
     return 0;
   }
@@ -81,12 +64,13 @@ int PDMClass::begin(int channels, int sampleRate) {
   g_pcmbuf = (uint16_t*)_doubleBuffer.data();
   _doubleBuffer.swap(0);
 
-  _cutSamples = 4 * channels;
+  //HAL_Init();
 
-  if(py_audio_init(channels, sampleRate, _gain, 0.9883f)) {
-    py_audio_start_streaming();
-    _init = 1;
-    return 1;
+  if(py_audio_init(channels, sampleRate)) {
+    if (py_audio_start_streaming()) {
+      _init = 1;
+      return 1;
+    }
   }
   return 0;
 }
@@ -135,26 +119,22 @@ size_t PDMClass::getBufferSize()
   return _doubleBuffer.getSize();
 }
 
-#define HALF_TRANSFER_SIZE  (64*_channels)
+#define HALF_TRANSFER_SIZE  (256*_channels)
 static int g_pcmbuf_size=0;
 
 void PDMClass::IrqHandler(bool halftranfer)
 {
   if (g_pcmbuf_size < _doubleBuffer.getSize()) {
     audio_pendsv_callback();
-    g_pcmbuf += (HALF_TRANSFER_SIZE/2);
-    g_pcmbuf_size += HALF_TRANSFER_SIZE;
+    g_pcmbuf += (HALF_TRANSFER_SIZE);
+    g_pcmbuf_size += HALF_TRANSFER_SIZE*2;
 
     if(g_pcmbuf_size == _doubleBuffer.getSize()) {
       _doubleBuffer.swap(g_pcmbuf_size);
       g_pcmbuf = (uint16_t*)_doubleBuffer.data();
       g_pcmbuf_size = 0;
-      if(_cutSamples == 0) {
-        if (_onReceive) {
-          _onReceive();
-        }
-      } else {
-          _cutSamples--;
+      if (_onReceive) {
+        _onReceive();
       }
     }
   }

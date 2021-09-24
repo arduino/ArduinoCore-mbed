@@ -8,7 +8,7 @@
  *
  * Audio Python module.
  */
-#ifdef TARGET_STM
+#ifdef ARDUINO_PORTENTA_H7_M7
 
 #include <stdio.h>
 #include "stm32h7xx_hal.h"

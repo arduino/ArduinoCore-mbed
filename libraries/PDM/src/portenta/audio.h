@@ -1,4 +1,4 @@
-#ifdef TARGET_STM
+#ifdef ARDUINO_PORTENTA_H7_M7
 
 #include "stdbool.h"
 
@@ -9,6 +9,7 @@
 #define AUDIO_SAI_FREQKHZ           (2048U) // 2048KHz
 #define AUDIO_SAI_NBR_CHANNELS      (2) // Default number of channels.
 
+#if defined(ARDUINO_PORTENTA_H7_M7)
 #define AUDIO_SAI_CK_PORT           (GPIOE)
 #define AUDIO_SAI_CK_PIN            (GPIO_PIN_2)
 #define AUDIO_SAI_CK_AF             (GPIO_AF10_SAI4)
@@ -16,6 +17,7 @@
 #define AUDIO_SAI_D1_PORT           (GPIOB)
 #define AUDIO_SAI_D1_PIN            (GPIO_PIN_2)
 #define AUDIO_SAI_D1_AF             (GPIO_AF10_SAI4)
+#endif
 
 #define AUDIO_SAI_DMA_STREAM        BDMA_Channel1
 #define AUDIO_SAI_DMA_REQUEST       BDMA_REQUEST_SAI4_A
