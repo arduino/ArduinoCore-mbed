@@ -27,7 +27,9 @@
 #include "netsocket/SocketAddress.h"
 #include "netsocket/UDPSocket.h"
 
-#define UDP_TX_PACKET_MAX_SIZE 24
+#ifndef WIFI_UDP_BUFFER_SIZE
+#define WIFI_UDP_BUFFER_SIZE 508
+#endif
 
 namespace arduino {
 
@@ -43,6 +45,8 @@ private:
   // these two variables are used to cache the state of the current packet
   uint8_t* _current_packet;
   size_t _current_packet_size;
+
+  RingBufferN<WIFI_UDP_BUFFER_SIZE> txBuffer;
 
 protected:
   virtual NetworkInterface* getNetwork() = 0;
