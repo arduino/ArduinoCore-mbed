@@ -1,9 +1,5 @@
 #include "MbedUdp.h"
 
-#ifndef WIFI_UDP_BUFFER_SIZE
-#define WIFI_UDP_BUFFER_SIZE 508
-#endif
-
 arduino::MbedUDP::MbedUDP() {
   _packet_buffer = new uint8_t[WIFI_UDP_BUFFER_SIZE];
   _current_packet = NULL;
@@ -60,18 +56,35 @@ void arduino::MbedUDP::stop() {
 int arduino::MbedUDP::beginPacket(IPAddress ip, uint16_t port) {
   _host = SocketHelpers::socketAddressFromIpAddress(ip, port);
   //If IP is null and port is 0 the initialization failed
+  txBuffer.clear();
   return (_host.get_ip_address() == nullptr && _host.get_port() == 0) ? 0 : 1;
 }
 
 int arduino::MbedUDP::beginPacket(const char *host, uint16_t port) {
   _host = SocketAddress(host, port);
+  txBuffer.clear();
   getNetwork()->gethostbyname(host, &_host);
   //If IP is null and port is 0 the initialization failed
   return (_host.get_ip_address() == nullptr && _host.get_port() == 0) ? 0 : 1;
 }
 
 int arduino::MbedUDP::endPacket() {
-  return 1;
+  _socket.set_blocking(true);
+  _socket.set_timeout(1000);
+
+  size_t size = txBuffer.available();
+  uint8_t buffer[size];
+  for (int i = 0; i < size; i++) {
+    buffer[i] = txBuffer.read_char();
+  }
+
+  nsapi_size_or_error_t ret = _socket.sendto(_host, buffer, size);
+  _socket.set_blocking(false);
+  _socket.set_timeout(0);
+  if (ret < 0) {
+    return 0;
+  }
+  return size;
 }
 
 // Write a single byte into the packet
@@ -81,13 +94,12 @@ size_t arduino::MbedUDP::write(uint8_t byte) {
 
 // Write size bytes from buffer into the packet
 size_t arduino::MbedUDP::write(const uint8_t *buffer, size_t size) {
-  _socket.set_blocking(true);
-  _socket.set_timeout(1000);
-  nsapi_size_or_error_t ret = _socket.sendto(_host, buffer, size);
-  _socket.set_blocking(false);
-  _socket.set_timeout(0);
-  if (ret < 0) {
-    return 0;
+  for (int i = 0; i<size; i++) {
+    if (txBuffer.availableForStore()) {
+      txBuffer.store_char(buffer[i]);
+    } else {
+      return 0;
+    }
   }
   return size;
 }
