@@ -1,4 +1,4 @@
-#include "Portenta_LittleVGL.h"
+#include "Portenta_lvgl.h"
 #include "lv_demo_widgets.h"
 
 void setup() {

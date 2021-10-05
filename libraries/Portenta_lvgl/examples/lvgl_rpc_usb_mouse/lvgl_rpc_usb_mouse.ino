@@ -1,4 +1,4 @@
-#include "Portenta_LittleVGL.h"
+#include "Portenta_lvgl.h"
 #include "RPC_internal.h"
 #include "USBHost.h"
 

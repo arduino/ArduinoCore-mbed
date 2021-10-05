@@ -1,4 +1,4 @@
-#include "Portenta_LittleVGL.h"
+#include "Portenta_lvgl.h"
 #include "lv_conf.h"
 #include <lvgl.h>
 #include "mbed.h"
