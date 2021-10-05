@@ -89,7 +89,7 @@ static void controls_create(lv_obj_t * parent)
 
 
     /*Add some extra top padding to make space for the box titles.*/
-    lv_obj_set_style_local_pad_top(parent, LV_PAGE_PART_SCRL, LV_STATE_DEFAULT, LV_DPI/3);
+    lv_obj_set_style_local_pad_top(parent, LV_PAGE_PART_SCROLLABLE, LV_STATE_DEFAULT, LV_DPI/3);
 
     lv_obj_t * h = lv_cont_create(parent, NULL);
     lv_cont_set_layout(h, LV_LAYOUT_COLUMN_LEFT);
@@ -226,7 +226,7 @@ static void visuals_create(lv_obj_t * parent)
     lv_obj_set_size(page, LV_HOR_RES / 3, LV_DPI * 2);
     lv_page_set_scroll_propagation(page, true);
     lv_cont_set_fit2(page, LV_FIT_TIGHT, LV_FIT_NONE);
-    lv_page_set_scrl_fit(page, LV_FIT_TIGHT);
+    lv_page_set_scrollable_fit(page, LV_FIT_TIGHT);
 
     lv_obj_t * table1 = lv_table_create(page, NULL);
     lv_obj_set_click(table1, false);
