@@ -193,7 +193,15 @@ int UART::read() {
 }
 
 void UART::flush() {
+#if defined(SERIAL_CDC)
+	if (is_usb) {
+		while(!_SerialUSB.writeable());
+	} else {
+		while(!_serial->obj->writeable());
+	}
+#else
 	while(!_serial->obj->writeable());
+#endif
 }
 
 size_t UART::write(uint8_t c) {
