@@ -69,13 +69,13 @@ static const uint8_t A7  = PIN_A7;
 #define D12 (12u)
 #define D13 (13u)
 #define D14 (14u)
-#define D15 (15u)
-#define D16 (u16)
-#define D17 (u17)
-#define D18 (u18)
-#define D19 (u19)
-#define D20 (u20)
-#define D21 (u21)
+#define D15 #error Pin cannot be used as digital pin.
+#define D16 #error Pin cannot be used as digital pin.
+#define D17 #error Pin cannot be used as digital pin.
+#define D18 #error Pin cannot be used as digital pin.
+#define D19 (19u)
+#define D20 (20u)
+#define D21 (21u)
 
 //DACs
 #define DAC           (A6)
