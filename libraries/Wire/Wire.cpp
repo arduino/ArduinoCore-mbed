@@ -162,7 +162,7 @@ void arduino::MbedI2C::receiveThd() {
 				if (rxBuffer.available() > 0 && onReceiveCb != NULL) {
 					onReceiveCb(rxBuffer.available());
 				}
-				slave->stop();
+				//slave->stop();
 				break;
 		case mbed::I2CSlave::NoData:
 			//slave->stop();
