@@ -48,6 +48,9 @@ jobs:
               - libraries/ThreadDebug
           - board:
               fqbn: arduino:mbed:envie_m4
+            additional-libraries: |
+              - name: lvgl
+                version: 7.11.0
             additional-sketch-paths: |
               - libraries/doom
               - libraries/KernelDebug
@@ -56,6 +59,9 @@ jobs:
               - libraries/RPC
           - board:
               fqbn: arduino:mbed:envie_m7
+            additional-libraries: |
+              - name: lvgl
+                version: 7.11.0
             additional-sketch-paths: |
               - libraries/PDM
               - libraries/doom
@@ -99,6 +105,7 @@ jobs:
           fqbn: ${{ matrix.board.fqbn }}
           libraries: |
             - name: WiFiNINA
+            ${{ matrix.additional-libraries }}
           platforms: |
             # Use Board Manager to install the latest release of Arduino mbed Boards to get the toolchain
             - name: "arduino:mbed"
