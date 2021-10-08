@@ -57,9 +57,9 @@ void setup() {
 
     frameBuffer();
     // Uncomment to test the other functionality 
-    // noFrameBuffer();
+    // nonFrameBuffer();
 
-    // Sort of memtest fo stability, useful for testing when overclocking
+    // Sort of memtest for stability, useful for testing when overclocking
     if (SDRAM.test()) {
         Serial.println("SDRAM completely functional");
     }

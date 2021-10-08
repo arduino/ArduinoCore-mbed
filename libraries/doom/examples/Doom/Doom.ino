@@ -2,7 +2,7 @@
     Arduino wrapper for DoomGeneric
     Mouse and keyboard controls are not implemented at the moment.
 
-    To use the internal QSPI flash as storage, run Portenta_WiFiFirmwareUpdater
+    To use the internal QSPI flash as storage, run PortentaWiFiFirmwareUpdater
     sketch once to create the partitions, AccessFlashAsUSBDisk to expose the QSPI flash
     as a USB disk, copy DOOM1.WAD in the biggest partition, flash this sketch and you are ready to go :)
 */
