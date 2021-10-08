@@ -46,6 +46,8 @@ jobs:
             additional-sketch-paths: |
               - libraries/PDM
               - libraries/ThreadDebug
+              - libraries/USBHID
+              - libraries/USBMSD/examples/Nano33BLE_FlashMassStorage
           - board:
               fqbn: arduino:mbed:envie_m4
             additional-libraries: |
@@ -55,6 +57,7 @@ jobs:
               - libraries/doom
               - libraries/KernelDebug
               - libraries/Portenta_SDCARD
+              - libraries/Portenta_SDRAM
               - libraries/Portenta_Video
               - libraries/RPC
           - board:
@@ -68,16 +71,20 @@ jobs:
               - libraries/KernelDebug
               - libraries/Portenta_Camera/examples
               - libraries/Portenta_SDCARD
+              - libraries/Portenta_SDRAM
               - libraries/Portenta_System
               - libraries/Portenta_Video
               - libraries/RPC
               - libraries/ThreadDebug
+              - libraries/USBHID
               - libraries/USBHOST
+              - libraries/USBMSD/examples/AccessFlashAsUSBDisk
               - libraries/WiFi
           - board:
               fqbn: arduino:mbed:nanorp2040connect
             additional-sketch-paths: |
               - libraries/PDM
+              - libraries/USBHID
               - ~/Arduino/libraries/WiFiNINA
           - board:
               fqbn: arduino:mbed:nicla_sense
