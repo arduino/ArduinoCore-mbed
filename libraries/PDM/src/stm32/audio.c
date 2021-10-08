@@ -148,29 +148,29 @@ int py_audio_init(size_t channels, uint32_t frequency, int gain_db, float highpa
     if((frequency == AUDIO_FREQUENCY_11K) || (frequency == AUDIO_FREQUENCY_22K) || (frequency == AUDIO_FREQUENCY_44K))
     {
         /* SAI clock config:
-        PLL2_VCO Input = HSE_VALUE/PLL2M = 1 Mhz
-        PLL2_VCO Output = PLL2_VCO Input * PLL2N = 429 Mhz
-        SAI_CLK_x = PLL2_VCO Output/PLL2P = 429/38 = 11.289 Mhz */
+        PLL3_VCO Input = HSE_VALUE/PLL3M = 1 Mhz
+        PLL3_VCO Output = PLL3_VCO Input * PLL3N = 429 Mhz
+        SAI_CLK_x = PLL3_VCO Output/PLL3P = 429/38 = 11.289 Mhz */
         rcc_ex_clk_init_struct.PeriphClockSelection = RCC_PERIPHCLK_SAI4A;
-        rcc_ex_clk_init_struct.Sai4AClockSelection = RCC_SAI4ACLKSOURCE_PLL2;
-        rcc_ex_clk_init_struct.PLL2.PLL2P = 38;
-        rcc_ex_clk_init_struct.PLL2.PLL2Q = 1;
-        rcc_ex_clk_init_struct.PLL2.PLL2R = 1;
-        rcc_ex_clk_init_struct.PLL2.PLL2N = 429;
-        rcc_ex_clk_init_struct.PLL2.PLL2M = isBoardRev2() ? 25 : 27;
+        rcc_ex_clk_init_struct.Sai4AClockSelection = RCC_SAI4ACLKSOURCE_PLL3;
+        rcc_ex_clk_init_struct.PLL3.PLL3P = 38;
+        rcc_ex_clk_init_struct.PLL3.PLL3Q = 1;
+        rcc_ex_clk_init_struct.PLL3.PLL3R = 1;
+        rcc_ex_clk_init_struct.PLL3.PLL3N = 429;
+        rcc_ex_clk_init_struct.PLL3.PLL3M = isBoardRev2() ? 25 : 27;
 
     } else {
         /* SAI clock config:
-        PLL2_VCO Input = HSE_VALUE/PLL2M = 1 Mhz
-        PLL2_VCO Output = PLL2_VCO Input * PLL2N = 344 Mhz
-        sai_x_ker_ck = PLL2_VCO Output/PLL2P = 344/7 = 49.142 Mhz */
+        PLL3_VCO Input = HSE_VALUE/PLL3M = 1 Mhz
+        PLL3_VCO Output = PLL3_VCO Input * PLL3N = 344 Mhz
+        sai_x_ker_ck = PLL3_VCO Output/PLL3P = 344/7 = 49.142 Mhz */
         rcc_ex_clk_init_struct.PeriphClockSelection = RCC_PERIPHCLK_SAI4A;
-        rcc_ex_clk_init_struct.Sai4AClockSelection = RCC_SAI4ACLKSOURCE_PLL2;
-        rcc_ex_clk_init_struct.PLL2.PLL2P = 7;
-        rcc_ex_clk_init_struct.PLL2.PLL2Q = 1;
-        rcc_ex_clk_init_struct.PLL2.PLL2R = 1;
-        rcc_ex_clk_init_struct.PLL2.PLL2N = 344;
-        rcc_ex_clk_init_struct.PLL2.PLL2M = isBoardRev2() ? 25 : 27;
+        rcc_ex_clk_init_struct.Sai4AClockSelection = RCC_SAI4ACLKSOURCE_PLL3;
+        rcc_ex_clk_init_struct.PLL3.PLL3P = 7;
+        rcc_ex_clk_init_struct.PLL3.PLL3Q = 1;
+        rcc_ex_clk_init_struct.PLL3.PLL3R = 2;
+        rcc_ex_clk_init_struct.PLL3.PLL3N = 344;
+        rcc_ex_clk_init_struct.PLL3.PLL3M = isBoardRev2() ? 25 : 27;
     }
 
     HAL_RCCEx_PeriphCLKConfig(&rcc_ex_clk_init_struct);
