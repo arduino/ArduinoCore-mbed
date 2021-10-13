@@ -7,6 +7,9 @@ void setup() {
 }
 
 void loop() {
+#if LVGL_VERSION_MAJOR > 7
+  lv_timer_handler();
+#else
   lv_task_handler();
-  delay(3);
+#endif
 }

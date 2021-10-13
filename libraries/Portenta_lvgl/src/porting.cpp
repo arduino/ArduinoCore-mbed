@@ -151,24 +151,36 @@ void portenta_init_video() {
   getNextFrameBuffer();
 
   static lv_color_t buf[LV_HOR_RES_MAX * LV_VER_RES_MAX / 6];
-  static lv_disp_buf_t disp_buf;
-  lv_disp_buf_init(&disp_buf, buf, NULL, LV_HOR_RES_MAX * LV_VER_RES_MAX / 6);
 
-  /*Initialize the display*/
-  lv_disp_drv_init(&disp_drv);
-  disp_drv.flush_cb = my_disp_flush;
-  disp_drv.gpu_fill_cb = gpu_fill;
-  disp_drv.gpu_blend_cb = gpu_blend;
-  disp_drv.buffer = &disp_buf;
-  lv_disp_drv_register(&disp_drv);
+  // Compatibility with v7 and v8 APIs
+  #if LVGL_VERSION_MAJOR > 7
+    static lv_disp_draw_buf_t  disp_buf;
+    lv_disp_draw_buf_init(&disp_buf, buf, NULL, LV_HOR_RES_MAX * LV_VER_RES_MAX / 6);
 
-  //  lv_obj_t * myCustomLabel = lv_label_create(lv_scr_act(), NULL);
-  //  lv_label_set_text(myCustomLabel, "Hello Arduino! Dev-7,0");
-  //  lv_obj_align(myCustomLabel, NULL, LV_ALIGN_CENTER, 0, 0);
-  //  lv_label_set_text_fmt(myCustomLabel, "%d", 1999);
-  //lv_label_set_text_fmt(myCustomLabel, "hola");
+    /*Initialize the display*/
+    lv_disp_drv_init(&disp_drv);
+    disp_drv.flush_cb = my_disp_flush;
+    disp_drv.gpu_fill_cb = gpu_fill;
+    disp_drv.draw_buf = &disp_buf;
+    disp_drv.hor_res = LV_HOR_RES_MAX;
+    disp_drv.ver_res = LV_VER_RES_MAX;
 
-  //lv_task_create(label_refresher_task, 1000, LV_TASK_PRIO_MID, NULL);
+    lv_disp_drv_register(&disp_drv);
+
+  #else
+    static lv_disp_buf_t disp_buf;
+    lv_disp_buf_init(&disp_buf, buf, NULL, LV_HOR_RES_MAX * LV_VER_RES_MAX / 6);
+
+    /*Initialize the display*/
+    lv_disp_drv_init(&disp_drv);
+    disp_drv.flush_cb = my_disp_flush;
+    disp_drv.gpu_fill_cb = gpu_fill;
+    disp_drv.gpu_blend_cb = gpu_blend;
+    disp_drv.buffer = &disp_buf;
+    
+    lv_disp_drv_register(&disp_drv);
+
+  #endif
 }
 
 

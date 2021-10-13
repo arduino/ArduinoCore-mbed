@@ -9,6 +9,8 @@
 #include "lvgl.h"
 #include "lv_demo_widgets.h"
 
+#if LVGL_VERSION_MAJOR == 7
+
 /*********************
  *      DEFINES
  *********************/
@@ -408,3 +410,5 @@ static void tab_changer_task_cb(lv_task_t * task)
 
     lv_tabview_set_tab_act(tv, act, LV_ANIM_ON);
 }
+
+#endif
