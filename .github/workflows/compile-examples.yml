@@ -52,7 +52,6 @@ jobs:
               fqbn: arduino:mbed:envie_m4
             additional-libraries: |
               - name: lvgl
-                version: 7.11.0
             additional-sketch-paths: |
               - libraries/doom
               - libraries/KernelDebug
@@ -70,6 +69,7 @@ jobs:
               - libraries/doom
               - libraries/KernelDebug
               - libraries/Portenta_Camera/examples
+              - libraries/Portenta_lvgl/examples/Portenta_lvgl
               - libraries/Portenta_SDCARD
               - libraries/Portenta_SDRAM
               - libraries/Portenta_System
