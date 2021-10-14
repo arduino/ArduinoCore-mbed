@@ -25,8 +25,13 @@ edge_control.vid.0=0x2341
 edge_control.pid.0=0x005d
 edge_control.vid.1=0x2341
 edge_control.pid.1=0x805d
+edge_control.upload_port.0.vid=0x2341
+edge_control.upload_port.0.pid=0x005d
+edge_control.upload_port.1.vid=0x2341
+edge_control.upload_port.1.pid=0x805d
 
 edge_control.upload.tool=bossac
+edge_control.upload.tool.default=bossac
 edge_control.upload.protocol=
 edge_control.upload.transport=
 edge_control.upload.use_1200bps_touch=true
@@ -36,6 +41,7 @@ edge_control.upload.maximum_size=983040
 edge_control.upload.maximum_data_size=262144
 
 edge_control.bootloader.tool=openocd
+edge_control.bootloader.tool.default=openocd
 edge_control.bootloader.extra_action.preflash=echo INFO:removed_mass-erase
 edge_control.bootloader.config=-f target/nrf52.cfg
 edge_control.bootloader.programmer=-f interface/cmsis-dap.cfg
@@ -79,8 +85,15 @@ envie_m7.vid.1=0x2341
 envie_m7.pid.1=0x035b
 envie_m7.vid.2=0x2341
 envie_m7.pid.2=0x045b
+envie_m7.upload_port.0.vid=0x2341
+envie_m7.upload_port.0.pid=0x025b
+envie_m7.upload_port.1.vid=0x2341
+envie_m7.upload_port.1.pid=0x035b
+envie_m7.upload_port.2.vid=0x2341
+envie_m7.upload_port.2.pid=0x045b
 
 envie_m7.upload.tool=dfu-util
+envie_m7.upload.tool.default=dfu-util
 envie_m7.upload.protocol=
 envie_m7.upload.transport=
 envie_m7.upload.vid=0x2341
@@ -97,6 +110,7 @@ envie_m7.upload.maximum_data_size=523624
 
 envie_m7.debug.tool=gdb
 envie_m7.bootloader.tool=openocd
+envie_m7.bootloader.tool.default=openocd
 envie_m7.bootloader.config=-f target/stm32h7x_dual_bank.cfg
 envie_m7.bootloader.programmer=-f interface/stlink.cfg
 envie_m7.bootloader.extra_action.preflash=stm32h7x option_write 0 0x01c 0xb86aaf0
@@ -105,6 +119,8 @@ envie_m7.bootloader.file=PORTENTA_H7/portentah7_bootloader_mbed_hs_v2.elf
 envie_m7_thread_debug.name=Arduino Portenta H7 (ThreadDebug)
 envie_m7_thread_debug.vid.0=0x2341
 envie_m7_thread_debug.pid.0=0x025B
+envie_m7_thread_debug.upload_port.0.vid=0x2341
+envie_m7_thread_debug.upload_port.0.pid=0x025B
 envie_m7_thread_debug.descriptor.0=DebugPort
 envie_m7_thread_debug.hide=true
 envie_m7_thread_debug.build.board=PORTENTA_H7_M7
@@ -144,8 +160,11 @@ envie_m4.vid.0=0x2341
 envie_m4.pid.0=0x005b
 envie_m4.build.vid=0x2341
 envie_m4.build.pid=0x005b
+envie_m4.upload_port.0.vid=0x2341
+envie_m4.upload_port.0.pid=0x005b
 
 envie_m4.upload.tool=dfu-util
+envie_m4.upload.tool.default=dfu-util
 envie_m4.upload.vid=0x2341
 envie_m4.upload.pid=0x035b
 envie_m4.upload.protocol=
@@ -165,6 +184,7 @@ envie_m4.upload.maximum_data_size=294248
 
 envie_m4.debug.tool=gdb
 envie_m4.bootloader.tool=openocd
+envie_m4.bootloader.tool.default=openocd
 envie_m4.bootloader.config=-f target/stm32h7x_dual_bank.cfg
 envie_m4.bootloader.programmer=-f interface/stlink.cfg
 envie_m4.bootloader.extra_action.preflash=stm32h7x option_write 0 0x01c 0xb86aaf0
@@ -199,8 +219,15 @@ nano33ble.vid.1=0x2341
 nano33ble.pid.1=0x805a
 nano33ble.vid.2=0x2341
 nano33ble.pid.2=0x015a
+nano33ble.upload_port.0.vid=0x2341
+nano33ble.upload_port.0.pid=0x005a
+nano33ble.upload_port.1.vid=0x2341
+nano33ble.upload_port.1.pid=0x805a
+nano33ble.upload_port.2.vid=0x2341
+nano33ble.upload_port.2.pid=0x015a
 
 nano33ble.upload.tool=bossac
+nano33ble.upload.tool.default=bossac
 nano33ble.upload.protocol=
 nano33ble.upload.transport=
 nano33ble.upload.use_1200bps_touch=true
@@ -210,6 +237,7 @@ nano33ble.upload.maximum_size=983040
 nano33ble.upload.maximum_data_size=262144
 
 nano33ble.bootloader.tool=openocd
+nano33ble.bootloader.tool.default=openocd
 nano33ble.bootloader.extra_action.preflash=echo INFO:removed_mass-erase
 nano33ble.bootloader.config=-f target/nrf52.cfg
 nano33ble.bootloader.programmer=-f interface/cmsis-dap.cfg
@@ -244,8 +272,15 @@ nanorp2040connect.vid.1=0x2341
 nanorp2040connect.pid.1=0x805e
 nanorp2040connect.vid.2=0x2341
 nanorp2040connect.pid.2=0x015e
+nanorp2040connect.upload_port.0.vid=0x2341
+nanorp2040connect.upload_port.0.pid=0x005e
+nanorp2040connect.upload_port.1.vid=0x2341
+nanorp2040connect.upload_port.1.pid=0x805e
+nanorp2040connect.upload_port.2.vid=0x2341
+nanorp2040connect.upload_port.2.pid=0x015e
 
 nanorp2040connect.upload.tool=picotool
+nanorp2040connect.upload.tool.default=picotool
 nanorp2040connect.upload.protocol=
 nanorp2040connect.upload.transport=
 nanorp2040connect.upload.use_1200bps_touch=true
@@ -255,6 +290,7 @@ nanorp2040connect.upload.maximum_size=16777216
 nanorp2040connect.upload.maximum_data_size=270336
 
 nanorp2040connect.bootloader.tool=openocd
+nanorp2040connect.bootloader.tool.default=openocd
 nanorp2040connect.bootloader.config=-f target/rp2040.cfg
 nanorp2040connect.bootloader.programmer=-f interface/cmsis-dap.cfg
 
@@ -283,8 +319,11 @@ pico.compiler.mbed.extra_ldflags=-lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
 pico.compiler.mbed="{build.variant.path}/libs/libmbed.a"
 pico.vid.0=0x2e8a
 pico.pid.0=0x00C0
+pico.upload_port.0.vid=0x2e8a
+pico.upload_port.0.pid=0x00C0
 
 pico.upload.tool=picotool
+pico.upload.tool.default=picotool
 pico.upload.protocol=
 pico.upload.transport=
 pico.upload.use_1200bps_touch=true
@@ -294,6 +333,7 @@ pico.upload.maximum_size=16777216
 pico.upload.maximum_data_size=270336
 
 pico.bootloader.tool=openocd
+pico.bootloader.tool.default=openocd
 pico.bootloader.config=-f target/rp2040.cfg
 pico.bootloader.programmer=-f interface/cmsis-dap.cfg
 
@@ -322,8 +362,11 @@ nicla_sense.compiler.mbed.extra_ldflags=-lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
 nicla_sense.compiler.mbed="{build.variant.path}/libs/libmbed.a"
 nicla_sense.vid.0=0x2341
 nicla_sense.pid.0=0x0060
+nicla_sense.upload_port.0.vid=0x2341
+nicla_sense.upload_port.0.pid=0x0060
 
 nicla_sense.upload.tool=openocd
+nicla_sense.upload.tool.default=openocd
 nicla_sense.upload.protocol=
 nicla_sense.upload.config=-f target/nrf52.cfg
 nicla_sense.upload.programmer=-f interface/cmsis-dap.cfg
@@ -335,6 +378,7 @@ nicla_sense.upload.maximum_size=527616
 nicla_sense.upload.maximum_data_size=64288
 
 nicla_sense.bootloader.tool=openocd
+nicla_sense.bootloader.tool.default=openocd
 nicla_sense.bootloader.extra_action.preflash=echo INFO:removed_mass-erase
 nicla_sense.bootloader.config=-f target/nrf52.cfg
 nicla_sense.bootloader.programmer=-f interface/cmsis-dap.cfg
