@@ -58,6 +58,8 @@ private:
   int _gain;
   int _init;
 
+  int _cutSamples;
+
   PDMDoubleBuffer _doubleBuffer;
 
   void (*_onReceive)(void);

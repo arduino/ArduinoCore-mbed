@@ -43,7 +43,8 @@ PDMClass::PDMClass(int dinPin, int clkPin, int pwrPin) :
   _gain(-1),
   _channels(-1),
   _samplerate(-1),
-  _init(-1)
+  _init(-1),
+  _cutSamples(0)
 {
 }
 
