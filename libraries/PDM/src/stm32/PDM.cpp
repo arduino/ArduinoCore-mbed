@@ -39,7 +39,8 @@ PDMClass::PDMClass(int dinPin, int clkPin, int pwrPin) :
   _gain(-1),
   _channels(-1),
   _samplerate(-1),
-  _init(-1)
+  _init(-1),
+  _cutSamples(4)
 {
   _instance = this;
 }
@@ -79,6 +80,8 @@ int PDMClass::begin(int channels, int sampleRate) {
 
   g_pcmbuf = (uint16_t*)_doubleBuffer.data();
   _doubleBuffer.swap(0);
+
+  _cutSamples = 4 * channels;
 
   if(py_audio_init(channels, sampleRate, _gain, 0.9883f)) {
     py_audio_start_streaming();
@@ -146,8 +149,12 @@ void PDMClass::IrqHandler(bool halftranfer)
       _doubleBuffer.swap(g_pcmbuf_size);
       g_pcmbuf = (uint16_t*)_doubleBuffer.data();
       g_pcmbuf_size = 0;
-      if (_onReceive) {
-        _onReceive();
+      if(_cutSamples == 0) {
+        if (_onReceive) {
+          _onReceive();
+        }
+      } else {
+          _cutSamples--;
       }
     }
   }

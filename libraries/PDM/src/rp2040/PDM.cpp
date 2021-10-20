@@ -53,7 +53,8 @@ PDMClass::PDMClass(int dinPin, int clkPin, int pwrPin) :
   _gain(-1),
   _channels(-1),
   _samplerate(-1),
-  _init(-1)
+  _init(-1),
+  _cutSamples(100)
 {
 }
 
@@ -138,6 +139,8 @@ int PDMClass::begin(int channels, int sampleRate)
     true                // Start immediately
   );
 
+  _cutSamples = 100;
+
   _init = 1;
 
   return 1;
@@ -190,8 +193,6 @@ void PDMClass::setBufferSize(int bufferSize)
 
 void PDMClass::IrqHandler(bool halftranfer)
 {
-  static int cutSamples = 100;
-
   // Clear the interrupt request.
   dma_hw->ints0 = 1u << dmaChannel; 
   // Restart dma pointing to the other buffer 
@@ -210,9 +211,9 @@ void PDMClass::IrqHandler(bool halftranfer)
     Open_PDM_Filter_64(rawBuffer[rawBufferIndex], finalBuffer, 1, &filter);
   }
 
-  if (cutSamples) {
-    memset(finalBuffer, 0, cutSamples);
-    cutSamples = 0;
+  if (_cutSamples) {
+    memset(finalBuffer, 0, _cutSamples);
+    _cutSamples = 0;
   }
 
   // swap final buffer and raw buffers' indexes
