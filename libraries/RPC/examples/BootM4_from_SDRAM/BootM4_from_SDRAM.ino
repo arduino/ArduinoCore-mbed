@@ -6,7 +6,7 @@
 #include "FATFileSystem.h"
 #include "PluggableUSBMSD.h"
 
-QSPIFBlockDevice root(PD_11, PD_12, PF_7, PD_13,  PF_10, PG_6, QSPIF_POLARITY_MODE_1, 40000000);
+QSPIFBlockDevice root;
 mbed::MBRBlockDevice ota_data(&root, 2);
 mbed::FATFileSystem ota_data_fs("fs");
 
