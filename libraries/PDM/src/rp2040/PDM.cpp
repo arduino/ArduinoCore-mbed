@@ -148,6 +148,7 @@ int PDMClass::begin(int channels, int sampleRate)
 
 void PDMClass::end()
 {
+  NVIC_DisableIRQ(DMA_IRQ_0n);
   pio_remove_program(pio, &pdm_pio_program, offset);
   dma_channel_abort(dmaChannel);
   pinMode(_clkPin, INPUT);
