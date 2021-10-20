@@ -105,9 +105,20 @@ recipe.size.regex=^(?:\.data|\.text)\s+([0-9]+).*
 recipe.output.tmp_file={build.project_name}.bin
 recipe.output.save_file={build.project_name}.{build.variant}.bin
 
-# Uploader tools
-# ---------------------
 
+# Required discoveries and monitors
+# ---------------------------------
+pluggable_discovery.required.0=builtin:serial-discovery
+pluggable_discovery.required.1=builtin:mdns-discovery
+pluggable_monitor.required.serial=builtin:serial-monitor
+
+
+# Uploader tools
+# --------------
+
+#
+# OpenOCD
+#
 tools.openocd.path={runtime.tools.openocd.path}
 tools.openocd.cmd=bin/openocd
 tools.openocd.cmd.windows=bin/openocd.exe
@@ -139,7 +150,9 @@ tools.bossac.upload.params.verbose=-d
 tools.bossac.upload.params.quiet=
 tools.bossac.upload.pattern="{path}/{cmd}" {upload.verbose} --port={serial.port.file} -U -i -e -w "{build.path}/{build.project_name}.bin" -R
 
+#
 # STM32FLASH
+#
 tools.stm32flash.cmd=stm32flash
 tools.stm32flash.path={runtime.platform.path}/tools/windows
 tools.stm32flash.path.macosx={runtime.platform.path}/tools/macosx
@@ -159,7 +172,6 @@ tools.stm32flash.erase.pattern="{path}/{cmd}" {serial.port} -e 1024 -b 2400
 #
 tools.dfu-util.path={runtime.tools.dfu-util.path}
 tools.dfu-util.cmd=dfu-util
-
 tools.dfu-util.upload.params.verbose=-d
 tools.dfu-util.upload.params.quiet=
 tools.dfu-util.upload.pattern="{path}/{cmd}" --device {upload.vid}:{upload.pid} -D "{build.path}/{build.project_name}.bin" -a{upload.interface} --dfuse-address={upload.address}:leave
@@ -167,10 +179,8 @@ tools.dfu-util.upload.pattern="{path}/{cmd}" --device {upload.vid}:{upload.pid} 
 #
 # PICOTOOL
 #
-
 tools.picotool.path={runtime.tools.rp2040tools.path}
 tools.picotool.cmd=rp2040load
-
 tools.picotool.upload.params.verbose=-v
 tools.picotool.upload.params.quiet=
 tools.picotool.upload.pattern="{path}/{cmd}" {upload.verbose} -D "{build.path}/{build.project_name}.elf"
