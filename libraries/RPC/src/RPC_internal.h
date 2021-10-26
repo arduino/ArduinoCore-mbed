@@ -35,12 +35,6 @@ extern "C" {
 
 #include "mbed.h"
 
-enum endpoints_t {
-	ENDPOINT_CM7TOCM4 = 0,
-	ENDPOINT_CM4TOCM7,
-	ENDPOINT_RAW
-};
-
 typedef struct _service_request {
   uint8_t* data;
 } service_request;
@@ -64,7 +58,7 @@ class RPC : public Stream, public rpc::detail::dispatcher {
 		void flush(void) {};
 		size_t write(uint8_t c);
 		size_t write(const uint8_t*, size_t);
-		size_t write(enum endpoints_t ep, const uint8_t* buf, size_t len);
+		size_t write(uint8_t ep, const uint8_t* buf, size_t len);
 
 		using Print::write; // pull in write(str) and write(buf, size) from Print
 		operator bool() {
@@ -84,6 +78,8 @@ class RPC : public Stream, public rpc::detail::dispatcher {
     		// find a free spot in clients[]
     		// create new object
     		// protect this with mutex
+
+    		mtx.lock();
     		int i = 0;
     		for (i=0; i<10; i++) {
     			if (clients[i] == NULL) {
@@ -91,12 +87,16 @@ class RPC : public Stream, public rpc::detail::dispatcher {
     				break;
     			}
     		}
+    		mtx.unlock();
+
     		// thread start and client .call
     		clients[i]->call(func_name, args...);
     		RPCLIB_MSGPACK::object_handle ret = std::move(clients[i]->result);
 
+    		mtx.lock();
     		delete clients[i];
     		clients[i] = NULL;
+    		mtx.unlock();
     		return ret;
     	}
 
@@ -105,26 +105,30 @@ class RPC : public Stream, public rpc::detail::dispatcher {
 	private:
 		RingBufferN<256> rx_buffer;
 		bool initialized = false;
-		static int rpmsg_recv_cm7tocm4_callback(struct rpmsg_endpoint *ept, void *data,
+
+		static int rpmsg_recv_callback(struct rpmsg_endpoint *ept, void *data,
                                        size_t len, uint32_t src, void *priv);
-		static int rpmsg_recv_cm4tocm7_callback(struct rpmsg_endpoint *ept, void *data,
+		static int rpmsg_recv_response_callback(struct rpmsg_endpoint *ept, void *data,
                                        size_t len, uint32_t src, void *priv);
-		static int rpmsg_recv_raw_callback(struct rpmsg_endpoint *ept, void *data,
-                                       size_t len, uint32_t src, void *priv);
+
 		static void new_service_cb(struct rpmsg_device *rdev, const char *name, uint32_t dest);
 
 		void dispatch();
+		void response();
 		events::EventQueue eventQueue;
 		mbed::Ticker ticker;
 		rtos::Thread* eventThread;
 		rtos::Thread* dispatcherThread;
-		RPCLIB_MSGPACK::unpacker pac_;
+		rtos::Thread* responseThread;
+		rtos::Mutex mtx;
+
 		mbed::Callback<void()> _rx;
 
 		//rpc::detail::response response;
 		RPCLIB_MSGPACK::object_handle call_result;
 
 		osThreadId dispatcherThreadId;
+		osThreadId responseThreadId;
 };
 }
 

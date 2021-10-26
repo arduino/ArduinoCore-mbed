@@ -10,6 +10,8 @@
 #include <metal/log.h>
 #include <metal/sys.h>
 
+#define DEFAULT_LOGGER_ON
+
 void metal_default_log_handler(enum metal_log_level level,
 			       const char *format, ...)
 {
@@ -34,7 +36,7 @@ void metal_default_log_handler(enum metal_log_level level,
 	if (level <= METAL_LOG_EMERGENCY || level > METAL_LOG_DEBUG)
 		level = METAL_LOG_EMERGENCY;
 
-	fprintf(stderr, "%s%s", level_strs[level], msg);
+	printf("%s%s", level_strs[level], msg);
 #else
 	(void)level;
 	(void)format;

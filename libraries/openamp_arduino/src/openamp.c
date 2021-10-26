@@ -162,9 +162,9 @@ int OPENAMP_create_endpoint(struct rpmsg_endpoint *ept, const char *name,
 		          unbind_cb);
   }
 
-void OPENAMP_check_for_message(void)
+int OPENAMP_check_for_message(void)
 {
-  MAILBOX_Poll(rvdev.vdev);
+  return MAILBOX_Poll(rvdev.vdev);
 }
 
 void OPENAMP_Wait_EndPointready(struct rpmsg_endpoint *rp_ept, size_t timeout)

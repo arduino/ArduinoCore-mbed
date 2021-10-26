@@ -19,10 +19,8 @@ public:
 	}
 	void flush(void) {};
 
-	using Print::write; // pull in write(str) and write(buf, size) from Print
-
-	void onWrite(std::vector<uint8_t> vec) {
-	  for (int i = 0; i < vec.size(); i++) {
+	void onWrite(std::vector<uint8_t>& vec) {
+	  for (size_t i = 0; i < vec.size(); i++) {
 	  	rx_buffer.store_char(vec[i]);
 	  }
 	  // call attached function
@@ -32,20 +30,33 @@ public:
 	}
 
 	size_t write(uint8_t c) {
-		write(&c, 1);
+		return write(&c, 1);
+	}
+
+	size_t write(const char* buf, size_t len) {
+		return write((uint8_t*)buf, len);
+	}
+	size_t write(char* buf, size_t len) {
+		return write((uint8_t*)buf, len);
 	}
 
 	size_t write(uint8_t* buf, size_t len) {
 		tx_buffer.clear();
-		for (int i=0; i<len; i++) {
+		for (size_t i=0; i < len; i++) {
 			tx_buffer.push_back(buf[i]);
 		}
 		RPC1.call("on_write", tx_buffer);
+		return len;
 	}
 
+	using Print::write;
+
 	int begin() {
-		RPC1.begin();
+		if (RPC1.begin() == 0) {
+			return 0;
+		}
 		RPC1.bind("on_write", mbed::callback(this, &SerialRPCClass::onWrite));
+		return 1;
 	}
 
 	operator bool() {
