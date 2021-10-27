@@ -100,8 +100,8 @@ static const uint8_t SCK  = PIN_SPI_SCK;
 #define PIN_WIRE_SCL        (12u)
 
 #define SERIAL_HOWMANY		2
-#define SERIAL1_TX			(digitalPinToPinName(PIN_SERIAL_TX))
-#define SERIAL1_RX			(digitalPinToPinName(PIN_SERIAL_RX))
+#define SERIAL1_TX			PA_9_ALT0
+#define SERIAL1_RX			PA_10_ALT0
 
 #define SERIAL2_TX			PB_6
 #define SERIAL2_RX			PB_7
