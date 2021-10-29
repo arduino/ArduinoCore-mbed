@@ -128,11 +128,12 @@ void _ontouch1200bps_();
 #define I2C_SCL_INTERNAL	(PF_1)
 #define I2C_SDA1			I2C_SDA_INTERNAL
 #define I2C_SCL1			I2C_SCL_INTERNAL
-//#define I2C_SDA1			(13u)
-//#define I2C_SCL1			(14u)
 
-#define I2C_SDA3			(18u)
-#define I2C_SCL3			(19u)
+#define I2C_SDA2			(13u)
+#define I2C_SCL2			(14u)
+
+//#define I2C_SDA3			(18u)
+//#define I2C_SCL3			(19u)
 
 #define SPI_HOWMANY			2
 

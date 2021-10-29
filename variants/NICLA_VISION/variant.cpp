@@ -26,8 +26,8 @@ PinDescription g_APinDescription[] = {
   { PE_13,        NULL, NULL, NULL },    // SPI_CIPO
   { PB_9,         NULL, NULL, NULL },    // SDA
   { PB_8,         NULL, NULL, NULL },    // SCL
-  { PF_0,         NULL, NULL, NULL },    // SDA2
-  { PF_1,         NULL, NULL, NULL },    // SCL2
+  { PC_9,         NULL, NULL, NULL },    // SDA2
+  { PA_8,         NULL, NULL, NULL },    // SCL2
 
   // A0 - A6
   { PC_4,         NULL, NULL, NULL },    // A0    ADC2_INP0
