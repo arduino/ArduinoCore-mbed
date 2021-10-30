@@ -98,7 +98,7 @@ void msgpack_unpacker_free(msgpack_unpacker* mpac);
 
 
 #ifndef MSGPACK_UNPACKER_RESERVE_SIZE
-#define MSGPACK_UNPACKER_RESERVE_SIZE (32*1024)
+#define MSGPACK_UNPACKER_RESERVE_SIZE (1024)
 #endif
 
 /**
