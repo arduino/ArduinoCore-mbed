@@ -1,4 +1,4 @@
-#include "RPC_internal.h"
+#include "RPC.h"
 #include "Arduino.h"
 
 namespace arduino {
@@ -45,22 +45,22 @@ public:
 		for (size_t i=0; i < len; i++) {
 			tx_buffer.push_back(buf[i]);
 		}
-		RPC1.call("on_write", tx_buffer);
+		RPC.call("on_write", tx_buffer);
 		return len;
 	}
 
 	using Print::write;
 
 	int begin() {
-		if (RPC1.begin() == 0) {
+		if (RPC.begin() == 0) {
 			return 0;
 		}
-		RPC1.bind("on_write", mbed::callback(this, &SerialRPCClass::onWrite));
+		RPC.bind("on_write", mbed::callback(this, &SerialRPCClass::onWrite));
 		return 1;
 	}
 
 	operator bool() {
-		return RPC1;
+		return RPC;
 	}
 
     void attach(void (*fptr)(void))

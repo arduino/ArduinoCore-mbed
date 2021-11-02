@@ -1,5 +1,5 @@
 #include "Arduino.h"
-#include "RPC_internal.h"
+#include "RPC.h"
 
 using namespace rtos;
 
@@ -40,11 +40,11 @@ void callSubstractFromM4() {
     delay(700); // Wait 700ms with the next calculation
     int a = random(100); // Generate a random number
     int b = random(100); // Generate a random number
-    RPC1.println(currentCPU() + ": calling subtract with " + String(a) + " and " + String(b));
+    RPC.println(currentCPU() + ": calling subtract with " + String(a) + " and " + String(b));
     
-    auto result = RPC1.call("remoteSubtract", a, b).as<int>();
+    auto result = RPC.call("remoteSubtract", a, b).as<int>();
     // Prints the result of the calculation
-    RPC1.println(currentCPU() + ": Result is " + String(a) + " - " + String(b) + " = " + String(result));
+    RPC.println(currentCPU() + ": Result is " + String(a) + " - " + String(b) + " = " + String(result));
   }
 }
 
@@ -53,7 +53,7 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
 
   // Initialize RPC library; this also boots the M4 core
-  RPC1.begin();
+  RPC.begin();
   Serial.begin(115200);
   //while (!Serial) {} // Uncomment this to wait until the Serial connection is ready
 
@@ -62,8 +62,8 @@ void setup() {
 
   if (currentCPU() == "M7") {
     // M7 CPU becomes the server, so it makes two functions available under the defined names
-    RPC1.bind("remoteAdd", addOnM7);
-    RPC1.bind("remoteSubtract", subtractOnM7);
+    RPC.bind("remoteAdd", addOnM7);
+    RPC.bind("remoteSubtract", subtractOnM7);
   } 
 
   if (currentCPU() == "M4") {
@@ -86,20 +86,20 @@ void loop() {
     int b = random(100);
     // PRC.print works like a Serial port, but it needs a receiver (in this case the M7) 
     // to actually print the strings to the Serial port
-    RPC1.println(currentCPU() + ": calling add with " + String(a) + " and " + String(b));
+    RPC.println(currentCPU() + ": calling add with " + String(a) + " and " + String(b));
     // Let's invoke addOnM7() and wait for a result.
     // This will be delayed by the forced delay() in addOnM7() function
     // Exercise: if you are not interested in the result of the operation, what operation would you invoke?
-    auto result = RPC1.call("remoteAdd", a, b).as<int>();    
-    RPC1.println(currentCPU() + ": Result is " + String(a) + " + " + String(b) + " = " + String(result));
+    auto result = RPC.call("remoteAdd", a, b).as<int>();    
+    RPC.println(currentCPU() + ": Result is " + String(a) + " + " + String(b) + " = " + String(result));
   }
   
   if (currentCPU() == "M7") {
     // On M7, let's print everything that is received over the RPC1 stream interface
     // Buffer it, otherwise all characters will be interleaved by other prints
     String buffer = "";
-    while (RPC1.available()) {
-      buffer += (char)RPC1.read(); // Fill the buffer with characters
+    while (RPC.available()) {
+      buffer += (char)RPC.read(); // Fill the buffer with characters
     }
 
     if (buffer.length() > 0) {

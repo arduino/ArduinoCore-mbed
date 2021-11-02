@@ -4,7 +4,7 @@
 
 //forward declaration
 namespace arduino {
-class RPC;
+class RPCClass;
 }
 
 namespace rpc {
@@ -62,7 +62,7 @@ class client {
 
   protected:
     osThreadId callThreadId;
-    friend class arduino::RPC;
+    friend class arduino::RPCClass;
     RPCLIB_MSGPACK::object_handle result;
 
   private:

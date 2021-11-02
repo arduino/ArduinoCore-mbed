@@ -1,4 +1,4 @@
-#include "RPC_internal.h"
+#include "RPC.h"
 
 static struct rpmsg_endpoint rp_endpoints[4];
 
@@ -16,10 +16,10 @@ static RingBufferN<256> intermediate_buffer_resp;
 //static uint8_t intermediate_buffer_resp[256];
 static rtos::Mutex rx_mtx;
 
-int RPC::rpmsg_recv_callback(struct rpmsg_endpoint *ept, void *data,
+int RPCClass::rpmsg_recv_callback(struct rpmsg_endpoint *ept, void *data,
                                        size_t len, uint32_t src, void *priv)
 {
-  RPC* rpc = (RPC*)priv;
+  RPCClass* rpc = (RPCClass*)priv;
 
   for (size_t i = 0; i < len; i++) {
     intermediate_buffer.store_char(((uint8_t*)data)[i]);
@@ -33,10 +33,10 @@ int RPC::rpmsg_recv_callback(struct rpmsg_endpoint *ept, void *data,
 
 static bool first_message = true;
 
-int RPC::rpmsg_recv_response_callback(struct rpmsg_endpoint *ept, void *data,
+int RPCClass::rpmsg_recv_response_callback(struct rpmsg_endpoint *ept, void *data,
                                        size_t len, uint32_t src, void *priv)
 {
-  RPC* rpc = (RPC*)priv;
+  RPCClass* rpc = (RPCClass*)priv;
 
 #ifdef CORE_CM4
       if (first_message) {
@@ -57,7 +57,7 @@ int RPC::rpmsg_recv_response_callback(struct rpmsg_endpoint *ept, void *data,
   return 0;
 }
 
-void RPC::new_service_cb(struct rpmsg_device *rdev, const char *name, uint32_t dest)
+void RPCClass::new_service_cb(struct rpmsg_device *rdev, const char *name, uint32_t dest)
 {
   if (strcmp(name, "raw") == 0) {
     OPENAMP_create_endpoint(&rp_endpoints[ENDPOINT_RAW], name, dest, rpmsg_recv_callback, NULL);
@@ -127,7 +127,7 @@ static void disableCM4Autoboot() {
   }
 }
 
-int RPC::begin() {
+int RPCClass::begin() {
 
 	OpenAMP_MPU_Config();
 
@@ -141,10 +141,10 @@ int RPC::begin() {
 	eventThread->start(&eventHandler);
 
   dispatcherThread = new rtos::Thread(osPriorityNormal);
-  dispatcherThread->start(mbed::callback(this, &RPC::dispatch));
+  dispatcherThread->start(mbed::callback(this, &RPCClass::dispatch));
 
   responseThread = new rtos::Thread(osPriorityNormal);
-  responseThread->start(mbed::callback(this, &RPC::response));
+  responseThread->start(mbed::callback(this, &RPCClass::response));
 
 	/* Initialize OpenAmp and libmetal libraries */
 	if (MX_OPENAMP_Init(RPMSG_MASTER, new_service_cb) !=  HAL_OK) {
@@ -182,16 +182,16 @@ int RPC::begin() {
 
 #ifdef CORE_CM4
 
-int RPC::begin() {
+int RPCClass::begin() {
 
   eventThread = new rtos::Thread(osPriorityHigh);
   eventThread->start(&eventHandler);
 
   dispatcherThread = new rtos::Thread(osPriorityNormal);
-  dispatcherThread->start(mbed::callback(this, &RPC::dispatch));
+  dispatcherThread->start(mbed::callback(this, &RPCClass::dispatch));
 
   responseThread = new rtos::Thread(osPriorityNormal);
-  responseThread->start(mbed::callback(this, &RPC::response));
+  responseThread->start(mbed::callback(this, &RPCClass::response));
 
   /* Initialize OpenAmp and libmetal libraries */
   if (MX_OPENAMP_Init(RPMSG_REMOTE, NULL) !=  0) {
@@ -221,7 +221,7 @@ int RPC::begin() {
 
 using raw_call_t = std::tuple<RPCLIB_MSGPACK::object>;
 
-void RPC::response() {
+void RPCClass::response() {
   responseThreadId = osThreadGetId();
 
   for (int i = 0; i< 10; i++) {
@@ -269,7 +269,7 @@ void RPC::response() {
   }
 }
 
-void RPC::dispatch() {
+void RPCClass::dispatch() {
 
   dispatcherThreadId = osThreadGetId();
 
@@ -322,16 +322,16 @@ void RPC::dispatch() {
 }
 
 
-size_t RPC::write(uint8_t c) {
+size_t RPCClass::write(uint8_t c) {
   write(&c, 1);
   return 1;
 }
 
-size_t RPC::write(const uint8_t* buf, size_t len) {
+size_t RPCClass::write(const uint8_t* buf, size_t len) {
   return write(ENDPOINT_RAW, buf, len);
 }
 
-size_t RPC::write(uint8_t ep, const uint8_t* buf, size_t len) {
+size_t RPCClass::write(uint8_t ep, const uint8_t* buf, size_t len) {
 
   std::vector<uint8_t> tx_buffer;
   for (size_t i = 0; i < len; i++) {
@@ -347,4 +347,4 @@ size_t RPC::write(uint8_t ep, const uint8_t* buf, size_t len) {
   return len;
 }
 
-arduino::RPC RPC1;
+arduino::RPCClass RPC;

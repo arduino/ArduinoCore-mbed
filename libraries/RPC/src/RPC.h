@@ -41,9 +41,9 @@ typedef struct _service_request {
 
 namespace arduino {
 
-class RPC : public Stream, public rpc::detail::dispatcher {
+class RPCClass : public Stream, public rpc::detail::dispatcher {
 	public:
-		RPC() {};
+		RPCClass() {};
 		int begin();
 		void end() {};
 		int available(void) {
@@ -132,7 +132,7 @@ class RPC : public Stream, public rpc::detail::dispatcher {
 };
 }
 
-extern arduino::RPC RPC1;
+extern arduino::RPCClass RPC;
 
 #endif
 #endif
