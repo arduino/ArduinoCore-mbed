@@ -105,12 +105,37 @@ static void OpenAMP_MPU_Config(void)
 	HAL_MPU_Enable(MPU_PRIVILEGED_DEFAULT);
 }
 
+#define return_if_not_ok(x) do { int ret = x ; if (ret != HAL_OK) return; } while (0);
+
+static void disableCM4Autoboot() {
+  FLASH_OBProgramInitTypeDef OBInit;
+  OBInit.Banks     = FLASH_BANK_1;
+  HAL_FLASHEx_OBGetConfig(&OBInit);
+  if (OBInit.USERConfig & FLASH_OPTSR_BCM4) {
+    OBInit.OptionType = OPTIONBYTE_USER;
+    OBInit.USERType = OB_USER_BCM4;
+    OBInit.USERConfig = 0;
+    return_if_not_ok(HAL_FLASH_OB_Unlock());
+    return_if_not_ok(HAL_FLASH_Unlock());
+    return_if_not_ok(HAL_FLASHEx_OBProgram(&OBInit));
+    return_if_not_ok(HAL_FLASH_OB_Launch());
+    return_if_not_ok(HAL_FLASH_OB_Lock());
+    return_if_not_ok(HAL_FLASH_Lock());
+    printf("CM4 autoboot disabled\n");
+    NVIC_SystemReset();
+    return;
+  }
+}
+
 int RPC::begin() {
 
 	OpenAMP_MPU_Config();
 
 	//resource_table_load_from_flash();
 	//HAL_SYSCFG_EnableCM4BOOT();
+
+  // Ideally this should execute only once
+  disableCM4Autoboot();
 
 	eventThread = new rtos::Thread(osPriorityHigh);
 	eventThread->start(&eventHandler);
