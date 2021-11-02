@@ -4,22 +4,24 @@
  *
  * This work is licensed under <>, see the file LICENSE for details.
  *
- * HM01B0 driver.
+ * GC2145 driver.
  */
-#ifndef __HIMAX_H
-#define __HIMAX_H
+#ifndef __GC2145_H
+#define __GC2145_H
 
 #include "camera.h"
 
-class HM01B0: public ImageSensor {
+class GC2145: public ImageSensor {
+   private:
+    int SetWindow(uint16_t reg, uint16_t x, uint16_t y, uint16_t w, uint16_t h);
    public:
        int Init();
        int Reset();
-       int GetID() { return HM01B0_I2C_ADDR; };
-       uint32_t GetClockFrequency() { return 6000000; };
+       int GetID() { return GC2145_I2C_ADDR; };
+       uint32_t GetClockFrequency() { return 12000000; };
        int SetFrameRate(uint32_t framerate);
        int SetResolution(uint32_t resolution);
        int SetPixelFormat(uint32_t pixelformat);
-       int SetTestPattern(bool enable, bool walking);
 };
-#endif /* __HIMAX_H */
+ 
+#endif /* __GC2145_H */

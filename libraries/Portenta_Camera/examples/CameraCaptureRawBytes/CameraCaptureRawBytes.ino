@@ -1,25 +1,46 @@
 #include "camera.h"
+#include "SDRAM.h"
 
-CameraClass cam;
-uint8_t fb[320*240];
+//REDIRECT_STDOUT_TO(Serial);
+
+Camera cam;
+uint8_t *fb = (uint8_t*) SDRAM_START_ADDRESS;
+
+void blink_error(uint32_t count)
+{
+  pinMode(LED_BUILTIN, OUTPUT);
+  while (count--) {
+    digitalWrite(LED_BUILTIN, LOW);  // turn the LED on (HIGH is the voltage level)
+    delay(50);                       // wait for a second
+    digitalWrite(LED_BUILTIN, HIGH); // turn the LED off by making the voltage LOW
+    delay(50);                       // wait for a second
+  }
+}
 
 void setup() {
-  Serial.begin(921600);  
+  Serial.begin(921600);
+
+  // Init DRAM and reserve 2MB for framebuffer.
+  SDRAM.begin(SDRAM_START_ADDRESS + 2 * 1024 * 1024);
 
   // Init the cam QVGA, 30FPS
-  cam.begin(CAMERA_R320x240, 30);
+  if (cam.begin(CAMERA_R320x240, 30) != 0) {
+    blink_error(0xFFFFFFFF);
+  }
+  
+  //Serial.print("Sensor ID:");
+  //Serial.println(cam.GetID());
+  blink_error(5);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  
-  // Wait until the receiver acknowledges
-  // that they are ready to receive new data
-  while(Serial.read() != 1){};
+  // Wait for sync byte.
+  while (Serial.read() != 1) { };
   
   // Grab frame and write to serial
-  if (cam.grab(fb) == 0) {
-     Serial.write(fb, 320*240);       
+  if (cam.GrabFrame(fb, 3000) == 0) {
+    Serial.write(fb, 320*240);
+  } else {
+    blink_error(0xFFFFFFFF);
   }
-  
 }

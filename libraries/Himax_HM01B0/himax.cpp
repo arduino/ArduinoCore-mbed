@@ -1,74 +1,127 @@
-/**
-******************************************************************************
-* @file    gapuino_himax.c
-* @author  GreenWave Technologies Application Team
-* @brief   This file includes a standard driver for the HIMAX I2C
-*          camera mounted on GAPUINO board.
-@verbatim
-==============================================================================
-##### How to use this driver #####
-==============================================================================
-[..]
-(#) This driver is used to drive the HIMAX I2C external
-memory mounted on GAPUINO board.
+/*
+ * TODO: Add license.
+ * Copyright (c) 2021
+ *
+ * This work is licensed under <>, see the file LICENSE for details.
+ *
+ * HM01B0 driver.
+ */
+#include "Wire.h"
+#include "himax.h"
 
-(#) This driver need a specific component driver (HIMAX) to be included with.
+#define ENABLE            0x01
+#define DISABLE           0x00
 
-(#) Initialization steps:
-
-**/
+// Register set
+// Read only registers
+#define         MODEL_ID_H          0x0000
+#define         MODEL_ID_L          0x0001
+#define         FRAME_COUNT         0x0005
+#define         PIXEL_ORDER         0x0006
+// R&W registers
+// Sensor mode control
+#define         MODE_SELECT         0x0100
+#define         IMG_ORIENTATION     0x0101
+#define         SW_RESET            0x0103
+#define         GRP_PARAM_HOLD      0x0104
+// Sensor exposure gain control
+#define         INTEGRATION_H       0x0202
+#define         INTEGRATION_L       0x0203
+#define         ANALOG_GAIN         0x0205
+#define         DIGITAL_GAIN_H      0x020E
+#define         DIGITAL_GAIN_L      0x020F
+// Frame timing control
+#define         FRAME_LEN_LINES_H   0x0340
+#define         FRAME_LEN_LINES_L   0x0341
+#define         LINE_LEN_PCK_H      0x0342
+#define         LINE_LEN_PCK_L      0x0343
+// Binning mode control
+#define         READOUT_X           0x0383
+#define         READOUT_Y           0x0387
+#define         BINNING_MODE        0x0390
+// Test pattern control
+#define         TEST_PATTERN_MODE   0x0601
+// Black level control
+#define         BLC_CFG             0x1000
+#define         BLC_TGT             0x1003
+#define         BLI_EN              0x1006
+#define         BLC2_TGT            0x1007
+//  Sensor reserved
+#define         DPC_CTRL            0x1008
+#define         SINGLE_THR_HOT      0x100B
+#define         SINGLE_THR_COLD     0x100C
+// VSYNC,HSYNC and pixel shift register
+#define         VSYNC_HSYNC_PIXEL_SHIFT_EN  0x1012
+// Automatic exposure gain control
+#define         AE_CTRL             0x2100
+#define         AE_TARGET_MEAN      0x2101
+#define         AE_MIN_MEAN         0x2102
+#define         CONVERGE_IN_TH      0x2103
+#define         CONVERGE_OUT_TH     0x2104
+#define         MAX_INTG_H          0x2105
+#define         MAX_INTG_L          0x2106
+#define         MIN_INTG            0x2107
+#define         MAX_AGAIN_FULL      0x2108
+#define         MAX_AGAIN_BIN2      0x2109
+#define         MIN_AGAIN           0x210A
+#define         MAX_DGAIN           0x210B
+#define         MIN_DGAIN           0x210C
+#define         DAMPING_FACTOR      0x210D
+#define         FS_CTRL             0x210E
+#define         FS_60HZ_H           0x210F
+#define         FS_60HZ_L           0x2110
+#define         FS_50HZ_H           0x2111
+#define         FS_50HZ_L           0x2112
+#define         FS_HYST_TH          0x2113
+// Motion detection control
+#define         MD_CTRL             0x2150
+#define         I2C_CLEAR           0x2153
+#define         WMEAN_DIFF_TH_H     0x2155
+#define         WMEAN_DIFF_TH_M     0x2156
+#define         WMEAN_DIFF_TH_L     0x2157
+#define         MD_THH              0x2158
+#define         MD_THM1             0x2159
+#define         MD_THM2             0x215A
+#define         MD_THL              0x215B
+#define         STATISTIC_CTRL      0x2000
+#define         MD_LROI_X_START_H   0x2011
+#define         MD_LROI_X_START_L   0x2012
+#define         MD_LROI_Y_START_H   0x2013
+#define         MD_LROI_Y_START_L   0x2014
+#define         MD_LROI_X_END_H     0x2015
+#define         MD_LROI_X_END_L     0x2016
+#define         MD_LROI_Y_END_H     0x2017
+#define         MD_LROI_Y_END_L     0x2018
+#define         MD_INTERRUPT        0x2160
+//  Sensor timing control
+#define         QVGA_WIN_EN         0x3010
+#define         SIX_BIT_MODE_EN     0x3011
+#define         PMU_AUTOSLEEP_FRAMECNT  0x3020
+#define         ADVANCE_VSYNC       0x3022
+#define         ADVANCE_HSYNC       0x3023
+#define         EARLY_GAIN          0x3035
+//  IO and clock control
+#define         BIT_CONTROL         0x3059
+#define         OSC_CLK_DIV         0x3060
+#define         ANA_Register_11     0x3061
+#define         IO_DRIVE_STR        0x3062
+#define         IO_DRIVE_STR2       0x3063
+#define         ANA_Register_14     0x3064
+#define         OUTPUT_PIN_STATUS_CONTROL   0x3065
+#define         ANA_Register_17     0x3067
+#define         PCLK_POLARITY       0x3068
 
 /*
-* Copyright (c) 2018, GreenWaves Technologies, Inc.
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without modification,
-* are permitted provided that the following conditions are met:
-*
-* o Redistributions of source code must retain the above copyright notice, this list
-*   of conditions and the following disclaimer.
-*
-* o Redistributions in binary form must reproduce the above copyright notice, this
-*   list of conditions and the following disclaimer in the documentation and/or
-*   other materials provided with the distribution.
-*
-* o Neither the name of GreenWaves Technologies, Inc. nor the names of its
-*   contributors may be used to endorse or promote products derived from this
-*   software without specific prior written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-* ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-* WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-* ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-* (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-* LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-* ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-* (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-* SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
-
-/* Includes ------------------------------------------------------------------*/
-#include "himax.h"
-#include "camera.h"
-
-/** @addtogroup BSP
- * @{
+ * Useful value of Himax registers
  */
+#define         HIMAX_RESET         0x01
+#define         PCLK_RISING_EDGE    0x00
+#define         PCLK_FALLING_EDGE   0x01
+#define         AE_CTRL_ENABLE      0x00
+#define         AE_CTRL_DISABLE     0x01
 
-/** @addtogroup GAPUINO
- * @{
- */
-
-/** @defgroup GAPUINO_QSPI QSPI
- * @{
- */
-
-/* Private constants --------------------------------------------------------*/
-/** @defgroup GAPUINO_QSPI_Private_Constants QSPI Private Constants
- * @{
- */
-
+#define HIMAX_LINE_LEN_PCK_FULL     0x178
+#define HIMAX_FRAME_LENGTH_FULL     0x109
 
 /**
  * @}
@@ -87,92 +140,118 @@ memory mounted on GAPUINO board.
 #define HIMAX_LINE_LEN_PCK_QQVGA    0x178
 #define HIMAX_FRAME_LENGTH_QQVGA    0x084
 
+typedef struct regval_list_ {
+    uint16_t reg_num;
+    uint8_t  value;
+} regval_list_t;
+
+enum {
+    HIMAX_Standby    = 0x0,
+    HIMAX_Streaming  = 0x1,       // I2C triggered streaming enable
+    HIMAX_Streaming2 = 0x3,       // Output N frames
+    HIMAX_Streaming3 = 0x5        // Hardware Trigger
+};
+
 static regval_list_t himax_default_regs[] = {
-  {BLC_TGT,              0x08},          //  BLC target :8  at 8 bit mode
-  {BLC2_TGT,             0x08},          //  BLI target :8  at 8 bit mode
-  {0x3044,               0x0A},          //  Increase CDS time for settling
-  {0x3045,               0x00},          //  Make symetric for cds_tg and rst_tg
-  {0x3047,               0x0A},          //  Increase CDS time for settling
-  {0x3050,               0xC0},          //  Make negative offset up to 4x
-  {0x3051,               0x42},
-  {0x3052,               0x50},
-  {0x3053,               0x00},
-  {0x3054,               0x03},          //  tuning sf sig clamping as lowest
-  {0x3055,               0xF7},          //  tuning dsun
-  {0x3056,               0xF8},          //  increase adc nonoverlap clk
-  {0x3057,               0x29},          //  increase adc pwr for missing code
-  {0x3058,               0x1F},          //  turn on dsun
-  {0x3059,               0x1E},
-  {0x3064,               0x00},
-  {0x3065,               0x04},          //  pad pull 0
+    {BLC_TGT,              0x08},          //  BLC target :8  at 8 bit mode
+    {BLC2_TGT,             0x08},          //  BLI target :8  at 8 bit mode
+    {0x3044,               0x0A},          //  Increase CDS time for settling
+    {0x3045,               0x00},          //  Make symetric for cds_tg and rst_tg
+    {0x3047,               0x0A},          //  Increase CDS time for settling
+    {0x3050,               0xC0},          //  Make negative offset up to 4x
+    {0x3051,               0x42},
+    {0x3052,               0x50},
+    {0x3053,               0x00},
+    {0x3054,               0x03},          //  tuning sf sig clamping as lowest
+    {0x3055,               0xF7},          //  tuning dsun
+    {0x3056,               0xF8},          //  increase adc nonoverlap clk
+    {0x3057,               0x29},          //  increase adc pwr for missing code
+    {0x3058,               0x1F},          //  turn on dsun
+    {0x3059,               0x1E},
+    {0x3064,               0x00},
+    {0x3065,               0x04},          //  pad pull 0
 
-  {BLC_CFG,              0x43},          //  BLC_on, IIR
+    {BLC_CFG,              0x43},          //  BLC_on, IIR
 
-  {0x1001,               0x43},          //  BLC dithering en
-  {0x1002,               0x43},          //  blc_darkpixel_thd
-  {0x0350,               0x7F},          //  Dgain Control
-  {BLI_EN,               0x01},          //  BLI enable
-  {0x1003,               0x00},          //  BLI Target [Def: 0x20]
+    {0x1001,               0x43},          //  BLC dithering en
+    {0x1002,               0x43},          //  blc_darkpixel_thd
+    {0x0350,               0x7F},          //  Dgain Control
+    {BLI_EN,               0x01},          //  BLI enable
+    {0x1003,               0x00},          //  BLI Target [Def: 0x20]
 
-  {DPC_CTRL,             0x01},          //  DPC option 0: DPC off   1 : mono   3 : bayer1   5 : bayer2
-  {0x1009,               0xA0},          //  cluster hot pixel th
-  {0x100A,               0x60},          //  cluster cold pixel th
-  {SINGLE_THR_HOT,       0x90},          //  single hot pixel th
-  {SINGLE_THR_COLD,      0x40},          //  single cold pixel th
-  {0x1012,               0x00},          //  Sync. shift disable
-  {STATISTIC_CTRL,       0x07},          //  AE stat en | MD LROI stat en | magic
-  {0x2003,               0x00},
-  {0x2004,               0x1C},
-  {0x2007,               0x00},
-  {0x2008,               0x58},
-  {0x200B,               0x00},
-  {0x200C,               0x7A},
-  {0x200F,               0x00},
-  {0x2010,               0xB8},
-  {0x2013,               0x00},
-  {0x2014,               0x58},
-  {0x2017,               0x00},
-  {0x2018,               0x9B},
+    {DPC_CTRL,             0x01},          //  DPC option 0: DPC off   1 : mono   3 : bayer1   5 : bayer2
+    {0x1009,               0xA0},          //  cluster hot pixel th
+    {0x100A,               0x60},          //  cluster cold pixel th
+    {SINGLE_THR_HOT,       0x90},          //  single hot pixel th
+    {SINGLE_THR_COLD,      0x40},          //  single cold pixel th
+    {0x1012,               0x00},          //  Sync. shift disable
+    {STATISTIC_CTRL,       0x07},          //  AE stat en | MD LROI stat en | magic
+    {0x2003,               0x00},
+    {0x2004,               0x1C},
+    {0x2007,               0x00},
+    {0x2008,               0x58},
+    {0x200B,               0x00},
+    {0x200C,               0x7A},
+    {0x200F,               0x00},
+    {0x2010,               0xB8},
+    {0x2013,               0x00},
+    {0x2014,               0x58},
+    {0x2017,               0x00},
+    {0x2018,               0x9B},
 
-  {AE_CTRL,              0x01},          //Automatic Exposure
-  {AE_TARGET_MEAN,       0x3C},          //AE target mean          [Def: 0x3C]
-  {AE_MIN_MEAN,          0x0A},          //AE min target mean      [Def: 0x0A]
-  {CONVERGE_IN_TH,       0x03},          //Converge in threshold   [Def: 0x03]
-  {CONVERGE_OUT_TH,      0x05},          //Converge out threshold  [Def: 0x05]
-  {MAX_INTG_H,           (HIMAX_FRAME_LENGTH_QVGA-2)>>8},          //Maximum INTG High Byte  [Def: 0x01]
-  {MAX_INTG_L,           (HIMAX_FRAME_LENGTH_QVGA-2)&0xFF},        //Maximum INTG Low Byte   [Def: 0x54]
-  {MAX_AGAIN_FULL,       0x03},          //Maximum Analog gain in full frame mode [Def: 0x03]
-  {MAX_AGAIN_BIN2,       0x04},          //Maximum Analog gain in bin2 mode       [Def: 0x04]
-  {MAX_DGAIN,            0xC0},
+    {AE_CTRL,              0x01},          //Automatic Exposure
+    {AE_TARGET_MEAN,       0x3C},          //AE target mean          [Def: 0x3C]
+    {AE_MIN_MEAN,          0x0A},          //AE min target mean      [Def: 0x0A]
+    {CONVERGE_IN_TH,       0x03},          //Converge in threshold   [Def: 0x03]
+    {CONVERGE_OUT_TH,      0x05},          //Converge out threshold  [Def: 0x05]
+    {MAX_INTG_H,           (HIMAX_FRAME_LENGTH_QVGA-2)>>8},          //Maximum INTG High Byte  [Def: 0x01]
+    {MAX_INTG_L,           (HIMAX_FRAME_LENGTH_QVGA-2)&0xFF},        //Maximum INTG Low Byte   [Def: 0x54]
+    {MAX_AGAIN_FULL,       0x03},          //Maximum Analog gain in full frame mode [Def: 0x03]
+    {MAX_AGAIN_BIN2,       0x04},          //Maximum Analog gain in bin2 mode       [Def: 0x04]
+    {MAX_DGAIN,            0xC0},
 
-  {INTEGRATION_H,        0x01},          //Integration H           [Def: 0x01]
-  {INTEGRATION_L,        0x08},          //Integration L           [Def: 0x08]
-  {ANALOG_GAIN,          0x00},          //Analog Global Gain      [Def: 0x00]
-  {DAMPING_FACTOR,       0x20},          //Damping Factor          [Def: 0x20]
-  {DIGITAL_GAIN_H,       0x01},          //Digital Gain High       [Def: 0x01]
-  {DIGITAL_GAIN_L,       0x00},          //Digital Gain Low        [Def: 0x00]
+    {INTEGRATION_H,        0x01},          //Integration H           [Def: 0x01]
+    {INTEGRATION_L,        0x08},          //Integration L           [Def: 0x08]
+    {ANALOG_GAIN,          0x00},          //Analog Global Gain      [Def: 0x00]
+    {DAMPING_FACTOR,       0x20},          //Damping Factor          [Def: 0x20]
+    {DIGITAL_GAIN_H,       0x01},          //Digital Gain High       [Def: 0x01]
+    {DIGITAL_GAIN_L,       0x00},          //Digital Gain Low        [Def: 0x00]
 
-  {FS_CTRL,              0x00},          //Flicker Control
+    {FS_CTRL,              0x00},          //Flicker Control
 
-  {FS_60HZ_H,            0x00},
-  {FS_60HZ_L,            0x3C},
-  {FS_50HZ_H,            0x00},
-  {FS_50HZ_L,            0x32},
+    {FS_60HZ_H,            0x00},
+    {FS_60HZ_L,            0x3C},
+    {FS_50HZ_H,            0x00},
+    {FS_50HZ_L,            0x32},
 
-  {MD_CTRL,              0x00},
-  {FRAME_LEN_LINES_H,    HIMAX_FRAME_LENGTH_QVGA>>8},
-  {FRAME_LEN_LINES_L,    HIMAX_FRAME_LENGTH_QVGA&0xFF},
-  {LINE_LEN_PCK_H,       HIMAX_LINE_LEN_PCK_QVGA>>8},
-  {LINE_LEN_PCK_L,       HIMAX_LINE_LEN_PCK_QVGA&0xFF},
-  {QVGA_WIN_EN,          0x01},          // Enable QVGA window readout
-  {0x0383,               0x01},
-  {0x0387,               0x01},
-  {0x0390,               0x00},
-  {0x3011,               0x70},
-  {0x3059,               0x02},
-  {OSC_CLK_DIV,          0x0B},
-  {IMG_ORIENTATION,      0x00},          // change the orientation
-  {0x0104,               0x01},
+    {MD_CTRL,              0x00},
+    {FRAME_LEN_LINES_H,    HIMAX_FRAME_LENGTH_QVGA>>8},
+    {FRAME_LEN_LINES_L,    HIMAX_FRAME_LENGTH_QVGA&0xFF},
+    {LINE_LEN_PCK_H,       HIMAX_LINE_LEN_PCK_QVGA>>8},
+    {LINE_LEN_PCK_L,       HIMAX_LINE_LEN_PCK_QVGA&0xFF},
+    {QVGA_WIN_EN,          0x01},          // Enable QVGA window readout
+    {0x0383,               0x01},
+    {0x0387,               0x01},
+    {0x0390,               0x00},
+    {0x3011,               0x70},
+    {0x3059,               0x02},
+    {OSC_CLK_DIV,          0x0B},
+    {IMG_ORIENTATION,      0x00},          // change the orientation
+    {0x0104,               0x01},
+};
+
+static regval_list_t himax_full_regs[] = { // 'full' resolution is 320x320
+    {0x0383,                0x01},
+    {0x0387,                0x01},
+    {0x0390,                0x00},
+    {QVGA_WIN_EN,           0x00},	      // Disable QVGA window readout
+    {MAX_INTG_H,            (HIMAX_FRAME_LENGTH_FULL-2)>>8},
+    {MAX_INTG_L,            (HIMAX_FRAME_LENGTH_FULL-2)&0xFF},
+    {FRAME_LEN_LINES_H,     (HIMAX_FRAME_LENGTH_FULL>>8)},
+    {FRAME_LEN_LINES_L,     (HIMAX_FRAME_LENGTH_FULL&0xFF)},
+    {LINE_LEN_PCK_H,        (HIMAX_FRAME_LENGTH_FULL>>8)},
+    {LINE_LEN_PCK_L,        (HIMAX_FRAME_LENGTH_FULL&0xFF)},
+    {GRP_PARAM_HOLD,        0x01},
 };
 
 static regval_list_t himax_full_regs[] = { // 'full' resolution is 320x320
@@ -190,93 +269,60 @@ static regval_list_t himax_full_regs[] = { // 'full' resolution is 320x320
 };
 
 static regval_list_t himax_qvga_regs[] = {
-  {0x0383,                0x01},
-  {0x0387,                0x01},
-  {0x0390,                0x00},
-  {MAX_INTG_H,            (HIMAX_FRAME_LENGTH_QVGA-2)>>8},
-  {MAX_INTG_L,            (HIMAX_FRAME_LENGTH_QVGA-2)&0xFF},
-  {FRAME_LEN_LINES_H,     (HIMAX_FRAME_LENGTH_QVGA>>8)},
-  {FRAME_LEN_LINES_L,     (HIMAX_FRAME_LENGTH_QVGA&0xFF)},
-  {LINE_LEN_PCK_H,        (HIMAX_LINE_LEN_PCK_QVGA>>8)},
-  {LINE_LEN_PCK_L,        (HIMAX_LINE_LEN_PCK_QVGA&0xFF)},
+    {0x0383,                0x01},
+    {0x0387,                0x01},
+    {0x0390,                0x00},
+    {MAX_INTG_H,            (HIMAX_FRAME_LENGTH_QVGA-2)>>8},
+    {MAX_INTG_L,            (HIMAX_FRAME_LENGTH_QVGA-2)&0xFF},
+    {FRAME_LEN_LINES_H,     (HIMAX_FRAME_LENGTH_QVGA>>8)},
+    {FRAME_LEN_LINES_L,     (HIMAX_FRAME_LENGTH_QVGA&0xFF)},
+    {LINE_LEN_PCK_H,        (HIMAX_LINE_LEN_PCK_QVGA>>8)},
+    {LINE_LEN_PCK_L,        (HIMAX_LINE_LEN_PCK_QVGA&0xFF)},
 };
 
 static regval_list_t himax_qqvga_regs[] = {
-  {0x0383,                0x03},
-  {0x0387,                0x03},
-  {0x0390,                0x03},
-  {MAX_INTG_H,            (HIMAX_FRAME_LENGTH_QQVGA-2)>>8},
-  {MAX_INTG_L,            (HIMAX_FRAME_LENGTH_QQVGA-2)&0xFF},
-  {FRAME_LEN_LINES_H,     (HIMAX_FRAME_LENGTH_QQVGA>>8)},
-  {FRAME_LEN_LINES_L,     (HIMAX_FRAME_LENGTH_QQVGA&0xFF)},
-  {LINE_LEN_PCK_H,        (HIMAX_LINE_LEN_PCK_QQVGA>>8)},
-  {LINE_LEN_PCK_L,        (HIMAX_LINE_LEN_PCK_QQVGA&0xFF)},
+    {0x0383,                0x03},
+    {0x0387,                0x03},
+    {0x0390,                0x03},
+    {MAX_INTG_H,            (HIMAX_FRAME_LENGTH_QQVGA-2)>>8},
+    {MAX_INTG_L,            (HIMAX_FRAME_LENGTH_QQVGA-2)&0xFF},
+    {FRAME_LEN_LINES_H,     (HIMAX_FRAME_LENGTH_QQVGA>>8)},
+    {FRAME_LEN_LINES_L,     (HIMAX_FRAME_LENGTH_QQVGA&0xFF)},
+    {LINE_LEN_PCK_H,        (HIMAX_LINE_LEN_PCK_QQVGA>>8)},
+    {LINE_LEN_PCK_L,        (HIMAX_LINE_LEN_PCK_QQVGA&0xFF)},
 };
 
-/* SPI transfer command sequence array */
-regval_list_t reg;
-
-/**
- * @}
- */
-
-
-/* Private functions ---------------------------------------------------------*/
-
-/** @defgroup GAPUINO_QSPI_Private_Functions QSPI Private Functions
-  * @{
-  */
-static int            HIMAX_RegWrite          (uint16_t addr, uint8_t value);
-static uint8_t        HIMAX_RegRead           (uint16_t addr);
-static uint8_t        HIMAX_Reset             (void);
-static uint8_t        HIMAX_Boot              (void);
-static uint8_t        HIMAX_PrintReg          (void);
-static void           HIMAX_FrameRate         (void);
-
-
-/**
-  * @}
-  */
-
-/* Exported functions ---------------------------------------------------------*/
-
-/** @addtogroup GAPUINO_HIMAX_Exported_Functions
-  * @{
-  */
-
-/**
- * @brief  Initializes the I2C interface.
- * @retval HIMAX status
- */
-uint8_t HIMAX_Open(void)
+int HM01B0::Init()
 {
-    Wire.begin();
-
-    //printf("Model: %x:%x\n", HIMAX_RegRead(MODEL_ID_H), HIMAX_RegRead(MODEL_ID_L));
-
-    if (HIMAX_Reset()!=0) {
+    if (Reset() != 0 ) {
         return -1;
     }
 
-    HIMAX_Boot();
+    for (uint32_t i=0; i<(sizeof(himax_default_regs) / sizeof(regval_list_t)); i++) {
+        reg_write(HM01B0_I2C_ADDR, himax_default_regs[i].reg_num, himax_default_regs[i].value, true);
+    }
 
-    //For debugging camera Configuration
-    //HIMAX_PrintReg();
+    reg_write(HM01B0_I2C_ADDR, PCLK_POLARITY, (0x20 | PCLK_FALLING_EDGE), true);
+
+    reg_write(HM01B0_I2C_ADDR, MODE_SELECT, HIMAX_Streaming, true);
+
     HAL_Delay(200);
 
     return 0;
 }
 
-/**
- * @brief  This function selects HIMAX camera mode.
- * @retval None
- */
-int HIMAX_Mode(uint8_t mode)
+int HM01B0::Reset()
 {
-  return HIMAX_RegWrite(MODE_SELECT, mode);
+    uint32_t max_timeout=100;
+    do {
+        reg_write(HM01B0_I2C_ADDR, SW_RESET, HIMAX_RESET, true);
+        delay(1);
+    } while (reg_read(HM01B0_I2C_ADDR, MODE_SELECT, true) != HIMAX_Standby && ((--max_timeout)>0) );
+
+    return max_timeout>0 ? 0: -1 ;
 }
 
-int HIMAX_SetResolution(uint32_t resolution)
+int HM01B0::SetResolution(uint32_t resolution)
 {
   int ret = 0;
   uint32_t regs_count = 0;
@@ -300,17 +346,17 @@ int HIMAX_SetResolution(uint32_t resolution)
   }
 
   for(uint32_t i = 0; i < regs_count; i++) {
-    ret |= HIMAX_RegWrite(regs[i].reg_num, regs[i].value);
+    ret |= reg_write(HM01B0_I2C_ADDR, regs[i].reg_num, regs[i].value, true);
   }
 
   return ret;
 }
 
-int HIMAX_SetFramerate(uint32_t framerate)
+int HM01B0::SetFrameRate(uint32_t framerate)
 {
   uint8_t osc_div = 0;
   // binning is enabled for QQVGA
-  uint8_t binning = HIMAX_RegRead(BINNING_MODE) & 0x03;
+  uint8_t binning = reg_read(HM01B0_I2C_ADDR, BINNING_MODE, true) & 0x03;
 
   switch (framerate) {
     case 15:
@@ -330,13 +376,55 @@ int HIMAX_SetFramerate(uint32_t framerate)
       return -1;
   }
 
-  return HIMAX_RegWrite(OSC_CLK_DIV, 0x08 | osc_div);
+  return reg_write(HM01B0_I2C_ADDR, OSC_CLK_DIV, 0x08 | osc_div, true);
+}
+
+int HM01B0::SetPixelFormat(uint32_t pixelformat)
+{
+    return -1;
+}
+
+int HM01B0::SetTestPattern(bool enable, bool walking)
+{
+    uint8_t reg = 0;
+    reg_write(HM01B0_I2C_ADDR, PCLK_POLARITY, (0x20 | PCLK_FALLING_EDGE), true);
+    reg_write(HM01B0_I2C_ADDR, 0x2100,  0, true); //AE
+    reg_write(HM01B0_I2C_ADDR, 0x1000,  0, true); //BLC
+    reg_write(HM01B0_I2C_ADDR, 0x1008,  0, true); //DPC
+    reg_write(HM01B0_I2C_ADDR, 0x0205,  0, true); //AGAIN
+    reg_write(HM01B0_I2C_ADDR, 0x020e,  1, true); //DGAINH
+    reg_write(HM01B0_I2C_ADDR, 0x020f,  0, true); //DGAINL
+
+    if (enable) {
+        reg = 1 | (walking ? (1 << 4) : 0);
+    }
+    reg_write(HM01B0_I2C_ADDR, 0x0601,  reg, true);
+    reg_write(HM01B0_I2C_ADDR, 0x0104,  1, true); //group hold
+
+    HAL_Delay(100);
+
+    return 0;
+}
+
+// These functions need to be reimplemented as IOCTLs.
+#if 0
+int HIMAX_Mode(uint8_t mode)
+{
+  return reg_write(MODE_SELECT, mode);
+}
+
+static void HIMAX_GrayScale(uint8_t value)
+{
+    reg_write(BLC_CFG,  ENABLE);
+    reg_write(BLC_TGT,  value);
+    reg_write(BLI_EN,   ENABLE);
+    reg_write(BLC2_TGT, value);
 }
 
 int HIMAX_EnableMD(bool enable)
 {
   int ret = HIMAX_ClearMD();
-  ret |= HIMAX_RegWrite(MD_CTRL, enable ? 1:0);
+  ret |= reg_write(MD_CTRL, enable ? 1:0);
   return ret;
 }
 
@@ -350,159 +438,41 @@ int HIMAX_SetMDThreshold(uint32_t threshold)
   //
   // In other words, motion is detected if the abs difference of the ROI mean and the
   // average ROI mean of the last 8 or 16 frames is higher than (ROI mean * threshold / 64).
-  return HIMAX_RegWrite(MD_THL, (threshold < 3) ? 3 : (threshold > 0xF0) ? 0xF0 : threshold);
+  return reg_write(MD_THL, (threshold < 3) ? 3 : (threshold > 0xF0) ? 0xF0 : threshold);
 }
 
 int HIMAX_SetLROI(uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2)
 {
   int ret = 0;
-  ret |= HIMAX_RegWrite(MD_LROI_X_START_H, (x1>>8));
-  ret |= HIMAX_RegWrite(MD_LROI_X_START_L, (x1&0xff));
-  ret |= HIMAX_RegWrite(MD_LROI_Y_START_H, (y1>>8));
-  ret |= HIMAX_RegWrite(MD_LROI_Y_START_L, (y1&0xff));
-  ret |= HIMAX_RegWrite(MD_LROI_X_END_H,   (x2>>8));
-  ret |= HIMAX_RegWrite(MD_LROI_X_END_L,   (x2&0xff));
-  ret |= HIMAX_RegWrite(MD_LROI_Y_END_H,   (y2>>8));
-  ret |= HIMAX_RegWrite(MD_LROI_Y_END_L,   (y2&0xff));
+  ret |= reg_write(MD_LROI_X_START_H, (x1>>8));
+  ret |= reg_write(MD_LROI_X_START_L, (x1&0xff));
+  ret |= reg_write(MD_LROI_Y_START_H, (y1>>8));
+  ret |= reg_write(MD_LROI_Y_START_L, (y1&0xff));
+  ret |= reg_write(MD_LROI_X_END_H,   (x2>>8));
+  ret |= reg_write(MD_LROI_X_END_L,   (x2&0xff));
+  ret |= reg_write(MD_LROI_Y_END_H,   (y2>>8));
+  ret |= reg_write(MD_LROI_Y_END_L,   (y2&0xff));
   return ret;
 }
 
 int HIMAX_PollMD()
 {
-  return HIMAX_RegRead(MD_INTERRUPT);
+  return reg_read(MD_INTERRUPT);
 }
 
 int HIMAX_ClearMD()
 {
-  return HIMAX_RegWrite(I2C_CLEAR, 0x01);
+  return reg_write(I2C_CLEAR, 0x01);
 }
-
-/**
- * @brief  This function writes HIMAX camera registers.
- * @retval None
- */
-static int HIMAX_RegWrite(uint16_t addr, uint8_t value)
-{
-    uint8_t addr_high = (addr >> 8) & 0xFF;
-    uint8_t addr_low  = addr & 0xFF;
-
-    reg.reg_num = (addr_low << 8) | addr_high;
-    reg.value = value;
-
-    Wire.beginTransmission(HIMAX_I2C_ADDR);
-    Wire.write((const char *)&reg, 3);
-    int ret = Wire.endTransmission();
-
-    return ret;
-}
-
-/**
- * @brief  This function reads HIMAX camera registers.
- * @retval None
- */
-static uint8_t HIMAX_RegRead(uint16_t addr)
-{
-    uint8_t addr_high = (addr >> 8) & 0xFF;
-    uint8_t addr_low  = addr & 0xFF;
-
-    reg.reg_num = (addr_low << 8) | addr_high;
-
-    Wire.beginTransmission(HIMAX_I2C_ADDR);
-    Wire.write((const char *)&reg.reg_num, 2);
-    Wire.endTransmission(false);
-    int ret = Wire.requestFrom(HIMAX_I2C_ADDR, 1);
-    if (Wire.available()) {
-        reg.value = Wire.read();
-    }
-    while (Wire.available()) {
-        Wire.read();
-    }
-    return reg.value;
-}
-
-static uint8_t HIMAX_Reset()
-{
-    uint32_t max_timeout=100;
-    do {
-        HIMAX_RegWrite(SW_RESET, HIMAX_RESET);
-        delay(1);
-    } while (HIMAX_RegRead(MODE_SELECT) != HIMAX_Standby && ((--max_timeout)>0) );
-
-    return max_timeout>0 ? 0: -1 ;
-}
-
-static uint8_t HIMAX_Boot()
-{
-    uint32_t i;
-
-    for(i = 0; i < (sizeof(himax_default_regs) / sizeof(regval_list_t)); i++) {
-        HIMAX_RegWrite(himax_default_regs[i].reg_num, himax_default_regs[i].value);
-    }
-
-    HIMAX_RegWrite(PCLK_POLARITY, (0x20 | PCLK_FALLING_EDGE));
-
-    HIMAX_RegWrite(MODE_SELECT, HIMAX_Standby);
-    return 0;
-}
-
-static void HIMAX_GrayScale(uint8_t value)
-{
-    HIMAX_RegWrite(BLC_CFG,  ENABLE);
-    HIMAX_RegWrite(BLC_TGT,  value);
-    HIMAX_RegWrite(BLI_EN,   ENABLE);
-    HIMAX_RegWrite(BLC2_TGT, value);
-}
-
-void HIMAX_TestPattern(bool enable, bool walking)
-{
-    uint8_t reg = 0;
-    HIMAX_RegWrite(PCLK_POLARITY, (0x20 | PCLK_FALLING_EDGE));
-    HIMAX_RegWrite(0x2100,  0 ); //AE 
-    HIMAX_RegWrite(0x1000,  0 ); //BLC 
-    HIMAX_RegWrite(0x1008,  0 ); //DPC 
-    HIMAX_RegWrite(0x0205,  0 ); //AGAIN 
-    HIMAX_RegWrite(0x020e,  1 ); //DGAINH 
-    HIMAX_RegWrite(0x020f,  0 ); //DGAINL 
-    
-    if (enable) {
-        reg = 1 | (walking ? (1 << 4) : 0);
-    }
-    HIMAX_RegWrite(0x0601,  reg );
-    HIMAX_RegWrite(0x0104,  1 ); //group hold 
-
-    HAL_Delay(100);
-
-}
-
-static void HIMAX_FrameRate()
-{
-    HIMAX_RegWrite( FRAME_LEN_LINES_H, 0x02);
-    HIMAX_RegWrite( FRAME_LEN_LINES_L, 0x1C);
-    HIMAX_RegWrite( LINE_LEN_PCK_H,    0x01);
-    HIMAX_RegWrite( LINE_LEN_PCK_L,    0x72);
-}
-
 static uint8_t HIMAX_PrintReg()
 {
     unsigned int i;
-    for(i=0; i<(sizeof(himax_default_regs)/sizeof(regval_list_t)); i++){
-        printf("0x%04X: 0x%02X  0x%02X \n",himax_default_regs[i].reg_num, himax_default_regs[i].value, HIMAX_RegRead(himax_default_regs[i].reg_num));
+    for (i=0; i<(sizeof(himax_default_regs)/sizeof(regval_list_t)); i++) {
+        printf("0x%04X: 0x%02X  0x%02X \n",
+                himax_default_regs[i].reg_num,
+                himax_default_regs[i].value,
+                reg_read(himax_default_regs[i].reg_num));
     }
     return 0;
 }
-
-/**
- * @}
- */
-
-/**
- * @}
- */
-
-/**
- * @}
- */
-
-/**
- * @}
- */
+#endif
