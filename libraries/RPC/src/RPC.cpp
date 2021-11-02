@@ -21,9 +21,12 @@ int RPCClass::rpmsg_recv_callback(struct rpmsg_endpoint *ept, void *data,
 {
   RPCClass* rpc = (RPCClass*)priv;
 
+  rx_mtx.lock();
   for (size_t i = 0; i < len; i++) {
     intermediate_buffer.store_char(((uint8_t*)data)[i]);
   }
+  rx_mtx.unlock();
+
   //memcpy(intermediate_buffer, data, len);
 
   osSignalSet(rpc->dispatcherThreadId, len);
@@ -278,11 +281,13 @@ void RPCClass::dispatch() {
 
 {
     RPCLIB_MSGPACK::unpacker pac;
+    rx_mtx.lock();
     int len = intermediate_buffer.available();
     for (int i = 0; i< len; i++) {
       pac.buffer()[i] = intermediate_buffer.read_char();
     }
     pac.buffer_consumed(len);
+    rx_mtx.unlock();
 
     //memcpy(pac.buffer(), intermediate_buffer, v.value.signals);
     //pac.buffer_consumed(v.value.signals);
