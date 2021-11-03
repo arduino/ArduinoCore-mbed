@@ -16,10 +16,19 @@ static RingBufferN<256> intermediate_buffer_resp;
 //static uint8_t intermediate_buffer_resp[256];
 static rtos::Mutex rx_mtx;
 
+static bool _init_recv_message = true;
+
 int RPCClass::rpmsg_recv_callback(struct rpmsg_endpoint *ept, void *data,
                                        size_t len, uint32_t src, void *priv)
 {
   RPCClass* rpc = (RPCClass*)priv;
+
+#ifdef CORE_CM4
+      if (_init_recv_message) {
+        _init_recv_message = false;
+        return 0;
+      }
+#endif
 
   rx_mtx.lock();
   for (size_t i = 0; i < len; i++) {
@@ -34,7 +43,7 @@ int RPCClass::rpmsg_recv_callback(struct rpmsg_endpoint *ept, void *data,
   return 0;
 }
 
-static bool first_message = true;
+static bool _init_resp_message = true;
 
 int RPCClass::rpmsg_recv_response_callback(struct rpmsg_endpoint *ept, void *data,
                                        size_t len, uint32_t src, void *priv)
@@ -42,8 +51,8 @@ int RPCClass::rpmsg_recv_response_callback(struct rpmsg_endpoint *ept, void *dat
   RPCClass* rpc = (RPCClass*)priv;
 
 #ifdef CORE_CM4
-      if (first_message) {
-        first_message = false;
+      if (_init_resp_message) {
+        _init_resp_message = false;
         return 0;
       }
 #endif
