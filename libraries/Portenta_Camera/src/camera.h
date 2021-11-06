@@ -1,3 +1,11 @@
+/*
+ * TODO: Add license.
+ * Copyright (c) 2021
+ *
+ * This work is licensed under <>, see the file LICENSE for details.
+ *
+ * Camera driver.
+ */
 #ifndef __CAMERA_H
 #define __CAMERA_H
 #include "Wire.h"
@@ -70,10 +78,10 @@ class Camera {
         uint32_t resolution;
         ImageSensor *sensor;
         int Reset();
-        ImageSensor *ProbeSensor();
+        int ProbeSensor();
     public:
-        Camera(): sensor(NULL){}
-        int begin(uint32_t resolution = CAMERA_R320x240, uint32_t framerate = 30);
+        Camera(ImageSensor *sensor): sensor(sensor){}
+        int begin(uint32_t resolution=CAMERA_R320x240, uint32_t framerate=30);
         int GetID();
         int SetFrameRate(uint32_t framerate);
         int SetResolution(uint32_t resolution);

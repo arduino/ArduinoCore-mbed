@@ -305,11 +305,9 @@ int Camera::Reset()
     return 0;
 }
 
-ImageSensor *Camera::ProbeSensor()
+int Camera::ProbeSensor()
 {
     uint8_t addr;
-    ImageSensor *sensor = NULL;
-
     for (addr=1; addr<127; addr++) {
         Wire.beginTransmission(addr);
         if (Wire.endTransmission() == 0) {
@@ -317,18 +315,7 @@ ImageSensor *Camera::ProbeSensor()
         }
     }
 
-    switch (addr) {
-        case HM01B0_I2C_ADDR:
-            sensor = new HM01B0();
-            break;
-        case GC2145_I2C_ADDR:
-            sensor = new GC2145();
-            break;
-        default:
-            break;
-    }
-
-    return sensor;
+    return addr;
 }
 
 int Camera::begin(uint32_t resolution, uint32_t framerate)
@@ -348,8 +335,7 @@ int Camera::begin(uint32_t resolution, uint32_t framerate)
     Wire.begin();
     Wire.setClock(400000);
 
-    ImageSensor *sensor = ProbeSensor();
-    if (sensor == NULL) {
+    if (ProbeSensor() != this->sensor->GetID()) {
         return -1;
     }
 
@@ -359,7 +345,7 @@ int Camera::begin(uint32_t resolution, uint32_t framerate)
         HAL_Delay(10);
     }
 
-    if (sensor->Init() != 0) {
+    if (this->sensor->Init() != 0) {
         return -1;
     }
 
@@ -367,12 +353,10 @@ int Camera::begin(uint32_t resolution, uint32_t framerate)
         return -1;
     }
 
-    // Must set sensor first before calling Camera methods.
-    this->sensor = sensor;
-
     if (SetResolution(resolution) != 0) {
         return -1;
     }
+
     return 0;
 }
 

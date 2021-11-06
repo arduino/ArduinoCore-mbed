@@ -1,9 +1,9 @@
 #include "camera.h"
 #include "SDRAM.h"
-
+#include "himax.h"
 //REDIRECT_STDOUT_TO(Serial);
 
-Camera cam;
+Camera cam(new HM01B0());
 uint8_t *fb = (uint8_t*) SDRAM_START_ADDRESS;
 
 void blink_error(uint32_t count)
