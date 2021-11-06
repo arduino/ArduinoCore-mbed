@@ -12,18 +12,6 @@
 #define GC_MAX_WIN_W                    (1600)
 #define GC_MAX_WIN_H                    (1200)
 
-#define FRAMESIZE_QVGA_W                (320)
-#define FRAMESIZE_QVGA_H                (240)
-
-#define FRAMESIZE_VGA_W                 (640)
-#define FRAMESIZE_VGA_H                 (480)
-
-#define FRAMESIZE_SVGA_W                (800)
-#define FRAMESIZE_SVGA_H                (600)
-
-#define FRAMESIZE_UXGA_W                (1600)
-#define FRAMESIZE_UXGA_H                (1200)
-
 #define REG_AMODE1                      (0x17)
 #define REG_AMODE1_DEF                  (0x14)
 #define REG_AMODE1_SET_HMIRROR(r, x)    ((r&0xFE)|((x&1)<<0))
@@ -716,11 +704,6 @@ int GC2145::Init()
         reg_write(GC2145_I2C_ADDR, default_regs[i][0], default_regs[i][1]);
     }
 
-    // TODO:
-    // Set the format to bayer (1BPP) for now so things keep working.
-    reg_write(GC2145_I2C_ADDR, 0xFE, 0x00);    // P0 regs page.
-    uint8_t reg = reg_read(GC2145_I2C_ADDR, REG_OUTPUT_FMT);
-    reg_write(GC2145_I2C_ADDR, REG_OUTPUT_FMT, REG_OUTPUT_SET_FMT(reg, REG_OUTPUT_FMT_BAYER));
     return 0;
 }
 
@@ -755,52 +738,43 @@ int GC2145::Reset()
     return 0;
 }
 
-int GC2145::SetFrameRate(uint32_t framerate)
+int GC2145::SetFrameRate(int32_t framerate)
 {
     return 0;
 }
 
-int GC2145::SetResolution(uint32_t resolution)
+int GC2145::SetResolution(int32_t resolution)
 {
     int ret = 0;
 
     uint16_t win_w;
     uint16_t win_h;
 
-    uint16_t w, h;
+    uint16_t w = restab[resolution][0];
+    uint16_t h = restab[resolution][1];
 
     switch (resolution) {
         case CAMERA_R160x120:
-            w = 160;
-            h = 120;
+            win_w = w * 4;
+            win_h = h * 4;
             break;
         case CAMERA_R320x240:
-            w = 320;
-            h = 240;
-            break;
         case CAMERA_R320x320:
-            w = 320;
-            h = 320;
-            break;  
+            win_w = w * 3;
+            win_h = h * 3;
+            break;
+        case CAMERA_R640x480:
+            win_w = w * 2;
+            win_h = h * 2;
+            break;
+        case CAMERA_R800x600:
+        case CAMERA_R1600x1200:
+            // For frames bigger than subsample using full UXGA window.
+            win_w = 1600;
+            win_h = 1200;
+            break;
         default:
             return -1;
-    }
-
-    if (w < FRAMESIZE_QVGA_W && h < FRAMESIZE_QVGA_H) {
-        win_w = w * 4;
-        win_h = h * 4;
-    } else if (w < FRAMESIZE_VGA_W && h < FRAMESIZE_VGA_H) {
-        win_w = w * 3;
-        win_h = h * 3;
-    } else if (w < FRAMESIZE_SVGA_W && h < FRAMESIZE_SVGA_H) {
-        win_w = w * 2;
-        win_h = h * 2;
-    } else if (w <= FRAMESIZE_UXGA_W && h <= FRAMESIZE_UXGA_H) {
-        // For frames bigger than subsample using full UXGA window.
-        win_w = FRAMESIZE_UXGA_W;
-        win_h = FRAMESIZE_UXGA_H;
-    } else {
-        return -1;
     }
 
     uint16_t c_ratio = win_w / w;
@@ -829,7 +803,38 @@ int GC2145::SetResolution(uint32_t resolution)
 
 }
 
-int GC2145::SetPixelFormat(uint32_t pixelformat)
+int GC2145::SetPixelFormat(int32_t pixformat)
 {
-    return 0;
+    int ret = 0;
+    uint8_t reg;
+
+    // P0 regs
+    ret |= reg_write(GC2145_I2C_ADDR, 0xFE, 0x00);
+
+    // Read current output format reg
+    reg = reg_read(GC2145_I2C_ADDR, REG_OUTPUT_FMT);
+
+    switch (pixformat) {
+        case CAMERA_RGB565:
+            ret |= reg_write(GC2145_I2C_ADDR,
+                    REG_OUTPUT_FMT, REG_OUTPUT_SET_FMT(reg, REG_OUTPUT_FMT_RGB565));
+            break;
+        case CAMERA_GRAYSCALE:
+            // TODO: There's no support for extracting GS from YUV so we use Bayer for 1BPP for now.
+            //ret |= reg_write(GC2145_I2C_ADDR,
+            //        REG_OUTPUT_FMT, REG_OUTPUT_SET_FMT(reg, REG_OUTPUT_FMT_YCBYCR));
+            //break;
+        case CAMERA_BAYER:
+            // There's no BAYER support so it will just look off.
+            // Make sure odd/even row are switched to work with our bayer conversion.
+            ret |= reg_write(GC2145_I2C_ADDR,
+                    REG_SYNC_MODE, REG_SYNC_MODE_DEF | REG_SYNC_MODE_ROW_SWITCH);
+            ret |= reg_write(GC2145_I2C_ADDR,
+                    REG_OUTPUT_FMT, REG_OUTPUT_SET_FMT(reg, REG_OUTPUT_FMT_BAYER));
+            break;
+        default:
+            return -1;
+    }
+
+    return ret;
 }

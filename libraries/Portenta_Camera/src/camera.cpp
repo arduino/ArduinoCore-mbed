@@ -33,17 +33,25 @@
 #define DCMI_DMA_STREAM             DMA2_Stream3
 #define DCMI_DMA_IRQ                DMA2_Stream3_IRQn
 
-static DMA_HandleTypeDef hdma   = {0};
-static DCMI_HandleTypeDef hdcmi = {0};
 static TIM_HandleTypeDef  htim  = {0};
+static DMA_HandleTypeDef  hdma  = {0};
+static DCMI_HandleTypeDef hdcmi = {0};
 static volatile uint32_t frame_ready = 0;
 
-static const int CamRes[][2] = {
-    {160, 120},
-    {320, 240},
-    {320, 320},
+const uint32_t pixtab[CAMERA_PMAX] = {
+    1,
+    1,
+    2,
 };
 
+const uint32_t restab[CAMERA_RMAX][2] = {
+    {160,   120 },
+    {320,   240 },
+    {320,   320 },
+    {640,   480 },
+    {800,   600 },
+    {1600,  1200},
+};
 
 extern "C" {
 
@@ -91,20 +99,20 @@ void HAL_DCMI_MspInit(DCMI_HandleTypeDef *hdcmi)
 
 void HAL_DCMI_MspDeInit(DCMI_HandleTypeDef* hdcmi)
 {
-  /* Disable NVIC  for DCMI transfer complete interrupt */
-  HAL_NVIC_DisableIRQ(DCMI_IRQn);
-  
-  /* Disable NVIC for DMA2 transfer complete interrupt */
-  HAL_NVIC_DisableIRQ(DCMI_DMA_IRQ);
-  
-  /* Configure the DMA stream */
-  HAL_DMA_DeInit(hdcmi->DMA_Handle);
+    /* Disable NVIC  for DCMI transfer complete interrupt */
+    HAL_NVIC_DisableIRQ(DCMI_IRQn);
 
-  /* Disable DCMI clock */
-  __HAL_RCC_DCMI_CLK_DISABLE();
+    /* Disable NVIC for DMA2 transfer complete interrupt */
+    HAL_NVIC_DisableIRQ(DCMI_DMA_IRQ);
 
-  /* GPIO pins clock and DMA clock can be shut down in the application
-     by surcharging this __weak function */
+    /* Configure the DMA stream */
+    HAL_DMA_DeInit(hdcmi->DMA_Handle);
+
+    /* Disable DCMI clock */
+    __HAL_RCC_DCMI_CLK_DISABLE();
+
+    /* GPIO pins clock and DMA clock can be shut down in the application
+       by surcharging this __weak function */
 }
 
 /**
@@ -174,10 +182,10 @@ uint8_t BSP_CAMERA_Init()
   */
 uint8_t BSP_CAMERA_DeInit(void)
 { 
-  hdcmi.Instance = DCMI;
+    hdcmi.Instance = DCMI;
 
-  HAL_DCMI_DeInit(&hdcmi);
-  return 1;
+    HAL_DCMI_DeInit(&hdcmi);
+    return 1;
 }
 
 static int BSP_CAMERA_EXTCLK_Config(int frequency)
@@ -228,7 +236,7 @@ static int BSP_CAMERA_EXTCLK_Config(int frequency)
   */
 void BSP_CAMERA_PwrDown(void)
 {
-  digitalWrite(PC_13, LOW);
+    digitalWrite(PC_13, LOW);
 }
 
 /**
@@ -241,17 +249,17 @@ void BSP_CAMERA_ErrorCallback(void)
 
 void BSP_CAMERA_FrameEventCallback(void)
 {
-  frame_ready++;
+    frame_ready++;
 }
 
 void DCMI_IRQHandler(void)
 {
-  HAL_DCMI_IRQHandler(&hdcmi);
+    HAL_DCMI_IRQHandler(&hdcmi);
 }
 
 void DMA2_Stream3_IRQHandler(void)
 {
-  HAL_DMA_IRQHandler(&hdma);
+    HAL_DMA_IRQHandler(&hdma);
 }
 
 /**
@@ -269,7 +277,7 @@ void BSP_CAMERA_VsyncEventCallback(void)
   */
 void HAL_DCMI_VsyncEventCallback(DCMI_HandleTypeDef *hdcmi)
 {        
-  BSP_CAMERA_VsyncEventCallback();
+    BSP_CAMERA_VsyncEventCallback();
 }
 
 /**
@@ -279,7 +287,7 @@ void HAL_DCMI_VsyncEventCallback(DCMI_HandleTypeDef *hdcmi)
   */
 void HAL_DCMI_FrameEventCallback(DCMI_HandleTypeDef *hdcmi)
 {        
-  BSP_CAMERA_FrameEventCallback();
+    BSP_CAMERA_FrameEventCallback();
 }
 
 /**
@@ -289,7 +297,7 @@ void HAL_DCMI_FrameEventCallback(DCMI_HandleTypeDef *hdcmi)
   */
 void HAL_DCMI_ErrorCallback(DCMI_HandleTypeDef *hdcmi)
 {        
-  BSP_CAMERA_ErrorCallback();
+    BSP_CAMERA_ErrorCallback();
 }
 
 }
@@ -318,9 +326,9 @@ int Camera::ProbeSensor()
     return addr;
 }
 
-int Camera::begin(uint32_t resolution, uint32_t framerate)
+int Camera::begin(int32_t resolution, int32_t pixformat, int32_t framerate)
 {  
-    if (resolution >= CAMERA_RMAX) {
+    if (resolution >= CAMERA_RMAX || pixformat >= CAMERA_PMAX) {
         return -1;
     }
 
@@ -357,6 +365,14 @@ int Camera::begin(uint32_t resolution, uint32_t framerate)
         return -1;
     }
 
+    if (SetPixelFormat(pixformat) != 0) {
+        return -1;
+    }
+
+    if (SetFrameRate(framerate) != 0) {
+        return -1;
+    }
+
     return 0;
 }
 
@@ -369,18 +385,23 @@ int Camera::GetID()
     return this->sensor->GetID();
 }
 
-int Camera::SetFrameRate(uint32_t framerate)
+int Camera::SetFrameRate(int32_t framerate)
 {
     if (this->sensor == NULL) {
         return -1;
     }
 
-    return this->sensor->SetFrameRate(framerate);
+    if (this->sensor->SetFrameRate(framerate) == 0) {
+        this->framerate = framerate;
+        return 0;
+    }
+
+    return -1;
 }
 
-int Camera::SetResolution(uint32_t resolution)
+int Camera::SetResolution(int32_t resolution)
 {
-    if (this->sensor == NULL) {
+    if (this->sensor == NULL || resolution >= CAMERA_RMAX) {
         return -1;
     }
 
@@ -389,10 +410,10 @@ int Camera::SetResolution(uint32_t resolution)
      * @param  Y0    DCMI window Y offset
      * @param  XSize DCMI Pixel per line
      * @param  YSize DCMI Line number
-     * @retval HAL status
      */
     HAL_DCMI_EnableCROP(&hdcmi);
-    HAL_DCMI_ConfigCROP(&hdcmi, 0, 0, CamRes[resolution][0] - 1, CamRes[resolution][1] - 1);
+    uint32_t bpp = restab[resolution][0] * pixtab[this->pixformat];
+    HAL_DCMI_ConfigCROP(&hdcmi, 0, 0, bpp - 1, restab[resolution][1] - 1);
 
     if (this->sensor->SetResolution(resolution) == 0) {
         this->resolution = resolution;
@@ -401,13 +422,17 @@ int Camera::SetResolution(uint32_t resolution)
     return -1;
 }
 
-int Camera::SetPixelFormat(uint32_t pixelformat)
+int Camera::SetPixelFormat(int32_t pixformat)
 {
-    if (this->sensor == NULL) {
+    if (this->sensor == NULL || pixformat >= CAMERA_PMAX) {
         return -1;
     }
 
-    return this->sensor->SetPixelFormat(pixelformat);
+    if (this->sensor->SetPixelFormat(pixformat) == 0) {
+        this->pixformat = pixformat;
+        return 0;
+    }
+    return -1;
 }
 
 int Camera::SetStandby(bool enable)
@@ -428,9 +453,22 @@ int Camera::SetTestPattern(bool enable, bool walking)
     return this->sensor->SetTestPattern(enable, walking);
 }
 
+int Camera::FrameSize()
+{
+    if (this->sensor == NULL
+            || this->pixformat == -1
+            || this->resolution == -1) {
+        return -1;
+    }
+
+    return restab[this->resolution][0] * restab[this->resolution][1] * pixtab[this->pixformat];
+}
+
 int Camera::GrabFrame(uint8_t *framebuffer, uint32_t timeout)
 {
-    if (this->sensor == NULL) {
+    if (this->sensor == NULL
+            || this->pixformat == -1
+            || this->resolution == -1) {
         return -1;
     }
 
@@ -439,10 +477,9 @@ int Camera::GrabFrame(uint8_t *framebuffer, uint32_t timeout)
         return -1;
     }
 
-    /* Frame size from resolution. */
-    uint32_t framesize = CamRes[this->resolution][0] * CamRes[this->resolution][1];
-
     frame_ready = 0;
+
+    uint32_t framesize = FrameSize();
 
     /* Start the Camera Snapshot Capture */
     HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_SNAPSHOT, (uint32_t) framebuffer, framesize / 4);
@@ -460,5 +497,6 @@ int Camera::GrabFrame(uint8_t *framebuffer, uint32_t timeout)
 
     /* Invalidate buffer after DMA transfer */
     SCB_InvalidateDCache_by_Addr((uint32_t*) framebuffer, framesize);
+
     return 0;
 }

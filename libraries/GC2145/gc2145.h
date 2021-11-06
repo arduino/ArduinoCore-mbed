@@ -19,9 +19,9 @@ class GC2145: public ImageSensor {
        int Reset();
        int GetID() { return GC2145_I2C_ADDR; };
        uint32_t GetClockFrequency() { return 12000000; };
-       int SetFrameRate(uint32_t framerate);
-       int SetResolution(uint32_t resolution);
-       int SetPixelFormat(uint32_t pixelformat);
+       int SetFrameRate(int32_t framerate);
+       int SetResolution(int32_t resolution);
+       int SetPixelFormat(int32_t pixformat);
 };
  
 #endif /* __GC2145_H */

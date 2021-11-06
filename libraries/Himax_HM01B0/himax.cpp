@@ -317,7 +317,7 @@ int HM01B0::Reset()
     return max_timeout>0 ? 0: -1 ;
 }
 
-int HM01B0::SetResolution(uint32_t resolution)
+int HM01B0::SetResolution(int32_t resolution)
 {
   int ret = 0;
 
@@ -344,7 +344,7 @@ int HM01B0::SetResolution(uint32_t resolution)
   return ret;
 }
 
-int HM01B0::SetFrameRate(uint32_t framerate)
+int HM01B0::SetFrameRate(int32_t framerate)
 {
   uint8_t osc_div = 0;
   // binning is enabled for QQVGA
@@ -371,9 +371,9 @@ int HM01B0::SetFrameRate(uint32_t framerate)
   return reg_write(HM01B0_I2C_ADDR, OSC_CLK_DIV, 0x08 | osc_div, true);
 }
 
-int HM01B0::SetPixelFormat(uint32_t pixelformat)
+int HM01B0::SetPixelFormat(int32_t pixformat)
 {
-    return -1;
+    return (pixformat == CAMERA_GRAYSCALE) ? 0 : -1;
 }
 
 int HM01B0::SetTestPattern(bool enable, bool walking)

@@ -14,11 +14,24 @@
 #define GC2145_I2C_ADDR         (0x3C)
 
 enum {
-    CAMERA_R160x120 = 0x00,   /* QQVGA Resolution   */
-    CAMERA_R320x240 = 0x01,   /* QVGA Resolution    */
-    CAMERA_R320x320 = 0x02,   /* 320x320 Resolution */
+    CAMERA_GRAYSCALE    = 0,
+    CAMERA_BAYER        = 1,
+    CAMERA_RGB565       = 2,
+    CAMERA_PMAX
+};
+
+enum {
+    CAMERA_R160x120     = 0,   /* QQVGA Resolution   */
+    CAMERA_R320x240     = 1,   /* QVGA Resolution    */
+    CAMERA_R320x320     = 2,   /* 320x320 Resolution */
+    CAMERA_R640x480     = 3,   /* VGA                */
+    CAMERA_R800x600     = 5,   /* SVGA               */
+    CAMERA_R1600x1200   = 6,   /* UXGA               */
     CAMERA_RMAX
 };
+
+// Resolution table
+extern const uint32_t restab[CAMERA_RMAX][2];
 
 class ImageSensor {
     public:
@@ -26,9 +39,9 @@ class ImageSensor {
         virtual int Reset() = 0;
         virtual int GetID() = 0;
         virtual uint32_t GetClockFrequency() = 0;
-        virtual int SetFrameRate(uint32_t framerate) = 0;
-        virtual int SetResolution(uint32_t resolution) = 0;
-        virtual int SetPixelFormat(uint32_t pixelformat) = 0;
+        virtual int SetFrameRate(int32_t framerate) = 0;
+        virtual int SetResolution(int32_t resolution) = 0;
+        virtual int SetPixelFormat(int32_t pixelformat) = 0;
 
         int SetStandby(bool enable) {
             return -1;
@@ -75,19 +88,22 @@ class ImageSensor {
 
 class Camera {
     private:
-        uint32_t resolution;
+        int32_t pixformat;
+        int32_t resolution;
+        int32_t framerate;
         ImageSensor *sensor;
         int Reset();
         int ProbeSensor();
     public:
-        Camera(ImageSensor *sensor): sensor(sensor){}
-        int begin(uint32_t resolution=CAMERA_R320x240, uint32_t framerate=30);
+        Camera(ImageSensor *sensor): pixformat(-1), resolution(-1), framerate(-1), sensor(sensor) {}
+        int begin(int32_t resolution=CAMERA_R320x240, int32_t pixformat=CAMERA_GRAYSCALE, int32_t framerate=30);
         int GetID();
-        int SetFrameRate(uint32_t framerate);
-        int SetResolution(uint32_t resolution);
-        int SetPixelFormat(uint32_t pixelformat);
+        int SetFrameRate(int32_t framerate);
+        int SetResolution(int32_t resolution);
+        int SetPixelFormat(int32_t pixelformat);
         int SetStandby(bool enable);
         int SetTestPattern(bool enable, bool walking);
+        int FrameSize();
         int GrabFrame(uint8_t *buffer, uint32_t timeout=5000);
 };
 #endif // __CAMERA_H
