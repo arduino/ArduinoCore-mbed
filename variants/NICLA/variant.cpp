@@ -71,21 +71,28 @@ AnalogPinDescription g_AAnalogPinDescription[] = {
 
 PinDescription g_APinDescription[] = {
 
-  { P0_10, NULL, NULL, NULL },    // GPIO3
-  { P0_9, NULL, NULL, NULL },      // GPIO2/RX
-  { P0_20, NULL, NULL, NULL },     // GPIO1/TX
-  { P0_23, NULL, NULL, NULL },     // SCL1
-  { P0_22, NULL, NULL, NULL },     // SDA1
+  { P0_10, NULL, NULL, NULL },    // 0: GPIO3
+  { P0_9, NULL, NULL, NULL },     // 1: GPIO2/RX
+  { P0_20, NULL, NULL, NULL },    // 2: GPIO1/TX
+  { P0_23, NULL, NULL, NULL },    // 3: SCL1
+  { P0_22, NULL, NULL, NULL },    // 4: SDA1
 
 
-  { P0_24, NULL, NULL, NULL },     // GPIO0
-  { P0_29, NULL, NULL, NULL },     // CS
-  { P0_28, NULL, NULL, NULL },     // CIPO
-  { P0_27, NULL, NULL, NULL },     // COPI
-  { P0_11, NULL, NULL, NULL },     // SCLK
+  { P0_24, NULL, NULL, NULL },    // 5: GPIO0
+  { P0_29, NULL, NULL, NULL },    // 6: CS
+  { P0_28, NULL, NULL, NULL },    // 7: CIPO
+  { P0_27, NULL, NULL, NULL },    // 8: COPI
+  { P0_11, NULL, NULL, NULL },    // 9: SCLK
 
-  { P0_2, NULL, NULL, NULL },    // A0
-  { P0_30, NULL, NULL, NULL }    // A1
+  { P0_2, NULL, NULL, NULL },     // 10: A0
+  { P0_30, NULL, NULL, NULL },    // 11: A1
+
+  { P0_19, NULL, NULL, NULL },    // 12: INT ESLOV
+  { P0_18, NULL, NULL, NULL },    // 13: Reset BHI260
+  { P0_14, NULL, NULL, NULL },    // 14: INT BHI260
+  { P0_25, NULL, NULL, NULL },    // 15: BQ25120 CD
+  { P0_26, NULL, NULL, NULL },    // 16: CS FLASH
+  { P0_31, NULL, NULL, NULL },    // 17: CS BHI260  
 };
 
 extern "C" {
