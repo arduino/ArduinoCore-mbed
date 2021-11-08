@@ -1,7 +1,7 @@
-From 1d7a575419ec4a9545265ebba53c49e155382525 Mon Sep 17 00:00:00 2001
+From b9d9029ec94e9b16eebd61ec8442564b9e715e65 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Mon, 8 Mar 2021 11:17:31 +0100
-Subject: [PATCH 042/101] RP2040: SPI: check SS correctness only if declared
+Subject: [PATCH 42/87] RP2040: SPI: check SS correctness only if declared
 
 ---
  targets/TARGET_RASPBERRYPI/TARGET_RP2040/spi_api.c | 5 +++--
@@ -24,5 +24,5 @@ index 1cc6bfa0fb..73129835fa 100644
      /* Obtain pointer to the SPI module. */
      obj->dev = (spi_inst_t *)pinmap_function(mosi, PinMap_SPI_MOSI);
 -- 
-2.33.0
+2.33.1
 

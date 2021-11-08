@@ -1,7 +1,7 @@
-From 0821459c37bb6bcb5f49ea6eedde68b6ce1cb9b6 Mon Sep 17 00:00:00 2001
+From f1cb89bad6a25bf8c3640f30012e7797d78b87e2 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Mon, 3 May 2021 14:32:33 +0200
-Subject: [PATCH 058/101] RP2040: silence nasty warning
+Subject: [PATCH 58/87] RP2040: silence nasty warning
 
 ---
  targets/TARGET_RASPBERRYPI/TARGET_RP2040/objects.h | 1 +
@@ -20,5 +20,5 @@ index cdbd5655e6..280f166d4d 100644
  #ifdef __cplusplus
  #include <stdint.h>
 -- 
-2.33.0
+2.33.1
 

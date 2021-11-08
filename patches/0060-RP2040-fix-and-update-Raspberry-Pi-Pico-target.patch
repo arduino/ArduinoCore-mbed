@@ -1,7 +1,7 @@
-From e21767f34d835e8188853cc3c59c42ba972071bd Mon Sep 17 00:00:00 2001
+From f3c5937cab193ab09e1472fb916fbb2df587ba8e Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Mon, 3 May 2021 15:12:12 +0200
-Subject: [PATCH 060/101] RP2040: fix and update Raspberry Pi Pico target
+Subject: [PATCH 60/87] RP2040: fix and update Raspberry Pi Pico target
 
 ---
  .../TARGET_RASPBERRY_PI_PICO/CMakeLists.txt            | 10 +++++-----
@@ -53,5 +53,5 @@ index 6a47df933a..2b2e9463ef 100644
      LED1 = p25,
      LED2 = p25,
 -- 
-2.33.0
+2.33.1
 

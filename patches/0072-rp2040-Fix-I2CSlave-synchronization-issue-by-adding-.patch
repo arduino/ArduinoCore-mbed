@@ -1,0 +1,46 @@
+From 31707aa29963c035ccae355da8efcdfb75c7325b Mon Sep 17 00:00:00 2001
+From: giulcioffi <g.cioffi@arduino.cc>
+Date: Thu, 7 Oct 2021 18:11:59 +0200
+Subject: [PATCH 72/87] rp2040: Fix I2CSlave synchronization issue by adding a
+ timeout for the read
+
+---
+ .../TARGET_RASPBERRYPI/TARGET_RP2040/i2c_api.c    | 15 ++++++++++++++-
+ 1 file changed, 14 insertions(+), 1 deletion(-)
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/i2c_api.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/i2c_api.c
+index 2b776562a1..ec52728f63 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/i2c_api.c
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/i2c_api.c
+@@ -24,6 +24,8 @@
+ #define WriteGeneral   2 // the master is writing to all slave
+ #define WriteAddressed 3 // the master is writing to this slave (slave = receiver)
+ 
++#define BYTE_TIMEOUT_US   ((SystemCoreClock / obj->baudrate) * 3 * 10)
++
+ /******************************************************************************
+  * CONST
+  ******************************************************************************/
+@@ -193,7 +195,18 @@ int i2c_slave_receive(i2c_t *obj)
+  */
+ int i2c_slave_read(i2c_t *obj, char *data, int length)
+ {
+-    size_t read_len = i2c_read_raw_blocking(obj->dev, (uint8_t *)data, length);
++    int read_len = 0;
++
++    int timeout = 120 * (length + 1);
++    while (!i2c_get_read_available(obj->dev)) {
++        tight_loop_contents();
++    }
++    while (--timeout != 0) {
++        if (i2c_get_read_available(obj->dev)) {
++            data[read_len++] = i2c_get_hw(obj->dev)->data_cmd;
++        }
++        wait_us(1);
++    }
+ 
+     DEBUG_PRINTF("i2c_slave read %d bytes\r\n", read_len);
+ 
+-- 
+2.33.1
+

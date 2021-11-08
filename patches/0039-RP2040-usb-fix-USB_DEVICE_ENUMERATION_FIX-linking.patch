@@ -1,7 +1,7 @@
-From 102fd08f23ece7a44ec5aead6a2ec546c6ef01f3 Mon Sep 17 00:00:00 2001
+From 2d03a0003a1f2e196208994d6acf6b47a7bafd19 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Mon, 8 Mar 2021 10:06:58 +0100
-Subject: [PATCH 039/101] RP2040: usb: fix USB_DEVICE_ENUMERATION_FIX linking
+Subject: [PATCH 39/87] RP2040: usb: fix USB_DEVICE_ENUMERATION_FIX linking
 
 ---
  .../TARGET_RASPBERRYPI/TARGET_RP2040/USBPhy_RP2040.cpp   | 9 +++++++++
@@ -36,10 +36,10 @@ index 2ef354035d..c88bdcc573 100644
  // an atomic alias (this handles the state where both cores can access a register
  // and cause a bit loss through a read-modify-write access)
 diff --git a/targets/targets.json b/targets/targets.json
-index 53b69fa660..527a5d7550 100644
+index b1ce0db418..988635d662 100644
 --- a/targets/targets.json
 +++ b/targets/targets.json
-@@ -8466,6 +8466,7 @@
+@@ -8580,6 +8580,7 @@
      "NANO_RP2040_CONNECT": {
          "inherits": ["RP2040"],
          "macros_add": [
@@ -48,5 +48,5 @@ index 53b69fa660..527a5d7550 100644
              "MBED_MPU_CUSTOM",
              "PICO_TIME_DEFAULT_ALARM_POOL_DISABLED",
 -- 
-2.33.0
+2.33.1
 

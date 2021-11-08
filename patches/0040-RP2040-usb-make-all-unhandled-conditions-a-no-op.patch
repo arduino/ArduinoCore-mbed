@@ -1,7 +1,7 @@
-From 6de372fd4e81234b74330528c4ecec4451cc665d Mon Sep 17 00:00:00 2001
+From d796c56c56a7c65964b50e5d18e0bb10c18df6c0 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Mon, 8 Mar 2021 10:07:26 +0100
-Subject: [PATCH 040/101] RP2040: usb: make all unhandled conditions a no-op
+Subject: [PATCH 40/87] RP2040: usb: make all unhandled conditions a no-op
 
 ---
  .../TARGET_RP2040/USBPhy_RP2040.cpp              | 16 ++++------------
@@ -50,5 +50,5 @@ index c88bdcc573..ff24a6dcd6 100644
  
  void USBPhyHw::process()
 -- 
-2.33.0
+2.33.1
 

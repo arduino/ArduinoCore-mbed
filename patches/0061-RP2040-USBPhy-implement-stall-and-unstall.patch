@@ -1,7 +1,7 @@
-From 901f2dad61370ca2af7743c1b068f97892f2a0a6 Mon Sep 17 00:00:00 2001
+From c97b6955501f4c2e06dd84c3fde0723f78394819 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Fri, 7 May 2021 16:08:53 +0200
-Subject: [PATCH 061/101] RP2040: USBPhy: implement stall() and unstall()
+Subject: [PATCH 61/87] RP2040: USBPhy: implement stall() and unstall()
 
 ---
  .../TARGET_RP2040/USBPhy_RP2040.cpp                  | 12 +++++++++---
@@ -42,5 +42,5 @@ index fbece56a1d..9beb225a30 100644
  
  bool USBPhyHw::endpoint_read(usb_ep_t endpoint, uint8_t *data, uint32_t size)
 -- 
-2.33.0
+2.33.1
 

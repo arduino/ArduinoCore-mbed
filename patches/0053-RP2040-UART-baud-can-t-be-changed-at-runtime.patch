@@ -1,7 +1,7 @@
-From 5a749af0296bf93f4eef06e5dc011c14f98a4c87 Mon Sep 17 00:00:00 2001
+From dbf8f05a51e3f9d3f6715c2eef8af9c5d66e7008 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Wed, 24 Mar 2021 11:55:51 +0100
-Subject: [PATCH 053/101] RP2040: UART: baud can't be changed at runtime
+Subject: [PATCH 53/87] RP2040: UART: baud can't be changed at runtime
 
 ---
  targets/TARGET_RASPBERRYPI/TARGET_RP2040/serial_api.c | 3 ++-
@@ -22,5 +22,5 @@ index 6a90e64323..8d95f6c2a3 100644
  
  void serial_format(serial_t *obj, int data_bits, SerialParity parity, int stop_bits)
 -- 
-2.33.0
+2.33.1
 

@@ -1,7 +1,7 @@
-From c3c9b6ea5a48079a04f1c4212d7b1740944c46fa Mon Sep 17 00:00:00 2001
+From 127041a0000d8752ac72d6f850f622eeec7adfa2 Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Thu, 25 Feb 2021 12:44:31 +0100
-Subject: [PATCH 043/101] RP2040: Add I2C slave
+Subject: [PATCH 43/87] RP2040: Add I2C slave
 
 ---
  .../TARGET_RP2040/i2c_api.c                   | 145 +++++++++++++++++-
@@ -257,10 +257,10 @@ index ead7bf1b1b..2b5dca7798 100644
  
  #ifdef __cplusplus
 diff --git a/targets/targets.json b/targets/targets.json
-index 527a5d7550..d067131a35 100644
+index 988635d662..55bffd9593 100644
 --- a/targets/targets.json
 +++ b/targets/targets.json
-@@ -8452,6 +8452,7 @@
+@@ -8566,6 +8566,7 @@
              "ANALOGIN",
              "FLASH",
              "I2C",
@@ -269,5 +269,5 @@ index 527a5d7550..d067131a35 100644
              "PORT_IN",
              "PORT_OUT",
 -- 
-2.33.0
+2.33.1
 

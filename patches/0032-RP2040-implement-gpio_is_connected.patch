@@ -1,7 +1,7 @@
-From fd4c54c04e42cbc370f8e10c35d76abd5d2465b7 Mon Sep 17 00:00:00 2001
+From 2a760eec6f220f869cd10628bb390360fd1bc113 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Fri, 26 Feb 2021 12:51:25 +0100
-Subject: [PATCH 032/101] RP2040: implement gpio_is_connected()
+Subject: [PATCH 32/87] RP2040: implement gpio_is_connected()
 
 ---
  targets/TARGET_RASPBERRYPI/TARGET_RP2040/gpio_api.c | 3 +++
@@ -20,5 +20,5 @@ index 7f6131c972..3d09714881 100644
 +}
 \ No newline at end of file
 -- 
-2.33.0
+2.33.1
 

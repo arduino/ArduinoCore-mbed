@@ -1,7 +1,7 @@
-From 2f0d583c9211b43bc7f14f030a219259dfc8965b Mon Sep 17 00:00:00 2001
+From f5ff8c3a361030028d596dff2e9f519e1518d9ae Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Tue, 16 Mar 2021 11:07:10 +0100
-Subject: [PATCH 052/101] RP2040: fix spi.h spurious inclusion in case
+Subject: [PATCH 52/87] RP2040: fix spi.h spurious inclusion in case
  insensitive filesystems
 
 ---
@@ -33,5 +33,5 @@ diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardwa
 new file mode 100644
 index 0000000000..e69de29bb2
 -- 
-2.33.0
+2.33.1
 

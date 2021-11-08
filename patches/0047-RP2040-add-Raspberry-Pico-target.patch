@@ -1,7 +1,7 @@
-From 10057408ea838562ec451fb15e57276087041df0 Mon Sep 17 00:00:00 2001
+From 24be08424a878d2e25a6b9ec352625af0f1380ed Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Mon, 15 Mar 2021 15:28:08 +0100
-Subject: [PATCH 047/101] RP2040: add Raspberry Pico target
+Subject: [PATCH 47/87] RP2040: add Raspberry Pico target
 
 ---
  .../TARGET_RASPBERRY_PI_PICO/PinNames.h       | 70 +++++++++++++++++++
@@ -129,10 +129,10 @@ index 0000000000..fc6bea7df6
 +.byte 0xf4, 0x00, 0x00, 0x18, 0x22, 0x20, 0x00, 0xa0, 0x00, 0x01, 0x00, 0x10, 0x08, 0xed, 0x00, 0xe0
 +.byte 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x74, 0xb2, 0x4e, 0x7a
 diff --git a/targets/targets.json b/targets/targets.json
-index d067131a35..ae8cdcc02b 100644
+index 55bffd9593..05b2ca5e7f 100644
 --- a/targets/targets.json
 +++ b/targets/targets.json
-@@ -8475,6 +8475,17 @@
+@@ -8589,6 +8589,17 @@
              "PICO_UART_ENABLE_CRLF_SUPPORT=0"
          ]
      },
@@ -151,5 +151,5 @@ index d067131a35..ae8cdcc02b 100644
          "version": "1",
          "public": false
 -- 
-2.33.0
+2.33.1
 

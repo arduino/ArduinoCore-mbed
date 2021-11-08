@@ -1,0 +1,133 @@
+From 040dd31ee00dc07532a4c24be2a46b60fbfea420 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Mon, 28 Jun 2021 17:04:01 +0200
+Subject: [PATCH 76/87] STM32: HRTIM: greatly simplify corner cases
+
+---
+ targets/TARGET_STM/pwmout_api.c | 57 +++++++++++++++------------------
+ 1 file changed, 25 insertions(+), 32 deletions(-)
+
+diff --git a/targets/TARGET_STM/pwmout_api.c b/targets/TARGET_STM/pwmout_api.c
+index 1564a1c4d3..906dc1dcfd 100644
+--- a/targets/TARGET_STM/pwmout_api.c
++++ b/targets/TARGET_STM/pwmout_api.c
+@@ -142,9 +142,9 @@ static void _pwmout_init_direct(pwmout_t *obj, const PinMap *pinmap)
+         pin_function(pinmap->pin, pinmap->function);
+         pin_mode(pinmap->pin, PullNone);
+ 
+-        obj->period = 1000;
+-        obj->pulse = 500;
+-        obj->prescaler = 0x00000004U;
++        obj->period = 0;
++        obj->pulse = 0;
++        obj->prescaler = 0;
+ 
+         // Initialize the HRTIM structure
+         HrtimHandle.Instance = HRTIM1;
+@@ -155,7 +155,7 @@ static void _pwmout_init_direct(pwmout_t *obj, const PinMap *pinmap)
+ 
+         // Configure the HRTIM TIME PWM channels 2
+         sConfig_time_base.Mode = HRTIM_MODE_CONTINUOUS;
+-        sConfig_time_base.Period = 10000;
++        sConfig_time_base.Period = 0xFFDFU;
+         sConfig_time_base.PrescalerRatio = HRTIM_PRESCALERRATIO_DIV4;
+         sConfig_time_base.RepetitionCounter = 0;
+ 
+@@ -183,7 +183,7 @@ static void _pwmout_init_direct(pwmout_t *obj, const PinMap *pinmap)
+ 
+         sConfig_compare.AutoDelayedMode = HRTIM_AUTODELAYEDMODE_REGULAR;
+         sConfig_compare.AutoDelayedTimeout = 0;
+-        sConfig_compare.CompareValue = 5000;
++        sConfig_compare.CompareValue = 0;
+ 
+         HAL_HRTIM_WaveformCompareConfig(&HrtimHandle, hrtim_timer.timer, HRTIM_COMPAREUNIT_2, &sConfig_compare);
+ 
+@@ -213,7 +213,7 @@ static void _pwmout_init_direct(pwmout_t *obj, const PinMap *pinmap)
+             // PWM Generation Error
+             return;
+         }
+-        pwmout_period_us(obj, 1000); // 20 ms per default
++        pwmout_period_us(obj, 18000); // 550Hz minimum default
+ 
+         return;
+     }
+@@ -336,9 +336,8 @@ void pwmout_init(pwmout_t *obj, PinName pin)
+     int peripheral = 0;
+     int function = (int)pinmap_find_function(pin, PinMap_PWM);
+     // check Function before peripheral because pinmap_peripheral
+-    // assert a error and stop the exectution
++    // assert a error and stop the execution
+     if (function == -1) {
+-
+         peripheral = (int)pinmap_peripheral(pin, PinMap_PWM_HRTIM);
+         function = (int)pinmap_find_function(pin, PinMap_PWM_HRTIM);
+     } else {
+@@ -365,8 +364,8 @@ void pwmout_write(pwmout_t *obj, float value)
+         } else if (value > (float)1.0) {
+             value = 1.0;
+         }
+-        obj->pulse = value;
+-        sConfig_compare.CompareValue =  (uint32_t)((float)obj->period * value + 0.5);
++        obj->pulse = (uint32_t)((float)obj->period * value + 0.5);
++        sConfig_compare.CompareValue =  obj->pulse;
+         if (HAL_HRTIM_WaveformCompareConfig(&HrtimHandle,  hrtim_timer.timer, HRTIM_COMPAREUNIT_2, &sConfig_compare) != HAL_OK)
+         {
+             return;
+@@ -442,13 +441,6 @@ void pwmout_write(pwmout_t *obj, float value)
+ float pwmout_read(pwmout_t *obj)
+ {
+     float value = 0;
+-
+-#if defined(HRTIM1)
+-    if(obj->pwm == PWM_I) {
+-        return obj->pulse;
+-    }
+-#endif
+-
+     if (obj->period > 0) {
+         value = (float)(obj->pulse) / (float)(obj->period);
+     }
+@@ -472,24 +464,25 @@ void pwmout_period_us(pwmout_t *obj, int us)
+     if (obj->pwm == PWM_I) {
+         float dc = pwmout_read(obj);
+ 
+-        /*  Parse the pwm / apb mapping table to find the right entry */
+-        unsigned long frequency = 400;
++        uint32_t frequency;
++        uint32_t clocksource = __HAL_RCC_GET_HRTIM1_SOURCE();
++        switch (clocksource) {
++            case RCC_HRTIM1CLK_TIMCLK:
++                frequency = HAL_RCC_GetHCLKFreq();
++                break;
++            case RCC_HRTIM1CLK_CPUCLK:
++                frequency = HAL_RCC_GetSysClockFreq();
++                break;
++        }
+ 
+-        /* conversion from us to clock tick*/
+-        obj->period  = frequency * us;
++        /* conversion from us to clock tick */
++        obj->period = us * (frequency / 1000000) / 4;
++        obj->prescaler = HRTIM_PRESCALERRATIO_DIV4;
+ 
+-        obj->prescaler = 0x00000004U;
+-        /*  In case period or pre-scalers are out of range, loop-in to get valid values */
+-        /* this upper limit can be increased but degdating the efficiency of the clock*/
+-        while (obj->period > 50000) {
+-            obj->prescaler  = obj->prescaler + 1;
+-            if(obj->prescaler == 8) {
+-                obj->prescaler = 0x00000007U;
+-                break;
+-            }
+-            frequency = frequency/2;
+-            obj->period  = frequency *us;
++        if (obj->period > 0xFFDFU) {
++            obj->period = 0xFFDFU;
+         }
++
+         sConfig_time_base.Mode = HRTIM_MODE_CONTINUOUS;
+         sConfig_time_base.Period = obj->period;
+         sConfig_time_base.PrescalerRatio = obj->prescaler;
+-- 
+2.33.1
+

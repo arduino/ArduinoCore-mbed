@@ -1,0 +1,264 @@
+From ef0d3f7bef50e1a12f0e5a93eb3f08e0210d34b9 Mon Sep 17 00:00:00 2001
+From: Riccardo Rizzo <r.rizzo@arduino.cc>
+Date: Mon, 28 Jun 2021 15:25:11 +0200
+Subject: [PATCH 75/87] STM32: PWM: implement HRTIM based PWM APIs
+
+Signed-off-by: Martino Facchin <m.facchin@arduino.cc>
+---
+ targets/TARGET_STM/pwmout_api.c | 196 +++++++++++++++++++++++++++++++-
+ 1 file changed, 194 insertions(+), 2 deletions(-)
+
+diff --git a/targets/TARGET_STM/pwmout_api.c b/targets/TARGET_STM/pwmout_api.c
+index 8026921c67..1564a1c4d3 100644
+--- a/targets/TARGET_STM/pwmout_api.c
++++ b/targets/TARGET_STM/pwmout_api.c
+@@ -39,6 +39,22 @@
+ 
+ static TIM_HandleTypeDef TimHandle;
+ 
++#if defined(HRTIM1)
++#define HRTIM_CHANNEL(Y,X)  (uint32_t)(0x00000001 << ((((Y*2)+(X)) & 0xF)))
++#define HRTIM_TIMERID(X)  (uint32_t)(0x00000001 << (17U  + X))// << (X)))
++
++typedef struct{
++    uint8_t timer;
++    uint32_t channel;
++    uint32_t timerid;
++} hrtim_t;
++
++static hrtim_t hrtim_timer;
++static HRTIM_HandleTypeDef HrtimHandle;
++static HRTIM_CompareCfgTypeDef sConfig_compare;
++static HRTIM_TimeBaseCfgTypeDef sConfig_time_base;
++#endif
++
+ /* Convert STM32 Cube HAL channel to LL channel */
+ uint32_t TIM_ChannelConvert_HAL2LL(uint32_t channel, pwmout_t *obj)
+ {
+@@ -86,7 +102,6 @@ static void _pwmout_init_direct(pwmout_t *obj, const PinMap *pinmap)
+ {
+     // Get the peripheral name from the pin and assign it to the object
+     obj->pwm = (PWMName)pinmap->peripheral;
+-    MBED_ASSERT(obj->pwm != (PWMName)NC);
+ 
+     // Get the functions (timer channel, (non)inverted) from the pin and assign it to the object
+     uint32_t function = (uint32_t)pinmap->function;
+@@ -94,6 +109,116 @@ static void _pwmout_init_direct(pwmout_t *obj, const PinMap *pinmap)
+     obj->channel = STM_PIN_CHANNEL(function);
+     obj->inverted = STM_PIN_INVERTED(function);
+ 
++#if defined(HRTIM1)
++    if (obj->pwm == PWM_I) {
++
++        HRTIM_TimerCfgTypeDef       sConfig_timer;
++        HRTIM_OutputCfgTypeDef      sConfig_output_config;
++
++        __HAL_RCC_HRTIM1_CLK_ENABLE();
++
++        if(STM_PORT(pinmap->pin) == 0) {
++            __HAL_RCC_GPIOA_CLK_ENABLE();
++        } else if(STM_PORT(pinmap->pin) == 1) {
++            __HAL_RCC_GPIOB_CLK_ENABLE();
++        } else if(STM_PORT(pinmap->pin) == 2) {
++            __HAL_RCC_GPIOC_CLK_ENABLE();
++        } else if(STM_PORT(pinmap->pin) == 3) {
++            __HAL_RCC_GPIOD_CLK_ENABLE();
++        } else if(STM_PORT(pinmap->pin) == 4) {
++            __HAL_RCC_GPIOE_CLK_ENABLE();
++        } else if(STM_PORT(pinmap->pin) == 5) {
++            __HAL_RCC_GPIOF_CLK_ENABLE();
++        } else if(STM_PORT(pinmap->pin) == 6) {
++            __HAL_RCC_GPIOG_CLK_ENABLE();
++        } else {
++           __HAL_RCC_GPIOH_CLK_ENABLE();
++        }
++
++        hrtim_timer.timer = obj->channel;
++        hrtim_timer.channel = HRTIM_CHANNEL(hrtim_timer.timer,obj->inverted);
++        hrtim_timer.timerid = HRTIM_TIMERID(hrtim_timer.timer);
++
++        pin_function(pinmap->pin, pinmap->function);
++        pin_mode(pinmap->pin, PullNone);
++
++        obj->period = 1000;
++        obj->pulse = 500;
++        obj->prescaler = 0x00000004U;
++
++        // Initialize the HRTIM structure
++        HrtimHandle.Instance = HRTIM1;
++        HrtimHandle.Init.HRTIMInterruptResquests = HRTIM_IT_NONE;
++        HrtimHandle.Init.SyncOptions = HRTIM_SYNCOPTION_NONE;
++
++        HAL_HRTIM_Init(&HrtimHandle);
++
++        // Configure the HRTIM TIME PWM channels 2
++        sConfig_time_base.Mode = HRTIM_MODE_CONTINUOUS;
++        sConfig_time_base.Period = 10000;
++        sConfig_time_base.PrescalerRatio = HRTIM_PRESCALERRATIO_DIV4;
++        sConfig_time_base.RepetitionCounter = 0;
++
++        HAL_HRTIM_TimeBaseConfig(&HrtimHandle, hrtim_timer.timer, &sConfig_time_base);
++
++        sConfig_timer.DMARequests = HRTIM_TIM_DMA_NONE;
++        sConfig_timer.HalfModeEnable = HRTIM_HALFMODE_DISABLED;
++        sConfig_timer.StartOnSync = HRTIM_SYNCSTART_DISABLED;
++        sConfig_timer.ResetOnSync = HRTIM_SYNCRESET_DISABLED;
++        sConfig_timer.DACSynchro = HRTIM_DACSYNC_NONE;
++        sConfig_timer.PreloadEnable = HRTIM_PRELOAD_ENABLED;
++        sConfig_timer.UpdateGating = HRTIM_UPDATEGATING_INDEPENDENT;
++        sConfig_timer.BurstMode = HRTIM_TIMERBURSTMODE_MAINTAINCLOCK;
++        sConfig_timer.RepetitionUpdate = HRTIM_UPDATEONREPETITION_ENABLED;
++        sConfig_timer.ResetUpdate = HRTIM_TIMUPDATEONRESET_DISABLED;
++        sConfig_timer.InterruptRequests = HRTIM_TIM_IT_NONE;
++        sConfig_timer.PushPull = HRTIM_TIMPUSHPULLMODE_DISABLED;
++        sConfig_timer.FaultEnable = HRTIM_TIMFAULTENABLE_NONE;
++        sConfig_timer.FaultLock = HRTIM_TIMFAULTLOCK_READWRITE;
++        sConfig_timer.DeadTimeInsertion = HRTIM_TIMDEADTIMEINSERTION_DISABLED;
++        sConfig_timer.UpdateTrigger = HRTIM_TIMUPDATETRIGGER_NONE;
++        sConfig_timer.ResetTrigger = HRTIM_TIMRESETTRIGGER_NONE;
++
++        HAL_HRTIM_WaveformTimerConfig(&HrtimHandle, hrtim_timer.timer, &sConfig_timer);
++
++        sConfig_compare.AutoDelayedMode = HRTIM_AUTODELAYEDMODE_REGULAR;
++        sConfig_compare.AutoDelayedTimeout = 0;
++        sConfig_compare.CompareValue = 5000;
++
++        HAL_HRTIM_WaveformCompareConfig(&HrtimHandle, hrtim_timer.timer, HRTIM_COMPAREUNIT_2, &sConfig_compare);
++
++        sConfig_output_config.Polarity = HRTIM_OUTPUTPOLARITY_LOW;
++        sConfig_output_config.SetSource = HRTIM_OUTPUTRESET_TIMCMP2;
++        sConfig_output_config.ResetSource = HRTIM_OUTPUTSET_TIMPER;
++        sConfig_output_config.IdleMode = HRTIM_OUTPUTIDLEMODE_NONE;
++        sConfig_output_config.IdleLevel = HRTIM_OUTPUTIDLELEVEL_INACTIVE;
++        sConfig_output_config.FaultLevel = HRTIM_OUTPUTFAULTLEVEL_NONE;
++        sConfig_output_config.ChopperModeEnable = HRTIM_OUTPUTCHOPPERMODE_DISABLED;
++        sConfig_output_config.BurstModeEntryDelayed = HRTIM_OUTPUTBURSTMODEENTRY_REGULAR;
++        sConfig_output_config.ResetSource = HRTIM_OUTPUTRESET_TIMPER;
++        sConfig_output_config.SetSource = HRTIM_OUTPUTSET_TIMCMP2;
++
++        HAL_HRTIM_WaveformOutputConfig(&HrtimHandle,  hrtim_timer.timer, hrtim_timer.channel, &sConfig_output_config);
++
++        // Start PWM signals generation
++        if (HAL_HRTIM_WaveformOutputStart(&HrtimHandle, hrtim_timer.channel) != HAL_OK)
++        {
++            // PWM Generation Error
++            return;
++        }
++
++        // Start HRTIM counter
++        if (HAL_HRTIM_WaveformCounterStart(&HrtimHandle, hrtim_timer.timerid) != HAL_OK)
++        {
++            // PWM Generation Error
++            return;
++        }
++        pwmout_period_us(obj, 1000); // 20 ms per default
++
++        return;
++    }
++#endif
++
+     // Enable TIM clock
+ #if defined(TIM1_BASE)
+     if (obj->pwm == PWM_1) {
+@@ -208,9 +333,17 @@ static void _pwmout_init_direct(pwmout_t *obj, const PinMap *pinmap)
+ 
+ void pwmout_init(pwmout_t *obj, PinName pin)
+ {
+-    int peripheral = (int)pinmap_peripheral(pin, PinMap_PWM);
++    int peripheral = 0;
+     int function = (int)pinmap_find_function(pin, PinMap_PWM);
++    // check Function before peripheral because pinmap_peripheral
++    // assert a error and stop the exectution
++    if (function == -1) {
+ 
++        peripheral = (int)pinmap_peripheral(pin, PinMap_PWM_HRTIM);
++        function = (int)pinmap_find_function(pin, PinMap_PWM_HRTIM);
++    } else {
++        peripheral = (int)pinmap_peripheral(pin, PinMap_PWM);
++    }
+     const PinMap static_pinmap = {pin, peripheral, function};
+ 
+     PWM_INIT_DIRECT(obj, &static_pinmap);
+@@ -224,6 +357,24 @@ void pwmout_free(pwmout_t *obj)
+ 
+ void pwmout_write(pwmout_t *obj, float value)
+ {
++
++#if defined(HRTIM1)
++    if (obj->pwm == PWM_I) {
++        if (value < (float)0.0) {
++            value = 0.0;
++        } else if (value > (float)1.0) {
++            value = 1.0;
++        }
++        obj->pulse = value;
++        sConfig_compare.CompareValue =  (uint32_t)((float)obj->period * value + 0.5);
++        if (HAL_HRTIM_WaveformCompareConfig(&HrtimHandle,  hrtim_timer.timer, HRTIM_COMPAREUNIT_2, &sConfig_compare) != HAL_OK)
++        {
++            return;
++        }
++        return;
++    }
++#endif
++
+     TIM_OC_InitTypeDef sConfig;
+     int channel = 0;
+ 
+@@ -291,6 +442,13 @@ void pwmout_write(pwmout_t *obj, float value)
+ float pwmout_read(pwmout_t *obj)
+ {
+     float value = 0;
++
++#if defined(HRTIM1)
++    if(obj->pwm == PWM_I) {
++        return obj->pulse;
++    }
++#endif
++
+     if (obj->period > 0) {
+         value = (float)(obj->pulse) / (float)(obj->period);
+     }
+@@ -309,6 +467,40 @@ void pwmout_period_ms(pwmout_t *obj, int ms)
+ 
+ void pwmout_period_us(pwmout_t *obj, int us)
+ {
++
++#if defined(HRTIM1)
++    if (obj->pwm == PWM_I) {
++        float dc = pwmout_read(obj);
++
++        /*  Parse the pwm / apb mapping table to find the right entry */
++        unsigned long frequency = 400;
++
++        /* conversion from us to clock tick*/
++        obj->period  = frequency * us;
++
++        obj->prescaler = 0x00000004U;
++        /*  In case period or pre-scalers are out of range, loop-in to get valid values */
++        /* this upper limit can be increased but degdating the efficiency of the clock*/
++        while (obj->period > 50000) {
++            obj->prescaler  = obj->prescaler + 1;
++            if(obj->prescaler == 8) {
++                obj->prescaler = 0x00000007U;
++                break;
++            }
++            frequency = frequency/2;
++            obj->period  = frequency *us;
++        }
++        sConfig_time_base.Mode = HRTIM_MODE_CONTINUOUS;
++        sConfig_time_base.Period = obj->period;
++        sConfig_time_base.PrescalerRatio = obj->prescaler;
++        sConfig_time_base.RepetitionCounter = 0;
++
++        HAL_HRTIM_TimeBaseConfig(&HrtimHandle,  hrtim_timer.timer, &sConfig_time_base);
++        pwmout_write(obj, dc);
++        return;
++    }
++#endif
++
+     TimHandle.Instance = (TIM_TypeDef *)(obj->pwm);
+     RCC_ClkInitTypeDef RCC_ClkInitStruct;
+     uint32_t PclkFreq = 0;
+-- 
+2.33.1
+

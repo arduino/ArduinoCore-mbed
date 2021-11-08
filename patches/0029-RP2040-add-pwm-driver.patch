@@ -1,7 +1,7 @@
-From de584e1d1d2c4138787f8cd7d7cae63cab20ec8b Mon Sep 17 00:00:00 2001
+From 04c78f2a689270c32ac818a5ea7f7184b729d7ee Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Tue, 23 Feb 2021 16:48:23 +0100
-Subject: [PATCH 029/101] RP2040: add pwm driver
+Subject: [PATCH 29/87] RP2040: add pwm driver
 
 ---
  .../TARGET_RP2040/objects.h                   |   9 +
@@ -235,10 +235,10 @@ index 0000000000..5f5d847995
 +
 +#endif // DEVICE_PWMOUT
 diff --git a/targets/targets.json b/targets/targets.json
-index bd20990074..282efaa4a5 100644
+index 735b814669..1bedde872c 100644
 --- a/targets/targets.json
 +++ b/targets/targets.json
-@@ -8452,6 +8452,7 @@
+@@ -8566,6 +8566,7 @@
              "I2C",
              "PORT_IN",
              "PORT_OUT",
@@ -247,5 +247,5 @@ index bd20990074..282efaa4a5 100644
              "SPI",
              "USBDEVICE"
 -- 
-2.33.0
+2.33.1
 

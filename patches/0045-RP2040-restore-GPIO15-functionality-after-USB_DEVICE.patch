@@ -1,7 +1,7 @@
-From 6c1ab418109364c4e3da3a0a03d5b97893f4ca1a Mon Sep 17 00:00:00 2001
+From b44d1c4706fde4810a30f5a70357431178d668bb Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Mon, 15 Mar 2021 14:53:54 +0100
-Subject: [PATCH 045/101] RP2040: restore GPIO15 functionality after
+Subject: [PATCH 45/87] RP2040: restore GPIO15 functionality after
  USB_DEVICE_ENUMERATION_FIX
 
 ---
@@ -35,5 +35,5 @@ index ff24a6dcd6..fbece56a1d 100644
  
          // reset bus for USBDevice layer
 -- 
-2.33.0
+2.33.1
 

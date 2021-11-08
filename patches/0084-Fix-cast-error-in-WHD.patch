@@ -1,0 +1,25 @@
+From 039577eb10ba4d751af8a9377c935e96768a3213 Mon Sep 17 00:00:00 2001
+From: giulcioffi <g.cioffi@arduino.cc>
+Date: Fri, 17 Sep 2021 17:04:41 +0200
+Subject: [PATCH 84/87] Fix cast error in WHD
+
+---
+ .../wifi-host-driver/src/bus_protocols/whd_bus_common.c         | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/connectivity/drivers/wifi/COMPONENT_WHD/wifi-host-driver/src/bus_protocols/whd_bus_common.c b/connectivity/drivers/wifi/COMPONENT_WHD/wifi-host-driver/src/bus_protocols/whd_bus_common.c
+index 4eacf4869a..48c401a0a0 100755
+--- a/connectivity/drivers/wifi/COMPONENT_WHD/wifi-host-driver/src/bus_protocols/whd_bus_common.c
++++ b/connectivity/drivers/wifi/COMPONENT_WHD/wifi-host-driver/src/bus_protocols/whd_bus_common.c
+@@ -179,7 +179,7 @@ static whd_result_t whd_bus_common_download_resource(whd_driver_t whd_driver, wh
+             uint32_t tmp;
+ 
+             /* verify reset instruction value */
+-            result = whd_bus_read_backplane_value(whd_driver, 0, sizeof(tmp), (uint8_t *)&tmp);
++            result = whd_bus_read_backplane_value(whd_driver, 0, sizeof(tmp), (uint32_t *)&tmp);
+ 
+             if ( (result == WHD_SUCCESS) && (tmp != reset_instr) )
+             {
+-- 
+2.33.1
+

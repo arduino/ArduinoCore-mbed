@@ -1,17 +1,17 @@
-From 78510c70eccbc742c3b18505cee167d393931a0c Mon Sep 17 00:00:00 2001
+From 69262b2fbf89f0ca8f28b0b47786b8bc538edf40 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Mon, 24 May 2021 16:13:09 +0200
-Subject: [PATCH 064/101] Nano RP2040 Connect: force flash size to 16MB
+Subject: [PATCH 64/87] Nano RP2040 Connect: force flash size to 16MB
 
 ---
  targets/targets.json | 1 +
  1 file changed, 1 insertion(+)
 
 diff --git a/targets/targets.json b/targets/targets.json
-index 85b0f7cdd8..0879fac028 100644
+index 750e0d0e23..060329cf32 100644
 --- a/targets/targets.json
 +++ b/targets/targets.json
-@@ -8474,6 +8474,7 @@
+@@ -8588,6 +8588,7 @@
              "MBED_MPU_CUSTOM",
              "PICO_TIME_DEFAULT_ALARM_POOL_DISABLED",
              "PICO_ON_DEVICE=1",
@@ -20,5 +20,5 @@ index 85b0f7cdd8..0879fac028 100644
          ]
      },
 -- 
-2.33.0
+2.33.1
 

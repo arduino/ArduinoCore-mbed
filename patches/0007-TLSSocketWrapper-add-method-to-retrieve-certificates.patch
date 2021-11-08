@@ -1,7 +1,7 @@
-From 030534e8b54c350ee5e628bb6a1475e166a25c60 Mon Sep 17 00:00:00 2001
+From 2e73780a9b2e22b4e625d0c617b5e8f6b6b28abf Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Mon, 9 Nov 2020 10:00:01 +0100
-Subject: [PATCH 007/101] TLSSocketWrapper: add method to retrieve certificates
+Subject: [PATCH 07/87] TLSSocketWrapper: add method to retrieve certificates
  from filesystem
 
 ---
@@ -27,7 +27,7 @@ index a623c57a6c..57d5c788f3 100644
  #endif
  
 diff --git a/connectivity/netsocket/include/netsocket/TLSSocketWrapper.h b/connectivity/netsocket/include/netsocket/TLSSocketWrapper.h
-index 8f6af7f8ed..cc120a07b7 100644
+index 1ea28d8f61..143dda3aff 100644
 --- a/connectivity/netsocket/include/netsocket/TLSSocketWrapper.h
 +++ b/connectivity/netsocket/include/netsocket/TLSSocketWrapper.h
 @@ -116,6 +116,18 @@ public:
@@ -50,7 +50,7 @@ index 8f6af7f8ed..cc120a07b7 100644
       *
       * @param client_cert Client certification in PEM or DER format.
 diff --git a/connectivity/netsocket/source/TLSSocketWrapper.cpp b/connectivity/netsocket/source/TLSSocketWrapper.cpp
-index 9879af9e91..0c975e55fc 100644
+index cebaf04703..8202151eb7 100644
 --- a/connectivity/netsocket/source/TLSSocketWrapper.cpp
 +++ b/connectivity/netsocket/source/TLSSocketWrapper.cpp
 @@ -136,6 +136,35 @@ nsapi_error_t TLSSocketWrapper::set_root_ca_cert(const char *root_ca_pem)
@@ -90,5 +90,5 @@ index 9879af9e91..0c975e55fc 100644
  {
      return set_client_cert_key(client_cert_pem, strlen(client_cert_pem) + 1, client_private_key_pem, strlen(client_private_key_pem) + 1);
 -- 
-2.33.0
+2.33.1
 

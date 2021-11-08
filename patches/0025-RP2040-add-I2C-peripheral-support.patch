@@ -1,7 +1,7 @@
-From eb61d32a9b60248f23b7992e90467ed3f0cdd27c Mon Sep 17 00:00:00 2001
+From 34a8fcfc2bff0dd2776e5a96a2691cfe9abb2b01 Mon Sep 17 00:00:00 2001
 From: Alexander Entinger <cto@lxrobotics.com>
 Date: Tue, 16 Feb 2021 06:29:59 +0100
-Subject: [PATCH 025/101] RP2040: add I2C peripheral support
+Subject: [PATCH 25/87] RP2040: add I2C peripheral support
 
 ---
  .../TARGET_RP2040/i2c_api.c                   | 88 +++++++++++++++++++
@@ -117,10 +117,10 @@ index 16dab0daaf..061cee5908 100644
  
  struct spi_s {
 diff --git a/targets/targets.json b/targets/targets.json
-index 842bc4c520..1536423e20 100644
+index 6d61a766ae..420f23d88d 100644
 --- a/targets/targets.json
 +++ b/targets/targets.json
-@@ -8449,6 +8449,7 @@
+@@ -8563,6 +8563,7 @@
          },
          "device_has": [
              "ANALOGIN",
@@ -129,5 +129,5 @@ index 842bc4c520..1536423e20 100644
              "PORT_OUT",
              "SERIAL",
 -- 
-2.33.0
+2.33.1
 

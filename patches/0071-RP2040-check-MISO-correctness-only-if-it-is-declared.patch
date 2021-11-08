@@ -1,0 +1,30 @@
+From 83709c095e315a1fd0f0a6f1f754ad6548f046cd Mon Sep 17 00:00:00 2001
+From: Josep Comas <extern@jcomas.net>
+Date: Sat, 31 Jul 2021 18:57:41 +0200
+Subject: [PATCH 71/87] [RP2040] check MISO correctness only if it is declared
+
+It is very common  to have displays without MISO pin connected to MCU, for example, https://www.waveshare.com/pico-lcd-1.3.htm hangs calling spi_init(&spi, p11, NC, p10, NC);
+---
+ targets/TARGET_RASPBERRYPI/TARGET_RP2040/spi_api.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/spi_api.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/spi_api.c
+index 73129835fa..271cf58d1c 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/spi_api.c
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/spi_api.c
+@@ -26,8 +26,10 @@ void spi_init(spi_t *obj, PinName mosi, PinName miso, PinName sclk, PinName ssel
+     SPIName spi_sclk = (SPIName)pinmap_peripheral(sclk, PinMap_SPI_SCLK);
+     SPIName spi_ssel = (SPIName)pinmap_peripheral(ssel, PinMap_SPI_SSEL);
+ 
+-    MBED_ASSERT(spi_mosi == spi_miso);
+-    MBED_ASSERT(spi_miso == spi_sclk);
++    if (spi_miso != (SPIName)NC) {
++        MBED_ASSERT(spi_mosi == spi_miso);
++        MBED_ASSERT(spi_miso == spi_sclk);
++    }
+     if (spi_ssel != (SPIName)NC) {
+         MBED_ASSERT(spi_sclk == spi_ssel);
+     }
+-- 
+2.33.1
+

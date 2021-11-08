@@ -1,7 +1,7 @@
-From be92e58660f97048a3b01e2bec218b42f69e5aa4 Mon Sep 17 00:00:00 2001
+From 6f69fab19863b43d6e11c7be77c528ca12c8525f Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Wed, 12 May 2021 16:00:01 +0200
-Subject: [PATCH 063/101] RP2040: USB: retry handling irqs if some went missing
+Subject: [PATCH 63/87] RP2040: USB: retry handling irqs if some went missing
 
 ---
  targets/TARGET_RASPBERRYPI/TARGET_RP2040/USBPhy_RP2040.cpp | 6 +++++-
@@ -32,5 +32,5 @@ index 9beb225a30..5b5185dfee 100644
  
  
 -- 
-2.33.0
+2.33.1
 

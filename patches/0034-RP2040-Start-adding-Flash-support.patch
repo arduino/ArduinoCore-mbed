@@ -1,7 +1,7 @@
-From 7d6c86e1a0c9f3939d0c5654c5f7804e1c332032 Mon Sep 17 00:00:00 2001
+From 40c74856836a0664fffe69c155ef4111d3788e73 Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Thu, 25 Feb 2021 18:44:50 +0100
-Subject: [PATCH 034/101] RP2040: Start adding Flash support
+Subject: [PATCH 34/87] RP2040: Start adding Flash support
 
 ---
  .../TARGET_RP2040/flash_api.c                 | 107 ++++++++++++++++++
@@ -124,10 +124,10 @@ index 0000000000..85e8f5c81f
 +}
 \ No newline at end of file
 diff --git a/targets/targets.json b/targets/targets.json
-index 52f0dd8074..53b69fa660 100644
+index 8029c2ed2d..b1ce0db418 100644
 --- a/targets/targets.json
 +++ b/targets/targets.json
-@@ -8435,6 +8435,7 @@
+@@ -8549,6 +8549,7 @@
      },
      "RP2040": {
          "inherits": ["Target"],
@@ -135,7 +135,7 @@ index 52f0dd8074..53b69fa660 100644
          "core": "Cortex-M0+",
          "supported_toolchains": ["GCC_ARM"],
          "extra_labels": [
-@@ -8449,6 +8450,7 @@
+@@ -8563,6 +8564,7 @@
          },
          "device_has": [
              "ANALOGIN",
@@ -144,5 +144,5 @@ index 52f0dd8074..53b69fa660 100644
              "INTERRUPTIN",
              "PORT_IN",
 -- 
-2.33.0
+2.33.1
 

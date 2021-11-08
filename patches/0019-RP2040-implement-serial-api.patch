@@ -1,7 +1,7 @@
-From 15972d12d63d87cb53fe78498e4250910d7cad60 Mon Sep 17 00:00:00 2001
+From 67b7cb39e0bf69968a11298acbf77983058ed4e4 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Fri, 12 Feb 2021 15:49:55 +0100
-Subject: [PATCH 019/101] RP2040: implement serial api
+Subject: [PATCH 19/87] RP2040: implement serial api
 
 ---
  .../TARGET_RP2040/PeripheralPins.c            |  85 +++++++
@@ -490,10 +490,10 @@ index 0000000000..6a90e64323
 +#endif
 \ No newline at end of file
 diff --git a/targets/targets.json b/targets/targets.json
-index dd88178955..3e6e02f63c 100644
+index 70a4a31b20..08812eec21 100644
 --- a/targets/targets.json
 +++ b/targets/targets.json
-@@ -8450,7 +8450,8 @@
+@@ -8564,7 +8564,8 @@
          "device_has": [
              "ANALOGIN",
              "PORT_IN",
@@ -503,7 +503,7 @@ index dd88178955..3e6e02f63c 100644
          ]
      },
      "NANO_RP2040_CONNECT": {
-@@ -8459,7 +8460,8 @@
+@@ -8573,7 +8574,8 @@
              "PICO_NO_BINARY_INFO=1",
              "MBED_MPU_CUSTOM",
              "PICO_TIME_DEFAULT_ALARM_POOL_DISABLED",
@@ -514,5 +514,5 @@ index dd88178955..3e6e02f63c 100644
      },
      "__build_tools_metadata__": {
 -- 
-2.33.0
+2.33.1
 

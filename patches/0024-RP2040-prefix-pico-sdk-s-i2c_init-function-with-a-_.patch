@@ -1,8 +1,7 @@
-From 3e05fbb168a432bbf5fac08f42f5b5891d4d9e1c Mon Sep 17 00:00:00 2001
+From 5bbc0903dc5bdff41778932096a34ffb399590f3 Mon Sep 17 00:00:00 2001
 From: Alexander Entinger <cto@lxrobotics.com>
 Date: Tue, 16 Feb 2021 06:30:59 +0100
-Subject: [PATCH 024/101] RP2040: prefix pico-sdk's i2c_init function with a
- '_'
+Subject: [PATCH 24/87] RP2040: prefix pico-sdk's i2c_init function with a '_'
 
 to avoid name clashes with mbed I2C API.
 ---
@@ -37,5 +36,5 @@ index dda598c3e0..ead7bf1b1b 100644
  /*! \brief   Disable the I2C HW block
   *  \ingroup hardware_i2c
 -- 
-2.33.0
+2.33.1
 

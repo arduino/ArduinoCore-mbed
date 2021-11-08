@@ -1,7 +1,7 @@
-From 762d0913026b912257a8eb3fc4d29372275e6600 Mon Sep 17 00:00:00 2001
+From f20fa022bd97f730e759ffd49c3afc166d59ebb2 Mon Sep 17 00:00:00 2001
 From: Alexander Entinger <cto@lxrobotics.com>
 Date: Mon, 15 Feb 2021 15:51:03 +0100
-Subject: [PATCH 023/101] RP2040: add SPI support
+Subject: [PATCH 23/87] RP2040: add SPI support
 
 ---
  .../TARGET_RP2040/PeripheralPins.c            |  16 +--
@@ -193,10 +193,10 @@ index 0000000000..1cc6bfa0fb
 +    return PinMap_SPI_SSEL;
 +}
 diff --git a/targets/targets.json b/targets/targets.json
-index 3e6e02f63c..842bc4c520 100644
+index 08812eec21..6d61a766ae 100644
 --- a/targets/targets.json
 +++ b/targets/targets.json
-@@ -8451,7 +8451,8 @@
+@@ -8565,7 +8565,8 @@
              "ANALOGIN",
              "PORT_IN",
              "PORT_OUT",
@@ -207,5 +207,5 @@ index 3e6e02f63c..842bc4c520 100644
      },
      "NANO_RP2040_CONNECT": {
 -- 
-2.33.0
+2.33.1
 

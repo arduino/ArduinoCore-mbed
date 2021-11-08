@@ -1,7 +1,7 @@
-From b12ced99ec0be50448b5560bec50c4a63eb20880 Mon Sep 17 00:00:00 2001
+From 43d53d51e7edae6001bf55285d250857af9d94a9 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Tue, 23 Feb 2021 16:46:39 +0100
-Subject: [PATCH 027/101] RP2040: avoid float.h first level inclusion
+Subject: [PATCH 27/87] RP2040: avoid float.h first level inclusion
 
 ---
  targets/TARGET_RASPBERRYPI/TARGET_RP2040/.mbedignore             | 1 +
@@ -25,5 +25,5 @@ diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_f
 new file mode 100644
 index 0000000000..e69de29bb2
 -- 
-2.33.0
+2.33.1
 

@@ -1,0 +1,52 @@
+From c8e9f5cd3c724d012c34f5e18e12eb193ed9ef6f Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Fri, 23 Jul 2021 11:29:13 +0200
+Subject: [PATCH 81/87] PortentaH7: Disable WHD WPRINT_MACRO
+
+---
+ .../COMPONENT_WHD/port/cyhal_hw_types.h             | 13 +------------
+ .../TARGET_PORTENTA_H7/COMPONENT_WHD/whd_config.h   |  3 +++
+ 2 files changed, 4 insertions(+), 12 deletions(-)
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/cyhal_hw_types.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/cyhal_hw_types.h
+index 7028ab1f16..1f872abb37 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/cyhal_hw_types.h
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/cyhal_hw_types.h
+@@ -102,19 +102,8 @@ typedef struct
+     void *empty;
+ } cyhal_spi_t;
+ 
+-
+-#include "whd_debug.h"
+-
+-#if defined(WPRINT_ENABLE_WHD_ERROR) || defined(WPRINT_ENABLE_WHD_INFO) || defined(WPRINT_ENABLE_WHD_DEBUG)
+-/** \} group_hal_hw_types_data_structures */
+-#define PRINTF(...)   do { \
+-                      (void) printf(__VA_ARGS__); \
+-                      } while (0)
+-#else
+-#define PRINTF(...)
+-#endif
+-
+ #include "whd_config.h"
++#include "whd_debug.h"
+ 
+ #if defined(__cplusplus)
+ }
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/whd_config.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/whd_config.h
+index da67e0a036..cc442a6e44 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/whd_config.h
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/whd_config.h
+@@ -26,6 +26,9 @@
+ #include "stm32h7xx_hal.h"
+ #include <stdint.h>
+ 
++/* disable WPRINT_MACRO */
++#define WHD_PRINT_DISABLE
++
+ /* please define your configuration , either SDIO or SPI */
+ #define CY_WHD_CONFIG_USE_SDIO
+ //#define CY_WHD_CONFIG_USE_SPI
+-- 
+2.33.1
+

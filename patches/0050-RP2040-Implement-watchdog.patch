@@ -1,7 +1,7 @@
-From ff09ed83adc0227e2290d0e83be62a04bbd6b406 Mon Sep 17 00:00:00 2001
+From 187e2576558bba05291cdf75b1ee8a1f264d2a34 Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Mon, 15 Mar 2021 16:33:00 +0100
-Subject: [PATCH 050/101] RP2040: Implement watchdog
+Subject: [PATCH 50/87] RP2040: Implement watchdog
 
 ---
  .../TARGET_RP2040/watchdog_api.c              | 46 +++++++++++++++++++
@@ -62,10 +62,10 @@ index 0000000000..007b79c322
 +
 +#endif // DEVICE_WATCHDOG
 diff --git a/targets/targets.json b/targets/targets.json
-index ae8cdcc02b..1a266a269c 100644
+index 05b2ca5e7f..79d5f354a6 100644
 --- a/targets/targets.json
 +++ b/targets/targets.json
-@@ -8461,6 +8461,7 @@
+@@ -8575,6 +8575,7 @@
              "SERIAL_FC",
              "SPI",
              "USTICKER",
@@ -74,5 +74,5 @@ index ae8cdcc02b..1a266a269c 100644
          ]
      },
 -- 
-2.33.0
+2.33.1
 

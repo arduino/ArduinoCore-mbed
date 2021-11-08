@@ -1,0 +1,26 @@
+From 9022adaf4e71c4f05637d112de00d8b973357d5a Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Wed, 22 Sep 2021 15:34:24 +0200
+Subject: [PATCH 85/87] mbed-client-cli: ns_cmdline: make cmd_class_t cmd
+ private
+
+---
+ features/frameworks/mbed-client-cli/source/ns_cmdline.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/features/frameworks/mbed-client-cli/source/ns_cmdline.c b/features/frameworks/mbed-client-cli/source/ns_cmdline.c
+index 7e113502b6..1384e278ea 100644
+--- a/features/frameworks/mbed-client-cli/source/ns_cmdline.c
++++ b/features/frameworks/mbed-client-cli/source/ns_cmdline.c
+@@ -355,7 +355,7 @@ typedef struct cmd_class_s {
+     input_passthrough_func_t passthrough_fnc; // input passthrough cb function
+ } cmd_class_t;
+ 
+-cmd_class_t cmd = {
++static cmd_class_t cmd = {
+     .init = false,
+     .cmd_ptr = NULL,
+     .mutex_wait_fnc = NULL,
+-- 
+2.33.1
+

@@ -1,7 +1,7 @@
-From ae2ac1e2dc048b38c3c36bc10cff43ff716d97aa Mon Sep 17 00:00:00 2001
+From 80b766e6af5b1c46e6eff066acab839e83462534 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Tue, 13 Apr 2021 12:20:06 +0200
-Subject: [PATCH 056/101] RP2040: FLASH: fix multipage write
+Subject: [PATCH 56/87] RP2040: FLASH: fix multipage write
 
 ---
  .../TARGET_RASPBERRYPI/TARGET_RP2040/flash_api.c | 16 ++++++----------
@@ -37,5 +37,5 @@ index fb1a28dd7f..2ebfc40a04 100644
      return 0;
  
 -- 
-2.33.0
+2.33.1
 

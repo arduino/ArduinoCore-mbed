@@ -1,7 +1,7 @@
-From be09e52f7a98f551db47a421f9eba74999511854 Mon Sep 17 00:00:00 2001
+From bbdc9efdc824d23a3e573ef11c0f50117359e030 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Tue, 10 Aug 2021 12:09:30 +0200
-Subject: [PATCH 070/101] RP2040: enable led indication on mbed_die()
+Subject: [PATCH 70/87] RP2040: enable led indication on mbed_die()
 
 ---
  targets/TARGET_RASPBERRYPI/TARGET_RP2040/objects.h | 2 ++
@@ -19,5 +19,5 @@ index 280f166d4d..f5f44a58f4 100644
 +
  #endif
 -- 
-2.33.0
+2.33.1
 

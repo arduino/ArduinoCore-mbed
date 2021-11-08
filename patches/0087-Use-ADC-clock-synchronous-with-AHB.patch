@@ -1,0 +1,25 @@
+From 2b867bc0b4f46829624c23445dee7863792dec54 Mon Sep 17 00:00:00 2001
+From: giulcioffi <g.cioffi@arduino.cc>
+Date: Wed, 13 Oct 2021 10:48:44 +0200
+Subject: [PATCH 87/87] Use ADC clock synchronous with AHB
+
+---
+ targets/TARGET_STM/TARGET_STM32H7/analogin_device.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/analogin_device.c b/targets/TARGET_STM/TARGET_STM32H7/analogin_device.c
+index 905e86006e..c3ec31c07f 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/analogin_device.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/analogin_device.c
+@@ -89,7 +89,7 @@ void analogin_init(analogin_t *obj, PinName pin)
+ 
+     // Configure ADC object structures
+     obj->handle.State = HAL_ADC_STATE_RESET;
+-    obj->handle.Init.ClockPrescaler           = ADC_CLOCK_ASYNC_DIV4;
++    obj->handle.Init.ClockPrescaler           = ADC_CLOCK_SYNC_PCLK_DIV4;
+     obj->handle.Init.Resolution               = ADC_RESOLUTION_16B;
+     obj->handle.Init.ScanConvMode             = ADC_SCAN_DISABLE;
+     obj->handle.Init.EOCSelection             = ADC_EOC_SINGLE_CONV;
+-- 
+2.33.1
+

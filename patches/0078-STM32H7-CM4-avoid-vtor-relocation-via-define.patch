@@ -1,0 +1,25 @@
+From 9d8222570817f711c012485c0c5812684947d34a Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Mon, 16 Aug 2021 17:19:45 +0200
+Subject: [PATCH 78/87] STM32H7: CM4: avoid vtor relocation via define
+
+---
+ .../STM32Cube_FW/system_stm32h7xx_dualcore_boot_cm4_cm7.c       | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/STM32Cube_FW/system_stm32h7xx_dualcore_boot_cm4_cm7.c b/targets/TARGET_STM/TARGET_STM32H7/STM32Cube_FW/system_stm32h7xx_dualcore_boot_cm4_cm7.c
+index 8e0017de2a..b4a4cc7826 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/STM32Cube_FW/system_stm32h7xx_dualcore_boot_cm4_cm7.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/STM32Cube_FW/system_stm32h7xx_dualcore_boot_cm4_cm7.c
+@@ -232,7 +232,7 @@ __weak void SystemInit (void)
+   /* Configure the Vector Table location add offset address ------------------*/
+ #ifdef VECT_TAB_SRAM
+   SCB->VTOR = D2_AXISRAM_BASE | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal SRAM */
+-#else
++#elif !defined(NO_VTOR_RELOCATE)
+ #include "nvic_addr.h"                   // MBED
+   SCB->VTOR = NVIC_FLASH_VECTOR_ADDRESS; // MBED
+ #endif
+-- 
+2.33.1
+

@@ -1,8 +1,8 @@
-From 32a1afdd24d871a261c3b195dbbd149819c2f2f9 Mon Sep 17 00:00:00 2001
+From 32dbf8f936030455a90c0b9f3b6ad89de0b4faa6 Mon Sep 17 00:00:00 2001
 From: Paolo Calao <paolo.calao@gmail.com>
 Date: Wed, 26 Aug 2020 17:57:42 +0200
-Subject: [PATCH 014/101] Cordio Add sendCmplt Callback for updating
- NumCmplPckts on disconnection
+Subject: [PATCH 14/87] Cordio Add sendCmplt Callback for updating NumCmplPckts
+ on disconnection
 
 ---
  .../stack/controller/sources/ble/lctr/lctr_main_conn.c      | 6 ++++--
@@ -32,5 +32,5 @@ index 766c5170ec..5bc2190144 100644
    if (pLctrVsHdlrs && pLctrVsHdlrs->connCleanup)
    {
 -- 
-2.33.0
+2.33.1
 

@@ -1,7 +1,7 @@
-From 85010f67ca90ec2e900ca5558db0f92f4cb9a3b8 Mon Sep 17 00:00:00 2001
+From fce1c5e2265033494b7edc8e3c7a706277c33767 Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Fri, 5 Mar 2021 11:38:57 +0100
-Subject: [PATCH 037/101] RP2040: Rename pico-sdk's gpio_irq_handler with a '_'
+Subject: [PATCH 37/87] RP2040: Rename pico-sdk's gpio_irq_handler with a '_'
  to avoid clashes with mbed API
 
 ---
@@ -31,5 +31,5 @@ index 7051de309a..28a137663b 100644
  }
  
 -- 
-2.33.0
+2.33.1
 

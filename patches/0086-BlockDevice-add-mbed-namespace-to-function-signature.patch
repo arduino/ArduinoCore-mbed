@@ -1,0 +1,67 @@
+From 3b7863d3c7d9fc90cc42d906c67fd8a7b156a10a Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Thu, 23 Sep 2021 15:16:10 +0200
+Subject: [PATCH 86/87] BlockDevice: add mbed namespace to function signatures
+
+---
+ .../COMPONENT_QSPIF/include/QSPIF/QSPIFBlockDevice.h            | 2 +-
+ storage/blockdevice/COMPONENT_QSPIF/source/QSPIFBlockDevice.cpp | 2 +-
+ .../blockdevice/COMPONENT_SPIF/include/SPIF/SPIFBlockDevice.h   | 2 +-
+ storage/blockdevice/COMPONENT_SPIF/source/SPIFBlockDevice.cpp   | 2 +-
+ 4 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/storage/blockdevice/COMPONENT_QSPIF/include/QSPIF/QSPIFBlockDevice.h b/storage/blockdevice/COMPONENT_QSPIF/include/QSPIF/QSPIFBlockDevice.h
+index 3ebd0e504c..2903ecad32 100644
+--- a/storage/blockdevice/COMPONENT_QSPIF/include/QSPIF/QSPIFBlockDevice.h
++++ b/storage/blockdevice/COMPONENT_QSPIF/include/QSPIF/QSPIFBlockDevice.h
+@@ -315,7 +315,7 @@ private:
+     /* SFDP Detection and Parsing Functions */
+     /****************************************/
+     // Parse and Detect required Basic Parameters from Table
+-    int _sfdp_parse_basic_param_table(mbed::Callback<int(bd_addr_t, mbed::sfdp_cmd_addr_size_t, uint8_t, uint8_t, void *, bd_size_t)> sfdp_reader,
++    int _sfdp_parse_basic_param_table(mbed::Callback<int(mbed::bd_addr_t, mbed::sfdp_cmd_addr_size_t, uint8_t, uint8_t, void *, mbed::bd_size_t)> sfdp_reader,
+                                       mbed::sfdp_hdr_info &sfdp_info);
+ 
+     // Detect the soft reset protocol and reset - returns error if soft reset is not supported
+diff --git a/storage/blockdevice/COMPONENT_QSPIF/source/QSPIFBlockDevice.cpp b/storage/blockdevice/COMPONENT_QSPIF/source/QSPIFBlockDevice.cpp
+index 39b8c1c43c..898141f780 100644
+--- a/storage/blockdevice/COMPONENT_QSPIF/source/QSPIFBlockDevice.cpp
++++ b/storage/blockdevice/COMPONENT_QSPIF/source/QSPIFBlockDevice.cpp
+@@ -617,7 +617,7 @@ int QSPIFBlockDevice::remove_csel_instance(PinName csel)
+ /*********************************************************/
+ /********** SFDP Parsing and Detection Functions *********/
+ /*********************************************************/
+-int QSPIFBlockDevice::_sfdp_parse_basic_param_table(Callback<int(bd_addr_t, mbed::sfdp_cmd_addr_size_t, uint8_t, uint8_t, void *, bd_size_t)> sfdp_reader,
++int QSPIFBlockDevice::_sfdp_parse_basic_param_table(Callback<int(mbed::bd_addr_t, mbed::sfdp_cmd_addr_size_t, uint8_t, uint8_t, void *, bd_size_t)> sfdp_reader,
+                                                     sfdp_hdr_info &sfdp_info)
+ {
+     uint8_t param_table[SFDP_BASIC_PARAMS_TBL_SIZE]; /* Up To 20 DWORDS = 80 Bytes */
+diff --git a/storage/blockdevice/COMPONENT_SPIF/include/SPIF/SPIFBlockDevice.h b/storage/blockdevice/COMPONENT_SPIF/include/SPIF/SPIFBlockDevice.h
+index a0a87ab78b..76adeacf46 100644
+--- a/storage/blockdevice/COMPONENT_SPIF/include/SPIF/SPIFBlockDevice.h
++++ b/storage/blockdevice/COMPONENT_SPIF/include/SPIF/SPIFBlockDevice.h
+@@ -226,7 +226,7 @@ private:
+                                     void *rx_buffer, mbed::bd_size_t rx_length);
+ 
+     // Parse and Detect required Basic Parameters from Table
+-    int _sfdp_parse_basic_param_table(mbed::Callback<int(bd_addr_t, mbed::sfdp_cmd_addr_size_t, uint8_t, uint8_t, void *, bd_size_t)> sfdp_reader,
++    int _sfdp_parse_basic_param_table(mbed::Callback<int(mbed::bd_addr_t, mbed::sfdp_cmd_addr_size_t, uint8_t, uint8_t, void *, mbed::bd_size_t)> sfdp_reader,
+                                       mbed::sfdp_hdr_info &hdr_info);
+ 
+     // Detect fastest read Bus mode supported by device
+diff --git a/storage/blockdevice/COMPONENT_SPIF/source/SPIFBlockDevice.cpp b/storage/blockdevice/COMPONENT_SPIF/source/SPIFBlockDevice.cpp
+index bdbcae9e38..8b7e89b2d4 100644
+--- a/storage/blockdevice/COMPONENT_SPIF/source/SPIFBlockDevice.cpp
++++ b/storage/blockdevice/COMPONENT_SPIF/source/SPIFBlockDevice.cpp
+@@ -607,7 +607,7 @@ spif_bd_error SPIFBlockDevice::_spi_send_general_command(int instruction, bd_add
+ /*********************************************************/
+ /********** SFDP Parsing and Detection Functions *********/
+ /*********************************************************/
+-int SPIFBlockDevice::_sfdp_parse_basic_param_table(Callback<int(bd_addr_t, mbed::sfdp_cmd_addr_size_t, uint8_t, uint8_t, void *, bd_size_t)> sfdp_reader,
++int SPIFBlockDevice::_sfdp_parse_basic_param_table(Callback<int(mbed::bd_addr_t, mbed::sfdp_cmd_addr_size_t, uint8_t, uint8_t, void *, mbed::bd_size_t)> sfdp_reader,
+                                                    sfdp_hdr_info &sfdp_info)
+ {
+     uint8_t param_table[SFDP_BASIC_PARAMS_TBL_SIZE]; /* Up To 20 DWORDS = 80 Bytes */
+-- 
+2.33.1
+

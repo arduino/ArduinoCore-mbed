@@ -1,7 +1,7 @@
-From 55786977235220203b166be6cff9a51601718f13 Mon Sep 17 00:00:00 2001
+From 6cc7d3d4297260201555f7e9a635246941cd5453 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Mon, 2 Aug 2021 10:23:43 +0200
-Subject: [PATCH 068/101] RP2040: optimize flash/ram occupation
+Subject: [PATCH 68/87] RP2040: optimize flash/ram occupation
 
 Since we are not using ROM functions here, just keep everything as default as possible
 ---
@@ -61,5 +61,5 @@ index d92bd42107..ec8bac7e40 100644
  
          *(.data*)
 -- 
-2.33.0
+2.33.1
 

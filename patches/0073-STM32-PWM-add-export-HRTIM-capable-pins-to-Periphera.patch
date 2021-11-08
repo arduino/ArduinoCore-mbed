@@ -1,0 +1,143 @@
+From 9b44abd3d0f0d72f566be233b03c373276c8f525 Mon Sep 17 00:00:00 2001
+From: Riccardo Rizzo <r.rizzo@arduino.cc>
+Date: Mon, 28 Jun 2021 15:03:50 +0200
+Subject: [PATCH 73/87] STM32: PWM: add export HRTIM capable pins to
+ PeripheralPins
+
+---
+ .../tools/STM32_gen_PeripheralPins.py         | 77 +++++++++++++++++++
+ 1 file changed, 77 insertions(+)
+
+diff --git a/targets/TARGET_STM/tools/STM32_gen_PeripheralPins.py b/targets/TARGET_STM/tools/STM32_gen_PeripheralPins.py
+index be07c911b6..3dfb4fc528 100644
+--- a/targets/TARGET_STM/tools/STM32_gen_PeripheralPins.py
++++ b/targets/TARGET_STM/tools/STM32_gen_PeripheralPins.py
+@@ -42,6 +42,7 @@ daclist = []        #'PIN','name','DACSignal'
+ i2cscl_list = []    #'PIN','name','I2CSCLSignal'
+ i2csda_list = []    #'PIN','name','I2CSDASignal'
+ pwm_list = []       #'PIN','name','PWM'
++hrtim_list = []     #'PIN','name','HRTIM'
+ uarttx_list = []    #'PIN','name','UARTtx'
+ uartrx_list = []    #'PIN','name','UARTrx'
+ uartcts_list = []   #'PIN','name','UARTcts'
+@@ -291,6 +292,10 @@ def store_pwm(pin, name, signal):
+     if "_CH" in signal:
+         pwm_list.append([pin, name, signal])
+ 
++# function to store hrtim timers
++def store_hrtim(pin, name, signal):
++    if "_CH" in signal:
++        hrtim_list.append([pin, name, signal])
+ 
+ # function to store Uart pins
+ def store_uart(pin, name, signal):
+@@ -571,6 +576,8 @@ def print_all_lists():
+         print_i2c(i2cscl_list)
+     if print_list_header("PWM", "PWM", pwm_list, "PWMOUT"):
+         print_pwm()
++    if print_list_header("PWM_HRTIM", "PWM_HRTIM", hrtim_list, "PWMOUT"):
++        print_hrtim()
+     if print_list_header("SERIAL", "UART_TX", uarttx_list, "SERIAL"):
+         print_uart(uarttx_list)
+     if print_list_header("", "UART_RX", uartrx_list, "SERIAL"):
+@@ -898,6 +905,71 @@ def print_pwm():
+     if ADD_DEVICE_IF:
+         out_c_file.write( "#endif\n" )
+ 
++def print_hrtim():
++    prev_p = ''
++    alt_index = 0
++
++    tim_dualcore = "NOT_KNOWN"
++    for EachTarget in TIM_DUALCORE_LIST:
++        if EachTarget in mcu_file:
++            tim_dualcore = TIM_DUALCORE_LIST[EachTarget]
++
++    for parsed_pin in hrtim_list:
++        result = get_gpio_af_num(parsed_pin[1], parsed_pin[2])
++        commented_line = "  "
++        if parsed_pin[1] in PinLabel:
++            if "STDIO_UART" in PinLabel[parsed_pin[1]]:
++                commented_line = "//"
++            if "RCC_OSC" in PinLabel[parsed_pin[1]]:
++                commented_line = "//"
++        if "%s_" % TIM_MST in parsed_pin[2]:
++            commented_line = "//"
++        if "%s_" % tim_dualcore in parsed_pin[2]:
++            commented_line = "//"
++        if commented_line != "//":
++            if parsed_pin[0] == prev_p:
++                prev_p = parsed_pin[0]
++                parsed_pin[0] += '_ALT%d' % alt_index
++                store_pin(parsed_pin[0], parsed_pin[0], "")
++                alt_index += 1
++            else:
++                prev_p = parsed_pin[0]
++                alt_index = 0
++        s1 = "%-17s" % (commented_line + "  {" + parsed_pin[0] + ',')
++        # parsed_pin[2] : TIM2_CH1 / TIM15_CH1N
++        a = parsed_pin[2].split('_')
++        inst = a[0].replace("HRTIM", "PWM_I")
++        # if len(inst) == 3:
++        #     inst += '1'
++        s1 += "%-8s" % (inst + ',')
++        N = len(a[1])
++
++        timer = a[1][0: N -1]
++        chan = a[1][N - 1: N]
++        
++        if chan.endswith('1'):
++            chan = ', 0'
++        else:
++            chan = ', 1'
++        s1 += 'STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, '
++        r = result.split(' ')
++        prev_s1 = ""
++        for af in r:
++            if s1 == prev_s1:
++                continue
++            else:
++                prev_s1 = s1
++                s2 = s1 + af + ', ' + timer + chan + ')}, // ' + parsed_pin[2]
++                if parsed_pin[1] in PinLabel:
++                    s2 += ' // Connected to ' + PinLabel[parsed_pin[1]]
++                s2 += '\n'
++                out_c_file.write(s2)
++    out_c_file.write( """    {NC, NC, 0}
++};
++""")
++    if ADD_DEVICE_IF:
++        out_c_file.write( "#endif\n" )
++
+ 
+ def print_uart(l):
+     global ALTERNATE_DEFINITION
+@@ -1318,6 +1390,8 @@ def sort_my_lists():
+     i2csda_list.sort(key=natural_sortkey)
+     pwm_list.sort(key=natural_sortkey2) # first sort on name column
+     pwm_list.sort(key=natural_sortkey)
++    hrtim_list.sort(key=natural_sortkey2) # first sort on name column
++    hrtim_list.sort(key=natural_sortkey)
+     uarttx_list.sort(key=natural_sortkey_uart) # first sort on name column
+     uartrx_list.sort(key=natural_sortkey_uart) # first sort on name column
+     uartcts_list.sort(key=natural_sortkey_uart) # first sort on name column
+@@ -1360,6 +1434,7 @@ def clean_all_lists():
+     del i2cscl_list[:]
+     del i2csda_list[:]
+     del pwm_list[:]
++    del hrtim_list[:]
+     del uarttx_list[:]
+     del uartrx_list[:]
+     del uartcts_list[:]
+@@ -1432,6 +1507,8 @@ def parse_pins():
+                     store_i2c(pin, name, sig)
+                 if re.match("^TIM", sig) is not None:  # ignore HRTIM
+                     store_pwm(pin, name, sig)
++                if re.match("^HRTIM", sig) is not None:  # ignore HRTIM
++                    store_hrtim(pin, name, sig)
+                 if re.match("^(LPU|US|U)ART", sig) is not None:
+                     store_uart(pin, name, sig)
+                 if "SPI" in sig:
+-- 
+2.33.1
+

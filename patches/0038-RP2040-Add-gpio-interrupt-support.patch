@@ -1,7 +1,7 @@
-From 7510e0b9cf371646606e4f61789a09c8cccc8343 Mon Sep 17 00:00:00 2001
+From b121864ceb56924cd53bee4c97c6322cddfbdbda Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Fri, 5 Mar 2021 11:46:46 +0100
-Subject: [PATCH 038/101] RP2040: Add gpio interrupt support
+Subject: [PATCH 38/87] RP2040: Add gpio interrupt support
 
 ---
  .../TARGET_RP2040/gpio_api.c                  | 105 +++++++++++++++++-
@@ -148,5 +148,5 @@ index 3d09714881..a10a7d6c89 100644
 +
 +#endif
 -- 
-2.33.0
+2.33.1
 

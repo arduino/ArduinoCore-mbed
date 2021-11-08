@@ -1,7 +1,7 @@
-From fd61d2a7d140fb5d1e8da2257f4b9c9454eabbbc Mon Sep 17 00:00:00 2001
+From 1f5849b41db4e04d5139270936c3eb44d6b9fb55 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Tue, 16 Mar 2021 17:19:42 +0100
-Subject: [PATCH 054/101] RP2040: i2c: remove debug prints
+Subject: [PATCH 54/87] RP2040: i2c: remove debug prints
 
 ---
  targets/TARGET_RASPBERRYPI/TARGET_RP2040/i2c_api.c | 2 +-
@@ -21,5 +21,5 @@ index 9d7510bedf..2b776562a1 100644
  #else
  #define DEBUG_PRINTF(...)
 -- 
-2.33.0
+2.33.1
 

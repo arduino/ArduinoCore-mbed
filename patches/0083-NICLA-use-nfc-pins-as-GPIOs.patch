@@ -1,0 +1,24 @@
+From f8bee9cb62908c1b5ddc024e9d243eff0f4f53dd Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Thu, 26 Aug 2021 11:47:20 +0200
+Subject: [PATCH 83/87] NICLA: use nfc pins as GPIOs
+
+---
+ targets/targets.json | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/targets/targets.json b/targets/targets.json
+index ce2361557c..3150c838a1 100644
+--- a/targets/targets.json
++++ b/targets/targets.json
+@@ -6249,6 +6249,7 @@
+         "device_name": "nRF52832_xxAA",
+         "macros_add": [
+             "CONFIG_GPIO_AS_PINRESET",
++            "CONFIG_NFCT_PINS_AS_GPIOS",
+             "NRF52_PAN_12",
+             "NRF52_PAN_15",
+             "NRF52_PAN_20",
+-- 
+2.33.1
+

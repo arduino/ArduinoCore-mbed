@@ -1,0 +1,35 @@
+From 55189f52fe08a8e133b84c3cf346f849588fbcdc Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Wed, 11 Aug 2021 12:14:57 +0200
+Subject: [PATCH 79/87] STM32: analogin: use critical section to protect PLL
+ configuration
+
+---
+ targets/TARGET_STM/TARGET_STM32H7/analogin_device.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/analogin_device.c b/targets/TARGET_STM/TARGET_STM32H7/analogin_device.c
+index 3fb41a7997..905e86006e 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/analogin_device.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/analogin_device.c
+@@ -32,6 +32,8 @@ void analogin_pll_configuration(void)
+     }
+ #endif /* DUAL_CORE */
+ 
++    core_util_critical_section_enter();
++
+     RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
+     PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_ADC;
+     PeriphClkInitStruct.PLL2.PLL2M = 4;
+@@ -47,6 +49,8 @@ void analogin_pll_configuration(void)
+         error("analogin_init HAL_RCCEx_PeriphCLKConfig");
+     }
+ 
++    core_util_critical_section_exit();
++
+ #if defined(DUAL_CORE)
+     LL_HSEM_ReleaseLock(HSEM, CFG_HW_RCC_SEMID, HSEM_CR_COREID_CURRENT);
+ #endif /* DUAL_CORE */
+-- 
+2.33.1
+

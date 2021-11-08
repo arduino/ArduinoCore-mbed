@@ -1,7 +1,7 @@
-From acc9c596fb3177e60cc4b564746200ace469370f Mon Sep 17 00:00:00 2001
+From f347fb781c7ac4ad3f357de9fd12a409c33dd33d Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Tue, 23 Feb 2021 10:41:45 +0100
-Subject: [PATCH 026/101] RP2040: implement USBDevice
+Subject: [PATCH 26/87] RP2040: implement USBDevice
 
 Code by @ghollingworth
 ---
@@ -613,10 +613,10 @@ index 0000000000..2ef354035d
 +    instance->events->start_process();
 +}
 diff --git a/targets/targets.json b/targets/targets.json
-index 1536423e20..bd20990074 100644
+index 420f23d88d..735b814669 100644
 --- a/targets/targets.json
 +++ b/targets/targets.json
-@@ -8453,12 +8453,14 @@
+@@ -8567,12 +8567,14 @@
              "PORT_IN",
              "PORT_OUT",
              "SERIAL",
@@ -633,5 +633,5 @@ index 1536423e20..bd20990074 100644
              "MBED_MPU_CUSTOM",
              "PICO_TIME_DEFAULT_ALARM_POOL_DISABLED",
 -- 
-2.33.0
+2.33.1
 

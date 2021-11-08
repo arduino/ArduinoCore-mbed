@@ -1,7 +1,7 @@
-From 9cc4662da25c94c15c8aab6faf44fd09d026029c Mon Sep 17 00:00:00 2001
+From f3eaf45874f49e48daba2384d938e30652e6b8f8 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Fri, 5 Mar 2021 17:01:18 +0100
-Subject: [PATCH 033/101] RP2040: adapt linker script to mbed
+Subject: [PATCH 33/87] RP2040: adapt linker script to mbed
 
 ---
  .../TOOLCHAIN_GCC_ARM/memmap_default.ld          | 16 ++++++++++++----
@@ -84,10 +84,10 @@ index 38de608634..3f90b95ee2 100644
 -    .equ HeapSize, PICO_HEAP_SIZE
 -.space HeapSize
 diff --git a/targets/targets.json b/targets/targets.json
-index dc93b8189e..52f0dd8074 100644
+index e6bc55c2c9..8029c2ed2d 100644
 --- a/targets/targets.json
 +++ b/targets/targets.json
-@@ -8464,7 +8464,6 @@
+@@ -8578,7 +8578,6 @@
      "NANO_RP2040_CONNECT": {
          "inherits": ["RP2040"],
          "macros_add": [
@@ -96,5 +96,5 @@ index dc93b8189e..52f0dd8074 100644
              "MBED_MPU_CUSTOM",
              "PICO_TIME_DEFAULT_ALARM_POOL_DISABLED",
 -- 
-2.33.0
+2.33.1
 
