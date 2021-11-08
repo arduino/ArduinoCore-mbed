@@ -132,11 +132,13 @@ void UART::on_rx() {
 		return;
 	}
 #endif
-	while(_serial->obj->readable() && rx_buffer.availableForStore()) {
+	while(_serial->obj->readable()) {
 		char c;
 		core_util_critical_section_enter();
 		_serial->obj->read(&c, 1);
-		rx_buffer.store_char(c);
+		if (rx_buffer.availableForStore()) {
+			rx_buffer.store_char(c);
+		}
 		core_util_critical_section_exit();
 	}
 }
