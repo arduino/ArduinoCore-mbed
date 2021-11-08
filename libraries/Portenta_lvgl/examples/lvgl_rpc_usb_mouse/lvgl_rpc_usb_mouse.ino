@@ -1,5 +1,5 @@
 #include "Portenta_lvgl.h"
-#include "RPC_internal.h"
+#include "RPC.h"
 #include "USBHost.h"
 
 int16_t touchpad_x = 0;
@@ -63,10 +63,10 @@ bool button_read(lv_indev_drv_t * drv, lv_indev_data_t*data){
 }
 void setup() {
   // put your setup code here, to run once:
-  RPC1.begin();
+  RPC.begin();
   Serial1.begin(115200);
-  RPC1.bind("on_mouse", on_mouse);
-  RPC1.bind("on_key", on_key);
+  RPC.bind("on_mouse", on_mouse);
+  RPC.bind("on_key", on_key);
   portenta_init_video();
 
   // Mouse pointer init

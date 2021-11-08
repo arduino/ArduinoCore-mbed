@@ -1,5 +1,5 @@
 #include "USBHost.h"
-#include "RPC_internal.h"
+#include "RPC.h"
 
 #ifndef CORE_CM4
 #error "This sketch should be compiled for Portenta (M4 core)"
@@ -24,7 +24,7 @@ static const char tabB[] = "\t _+{}|~:\"~<>?";
 // route the key event to stdin
 
 static void stdin_recvchar(char ch) {
-  RPC1.call("on_key", ch);
+  RPC.call("on_key", ch);
 }
 
 static int process_key(tusbh_ep_info_t* ep, const uint8_t* keys)
@@ -71,7 +71,7 @@ static int process_mouse(tusbh_ep_info_t* ep, const uint8_t* mouse)
   uint8_t btn = mouse[0];
   int8_t x = ((int8_t*)mouse)[1];
   int8_t y = ((int8_t*)mouse)[2];
-  RPC1.call("on_mouse", btn, x, y);
+  RPC.call("on_mouse", btn, x, y);
 }
 
 static const tusbh_boot_key_class_t cls_boot_key = {
@@ -105,7 +105,7 @@ static const tusbh_class_reg_t class_table[] = {
 void setup()
 {
   Serial1.begin(115200);
-  RPC1.begin();
+  RPC.begin();
   usb.Init(USB_CORE_ID_HS, class_table);
   //usb.Init(USB_CORE_ID_FS, class_table);
 }
