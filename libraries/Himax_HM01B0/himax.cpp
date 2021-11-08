@@ -153,6 +153,11 @@ enum {
     HIMAX_Streaming3 = 0x5        // Hardware Trigger
 };
 
+typedef struct regval_list_ {
+    uint16_t reg_num;
+    uint8_t  value;
+} regval_list_t;
+
 static uint16_t himax_default_regs[][2] = {
     {BLC_TGT,               0x08},          //  BLC target :8  at 8 bit mode
     {BLC2_TGT,              0x08},          //  BLI target :8  at 8 bit mode
@@ -255,21 +260,6 @@ static const uint16_t himax_full_regs[][2] = {
     {LINE_LEN_PCK_H,        (HIMAX_LINE_LEN_PCK_FULL>>8)},
     {LINE_LEN_PCK_L,        (HIMAX_LINE_LEN_PCK_FULL&0xFF)},
     {GRP_PARAM_HOLD,        0x01},
-};
-
-static regval_list_t himax_full_regs[] = { // 'full' resolution is 320x320
-    {0x0383,                0x01},
-    {0x0387,                0x01},
-    {0x0390,                0x00},
-    {QVGA_WIN_EN,           0x00},	      // Disable QVGA window readout
-    {MAX_INTG_H,            (HIMAX_FRAME_LENGTH_FULL-2)>>8},
-    {MAX_INTG_L,            (HIMAX_FRAME_LENGTH_FULL-2)&0xFF},
-    {FRAME_LEN_LINES_H,     (HIMAX_FRAME_LENGTH_FULL>>8)},
-    {FRAME_LEN_LINES_L,     (HIMAX_FRAME_LENGTH_FULL&0xFF)},
-    {LINE_LEN_PCK_H,        (HIMAX_FRAME_LENGTH_FULL>>8)},
-    {LINE_LEN_PCK_L,        (HIMAX_FRAME_LENGTH_FULL&0xFF)},
-    {GRP_PARAM_HOLD,        0x01},
-    {0x0000,                0x00}, // EOF
 };
 
 static const uint16_t himax_qvga_regs[][2] = {
@@ -468,3 +458,36 @@ uint8_t HM01B0::PrintRegs()
     }
     return 0;
 }
+
+int HM01B0::reg_write(uint8_t dev_addr, uint16_t reg_addr, uint8_t reg_data, bool wide_addr)
+{
+    Wire.beginTransmission(dev_addr);
+    uint8_t buf[3] = {(uint8_t) (reg_addr >> 8), (uint8_t) (reg_addr & 0xFF), reg_data};
+    if (wide_addr == true) {
+        Wire.write(buf, 1);
+    }
+    Wire.write(&buf[1], 2);
+    return Wire.endTransmission();
+}
+
+uint8_t HM01B0::reg_read(uint8_t dev_addr, uint16_t reg_addr, bool wide_addr)
+{
+    uint8_t reg_data = 0;
+    uint8_t buf[2] = {(uint8_t) (reg_addr >> 8), (uint8_t) (reg_addr & 0xFF)};
+    Wire.beginTransmission(dev_addr);
+    if (wide_addr) {
+        Wire.write(buf, 2);
+    } else {
+        Wire.write(&buf[1], 1);
+    }
+    Wire.endTransmission(false);
+    Wire.requestFrom(dev_addr, 1);
+    if (Wire.available()) {
+        reg_data = Wire.read();
+    }
+    while (Wire.available()) {
+        Wire.read();
+    }
+    return reg_data;
+}
+

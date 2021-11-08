@@ -23,15 +23,18 @@
 
 class GC2145: public ImageSensor {
    private:
-    int SetWindow(uint16_t reg, uint16_t x, uint16_t y, uint16_t w, uint16_t h);
+        int SetWindow(uint16_t reg, uint16_t x, uint16_t y, uint16_t w, uint16_t h);
+
    public:
-       int Init();
-       int Reset();
-       int GetID() { return GC2145_I2C_ADDR; };
-       uint32_t GetClockFrequency() { return 12000000; };
-       int SetFrameRate(int32_t framerate);
-       int SetResolution(int32_t resolution);
-       int SetPixelFormat(int32_t pixformat);
+        int Init();
+        int Reset();
+        int GetID() { return GC2145_I2C_ADDR; };
+        uint32_t GetClockFrequency() { return 12000000; };
+        int SetFrameRate(int32_t framerate);
+        int SetResolution(int32_t resolution);
+        int SetPixelFormat(int32_t pixformat);
+        int reg_write(uint8_t dev_addr, uint16_t reg_addr, uint8_t reg_data, bool wide_addr = false);
+        uint8_t reg_read(uint8_t dev_addr, uint16_t reg_addr, bool wide_addr = false);
 };
  
 #endif /* __GC2145_H */

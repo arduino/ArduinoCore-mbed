@@ -52,6 +52,8 @@ class ImageSensor {
         virtual int SetFrameRate(int32_t framerate) = 0;
         virtual int SetResolution(int32_t resolution) = 0;
         virtual int SetPixelFormat(int32_t pixelformat) = 0;
+        virtual int reg_write(uint8_t dev_addr, uint16_t reg_addr, uint8_t reg_data, bool wide_addr) = 0;
+        virtual uint8_t reg_read(uint8_t dev_addr, uint16_t reg_addr, bool wide_addr) = 0;
 
         int SetStandby(bool enable) {
             return -1;
@@ -63,36 +65,6 @@ class ImageSensor {
 
         int SetTestPattern(bool enable, bool walking) {
             return -1;
-        }
-
-        int reg_write(uint8_t dev_addr, uint16_t reg_addr, uint8_t reg_data, bool wide_addr = false) {
-            Wire.beginTransmission(dev_addr);
-            uint8_t buf[3] = {(uint8_t) (reg_addr >> 8), (uint8_t) (reg_addr & 0xFF), reg_data};
-            if (wide_addr == true) {
-                Wire.write(buf, 1);
-            }
-            Wire.write(&buf[1], 2);
-            return Wire.endTransmission();
-        }
-
-        uint8_t reg_read(uint8_t dev_addr, uint16_t reg_addr, bool wide_addr = false) {
-            uint8_t reg_data = 0;
-            uint8_t buf[2] = {(uint8_t) (reg_addr >> 8), (uint8_t) (reg_addr & 0xFF)};
-            Wire.beginTransmission(dev_addr);
-            if (wide_addr) {
-                Wire.write(buf, 2);
-            } else {
-                Wire.write(&buf[1], 1);
-            }
-            Wire.endTransmission(false);
-            Wire.requestFrom(dev_addr, 1);
-            if (Wire.available()) {
-                reg_data = Wire.read();
-            }
-            while (Wire.available()) {
-                Wire.read();
-            }
-            return reg_data;
         }
 };
 

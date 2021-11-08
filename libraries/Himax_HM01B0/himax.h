@@ -30,6 +30,8 @@ class HM01B0: public ImageSensor {
         int SetFrameRate(int32_t framerate);
         int SetResolution(int32_t resolution);
         int SetPixelFormat(int32_t pixformat);
+        int reg_write(uint8_t dev_addr, uint16_t reg_addr, uint8_t reg_data, bool wide_addr = false);
+        uint8_t reg_read(uint8_t dev_addr, uint16_t reg_addr, bool wide_addr = false);
         int SetTestPattern(bool enable, bool walking);
         int EnableMD(bool enable);
         int SetMDThreshold(uint32_t threshold);

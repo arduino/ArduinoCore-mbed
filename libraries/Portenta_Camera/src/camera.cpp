@@ -26,8 +26,8 @@
 #define UNUSED(x) ((void)((uint32_t)(x)))
 
 // Include all image sensor drivers here.
+#ifdef ARDUINO_PORTENTA_H7_M7
 #include "himax.h"
-#include "gc2145.h"
 
 #define DCMI_TIM                    (TIM1)
 #define DCMI_TIM_PIN                (GPIO_PIN_1)
@@ -38,6 +38,21 @@
 #define DCMI_TIM_CLK_DISABLE()      __TIM1_CLK_DISABLE()
 #define DCMI_TIM_PCLK_FREQ()        HAL_RCC_GetPCLK2Freq()
 #define DCMI_TIM_FREQUENCY          (6000000)
+#endif
+
+#ifdef ARDUINO_NICLA_VISION
+#include "gc2145.h"
+#define DCMI_TIM                    (TIM3)
+#define DCMI_TIM_PIN                (GPIO_PIN_7)
+#define DCMI_TIM_PORT               (GPIOA)
+#define DCMI_TIM_AF                 (GPIO_AF2_TIM3)
+#define DCMI_TIM_CHANNEL            (TIM_CHANNEL_2)
+#define DCMI_TIM_CLK_ENABLE()       __TIM3_CLK_ENABLE()
+#define DCMI_TIM_CLK_DISABLE()      __TIM3_CLK_DISABLE()
+#define DCMI_TIM_PCLK_FREQ()        HAL_RCC_GetPCLK1Freq()
+#define DCMI_TIM_FREQUENCY          (12000000)
+#endif
+
 #define DCMI_IRQ_PRI                NVIC_EncodePriority(NVIC_PRIORITYGROUP_4, 2, 0)
 
 #define DCMI_DMA_CLK_ENABLE()       __HAL_RCC_DMA2_CLK_ENABLE()
@@ -47,6 +62,7 @@
 
 // DCMI GPIO pins struct
 static const struct { GPIO_TypeDef *port; uint16_t pin; } dcmi_pins[] = {
+#ifdef ARDUINO_PORTENTA_H7_M7
     {GPIOA,     GPIO_PIN_4  },
     {GPIOA,     GPIO_PIN_6  },
     {GPIOI,     GPIO_PIN_4  },
@@ -58,6 +74,19 @@ static const struct { GPIO_TypeDef *port; uint16_t pin; } dcmi_pins[] = {
     {GPIOH,     GPIO_PIN_11 },
     {GPIOH,     GPIO_PIN_12 },
     {GPIOH,     GPIO_PIN_14 },
+#elif defined(ARDUINO_NICLA_VISION)
+    {GPIOA,     GPIO_PIN_4  },
+    {GPIOA,     GPIO_PIN_6  },
+    {GPIOC,     GPIO_PIN_6  },
+    {GPIOC,     GPIO_PIN_7  },
+    {GPIOD,     GPIO_PIN_3  },
+    {GPIOE,     GPIO_PIN_0  },
+    {GPIOE,     GPIO_PIN_1  },
+    {GPIOE,     GPIO_PIN_4 },
+    {GPIOE,     GPIO_PIN_5 },
+    {GPIOE,     GPIO_PIN_6 },
+    {GPIOG,     GPIO_PIN_9 },
+#endif
 };
 #define NUM_DCMI_PINS   (sizeof(dcmi_pins)/sizeof(dcmi_pins[0]))
 
@@ -106,16 +135,27 @@ void HAL_DCMI_MspInit(DCMI_HandleTypeDef *hdcmi)
     __HAL_RCC_DCMI_CLK_ENABLE();
 
     // Enable DCMI GPIO clocks
-    __HAL_RCC_GPIOA_CLK_ENABLE();
-    __HAL_RCC_GPIOH_CLK_ENABLE();
-    __HAL_RCC_GPIOI_CLK_ENABLE();
+    GPIO_InitTypeDef hgpio;
 
     // Configure DCMI GPIOs
-    GPIO_InitTypeDef hgpio;
     hgpio.Mode      = GPIO_MODE_AF_PP;
     hgpio.Pull      = GPIO_PULLUP;
     hgpio.Speed     = GPIO_SPEED_FREQ_VERY_HIGH;
     hgpio.Alternate = GPIO_AF13_DCMI;
+
+#ifdef ARDUINO_PORTENTA_H7_M7
+    /* Enable GPIO clocks */
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+    __HAL_RCC_GPIOH_CLK_ENABLE();
+    __HAL_RCC_GPIOI_CLK_ENABLE();
+#elif defined(ARDUINO_NICLA_VISION)
+    /* Enable GPIO clocks */
+    __HAL_RCC_GPIOG_CLK_ENABLE();
+    __HAL_RCC_GPIOE_CLK_ENABLE();
+    __HAL_RCC_GPIOD_CLK_ENABLE();
+    __HAL_RCC_GPIOC_CLK_ENABLE();
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+#endif
     for (uint32_t i=0; i<NUM_DCMI_PINS; i++) {
         hgpio.Pin = dcmi_pins[i].pin;
         HAL_GPIO_Init(dcmi_pins[i].port, &hgpio);
@@ -261,25 +301,39 @@ void HAL_DCMI_FrameEventCallback(DCMI_HandleTypeDef *hdcmi)
 
 int Camera::Reset()
 {
+#ifdef ARDUINO_PORTENTA_H7_M7
     // Reset sensor.
     digitalWrite(PC_13, LOW);
     HAL_Delay(10);
 
     digitalWrite(PC_13, HIGH);
     HAL_Delay(100);
+#endif
     return 0;
 }
 
 int Camera::ProbeSensor()
 {
     uint8_t addr;
+#ifdef ARDUINO_PORTENTA_H7_M7
     for (addr=1; addr<127; addr++) {
         Wire.beginTransmission(addr);
         if (Wire.endTransmission() == 0) {
             break;
         }
     }
-
+#endif //ARDUINO_PORTENTA_H7_M7
+#ifdef ARDUINO_NICLA_VISION
+    Serial.println("In ProbeSensor Nicla Vision");
+    for (addr=1; addr<127; addr++) {
+        Wire2.beginTransmission(addr);
+        if (Wire2.endTransmission() == 0) {
+            break;
+        }
+    }
+    Serial.print("Current addr: ");
+    Serial.println(addr);
+#endif //ARDUINO_NICLA_VISION
     return addr;
 }
 
@@ -297,12 +351,21 @@ int Camera::begin(int32_t resolution, int32_t pixformat, int32_t framerate)
     Reset();
 
     // Start I2C
+#ifdef ARDUINO_PORTENTA_H7_M7
     Wire.begin();
     Wire.setClock(400000);
+#endif
 
-    if (ProbeSensor() != this->sensor->GetID()) {
-        return -1;
-    }
+#ifdef ARDUINO_NICLA_VISION
+    Wire2.begin();
+    Wire2.setClock(100000);
+#endif
+
+    //if (ProbeSensor() != this->sensor->GetID()) {
+        Serial.print("SensorID: 0x");
+        Serial.println(this->sensor->GetID(), HEX);
+        //return -1;
+    //}
 
     if (sensor->GetClockFrequency() != DCMI_TIM_FREQUENCY) {
         // Reconfigure the sensor clock frequency.
