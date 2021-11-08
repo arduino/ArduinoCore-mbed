@@ -105,13 +105,6 @@ public:
   void end(void);
 
   /*
-     * Get the interface MAC address.
-     *
-     * return: pointer to uint8_t array with length WL_MAC_ADDR_LENGTH
-     */
-  uint8_t* macAddress(uint8_t* mac);
-
-  /*
      * Return the current SSID associated with the network
      *
      * return: ssid string
