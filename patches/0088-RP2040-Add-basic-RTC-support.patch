@@ -1,0 +1,151 @@
+From 20801d7063780c551a38fb3be637c76d97bb0444 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Fri, 30 Jul 2021 17:22:36 +0200
+Subject: [PATCH] RP2040: Add basic RTC support
+
+---
+ .../hardware_rtc/include/hardware/rtc.h       |  2 +-
+ .../pico-sdk/rp2_common/hardware_rtc/rtc.c    |  2 +-
+ .../TARGET_RP2040/rtc_api.c                   | 91 +++++++++++++++++++
+ targets/targets.json                          |  1 +
+ 4 files changed, 94 insertions(+), 2 deletions(-)
+ create mode 100644 targets/TARGET_RASPBERRYPI/TARGET_RP2040/rtc_api.c
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_rtc/include/hardware/rtc.h b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_rtc/include/hardware/rtc.h
+index 83d5bdf288..dcdcd2285f 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_rtc/include/hardware/rtc.h
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_rtc/include/hardware/rtc.h
+@@ -34,7 +34,7 @@ typedef void (*rtc_callback_t)(void);
+ /*! \brief Initialise the RTC system
+  *  \ingroup hardware_rtc
+  */
+-void rtc_init(void);
++void _rtc_init(void);
+ 
+ /*! \brief Set the RTC to the specified time
+  *  \ingroup hardware_rtc
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_rtc/rtc.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_rtc/rtc.c
+index 91bd1994c1..ebd6783ba0 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_rtc/rtc.c
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_rtc/rtc.c
+@@ -19,7 +19,7 @@ bool rtc_running(void) {
+     return (rtc_hw->ctrl & RTC_CTRL_RTC_ACTIVE_BITS);
+ }
+ 
+-void rtc_init(void) {
++void _rtc_init(void) {
+     // Get clk_rtc freq and make sure it is running
+     uint rtc_freq = clock_get_hz(clk_rtc);
+     assert(rtc_freq != 0);
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/rtc_api.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/rtc_api.c
+new file mode 100644
+index 0000000000..999f556355
+--- /dev/null
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/rtc_api.c
+@@ -0,0 +1,91 @@
++#if DEVICE_RTC
++
++#include "rtc_api.h"
++#include "hardware/rtc.h"
++#include "hardware/structs/rtc.h"
++#include "mbed_mktime.h"
++
++void rtc_init(void)
++{
++    _rtc_init();
++}
++
++void rtc_free(void)
++{
++   /* RTC clock can not be reset */
++}
++
++int rtc_isenabled(void)
++{
++    return rtc_running();
++}
++
++time_t rtc_read(void)
++{
++    struct tm timeinfo;
++    time_t t;
++    datetime_t date;
++    
++    if (!rtc_get_datetime(&date)) {
++        return 0;
++    } 
++
++    /* Setup a tm structure based on the RTC
++    struct tm :
++        tm_sec      seconds after the minute 0-61
++        tm_min      minutes after the hour 0-59
++        tm_hour     hours since midnight 0-23
++        tm_mday     day of the month 1-31
++        tm_mon      months since January 0-11
++        tm_year     years since 1900
++        tm_yday     information is ignored by _rtc_maketime
++        tm_wday     information is ignored by _rtc_maketime
++        tm_isdst    information is ignored by _rtc_maketime
++    */
++    timeinfo.tm_year = date.year - 1900;
++    timeinfo.tm_mon = date.month - 1;
++    timeinfo.tm_mday = date.day;
++    timeinfo.tm_wday = date.dotw;
++    timeinfo.tm_hour = date.hour;
++    timeinfo.tm_min = date.min;
++    timeinfo.tm_sec = date.sec;
++
++    if (_rtc_maketime(&timeinfo, &t, RTC_4_YEAR_LEAP_YEAR_SUPPORT) == false) {
++        return 0;
++    }
++
++    return t;
++}
++
++void rtc_write(time_t t)
++{
++    struct tm timeinfo;
++    datetime_t date;
++
++    if (_rtc_localtime(t, &timeinfo, RTC_4_YEAR_LEAP_YEAR_SUPPORT) == false) {
++        return;
++    }
++    
++    /* Setup a datetime_t structure based on the RTC
++     struct datetime_t
++        year;     0..4095
++        month;    1..12, 1 is January
++        day;      1..28,29,30,31 depending on month
++        dotw;     0..6, 0 is Sunday
++        hour;     0..23
++        min;      0..59
++        sec;      0..59
++    */
++    date.year = timeinfo.tm_year + 1900;
++    date.month = timeinfo.tm_mon + 1;
++    date.day = timeinfo.tm_mday;
++    date.dotw = timeinfo.tm_wday;
++    date.hour = timeinfo.tm_hour;
++    date.min = timeinfo.tm_min;
++    date.sec = timeinfo.tm_sec;
++
++    rtc_set_datetime(&date);
++    return;
++}
++
++#endif // DEVICE_RTC
+diff --git a/targets/targets.json b/targets/targets.json
+index 3150c838a1..b28205d060 100644
+--- a/targets/targets.json
++++ b/targets/targets.json
+@@ -8600,6 +8600,7 @@
+             "SERIAL",
+             "SERIAL_FC",
+             "SPI",
++            "RTC",
+             "USTICKER",
+             "WATCHDOG",
+             "USBDEVICE",
+-- 
+2.33.1
+
