@@ -1,8 +1,18 @@
 /*
- * TODO: Add license.
- * Copyright (c) 2021
+ * Copyright 2021 Arduino SA
  *
- * This work is licensed under <>, see the file LICENSE for details.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  * HM01B0 driver.
  */
@@ -161,6 +171,7 @@ static uint16_t himax_default_regs[][2] = {
     {0x3059,                0x1E},
     {0x3064,                0x00},
     {0x3065,                0x04},          //  pad pull 0
+    {ANA_Register_17,       0x00},          //  Disable internal oscillator
 
     {BLC_CFG,               0x43},          //  BLC_on, IIR
 
@@ -191,13 +202,13 @@ static uint16_t himax_default_regs[][2] = {
     {0x2018,                0x9B},
 
     {AE_CTRL,               0x01},          //Automatic Exposure
-    {AE_TARGET_MEAN,        0x3C},          //AE target mean          [Def: 0x3C]
+    {AE_TARGET_MEAN,        0x64},          //AE target mean          [Def: 0x3C]
     {AE_MIN_MEAN,           0x0A},          //AE min target mean      [Def: 0x0A]
     {CONVERGE_IN_TH,        0x03},          //Converge in threshold   [Def: 0x03]
     {CONVERGE_OUT_TH,       0x05},          //Converge out threshold  [Def: 0x05]
     {MAX_INTG_H,            (HIMAX_FRAME_LENGTH_QVGA-2)>>8},          //Maximum INTG High Byte  [Def: 0x01]
     {MAX_INTG_L,            (HIMAX_FRAME_LENGTH_QVGA-2)&0xFF},        //Maximum INTG Low Byte   [Def: 0x54]
-    {MAX_AGAIN_FULL,        0x03},          //Maximum Analog gain in full frame mode [Def: 0x03]
+    {MAX_AGAIN_FULL,        0x04},          //Maximum Analog gain in full frame mode [Def: 0x03]
     {MAX_AGAIN_BIN2,        0x04},          //Maximum Analog gain in bin2 mode       [Def: 0x04]
     {MAX_DGAIN,             0xC0},
 
@@ -229,20 +240,20 @@ static uint16_t himax_default_regs[][2] = {
     {OSC_CLK_DIV,           0x0B},
     {IMG_ORIENTATION,       0x00},          // change the orientation
     {0x0104,                0x01},
-    {0x0000,                0x00},
+    {0x0000,                0x00},  // EOF
 };
 
-static uint16_t himax_full_regs[][2] = { // 'full' resolution is 320x320
+static const uint16_t himax_full_regs[][2] = {
     {0x0383,                0x01},
     {0x0387,                0x01},
     {0x0390,                0x00},
-    {QVGA_WIN_EN,           0x00},	      // Disable QVGA window readout
+    {QVGA_WIN_EN,           0x00},// Disable QVGA window readout
     {MAX_INTG_H,            (HIMAX_FRAME_LENGTH_FULL-2)>>8},
     {MAX_INTG_L,            (HIMAX_FRAME_LENGTH_FULL-2)&0xFF},
     {FRAME_LEN_LINES_H,     (HIMAX_FRAME_LENGTH_FULL>>8)},
     {FRAME_LEN_LINES_L,     (HIMAX_FRAME_LENGTH_FULL&0xFF)},
-    {LINE_LEN_PCK_H,        (HIMAX_FRAME_LENGTH_FULL>>8)},
-    {LINE_LEN_PCK_L,        (HIMAX_FRAME_LENGTH_FULL&0xFF)},
+    {LINE_LEN_PCK_H,        (HIMAX_LINE_LEN_PCK_FULL>>8)},
+    {LINE_LEN_PCK_L,        (HIMAX_LINE_LEN_PCK_FULL&0xFF)},
     {GRP_PARAM_HOLD,        0x01},
 };
 
@@ -261,30 +272,35 @@ static regval_list_t himax_full_regs[] = { // 'full' resolution is 320x320
     {0x0000,                0x00}, // EOF
 };
 
-static uint16_t himax_qvga_regs[][2] = {
+static const uint16_t himax_qvga_regs[][2] = {
     {0x0383,                0x01},
     {0x0387,                0x01},
     {0x0390,                0x00},
+    {QVGA_WIN_EN,           0x01},// Enable QVGA window readout
     {MAX_INTG_H,            (HIMAX_FRAME_LENGTH_QVGA-2)>>8},
     {MAX_INTG_L,            (HIMAX_FRAME_LENGTH_QVGA-2)&0xFF},
     {FRAME_LEN_LINES_H,     (HIMAX_FRAME_LENGTH_QVGA>>8)},
     {FRAME_LEN_LINES_L,     (HIMAX_FRAME_LENGTH_QVGA&0xFF)},
     {LINE_LEN_PCK_H,        (HIMAX_LINE_LEN_PCK_QVGA>>8)},
     {LINE_LEN_PCK_L,        (HIMAX_LINE_LEN_PCK_QVGA&0xFF)},
-    {0x0000,                0x00}, // EOF
+    {GRP_PARAM_HOLD,        0x01},
+    {0x0000,                0x00},  // EOF
+
 };
 
-static uint16_t himax_qqvga_regs[][2] = {
+static const uint16_t himax_qqvga_regs[][2] = {
     {0x0383,                0x03},
     {0x0387,                0x03},
     {0x0390,                0x03},
+    {QVGA_WIN_EN,           0x01},// Enable QVGA window readout
     {MAX_INTG_H,            (HIMAX_FRAME_LENGTH_QQVGA-2)>>8},
     {MAX_INTG_L,            (HIMAX_FRAME_LENGTH_QQVGA-2)&0xFF},
     {FRAME_LEN_LINES_H,     (HIMAX_FRAME_LENGTH_QQVGA>>8)},
     {FRAME_LEN_LINES_L,     (HIMAX_FRAME_LENGTH_QQVGA&0xFF)},
     {LINE_LEN_PCK_H,        (HIMAX_LINE_LEN_PCK_QQVGA>>8)},
     {LINE_LEN_PCK_L,        (HIMAX_LINE_LEN_PCK_QQVGA&0xFF)},
-    {0x0000,                0x00}, // EOF
+    {GRP_PARAM_HOLD,        0x01},
+    {0x0000,                0x00},  // EOF
 };
 
 int HM01B0::Init()
@@ -314,7 +330,7 @@ int HM01B0::Reset()
         delay(1);
     } while (reg_read(HM01B0_I2C_ADDR, MODE_SELECT, true) != HIMAX_Standby && ((--max_timeout)>0) );
 
-    return max_timeout>0 ? 0: -1 ;
+    return (max_timeout > 0) ? 0 : -1;
 }
 
 int HM01B0::SetResolution(int32_t resolution)
@@ -447,7 +463,7 @@ uint8_t HM01B0::PrintRegs()
     for (uint32_t i=0; himax_default_regs[i][0]; i++) {
         printf("0x%04X: 0x%02X  0x%02X \n",
                 himax_default_regs[i][0],
-                himax_default_regs[i][0],
+                himax_default_regs[i][1],
                 reg_read(HM01B0_I2C_ADDR, himax_default_regs[i][0], true));
     }
     return 0;

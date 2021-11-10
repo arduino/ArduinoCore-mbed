@@ -1,8 +1,18 @@
 /*
- * TODO: Add license.
- * Copyright (c) 2021
+ * Copyright 2021 Arduino SA
  *
- * This work is licensed under <>, see the file LICENSE for details.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  * Camera driver.
  */
@@ -11,11 +21,11 @@
 #include "Wire.h"
 #include "stm32h7xx_hal_dcmi.h"
 
-/* Workaround for the broken UNUSED macro */
+// Workaround for the broken UNUSED macro.
 #undef UNUSED
 #define UNUSED(x) ((void)((uint32_t)(x)))
 
-// Include all image sensor drivers.
+// Include all image sensor drivers here.
 #include "himax.h"
 #include "gc2145.h"
 
@@ -28,10 +38,28 @@
 #define DCMI_TIM_CLK_DISABLE()      __TIM1_CLK_DISABLE()
 #define DCMI_TIM_PCLK_FREQ()        HAL_RCC_GetPCLK2Freq()
 #define DCMI_TIM_FREQUENCY          (6000000)
+#define DCMI_IRQ_PRI                NVIC_EncodePriority(NVIC_PRIORITYGROUP_4, 2, 0)
 
 #define DCMI_DMA_CLK_ENABLE()       __HAL_RCC_DMA2_CLK_ENABLE()
 #define DCMI_DMA_STREAM             DMA2_Stream3
 #define DCMI_DMA_IRQ                DMA2_Stream3_IRQn
+#define DCMI_DMA_IRQ_PRI            NVIC_EncodePriority(NVIC_PRIORITYGROUP_4, 3, 0)
+
+// DCMI GPIO pins struct
+static const struct { GPIO_TypeDef *port; uint16_t pin; } dcmi_pins[] = {
+    {GPIOA,     GPIO_PIN_4  },
+    {GPIOA,     GPIO_PIN_6  },
+    {GPIOI,     GPIO_PIN_4  },
+    {GPIOI,     GPIO_PIN_5  },
+    {GPIOI,     GPIO_PIN_6  },
+    {GPIOI,     GPIO_PIN_7  },
+    {GPIOH,     GPIO_PIN_9  },
+    {GPIOH,     GPIO_PIN_10 },
+    {GPIOH,     GPIO_PIN_11 },
+    {GPIOH,     GPIO_PIN_12 },
+    {GPIOH,     GPIO_PIN_14 },
+};
+#define NUM_DCMI_PINS   (sizeof(dcmi_pins)/sizeof(dcmi_pins[0]))
 
 static TIM_HandleTypeDef  htim  = {0};
 static DMA_HandleTypeDef  hdma  = {0};
@@ -58,152 +86,79 @@ extern "C" {
 void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef *htim)
 {
     if (htim->Instance == DCMI_TIM) {
-        /* Enable DCMI timer clock */
+        // Enable DCMI timer clock
         DCMI_TIM_CLK_ENABLE();
 
-        /* Timer GPIO configuration */
-        GPIO_InitTypeDef  GPIO_InitStructure;
-        GPIO_InitStructure.Pin       = DCMI_TIM_PIN;
-        GPIO_InitStructure.Pull      = GPIO_NOPULL;
-        GPIO_InitStructure.Speed     = GPIO_SPEED_HIGH;
-        GPIO_InitStructure.Mode      = GPIO_MODE_AF_PP;
-        GPIO_InitStructure.Alternate = DCMI_TIM_AF;
-        HAL_GPIO_Init(DCMI_TIM_PORT, &GPIO_InitStructure);
+        // Timer GPIO configuration
+        GPIO_InitTypeDef  hgpio;
+        hgpio.Pin       = DCMI_TIM_PIN;
+        hgpio.Pull      = GPIO_NOPULL;
+        hgpio.Speed     = GPIO_SPEED_HIGH;
+        hgpio.Mode      = GPIO_MODE_AF_PP;
+        hgpio.Alternate = DCMI_TIM_AF;
+        HAL_GPIO_Init(DCMI_TIM_PORT, &hgpio);
     }
 }
 
 void HAL_DCMI_MspInit(DCMI_HandleTypeDef *hdcmi)
 {
-    GPIO_InitTypeDef hgpio;
+    // Enable DCMI clock
+    __HAL_RCC_DCMI_CLK_ENABLE();
 
-    /* Enable GPIO clocks */
+    // Enable DCMI GPIO clocks
     __HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_GPIOH_CLK_ENABLE();
     __HAL_RCC_GPIOI_CLK_ENABLE();
 
-    /*** Configure the GPIOs ***/
+    // Configure DCMI GPIOs
+    GPIO_InitTypeDef hgpio;
     hgpio.Mode      = GPIO_MODE_AF_PP;
     hgpio.Pull      = GPIO_PULLUP;
     hgpio.Speed     = GPIO_SPEED_FREQ_VERY_HIGH;
     hgpio.Alternate = GPIO_AF13_DCMI;
-
-    hgpio.Pin       = GPIO_PIN_4 | GPIO_PIN_6;
-    HAL_GPIO_Init(GPIOA, &hgpio);
-
-    hgpio.Pin       = GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7;
-    HAL_GPIO_Init(GPIOI, &hgpio);
-
-    hgpio.Pin       = GPIO_PIN_9 | GPIO_PIN_10 | GPIO_PIN_11 | GPIO_PIN_12 | GPIO_PIN_14;
-    HAL_GPIO_Init(GPIOH, &hgpio);
+    for (uint32_t i=0; i<NUM_DCMI_PINS; i++) {
+        hgpio.Pin = dcmi_pins[i].pin;
+        HAL_GPIO_Init(dcmi_pins[i].port, &hgpio);
+    }
 }
 
 void HAL_DCMI_MspDeInit(DCMI_HandleTypeDef* hdcmi)
 {
-    /* Disable NVIC  for DCMI transfer complete interrupt */
+    // Disable DCMI IRQs.
     HAL_NVIC_DisableIRQ(DCMI_IRQn);
 
-    /* Disable NVIC for DMA2 transfer complete interrupt */
+    // Disable DMA IRQs.
     HAL_NVIC_DisableIRQ(DCMI_DMA_IRQ);
 
-    /* Configure the DMA stream */
-    HAL_DMA_DeInit(hdcmi->DMA_Handle);
+    // Deinit the DMA stream.
+    if (hdcmi->DMA_Handle != NULL) {
+        HAL_DMA_DeInit(hdcmi->DMA_Handle);
+    }
 
-    /* Disable DCMI clock */
+    // Disable DCMI clock.
     __HAL_RCC_DCMI_CLK_DISABLE();
 
-    /* GPIO pins clock and DMA clock can be shut down in the application
-       by surcharging this __weak function */
+    // Deinit DCMI GPIOs.
+    for (uint32_t i=0; i<NUM_DCMI_PINS; i++) {
+        HAL_GPIO_DeInit(dcmi_pins[i].port, dcmi_pins[i].pin);
+    }
 }
 
-/**
-  * @brief  Initializes the camera.
-  * @retval Camera status
-  */
-uint8_t BSP_CAMERA_Init()
+static int camera_extclk_config(int frequency)
 {
-    /*** Configure the DMA ***/
-    hdma.Instance                 = DCMI_DMA_STREAM;
-    hdma.Init.Request             = DMA_REQUEST_DCMI;
-    hdma.Init.Direction           = DMA_PERIPH_TO_MEMORY;
-    hdma.Init.PeriphInc           = DMA_PINC_DISABLE;
-    hdma.Init.MemInc              = DMA_MINC_ENABLE;
-    hdma.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
-    hdma.Init.MemDataAlignment    = DMA_MDATAALIGN_WORD;
-    hdma.Init.Mode                = DMA_NORMAL;
-    hdma.Init.Priority            = DMA_PRIORITY_HIGH;
-    hdma.Init.FIFOMode            = DMA_FIFOMODE_DISABLE;
-    hdma.Init.FIFOThreshold       = DMA_FIFO_THRESHOLD_FULL;
-    hdma.Init.MemBurst            = DMA_MBURST_INC4;
-    hdma.Init.PeriphBurst         = DMA_PBURST_SINGLE;
-
-    /* Enable DMA clock */
-    DCMI_DMA_CLK_ENABLE();
-
-    /* Configure the DMA stream */
-    HAL_DMA_Init(&hdma);
-
-    /* NVIC configuration for DMA transfer complete interrupt */
-    HAL_NVIC_SetPriority(DCMI_DMA_IRQ, 0x03, 0);
-    HAL_NVIC_EnableIRQ(DCMI_DMA_IRQ);
-
-    /*** Configures the DCMI to interface with the camera module ***/
-    hdcmi.Instance              = DCMI;
-    hdcmi.Init.CaptureRate      = DCMI_CR_ALL_FRAME;
-    hdcmi.Init.HSPolarity       = DCMI_HSPOLARITY_LOW;
-    hdcmi.Init.VSPolarity       = DCMI_VSPOLARITY_LOW;
-    hdcmi.Init.PCKPolarity      = DCMI_PCKPOLARITY_FALLING;
-    hdcmi.Init.SynchroMode      = DCMI_SYNCHRO_HARDWARE;
-    hdcmi.Init.ExtendedDataMode = DCMI_EXTEND_DATA_8B;
-    hdcmi.Init.ByteSelectMode   = DCMI_BSM_ALL;         // Capture all received bytes
-    hdcmi.Init.ByteSelectStart  = DCMI_OEBS_ODD;        // Ignored
-    hdcmi.Init.LineSelectMode   = DCMI_LSM_ALL;         // Capture all received lines
-    hdcmi.Init.LineSelectStart  = DCMI_OELS_ODD;        // Ignored
-
-    /* Associate the initialized DMA handle to the DCMI handle */
-    __HAL_LINKDMA(&hdcmi, DMA_Handle, hdma);
-
-    /* Enable DCMI clock */
-    __HAL_RCC_DCMI_CLK_ENABLE();
-
-    /* DCMI Initialization */
-    HAL_DCMI_Init(&hdcmi);
-    __HAL_DCMI_ENABLE_IT(&hdcmi, DCMI_IT_FRAME);
-    __HAL_DCMI_DISABLE_IT(&hdcmi, DCMI_IT_LINE);
-
-    /* NVIC configuration for DCMI transfer complete interrupt */
-    HAL_NVIC_SetPriority(DCMI_IRQn, 0x02, 0);
-    HAL_NVIC_EnableIRQ(DCMI_IRQn);
-    return 0;
-}
-
-/**
-  * @brief  DeInitializes the camera.
-  * @retval Camera status
-  */
-uint8_t BSP_CAMERA_DeInit(void)
-{ 
-    hdcmi.Instance = DCMI;
-
-    HAL_DCMI_DeInit(&hdcmi);
-    return 1;
-}
-
-static int BSP_CAMERA_EXTCLK_Config(int frequency)
-{
-    /* TCLK (PCLK) */
+    // TCLK (PCLK * 2).
     uint32_t tclk = DCMI_TIM_PCLK_FREQ() * 2;
 
-    /* Period should be even */
+    // Period should be even.
     uint32_t period = (tclk / frequency) - 1;
 
     if (htim.Init.Period && (htim.Init.Period != period)) {
-        // __HAL_TIM_SET_AUTORELOAD sets htim.Init.Period...
         __HAL_TIM_SET_AUTORELOAD(&htim, period);
         __HAL_TIM_SET_COMPARE(&htim, DCMI_TIM_CHANNEL, period / 2);
         return 0;
     }
 
-    /* Timer base configuration */
+    // Timer base configuration.
     htim.Instance               = DCMI_TIM;
     htim.Init.Period            = period;
     htim.Init.Prescaler         = 0;
@@ -212,15 +167,17 @@ static int BSP_CAMERA_EXTCLK_Config(int frequency)
     htim.Init.RepetitionCounter = 0;
     htim.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
 
-    /* Timer channel configuration */
+    // Timer channel configuration.
     TIM_OC_InitTypeDef TIMOCHandle;
     TIMOCHandle.Pulse           = period / 2;
     TIMOCHandle.OCMode          = TIM_OCMODE_PWM1;
     TIMOCHandle.OCPolarity      = TIM_OCPOLARITY_HIGH;
+    TIMOCHandle.OCNPolarity     = TIM_OCNPOLARITY_HIGH;
     TIMOCHandle.OCFastMode      = TIM_OCFAST_DISABLE;
     TIMOCHandle.OCIdleState     = TIM_OCIDLESTATE_RESET;
-    TIMOCHandle.OCNIdleState    = TIM_OCIDLESTATE_RESET;
+    TIMOCHandle.OCNIdleState    = TIM_OCNIDLESTATE_RESET;
 
+    // Init, config and start the timer.
     if ((HAL_TIM_PWM_Init(&htim) != HAL_OK)
     || (HAL_TIM_PWM_ConfigChannel(&htim, &TIMOCHandle, DCMI_TIM_CHANNEL) != HAL_OK)
     || (HAL_TIM_PWM_Start(&htim, DCMI_TIM_CHANNEL) != HAL_OK)) {
@@ -230,26 +187,59 @@ static int BSP_CAMERA_EXTCLK_Config(int frequency)
     return 0;
 }
 
-/**
-  * @brief  CAMERA power down
-  * @retval None
-  */
-void BSP_CAMERA_PwrDown(void)
+uint8_t camera_dcmi_config()
 {
-    digitalWrite(PC_13, LOW);
-}
+    // DMA Stream configuration
+    hdma.Instance                 = DCMI_DMA_STREAM;
+    hdma.Init.Request             = DMA_REQUEST_DCMI;
+    hdma.Init.Direction           = DMA_PERIPH_TO_MEMORY;
+    hdma.Init.MemInc              = DMA_MINC_ENABLE;
+    hdma.Init.PeriphInc           = DMA_PINC_DISABLE;
+    hdma.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
+    hdma.Init.MemDataAlignment    = DMA_MDATAALIGN_WORD;
+    hdma.Init.Mode                = DMA_NORMAL;
+    hdma.Init.Priority            = DMA_PRIORITY_HIGH;
+    hdma.Init.FIFOMode            = DMA_FIFOMODE_DISABLE;
+    hdma.Init.FIFOThreshold       = DMA_FIFO_THRESHOLD_FULL;
+    hdma.Init.MemBurst            = DMA_MBURST_INC4;
+    hdma.Init.PeriphBurst         = DMA_PBURST_SINGLE;
 
-/**
-  * @brief  Error callback.
-  * @retval None
-  */
-void BSP_CAMERA_ErrorCallback(void)
-{
-}
+    // Enable DMA clock
+    DCMI_DMA_CLK_ENABLE();
 
-void BSP_CAMERA_FrameEventCallback(void)
-{
-    frame_ready++;
+    // Initialize the DMA stream
+    HAL_DMA_Init(&hdma);
+
+    // Configure and enable DMA IRQ Channel
+    NVIC_SetPriority(DCMI_DMA_IRQ, DCMI_DMA_IRQ_PRI);
+    HAL_NVIC_EnableIRQ(DCMI_DMA_IRQ);
+
+    // Configure the DCMI interface.
+    hdcmi.Instance              = DCMI;
+    hdcmi.Init.HSPolarity       = DCMI_HSPOLARITY_LOW;
+    hdcmi.Init.VSPolarity       = DCMI_VSPOLARITY_LOW;
+    hdcmi.Init.PCKPolarity      = DCMI_PCKPOLARITY_FALLING;
+    hdcmi.Init.SynchroMode      = DCMI_SYNCHRO_HARDWARE;
+    hdcmi.Init.CaptureRate      = DCMI_CR_ALL_FRAME;
+    hdcmi.Init.ExtendedDataMode = DCMI_EXTEND_DATA_8B;
+    hdcmi.Init.JPEGMode         = DCMI_JPEG_DISABLE;
+    hdcmi.Init.ByteSelectMode   = DCMI_BSM_ALL;         // Capture all received bytes
+    hdcmi.Init.ByteSelectStart  = DCMI_OEBS_ODD;        // Ignored
+    hdcmi.Init.LineSelectMode   = DCMI_LSM_ALL;         // Capture all received lines
+    hdcmi.Init.LineSelectStart  = DCMI_OELS_ODD;        // Ignored
+
+    // Link the DMA handle to the DCMI handle.
+    __HAL_LINKDMA(&hdcmi, DMA_Handle, hdma);
+
+    // Initialize the DCMI
+    HAL_DCMI_Init(&hdcmi);
+    __HAL_DCMI_ENABLE_IT(&hdcmi, DCMI_IT_FRAME);
+    __HAL_DCMI_DISABLE_IT(&hdcmi, DCMI_IT_LINE);
+
+    // Configure and enable DCMI IRQ Channel
+    NVIC_SetPriority(DCMI_IRQn, DCMI_IRQ_PRI);
+    HAL_NVIC_EnableIRQ(DCMI_IRQn);
+    return 0;
 }
 
 void DCMI_IRQHandler(void)
@@ -262,45 +252,12 @@ void DMA2_Stream3_IRQHandler(void)
     HAL_DMA_IRQHandler(&hdma);
 }
 
-/**
-  * @brief  VSYNC Event callback.
-  * @retval None
-  */
-void BSP_CAMERA_VsyncEventCallback(void)
-{
-}
-
-/**
-  * @brief  VSYNC event callback
-  * @param  hdcmi: pointer to the DCMI handle
-  * @retval None
-  */
-void HAL_DCMI_VsyncEventCallback(DCMI_HandleTypeDef *hdcmi)
-{        
-    BSP_CAMERA_VsyncEventCallback();
-}
-
-/**
-  * @brief  Frame event callback
-  * @param  hdcmi: pointer to the DCMI handle
-  * @retval None
-  */
 void HAL_DCMI_FrameEventCallback(DCMI_HandleTypeDef *hdcmi)
 {        
-    BSP_CAMERA_FrameEventCallback();
+    frame_ready++;
 }
 
-/**
-  * @brief  Error callback
-  * @param  hdcmi: pointer to the DCMI handle
-  * @retval None
-  */
-void HAL_DCMI_ErrorCallback(DCMI_HandleTypeDef *hdcmi)
-{        
-    BSP_CAMERA_ErrorCallback();
-}
-
-}
+} // extern "C"
 
 int Camera::Reset()
 {
@@ -333,7 +290,7 @@ int Camera::begin(int32_t resolution, int32_t pixformat, int32_t framerate)
     }
 
     // Configure the initial sensor clock.
-    BSP_CAMERA_EXTCLK_Config(DCMI_TIM_FREQUENCY);
+    camera_extclk_config(DCMI_TIM_FREQUENCY);
     HAL_Delay(10);
 
     // Reset the image sensor.
@@ -349,7 +306,7 @@ int Camera::begin(int32_t resolution, int32_t pixformat, int32_t framerate)
 
     if (sensor->GetClockFrequency() != DCMI_TIM_FREQUENCY) {
         // Reconfigure the sensor clock frequency.
-        BSP_CAMERA_EXTCLK_Config(sensor->GetClockFrequency());
+        camera_extclk_config(sensor->GetClockFrequency());
         HAL_Delay(10);
     }
 
@@ -357,15 +314,17 @@ int Camera::begin(int32_t resolution, int32_t pixformat, int32_t framerate)
         return -1;
     }
 
-    if (BSP_CAMERA_Init() != 0) {
+    if (camera_dcmi_config() != 0) {
+        return -1;
+    }
+
+    // NOTE: The pixel format must be set first before the resolution,
+    // to lookup the BPP for this format to set the DCMI cropping.
+    if (SetPixelFormat(pixformat) != 0) {
         return -1;
     }
 
     if (SetResolution(resolution) != 0) {
-        return -1;
-    }
-
-    if (SetPixelFormat(pixformat) != 0) {
         return -1;
     }
 
@@ -401,7 +360,8 @@ int Camera::SetFrameRate(int32_t framerate)
 
 int Camera::SetResolution(int32_t resolution)
 {
-    if (this->sensor == NULL || resolution >= CAMERA_RMAX) {
+    if (this->sensor == NULL || resolution >= CAMERA_RMAX
+            || pixformat >= CAMERA_PMAX || pixformat == -1) {
         return -1;
     }
 
@@ -412,8 +372,8 @@ int Camera::SetResolution(int32_t resolution)
      * @param  YSize DCMI Line number
      */
     HAL_DCMI_EnableCROP(&hdcmi);
-    uint32_t bpp = restab[resolution][0] * pixtab[this->pixformat];
-    HAL_DCMI_ConfigCROP(&hdcmi, 0, 0, bpp - 1, restab[resolution][1] - 1);
+    uint32_t bpl = restab[resolution][0] * pixtab[pixformat];
+    HAL_DCMI_ConfigCROP(&hdcmi, 0, 0, bpl - 1, restab[resolution][1] - 1);
 
     if (this->sensor->SetResolution(resolution) == 0) {
         this->resolution = resolution;
@@ -472,8 +432,8 @@ int Camera::GrabFrame(uint8_t *framebuffer, uint32_t timeout)
         return -1;
     }
 
+    // Ensure FB is aligned to 32 bytes cache lines.
     if ((uint32_t) framebuffer & 0x1F) {
-        // FB must be aligned to 32 bytes cache lines.
         return -1;
     }
 
@@ -481,10 +441,10 @@ int Camera::GrabFrame(uint8_t *framebuffer, uint32_t timeout)
 
     uint32_t framesize = FrameSize();
 
-    /* Start the Camera Snapshot Capture */
+    // Start the Camera Snapshot Capture.
     HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_SNAPSHOT, (uint32_t) framebuffer, framesize / 4);
 
-    /* Wait until camera frame is ready : DCMI Frame event */
+    // Wait until camera frame is ready.
     for (uint32_t start = millis(); frame_ready == 0;) {
         __WFI();
         if ((millis() - start) > timeout) {
@@ -495,7 +455,7 @@ int Camera::GrabFrame(uint8_t *framebuffer, uint32_t timeout)
     
     HAL_DCMI_Stop(&hdcmi);
 
-    /* Invalidate buffer after DMA transfer */
+    // Invalidate buffer after DMA transfer.
     SCB_InvalidateDCache_by_Addr((uint32_t*) framebuffer, framesize);
 
     return 0;
