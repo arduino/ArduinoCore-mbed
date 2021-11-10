@@ -416,6 +416,7 @@ nicla_vision.pid.2=0x045f
 
 nicla_vision.upload.tool=dfu-util
 nicla_vision.upload.protocol=
+nicla_vision.upload.transport=
 nicla_vision.upload.vid=0x2341
 nicla_vision.upload.pid=0x035f
 nicla_vision.upload.address=0x08040000
@@ -431,5 +432,4 @@ nicla_vision.bootloader.tool=openocd
 nicla_vision.bootloader.config=-f target/stm32h7x_dual_bank.cfg
 nicla_vision.bootloader.programmer=-f interface/stlink.cfg
 nicla_vision.bootloader.extra_action.preflash=stm32h7x option_write 0 0x01c 0xb86aaf0
-nicla_vision.bootloader.file=
-
+nicla_vision.bootloader.file=NICLA_VISION/bootloader.elf
