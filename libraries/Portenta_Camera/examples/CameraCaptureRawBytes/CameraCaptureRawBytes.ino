@@ -3,13 +3,7 @@
 
 //REDIRECT_STDOUT_TO(Serial);
 
-// Uncomment for HM01B0
-#include "himax.h"
-Camera cam(new HM01B0());
-
-// Uncomment to use GC2145 instead
-//#include "gc2145.h"
-//Camera cam(new GC2145());
+Camera cam;
 
 uint8_t *fb = (uint8_t*) SDRAM_START_ADDRESS;
 

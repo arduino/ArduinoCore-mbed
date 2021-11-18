@@ -293,8 +293,16 @@ static const uint16_t himax_qqvga_regs[][2] = {
     {0x0000,                0x00},  // EOF
 };
 
+HM01B0::HM01B0(arduino::MbedI2C &i2c) : 
+    _i2c(&i2c)
+{
+}
+
 int HM01B0::Init()
 {
+    _i2c->begin();
+    _i2c->setClock(100000);
+
     if (Reset() != 0 ) {
         return -1;
     }
@@ -461,32 +469,32 @@ uint8_t HM01B0::PrintRegs()
 
 int HM01B0::reg_write(uint8_t dev_addr, uint16_t reg_addr, uint8_t reg_data, bool wide_addr)
 {
-    Wire.beginTransmission(dev_addr);
+    _i2c->beginTransmission(dev_addr);
     uint8_t buf[3] = {(uint8_t) (reg_addr >> 8), (uint8_t) (reg_addr & 0xFF), reg_data};
     if (wide_addr == true) {
-        Wire.write(buf, 1);
+        _i2c->write(buf, 1);
     }
-    Wire.write(&buf[1], 2);
-    return Wire.endTransmission();
+    _i2c->write(&buf[1], 2);
+    return _i2c->endTransmission();
 }
 
 uint8_t HM01B0::reg_read(uint8_t dev_addr, uint16_t reg_addr, bool wide_addr)
 {
     uint8_t reg_data = 0;
     uint8_t buf[2] = {(uint8_t) (reg_addr >> 8), (uint8_t) (reg_addr & 0xFF)};
-    Wire.beginTransmission(dev_addr);
+    _i2c->beginTransmission(dev_addr);
     if (wide_addr) {
-        Wire.write(buf, 2);
+        _i2c->write(buf, 2);
     } else {
-        Wire.write(&buf[1], 1);
+        _i2c->write(&buf[1], 1);
     }
-    Wire.endTransmission(false);
-    Wire.requestFrom(dev_addr, 1);
-    if (Wire.available()) {
-        reg_data = Wire.read();
+    _i2c->endTransmission(false);
+    _i2c->requestFrom(dev_addr, 1);
+    if (_i2c->available()) {
+        reg_data = _i2c->read();
     }
-    while (Wire.available()) {
-        Wire.read();
+    while (_i2c->available()) {
+        _i2c->read();
     }
     return reg_data;
 }

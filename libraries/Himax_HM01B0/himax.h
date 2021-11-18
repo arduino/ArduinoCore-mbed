@@ -24,7 +24,9 @@
 class HM01B0: public ImageSensor {
    private:
         Stream *_debug;
+        arduino::MbedI2C *_i2c;
    public:
+        HM01B0(arduino::MbedI2C &i2c = CameraWire);
         int Init();
         int Reset();
         int GetID() { return HM01B0_I2C_ADDR; };

@@ -27,7 +27,6 @@
 
 // Include all image sensor drivers here.
 #ifdef ARDUINO_PORTENTA_H7_M7
-#include "himax.h"
 
 #define DCMI_TIM                    (TIM1)
 #define DCMI_TIM_PIN                (GPIO_PIN_1)
@@ -38,10 +37,10 @@
 #define DCMI_TIM_CLK_DISABLE()      __TIM1_CLK_DISABLE()
 #define DCMI_TIM_PCLK_FREQ()        HAL_RCC_GetPCLK2Freq()
 #define DCMI_TIM_FREQUENCY          (6000000)
-#endif
+arduino::MbedI2C CameraWire(I2C_SDA, I2C_SCL);
 
-#ifdef ARDUINO_NICLA_VISION
-#include "gc2145.h"
+#elif defined(ARDUINO_NICLA_VISION)
+
 #define DCMI_TIM                    (TIM3)
 #define DCMI_TIM_PIN                (GPIO_PIN_7)
 #define DCMI_TIM_PORT               (GPIOA)
@@ -51,6 +50,8 @@
 #define DCMI_TIM_CLK_DISABLE()      __TIM3_CLK_DISABLE()
 #define DCMI_TIM_PCLK_FREQ()        HAL_RCC_GetPCLK1Freq()
 #define DCMI_TIM_FREQUENCY          (12000000)
+arduino::MbedI2C CameraWire(I2C_SDA2, I2C_SCL2);
+
 #endif
 
 #define DCMI_IRQ_PRI                NVIC_EncodePriority(NVIC_PRIORITYGROUP_4, 2, 0)
@@ -299,6 +300,15 @@ void HAL_DCMI_FrameEventCallback(DCMI_HandleTypeDef *hdcmi)
 
 } // extern "C"
 
+Camera::Camera(ImageSensor &sensor) : 
+    pixformat(-1),
+    resolution(-1),
+    framerate(-1),
+    sensor(&sensor),
+    _debug(NULL)
+{
+}
+
 int Camera::Reset()
 {
 #ifdef ARDUINO_PORTENTA_H7_M7
@@ -311,7 +321,7 @@ int Camera::Reset()
 #endif
     return 0;
 }
-
+/*
 int Camera::ProbeSensor()
 {
     uint8_t addr;
@@ -337,7 +347,7 @@ int Camera::ProbeSensor()
 #endif //ARDUINO_NICLA_VISION
     return addr;
 }
-
+*/
 int Camera::begin(int32_t resolution, int32_t pixformat, int32_t framerate)
 {  
     if (resolution >= CAMERA_RMAX || pixformat >= CAMERA_PMAX) {
@@ -351,24 +361,15 @@ int Camera::begin(int32_t resolution, int32_t pixformat, int32_t framerate)
     // Reset the image sensor.
     Reset();
 
-    // Start I2C
-#ifdef ARDUINO_PORTENTA_H7_M7
-    Wire.begin();
-    Wire.setClock(400000);
-#endif
-
-#ifdef ARDUINO_NICLA_VISION
-    Wire2.begin();
-    Wire2.setClock(100000);
-#endif
-
-    //if (ProbeSensor() != this->sensor->GetID()) {
+    /*
+    if (ProbeSensor() != this->sensor->GetID()) {
         if (_debug) {
             _debug->print("SensorID: 0x");
             _debug->println(this->sensor->GetID(), HEX);
         }
-        //return -1;
-    //}
+        return -1;
+    }
+    */
 
     if (sensor->GetClockFrequency() != DCMI_TIM_FREQUENCY) {
         // Reconfigure the sensor clock frequency.

@@ -25,8 +25,10 @@ class GC2145: public ImageSensor {
    private:
         int SetWindow(uint16_t reg, uint16_t x, uint16_t y, uint16_t w, uint16_t h);
         Stream *_debug;
+        arduino::MbedI2C *_i2c;
 
    public:
+        GC2145(arduino::MbedI2C &i2c = CameraWire);
         int Init();
         int Reset();
         int GetID() { return GC2145_I2C_ADDR; };

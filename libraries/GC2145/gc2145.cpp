@@ -707,8 +707,16 @@ static const uint8_t default_regs[][2] = {
     {0x00, 0x00},
 };
 
+GC2145::GC2145(arduino::MbedI2C &i2c) : 
+    _i2c(&i2c)
+{
+}
+
 int GC2145::Init()
 {
+    _i2c->begin();
+    _i2c->setClock(100000);
+
     int ret = 0;
 
     // Write default regsiters
@@ -853,32 +861,32 @@ int GC2145::SetPixelFormat(int32_t pixformat)
 
 int GC2145::reg_write(uint8_t dev_addr, uint16_t reg_addr, uint8_t reg_data, bool wide_addr)
 {
-    Wire2.beginTransmission(dev_addr);
+    _i2c->beginTransmission(dev_addr);
     uint8_t buf[3] = {(uint8_t) (reg_addr >> 8), (uint8_t) (reg_addr & 0xFF), reg_data};
     if (wide_addr == true) {
-        Wire2.write(buf, 1);
+        _i2c->write(buf, 1);
     }
-    Wire2.write(&buf[1], 2);
-    return Wire2.endTransmission();
+    _i2c->write(&buf[1], 2);
+    return _i2c->endTransmission();
 }
 
 uint8_t GC2145::reg_read(uint8_t dev_addr, uint16_t reg_addr, bool wide_addr)
 {
     uint8_t reg_data = 0;
     uint8_t buf[2] = {(uint8_t) (reg_addr >> 8), (uint8_t) (reg_addr & 0xFF)};
-    Wire2.beginTransmission(dev_addr);
+    _i2c->beginTransmission(dev_addr);
     if (wide_addr) {
-        Wire2.write(buf, 2);
+        _i2c->write(buf, 2);
     } else {
-        Wire2.write(&buf[1], 1);
+        _i2c->write(&buf[1], 1);
     }
-    Wire2.endTransmission(false);
-    Wire2.requestFrom(dev_addr, 1);
-    if (Wire2.available()) {
-        reg_data = Wire2.read();
+    _i2c->endTransmission(false);
+    _i2c->requestFrom(dev_addr, 1);
+    if (_i2c->available()) {
+        reg_data = _i2c->read();
     }
-    while (Wire2.available()) {
-        Wire2.read();
+    while (_i2c->available()) {
+        _i2c->read();
     }
     return reg_data;
 }

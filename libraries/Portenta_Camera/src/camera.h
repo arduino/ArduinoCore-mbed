@@ -45,6 +45,7 @@ extern const uint32_t restab[CAMERA_RMAX][2];
 
 class ImageSensor {
     public:
+        virtual ~ImageSensor() { }
         virtual int Init() = 0;
         virtual int Reset() = 0;
         virtual int GetID() = 0;
@@ -78,8 +79,9 @@ class Camera {
         int Reset();
         int ProbeSensor();
         Stream *_debug;
+        arduino::MbedI2C *_i2c;
     public:
-        Camera(ImageSensor *sensor): pixformat(-1), resolution(-1), framerate(-1), sensor(sensor) {}
+        Camera(ImageSensor &sensor);
         int begin(int32_t resolution=CAMERA_R320x240, int32_t pixformat=CAMERA_GRAYSCALE, int32_t framerate=30);
         int GetID();
         int SetFrameRate(int32_t framerate);
@@ -91,4 +93,7 @@ class Camera {
         int GrabFrame(uint8_t *buffer, uint32_t timeout=5000);
         void debug(Stream &stream);
 };
+
 #endif // __CAMERA_H
+
+extern arduino::MbedI2C CameraWire;
