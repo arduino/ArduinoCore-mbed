@@ -34,7 +34,7 @@ typedef void (*rtc_callback_t)(void);
 /*! \brief Initialise the RTC system
  *  \ingroup hardware_rtc
  */
-void rtc_init(void);
+void _rtc_init(void);
 
 /*! \brief Set the RTC to the specified time
  *  \ingroup hardware_rtc
