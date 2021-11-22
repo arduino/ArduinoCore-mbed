@@ -184,7 +184,7 @@ void HAL_DCMI_MspDeInit(DCMI_HandleTypeDef* hdcmi)
     }
 }
 
-static int camera_extclk_config(int frequency)
+__weak int camera_extclk_config(int frequency)
 {
     // TCLK (PCLK * 2).
     uint32_t tclk = DCMI_TIM_PCLK_FREQ() * 2;
