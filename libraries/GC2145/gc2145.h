@@ -24,6 +24,7 @@
 class GC2145: public ImageSensor {
    private:
         int SetWindow(uint16_t reg, uint16_t x, uint16_t y, uint16_t w, uint16_t h);
+        Stream *_debug;
 
    public:
         int Init();
@@ -35,6 +36,7 @@ class GC2145: public ImageSensor {
         int SetPixelFormat(int32_t pixformat);
         int reg_write(uint8_t dev_addr, uint16_t reg_addr, uint8_t reg_data, bool wide_addr = false);
         uint8_t reg_read(uint8_t dev_addr, uint16_t reg_addr, bool wide_addr = false);
+        void debug(Stream &stream);
 };
  
 #endif /* __GC2145_H */

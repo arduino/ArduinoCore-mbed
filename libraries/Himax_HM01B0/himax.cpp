@@ -491,3 +491,8 @@ uint8_t HM01B0::reg_read(uint8_t dev_addr, uint16_t reg_addr, bool wide_addr)
     return reg_data;
 }
 
+void HM01B0::debug(Stream &stream)
+{
+  _debug = &stream;
+}
+

@@ -882,3 +882,8 @@ uint8_t GC2145::reg_read(uint8_t dev_addr, uint16_t reg_addr, bool wide_addr)
     }
     return reg_data;
 }
+
+void GC2145::debug(Stream &stream)
+{
+  _debug = &stream;
+}

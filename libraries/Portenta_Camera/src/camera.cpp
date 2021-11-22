@@ -324,15 +324,16 @@ int Camera::ProbeSensor()
     }
 #endif //ARDUINO_PORTENTA_H7_M7
 #ifdef ARDUINO_NICLA_VISION
-    Serial.println("In ProbeSensor Nicla Vision");
     for (addr=1; addr<127; addr++) {
         Wire2.beginTransmission(addr);
         if (Wire2.endTransmission() == 0) {
             break;
         }
     }
-    Serial.print("Current addr: ");
-    Serial.println(addr);
+    if (_debug) {
+        _debug->print("Current addr: ");
+        _debug->println(addr);
+    }
 #endif //ARDUINO_NICLA_VISION
     return addr;
 }
@@ -362,8 +363,10 @@ int Camera::begin(int32_t resolution, int32_t pixformat, int32_t framerate)
 #endif
 
     //if (ProbeSensor() != this->sensor->GetID()) {
-        Serial.print("SensorID: 0x");
-        Serial.println(this->sensor->GetID(), HEX);
+        if (_debug) {
+            _debug->print("SensorID: 0x");
+            _debug->println(this->sensor->GetID(), HEX);
+        }
         //return -1;
     //}
 
@@ -497,29 +500,51 @@ int Camera::GrabFrame(uint8_t *framebuffer, uint32_t timeout)
 
     // Ensure FB is aligned to 32 bytes cache lines.
     if ((uint32_t) framebuffer & 0x1F) {
+        if (_debug) {
+            _debug->println("Framebuffer not aligned to 32 bytes cache lines");
+        }
         return -1;
     }
 
     frame_ready = 0;
 
+    if (HAL_DCMI_Resume(&hdcmi) != HAL_OK) {
+        if (_debug) {
+            _debug->println("HAL_DCMI_Resume FAILED!");
+        }
+    }
+
     uint32_t framesize = FrameSize();
 
     // Start the Camera Snapshot Capture.
-    HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_SNAPSHOT, (uint32_t) framebuffer, framesize / 4);
+    if (HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_SNAPSHOT, (uint32_t) framebuffer, framesize / 4) != HAL_OK) {
+        if (_debug) {
+            _debug->println("HAL_DCMI_Start_DMA FAILED!");
+        }
+    }
 
     // Wait until camera frame is ready.
     for (uint32_t start = millis(); frame_ready == 0;) {
         __WFI();
         if ((millis() - start) > timeout) {
+            if (_debug) {
+                _debug->println("Timeout expired!");
+            }
             HAL_DMA_Abort(&hdma);
             return -1;
         }
     }
-    
-    HAL_DCMI_Stop(&hdcmi);
+
+    HAL_DCMI_Suspend(&hdcmi);
 
     // Invalidate buffer after DMA transfer.
     SCB_InvalidateDCache_by_Addr((uint32_t*) framebuffer, framesize);
 
     return 0;
+}
+
+void Camera::debug(Stream &stream)
+{
+  _debug = &stream;
+  this->sensor->debug(stream);
 }

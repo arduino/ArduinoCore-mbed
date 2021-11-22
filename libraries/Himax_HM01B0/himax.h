@@ -22,6 +22,8 @@
 #include "camera.h"
 
 class HM01B0: public ImageSensor {
+   private:
+        Stream *_debug;
    public:
         int Init();
         int Reset();
@@ -39,5 +41,6 @@ class HM01B0: public ImageSensor {
         int PollMD();
         int ClearMD();
         uint8_t PrintRegs();
+        void debug(Stream &stream);
 };
 #endif /* __HIMAX_H */

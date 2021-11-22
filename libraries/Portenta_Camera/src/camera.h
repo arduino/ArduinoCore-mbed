@@ -54,6 +54,7 @@ class ImageSensor {
         virtual int SetPixelFormat(int32_t pixelformat) = 0;
         virtual int reg_write(uint8_t dev_addr, uint16_t reg_addr, uint8_t reg_data, bool wide_addr) = 0;
         virtual uint8_t reg_read(uint8_t dev_addr, uint16_t reg_addr, bool wide_addr) = 0;
+        virtual void debug(Stream &stream) = 0;
 
         int SetStandby(bool enable) {
             return -1;
@@ -76,6 +77,7 @@ class Camera {
         ImageSensor *sensor;
         int Reset();
         int ProbeSensor();
+        Stream *_debug;
     public:
         Camera(ImageSensor *sensor): pixformat(-1), resolution(-1), framerate(-1), sensor(sensor) {}
         int begin(int32_t resolution=CAMERA_R320x240, int32_t pixformat=CAMERA_GRAYSCALE, int32_t framerate=30);
@@ -87,5 +89,6 @@ class Camera {
         int SetTestPattern(bool enable, bool walking);
         int FrameSize();
         int GrabFrame(uint8_t *buffer, uint32_t timeout=5000);
+        void debug(Stream &stream);
 };
 #endif // __CAMERA_H
