@@ -1,11 +1,21 @@
 #include "camera.h"
-#include "SDRAM.h"
+//#include "gc2145.h"
+#include "himax.h"
 
-//REDIRECT_STDOUT_TO(Serial);
+FrameBuffer fb;
+/*
+Other buffer instantiation options:
+  FrameBuffer fb(0x30000000);
+  FrameBuffer fb(320,240,2);
+*/
 
-Camera cam;
+HM01B0 himax;
+Camera cam(himax);
 
-uint8_t *fb = (uint8_t*) SDRAM_START_ADDRESS;
+/*
+GC2145 galaxyCore;
+Camera cam(galaxyCore);
+*/
 
 void blink_error(uint32_t count = 0xFFFFFFFF)
 {
@@ -21,16 +31,11 @@ void blink_error(uint32_t count = 0xFFFFFFFF)
 void setup() {
   Serial.begin(921600);
 
-  // Init DRAM and reserve 2MB for framebuffer.
-  SDRAM.begin(SDRAM_START_ADDRESS + 2 * 1024 * 1024);  
-
   // Init the cam QVGA, 30FPS
   if (cam.begin(CAMERA_R320x240, CAMERA_GRAYSCALE, 30) != 0) {
     blink_error();
   }
-  
-  //Serial.print("Sensor ID:");
-  //Serial.println(cam.GetID());
+
   blink_error(5);
 }
 
@@ -40,8 +45,8 @@ void loop() {
   
   // Grab frame and write to serial
   if (cam.GrabFrame(fb, 3000) == 0) {
-    Serial.write(fb, cam.FrameSize());
+    Serial.write(fb.getBuffer(), cam.FrameSize());
   } else {
     blink_error();
-  } 
+  }
 }
