@@ -43,6 +43,22 @@ enum {
 // Resolution table
 extern const uint32_t restab[CAMERA_RMAX][2];
 
+class FrameBuffer {
+    private:
+        int32_t _fb_size;
+        uint8_t *_fb;
+        bool _isAllocated;
+    public:
+        FrameBuffer(int32_t x, int32_t y, int32_t bpp);
+        FrameBuffer(int32_t address);
+        FrameBuffer();
+        uint32_t getBufferSize();
+        uint8_t* getBuffer();
+        void setBuffer(uint8_t *buffer);
+        bool hasFixedSize();
+        bool isAllocated();
+};
+
 class ImageSensor {
     public:
         virtual ~ImageSensor() { }
@@ -80,6 +96,7 @@ class Camera {
         int ProbeSensor();
         Stream *_debug;
         arduino::MbedI2C *_i2c;
+        FrameBuffer *_framebuffer;
     public:
         Camera(ImageSensor &sensor);
         int begin(int32_t resolution=CAMERA_R320x240, int32_t pixformat=CAMERA_GRAYSCALE, int32_t framerate=30);
@@ -90,7 +107,7 @@ class Camera {
         int SetStandby(bool enable);
         int SetTestPattern(bool enable, bool walking);
         int FrameSize();
-        int GrabFrame(uint8_t *buffer, uint32_t timeout=5000);
+        int GrabFrame(FrameBuffer &fb, uint32_t timeout=5000);
         void debug(Stream &stream);
 };
 

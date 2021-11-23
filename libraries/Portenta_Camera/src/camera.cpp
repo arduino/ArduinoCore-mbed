@@ -25,6 +25,8 @@
 #undef UNUSED
 #define UNUSED(x) ((void)((uint32_t)(x)))
 
+#define ALIGN_PTR(p,a)   ((p & (a-1)) ?(((uintptr_t)p + a) & ~(uintptr_t)(a-1)) : p)
+
 // Include all image sensor drivers here.
 #ifdef ARDUINO_PORTENTA_H7_M7
 
@@ -300,6 +302,59 @@ void HAL_DCMI_FrameEventCallback(DCMI_HandleTypeDef *hdcmi)
 
 } // extern "C"
 
+
+
+FrameBuffer::FrameBuffer(int32_t x, int32_t y, int32_t bpp) : 
+    _fb_size(x*y*bpp),
+    _isAllocated(true)
+{
+    uint8_t *buffer = (uint8_t *)malloc(x*y*bpp);
+    _fb = (uint8_t *)ALIGN_PTR((uintptr_t)buffer, 32);
+}
+
+FrameBuffer::FrameBuffer(int32_t address) : 
+    _fb_size(0),
+    _isAllocated(true)
+{
+    _fb = (uint8_t *)ALIGN_PTR((uintptr_t)address, 32);
+}
+
+FrameBuffer::FrameBuffer() : 
+    _fb_size(0),
+    _isAllocated(false)
+{
+}
+
+uint32_t FrameBuffer::getBufferSize()
+{
+    return _fb_size;
+}
+
+uint8_t* FrameBuffer::getBuffer()
+{
+    return _fb;
+}
+
+void FrameBuffer::setBuffer(uint8_t *buffer)
+{
+    _isAllocated = true;
+    _fb = buffer;
+}
+
+bool FrameBuffer::hasFixedSize()
+{
+    if (_fb_size) {
+        return true;
+    }
+    return false;
+}
+
+bool FrameBuffer::isAllocated()
+{
+    return _isAllocated;
+}
+
+
 Camera::Camera(ImageSensor &sensor) : 
     pixformat(-1),
     resolution(-1),
@@ -491,13 +546,39 @@ int Camera::FrameSize()
     return restab[this->resolution][0] * restab[this->resolution][1] * pixtab[this->pixformat];
 }
 
-int Camera::GrabFrame(uint8_t *framebuffer, uint32_t timeout)
+int Camera::GrabFrame(FrameBuffer &fb, uint32_t timeout)
 {
     if (this->sensor == NULL
             || this->pixformat == -1
             || this->resolution == -1) {
         return -1;
     }
+
+    uint32_t framesize = FrameSize();
+
+    if (fb.isAllocated()) {
+        //A buffer has already been allocated
+        //Check buffer size
+        if (fb.hasFixedSize()) {
+            uint32_t fbSize = fb.getBufferSize();
+            if (_debug) {
+                _debug->print("fbSize: ");
+                _debug->println(fbSize);
+            }
+            if (fbSize < framesize) {
+                if (_debug) {
+                    _debug->println("The allocated buffer is too small!");
+                }
+                return -1;
+            }
+        }
+    } else {
+        uint8_t *buffer = (uint8_t *)malloc(framesize+32);
+        uint8_t *alignedBuff = (uint8_t *)ALIGN_PTR((uintptr_t)buffer, 32);
+        fb.setBuffer(alignedBuff);
+    }
+
+    uint8_t *framebuffer = fb.getBuffer();
 
     // Ensure FB is aligned to 32 bytes cache lines.
     if ((uint32_t) framebuffer & 0x1F) {
@@ -514,8 +595,6 @@ int Camera::GrabFrame(uint8_t *framebuffer, uint32_t timeout)
             _debug->println("HAL_DCMI_Resume FAILED!");
         }
     }
-
-    uint32_t framesize = FrameSize();
 
     // Start the Camera Snapshot Capture.
     if (HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_SNAPSHOT, (uint32_t) framebuffer, framesize / 4) != HAL_OK) {
