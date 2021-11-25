@@ -84,6 +84,14 @@ public:
 
     virtual nsapi_error_t get_sim_state(SimState &state);
 
+    nsapi_error_t enable_cmux();
+
+    nsapi_error_t config_cmux();
+
+    void set_cmux_status_flag(bool cmux_status);
+
+    virtual bool is_cmux_enabled();
+
     virtual CellularContext *create_context(const char *apn = NULL, bool cp_req = false, bool nonip_req = false);
 
     virtual void delete_context(CellularContext *context);
@@ -97,6 +105,12 @@ public:
     virtual void close_information();
 
     virtual void set_timeout(int timeout);
+
+    virtual unsigned long get_time();
+
+    virtual unsigned long get_local_time();
+
+    virtual bool set_time(unsigned long const epoch, int const timezone = 0);
 
     virtual void modem_debug_on(bool on);
 
@@ -184,6 +198,7 @@ protected:
 private:
     void urc_nw_deact();
     void urc_pdn_deact();
+    nsapi_error_t set_authomatic_time_zone_update();
 
 protected:
     ATHandler _at;
@@ -199,6 +214,7 @@ private:
 
     std::chrono::duration<int, std::milli> _default_timeout;
     bool _modem_debug_on;
+    bool _cmux_status;
     const intptr_t *_property_array;
 };
 

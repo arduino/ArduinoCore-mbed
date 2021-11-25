@@ -58,13 +58,20 @@ protected:
 
     virtual nsapi_error_t socket_connect(nsapi_socket_t handle, const SocketAddress &address);
 
+#ifdef MBED_CONF_CELLULAR_OFFLOAD_DNS_QUERIES
+    virtual nsapi_error_t gethostbyname(const char *host, SocketAddress *address, nsapi_version_t version, const char *interface_name);
+#endif
+
 private:
     // socket URC handlers as per Cinterion AT manuals
     void urc_sis();
     void urc_sisw();
+    void urc_sysstart();
     void sisw_urc_handler(int sock_id, int urc_code);
     void urc_sisr();
     void sisr_urc_handler(int sock_id, int urc_code);
+
+    void urc_gnss();
 
     // sockets need a connection profile, one profile is enough to support single stack sockets
     nsapi_error_t create_connection_profile(int connection_profile_id);
@@ -77,6 +84,14 @@ private:
     const char *_apn;
     const char *_user;
     const char *_password;
+    bool _engine;
+
+    mbed::Callback<void(char*)> _gnss_cb;
+
+#ifdef MBED_CONF_CELLULAR_OFFLOAD_DNS_QUERIES
+    hostbyname_cb_t _dns_callback;
+    nsapi_version_t _dns_version;
+#endif
 };
 
 } // namespace mbed

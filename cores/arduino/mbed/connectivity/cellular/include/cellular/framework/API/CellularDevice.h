@@ -73,6 +73,8 @@ public:
      */
     static CellularDevice *get_default_instance();
 
+    mbed::Callback<void(void)> enableCMUXChannel = nullptr;
+
     /** Return target onboard instance of CellularDevice
      *
      *  @remark Mbed OS target shall override (non-weak) this function for an onboard modem.
@@ -216,6 +218,13 @@ public: //Pure virtual functions
      */
     virtual nsapi_error_t get_sim_state(SimState &state) = 0;
 
+    virtual nsapi_error_t enable_cmux() = 0;
+
+
+    virtual bool is_cmux_enabled() = 0;
+
+    virtual void set_cmux_status_flag(bool cmux_status) = 0;
+
     /** Creates a new CellularContext interface.
      *
      *  @param fh       file handle used in communication to modem. This can be, for example, UART handle. If null, then the default
@@ -341,6 +350,12 @@ public: //Pure virtual functions
      *  @param timeout    milliseconds to wait response from modem
      */
     virtual void set_timeout(int timeout) = 0;
+
+    virtual unsigned long get_time() = 0;
+
+    virtual unsigned long get_local_time() = 0;
+
+    virtual bool set_time(unsigned long const epoch, int const timezone = 0) = 0;
 
 
 public: //Common functions

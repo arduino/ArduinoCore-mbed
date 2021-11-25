@@ -356,6 +356,12 @@ public:
      */
     void write_hex_string(const char *str, size_t size, bool quote_string = true);
 
+    /** Get the error detected during read_int()
+     *
+     *  @return the latest negative integer error got from read_int().
+     */
+    int32_t get_last_read_error();
+
     /** Reads as string and converts result to integer. Supports only non-negative integers.
      *
      *  @return the non-negative integer or -1 in case of error.
@@ -638,6 +644,7 @@ private: //Member variables
     rtos::Kernel::Clock::time_point _start_time;
     // eventqueue event id
     int _event_id;
+    int32_t _last_read_error;
 
     char _cmd_buffer[MBED_CONF_CELLULAR_AT_HANDLER_BUFFER_SIZE];
 };

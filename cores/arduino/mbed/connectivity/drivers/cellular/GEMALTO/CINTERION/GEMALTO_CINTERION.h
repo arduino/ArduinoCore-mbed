@@ -44,12 +44,14 @@ public:
         ModuleBGS2,
         ModuleEMS31,
         ModuleEHS5E,
+        ModuleTX62,
     };
     static Module get_module();
 
 protected: // AT_CellularDevice
     virtual AT_CellularContext *create_context_impl(ATHandler &at, const char *apn, bool cp_req = false, bool nonip_req = false);
     virtual AT_CellularInformation *open_information_impl(ATHandler &at);
+    virtual AT_CellularNetwork *open_network_impl(ATHandler &at);
 
 protected:
     virtual nsapi_error_t init();
@@ -60,6 +62,7 @@ private:
     void init_module_els61();
     void init_module_ems31();
     void init_module_ehs5e();
+    void init_module_tx62();
 };
 
 } // namespace mbed
