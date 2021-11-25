@@ -1,0 +1,43 @@
+From b2d8fb22966f4ee03e8b8e1da619d7b1d5de146b Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Wed, 11 Aug 2021 17:30:39 +0200
+Subject: [PATCH 105/106] GEMALTO: TX62: tune AT configuration
+
+---
+ .../cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.cpp   | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.cpp b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.cpp
+index 459bba8eb1..3e3bcd4121 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.cpp
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.cpp
+@@ -103,21 +103,21 @@ void GEMALTO_CINTERION::init_module_tx62()
+         AT_CellularNetwork::RegistrationModeDisable,    // C_REG
+         0,  // AT_CGSN_WITH_TYPE
+         0,  // AT_CGDATA
+-        1,  // AT_CGAUTH
++        0,  // AT_CGAUTH
+         1,  // AT_CNMI
+         1,  // AT_CSMP
+         1,  // AT_CMGF
+-        0,  // AT_CSDH
++        1,  // AT_CSDH
+         1,  // PROPERTY_IPV4_STACK
+         0,  // PROPERTY_IPV6_STACK
+         0,  // PROPERTY_IPV4V6_STACK
+         0,  // PROPERTY_NON_IP_PDP_TYPE
+-        0,  // PROPERTY_AT_CGEREP
+-        0,  // PROPERTY_AT_COPS_FALLBACK_AUTO
++        1,  // PROPERTY_AT_CGEREP
++        1,  // PROPERTY_AT_COPS_FALLBACK_AUTO
+         7,  // PROPERTY_SOCKET_COUNT
+         1,  // PROPERTY_IP_TCP
+         1,  // PROPERTY_IP_UDP
+-        100,  // PROPERTY_AT_SEND_DELAY
++        0,  // PROPERTY_AT_SEND_DELAY
+     };
+     set_cellular_properties(cellular_properties);
+     _module = ModuleTX62;
+-- 
+2.33.1
+

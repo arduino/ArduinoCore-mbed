@@ -1,0 +1,33 @@
+From 7ad3530cab80994fe2c8edfe2e8444b169772b5d Mon Sep 17 00:00:00 2001
+From: giulcioffi <g.cioffi@arduino.cc>
+Date: Tue, 13 Jul 2021 13:16:49 +0200
+Subject: [PATCH 092/106] Make set_cid() protected to call it from GEMALTO
+ stack
+
+---
+ .../cellular/include/cellular/framework/AT/AT_CellularContext.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/connectivity/cellular/include/cellular/framework/AT/AT_CellularContext.h b/connectivity/cellular/include/cellular/framework/AT/AT_CellularContext.h
+index 19099c0e08..0eb83531b0 100644
+--- a/connectivity/cellular/include/cellular/framework/AT/AT_CellularContext.h
++++ b/connectivity/cellular/include/cellular/framework/AT/AT_CellularContext.h
+@@ -109,6 +109,7 @@ protected:
+      */
+     virtual const char *get_nonip_context_type_str();
+     virtual void enable_access_technology();
++    virtual void set_cid(int cid);
+ 
+ private:
+ #if NSAPI_PPP_AVAILABLE
+@@ -125,7 +126,6 @@ private:
+     nsapi_error_t check_operation(nsapi_error_t err, ContextOperation op);
+     void ciot_opt_cb(mbed::CellularNetwork::CIoT_Supported_Opt ciot_opt);
+     virtual void do_connect_with_retry();
+-    void set_cid(int cid);
+ 
+ private:
+     ContextOperation _current_op;
+-- 
+2.33.1
+

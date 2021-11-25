@@ -1,0 +1,24 @@
+From 3306111343002bd993cc4dc09cee333c765f68d0 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Fri, 6 Aug 2021 10:29:11 +0200
+Subject: [PATCH 103/106] Gemalto: TX62: handle oob before closing the socket
+
+---
+ .../GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp        | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+index 147f5ffc15..94975e1b66 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+@@ -483,6 +483,7 @@ sisr_retry:
+     }
+     if (len == -1) {
+         if (GEMALTO_CINTERION::get_module() == GEMALTO_CINTERION::ModuleTX62 && _at.get_last_read_error() == -2) {
++            _at.process_oob();
+             tr_error("Socket %d recvfrom finished!", socket->id);
+             socket->pending_bytes = 0;
+             return NSAPI_ERROR_OK;
+-- 
+2.33.1
+

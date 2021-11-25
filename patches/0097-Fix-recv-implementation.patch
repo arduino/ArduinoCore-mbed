@@ -1,0 +1,62 @@
+From 6846691438ea59a04d98643190f865a35dcaf7bb Mon Sep 17 00:00:00 2001
+From: giulcioffi <g.cioffi@arduino.cc>
+Date: Tue, 20 Jul 2021 10:40:12 +0200
+Subject: [PATCH 097/106] Fix recv implementation
+
+---
+ .../CINTERION/GEMALTO_CINTERION_CellularStack.cpp | 15 +++++++--------
+ 1 file changed, 7 insertions(+), 8 deletions(-)
+
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+index 9eb3e27b39..034011d2d2 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+@@ -105,9 +105,9 @@ void GEMALTO_CINTERION_CellularStack::sisr_urc_handler(int sock_id, int urc_code
+ {
+     CellularSocket *sock = find_socket(sock_id);
+     if (sock) {
+-        if (urc_code == 1) { // data available
++        if (urc_code > 0) { // data available
+             if (sock->_cb) {
+-                sock->pending_bytes = 1;
++                sock->pending_bytes = urc_code;
+                 sock->_cb(sock->_data);
+             }
+         }
+@@ -442,7 +442,6 @@ nsapi_size_or_error_t GEMALTO_CINTERION_CellularStack::socket_recvfrom_impl(Cell
+     _at.cmd_start_stop("^SISR", "=", "%d%d", socket->id, size);
+ 
+ sisr_retry:
+-    socket->pending_bytes = 1;
+     _at.resp_start("^SISR:");
+     if (!_at.info_resp()) {
+         tr_error("Socket %d not responding", socket->id);
+@@ -476,13 +475,9 @@ sisr_retry:
+         tr_error("Socket %d recvfrom failed!", socket->id);
+         return NSAPI_ERROR_DEVICE_ERROR;
+     }
+-    socket->pending_bytes = 0;
++    socket->pending_bytes = 1;
+     if (len >= (nsapi_size_or_error_t)size) {
+         len = (nsapi_size_or_error_t)size;
+-        int remain_len = _at.read_int();
+-        if (remain_len > 0) {
+-            socket->pending_bytes = 1;
+-        }
+     }
+ 
+     // UDP Udp_RemClient
+@@ -525,6 +520,10 @@ sisr_retry:
+ 
+     nsapi_size_or_error_t recv_len = _at.read_bytes((uint8_t *)buffer, len);
+ 
++    if (recv_len < len) {
++        goto sisr_retry;
++    }
++
+     _at.resp_stop();
+ 
+     return (_at.get_last_error() == NSAPI_ERROR_OK) ? (recv_len ? recv_len : NSAPI_ERROR_WOULD_BLOCK) : NSAPI_ERROR_DEVICE_ERROR;
+-- 
+2.33.1
+

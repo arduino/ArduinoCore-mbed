@@ -1,0 +1,129 @@
+From 09d2e9582d2dd420df3f7e3f69e1561f95b812fb Mon Sep 17 00:00:00 2001
+From: Riccardo Rizzo <r.rizzo@arduino.cc>
+Date: Mon, 13 Sep 2021 11:56:44 +0200
+Subject: [PATCH] Added GNSS/Psm management and bug fixing
+
+Added GNSS psm management and removed callback pointer bug introduced in previous PR
+also set CGAUTH to 1in order to allows for context credential settings.
+---
+ .../GEMALTO/CINTERION/GEMALTO_CINTERION.cpp   |  2 +-
+ .../GEMALTO_CINTERION_CellularStack.cpp       | 33 +++++++++++++------
+ .../GEMALTO_CINTERION_CellularStack.h         |  4 ++-
+ 3 files changed, 27 insertions(+), 12 deletions(-)
+
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.cpp b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.cpp
+index 3e3bcd4121..c7790fe348 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.cpp
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.cpp
+@@ -103,7 +103,7 @@ void GEMALTO_CINTERION::init_module_tx62()
+         AT_CellularNetwork::RegistrationModeDisable,    // C_REG
+         0,  // AT_CGSN_WITH_TYPE
+         0,  // AT_CGDATA
+-        0,  // AT_CGAUTH
++        1,  // AT_CGAUTH
+         1,  // AT_CNMI
+         1,  // AT_CSMP
+         1,  // AT_CMGF
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+index 6961e40f38..967d9628b0 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+@@ -136,13 +136,10 @@ void GEMALTO_CINTERION_CellularStack::unlock() {
+ }
+ 
+ void GEMALTO_CINTERION_CellularStack::urc_gnss() {
+-    printf("urc_gnss called\n");
+-    printf("%x\n", _gnss_cb);
+-
+-    char gnss_string[50] = {'$', 'G'};
++    char gnss_string[100] = {'$', 'G'};
+     if (_gnss_cb) {
+         _at.set_delimiter('\n');
+-        _at.read_string(&gnss_string[2], 48);
++        _at.read_string(&gnss_string[2], 98);
+         _at.set_default_delimiter();
+         _gnss_cb(gnss_string);
+     }
+@@ -165,7 +162,7 @@ void GEMALTO_CINTERION_CellularStack::endGNSS() {
+     _at.unlock();
+ }
+ 
+-void GEMALTO_CINTERION_CellularStack::startGNSS() {
++int GEMALTO_CINTERION_CellularStack::startGNSS() {
+     _at.lock();
+     _engine = false;
+     _at.cmd_start_stop("^SGPSC", "=", "%s%d", "Engine", 3);
+@@ -177,18 +174,18 @@ void GEMALTO_CINTERION_CellularStack::startGNSS() {
+         _engine = false;
+         _at.at_cmd_discard("^SGPSC", "=", "%s%d", "Engine", 0);
+         _at.at_cmd_discard("^SGPSC", "=", "%s%s", "Nmea/Urc", "off");
+-        return;
++        return 0;
+     }
+     _engine = true;
+     _at.at_cmd_discard("^SGPSC", "=", "%s%s", "Nmea/Urc", "on");
+     _at.clear_error();
+     _at.unlock();
++    return 1;
+ }
+ 
+ void GEMALTO_CINTERION_CellularStack::stopGNSS() {
+     if(_engine) {
+         _at.lock();
+-        _gnss_cb = nullptr;
+         _at.at_cmd_discard("^SGPSC", "=", "%s%s", "Nmea/Urc", "off");
+         _at.at_cmd_discard("^SGPSC", "=", "%s%d", "Engine", 0);
+         _at.clear_error();
+@@ -197,6 +194,24 @@ void GEMALTO_CINTERION_CellularStack::stopGNSS() {
+     }
+ }
+ 
++void GEMALTO_CINTERION_CellularStack::PSMEnable() {
++    if(_engine) {
++        _at.lock();
++        _at.at_cmd_discard("^SGPSC", "=", "%s%d", "Power/Psm", 1);
++        _at.clear_error();
++        _at.unlock();
++    }
++}
++
++void GEMALTO_CINTERION_CellularStack::PSMDisable() {
++    if(_engine) {
++        _at.lock();
++        _at.at_cmd_discard("^SGPSC", "=", "%s%d", "Power/Psm", 0);
++        _at.clear_error();
++        _at.unlock();
++    }
++}
++
+ nsapi_error_t GEMALTO_CINTERION_CellularStack::socket_stack_init()
+ {
+     _at.lock();
+@@ -231,8 +246,6 @@ nsapi_error_t GEMALTO_CINTERION_CellularStack::socket_close_impl(int sock_id)
+ 
+     _at.clear_error(); // clear SISS even though SISC fails
+ 
+-    _at.at_cmd_discard("^SISS", "=", "%d%s%s", sock_id, "srvType", "none");
+-
+     _at.restore_at_timeout();
+ 
+     return _at.get_last_error();
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.h b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.h
+index ffaed50184..37eee5858a 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.h
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.h
+@@ -38,8 +38,10 @@ public:
+     void unlock();
+     void beginGNSS(mbed::Callback<void(char*)> gnss_cb);
+     void endGNSS();
+-    void startGNSS();
++    int startGNSS();
+     void stopGNSS();
++    void PSMEnable();
++    void PSMDisable();
+ 
+ protected:
+ 
+-- 
+2.33.1
+

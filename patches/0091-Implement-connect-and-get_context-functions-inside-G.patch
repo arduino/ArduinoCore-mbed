@@ -1,0 +1,181 @@
+From 083b7057da81658a6f89607409e494d6043e7a50 Mon Sep 17 00:00:00 2001
+From: giulcioffi <g.cioffi@arduino.cc>
+Date: Tue, 13 Jul 2021 13:16:06 +0200
+Subject: [PATCH 091/106] Implement connect() and get_context() functions
+ inside GEMALTO stack
+
+---
+ .../framework/AT/AT_CellularContext.cpp       | 33 --------
+ .../GEMALTO_CINTERION_CellularContext.cpp     | 82 +++++++++++++++++++
+ .../GEMALTO_CINTERION_CellularContext.h       |  3 +
+ 3 files changed, 85 insertions(+), 33 deletions(-)
+
+diff --git a/connectivity/cellular/source/framework/AT/AT_CellularContext.cpp b/connectivity/cellular/source/framework/AT/AT_CellularContext.cpp
+index b4678ff081..620af5ac76 100644
+--- a/connectivity/cellular/source/framework/AT/AT_CellularContext.cpp
++++ b/connectivity/cellular/source/framework/AT/AT_CellularContext.cpp
+@@ -269,26 +269,6 @@ nsapi_error_t AT_CellularContext::connect(const char *sim_pin, const char *apn,
+     set_sim_pin(sim_pin);
+     set_credentials(apn, uname, pwd);
+ 
+-#if defined __has_include
+-#  if __has_include (<GEMALTO_CINTERION.h>)
+-    set_device_ready();
+-
+-    _at.lock();
+-    bool valid_context = get_context();
+-    _at.unlock();
+-
+-    if(!valid_context) {
+-        set_new_context(_cid);
+-    }
+-
+-    do_user_authentication();
+-
+-    enable_access_technology();
+-
+-    do_connect();
+-#  endif
+-#endif
+-
+     return connect();
+ }
+ 
+@@ -378,13 +358,7 @@ bool AT_CellularContext::get_context()
+         int pdp_type_len = _at.read_string(pdp_type_from_context, sizeof(pdp_type_from_context));
+         if (pdp_type_len > 0) {
+             apn_len = _at.read_string(apn, sizeof(apn));
+-#if defined __has_include
+-#  if __has_include (<GEMALTO_CINTERION.h>)
+-            if (apn_len > 0) {
+-#  else
+             if (apn_len >= 0) {
+-#  endif
+-#endif
+                 if (_apn && (strcmp(apn, _apn) != 0)) {
+                     tr_debug("CID %d APN \"%s\"", cid, apn);
+                     continue;
+@@ -402,13 +376,6 @@ bool AT_CellularContext::get_context()
+                     set_cid(cid);
+                 }
+             }
+-#if defined __has_include
+-#  if __has_include (<GEMALTO_CINTERION.h>)
+-             else {
+-                cid_max = 0;
+-            }
+-#  endif
+-#endif
+         }
+     }
+ 
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.cpp b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.cpp
+index ee0a56e57a..8f04e1274a 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.cpp
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.cpp
+@@ -30,6 +30,88 @@ GEMALTO_CINTERION_CellularContext::~GEMALTO_CINTERION_CellularContext()
+ {
+ }
+ 
++nsapi_error_t GEMALTO_CINTERION_CellularContext::connect(const char *sim_pin, const char *apn, const char *uname,
++                                          const char *pwd)
++{
++    set_sim_pin(sim_pin);
++    set_credentials(apn, uname, pwd);
++
++    set_device_ready();
++
++    _at.lock();
++    bool valid_context = get_context();
++    _at.unlock();
++
++    if(!valid_context) {
++        set_new_context(_cid);
++    }
++
++    do_user_authentication();
++
++    enable_access_technology();
++
++    return AT_CellularContext::connect();
++}
++
++bool GEMALTO_CINTERION_CellularContext::get_context()
++{
++    _at.cmd_start_stop("+CGDCONT", "?");
++    _at.resp_start("+CGDCONT:");
++    set_cid(-1);
++    int cid_max = 0; // needed when creating new context
++    char apn[MAX_ACCESSPOINT_NAME_LENGTH];
++    int apn_len = 0;
++
++    while (_at.info_resp()) {
++        int cid = _at.read_int();
++        if (cid > cid_max) {
++            cid_max = cid;
++        }
++        char pdp_type_from_context[10];
++        int pdp_type_len = _at.read_string(pdp_type_from_context, sizeof(pdp_type_from_context));
++        if (pdp_type_len > 0) {
++            apn_len = _at.read_string(apn, sizeof(apn));
++            if (apn_len > 0) {
++                if (_apn && (strcmp(apn, _apn) != 0)) {
++                    tr_debug("CID %d APN \"%s\"", cid, apn);
++                    continue;
++                }
++
++                // APN matched -> Check PDP type
++                pdp_type_t pdp_type = string_to_pdp_type(pdp_type_from_context);
++                tr_debug("CID %d APN \"%s\" pdp_type %u", cid, apn, pdp_type);
++
++                // Accept exact matching PDP context type or dual PDP context for modems that support both IPv4 and IPv6 stacks
++                if (get_device()->get_property(pdp_type_t_to_cellular_property(pdp_type)) ||
++                        ((pdp_type == IPV4V6_PDP_TYPE && (get_device()->get_property(AT_CellularDevice::PROPERTY_IPV4_PDP_TYPE) &&
++                                                          get_device()->get_property(AT_CellularDevice::PROPERTY_IPV6_PDP_TYPE))) && !_nonip_req)) {
++                    _pdp_type = pdp_type;
++                    set_cid(cid);
++                }
++            }
++             else {
++                cid_max = 0;
++            }
++        }
++    }
++
++    _at.resp_stop();
++    if (_cid == -1) { // no suitable context was found so create a new one
++        if (!set_new_context(cid_max + 1)) {
++            return false;
++        }
++    }
++
++    // save the apn
++    if (apn_len > 0 && !_apn) {
++        memcpy(_found_apn, apn, apn_len + 1);
++    }
++
++    tr_info("Found PDP context %d", _cid);
++
++    return true;
++}
++
+ 
+ nsapi_error_t GEMALTO_CINTERION_CellularContext::do_user_authentication()
+ {
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.h b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.h
+index da6e7676d6..0645b2b87c 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.h
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.h
+@@ -25,6 +25,9 @@ class GEMALTO_CINTERION_CellularContext: public AT_CellularContext {
+ public:
+     GEMALTO_CINTERION_CellularContext(ATHandler &at, CellularDevice *device, const char *apn, bool cp_req = false, bool nonip_req = false);
+     virtual ~GEMALTO_CINTERION_CellularContext();
++    virtual nsapi_error_t connect(const char *sim_pin, const char *apn = 0, const char *uname = 0,
++                                  const char *pwd = 0);
++    virtual bool get_context();
+ 
+ protected:
+ #if !NSAPI_PPP_AVAILABLE
+-- 
+2.33.1
+

@@ -1,0 +1,41 @@
+From 69d4c6e48a452368c8e1e34f89b6dd40fc9b69f6 Mon Sep 17 00:00:00 2001
+From: giulcioffi <g.cioffi@arduino.cc>
+Date: Wed, 14 Jul 2021 10:25:40 +0200
+Subject: [PATCH 094/106] Handle missing IP address resolution
+
+---
+ .../GEMALTO_CINTERION_CellularStack.cpp        | 18 +++++++++++++-----
+ 1 file changed, 13 insertions(+), 5 deletions(-)
+
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+index 13c1a0b2fa..9eb3e27b39 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+@@ -172,11 +172,19 @@ nsapi_error_t GEMALTO_CINTERION_CellularStack::gethostbyname(const char *host, S
+         _at.cmd_start_stop("^SISX" , "=" , "%s%d%s", "HostByName" , _cid, host);
+         _at.resp_start("^SISX: \"HostByName\",");
+         char ipAddress[NSAPI_IP_SIZE];
+-        _at.read_string(ipAddress, sizeof(ipAddress));
+-        _at.restore_at_timeout();
+-        if (!address->set_ip_address(ipAddress)) {
+-            _at.unlock();
+-            return NSAPI_ERROR_DNS_FAILURE;
++        int size = _at.read_string(ipAddress, sizeof(ipAddress));
++        if (size) {
++            //Valid string received
++            tr_info("Read %d bytes. Valid string: %s\n", size, ipAddress);
++            _at.restore_at_timeout();
++            if (!address->set_ip_address(ipAddress)) {
++                _at.unlock();
++                return NSAPI_ERROR_DNS_FAILURE;
++            }
++        } else {
++            //Null string received
++            tr_info("Read %d bytes. Null string\n", size);
++            return NSAPI_ERROR_NO_ADDRESS;
+         }
+     }
+ 
+-- 
+2.33.1
+

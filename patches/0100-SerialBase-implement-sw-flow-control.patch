@@ -1,0 +1,88 @@
+From 98948639940fae6b26473cd7795f7655b9220499 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Thu, 5 Aug 2021 15:13:58 +0200
+Subject: [PATCH 100/106] SerialBase: implement sw flow control
+
+---
+ drivers/include/drivers/SerialBase.h |  9 ++++++++-
+ drivers/source/SerialBase.cpp        | 14 ++++++++++++++
+ 2 files changed, 22 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/include/drivers/SerialBase.h b/drivers/include/drivers/SerialBase.h
+index 9288c271e1..7d8734c7af 100644
+--- a/drivers/include/drivers/SerialBase.h
++++ b/drivers/include/drivers/SerialBase.h
+@@ -26,6 +26,9 @@
+ #include "platform/mbed_toolchain.h"
+ #include "platform/NonCopyable.h"
+ 
++#include "drivers/DigitalOut.h"
++#include "drivers/DigitalIn.h"
++
+ #if DEVICE_SERIAL_ASYNCH
+ #include "platform/CThunk.h"
+ #include "hal/dma_api.h"
+@@ -71,7 +74,8 @@ public:
+         Disabled = 0,
+         RTS,
+         CTS,
+-        RTSCTS
++        RTSCTS,
++        RTSCTS_SW
+     };
+ 
+     /** Set the transmission format used by the serial port
+@@ -326,8 +330,11 @@ protected:
+     Flow                           _flow_type = Disabled;
+     PinName                        _flow1 = NC;
+     PinName                        _flow2 = NC;
++    DigitalIn* _cts_pin;
++    DigitalOut* _rts_pin;
+     const serial_fc_pinmap_t       *_static_pinmap_fc = NULL;
+     void (SerialBase::*_set_flow_control_sp_func)(Flow, const serial_fc_pinmap_t &) = NULL;
++    bool sw_flow_control = false;
+ #endif
+ 
+ #endif
+diff --git a/drivers/source/SerialBase.cpp b/drivers/source/SerialBase.cpp
+index 40bf7d0b61..7c21d12e9c 100644
+--- a/drivers/source/SerialBase.cpp
++++ b/drivers/source/SerialBase.cpp
+@@ -71,6 +71,9 @@ int SerialBase::readable()
+ {
+     lock();
+     int ret = serial_readable(&_serial);
++    if (sw_flow_control == true && _rts_pin != nullptr) {
++        *_rts_pin = !!!ret;
++    }
+     unlock();
+     return ret;
+ }
+@@ -80,6 +83,9 @@ int SerialBase::writeable()
+ {
+     lock();
+     int ret = serial_writable(&_serial);
++    if (sw_flow_control) {
++        ret = ret & !(*_cts_pin);
++    }
+     unlock();
+     return ret;
+ }
+@@ -319,6 +325,14 @@ void SerialBase::set_flow_control(Flow type, PinName flow1, PinName flow2)
+             serial_set_flow_control(&_serial, flow_type, flow1, flow2);
+             break;
+ 
++        case RTSCTS_SW:
++            sw_flow_control = true;
++            if (_flow1 != NC)
++                _cts_pin = new DigitalIn(_flow1);
++            if (_flow2 != NC)
++                _rts_pin = new DigitalOut(_flow2, 0);
++            break;
++
+         default:
+             break;
+     }
+-- 
+2.33.1
+

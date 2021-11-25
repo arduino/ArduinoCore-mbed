@@ -1,0 +1,57 @@
+From 59d13e7c84674cd77781dee8b8a4c77b41908763 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Fri, 6 Aug 2021 10:28:50 +0200
+Subject: [PATCH 102/106] Gemalto: properly handle ^SYSSTART URC
+
+---
+ .../CINTERION/GEMALTO_CINTERION_CellularStack.cpp  | 14 +++++++++++++-
+ .../CINTERION/GEMALTO_CINTERION_CellularStack.h    |  1 +
+ 2 files changed, 14 insertions(+), 1 deletion(-)
+
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+index 06952694e2..147f5ffc15 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+@@ -101,6 +101,18 @@ void GEMALTO_CINTERION_CellularStack::urc_sisr()
+     sisr_urc_handler(sock_id, urc_code);
+ }
+ 
++void GEMALTO_CINTERION_CellularStack::urc_sysstart()
++{
++    // close sockets if open
++    _at.lock();
++    for (int i = 0; i < _device.get_property(AT_CellularDevice::PROPERTY_SOCKET_COUNT); i++) {
++        _at.clear_error();
++        socket_close_impl(i);
++    }
++    _at.clear_error();
++    _at.unlock();
++}
++
+ void GEMALTO_CINTERION_CellularStack::sisr_urc_handler(int sock_id, int urc_code)
+ {
+     CellularSocket *sock = find_socket(sock_id);
+@@ -122,7 +134,7 @@ nsapi_error_t GEMALTO_CINTERION_CellularStack::socket_stack_init()
+         _at.set_urc_handler("^SIS:", mbed::Callback<void()>(this, &GEMALTO_CINTERION_CellularStack::urc_sis));
+         _at.set_urc_handler("^SISW:", mbed::Callback<void()>(this, &GEMALTO_CINTERION_CellularStack::urc_sisw));
+         _at.set_urc_handler("^SISR:", mbed::Callback<void()>(this, &GEMALTO_CINTERION_CellularStack::urc_sisr));
+-        _at.set_urc_handler("^SYSSTART", mbed::Callback<void()>(this, &GEMALTO_CINTERION_CellularStack::urc_sisr));
++        _at.set_urc_handler("^SYSSTART", mbed::Callback<void()>(this, &GEMALTO_CINTERION_CellularStack::urc_sysstart));
+     } else { // recovery cleanup
+         // close all Internet and connection profiles
+         for (int i = 0; i < _device.get_property(AT_CellularDevice::PROPERTY_SOCKET_COUNT); i++) {
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.h b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.h
+index 22711d2173..b0ae8d23e1 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.h
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.h
+@@ -56,6 +56,7 @@ private:
+     // socket URC handlers as per Cinterion AT manuals
+     void urc_sis();
+     void urc_sisw();
++    void urc_sysstart();
+     void sisw_urc_handler(int sock_id, int urc_code);
+     void urc_sisr();
+     void sisr_urc_handler(int sock_id, int urc_code);
+-- 
+2.33.1
+

@@ -1,0 +1,568 @@
+From 067e0a840d23839c5ee06e42dfa042f69b31e1e8 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Thu, 10 Dec 2020 19:23:36 +0100
+Subject: [PATCH 090/106] Thales: mbed library porting
+
+Wrap changes for Thales inside a library include check
+
+Clean up library changes for Thales
+
+Fix recv API to correctly handle multiple reads
+---
+ .../cellular/framework/API/ATHandler.h        |  7 ++
+ .../cellular/framework/API/CellularContext.h  |  7 ++
+ .../framework/AT/AT_CellularContext.h         |  3 +
+ .../framework/AT/AT_CellularContext.cpp       | 70 ++++++++++++++++++-
+ .../source/framework/AT/AT_CellularDevice.cpp |  3 +-
+ .../framework/AT/AT_CellularNetwork.cpp       |  2 +
+ .../source/framework/device/ATHandler.cpp     | 12 +++-
+ .../framework/device/CellularStateMachine.cpp |  8 ++-
+ .../GEMALTO/CINTERION/GEMALTO_CINTERION.cpp   | 31 ++++++++
+ .../GEMALTO/CINTERION/GEMALTO_CINTERION.h     |  2 +
+ .../GEMALTO_CINTERION_CellularContext.cpp     | 20 ++++++
+ .../GEMALTO_CINTERION_CellularContext.h       |  1 +
+ .../GEMALTO_CINTERION_CellularStack.cpp       | 50 +++++++++++++
+ .../GEMALTO_CINTERION_CellularStack.h         |  9 +++
+ 14 files changed, 220 insertions(+), 5 deletions(-)
+
+diff --git a/connectivity/cellular/include/cellular/framework/API/ATHandler.h b/connectivity/cellular/include/cellular/framework/API/ATHandler.h
+index da2a6ea124..bfcff552b9 100644
+--- a/connectivity/cellular/include/cellular/framework/API/ATHandler.h
++++ b/connectivity/cellular/include/cellular/framework/API/ATHandler.h
+@@ -356,6 +356,12 @@ public:
+      */
+     void write_hex_string(const char *str, size_t size, bool quote_string = true);
+ 
++    /** Get the error detected during read_int()
++     *
++     *  @return the latest negative integer error got from read_int().
++     */
++    int32_t get_last_read_error();
++
+     /** Reads as string and converts result to integer. Supports only non-negative integers.
+      *
+      *  @return the non-negative integer or -1 in case of error.
+@@ -638,6 +644,7 @@ private: //Member variables
+     rtos::Kernel::Clock::time_point _start_time;
+     // eventqueue event id
+     int _event_id;
++    int32_t _last_read_error;
+ 
+     char _cmd_buffer[MBED_CONF_CELLULAR_AT_HANDLER_BUFFER_SIZE];
+ };
+diff --git a/connectivity/cellular/include/cellular/framework/API/CellularContext.h b/connectivity/cellular/include/cellular/framework/API/CellularContext.h
+index 8281b1c25e..1061d5d926 100644
+--- a/connectivity/cellular/include/cellular/framework/API/CellularContext.h
++++ b/connectivity/cellular/include/cellular/framework/API/CellularContext.h
+@@ -29,6 +29,12 @@
+  *
+  */
+ 
++/* Radio Access Technology type  */
++enum RadioAccessTechnologyType {
++    CATM1 = 7,
++    CATNB = 8
++};
++
+ namespace mbed {
+ 
+ /**
+@@ -153,6 +159,7 @@ public: // from NetworkInterface
+     virtual nsapi_error_t connect(const char *sim_pin, const char *apn = 0, const char *uname = 0,
+                                   const char *pwd = 0) = 0;
+     virtual void set_credentials(const char *apn, const char *uname = 0, const char *pwd = 0) = 0;
++    virtual void set_access_technology(RadioAccessTechnologyType rat = CATM1) = 0;
+     virtual bool is_connected() = 0;
+ 
+     /** Same as NetworkInterface::get_default_instance()
+diff --git a/connectivity/cellular/include/cellular/framework/AT/AT_CellularContext.h b/connectivity/cellular/include/cellular/framework/AT/AT_CellularContext.h
+index b1d8985a9c..19099c0e08 100644
+--- a/connectivity/cellular/include/cellular/framework/AT/AT_CellularContext.h
++++ b/connectivity/cellular/include/cellular/framework/AT/AT_CellularContext.h
+@@ -47,6 +47,7 @@ public:
+     virtual nsapi_error_t connect(const char *sim_pin, const char *apn = 0, const char *uname = 0,
+                                   const char *pwd = 0);
+     virtual void set_credentials(const char *apn, const char *uname = 0, const char *pwd = 0);
++    virtual void set_access_technology(RadioAccessTechnologyType rat = CATM1);
+ 
+ // from CellularContext
+     virtual nsapi_error_t get_pdpcontext_params(pdpContextList_t &params_list);
+@@ -107,6 +108,7 @@ protected:
+      *  @return     NIDD context text, e.g. Non-IP or NONIP
+      */
+     virtual const char *get_nonip_context_type_str();
++    virtual void enable_access_technology();
+ 
+ private:
+ #if NSAPI_PPP_AVAILABLE
+@@ -132,6 +134,7 @@ private:
+ 
+     PinName _dcd_pin;
+     bool _active_high;
++    RadioAccessTechnologyType _rat;
+ 
+ protected:
+     char _found_apn[MAX_APN_LENGTH];
+diff --git a/connectivity/cellular/source/framework/AT/AT_CellularContext.cpp b/connectivity/cellular/source/framework/AT/AT_CellularContext.cpp
+index f2b1d632b9..b4678ff081 100644
+--- a/connectivity/cellular/source/framework/AT/AT_CellularContext.cpp
++++ b/connectivity/cellular/source/framework/AT/AT_CellularContext.cpp
+@@ -48,7 +48,7 @@ using namespace rtos;
+ using namespace std::chrono_literals;
+ 
+ AT_CellularContext::AT_CellularContext(ATHandler &at, CellularDevice *device, const char *apn, bool cp_req, bool nonip_req) :
+-    _current_op(OP_INVALID), _dcd_pin(NC), _active_high(false), _cp_req(cp_req), _is_connected(false), _at(at)
++    _current_op(OP_INVALID), _dcd_pin(NC), _active_high(false), _rat(CATM1), _cp_req(cp_req), _is_connected(false), _at(at)
+ {
+     tr_info("New CellularContext %s (%p)", apn ? apn : "", this);
+     _nonip_req = nonip_req;
+@@ -268,6 +268,27 @@ nsapi_error_t AT_CellularContext::connect(const char *sim_pin, const char *apn,
+ {
+     set_sim_pin(sim_pin);
+     set_credentials(apn, uname, pwd);
++
++#if defined __has_include
++#  if __has_include (<GEMALTO_CINTERION.h>)
++    set_device_ready();
++
++    _at.lock();
++    bool valid_context = get_context();
++    _at.unlock();
++
++    if(!valid_context) {
++        set_new_context(_cid);
++    }
++
++    do_user_authentication();
++
++    enable_access_technology();
++
++    do_connect();
++#  endif
++#endif
++
+     return connect();
+ }
+ 
+@@ -278,6 +299,11 @@ void AT_CellularContext::set_credentials(const char *apn, const char *uname, con
+     _pwd = pwd;
+ }
+ 
++void AT_CellularContext::set_access_technology(RadioAccessTechnologyType rat)
++{
++    _rat = rat;
++}
++
+ // PDP Context handling
+ void AT_CellularContext::delete_current_context()
+ {
+@@ -352,7 +378,13 @@ bool AT_CellularContext::get_context()
+         int pdp_type_len = _at.read_string(pdp_type_from_context, sizeof(pdp_type_from_context));
+         if (pdp_type_len > 0) {
+             apn_len = _at.read_string(apn, sizeof(apn));
++#if defined __has_include
++#  if __has_include (<GEMALTO_CINTERION.h>)
++            if (apn_len > 0) {
++#  else
+             if (apn_len >= 0) {
++#  endif
++#endif
+                 if (_apn && (strcmp(apn, _apn) != 0)) {
+                     tr_debug("CID %d APN \"%s\"", cid, apn);
+                     continue;
+@@ -370,6 +402,13 @@ bool AT_CellularContext::get_context()
+                     set_cid(cid);
+                 }
+             }
++#if defined __has_include
++#  if __has_include (<GEMALTO_CINTERION.h>)
++             else {
++                cid_max = 0;
++            }
++#  endif
++#endif
+         }
+     }
+ 
+@@ -432,6 +471,35 @@ bool AT_CellularContext::set_new_context(int cid)
+     return success;
+ }
+ 
++void AT_CellularContext::enable_access_technology()
++{
++    switch (_rat)
++    {
++    case CATM1:
++        _at.at_cmd_discard("^SXRAT", "=","%d", _rat);
++        _at.cmd_start_stop("^SCFG", "=","%s%d", "Radio/Band/CatM",80000);
++        _at.resp_start("^SCFG");
++        _at.cmd_start_stop("^SCFG", "=","%s%d%d", "Radio/Band/CatNB",0,0);
++        _at.resp_start("^SCFG");
++        break;
++
++    case CATNB:
++        _at.at_cmd_discard("^SXRAT", "=","%d", _rat);
++        _at.cmd_start_stop("^SCFG", "=","%s%d", "Radio/Band/CatNB",80000);
++        _at.resp_start("^SCFG");
++        _at.cmd_start_stop("^SCFG", "=","%s%d%d", "Radio/Band/CatM",0,0);
++        _at.resp_start("^SCFG");
++        break;
++
++    default:
++        break;
++    }
++
++    _at.cmd_start_stop("^SCFG", "=", "%s%s", "Tcp/withURCs", "on");
++    _at.resp_start("^SCFG");
++
++}
++
+ nsapi_error_t AT_CellularContext::do_activate_context()
+ {
+     if (_nonip_req && _cp_in_use) {
+diff --git a/connectivity/cellular/source/framework/AT/AT_CellularDevice.cpp b/connectivity/cellular/source/framework/AT/AT_CellularDevice.cpp
+index 83ab47a3c4..f71921e29a 100644
+--- a/connectivity/cellular/source/framework/AT/AT_CellularDevice.cpp
++++ b/connectivity/cellular/source/framework/AT/AT_CellularDevice.cpp
+@@ -414,7 +414,8 @@ nsapi_error_t AT_CellularDevice::init()
+         _at.flush();
+         _at.at_cmd_discard("E0", "");
+         if (_at.get_last_error() == NSAPI_ERROR_OK) {
+-            _at.at_cmd_discard("+CMEE", "=1");
++            //Enable verbose error messages
++            _at.at_cmd_discard("+CMEE", "=2");
+             _at.at_cmd_discard("+CFUN", "=1");
+             if (_at.get_last_error() == NSAPI_ERROR_OK) {
+                 break;
+diff --git a/connectivity/cellular/source/framework/AT/AT_CellularNetwork.cpp b/connectivity/cellular/source/framework/AT/AT_CellularNetwork.cpp
+index 0afbf88e4a..cf6781bf43 100644
+--- a/connectivity/cellular/source/framework/AT/AT_CellularNetwork.cpp
++++ b/connectivity/cellular/source/framework/AT/AT_CellularNetwork.cpp
+@@ -205,6 +205,7 @@ nsapi_error_t AT_CellularNetwork::get_network_registering_mode(NWRegisteringMode
+     if (error == NSAPI_ERROR_OK) {
+         mode = (NWRegisteringMode)ret;
+     }
++
+     return error;
+ }
+ 
+@@ -219,6 +220,7 @@ nsapi_error_t AT_CellularNetwork::set_registration(const char *plmn)
+             return NSAPI_ERROR_DEVICE_ERROR;
+         }
+         if (mode != NWModeAutomatic) {
++            //Force operator registration
+             return _at.at_cmd_discard("+COPS", "=0");
+         }
+         return NSAPI_ERROR_OK;
+diff --git a/connectivity/cellular/source/framework/device/ATHandler.cpp b/connectivity/cellular/source/framework/device/ATHandler.cpp
+index 034d586a14..f305fd8af5 100644
+--- a/connectivity/cellular/source/framework/device/ATHandler.cpp
++++ b/connectivity/cellular/source/framework/device/ATHandler.cpp
+@@ -46,7 +46,7 @@ using namespace std::chrono_literals;
+ #define PROCESS_URC_TIME 20ms
+ 
+ // Suppress logging of very big packet payloads, maxlen is approximate due to write/read are cached
+-#define DEBUG_MAXLEN 60
++#define DEBUG_MAXLEN 120
+ #define DEBUG_END_MARK "..\r"
+ 
+ const char *mbed::OK = "OK\r\n";
+@@ -101,7 +101,8 @@ ATHandler::ATHandler(FileHandle *fh, EventQueue &queue, mbed::chrono::millisecon
+     _cmd_start(false),
+     _use_delimiter(true),
+     _start_time(),
+-    _event_id(0)
++    _event_id(0),
++    _last_read_error(0)
+ {
+     clear_error();
+ 
+@@ -677,6 +678,11 @@ ssize_t ATHandler::read_hex_string(char *buf, size_t size)
+     return buf_idx;
+ }
+ 
++int32_t ATHandler::get_last_read_error()
++{
++    return (int32_t) _last_read_error;
++}
++
+ int32_t ATHandler::read_int()
+ {
+     if (!ok_to_proceed() || !_stop_tag ||  _stop_tag->found) {
+@@ -691,9 +697,11 @@ int32_t ATHandler::read_int()
+     errno = 0;
+     long result = std::strtol(buff, NULL, 10);
+     if ((result == LONG_MIN || result == LONG_MAX) && errno == ERANGE) {
++        _last_read_error = result;
+         return -1; // overflow/underflow
+     }
+     if (result < 0) {
++        _last_read_error = result;
+         return -1; // negative values are unsupported
+     }
+     if (*buff == '\0') {
+diff --git a/connectivity/cellular/source/framework/device/CellularStateMachine.cpp b/connectivity/cellular/source/framework/device/CellularStateMachine.cpp
+index 44d67b729a..35b16839d3 100644
+--- a/connectivity/cellular/source/framework/device/CellularStateMachine.cpp
++++ b/connectivity/cellular/source/framework/device/CellularStateMachine.cpp
+@@ -28,7 +28,7 @@ using namespace std::chrono_literals;
+ 
+ // timeout to wait for AT responses
+ #define TIMEOUT_POWER_ON     1s
+-#define TIMEOUT_SIM_PIN      1s
++#define TIMEOUT_SIM_PIN      10s
+ #define TIMEOUT_NETWORK      10s
+ /** CellularStateMachine does connecting up to packet service attach, and
+  *  after that it's up to CellularContext::connect() to connect to PDN.
+@@ -471,7 +471,13 @@ void CellularStateMachine::state_registering()
+         _cb_data.error = NSAPI_ERROR_OK;
+         send_event_cb(_current_event);
+         // we are already registered, go to attach
++#if defined __has_include
++#  if __has_include (<GEMALTO_CINTERION.h>)
++#  else
++        //This state is not needed for Gemalto TX62-W module
+         enter_to_state(STATE_ATTACHING_NETWORK);
++#  endif
++#endif
+     } else {
+         tr_info("Network registration (timeout %d ms)", _state_timeout_registration.count());
+         change_timeout(_state_timeout_registration);
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.cpp b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.cpp
+index 402e56a52f..6e062039d4 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.cpp
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.cpp
+@@ -70,6 +70,8 @@ nsapi_error_t GEMALTO_CINTERION::init()
+         init_module_ems31();
+     } else if (memcmp(model, "EHS5-E", sizeof("EHS5-E") - 1) == 0) {
+         init_module_ehs5e();
++    } else if (memcmp(model, "TX62", sizeof("TX62") - 1) == 0) {
++        init_module_tx62();
+     } else {
+         tr_error("Cinterion model unsupported %s", model);
+         return NSAPI_ERROR_UNSUPPORTED;
+@@ -86,6 +88,35 @@ GEMALTO_CINTERION::Module GEMALTO_CINTERION::get_module()
+     return _module;
+ }
+ 
++void GEMALTO_CINTERION::init_module_tx62()
++{
++    // TX-62
++    static const intptr_t cellular_properties[AT_CellularDevice::PROPERTY_MAX] = {
++        AT_CellularNetwork::RegistrationModeLAC,// C_EREG
++        AT_CellularNetwork::RegistrationModeDisable,    // C_GREG
++        AT_CellularNetwork::RegistrationModeDisable,    // C_REG
++        0,  // AT_CGSN_WITH_TYPE
++        0,  // AT_CGDATA
++        1,  // AT_CGAUTH
++        1,  // AT_CNMI
++        1,  // AT_CSMP
++        1,  // AT_CMGF
++        0,  // AT_CSDH
++        1,  // PROPERTY_IPV4_STACK
++        0,  // PROPERTY_IPV6_STACK
++        0,  // PROPERTY_IPV4V6_STACK
++        0,  // PROPERTY_NON_IP_PDP_TYPE
++        0,  // PROPERTY_AT_CGEREP
++        0,  // PROPERTY_AT_COPS_FALLBACK_AUTO
++        7,  // PROPERTY_SOCKET_COUNT
++        1,  // PROPERTY_IP_TCP
++        1,  // PROPERTY_IP_UDP
++        100,  // PROPERTY_AT_SEND_DELAY
++    };
++    set_cellular_properties(cellular_properties);
++    _module = ModuleTX62;
++}
++
+ void GEMALTO_CINTERION::init_module_bgs2()
+ {
+     // BGS2-W_ATC_V00.100
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.h b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.h
+index ca2d6f542a..73cb7dc67c 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.h
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.h
+@@ -44,6 +44,7 @@ public:
+         ModuleBGS2,
+         ModuleEMS31,
+         ModuleEHS5E,
++        ModuleTX62,
+     };
+     static Module get_module();
+ 
+@@ -60,6 +61,7 @@ private:
+     void init_module_els61();
+     void init_module_ems31();
+     void init_module_ehs5e();
++    void init_module_tx62();
+ };
+ 
+ } // namespace mbed
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.cpp b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.cpp
+index 38a5ba4819..ee0a56e57a 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.cpp
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.cpp
+@@ -30,6 +30,26 @@ GEMALTO_CINTERION_CellularContext::~GEMALTO_CINTERION_CellularContext()
+ {
+ }
+ 
++
++nsapi_error_t GEMALTO_CINTERION_CellularContext::do_user_authentication()
++{
++    // if user has defined user name and password we need to call CGAUTH before activating or modifying context
++    if (_pwd && _uname) {
++        if (!get_device()->get_property(AT_CellularDevice::PROPERTY_AT_CGAUTH)) {
++            return NSAPI_ERROR_UNSUPPORTED;
++        }
++
++        _at.at_cmd_discard("^SGAUTH", "=", "%d%d%s%s", _cid, _authentication_type, _uname, _pwd);
++
++        if (_at.get_last_error() != NSAPI_ERROR_OK) {
++            return NSAPI_ERROR_AUTH_FAILURE;
++        }
++    }
++
++    return NSAPI_ERROR_OK;
++}
++
++
+ #if !NSAPI_PPP_AVAILABLE
+ NetworkStack *GEMALTO_CINTERION_CellularContext::get_stack()
+ {
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.h b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.h
+index 86209eda59..da6e7676d6 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.h
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.h
+@@ -30,6 +30,7 @@ protected:
+ #if !NSAPI_PPP_AVAILABLE
+     virtual NetworkStack *get_stack();
+ #endif // NSAPI_PPP_AVAILABLE
++    virtual nsapi_error_t do_user_authentication();
+ };
+ 
+ } /* namespace mbed */
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+index 1353c30019..13c1a0b2fa 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+@@ -19,6 +19,7 @@
+ #include "GEMALTO_CINTERION_CellularStack.h"
+ #include "GEMALTO_CINTERION.h"
+ #include "CellularLog.h"
++#include "rtos.h"
+ 
+ using namespace std::chrono_literals;
+ 
+@@ -151,6 +152,38 @@ nsapi_error_t GEMALTO_CINTERION_CellularStack::socket_close_impl(int sock_id)
+     return _at.get_last_error();
+ }
+ 
++#ifdef MBED_CONF_CELLULAR_OFFLOAD_DNS_QUERIES
++nsapi_error_t GEMALTO_CINTERION_CellularStack::gethostbyname(const char *host, SocketAddress *address,
++                                                        nsapi_version_t version, const char *interface_name)
++{
++    (void) interface_name;
++    MBED_ASSERT(host);
++    MBED_ASSERT(address);
++
++    _at.lock();
++
++    if (_dns_callback) {
++        _at.unlock();
++        return NSAPI_ERROR_BUSY;
++    }
++
++    if (!address->set_ip_address(host)) {
++        //_at.set_at_timeout(1min);
++        _at.cmd_start_stop("^SISX" , "=" , "%s%d%s", "HostByName" , _cid, host);
++        _at.resp_start("^SISX: \"HostByName\",");
++        char ipAddress[NSAPI_IP_SIZE];
++        _at.read_string(ipAddress, sizeof(ipAddress));
++        _at.restore_at_timeout();
++        if (!address->set_ip_address(ipAddress)) {
++            _at.unlock();
++            return NSAPI_ERROR_DNS_FAILURE;
++        }
++    }
++
++    return _at.unlock_return_error();
++}
++#endif
++
+ nsapi_error_t GEMALTO_CINTERION_CellularStack::socket_open_defer(CellularSocket *socket, const SocketAddress *address)
+ {
+     int retry_open = 1;
+@@ -159,6 +192,11 @@ retry_open:
+     int internet_service_id = find_socket_index(socket);
+     bool foundSrvType = false;
+     bool foundConIdType = false;
++
++    if (GEMALTO_CINTERION::get_module() == GEMALTO_CINTERION::ModuleTX62) {
++        _at.cmd_start_stop("^SICA", "=", "%d%d", 1, _cid);
++    }
++
+     _at.cmd_start_stop("^SISS", "?");
+     _at.resp_start("^SISS:");
+     /*
+@@ -396,6 +434,7 @@ nsapi_size_or_error_t GEMALTO_CINTERION_CellularStack::socket_recvfrom_impl(Cell
+     _at.cmd_start_stop("^SISR", "=", "%d%d", socket->id, size);
+ 
+ sisr_retry:
++    socket->pending_bytes = 1;
+     _at.resp_start("^SISR:");
+     if (!_at.info_resp()) {
+         tr_error("Socket %d not responding", socket->id);
+@@ -421,6 +460,11 @@ sisr_retry:
+         return NSAPI_ERROR_WOULD_BLOCK;
+     }
+     if (len == -1) {
++        if (GEMALTO_CINTERION::get_module() == GEMALTO_CINTERION::ModuleTX62 && _at.get_last_read_error() == -2) {
++            tr_error("Socket %d recvfrom finished!", socket->id);
++            socket->pending_bytes = 0;
++            return NSAPI_ERROR_OK;
++        }
+         tr_error("Socket %d recvfrom failed!", socket->id);
+         return NSAPI_ERROR_DEVICE_ERROR;
+     }
+@@ -486,6 +530,12 @@ nsapi_error_t GEMALTO_CINTERION_CellularStack::create_connection_profile(int con
+         return NSAPI_ERROR_OK;
+     }
+ 
++    if (GEMALTO_CINTERION::get_module() == GEMALTO_CINTERION::ModuleTX62) {
++        _at.cmd_start_stop("^SICA", "=", "%d%d", 1, _cid);
++        tr_debug("Cinterion profile %d, %s (err %d)", connection_profile_id, (_stack_type == IPV4_STACK) ? "IPv4" : "IPv6", _at.get_last_error());
++        return _at.get_last_error();
++    }
++
+     char conParamType[sizeof("GPRS0") + 1];
+     std::sprintf(conParamType, "GPRS%d", (_stack_type == IPV4_STACK) ? 0 : 6);
+ 
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.h b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.h
+index 01c5b71c65..22711d2173 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.h
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.h
+@@ -48,6 +48,10 @@ protected:
+ 
+     virtual nsapi_error_t socket_connect(nsapi_socket_t handle, const SocketAddress &address);
+ 
++#ifdef MBED_CONF_CELLULAR_OFFLOAD_DNS_QUERIES
++    virtual nsapi_error_t gethostbyname(const char *host, SocketAddress *address, nsapi_version_t version, const char *interface_name);
++#endif
++
+ private:
+     // socket URC handlers as per Cinterion AT manuals
+     void urc_sis();
+@@ -67,6 +71,11 @@ private:
+     const char *_apn;
+     const char *_user;
+     const char *_password;
++
++#ifdef MBED_CONF_CELLULAR_OFFLOAD_DNS_QUERIES
++    hostbyname_cb_t _dns_callback;
++    nsapi_version_t _dns_version;
++#endif
+ };
+ 
+ } // namespace mbed
+-- 
+2.33.1
+

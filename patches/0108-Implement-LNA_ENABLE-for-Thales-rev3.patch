@@ -1,0 +1,40 @@
+From 2941a989d79cc9123776c95a3fed5ba2d289465b Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Thu, 25 Nov 2021 14:55:22 +0100
+Subject: [PATCH] Implement LNA_ENABLE for Thales rev3
+
+---
+ .../GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp     | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+index 967d9628b0..9f111d7da0 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+@@ -151,12 +151,15 @@ void GEMALTO_CINTERION_CellularStack::beginGNSS(mbed::Callback<void(char*)> gnss
+     _at.at_cmd_discard("^SGPSC", "=", "%s%d", "Engine/StartMode", 0);
+     _at.at_cmd_discard("^SGPSC", "=", "%s%d", "Engine", 0);
+     _at.at_cmd_discard("^SGPSC", "=", "%s%s", "Nmea/Urc", "off");
++    _at.at_cmd_discard("^SPIO", "=", "%d", 1);
++    _at.at_cmd_discard("^SCPIN", "=", "%d%d%d%d", 1, 7, 1, 0);
+     _at.clear_error();
+     _at.unlock();
+ }
+ 
+ void GEMALTO_CINTERION_CellularStack::endGNSS() {
+     _at.lock();
++    _at.at_cmd_discard("^SSIO", "=", "%d%d", 7, 0);
+     _gnss_cb = nullptr;
+     _at.clear_error();
+     _at.unlock();
+@@ -165,6 +168,7 @@ void GEMALTO_CINTERION_CellularStack::endGNSS() {
+ int GEMALTO_CINTERION_CellularStack::startGNSS() {
+     _at.lock();
+     _engine = false;
++    _at.at_cmd_discard("^SSIO", "=", "%d%d", 7, 1);
+     _at.cmd_start_stop("^SGPSC", "=", "%s%d", "Engine", 3);
+     _at.resp_start("^SGPSC: \"Engine\",");
+ 
+-- 
+2.33.1
+

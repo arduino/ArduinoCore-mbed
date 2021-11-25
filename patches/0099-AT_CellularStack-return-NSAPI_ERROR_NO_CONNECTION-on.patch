@@ -1,0 +1,35 @@
+From 8e8e42c07093a9c22a70821e5467eef987df4dbe Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Thu, 5 Aug 2021 15:10:54 +0200
+Subject: [PATCH 099/106] AT_CellularStack: return NSAPI_ERROR_NO_CONNECTION on
+ socket closed
+
+---
+ .../cellular/source/framework/AT/AT_CellularStack.cpp         | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/connectivity/cellular/source/framework/AT/AT_CellularStack.cpp b/connectivity/cellular/source/framework/AT/AT_CellularStack.cpp
+index 961d101c9b..ca7d2a786c 100644
+--- a/connectivity/cellular/source/framework/AT/AT_CellularStack.cpp
++++ b/connectivity/cellular/source/framework/AT/AT_CellularStack.cpp
+@@ -332,7 +332,7 @@ nsapi_size_or_error_t AT_CellularStack::socket_recvfrom(nsapi_socket_t handle, S
+ 
+     if (socket->closed) {
+         tr_info("recvfrom socket %d closed", socket->id);
+-        return 0;
++        return NSAPI_ERROR_NO_CONNECTION;
+     }
+ 
+     nsapi_size_or_error_t ret_val = NSAPI_ERROR_OK;
+@@ -357,7 +357,7 @@ nsapi_size_or_error_t AT_CellularStack::socket_recvfrom(nsapi_socket_t handle, S
+ 
+     if (socket->closed) {
+         tr_info("recvfrom socket %d closed", socket->id);
+-        return 0;
++        return NSAPI_ERROR_NO_CONNECTION;
+     }
+ 
+     if (ret_val >= 0) {
+-- 
+2.33.1
+

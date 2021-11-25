@@ -1,0 +1,153 @@
+From a18d5e8c226fa748e62b6cc56661518fd7923ac3 Mon Sep 17 00:00:00 2001
+From: giulcioffi <g.cioffi@arduino.cc>
+Date: Tue, 13 Jul 2021 18:17:13 +0200
+Subject: [PATCH 093/106] Implement GEMALTO subclass of CellularNetwork
+
+---
+ .../framework/device/CellularStateMachine.cpp |  6 ----
+ .../GEMALTO/CINTERION/GEMALTO_CINTERION.cpp   |  6 ++++
+ .../GEMALTO/CINTERION/GEMALTO_CINTERION.h     |  1 +
+ .../GEMALTO_CINTERION_CellularNetwork.cpp     | 34 ++++++++++++++++++
+ .../GEMALTO_CINTERION_CellularNetwork.h       | 35 +++++++++++++++++++
+ 5 files changed, 76 insertions(+), 6 deletions(-)
+ create mode 100644 connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularNetwork.cpp
+ create mode 100644 connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularNetwork.h
+
+diff --git a/connectivity/cellular/source/framework/device/CellularStateMachine.cpp b/connectivity/cellular/source/framework/device/CellularStateMachine.cpp
+index 35b16839d3..0a452eacb3 100644
+--- a/connectivity/cellular/source/framework/device/CellularStateMachine.cpp
++++ b/connectivity/cellular/source/framework/device/CellularStateMachine.cpp
+@@ -471,13 +471,7 @@ void CellularStateMachine::state_registering()
+         _cb_data.error = NSAPI_ERROR_OK;
+         send_event_cb(_current_event);
+         // we are already registered, go to attach
+-#if defined __has_include
+-#  if __has_include (<GEMALTO_CINTERION.h>)
+-#  else
+-        //This state is not needed for Gemalto TX62-W module
+         enter_to_state(STATE_ATTACHING_NETWORK);
+-#  endif
+-#endif
+     } else {
+         tr_info("Network registration (timeout %d ms)", _state_timeout_registration.count());
+         change_timeout(_state_timeout_registration);
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.cpp b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.cpp
+index 6e062039d4..f8f892fccd 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.cpp
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.cpp
+@@ -17,6 +17,7 @@
+ 
+ #include "GEMALTO_CINTERION_CellularContext.h"
+ #include "GEMALTO_CINTERION_CellularInformation.h"
++#include "GEMALTO_CINTERION_CellularNetwork.h"
+ #include "GEMALTO_CINTERION.h"
+ #include "AT_CellularNetwork.h"
+ #include "CellularLog.h"
+@@ -43,6 +44,11 @@ AT_CellularInformation *GEMALTO_CINTERION::open_information_impl(ATHandler &at)
+     return AT_CellularDevice::open_information_impl(at);
+ }
+ 
++AT_CellularNetwork *GEMALTO_CINTERION::open_network_impl(ATHandler &at)
++{
++    return new GEMALTO_CINTERION_CellularNetwork(at, *this);
++}
++
+ nsapi_error_t GEMALTO_CINTERION::init()
+ {
+     nsapi_error_t err = AT_CellularDevice::init();
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.h b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.h
+index 73cb7dc67c..21d5888383 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.h
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.h
+@@ -51,6 +51,7 @@ public:
+ protected: // AT_CellularDevice
+     virtual AT_CellularContext *create_context_impl(ATHandler &at, const char *apn, bool cp_req = false, bool nonip_req = false);
+     virtual AT_CellularInformation *open_information_impl(ATHandler &at);
++    virtual AT_CellularNetwork *open_network_impl(ATHandler &at);
+ 
+ protected:
+     virtual nsapi_error_t init();
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularNetwork.cpp b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularNetwork.cpp
+new file mode 100644
+index 0000000000..37ca733b6e
+--- /dev/null
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularNetwork.cpp
+@@ -0,0 +1,34 @@
++/*
++ * Copyright (c) 2018, Arm Limited and affiliates.
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *     http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++#include "GEMALTO_CINTERION_CellularNetwork.h"
++
++using namespace mbed;
++
++GEMALTO_CINTERION_CellularNetwork::GEMALTO_CINTERION_CellularNetwork(ATHandler &at, AT_CellularDevice &device) : AT_CellularNetwork(at, device)
++{
++}
++
++GEMALTO_CINTERION_CellularNetwork::~GEMALTO_CINTERION_CellularNetwork()
++{
++}
++
++nsapi_error_t GEMALTO_CINTERION_CellularNetwork::set_attach()
++{
++    return NSAPI_ERROR_OK;
++}
++
++ /* namespace mbed */
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularNetwork.h b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularNetwork.h
+new file mode 100644
+index 0000000000..8d5f49cf5a
+--- /dev/null
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularNetwork.h
+@@ -0,0 +1,35 @@
++/*
++ * Copyright (c) 2018, Arm Limited and affiliates.
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *     http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++#ifndef GEMALTO_CINTERION_CELLULARNETWORK_H_
++#define GEMALTO_CINTERION_CELLULARNETWORK_H_
++
++#include "AT_CellularNetwork.h"
++
++namespace mbed {
++
++class GEMALTO_CINTERION_CellularNetwork: public AT_CellularNetwork {
++public:
++    GEMALTO_CINTERION_CellularNetwork(ATHandler &at, AT_CellularDevice &device);
++    virtual ~GEMALTO_CINTERION_CellularNetwork();
++    virtual nsapi_error_t set_attach();
++
++protected:
++};
++
++} /* namespace mbed */
++
++#endif // GEMALTO_CINTERION_CELLULARNETWORK_H_
+-- 
+2.33.1
+

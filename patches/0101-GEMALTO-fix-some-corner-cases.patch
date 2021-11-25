@@ -1,0 +1,57 @@
+From 52076efd41f36e81611c944c3efcc86bce1afd85 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Thu, 5 Aug 2021 15:14:13 +0200
+Subject: [PATCH 101/106] GEMALTO: fix some corner cases
+
+---
+ .../GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp   | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+index 034011d2d2..06952694e2 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+@@ -122,6 +122,7 @@ nsapi_error_t GEMALTO_CINTERION_CellularStack::socket_stack_init()
+         _at.set_urc_handler("^SIS:", mbed::Callback<void()>(this, &GEMALTO_CINTERION_CellularStack::urc_sis));
+         _at.set_urc_handler("^SISW:", mbed::Callback<void()>(this, &GEMALTO_CINTERION_CellularStack::urc_sisw));
+         _at.set_urc_handler("^SISR:", mbed::Callback<void()>(this, &GEMALTO_CINTERION_CellularStack::urc_sisr));
++        _at.set_urc_handler("^SYSSTART", mbed::Callback<void()>(this, &GEMALTO_CINTERION_CellularStack::urc_sisr));
+     } else { // recovery cleanup
+         // close all Internet and connection profiles
+         for (int i = 0; i < _device.get_property(AT_CellularDevice::PROPERTY_SOCKET_COUNT); i++) {
+@@ -173,7 +174,7 @@ nsapi_error_t GEMALTO_CINTERION_CellularStack::gethostbyname(const char *host, S
+         _at.resp_start("^SISX: \"HostByName\",");
+         char ipAddress[NSAPI_IP_SIZE];
+         int size = _at.read_string(ipAddress, sizeof(ipAddress));
+-        if (size) {
++        if (size > 0) {
+             //Valid string received
+             tr_info("Read %d bytes. Valid string: %s\n", size, ipAddress);
+             _at.restore_at_timeout();
+@@ -207,6 +208,7 @@ retry_open:
+ 
+     _at.cmd_start_stop("^SISS", "?");
+     _at.resp_start("^SISS:");
++
+     /*
+      * Profile is a list of tag-value map:
+      * ^SISS: <srvProfileId>, <srvParmTag>, <srvParmValue>
+@@ -439,6 +441,7 @@ nsapi_size_or_error_t GEMALTO_CINTERION_CellularStack::socket_recvfrom_impl(Cell
+         size = UDP_PACKET_SIZE;
+     }
+ 
++    tr_info("requesting %d bytes\n", size);
+     _at.cmd_start_stop("^SISR", "=", "%d%d", socket->id, size);
+ 
+ sisr_retry:
+@@ -475,7 +478,6 @@ sisr_retry:
+         tr_error("Socket %d recvfrom failed!", socket->id);
+         return NSAPI_ERROR_DEVICE_ERROR;
+     }
+-    socket->pending_bytes = 1;
+     if (len >= (nsapi_size_or_error_t)size) {
+         len = (nsapi_size_or_error_t)size;
+     }
+-- 
+2.33.1
+
