@@ -9,10 +9,20 @@
 #define MAXRETRY 3
 
 
+arduino::CMUXClass *mbed::CMUXClass::get_default_instance()
+{
+  // TODO: CHECK WHICH IS THE RIGHT ONE
+  //static mbed::BufferedSerial serial(MBED_CONF_GEMALTO_CINTERION_TX, MBED_CONF_GEMALTO_CINTERION_RX, 115200);
+  static mbed::UnbufferedSerial serial(MBED_CONF_GEMALTO_CINTERION_TX, MBED_CONF_GEMALTO_CINTERION_RX, 115200);
+  serial.set_flow_control(mbed::SerialBase::RTSCTS_SW, MBED_CONF_GEMALTO_CINTERION_CTS, NC);
+  static arduino::CMUXClass device(&serial);
+  return &device;
+}
+
 mbed::CellularDevice *mbed::CellularDevice::get_default_instance()
 {
-  static mbed::BufferedSerial serial(MBED_CONF_GEMALTO_CINTERION_TX, MBED_CONF_GEMALTO_CINTERION_RX, 115200);
-  serial.set_flow_control(mbed::SerialBase::RTSCTS_SW, MBED_CONF_GEMALTO_CINTERION_CTS, NC);
+  auto cmux = arduino::CMUXClass::get_default_instance();
+  auto serial = cmux.get_serial(0);
   static mbed::GEMALTO_CINTERION device(&serial);
   return &device;
 }

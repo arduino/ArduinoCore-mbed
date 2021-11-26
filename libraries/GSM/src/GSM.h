@@ -96,6 +96,110 @@ private:
   mbed::CellularDevice* _device = nullptr;
 };
 
+
+class PTYSerial: public FileHandle {
+public:
+  PTYSerial(CMUXClass* parent) : _parent(parent) {};
+  int populate_rx_buffer(char* buf, size_t sz) {
+    // TO BE IMPLEMENTED
+  }
+  int write(char* buf, size_t sz) {
+    _parent->populate_tx_buffer(buf, sz, this != _parent->get_serial(0));
+  }
+}
+
+class CMUXClass : {
+public:
+  //CMUXClass(BufferedSerial* hw_serial)
+  CMUXClass(FileHandle* hw_serial) : _hw_serial(hw_serial) {
+
+    _gsm_serial = new PTYSerial(this);
+    _gps_serial = new PTYSerial(this);
+
+    reader_thd.start(mbed::callback(this, &CMUXClass::read));
+    writer_thd.start(mbed::callback(this, &CMUXClass::write));
+    _hw_serial.attach(mbed::callback(this, &CMUXClass::on_rx), mbed::SerialBase::RxIrq);
+  }
+
+  void on_rx() {
+    while(_hw_serial->readable()) {
+      char c;
+      core_util_critical_section_enter();
+      _hw_serial->read(&c, 1);
+      rx_buffer.push(c);
+    }
+    osSignalSet(reader_thd.get_id(), 0xA);
+  }
+
+  void read() {
+    while (1) {
+      osSignalWait(0, osWaitForever);
+      char temp_buf[256];
+      size_t howMany = rx_buffer.size();
+      rx_buffer.pop(temp_buf, howMany);
+      size_t i = 0;
+      while (i < howMany) {
+        char payload[256];
+        int frame_id;
+        // cmux_handle_frame increments temp_buf
+        auto ret = cmux_handle_frame(temp_buf, howMany, final_buf, &frame_id);
+        if (ret <= 0) {
+          // push again pop-ped data in rx_buffer and break
+          rx_buffer.push(temp_buf, howMany - actualPosition);
+          break;
+        }
+        if (frame_id == 0) {
+          _gsm_serial->populate_rx_buffer(final_buf, ret);
+        }
+        if (frame_id == 1) {
+          _gps_serial->populate_rx_buffer(final_buf, ret);
+        }
+      }
+    }
+  }
+
+  void write() {
+    while (1) {
+      auto ev = osSignalWait(0, osWaitForever);
+      char payload[256];
+      char frame[256];
+      uint8_t frame_id = ev.value.v;
+      size_t howMany = tx_buffer.size();
+      tx_buffer.pop(temp_buf, howMany);
+      int ret = cmux_write_buffer(payload, howMany, frame_id, frame);
+      if (ret > 0) {
+        _hw_serial->write(frame, ret);
+      }
+    }
+  }
+
+  int populate_tx_buffer(char* buf, size_t sz, uint8_t id) {
+    tx_buffer.push(buf, sz);
+    osSignalSet(writer_thd.get_id(), id);
+  }
+
+  static CMUXClass *get_default_instance();
+
+  FileHandle* get_serial(int index) {
+    if (index == 0) {
+      return _gsm_serial;
+    }
+    if (index == 1) {
+      return _gps_serial;
+    }
+    return nullptr;
+  }
+
+private:
+  FileHandle* _hw_serial = nullptr;
+  FileHandle* _gsm_serial = nullptr;
+  FileHandle* _gps_serial = nullptr;
+  CircularBuffer<char, 1024> rx_buffer;
+  CircularBuffer<char, 1024> tx_buffer;
+  rtos::Thread reader_thd = rtos::Thread{osPriorityNormal, 4096, nullptr, "CMUXt1"};
+  rtos::Thread writer_thd = rtos::Thread{osPriorityNormal, 4096, nullptr, "CMUXt2"};;
+};
+
 }
 
 extern GSMClass GSM;
