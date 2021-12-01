@@ -1,3 +1,4 @@
+#include <GPS.h>
 #include <GSM.h>
 
 REDIRECT_STDOUT_TO(Serial);
@@ -8,27 +9,24 @@ char apn[]      = SECRET_APN;
 char username[] = SECRET_USERNAME;
 char pass[]     = SECRET_PASSWORD;
 
-void mycallback(char * output);
-
 void setup() {
   Serial.begin(115200);
   while (!Serial) {}
   //GSM.debug(Serial);
   Serial.println("\nStarting connection to server...");
   GSM.begin(pin, apn, username, pass, CATNB);
-  Serial.println("\nStarting connection ...");
-
   Serial.println("\nEnable GNSS Engine...");
-  GSM.beginGNSS(mycallback);
-  GSM.startGNSS();
+  // GPS.begin() start and eanble the GNSS engine
+  GPS.begin();
+  Serial.println("\nGNSS Engine enabled...");
 }
 
 void loop() {
-//    GSM.startGNSS();
-//    delay(10000);
-//    GSM.stopGNSS();
-}
-void mycallback(char * output)
-{
-  Serial.println(output);
+  //GPS.begin();
+  if(GPS.available()){
+    Serial.print((char) GPS.read());
+    delay(1);
+  }
+  // GPS.end() stop and disable the GNSS engine
+  // GPS.end();
 }

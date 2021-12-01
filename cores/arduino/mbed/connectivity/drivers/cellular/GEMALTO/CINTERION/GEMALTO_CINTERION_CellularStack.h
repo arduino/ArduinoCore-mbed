@@ -34,6 +34,16 @@ public:
      */
     nsapi_error_t socket_stack_init();
 
+    void lock();
+    void unlock();
+    void beginGNSS(mbed::Callback<void(char*)> gnss_cb);
+    void enableCmux();
+    void endGNSS();
+    int startGNSS();
+    void stopGNSS();
+    void PSMEnable();
+    void PSMDisable();
+
 protected:
 
     virtual nsapi_error_t socket_close_impl(int sock_id);

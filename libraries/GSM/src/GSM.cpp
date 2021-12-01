@@ -8,11 +8,11 @@
 
 #define MAXRETRY 3
 
-
-arduino::CMUXClass *mbed::CMUXClass::get_default_instance()
+bool _cmuxEnable = false;
+arduino::CMUXClass * arduino::CMUXClass::get_default_instance()
 {
   // TODO: CHECK WHICH IS THE RIGHT ONE
-  //static mbed::BufferedSerial serial(MBED_CONF_GEMALTO_CINTERION_TX, MBED_CONF_GEMALTO_CINTERION_RX, 115200);
+  // static mbed::BufferedSerial serial(MBED_CONF_GEMALTO_CINTERION_TX, MBED_CONF_GEMALTO_CINTERION_RX, 115200);
   static mbed::UnbufferedSerial serial(MBED_CONF_GEMALTO_CINTERION_TX, MBED_CONF_GEMALTO_CINTERION_RX, 115200);
   serial.set_flow_control(mbed::SerialBase::RTSCTS_SW, MBED_CONF_GEMALTO_CINTERION_CTS, NC);
   static arduino::CMUXClass device(&serial);
@@ -21,13 +21,30 @@ arduino::CMUXClass *mbed::CMUXClass::get_default_instance()
 
 mbed::CellularDevice *mbed::CellularDevice::get_default_instance()
 {
-  auto cmux = arduino::CMUXClass::get_default_instance();
-  auto serial = cmux.get_serial(0);
-  static mbed::GEMALTO_CINTERION device(&serial);
-  return &device;
+    static auto cmux = arduino::CMUXClass::get_default_instance();
+    static mbed::GEMALTO_CINTERION device(cmux->get_serial(nextSerialPort));
+    nextSerialPort++;
+    device.enableCMUXChannel = mbed::callback(cmux, &arduino::CMUXClass::enableCMUXChannel);
+    return &device;
 }
 
-int arduino::GSMClass::begin(const char* pin, const char* apn, const char* username, const char* password, RadioAccessTechnologyType rat) {
+int arduino::GSMClass::begin(const char* pin, const char* apn, const char* username, const char* password, RadioAccessTechnologyType rat, bool restart) {
+
+  if(restart || isCmuxEnable()) {
+    pinMode(PJ_10, OUTPUT);
+    digitalWrite(PJ_10, HIGH);
+    delay(800);
+    digitalWrite(PJ_10, LOW);
+    pinMode(PJ_7, OUTPUT);
+    digitalWrite(PJ_7, LOW);
+    delay(1);
+    digitalWrite(PJ_7, HIGH);
+    delay(1);
+    // this timer is to make sure that at boottime and when the CMUX is used,
+    //  ^SYSTART is received in time to avoid stranger behaviour
+    // from HW serial
+    delay(2000);
+  }
 
   _context = mbed::CellularContext::get_default_instance();
 
@@ -35,11 +52,13 @@ int arduino::GSMClass::begin(const char* pin, const char* apn, const char* usern
     printf("Invalid context\n");
     return 0;
   }
-
   pinMode(PJ_7, INPUT_PULLDOWN);
+
   static mbed::DigitalOut rts(MBED_CONF_GEMALTO_CINTERION_RTS, 0);
 
   _device = _context->get_device();
+
+  _device->set_cmux_status_flag(_cmuxGSMenable);
 
   _context->set_sim_pin(pin);
 
@@ -80,27 +99,20 @@ int arduino::GSMClass::begin(const char* pin, const char* apn, const char* usern
   return connect_status == NSAPI_ERROR_OK ? 1 : 0;
 }
 
+void arduino::GSMClass::enableCmux(){
+  _cmuxGSMenable = true;
+}
+
+bool arduino::GSMClass::isCmuxEnable(){
+  return _cmuxGSMenable;
+}
+
 void arduino::GSMClass::end() {
 
 }
-void arduino::GSMClass::beginGNSS(mbed::Callback<void(char*)> gnss_cb) {
-  (static_cast<mbed::GEMALTO_CINTERION_CellularStack*>(_context->get_stack()))->beginGNSS(gnss_cb);
-}
-
-void arduino::GSMClass::endGNSS() {
-  (static_cast<mbed::GEMALTO_CINTERION_CellularStack*>(_context->get_stack()))->endGNSS();
-}
-
-void arduino::GSMClass::startGNSS() {
-  (static_cast<mbed::GEMALTO_CINTERION_CellularStack*>(_context->get_stack()))->startGNSS();
-}
-
-void arduino::GSMClass::stopGNSS() {
-  (static_cast<mbed::GEMALTO_CINTERION_CellularStack*>(_context->get_stack()))->stopGNSS();
-}
 
 int arduino::GSMClass::disconnect() {
-  return 0;
+  return _context->disconnect();
 }
 
 unsigned long arduino::GSMClass::getTime()
