@@ -45,6 +45,8 @@ void arduino::MbedI2C::end() {
 	}
 #ifdef DEVICE_I2CSLAVE
 	if (slave != NULL) {
+		slave_th.terminate();
+		slave_th.free_stack();
 		delete slave;
 	}
 #endif
