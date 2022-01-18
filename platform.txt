@@ -196,6 +196,16 @@ tools.imgtool.cmd=imgtool
 tools.imgtool.flags=sign --key "{build.keys.keychain}/{build.keys.sign_key}" --encrypt "{build.keys.keychain}/{build.keys.encrypt_key}" "{build.path}/{build.project_name}.bin" "{build.path}/{build.project_name}.bin" --align {build.alignment} --max-align {build.alignment} --version {build.version} --header-size {build.header_size} --pad-header --slot-size {build.slot_size}
 
 #
+# ADB WRAPPER
+#
+
+tools.adb.path={runtime.tools.adb.path}
+tools.adb.cmd=adb-wrapper
+tools.adb.upload.params.verbose=-v
+tools.adb.upload.params.quiet=
+tools.adb.upload.pattern="{path}/{cmd}" flash "{build.path}/{build.project_name}.bin"
+
+#
 # GDB (Debugger)
 #
 # EXPERIMENTAL feature: debug.pattern
