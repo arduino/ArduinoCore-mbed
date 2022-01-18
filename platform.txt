@@ -199,7 +199,9 @@ tools.imgtool.flags=sign --key "{build.keys.keychain}/{build.keys.sign_key}" --e
 # ADB WRAPPER
 #
 
-tools.adb.path={runtime.tools.adb.path}
+#tools.adb.path={runtime.tools.adb.path}
+# temp
+tools.adb.path={runtime.platform.path}/extras/
 tools.adb.cmd=adb-wrapper
 tools.adb.upload.params.verbose=-v
 tools.adb.upload.params.quiet=
