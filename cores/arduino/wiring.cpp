@@ -68,6 +68,15 @@ void init()
   lowPowerTimer.start();
 }
 
+mbed::Timer* getTimer(TimerType t)
+{
+  if (t == LPTIMER) {
+    return (mbed::Timer*)(&lowPowerTimer);
+  } else {
+    return &timer;
+  }
+}
+
 void yield() {
 #ifndef NO_RTOS
   rtos::ThisThread::yield();
