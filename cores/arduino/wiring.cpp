@@ -68,12 +68,12 @@ void init()
   lowPowerTimer.start();
 }
 
-mbed::Timer* getTimer(TimerType t)
+ArduinoTimer getTimer(TimerType t)
 {
   if (t == LPTIMER) {
-    return (mbed::Timer*)(&lowPowerTimer);
+    return ArduinoTimer((mbed::Timer*)(&lowPowerTimer));
   } else {
-    return &timer;
+    return ArduinoTimer(&timer);
   }
 }
 
