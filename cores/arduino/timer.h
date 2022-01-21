@@ -15,6 +15,7 @@ namespace arduino {
   class ArduinoTimer {
     public:
       ArduinoTimer(void* _timer);
+      ~ArduinoTimer();
       void start();
       void stop();
 

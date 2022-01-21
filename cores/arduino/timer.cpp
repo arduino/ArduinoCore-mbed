@@ -10,14 +10,18 @@ struct _mbed_timer {
 
 ArduinoTimer::ArduinoTimer(void* _timer) {
 
-	if (timer == NULL) {
-		timer = new mbed_timer;
-		timer->obj = NULL;
-	}
-	if (timer->obj == NULL) {
-		timer->obj = (mbed::Timer*)_timer;
+	if (timer != NULL) {
+		delete timer;
 	}
 
+	timer = new mbed_timer;
+	timer->obj = (mbed::Timer*)_timer;
+}
+
+ArduinoTimer::~ArduinoTimer() {
+	if (timer != NULL) {
+		delete timer;
+	}
 }
 
 void ArduinoTimer::start() {
