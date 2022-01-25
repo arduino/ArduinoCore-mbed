@@ -45,13 +45,13 @@ public:
 		for (size_t i=0; i < len; i++) {
 			tx_buffer.push_back(buf[i]);
 		}
-		RPC.call("on_write", tx_buffer);
+		RPC.send("on_write", tx_buffer);
 		return len;
 	}
 
 	using Print::write;
 
-	int begin() {
+	int begin(long unsigned int = 0, uint16_t = 0) {
 		if (RPC.begin() == 0) {
 			return 0;
 		}

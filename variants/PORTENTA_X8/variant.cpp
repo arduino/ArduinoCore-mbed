@@ -68,3 +68,8 @@ extern "C" {
     return (sizeof(g_APinDescription) / sizeof(g_APinDescription[0]));
   }
 }
+
+
+void initVariant() {
+
+}

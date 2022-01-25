@@ -72,6 +72,15 @@ class RPCClass : public Stream, public rpc::detail::dispatcher {
 	        }
 	    }
 
+    template <typename... Args>
+      void send(std::string const &func_name,
+                                       Args... args) {
+
+        auto client = new rpc::client();
+        client->call(func_name, args...);
+        delete client;
+      }
+
 		template <typename... Args>
     	RPCLIB_MSGPACK::object_handle call(std::string const &func_name,
                                        Args... args) {

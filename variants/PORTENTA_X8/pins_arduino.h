@@ -140,7 +140,7 @@ void _ontouch1200bps_();
 
 #include "api/HardwareSerial.h"
 
-#define MACRO_ERROR_SERIAL_STR "\n\n****\nPlease include RPC library to use Serial\n****\n\n"
+#define MACRO_ERROR_SERIAL_STR "\n\n****\nPlease include SerialRPC library to use Serial\n****\n\n"
 #define MACRO_ERROR_SERIAL __attribute__ ((error(MACRO_ERROR_SERIAL_STR)))
 
 class ErrorSerialClass : public arduino::HardwareSerial {
