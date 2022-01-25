@@ -139,7 +139,7 @@ static void disableCM4Autoboot() {
   }
 }
 
-int RPCClass::begin() {
+int RPCClass::begin(long unsigned int np, uint16_t nd) {
 
 	OpenAMP_MPU_Config();
 
@@ -194,7 +194,7 @@ int RPCClass::begin() {
 
 #ifdef CORE_CM4
 
-int RPCClass::begin() {
+int RPCClass::begin(long unsigned int np, uint16_t nd) {
 
   eventThread = new rtos::Thread(osPriorityHigh);
   eventThread->start(&eventHandler);

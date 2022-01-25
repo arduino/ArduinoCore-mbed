@@ -44,7 +44,7 @@ namespace arduino {
 class RPCClass : public Stream, public rpc::detail::dispatcher {
 	public:
 		RPCClass() {};
-		int begin();
+		int begin(long unsigned int = 0, uint16_t = 0);
 		void end() {};
 		int available(void) {
 			return rx_buffer.available();

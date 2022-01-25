@@ -100,7 +100,7 @@ static const uint8_t SCK  = PIN_SPI_SCK;
 #define PIN_WIRE_SDA        (11u)
 #define PIN_WIRE_SCL        (12u)
 
-//#define SERIAL_CDC			0
+#define RPC_SERIAL				1
 #define HAS_UNIQUE_ISERIAL_DESCRIPTOR
 #define BOARD_VENDORID		0x2341
 #define BOARD_PRODUCTID		0x0061
@@ -135,5 +135,32 @@ void _ontouch1200bps_();
 #define SERIAL_PORT_HARDWARE_OPEN   Serial2
 
 #define USB_MAX_POWER	(500)
+
+#ifdef __cplusplus
+
+#include "api/HardwareSerial.h"
+
+#define MACRO_ERROR_SERIAL_STR "\n\n****\nPlease include RPC library to use Serial\n****\n\n"
+#define MACRO_ERROR_SERIAL __attribute__ ((error(MACRO_ERROR_SERIAL_STR)))
+
+class ErrorSerialClass : public arduino::HardwareSerial {
+public:
+	ErrorSerialClass() {};
+	~ErrorSerialClass() {};
+	void MACRO_ERROR_SERIAL begin(long unsigned int);
+	void MACRO_ERROR_SERIAL begin(long unsigned int, uint16_t);
+	size_t MACRO_ERROR_SERIAL write(uint8_t);
+	MACRO_ERROR_SERIAL operator bool();
+	void MACRO_ERROR_SERIAL end();
+	int MACRO_ERROR_SERIAL peek();
+	int MACRO_ERROR_SERIAL read();
+	int MACRO_ERROR_SERIAL available();
+	void MACRO_ERROR_SERIAL flush();
+};
+
+extern ErrorSerialClass ErrorSerial;
+
+#endif
+
 
 #endif //__PINS_ARDUINO__
