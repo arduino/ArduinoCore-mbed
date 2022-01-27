@@ -90,7 +90,7 @@ envie_m7.pid.1=0x035b
 
 # Used for OpenMV
 envie_m7.vid.2=0x2341
-envie_m7.pid.2=0x005b
+envie_m7.pid.2=0x045b
 
 envie_m7.upload_port.0.vid=0x2341
 envie_m7.upload_port.0.pid=0x025b
