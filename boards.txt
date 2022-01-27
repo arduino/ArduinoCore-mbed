@@ -79,12 +79,19 @@ envie_m7.compiler.mbed.cxxflags={build.variant.path}/cxxflags.txt
 envie_m7.compiler.mbed.includes={build.variant.path}/includes.txt
 envie_m7.compiler.mbed.extra_ldflags=-lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
 envie_m7.compiler.mbed="{build.variant.path}/libs/libmbed.a"
+
+# Used for sketches
 envie_m7.vid.0=0x2341
 envie_m7.pid.0=0x025b
+
+# Used for bootloader
 envie_m7.vid.1=0x2341
 envie_m7.pid.1=0x035b
+
+# Used for OpenMV
 envie_m7.vid.2=0x2341
-envie_m7.pid.2=0x045b
+envie_m7.pid.2=0x005b
+
 envie_m7.upload_port.0.vid=0x2341
 envie_m7.upload_port.0.pid=0x025b
 envie_m7.upload_port.1.vid=0x2341
@@ -213,12 +220,19 @@ nano33ble.compiler.mbed.cxxflags={build.variant.path}/cxxflags.txt
 nano33ble.compiler.mbed.includes={build.variant.path}/includes.txt
 nano33ble.compiler.mbed.extra_ldflags=-lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
 nano33ble.compiler.mbed="{build.variant.path}/libs/libmbed.a" "{build.variant.path}/libs/libcc_310_core.a" "{build.variant.path}/libs/libcc_310_ext.a" "{build.variant.path}/libs/libcc_310_trng.a"
+
+# Used for bootloader
 nano33ble.vid.0=0x2341
 nano33ble.pid.0=0x005a
+
+# Used for sketches
 nano33ble.vid.1=0x2341
 nano33ble.pid.1=0x805a
+
+# Used for OpenMV
 nano33ble.vid.2=0x2341
 nano33ble.pid.2=0x015a
+
 nano33ble.upload_port.0.vid=0x2341
 nano33ble.upload_port.0.pid=0x005a
 nano33ble.upload_port.1.vid=0x2341
