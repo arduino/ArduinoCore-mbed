@@ -221,6 +221,8 @@ generate_libs () {
 	cp ./BUILD/"$BOARDNAME"/GCC_ARM${PROFILE}/.link_script.ld "$ARDUINOVARIANT"/linker_script.ld
 	cp ./BUILD/"$BOARDNAME"/GCC_ARM${PROFILE}/mbed_config.h "$ARDUINOVARIANT"/
 
+	sed -i "s/custom_mbedtls_config.h/conf\/custom_mbedtls_config.h/" $ARDUINOVARIANT/mbed_config.h
+
 	# TODO: discover needed libraries based on compile target
 	#find -L . -name 'lib*.a' -exec cp '{}' "$ARDUINOVARIANT"/libs/ ';'
 	echo " done."
