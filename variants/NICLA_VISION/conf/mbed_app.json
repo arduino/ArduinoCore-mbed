@@ -1,4 +1,5 @@
 {
+  "macros" : ["MBEDTLS_USER_CONFIG_FILE=\"custom_mbedtls_config.h\""],
   "target_overrides": {
     "*": {
       "target.printf_lib": "std",
