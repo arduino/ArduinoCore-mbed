@@ -1,0 +1,249 @@
+From 2245cb8f3b0fc6eb18b724cb7994b0b234605fe8 Mon Sep 17 00:00:00 2001
+From: Riccardo Rizzo <r.rizzo@arduino.cc>
+Date: Fri, 26 Nov 2021 14:46:40 +0100
+Subject: [PATCH] cmux support
+
+- CMUX.h handle ongoig packet from all serial(virtual, real) and route  to the correct owner, when
+  also the cmux enable is ready is supposed that this class should also handle and frammentate the packet to be
+  routed in the properly channel, actually should work as a big serialpassthrough because tested over a unique channel(GSMpty.s0)
+- PTYSerial.h virtual serial buffer
+- PTYclass.h take two serial and  set s1.in to s0.out and viceversa used in
+  CMUXManager.cpp, in mbed-core, during init time to set properly the interfaced used by all actors
+- GSM.h and  GPS.h, in mbed-core, reworked in order to:
+  1. take the serial as input
+  2. in begin() method use the serial propagated by input in order to create a device -> get_default_istance()
+     than set this device for cinterion stack usage(GSMPTY.s1 or GPSPTY.s1)
+- CMUXManager.cpp set the thread that should be used for manage the comunication between the virtuar serial and hw serial
+  provide get method to access the PTYclass serials for stack side
+
+https://github.com/Rocketct/ArduinoCore-mbed/tree/cmux_core_211126
+
+modified cellular cstate machine to take enable  CMUX when required.
+added support API for enable and disable CMUX from cellular device.
+added callback logic to enable virtual channels.
+---
+ .../cellular/framework/API/CellularDevice.h   |  9 ++++++
+ .../cellular/framework/AT/AT_CellularDevice.h |  9 ++++++
+ .../source/framework/AT/AT_CellularDevice.cpp | 31 +++++++++++++++++++
+ .../framework/device/CellularStateMachine.cpp |  6 ++++
+ .../GEMALTO/CINTERION/GEMALTO_CINTERION.cpp   |  7 +++--
+ .../GEMALTO_CINTERION_CellularNetwork.cpp     |  5 +++
+ .../GEMALTO_CINTERION_CellularNetwork.h       |  2 ++
+ .../GEMALTO_CINTERION_CellularStack.cpp       |  9 +++---
+ .../GEMALTO_CINTERION_CellularStack.h         |  1 +
+ 9 files changed, 73 insertions(+), 6 deletions(-)
+
+diff --git a/connectivity/cellular/include/cellular/framework/API/CellularDevice.h b/connectivity/cellular/include/cellular/framework/API/CellularDevice.h
+index a5fa3b68fd..0c8d1a2db2 100644
+--- a/connectivity/cellular/include/cellular/framework/API/CellularDevice.h
++++ b/connectivity/cellular/include/cellular/framework/API/CellularDevice.h
+@@ -73,6 +73,8 @@ public:
+      */
+     static CellularDevice *get_default_instance();
+ 
++    mbed::Callback<void(void)> enableCMUXChannel = nullptr;
++
+     /** Return target onboard instance of CellularDevice
+      *
+      *  @remark Mbed OS target shall override (non-weak) this function for an onboard modem.
+@@ -216,6 +218,13 @@ public: //Pure virtual functions
+      */
+     virtual nsapi_error_t get_sim_state(SimState &state) = 0;
+ 
++    virtual nsapi_error_t enable_cmux() = 0;
++
++
++    virtual bool is_cmux_enabled() = 0;
++
++    virtual void set_cmux_status_flag(bool cmux_status) = 0;
++
+     /** Creates a new CellularContext interface.
+      *
+      *  @param fh       file handle used in communication to modem. This can be, for example, UART handle. If null, then the default
+diff --git a/connectivity/cellular/include/cellular/framework/AT/AT_CellularDevice.h b/connectivity/cellular/include/cellular/framework/AT/AT_CellularDevice.h
+index 5ee2d5cf2d..60ae735e79 100755
+--- a/connectivity/cellular/include/cellular/framework/AT/AT_CellularDevice.h
++++ b/connectivity/cellular/include/cellular/framework/AT/AT_CellularDevice.h
+@@ -84,6 +84,14 @@ public:
+ 
+     virtual nsapi_error_t get_sim_state(SimState &state);
+ 
++    nsapi_error_t enable_cmux();
++
++    nsapi_error_t config_cmux();
++
++    void set_cmux_status_flag(bool cmux_status);
++
++    virtual bool is_cmux_enabled();
++
+     virtual CellularContext *create_context(const char *apn = NULL, bool cp_req = false, bool nonip_req = false);
+ 
+     virtual void delete_context(CellularContext *context);
+@@ -206,6 +214,7 @@ private:
+ 
+     std::chrono::duration<int, std::milli> _default_timeout;
+     bool _modem_debug_on;
++    bool _cmux_status;
+     const intptr_t *_property_array;
+ };
+ 
+diff --git a/connectivity/cellular/source/framework/AT/AT_CellularDevice.cpp b/connectivity/cellular/source/framework/AT/AT_CellularDevice.cpp
+index 0b2d37e714..923fb11fbc 100644
+--- a/connectivity/cellular/source/framework/AT/AT_CellularDevice.cpp
++++ b/connectivity/cellular/source/framework/AT/AT_CellularDevice.cpp
+@@ -241,6 +241,37 @@ nsapi_error_t AT_CellularDevice::get_sim_state(SimState &state)
+     return error;
+ }
+ 
++nsapi_error_t AT_CellularDevice::enable_cmux()
++{
++setup_at_handler();
++
++    _at.lock();
++    for (int retry = 1; retry <= 3; retry++) {
++        _at.clear_error();
++        _at.flush();
++        _at.at_cmd_discard("E0", "");
++        if (_at.get_last_error() == NSAPI_ERROR_OK) {
++            _at.at_cmd_discard("+CMUX", "=0");
++            if (_at.get_last_error() == NSAPI_ERROR_OK) {
++                break;
++            }
++        }
++        tr_debug("Wait 100ms to init modem");
++        rtos::ThisThread::sleep_for(100ms); // let modem have time to get ready
++    }
++ return _at.unlock_return_error();
++}
++
++
++bool AT_CellularDevice::is_cmux_enabled()
++{
++    return _cmux_status;
++}
++
++void AT_CellularDevice::set_cmux_status_flag(bool cmux_status)
++{
++    _cmux_status = cmux_status;
++}
+ nsapi_error_t AT_CellularDevice::set_pin(const char *sim_pin)
+ {
+     // if SIM is already in ready state then settings the PIN
+diff --git a/connectivity/cellular/source/framework/device/CellularStateMachine.cpp b/connectivity/cellular/source/framework/device/CellularStateMachine.cpp
+index 0a452eacb3..833f1d2239 100644
+--- a/connectivity/cellular/source/framework/device/CellularStateMachine.cpp
++++ b/connectivity/cellular/source/framework/device/CellularStateMachine.cpp
+@@ -361,6 +361,12 @@ void CellularStateMachine::state_device_ready()
+         _cb_data.error = _cellularDevice.soft_power_on();
+     }
+     if (_cb_data.error == NSAPI_ERROR_OK) {
++        if(_cellularDevice.is_cmux_enabled()){
++            _cb_data.error = _cellularDevice.enable_cmux();
++             if (_cb_data.error == NSAPI_ERROR_OK) {
++                _cellularDevice.enableCMUXChannel();
++             }
++        }
+         _cb_data.error = _cellularDevice.init();
+         if (_cb_data.error == NSAPI_ERROR_OK) {
+ 
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.cpp b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.cpp
+index c7790fe348..1f82199106 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.cpp
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.cpp
+@@ -51,6 +51,11 @@ AT_CellularNetwork *GEMALTO_CINTERION::open_network_impl(ATHandler &at)
+ 
+ nsapi_error_t GEMALTO_CINTERION::init()
+ {
++    // init CMUX if requested
++    if(is_cmux_enabled()){
++        enable_cmux();
++        enableCMUXChannel();
++    }
+     nsapi_error_t err = AT_CellularDevice::init();
+     if (err != NSAPI_ERROR_OK) {
+         return err;
+@@ -67,7 +72,6 @@ nsapi_error_t GEMALTO_CINTERION::init()
+         tr_error("Cellular model not found!");
+         return NSAPI_ERROR_DEVICE_ERROR;
+     }
+-
+     if (memcmp(model, "ELS61", sizeof("ELS61") - 1) == 0) {
+         init_module_els61();
+     } else if (memcmp(model, "BGS2", sizeof("BGS2") - 1) == 0) {
+@@ -83,7 +87,6 @@ nsapi_error_t GEMALTO_CINTERION::init()
+         return NSAPI_ERROR_UNSUPPORTED;
+     }
+     tr_info("Cinterion model %s (%d)", model, _module);
+-
+     set_at_urcs();
+ 
+     return NSAPI_ERROR_OK;
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularNetwork.cpp b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularNetwork.cpp
+index 37ca733b6e..f749b4e575 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularNetwork.cpp
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularNetwork.cpp
+@@ -31,4 +31,9 @@ nsapi_error_t GEMALTO_CINTERION_CellularNetwork::set_attach()
+     return NSAPI_ERROR_OK;
+ }
+ 
++void GEMALTO_CINTERION_CellularNetwork::get_context_state_command()
++{
++    _at.cmd_start_stop("^SICA", "?");
++    _at.resp_start("^SICA:");
++}
+  /* namespace mbed */
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularNetwork.h b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularNetwork.h
+index 8d5f49cf5a..7483c5e019 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularNetwork.h
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularNetwork.h
+@@ -26,6 +26,8 @@ public:
+     GEMALTO_CINTERION_CellularNetwork(ATHandler &at, AT_CellularDevice &device);
+     virtual ~GEMALTO_CINTERION_CellularNetwork();
+     virtual nsapi_error_t set_attach();
++    virtual void get_context_state_command();
++
+ 
+ protected:
+ };
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+index 9f111d7da0..2993285049 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+@@ -165,6 +165,11 @@ void GEMALTO_CINTERION_CellularStack::endGNSS() {
+     _at.unlock();
+ }
+ 
++void GEMALTO_CINTERION_CellularStack::enableCmux()
++{
++    _at.at_cmd_discard("+CMUX", "=0");
++}
++
+ int GEMALTO_CINTERION_CellularStack::startGNSS() {
+     _at.lock();
+     _engine = false;
+@@ -304,10 +309,6 @@ retry_open:
+     bool foundSrvType = false;
+     bool foundConIdType = false;
+ 
+-    if (GEMALTO_CINTERION::get_module() == GEMALTO_CINTERION::ModuleTX62) {
+-        _at.cmd_start_stop("^SICA", "=", "%d%d", 1, _cid);
+-    }
+-
+     _at.cmd_start_stop("^SISS", "?");
+     _at.resp_start("^SISS:");
+ 
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.h b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.h
+index 37eee5858a..f89da8c314 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.h
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.h
+@@ -37,6 +37,7 @@ public:
+     void lock();
+     void unlock();
+     void beginGNSS(mbed::Callback<void(char*)> gnss_cb);
++    void enableCmux();
+     void endGNSS();
+     int startGNSS();
+     void stopGNSS();
+-- 
+2.34.1
+
