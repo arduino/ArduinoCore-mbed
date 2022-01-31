@@ -12,9 +12,13 @@ char pass[]     = SECRET_PASSWORD;
 void setup() {
   Serial.begin(115200);
   while (!Serial) {}
-  //GSM.debug(Serial);
-  Serial.println("\nStarting connection to server...");
-  GSM.begin(pin, apn, username, pass, CATNB);
+
+  Serial.println("Starting Carrier Network registration");
+  if(!GSM.begin(pin, apn, username, pass, CATNB)){
+    Serial.println("The board was not able to register to the network...");
+    // do nothing forevermore:
+    while(1);
+  }
   Serial.println("\nEnable GNSS Engine...");
   // GPS.begin() start and eanble the GNSS engine
   GPS.begin();
@@ -22,11 +26,11 @@ void setup() {
 }
 
 void loop() {
-  //GPS.begin();
   if(GPS.available()){
     Serial.print((char) GPS.read());
     delay(1);
   }
-  // GPS.end() stop and disable the GNSS engine
+  // After geting valid packet GPS.end() can be used to stop and
+  // disable the GNSS engine
   // GPS.end();
 }

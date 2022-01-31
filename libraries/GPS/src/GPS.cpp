@@ -37,6 +37,7 @@ void arduino::GPSClass::begin(unsigned long baudrate, uint16_t config)
 
     _serial->write("AT^SSIO=7,1\r\n", sizeof("AT^SSIO=7,1\r\n"));
     readAndDrop();
+
     _serial->write("AT^SGIO=7\r\n", sizeof("AT^SGIO=7\r\n"));
   } while (!checkGNSSEngine("^SGIO: 1"));
 
@@ -108,7 +109,7 @@ void arduino::GPSClass::readAndDrop()
 }
 
 void arduino::GPSClass::begin(unsigned long baudrate)
-{ //  alligne with other begin
+{
   auto cmux = arduino::CMUXClass::get_default_instance();
 
   auto serial = cmux->get_serial(1);
@@ -118,27 +119,37 @@ void arduino::GPSClass::begin(unsigned long baudrate)
   _serial->write("ATE0\r\n", sizeof("ATE0\r\n"));
   readAndDrop();
 
-  _serial->write("AT^SGPSC=Engine/StartMode,0\r\n", sizeof("AT^SGPSC=Engine/StartMode,0\r\n"));
+  // burn any incoming message on gps rx buffer
   readAndDrop();
 
-  _serial->write("AT^SPIO=1\r\n", sizeof("AT^SPIO=1\r\n"));
-  readAndDrop();
-
-  _serial->write("AT^SCPIN=1,7,1,0\r\n", sizeof("AT^SCPIN=1,7,1,0\r\n"));
-  readAndDrop();
-
-  _serial->write("AT^SSIO=7,1\r\n", sizeof("AT^SSIO=7,1\r\n"));
-  readAndDrop();
-
-  _serial->write("AT^SGPSC=Engine,3\r\n", sizeof("AT^SGPSC=Engine,3\r\n")); //
-  checkGNSSEngine("^SGPSC: \"Engine\",\"3\"");
-  _engine = true;
-
-  if (_engine)
+  do
   {
-    _serial->write("AT^SGPSC=Nmea/Urc,on\r\n", sizeof("AT^SGPSC=Nmea/Urc,on\r\n"));
+    _serial->write("AT^SPIO=0\r\n", sizeof("AT^SPIO=0\r\n"));
     readAndDrop();
+
+    _serial->write("AT^SPIO=1\r\n", sizeof("AT^SPIO=1\r\n"));
+    readAndDrop();
+
+    _serial->write("AT^SCPIN=1,7,1,0\r\n", sizeof("AT^SCPIN=1,7,1,0\r\n"));
+    readAndDrop();
+
+    _serial->write("AT^SSIO=7,1\r\n", sizeof("AT^SSIO=7,1\r\n"));
+    readAndDrop();
+
+    _serial->write("AT^SGIO=7\r\n", sizeof("AT^SGIO=7\r\n"));
+  } while (!checkGNSSEngine("^SGIO: 1"));
+
+  _serial->write("AT^SGPSC=Engine/StartMode,0\r\n", sizeof("AT^SGPSC=Engine/StartMode,0\r\n"));
+  checkGNSSEngine("^SGPSC: \"Engine/StartMode\",\"0\"");
+
+  while (!_engine)
+  {
+    _serial->write("AT^SGPSC=Engine,3\r\n", sizeof("AT^SGPSC=Engine,3\r\n"));
+    _engine = checkGNSSEngine("^SGPSC: \"Engine\",\"3\"");
   }
+
+  _serial->write("AT^SGPSC=Nmea/Urc,on\r\n", sizeof("AT^SGPSC=Nmea/Urc,on\r\n"));
+  readAndDrop();
 }
 
 int arduino::GPSClass::peek(void)
@@ -177,7 +188,6 @@ size_t arduino::GPSClass::write(uint8_t c)
 
 void arduino::GPSClass::end()
 {
-
   _serial->write("AT^SGPSC=Nmea/Urc,off\r\n", sizeof("AT^SGPSC=Nmea/Urc,off\r\n"));
   readAndDrop();
 
@@ -188,7 +198,7 @@ void arduino::GPSClass::end()
   }
 
   _serial->write("^SSIO=7,0\r\n", sizeof("^SSIO=7,0\r\n"));
-  readAndDrop(); // sgio in modo da verificare l effettivo spegnimento
+  readAndDrop();
 }
 
 arduino::GPSClass::operator bool()

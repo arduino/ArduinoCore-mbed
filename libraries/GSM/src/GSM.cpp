@@ -11,8 +11,6 @@
 bool _cmuxEnable = false;
 arduino::CMUXClass * arduino::CMUXClass::get_default_instance()
 {
-  // TODO: CHECK WHICH IS THE RIGHT ONE
-  // static mbed::BufferedSerial serial(MBED_CONF_GEMALTO_CINTERION_TX, MBED_CONF_GEMALTO_CINTERION_RX, 115200);
   static mbed::UnbufferedSerial serial(MBED_CONF_GEMALTO_CINTERION_TX, MBED_CONF_GEMALTO_CINTERION_RX, 115200);
   serial.set_flow_control(mbed::SerialBase::RTSCTS_SW, MBED_CONF_GEMALTO_CINTERION_CTS, NC);
   static arduino::CMUXClass device(&serial);
@@ -22,7 +20,7 @@ arduino::CMUXClass * arduino::CMUXClass::get_default_instance()
 mbed::CellularDevice *mbed::CellularDevice::get_default_instance()
 {
     static auto cmux = arduino::CMUXClass::get_default_instance();
-    static mbed::GEMALTO_CINTERION device(cmux->get_serial(nextSerialPort));
+    static mbed::GEMALTO_CINTERION device(cmux->get_serial(0));
     nextSerialPort++;
     device.enableCMUXChannel = mbed::callback(cmux, &arduino::CMUXClass::enableCMUXChannel);
     return &device;

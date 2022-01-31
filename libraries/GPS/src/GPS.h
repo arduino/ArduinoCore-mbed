@@ -1,5 +1,5 @@
 /*
-  GSM.h - Library for GSM on mbed platforms.
+  GPS.h - Library for GSM on mbed platforms.
   Copyright (c) 2011-2021 Arduino LLC.  All right reserved.
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public

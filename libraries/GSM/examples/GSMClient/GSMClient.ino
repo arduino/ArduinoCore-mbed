@@ -17,9 +17,12 @@ GSMClient client;
 void setup() {
   Serial.begin(115200);
   while(!Serial) {}
-
-  GSM.begin(pin, apn, username, pass, CATNB);
-  
+  Serial.println("Starting Carrier Network registration");
+  if(!GSM.begin(pin, apn, username, pass, CATNB)){
+    Serial.println("The board was not able to register to the network...");
+    // do nothing forevermore:
+    while(1);
+  }
   Serial.println("\nStarting connection to server...");
   // if you get a connection, report back via serial:
   if (client.connect(server, port)) {

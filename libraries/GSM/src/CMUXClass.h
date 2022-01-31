@@ -17,7 +17,6 @@ namespace arduino {
 static int nextSerialPort;
 class CMUXClass {
 public:
-  //CMUXClass(mbed::BufferedSerial* hw_serial)
   CMUXClass(mbed::UnbufferedSerial* hw_serial);
   ~CMUXClass();
   void read();
@@ -58,7 +57,6 @@ private:
   mbed::CircularBuffer<char, 1500> rx_buffer;
   mbed::CircularBuffer<char, 1500> tx_buffer;
   rtos::Thread * reader_thd = new rtos::Thread(osPriorityNormal, 4096, nullptr, "CMUXt1");
-  //rtos::Thread * writer_thd = new rtos::Thread(osPriorityNormal, 4096, nullptr, "CMUXt2");
 };
 
 }
