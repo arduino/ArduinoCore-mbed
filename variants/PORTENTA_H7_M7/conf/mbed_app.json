@@ -16,6 +16,7 @@
       "mbed-trace.enable": true,
       "target.mbed_app_start": "0x8040000",
       "target.macros_add": [
+        "BT_UART_NO_3M_SUPPORT",
         "USB_DYNAMIC_CONFIGURATION",
         "METAL_INTERNAL",
         "VIRTIO_MASTER_ONLY",
