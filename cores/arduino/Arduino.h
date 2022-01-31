@@ -100,6 +100,7 @@ extern analogin_config_t adcCurrentConfig;
 #endif
 
 #include "Serial.h"
+#include "timer.h"
 #if defined(SERIAL_CDC)
 #define Serial _UART_USB_
 #define SerialUSB _UART_USB_

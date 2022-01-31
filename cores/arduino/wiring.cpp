@@ -68,6 +68,15 @@ void init()
   lowPowerTimer.start();
 }
 
+ArduinoTimer getTimer(TimerType t)
+{
+  if (t == LPTIMER) {
+    return ArduinoTimer((mbed::Timer*)(&lowPowerTimer));
+  } else {
+    return ArduinoTimer(&timer);
+  }
+}
+
 void yield() {
 #ifndef NO_RTOS
   rtos::ThisThread::yield();
