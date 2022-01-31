@@ -42,10 +42,10 @@ static const uint8_t A3  = PIN_A3;
 #define PIN_SERIAL_RX (1ul)
 
 // SPI
-#define PIN_SPI_MISO  (4u)
-#define PIN_SPI_MOSI  (3u)
-#define PIN_SPI_SCK   (2u)
-#define PIN_SPI_SS    (5u)
+#define PIN_SPI_MISO  (16u)
+#define PIN_SPI_MOSI  (19u)
+#define PIN_SPI_SCK   (18u)
+#define PIN_SPI_SS    (17u)
 
 static const uint8_t SS   = PIN_SPI_SS;   // SPI Slave SS not used. Set here only for reference.
 static const uint8_t MOSI = PIN_SPI_MOSI;
@@ -53,8 +53,8 @@ static const uint8_t MISO = PIN_SPI_MISO;
 static const uint8_t SCK  = PIN_SPI_SCK;
 
 // Wire
-#define PIN_WIRE_SDA        (6u)
-#define PIN_WIRE_SCL        (7u)
+#define PIN_WIRE_SDA        (4u)
+#define PIN_WIRE_SCL        (5u)
 
 #define SERIAL_HOWMANY		1
 #define SERIAL1_TX			(digitalPinToPinName(PIN_SERIAL_TX))
