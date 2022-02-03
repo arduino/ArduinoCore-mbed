@@ -153,14 +153,16 @@ void portenta_init_video() {
   static lv_color_t buf[LV_HOR_RES_MAX * LV_VER_RES_MAX / 6];
 
   // Compatibility with v7 and v8 APIs
-  #if LVGL_VERSION_MAJOR > 7
+  #if LVGL_VERSION_MAJOR == 8
     static lv_disp_draw_buf_t  disp_buf;
     lv_disp_draw_buf_init(&disp_buf, buf, NULL, LV_HOR_RES_MAX * LV_VER_RES_MAX / 6);
 
     /*Initialize the display*/
     lv_disp_drv_init(&disp_drv);
     disp_drv.flush_cb = my_disp_flush;
+    #if LVGL_VERSION_MINOR < 1
     disp_drv.gpu_fill_cb = gpu_fill;
+    #endif
     disp_drv.draw_buf = &disp_buf;
     disp_drv.hor_res = LV_HOR_RES_MAX;
     disp_drv.ver_res = LV_VER_RES_MAX;
