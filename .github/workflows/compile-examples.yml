@@ -90,6 +90,10 @@ jobs:
               fqbn: arduino:mbed:nicla_sense
             additional-sketch-paths: |
               - libraries/Nicla_System
+              - ~/Arduino/libraries/Arduino_BHY2
+            additional-libraries: |
+              - name: Arduino_BHY2
+              - name: ArduinoBLE
 
     steps:
       - name: Checkout repository
