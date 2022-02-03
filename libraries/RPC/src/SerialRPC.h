@@ -33,6 +33,9 @@ public:
 		return write(&c, 1);
 	}
 
+	size_t write(const uint8_t* buf, size_t len) override {
+		return write((uint8_t*)buf, len);
+	}
 	size_t write(const char* buf, size_t len) {
 		return write((uint8_t*)buf, len);
 	}
@@ -73,7 +76,7 @@ public:
 private:
    	mbed::Callback<void()> _rx;
 	RingBufferN<1024> rx_buffer;
-	std::vector<uint8_t> tx_buffer;
+	std::vector<char> tx_buffer;
 };
 }
 
