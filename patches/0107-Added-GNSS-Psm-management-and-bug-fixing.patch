@@ -1,7 +1,7 @@
-From 09d2e9582d2dd420df3f7e3f69e1561f95b812fb Mon Sep 17 00:00:00 2001
+From ce864aeea51868406b98ab85cc146abafc858b42 Mon Sep 17 00:00:00 2001
 From: Riccardo Rizzo <r.rizzo@arduino.cc>
 Date: Mon, 13 Sep 2021 11:56:44 +0200
-Subject: [PATCH] Added GNSS/Psm management and bug fixing
+Subject: [PATCH 107/110] Added GNSS/Psm management and bug fixing
 
 Added GNSS psm management and removed callback pointer bug introduced in previous PR
 also set CGAUTH to 1in order to allows for context credential settings.
@@ -125,5 +125,5 @@ index ffaed50184..37eee5858a 100644
  protected:
  
 -- 
-2.33.1
+2.34.1
 

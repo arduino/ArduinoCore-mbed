@@ -1,7 +1,7 @@
-From 067e0a840d23839c5ee06e42dfa042f69b31e1e8 Mon Sep 17 00:00:00 2001
+From afa24e63fb5cb10e60481dc3517bc026ec6e3289 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Thu, 10 Dec 2020 19:23:36 +0100
-Subject: [PATCH 090/106] Thales: mbed library porting
+Subject: [PATCH 090/110] Thales: mbed library porting
 
 Wrap changes for Thales inside a library include check
 
@@ -564,5 +564,5 @@ index 01c5b71c65..22711d2173 100644
  
  } // namespace mbed
 -- 
-2.33.1
+2.34.1
 

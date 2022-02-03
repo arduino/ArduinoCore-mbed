@@ -1,7 +1,7 @@
-From 5f949ca99a6479cf81908149e38d01e09cc10596 Mon Sep 17 00:00:00 2001
+From a5fb35e416cc68648ede4f5adcb0bd302b35296f Mon Sep 17 00:00:00 2001
 From: Riccardo Rizzo <r.rizzo@arduino.cc>
 Date: Tue, 7 Sep 2021 12:33:02 +0200
-Subject: [PATCH 106/106] [GEMALTO-TX62] Add APIs to start and stop gnss
+Subject: [PATCH 106/109] [GEMALTO-TX62] Add APIs to start and stop gnss
  functionality
 
 the usage of start and stop should allows for switching the usage of gnss with respect for lte gsm operations
@@ -98,5 +98,5 @@ index 163fa3193f..ffaed50184 100644
      mbed::Callback<void(char*)> _gnss_cb;
  
 -- 
-2.33.1
+2.34.1
 

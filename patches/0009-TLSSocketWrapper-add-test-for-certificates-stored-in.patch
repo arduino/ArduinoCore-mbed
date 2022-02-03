@@ -1,7 +1,7 @@
-From e9ca06b93d1db1a11ace1ad50a2132b7e8bbdb32 Mon Sep 17 00:00:00 2001
+From b61ee5dcb0010d99b8260457ac8286bb1078412b Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Mon, 9 Nov 2020 13:52:28 +0100
-Subject: [PATCH 09/87] TLSSocketWrapper: add test for certificates stored in
+Subject: [PATCH 009/110] TLSSocketWrapper: add test for certificates stored in
  filesystem
 
 ---
@@ -12,10 +12,10 @@ Subject: [PATCH 09/87] TLSSocketWrapper: add test for certificates stored in
  create mode 100644 connectivity/netsocket/tests/TESTS/netsocket/tls/tlssocket_cert_in_filesystem.cpp
 
 diff --git a/connectivity/netsocket/tests/TESTS/netsocket/tls/main.cpp b/connectivity/netsocket/tests/TESTS/netsocket/tls/main.cpp
-index f6489a3d73..495178d54a 100644
+index aa256a7128..d9f9cd640c 100644
 --- a/connectivity/netsocket/tests/TESTS/netsocket/tls/main.cpp
 +++ b/connectivity/netsocket/tests/TESTS/netsocket/tls/main.cpp
-@@ -233,6 +233,9 @@ Case cases[] = {
+@@ -234,6 +234,9 @@ Case cases[] = {
      Case("TLSSOCKET_SEND_REPEAT", TLSSOCKET_SEND_REPEAT),
      Case("TLSSOCKET_SEND_TIMEOUT", TLSSOCKET_SEND_TIMEOUT),
      Case("TLSSOCKET_NO_CERT", TLSSOCKET_NO_CERT),
@@ -95,5 +95,5 @@ index 0000000000..cf3dff2e93
 +}
 \ No newline at end of file
 -- 
-2.33.1
+2.34.1
 

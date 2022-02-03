@@ -1,0 +1,36 @@
+From ed508d59795c23c6c45c5b9ed42f3370cc8aaf69 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Wed, 12 May 2021 16:00:01 +0200
+Subject: [PATCH 061/110] RP2040: USB: retry handling irqs if some went missing
+
+---
+ targets/TARGET_RASPBERRYPI/TARGET_RP2040/USBPhy_RP2040.cpp | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/USBPhy_RP2040.cpp b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/USBPhy_RP2040.cpp
+index eb387af3c3..64ae5d3a4c 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/USBPhy_RP2040.cpp
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/USBPhy_RP2040.cpp
+@@ -390,6 +390,9 @@ void USBPhyHw::endpoint_abort(usb_ep_t endpoint)
+ 
+ void USBPhyHw::process()
+ {
++
++again:
++
+     // reset interrupt
+     if (usb_hw->ints & USB_INTS_BUS_RESET_BITS) {
+         // Clear the device address
+@@ -502,7 +505,8 @@ void USBPhyHw::process()
+     {
+         volatile int ints = usb_hw->ints;
+         volatile int going = 1;
+-        while(ints && going);
++        goto again;
++        //while(ints && going);
+     }
+ 
+ 
+-- 
+2.34.1
+

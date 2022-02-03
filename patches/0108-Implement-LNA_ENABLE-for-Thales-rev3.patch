@@ -1,7 +1,7 @@
-From 2941a989d79cc9123776c95a3fed5ba2d289465b Mon Sep 17 00:00:00 2001
+From 4343171f71de52614142324c570eae6f8a360ed5 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Thu, 25 Nov 2021 14:55:22 +0100
-Subject: [PATCH] Implement LNA_ENABLE for Thales rev3
+Subject: [PATCH 108/110] Implement LNA_ENABLE for Thales rev3
 
 ---
  .../GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp     | 4 ++++
@@ -36,5 +36,5 @@ index 967d9628b0..9f111d7da0 100644
      _at.resp_start("^SGPSC: \"Engine\",");
  
 -- 
-2.33.1
+2.34.1
 

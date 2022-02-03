@@ -1,0 +1,46 @@
+From 6db6500d74a388ae1b7e39d8fb96097fcbd4423f Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Fri, 7 May 2021 16:08:53 +0200
+Subject: [PATCH 059/110] RP2040: USBPhy: implement stall() and unstall()
+
+---
+ .../TARGET_RP2040/USBPhy_RP2040.cpp                  | 12 +++++++++---
+ 1 file changed, 9 insertions(+), 3 deletions(-)
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/USBPhy_RP2040.cpp b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/USBPhy_RP2040.cpp
+index ff24a6dcd6..eb387af3c3 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/USBPhy_RP2040.cpp
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/USBPhy_RP2040.cpp
+@@ -110,7 +110,11 @@ void USBPhyHw::connect()
+     // and when a setup packet is received
+     usb_hw->inte = USB_INTS_BUFF_STATUS_BITS   |
+                    USB_INTS_BUS_RESET_BITS     |
+-                   USB_INTS_SETUP_REQ_BITS;
++                   USB_INTS_SETUP_REQ_BITS     |
++                   USB_INTS_HOST_CONN_DIS_BITS |
++                   USB_INTS_HOST_RESUME_BITS   |
++                   USB_INTS_ERROR_RX_OVERFLOW_BITS |
++                   USB_INTS_STALL_BITS;
+ 
+     // Present full speed device by enabling pull up on DP
+     usb_hw_set->sie_ctrl = USB_SIE_CTRL_PULLUP_EN_BITS;
+@@ -300,12 +304,14 @@ void USBPhyHw::endpoint_remove(usb_ep_t endpoint)
+ 
+ void USBPhyHw::endpoint_stall(usb_ep_t endpoint)
+ {
+-
++    int ep_num = endpoint & 0x7f;
++    usb_dpram->ep_buf_ctrl[ep_num].out |= USB_BUF_CTRL_STALL;
+ }
+ 
+ void USBPhyHw::endpoint_unstall(usb_ep_t endpoint)
+ {
+-
++    int ep_num = endpoint & 0x7f;
++    usb_dpram->ep_buf_ctrl[ep_num].out &= ~USB_BUF_CTRL_STALL;
+ }
+ 
+ bool USBPhyHw::endpoint_read(usb_ep_t endpoint, uint8_t *data, uint32_t size)
+-- 
+2.34.1
+

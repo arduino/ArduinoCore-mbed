@@ -1,0 +1,51 @@
+From e4024c767229fa2006d878df098b23c6380f96cc Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Mon, 3 May 2021 14:32:14 +0200
+Subject: [PATCH 055/110] RP2040: fix include paths
+
+---
+ targets/TARGET_RASPBERRYPI/TARGET_RP2040/analogin_api.c | 2 +-
+ targets/TARGET_RASPBERRYPI/TARGET_RP2040/reset_reason.c | 2 +-
+ targets/TARGET_RASPBERRYPI/TARGET_RP2040/watchdog_api.c | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/analogin_api.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/analogin_api.c
+index e1773a065c..a5cf6995f9 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/analogin_api.c
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/analogin_api.c
+@@ -1,6 +1,6 @@
+ #include "mbed_assert.h"
+ #include "analogin_api.h"
+-#include "adc.h"
++#include "hardware/adc.h"
+ #include "pinmap.h"
+ #include "PeripheralPins.h"
+ 
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/reset_reason.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/reset_reason.c
+index 7e511078c5..83de2cfb9d 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/reset_reason.c
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/reset_reason.c
+@@ -3,7 +3,7 @@
+ 
+ #ifdef DEVICE_RESET_REASON
+ 
+-#include "structs/resets.h"
++#include "hardware/structs/resets.h"
+ 
+ reset_reason_t hal_reset_reason_get(void)
+ {
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/watchdog_api.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/watchdog_api.c
+index 007b79c322..b7abac8917 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/watchdog_api.c
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/watchdog_api.c
+@@ -1,6 +1,6 @@
+ #include "watchdog_api.h"
+ #include "hardware/watchdog.h"
+-#include "structs/watchdog.h"
++#include "hardware/structs/watchdog.h"
+ 
+ #if DEVICE_WATCHDOG
+ 
+-- 
+2.34.1
+

@@ -1,7 +1,7 @@
-From 6846691438ea59a04d98643190f865a35dcaf7bb Mon Sep 17 00:00:00 2001
+From 59b5f95c142ade4bcf24f8336ccddea3faeb1811 Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Tue, 20 Jul 2021 10:40:12 +0200
-Subject: [PATCH 097/106] Fix recv implementation
+Subject: [PATCH 097/110] Fix recv implementation
 
 ---
  .../CINTERION/GEMALTO_CINTERION_CellularStack.cpp | 15 +++++++--------
@@ -58,5 +58,5 @@ index 9eb3e27b39..034011d2d2 100644
  
      return (_at.get_last_error() == NSAPI_ERROR_OK) ? (recv_len ? recv_len : NSAPI_ERROR_WOULD_BLOCK) : NSAPI_ERROR_DEVICE_ERROR;
 -- 
-2.33.1
+2.34.1
 

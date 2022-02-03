@@ -1,0 +1,72 @@
+From 36cce1ae5736533f43eb5abdef37dd83c585f51a Mon Sep 17 00:00:00 2001
+From: Giampaolo Mancini <giampaolo@trampolineup.com>
+Date: Thu, 3 Feb 2022 09:50:08 +0100
+Subject: [PATCH 110/110] Implement Udp_RemClient for TX62
+
+---
+ .../GEMALTO_CINTERION_CellularStack.cpp       | 48 +++++++++++++++++--
+ 1 file changed, 43 insertions(+), 5 deletions(-)
+
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+index 2993285049..1eca8f54e0 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+@@ -588,12 +588,50 @@ sisr_retry:
+ 
+     // UDP Udp_RemClient
+     if (socket->proto == NSAPI_UDP && GEMALTO_CINTERION::get_module() != GEMALTO_CINTERION::ModuleBGS2) {
+-        char ip_address[NSAPI_IPv6_SIZE + sizeof("[]:12345") - 1 + 1];
+-        int ip_len = _at.read_string(ip_address, sizeof(ip_address));
+-        if (ip_len <= 0) {
+-            tr_error("Socket %d recvfrom addr (len %d)", socket->id, ip_len);
+-            return NSAPI_ERROR_DEVICE_ERROR;
++
++        size_t ip_address_len = NSAPI_IPv6_SIZE + sizeof("[]:12345") - 1 + 1;
++        char ip_address[ip_address_len];
++
++        if (GEMALTO_CINTERION::get_module() == GEMALTO_CINTERION::ModuleTX62) {
++            // Local buffer for parsing Udp_RemClient for TX62
++            uint8_t at_buf[ip_address_len];
++            size_t ip_len = 0;
++
++            // Skip <remainUdpPacketLength>
++            nsapi_size_or_error_t rem_len = _at.read_int();
++
++            // Wait for full <Udp_RemClient> in the _at buffer
++            do {
++                int len = _at.read_bytes(at_buf + ip_len, 1);
++                if (len <= 0) {
++                    tr_error("Socket %d recvfrom addr (len %d)", socket->id, ip_len);
++                    return NSAPI_ERROR_DEVICE_ERROR;
++                }
++                ip_len += len;
++            } while (ip_len < ip_address_len && at_buf[ip_len - 2] != '\r' && at_buf[ip_len - 1] != '\n');
++
++            // if (ip_len < sizeof("0.0.0.0:0")) {
++            if (ip_len < sizeof("[]:0")) {
++                tr_error("Socket %d has no address", socket->id);
++                goto sisr_retry;
++            }
++
++            // at_buf contains remote client IP information
++            // in the format "<ip address>:<port>"\r\n.
++
++            // Terminate the C string at the closing quotation mark
++            at_buf[ip_len - 3] = '\0';
++            // Skip the opening quotation mark
++            memcpy(ip_address, at_buf + 1, ip_len - 4);
++            tr_info("ip_address %s (%d)", ip_address, ip_len - 4);
++        } else {
++            int ip_len = _at.read_string(ip_address, sizeof(ip_address));
++            if (ip_len <= 0) {
++                tr_error("Socket %d recvfrom addr (len %d)", socket->id, ip_len);
++                return NSAPI_ERROR_DEVICE_ERROR;
++            }
+         }
++
+         if (address) {
+             char *ip_start = ip_address;
+             char *ip_stop;
+-- 
+2.34.1
+

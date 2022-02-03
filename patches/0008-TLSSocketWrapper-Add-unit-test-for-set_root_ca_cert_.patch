@@ -1,7 +1,7 @@
-From e03035b26d7372b0713ea2c5d2359b0116325d56 Mon Sep 17 00:00:00 2001
+From ec10b2d3b5671f72ff3be6510f561dcc15712d5e Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Mon, 9 Nov 2020 13:34:18 +0100
-Subject: [PATCH 08/87] TLSSocketWrapper: Add unit test for
+Subject: [PATCH 008/110] TLSSocketWrapper: Add unit test for
  set_root_ca_cert_path
 
 ---
@@ -11,10 +11,10 @@ Subject: [PATCH 08/87] TLSSocketWrapper: Add unit test for
  3 files changed, 13 insertions(+), 1 deletion(-)
 
 diff --git a/connectivity/nanostack/coap-service/test/coap-service/unittest/stub/mbedtls_stub.c b/connectivity/nanostack/coap-service/test/coap-service/unittest/stub/mbedtls_stub.c
-index be8d31955b..91c17e2c23 100644
+index b63eb0269d..32026c4fe6 100644
 --- a/connectivity/nanostack/coap-service/test/coap-service/unittest/stub/mbedtls_stub.c
 +++ b/connectivity/nanostack/coap-service/test/coap-service/unittest/stub/mbedtls_stub.c
-@@ -300,6 +300,12 @@ int mbedtls_x509_crt_parse(mbedtls_x509_crt *a, const unsigned char *b, size_t c
+@@ -303,6 +303,12 @@ int mbedtls_x509_crt_parse(mbedtls_x509_crt *a, const unsigned char *b, size_t c
      return mbedtls_stub.expected_int;
  }
  
@@ -57,5 +57,5 @@ index 4f9ce6b96c..ad2d3d8d44 100644
  
  #endif /* UNITTESTS_FEATURES_NETSOCKET_TLSSOCKET_TLS_TEST_CONFIG_H_ */
 -- 
-2.33.1
+2.34.1
 

@@ -1,7 +1,7 @@
-From 8e8e42c07093a9c22a70821e5467eef987df4dbe Mon Sep 17 00:00:00 2001
+From aac8d3964903304bb15ca97736b8b413b4208a67 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Thu, 5 Aug 2021 15:10:54 +0200
-Subject: [PATCH 099/106] AT_CellularStack: return NSAPI_ERROR_NO_CONNECTION on
+Subject: [PATCH 099/110] AT_CellularStack: return NSAPI_ERROR_NO_CONNECTION on
  socket closed
 
 ---
@@ -31,5 +31,5 @@ index 961d101c9b..ca7d2a786c 100644
  
      if (ret_val >= 0) {
 -- 
-2.33.1
+2.34.1
 
