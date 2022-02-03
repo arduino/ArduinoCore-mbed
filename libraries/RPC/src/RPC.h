@@ -77,7 +77,7 @@ class RPCClass : public Stream, public rpc::detail::dispatcher {
                                        Args... args) {
 
         auto client = new rpc::client();
-        client->call(func_name, args...);
+        client->send(func_name, args...);
         delete client;
       }
 

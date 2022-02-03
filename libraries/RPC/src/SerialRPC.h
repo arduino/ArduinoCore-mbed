@@ -45,7 +45,7 @@ public:
 		for (size_t i=0; i < len; i++) {
 			tx_buffer.push_back(buf[i]);
 		}
-		RPC.send("on_write", tx_buffer);
+		RPC.send("tty", tx_buffer);
 		return len;
 	}
 
@@ -55,7 +55,7 @@ public:
 		if (RPC.begin() == 0) {
 			return 0;
 		}
-		RPC.bind("on_write", mbed::callback(this, &SerialRPCClass::onWrite));
+		RPC.bind("tty", mbed::callback(this, &SerialRPCClass::onWrite));
 		return 1;
 	}
 

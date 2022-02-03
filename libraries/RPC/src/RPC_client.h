@@ -20,7 +20,7 @@ class client {
 
       auto args_obj = std::make_tuple(args...);
       auto call_obj = std::make_tuple(
-                        static_cast<uint8_t>(client::request_type::request), (const int)callThreadId, func_name,
+                        static_cast<uint8_t>(client::request_type::call), (int32_t)callThreadId, func_name,
                         args_obj);
 
       auto buffer = new RPCLIB_MSGPACK::sbuffer;
@@ -48,9 +48,11 @@ class client {
     void send(std::string const &func_name, Args... args) {
       LOG_DEBUG("Call function {} and forget", func_name);
 
+      callThreadId = osThreadGetId();
+
       auto args_obj = std::make_tuple(args...);
       auto call_obj = std::make_tuple(
-                        static_cast<uint8_t>(client::request_type::request_no_answer), func_name,
+                        static_cast<uint8_t>(client::request_type::notification), (const int)callThreadId, func_name,
                         args_obj);
 
       auto buffer = new RPCLIB_MSGPACK::sbuffer;
@@ -66,7 +68,7 @@ class client {
     RPCLIB_MSGPACK::object_handle result;
 
   private:
-    enum class request_type { raw = 1, request = 2, request_no_answer = 3,  response = 4 };
+    enum class request_type { call = 0, notification = 2 };;
 
     void send_msgpack(RPCLIB_MSGPACK::sbuffer *buffer);
     void getResult(RPCLIB_MSGPACK::object_handle& res);
