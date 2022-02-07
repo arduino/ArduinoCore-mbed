@@ -41,7 +41,7 @@ mbed_revision () {
 		echo -n " Checking out remote branch $REMOTE_BRANCH..."
 		# checkout the mbed-os version you prefer...
 		cd mbed-os
-		git checkout --track "$REMOTE_BRANCH"
+		git checkout "$REMOTE_BRANCH"
 		cd ..
 	fi
 
