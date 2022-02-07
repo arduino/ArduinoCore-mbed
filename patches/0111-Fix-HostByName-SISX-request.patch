@@ -1,29 +1,30 @@
-From 658bbcebf9375ef322e29e6264118941a08c8eda Mon Sep 17 00:00:00 2001
+From 801f2a2d0fbfe226f0be04bb89a08b67f642d763 Mon Sep 17 00:00:00 2001
 From: Giampaolo Mancini <giampaolo@trampolineup.com>
-Date: Fri, 4 Feb 2022 14:52:35 +0100
+Date: Mon, 7 Feb 2022 15:13:41 +0100
 Subject: [PATCH] Fix HostByName SISX request
 
 ---
- .../GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp    | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
+ .../GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp  | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
 
 diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
-index 0416f561ac..8033058182 100644
+index 1eca8f54e0..33a73bf9a3 100644
 --- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
 +++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
-@@ -284,15 +284,16 @@ nsapi_error_t GEMALTO_CINTERION_CellularStack::gethostbyname(const char* host, S
+@@ -276,15 +276,16 @@ nsapi_error_t GEMALTO_CINTERION_CellularStack::gethostbyname(const char *host, S
      }
  
      if (!address->set_ip_address(host)) {
 -        //_at.set_at_timeout(1min);
+-        _at.cmd_start_stop("^SISX" , "=" , "%s%d%s", "HostByName" , _cid, host);
 +        // _at.set_at_timeout(1min);
-         _at.cmd_start_stop("^SISX", "=", "%s%d%s", "HostByName", _cid, host);
++        _at.cmd_start_stop("^SISX", "=", "%s%d%s", "HostByName", _cid, host);
          _at.resp_start("^SISX: \"HostByName\",");
          char ipAddress[NSAPI_IP_SIZE];
          int size = _at.read_string(ipAddress, sizeof(ipAddress));
 +        _at.resp_stop();
          if (size > 0) {
-             // Valid string received
+             //Valid string received
              tr_info("Read %d bytes. Valid string: %s\n", size, ipAddress);
 -            _at.restore_at_timeout();
 +            // _at.restore_at_timeout();
