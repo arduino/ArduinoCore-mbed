@@ -85,6 +85,8 @@ public:
      *        must be between ASCII 32-126 (decimal).
      */
   int begin(const char* ssid, const char* passphrase);
+	
+  void config(const char* localip, const char* netmask, const char* gateway);
 
   int beginAP(const char* ssid, const char* passphrase, uint8_t channel = DEFAULT_AP_CHANNEL);
 
