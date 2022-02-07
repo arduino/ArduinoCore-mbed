@@ -30,6 +30,12 @@ int arduino::WiFiClass::begin(const char* ssid, const char* passphrase) {
   return _currentNetworkStatus;
 }
 
+//Config Wifi to set Static IP && Disable DHCP
+void arduino::WiFiClass::config(const char* localip, const char* netmask, const char* gateway){
+  wifi_if->set_network(localip, netmask, gateway);
+  wifi_if->set_dhcp(false);
+}
+
 int arduino::WiFiClass::beginAP(const char* ssid, const char* passphrase, uint8_t channel) {
 
 #if defined(COMPONENT_4343W_FS)
