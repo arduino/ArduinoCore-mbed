@@ -213,7 +213,8 @@ static inline void uart_set_format(uart_inst_t *uart, uint data_bits, uint stop_
  */
 static inline void uart_set_irq_enables(uart_inst_t *uart, bool rx_has_data, bool tx_needs_data) {
     uart_get_hw(uart)->imsc = (!!tx_needs_data << UART_UARTIMSC_TXIM_LSB) |
-                              (!!rx_has_data << UART_UARTIMSC_RXIM_LSB);
+                              (!!rx_has_data << UART_UARTIMSC_RXIM_LSB) |
+                              (1 << UART_UARTIMSC_RTIM_LSB);
     if (rx_has_data) {
         // Set minimum threshold
         hw_write_masked(&uart_get_hw(uart)->ifls, 0 << UART_UARTIFLS_RXIFLSEL_LSB,

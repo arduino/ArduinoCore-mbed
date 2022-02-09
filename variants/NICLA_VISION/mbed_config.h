@@ -47,16 +47,16 @@
 #define BLE_SECURITY_DATABASE_FILESYSTEM                                        1                                                                                                // set by library:ble
 #define BLE_SECURITY_DATABASE_KVSTORE                                           0                                                                                                // set by library:ble
 #define BLE_SECURITY_DATABASE_MAX_ENTRIES                                       5                                                                                                // set by library:ble
-#define CLOCK_SOURCE                                                            USE_PLL_HSE_EXTC                                                                                 // set by target:PORTENTA_H7
+#define CLOCK_SOURCE                                                            USE_PLL_HSE_EXTC                                                                                 // set by target:NICLA_VISION
 #define DM_CONN_MAX                                                             5                                                                                                // set by application[*]
 #define DM_NUM_ADV_SETS                                                         3                                                                                                // set by library:cordio
 #define DM_NUM_PHYS                                                             3                                                                                                // set by library:cordio
 #define DM_SYNC_MAX                                                             1                                                                                                // set by library:cordio
 #define EATT_CONN_CHAN_MAX                                                      1                                                                                                // set by library:cordio
-#define HSE_VALUE                                                               25000000                                                                                         // set by target:PORTENTA_H7
+#define HSE_VALUE                                                               25000000                                                                                         // set by target:NICLA_VISION
 #define L2C_COC_CHAN_MAX                                                        1                                                                                                // set by library:cordio
 #define L2C_COC_REG_MAX                                                         1                                                                                                // set by library:cordio
-#define LPTICKER_DELAY_TICKS                                                    0                                                                                                // set by target:PORTENTA_H7
+#define LPTICKER_DELAY_TICKS                                                    0                                                                                                // set by target:NICLA_VISION
 #define MBED_ALL_STATS_ENABLED                                                  1                                                                                                // set by application[*]
 #define MBED_CONF_ALT1250_PPP_BAUDRATE                                          115200                                                                                           // set by library:ALT1250_PPP
 #define MBED_CONF_ALT1250_PPP_PROVIDE_DEFAULT                                   0                                                                                                // set by library:ALT1250_PPP
@@ -149,6 +149,8 @@
 #define MBED_CONF_FAT_CHAN_FF_NORTC_MDAY                                        1                                                                                                // set by library:fat_chan
 #define MBED_CONF_FAT_CHAN_FF_NORTC_MON                                         1                                                                                                // set by library:fat_chan
 #define MBED_CONF_FAT_CHAN_FF_NORTC_YEAR                                        2017                                                                                             // set by library:fat_chan
+#define MBED_CONF_FAT_CHAN_FF_PRINT_FLOAT                                       0                                                                                                // set by library:fat_chan
+#define MBED_CONF_FAT_CHAN_FF_PRINT_LLI                                         0                                                                                                // set by library:fat_chan
 #define MBED_CONF_FAT_CHAN_FF_SFN_BUF                                           12                                                                                               // set by library:fat_chan
 #define MBED_CONF_FAT_CHAN_FF_STRF_ENCODE                                       3                                                                                                // set by library:fat_chan
 #define MBED_CONF_FAT_CHAN_FF_STR_VOLUME_ID                                     0                                                                                                // set by library:fat_chan
@@ -211,7 +213,7 @@
 #define MBED_CONF_LWIP_MBOX_SIZE                                                8                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_MEMP_NUM_TCPIP_MSG_INPKT                                 8                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_MEMP_NUM_TCP_SEG                                         16                                                                                               // set by library:lwip
-#define MBED_CONF_LWIP_MEM_SIZE                                                 16000                                                                                            // set by library:lwip[PORTENTA_H7]
+#define MBED_CONF_LWIP_MEM_SIZE                                                 16000                                                                                            // set by library:lwip[NICLA_VISION]
 #define MBED_CONF_LWIP_ND6_QUEUEING                                             0                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_ND6_RDNSS_MAX_DNS_SERVERS                                0                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_NUM_NETBUF                                               8                                                                                                // set by library:lwip
@@ -256,6 +258,7 @@
 #define MBED_CONF_PLATFORM_CALLBACK_NONTRIVIAL                                  1                                                                                                // set by application[*]
 #define MBED_CONF_PLATFORM_CRASH_CAPTURE_ENABLED                                0                                                                                                // set by library:platform
 #define MBED_CONF_PLATFORM_CTHUNK_COUNT_MAX                                     8                                                                                                // set by library:platform
+#define MBED_CONF_PLATFORM_DEEPSLEEP_STATS_VERBOSE                              0                                                                                                // set by library:platform[STM]
 #define MBED_CONF_PLATFORM_DEFAULT_SERIAL_BAUD_RATE                             115200                                                                                           // set by application[*]
 #define MBED_CONF_PLATFORM_ERROR_ALL_THREADS_INFO                               0                                                                                                // set by library:platform
 #define MBED_CONF_PLATFORM_ERROR_FILENAME_CAPTURE_ENABLED                       0                                                                                                // set by library:platform
@@ -307,6 +310,7 @@
 #define MBED_CONF_RM1000_AT_BAUDRATE                                            230400                                                                                           // set by library:RM1000_AT
 #define MBED_CONF_RM1000_AT_PROVIDE_DEFAULT                                     0                                                                                                // set by library:RM1000_AT
 #define MBED_CONF_RTOS_API_PRESENT                                              1                                                                                                // set by library:rtos-api
+#define MBED_CONF_RTOS_ENABLE_ALL_RTX_EVENTS                                    0                                                                                                // set by library:rtos
 #define MBED_CONF_RTOS_EVFLAGS_NUM                                              0                                                                                                // set by library:rtos
 #define MBED_CONF_RTOS_IDLE_THREAD_STACK_SIZE                                   512                                                                                              // set by library:rtos
 #define MBED_CONF_RTOS_IDLE_THREAD_STACK_SIZE_DEBUG_EXTRA                       128                                                                                              // set by library:rtos[STM]
@@ -369,21 +373,25 @@
 #define MBED_CONF_TARGET_DEEP_SLEEP_LATENCY                                     4                                                                                                // set by target:MCU_STM32
 #define MBED_CONF_TARGET_DEFAULT_ADC_VREF                                       NAN                                                                                              // set by target:Target
 #define MBED_CONF_TARGET_GPIO_RESET_AT_INIT                                     0                                                                                                // set by target:MCU_STM32
-#define MBED_CONF_TARGET_I2C_TIMING_VALUE_ALGO                                  1                                                                                                // set by target:PORTENTA_H7
+#define MBED_CONF_TARGET_I2C_TIMING_VALUE_ALGO                                  1                                                                                                // set by target:NICLA_VISION
 #define MBED_CONF_TARGET_INIT_US_TICKER_AT_BOOT                                 1                                                                                                // set by target:MCU_STM32
 #define MBED_CONF_TARGET_INTERNAL_FLASH_UNIFORM_SECTORS                         1                                                                                                // set by target:Target
 #define MBED_CONF_TARGET_LPTICKER_LPTIM                                         1                                                                                                // set by target:MCU_STM32H7
 #define MBED_CONF_TARGET_LPTICKER_LPTIM_CLOCK                                   1                                                                                                // set by target:MCU_STM32
-#define MBED_CONF_TARGET_LPUART_CLOCK_SOURCE                                    USE_LPUART_CLK_LSE|USE_LPUART_CLK_PCLK1                                                          // set by target:MCU_STM32
-#define MBED_CONF_TARGET_LSE_AVAILABLE                                          0                                                                                                // set by target:PORTENTA_H7
-#define MBED_CONF_TARGET_LSE_BYPASS                                             1                                                                                                // set by target:PORTENTA_H7
+#define MBED_CONF_TARGET_LPUART_CLOCK_SOURCE                                    USE_LPUART_CLK_HSI                                                                               // set by target:NICLA_VISION
+#define MBED_CONF_TARGET_LSE_AVAILABLE                                          0                                                                                                // set by target:NICLA_VISION
+#define MBED_CONF_TARGET_LSE_BYPASS                                             1                                                                                                // set by target:NICLA_VISION
 #define MBED_CONF_TARGET_LSE_DRIVE_LOAD_LEVEL                                   RCC_LSEDRIVE_LOW                                                                                 // set by target:MCU_STM32H7
 #define MBED_CONF_TARGET_MPU_ROM_END                                            0x0fffffff                                                                                       // set by target:Target
-#define MBED_CONF_TARGET_NETWORK_DEFAULT_INTERFACE_TYPE                         ETHERNET                                                                                         // set by target:PORTENTA_H7
+#define MBED_CONF_TARGET_NETWORK_DEFAULT_INTERFACE_TYPE                         WIFI                                                                                             // set by target:NICLA_VISION
 #define MBED_CONF_TARGET_RTC_CLOCK_SOURCE                                       USE_RTC_CLK_LSE_OR_LSI                                                                           // set by target:MCU_STM32
-#define MBED_CONF_TARGET_SYSTEM_POWER_SUPPLY                                    PWR_SMPS_1V8_SUPPLIES_LDO                                                                        // set by target:PORTENTA_H7
+#define MBED_CONF_TARGET_SE050_ENA                                              PG_0                                                                                             // set by target:NICLA_VISION
+#define MBED_CONF_TARGET_SE050_I2C_FREQ                                         1000000                                                                                          // set by target:NICLA_VISION
+#define MBED_CONF_TARGET_SE050_SCL                                              PF_1                                                                                             // set by target:NICLA_VISION
+#define MBED_CONF_TARGET_SE050_SDA                                              PF_0                                                                                             // set by target:NICLA_VISION
+#define MBED_CONF_TARGET_SYSTEM_POWER_SUPPLY                                    PWR_LDO_SUPPLY                                                                                   // set by target:NICLA_VISION
 #define MBED_CONF_TARGET_TICKLESS_FROM_US_TICKER                                0                                                                                                // set by target:Target
-#define MBED_CONF_TARGET_USB_SPEED                                              USE_USB_OTG_HS                                                                                   // set by target:PORTENTA_H7
+#define MBED_CONF_TARGET_USB_SPEED                                              USE_USB_OTG_HS                                                                                   // set by target:NICLA_VISION
 #define MBED_CONF_TARGET_XIP_ENABLE                                             0                                                                                                // set by target:Target
 #define MBED_CONF_TELIT_HE910_BAUDRATE                                          115200                                                                                           // set by library:TELIT_HE910
 #define MBED_CONF_TELIT_HE910_PROVIDE_DEFAULT                                   0                                                                                                // set by library:TELIT_HE910
@@ -421,6 +429,7 @@
 #define WSF_TRACE_ENABLED                                                       0                                                                                                // set by library:cordio
 // Macros
 #define MBEDTLS_CIPHER_MODE_CTR                                                                                                                                                  // defined by library:SecureStore
+#define MBEDTLS_USER_CONFIG_FILE                                                "conf/custom_mbedtls_config.h"                                                                        // defined by application
 #define NSAPI_PPP_AVAILABLE                                                     (MBED_CONF_PPP_ENABLED || MBED_CONF_LWIP_PPP_ENABLED)                                            // defined by library:ppp
 #define NSDYNMEM_TRACKER_ENABLED                                                MBED_CONF_NANOSTACK_LIBSERVICE_NSDYNMEM_TRACKER_ENABLED                                          // defined by library:nanostack-libservice
 #define UNITY_INCLUDE_CONFIG_H                                                                                                                                                   // defined by library:utest

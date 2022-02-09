@@ -32,6 +32,16 @@
 #include "mbedtls/hmac_drbg.h"
 #include "mbedtls/error.h"
 
+#if defined(COMPONENT_SE050) && defined(MBEDTLS_ECDH_ALT) && SSS_HAVE_ALT_SSS
+extern "C" {
+#include "sss_mbedtls.h"
+}
+#include "ex_sss_boot.h"
+extern "C" {
+#include "ecdsa_verify_alt.h"
+}
+#endif
+
 // This class requires Mbed TLS SSL/TLS client code
 #if defined(MBEDTLS_SSL_CLI_C) || defined(DOXYGEN_ONLY)
 
@@ -116,6 +126,29 @@ public:
      */
     nsapi_error_t set_root_ca_cert(const char *root_ca_pem);
 
+    /** Appends the certificate to an existing ca chain.
+     *
+     * @note Must be called before calling connect()
+     *
+     * @param root_ca Root CA Certificate in any Mbed TLS-supported format.
+     * @param len     Length of certificate (including terminating 0 for PEM).
+     * @retval NSAPI_ERROR_OK on success.
+     * @retval NSAPI_ERROR_NO_MEMORY in case there is not enough memory to allocate certificate.
+     * @retval NSAPI_ERROR_PARAMETER in case the provided root_ca parameter failed parsing.
+     */
+    nsapi_error_t append_root_ca_cert(const void *root_ca, size_t len);
+
+    /** Appends the certificate to an existing ca chain.
+     *
+     * @note Must be called before calling connect()
+     *
+     * @param root_ca_pem Root CA Certificate in PEM format.
+     * @retval NSAPI_ERROR_OK on success.
+     * @retval NSAPI_ERROR_NO_MEMORY in case there is not enough memory to allocate certificate.
+     * @retval NSAPI_ERROR_PARAMETER in case the provided root_ca parameter failed parsing.
+     */
+    nsapi_error_t append_root_ca_cert(const char *root_ca_pem);
+
     /** Sets the certification of Root CA.
      *
      * @note Must be called before calling connect()
@@ -148,6 +181,9 @@ public:
      * @retval NSAPI_ERROR_PARAMETER in case the provided root_ca parameter failed parsing.
      */
     nsapi_error_t set_client_cert_key(const char *client_cert_pem, const char *client_private_key_pem);
+#if defined(COMPONENT_SE050) && defined(MBEDTLS_ECDH_ALT) && SSS_HAVE_ALT_SSS
+    nsapi_error_t set_client_cert_key(const void *client_cert, size_t client_cert_len, sss_object_t *pkeyObject, ex_sss_boot_ctx_t *deviceCtx);
+#endif
 
     /** Send data over a TLS socket.
      *
@@ -327,6 +363,11 @@ private:
     mbedtls_ssl_context _ssl;
 #ifdef MBEDTLS_X509_CRT_PARSE_C
     mbedtls_pk_context _pkctx;
+#endif
+
+#if defined(COMPONENT_SE050) && defined(MBEDTLS_ECDH_ALT) && SSS_HAVE_ALT_SSS
+    sss_object_t *_sss_key_pair_ptr = nullptr;
+    sss_key_store_t *_sss_ks_ptr = nullptr;
 #endif
 
     DRBG_CTX _drbg;

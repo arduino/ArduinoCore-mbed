@@ -3,11 +3,7 @@
 -fno-rtti
 -std=gnu++14
 -DAPPLICATION_ADDR=0x8040000
--DAPPLICATION_RAM_ADDR=0x24000000
--DAPPLICATION_RAM_SIZE=0x80000
 -DAPPLICATION_SIZE=0xc0000
--DMBED_RAM1_SIZE=0x80000
--DMBED_RAM1_START=0x24000000
 -DMBED_RAM_SIZE=0x80000
 -DMBED_RAM_START=0x24000000
 -DMBED_ROM_SIZE=0x100000
@@ -21,6 +17,7 @@
 -fdata-sections
 -ffunction-sections
 -fmessage-length=0
+-fno-exceptions
 -fomit-frame-pointer
 -funsigned-char
 -mcpu=cortex-m7
