@@ -1,7 +1,7 @@
 From 035027aba76d65f6f82d86495e1fda3b0e99a05e Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Mon, 6 Dec 2021 12:02:28 +0100
-Subject: [PATCH 089/110] RP2040: correct system clock frequency
+Subject: [PATCH 089/138] RP2040: correct system clock frequency
 
 Fixes https://github.com/arduino/ArduinoCore-mbed/issues/271
 ---
@@ -32,5 +32,5 @@ index 1f775638f9..b9ad1319af 100644
 +uint32_t SystemCoreClock = 125000000;
 \ No newline at end of file
 -- 
-2.34.1
+2.25.1
 

@@ -1,7 +1,7 @@
 From b1f552e3a7735549513bf9806f37bfc16685bee9 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Mon, 15 Feb 2021 12:24:50 +0100
-Subject: [PATCH 020/110] RP2040: Mark .init section as KEEP
+Subject: [PATCH 020/138] RP2040: Mark .init section as KEEP
 
 ---
  .../TARGET_RP2040/TOOLCHAIN_GCC_ARM/memmap_default.ld           | 2 +-
@@ -21,5 +21,5 @@ index 07d5812db1..fb2ff6d18a 100644
          *(.fini)
          /* Pull all c'tors into .text */
 -- 
-2.34.1
+2.25.1
 

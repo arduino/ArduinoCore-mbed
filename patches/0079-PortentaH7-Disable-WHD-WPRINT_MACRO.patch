@@ -1,7 +1,7 @@
 From cdad9d4da99dd48f942443742a0041af79dc09bd Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Fri, 23 Jul 2021 11:29:13 +0200
-Subject: [PATCH 079/110] PortentaH7: Disable WHD WPRINT_MACRO
+Subject: [PATCH 079/138] PortentaH7: Disable WHD WPRINT_MACRO
 
 ---
  .../COMPONENT_WHD/port/cyhal_hw_types.h             | 13 +------------
@@ -48,5 +48,5 @@ index da67e0a036..cc442a6e44 100644
  #define CY_WHD_CONFIG_USE_SDIO
  //#define CY_WHD_CONFIG_USE_SPI
 -- 
-2.34.1
+2.25.1
 

@@ -1,7 +1,7 @@
 From 074599cf1116d7343e6de80f7fa47fe8d01d38ed Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Tue, 23 Feb 2021 16:48:23 +0100
-Subject: [PATCH 028/110] RP2040: add pwm driver
+Subject: [PATCH 028/138] RP2040: add pwm driver
 
 ---
  .../TARGET_RP2040/objects.h                   |   9 +
@@ -247,5 +247,5 @@ index c9601649d8..5d7c81b24a 100644
              "SPI",
              "USBDEVICE"
 -- 
-2.34.1
+2.25.1
 

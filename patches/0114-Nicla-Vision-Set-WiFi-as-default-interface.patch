@@ -1,0 +1,26 @@
+From bb43009e3650270c078a3177d87a256725468be8 Mon Sep 17 00:00:00 2001
+From: giulcioffi <g.cioffi@arduino.cc>
+Date: Fri, 17 Sep 2021 15:46:29 +0200
+Subject: [PATCH 114/138] Nicla Vision: Set WiFi as default interface
+
+---
+ targets/targets.json | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/targets/targets.json b/targets/targets.json
+index eb83ff264e..4458fbb207 100644
+--- a/targets/targets.json
++++ b/targets/targets.json
+@@ -3497,7 +3497,8 @@
+             "system_power_supply": "PWR_LDO_SUPPLY",
+             "clock_source": "USE_PLL_HSE_EXTC",
+             "lse_available": 0,
+-            "lpticker_delay_ticks": 0
++            "lpticker_delay_ticks": 0,
++            "network-default-interface-type": "WIFI"
+         },
+         "components_add": [
+             "QSPIF",
+-- 
+2.25.1
+

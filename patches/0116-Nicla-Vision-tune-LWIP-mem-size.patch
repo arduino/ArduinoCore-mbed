@@ -1,0 +1,26 @@
+From 50fde62150c50372001e6bf9e1245efbb9d6869d Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Fri, 24 Dec 2021 09:53:40 +0100
+Subject: [PATCH 116/138] Nicla Vision: tune LWIP mem size
+
+---
+ connectivity/lwipstack/mbed_lib.json | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/connectivity/lwipstack/mbed_lib.json b/connectivity/lwipstack/mbed_lib.json
+index 6e725819b4..71df8d5449 100644
+--- a/connectivity/lwipstack/mbed_lib.json
++++ b/connectivity/lwipstack/mbed_lib.json
+@@ -221,6 +221,9 @@
+         "PORTENTA_H7": {
+             "mem-size": 16000
+         },
++        "NICLA_VISION": {
++            "mem-size": 16000
++        },
+         "FVP_MPS2_M3": {
+             "mem-size": 36560
+         },
+-- 
+2.25.1
+

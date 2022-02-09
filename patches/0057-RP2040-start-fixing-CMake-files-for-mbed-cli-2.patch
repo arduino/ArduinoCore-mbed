@@ -1,7 +1,7 @@
 From 01fe140916bb8aecba2d4c7966aa81a1b201b22c Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Mon, 3 May 2021 14:33:02 +0200
-Subject: [PATCH 057/110] RP2040: start fixing CMake files for mbed cli 2
+Subject: [PATCH 057/138] RP2040: start fixing CMake files for mbed cli 2
 
 ---
  targets/TARGET_RASPBERRYPI/CMakeLists.txt     | 17 ++--
@@ -189,5 +189,5 @@ index 0000000000..5df188f681
 +
 +target_link_libraries(mbed-raspberrypi-pico INTERFACE mbed-rp2040)
 -- 
-2.34.1
+2.25.1
 

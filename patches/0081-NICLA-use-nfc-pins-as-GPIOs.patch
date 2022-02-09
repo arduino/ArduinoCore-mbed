@@ -1,7 +1,7 @@
 From d7d06b38bfee2852076cc09b8bfe0c2a732a112f Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Thu, 26 Aug 2021 11:47:20 +0200
-Subject: [PATCH 081/110] NICLA: use nfc pins as GPIOs
+Subject: [PATCH 081/138] NICLA: use nfc pins as GPIOs
 
 ---
  targets/targets.json | 1 +
@@ -20,5 +20,5 @@ index 9b20540219..89205a0716 100644
              "NRF52_PAN_15",
              "NRF52_PAN_20",
 -- 
-2.34.1
+2.25.1
 

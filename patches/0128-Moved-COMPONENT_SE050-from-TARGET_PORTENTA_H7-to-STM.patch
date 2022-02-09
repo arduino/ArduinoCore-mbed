@@ -1,0 +1,866 @@
+From fa21a14868766a83c1adca0d34b2330f279fbe93 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Wed, 2 Feb 2022 14:23:36 +0100
+Subject: [PATCH 128/138] Moved COMPONENT_SE050 from TARGET_PORTENTA_H7 to
+ STM32H747xI
+
+plugAndTrust: rename log folder to nxlog and revert 86184757e34
+---
+ .gitignore                                                       | 1 +
+ .../{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/Apache_2_0.txt      | 0
+ .../{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/BSD3_license.txt    | 0
+ .../{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/ChangeLog.md        | 0
+ .../{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/LICENSE             | 0
+ .../{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/README.rst          | 0
+ .../COMPONENT_SE050/ecc_example/CMakeLists.txt                   | 0
+ .../{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/fsl_sss_ftr.h       | 0
+ .../COMPONENT_SE050/hostlib/hostLib/inc/Applet_SE050_Ver.h       | 0
+ .../hostlib/hostLib/inc/PlugAndTrust_HostLib_Ver.h               | 0
+ .../COMPONENT_SE050/hostlib/hostLib/inc/PlugAndTrust_Pkg_Ver.h   | 0
+ .../COMPONENT_SE050/hostlib/hostLib/inc/nxEnsure.h               | 0
+ .../COMPONENT_SE050/hostlib/hostLib/inc/nxScp03_Apis.h           | 0
+ .../COMPONENT_SE050/hostlib/hostLib/inc/nxScp03_Const.h          | 0
+ .../COMPONENT_SE050/hostlib/hostLib/inc/nxScp03_Types.h          | 0
+ .../COMPONENT_SE050/hostlib/hostLib/inc/scp.h                    | 0
+ .../COMPONENT_SE050/hostlib/hostLib/inc/se05x_const.h            | 0
+ .../COMPONENT_SE050/hostlib/hostLib/inc/se05x_ecc_curves.h       | 0
+ .../COMPONENT_SE050/hostlib/hostLib/inc/se05x_ecc_curves_inc.h   | 0
+ .../hostlib/hostLib/inc/se05x_ecc_curves_values.h                | 0
+ .../COMPONENT_SE050/hostlib/hostLib/inc/se05x_enums.h            | 0
+ .../COMPONENT_SE050/hostlib/hostLib/inc/se05x_ftr.h              | 0
+ .../COMPONENT_SE050/hostlib/hostLib/inc/se05x_tlv.h              | 0
+ .../COMPONENT_SE050/hostlib/hostLib/inc/sm_const.h               | 0
+ .../hostlib/hostLib/libCommon/infra/global_platf.c               | 0
+ .../hostlib/hostLib/libCommon/infra/global_platf.h               | 0
+ .../COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_apdu.c    | 0
+ .../COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_apdu.h    | 0
+ .../COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_api.h     | 0
+ .../COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_connect.c | 0
+ .../COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_errors.c  | 0
+ .../COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_errors.h  | 0
+ .../COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_printf.c  | 0
+ .../COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_types.h   | 0
+ .../hostlib/hostLib/libCommon/nxScp/nxScp03_Com.c                | 0
+ .../hostlib/hostLib/libCommon/nxlog}/nxLog.c                     | 0
+ .../hostlib/hostLib/libCommon/nxlog}/nxLog.h                     | 0
+ .../hostlib/hostLib/libCommon/nxlog}/nxLog_App.h                 | 0
+ .../hostlib/hostLib/libCommon/nxlog}/nxLog_DefaultConfig.h       | 0
+ .../hostlib/hostLib/libCommon/nxlog}/nxLog_hostLib.h             | 0
+ .../hostlib/hostLib/libCommon/nxlog}/nxLog_mbedtls.h             | 0
+ .../hostlib/hostLib/libCommon/nxlog}/nxLog_scp.h                 | 0
+ .../hostlib/hostLib/libCommon/nxlog}/nxLog_smCom.h               | 0
+ .../hostlib/hostLib/libCommon/nxlog}/nxLog_sss.h                 | 0
+ .../hostlib/hostLib/libCommon/smCom/T1oI2C/phEseStatus.h         | 0
+ .../hostlib/hostLib/libCommon/smCom/T1oI2C/phEseTypes.h          | 0
+ .../hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEsePal_i2c.c     | 0
+ .../hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEsePal_i2c.h     | 0
+ .../hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEseProto7816_3.c | 0
+ .../hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEseProto7816_3.h | 0
+ .../hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEse_Api.c        | 0
+ .../hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEse_Api.h        | 0
+ .../hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEse_Internal.h   | 0
+ .../COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/apduComm.h   | 0
+ .../COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/smCom.c      | 0
+ .../COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/smCom.h      | 0
+ .../hostlib/hostLib/libCommon/smCom/smComT1oI2C.c                | 0
+ .../hostlib/hostLib/libCommon/smCom/smComT1oI2C.h                | 0
+ .../COMPONENT_SE050/hostlib/hostLib/mbedtls/src/ecdh_alt.c       | 0
+ .../COMPONENT_SE050/hostlib/hostLib/mbedtls/src/rsa_alt.c        | 0
+ .../COMPONENT_SE050/hostlib/hostLib/platform/generic/sm_timer.c  | 0
+ .../COMPONENT_SE050/hostlib/hostLib/platform/inc/i2c_a7.h        | 0
+ .../COMPONENT_SE050/hostlib/hostLib/platform/inc/se05x_apis.h    | 0
+ .../COMPONENT_SE050/hostlib/hostLib/platform/inc/sm_printf.h     | 0
+ .../COMPONENT_SE050/hostlib/hostLib/platform/inc/sm_timer.h      | 0
+ .../COMPONENT_SE050/hostlib/hostLib/platform/se05x_i2c.cpp       | 0
+ .../COMPONENT_SE050/hostlib/hostLib/platform/se05x_power.cpp     | 0
+ .../COMPONENT_SE050/hostlib/hostLib/se05x/src/se05x_ECC_curves.c | 0
+ .../COMPONENT_SE050/hostlib/hostLib/se05x/src/se05x_mw.c         | 0
+ .../COMPONENT_SE050/hostlib/hostLib/se05x/src/se05x_tlv.c        | 0
+ .../hostlib/hostLib/se05x_03_xx_xx/se05x_04_xx_APDU_apis.h       | 0
+ .../hostlib/hostLib/se05x_03_xx_xx/se05x_04_xx_APDU_impl.h       | 0
+ .../COMPONENT_SE050/hostlib/hostLib/se05x_03_xx_xx/se05x_APDU.c  | 0
+ .../COMPONENT_SE050/hostlib/hostLib/se05x_03_xx_xx/se05x_APDU.h  | 0
+ .../hostlib/hostLib/se05x_03_xx_xx/se05x_APDU_apis.h             | 0
+ .../hostlib/hostLib/se05x_03_xx_xx/se05x_APDU_impl.h             | 0
+ .../COMPONENT_SE050/mbedtls_cli_srv/CMakeLists.txt               | 0
+ .../COMPONENT_SE050/sss/ex/ecc/ex_sss_ecc.c                      | 0
+ .../COMPONENT_SE050/sss/ex/inc/ex_scp03_puf.h                    | 0
+ .../{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/ex/inc/ex_sss.h | 0
+ .../COMPONENT_SE050/sss/ex/inc/ex_sss_auth.h                     | 0
+ .../COMPONENT_SE050/sss/ex/inc/ex_sss_boot.h                     | 0
+ .../COMPONENT_SE050/sss/ex/inc/ex_sss_main_inc.h                 | 0
+ .../COMPONENT_SE050/sss/ex/inc/ex_sss_main_inc_linux.h           | 0
+ .../COMPONENT_SE050/sss/ex/inc/ex_sss_objid.h                    | 0
+ .../COMPONENT_SE050/sss/ex/inc/ex_sss_ports.h                    | 0
+ .../COMPONENT_SE050/sss/ex/inc/ex_sss_scp03_keys.h               | 0
+ .../COMPONENT_SE050/sss/ex/inc/ex_sss_tp_scp03_keys.h            | 0
+ .../COMPONENT_SE050/sss/ex/mbedtls/ex_sss_ssl2.c                 | 0
+ .../COMPONENT_SE050/sss/ex/src/ex_sss_boot.c                     | 0
+ .../COMPONENT_SE050/sss/ex/src/ex_sss_boot_connectstring.c       | 0
+ .../COMPONENT_SE050/sss/ex/src/ex_sss_boot_int.h                 | 0
+ .../COMPONENT_SE050/sss/ex/src/ex_sss_scp03_auth.c               | 0
+ .../COMPONENT_SE050/sss/ex/src/ex_sss_se05x.c                    | 0
+ .../COMPONENT_SE050/sss/ex/src/ex_sss_se05x_auth.c               | 0
+ .../{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/inc/fsl_sscp.h  | 0
+ .../COMPONENT_SE050/sss/inc/fsl_sss_api.h                        | 0
+ .../COMPONENT_SE050/sss/inc/fsl_sss_api_ver.h                    | 0
+ .../COMPONENT_SE050/sss/inc/fsl_sss_config.h                     | 0
+ .../COMPONENT_SE050/sss/inc/fsl_sss_ftr_default.h                | 0
+ .../COMPONENT_SE050/sss/inc/fsl_sss_keyid_map.h                  | 0
+ .../COMPONENT_SE050/sss/inc/fsl_sss_lpc55s_apis.h                | 0
+ .../COMPONENT_SE050/sss/inc/fsl_sss_mbedtls_apis.h               | 0
+ .../COMPONENT_SE050/sss/inc/fsl_sss_mbedtls_types.h              | 0
+ .../COMPONENT_SE050/sss/inc/fsl_sss_openssl_apis.h               | 0
+ .../COMPONENT_SE050/sss/inc/fsl_sss_openssl_types.h              | 0
+ .../COMPONENT_SE050/sss/inc/fsl_sss_policy.h                     | 0
+ .../COMPONENT_SE050/sss/inc/fsl_sss_se05x_apis.h                 | 0
+ .../COMPONENT_SE050/sss/inc/fsl_sss_se05x_policy.h               | 0
+ .../COMPONENT_SE050/sss/inc/fsl_sss_se05x_scp03.h                | 0
+ .../COMPONENT_SE050/sss/inc/fsl_sss_se05x_types.h                | 0
+ .../COMPONENT_SE050/sss/inc/fsl_sss_sscp.h                       | 0
+ .../COMPONENT_SE050/sss/inc/fsl_sss_user_apis.h                  | 0
+ .../COMPONENT_SE050/sss/inc/fsl_sss_user_types.h                 | 0
+ .../COMPONENT_SE050/sss/inc/fsl_sss_util_asn1_der.h              | 0
+ .../COMPONENT_SE050/sss/inc/fsl_sss_util_rsa_sign_utils.h        | 0
+ .../COMPONENT_SE050/sss/plugin/mbedtls/ecdh_alt_ax.c             | 0
+ .../COMPONENT_SE050/sss/plugin/mbedtls/ecdsa_verify_alt.c        | 0
+ .../COMPONENT_SE050/sss/plugin/mbedtls/ecdsa_verify_alt.h        | 0
+ .../COMPONENT_SE050/sss/plugin/mbedtls/ecp_alt.h                 | 0
+ .../COMPONENT_SE050/sss/plugin/mbedtls/port/ksdk/ecp_alt.c       | 0
+ .../sss/plugin/mbedtls/port/ksdk/ecp_curves_alt.c                | 0
+ .../COMPONENT_SE050/sss/plugin/mbedtls/rsa_alt.h                 | 0
+ .../COMPONENT_SE050/sss/plugin/mbedtls/sss_mbedtls.c             | 0
+ .../COMPONENT_SE050/sss/plugin/mbedtls/sss_mbedtls.h             | 0
+ .../COMPONENT_SE050/sss/plugin/mbedtls/sss_mbedtls_rsa.c         | 0
+ .../COMPONENT_SE050/sss/plugin/mbedtls/sss_mbedtls_x86_config.h  | 0
+ .../COMPONENT_SE050/sss/port/default/fsl_sss_types.h             | 0
+ .../COMPONENT_SE050/sss/src/fsl_sss_apis.c                       | 0
+ .../COMPONENT_SE050/sss/src/fsl_sss_util_asn1_der.c              | 0
+ .../COMPONENT_SE050/sss/src/fsl_sss_util_rsa_sign_utils.c        | 0
+ .../COMPONENT_SE050/sss/src/keystore/keystore_cmn.c              | 0
+ .../COMPONENT_SE050/sss/src/keystore/keystore_openssl.c          | 0
+ .../COMPONENT_SE050/sss/src/keystore/keystore_pc.c               | 0
+ .../COMPONENT_SE050/sss/src/mbedtls/fsl_sss_mbedtls_apis.c       | 0
+ .../COMPONENT_SE050/sss/src/openssl/fsl_sss_openssl_apis.c       | 0
+ .../COMPONENT_SE050/sss/src/se05x/fsl_sss_se05x_apis.c           | 0
+ .../COMPONENT_SE050/sss/src/se05x/fsl_sss_se05x_eckey.c          | 0
+ .../COMPONENT_SE050/sss/src/se05x/fsl_sss_se05x_mw.c             | 0
+ .../COMPONENT_SE050/sss/src/se05x/fsl_sss_se05x_policy.c         | 0
+ .../COMPONENT_SE050/sss/src/se05x/fsl_sss_se05x_scp03.c          | 0
+ 141 files changed, 1 insertion(+)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/Apache_2_0.txt (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/BSD3_license.txt (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/ChangeLog.md (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/LICENSE (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/README.rst (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/ecc_example/CMakeLists.txt (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/fsl_sss_ftr.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/inc/Applet_SE050_Ver.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/inc/PlugAndTrust_HostLib_Ver.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/inc/PlugAndTrust_Pkg_Ver.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/inc/nxEnsure.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/inc/nxScp03_Apis.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/inc/nxScp03_Const.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/inc/nxScp03_Types.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/inc/scp.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/inc/se05x_const.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/inc/se05x_ecc_curves.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/inc/se05x_ecc_curves_inc.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/inc/se05x_ecc_curves_values.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/inc/se05x_enums.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/inc/se05x_ftr.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/inc/se05x_tlv.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/inc/sm_const.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/global_platf.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/global_platf.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_apdu.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_apdu.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_api.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_connect.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_errors.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_errors.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_printf.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_types.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/libCommon/nxScp/nxScp03_Com.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/log => COMPONENT_SE050/hostlib/hostLib/libCommon/nxlog}/nxLog.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/log => COMPONENT_SE050/hostlib/hostLib/libCommon/nxlog}/nxLog.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/log => COMPONENT_SE050/hostlib/hostLib/libCommon/nxlog}/nxLog_App.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/log => COMPONENT_SE050/hostlib/hostLib/libCommon/nxlog}/nxLog_DefaultConfig.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/log => COMPONENT_SE050/hostlib/hostLib/libCommon/nxlog}/nxLog_hostLib.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/log => COMPONENT_SE050/hostlib/hostLib/libCommon/nxlog}/nxLog_mbedtls.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/log => COMPONENT_SE050/hostlib/hostLib/libCommon/nxlog}/nxLog_scp.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/log => COMPONENT_SE050/hostlib/hostLib/libCommon/nxlog}/nxLog_smCom.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/log => COMPONENT_SE050/hostlib/hostLib/libCommon/nxlog}/nxLog_sss.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phEseStatus.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phEseTypes.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEsePal_i2c.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEsePal_i2c.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEseProto7816_3.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEseProto7816_3.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEse_Api.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEse_Api.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEse_Internal.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/apduComm.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/smCom.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/smCom.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/smComT1oI2C.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/smComT1oI2C.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/mbedtls/src/ecdh_alt.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/mbedtls/src/rsa_alt.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/platform/generic/sm_timer.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/platform/inc/i2c_a7.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/platform/inc/se05x_apis.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/platform/inc/sm_printf.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/platform/inc/sm_timer.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/platform/se05x_i2c.cpp (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/platform/se05x_power.cpp (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/se05x/src/se05x_ECC_curves.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/se05x/src/se05x_mw.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/se05x/src/se05x_tlv.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/se05x_03_xx_xx/se05x_04_xx_APDU_apis.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/se05x_03_xx_xx/se05x_04_xx_APDU_impl.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/se05x_03_xx_xx/se05x_APDU.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/se05x_03_xx_xx/se05x_APDU.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/se05x_03_xx_xx/se05x_APDU_apis.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/hostlib/hostLib/se05x_03_xx_xx/se05x_APDU_impl.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/mbedtls_cli_srv/CMakeLists.txt (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/ex/ecc/ex_sss_ecc.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/ex/inc/ex_scp03_puf.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/ex/inc/ex_sss.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/ex/inc/ex_sss_auth.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/ex/inc/ex_sss_boot.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/ex/inc/ex_sss_main_inc.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/ex/inc/ex_sss_main_inc_linux.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/ex/inc/ex_sss_objid.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/ex/inc/ex_sss_ports.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/ex/inc/ex_sss_scp03_keys.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/ex/inc/ex_sss_tp_scp03_keys.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/ex/mbedtls/ex_sss_ssl2.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/ex/src/ex_sss_boot.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/ex/src/ex_sss_boot_connectstring.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/ex/src/ex_sss_boot_int.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/ex/src/ex_sss_scp03_auth.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/ex/src/ex_sss_se05x.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/ex/src/ex_sss_se05x_auth.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/inc/fsl_sscp.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/inc/fsl_sss_api.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/inc/fsl_sss_api_ver.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/inc/fsl_sss_config.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/inc/fsl_sss_ftr_default.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/inc/fsl_sss_keyid_map.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/inc/fsl_sss_lpc55s_apis.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/inc/fsl_sss_mbedtls_apis.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/inc/fsl_sss_mbedtls_types.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/inc/fsl_sss_openssl_apis.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/inc/fsl_sss_openssl_types.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/inc/fsl_sss_policy.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/inc/fsl_sss_se05x_apis.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/inc/fsl_sss_se05x_policy.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/inc/fsl_sss_se05x_scp03.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/inc/fsl_sss_se05x_types.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/inc/fsl_sss_sscp.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/inc/fsl_sss_user_apis.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/inc/fsl_sss_user_types.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/inc/fsl_sss_util_asn1_der.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/inc/fsl_sss_util_rsa_sign_utils.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/plugin/mbedtls/ecdh_alt_ax.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/plugin/mbedtls/ecdsa_verify_alt.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/plugin/mbedtls/ecdsa_verify_alt.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/plugin/mbedtls/ecp_alt.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/plugin/mbedtls/port/ksdk/ecp_alt.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/plugin/mbedtls/port/ksdk/ecp_curves_alt.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/plugin/mbedtls/rsa_alt.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/plugin/mbedtls/sss_mbedtls.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/plugin/mbedtls/sss_mbedtls.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/plugin/mbedtls/sss_mbedtls_rsa.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/plugin/mbedtls/sss_mbedtls_x86_config.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/port/default/fsl_sss_types.h (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/src/fsl_sss_apis.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/src/fsl_sss_util_asn1_der.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/src/fsl_sss_util_rsa_sign_utils.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/src/keystore/keystore_cmn.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/src/keystore/keystore_openssl.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/src/keystore/keystore_pc.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/src/mbedtls/fsl_sss_mbedtls_apis.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/src/openssl/fsl_sss_openssl_apis.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/src/se05x/fsl_sss_se05x_apis.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/src/se05x/fsl_sss_se05x_eckey.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/src/se05x/fsl_sss_se05x_mw.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/src/se05x/fsl_sss_se05x_policy.c (100%)
+ rename targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/{TARGET_PORTENTA_H7 => }/COMPONENT_SE050/sss/src/se05x/fsl_sss_se05x_scp03.c (100%)
+
+diff --git a/.gitignore b/.gitignore
+index 7a68e77ae8..3e907cf52c 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -90,6 +90,7 @@ tags
+ features/FEATURE_BLE/targets/TARGET_CORDIO/stack_backup/
+ 
+ .pytest_cache
++log
+ 
+ # Icetea related file
+ test_suite.json
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/Apache_2_0.txt b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/Apache_2_0.txt
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/Apache_2_0.txt
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/Apache_2_0.txt
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/BSD3_license.txt b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/BSD3_license.txt
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/BSD3_license.txt
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/BSD3_license.txt
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/ChangeLog.md b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/ChangeLog.md
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/ChangeLog.md
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/ChangeLog.md
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/LICENSE b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/LICENSE
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/LICENSE
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/LICENSE
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/README.rst b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/README.rst
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/README.rst
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/README.rst
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/ecc_example/CMakeLists.txt b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/ecc_example/CMakeLists.txt
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/ecc_example/CMakeLists.txt
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/ecc_example/CMakeLists.txt
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/fsl_sss_ftr.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/fsl_sss_ftr.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/fsl_sss_ftr.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/fsl_sss_ftr.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/inc/Applet_SE050_Ver.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/inc/Applet_SE050_Ver.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/inc/Applet_SE050_Ver.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/inc/Applet_SE050_Ver.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/inc/PlugAndTrust_HostLib_Ver.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/inc/PlugAndTrust_HostLib_Ver.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/inc/PlugAndTrust_HostLib_Ver.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/inc/PlugAndTrust_HostLib_Ver.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/inc/PlugAndTrust_Pkg_Ver.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/inc/PlugAndTrust_Pkg_Ver.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/inc/PlugAndTrust_Pkg_Ver.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/inc/PlugAndTrust_Pkg_Ver.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/inc/nxEnsure.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/inc/nxEnsure.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/inc/nxEnsure.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/inc/nxEnsure.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/inc/nxScp03_Apis.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/inc/nxScp03_Apis.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/inc/nxScp03_Apis.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/inc/nxScp03_Apis.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/inc/nxScp03_Const.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/inc/nxScp03_Const.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/inc/nxScp03_Const.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/inc/nxScp03_Const.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/inc/nxScp03_Types.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/inc/nxScp03_Types.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/inc/nxScp03_Types.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/inc/nxScp03_Types.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/inc/scp.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/inc/scp.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/inc/scp.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/inc/scp.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/inc/se05x_const.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/inc/se05x_const.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/inc/se05x_const.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/inc/se05x_const.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/inc/se05x_ecc_curves.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/inc/se05x_ecc_curves.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/inc/se05x_ecc_curves.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/inc/se05x_ecc_curves.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/inc/se05x_ecc_curves_inc.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/inc/se05x_ecc_curves_inc.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/inc/se05x_ecc_curves_inc.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/inc/se05x_ecc_curves_inc.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/inc/se05x_ecc_curves_values.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/inc/se05x_ecc_curves_values.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/inc/se05x_ecc_curves_values.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/inc/se05x_ecc_curves_values.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/inc/se05x_enums.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/inc/se05x_enums.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/inc/se05x_enums.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/inc/se05x_enums.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/inc/se05x_ftr.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/inc/se05x_ftr.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/inc/se05x_ftr.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/inc/se05x_ftr.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/inc/se05x_tlv.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/inc/se05x_tlv.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/inc/se05x_tlv.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/inc/se05x_tlv.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/inc/sm_const.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/inc/sm_const.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/inc/sm_const.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/inc/sm_const.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/global_platf.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/global_platf.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/global_platf.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/global_platf.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/global_platf.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/global_platf.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/global_platf.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/global_platf.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_apdu.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_apdu.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_apdu.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_apdu.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_apdu.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_apdu.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_apdu.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_apdu.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_api.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_api.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_api.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_api.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_connect.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_connect.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_connect.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_connect.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_errors.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_errors.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_errors.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_errors.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_errors.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_errors.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_errors.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_errors.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_printf.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_printf.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_printf.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_printf.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_types.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_types.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_types.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/infra/sm_types.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/nxScp/nxScp03_Com.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/nxScp/nxScp03_Com.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/nxScp/nxScp03_Com.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/nxScp/nxScp03_Com.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/log/nxLog.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/nxlog/nxLog.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/log/nxLog.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/nxlog/nxLog.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/log/nxLog.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/nxlog/nxLog.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/log/nxLog.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/nxlog/nxLog.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/log/nxLog_App.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/nxlog/nxLog_App.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/log/nxLog_App.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/nxlog/nxLog_App.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/log/nxLog_DefaultConfig.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/nxlog/nxLog_DefaultConfig.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/log/nxLog_DefaultConfig.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/nxlog/nxLog_DefaultConfig.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/log/nxLog_hostLib.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/nxlog/nxLog_hostLib.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/log/nxLog_hostLib.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/nxlog/nxLog_hostLib.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/log/nxLog_mbedtls.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/nxlog/nxLog_mbedtls.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/log/nxLog_mbedtls.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/nxlog/nxLog_mbedtls.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/log/nxLog_scp.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/nxlog/nxLog_scp.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/log/nxLog_scp.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/nxlog/nxLog_scp.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/log/nxLog_smCom.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/nxlog/nxLog_smCom.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/log/nxLog_smCom.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/nxlog/nxLog_smCom.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/log/nxLog_sss.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/nxlog/nxLog_sss.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/log/nxLog_sss.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/nxlog/nxLog_sss.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phEseStatus.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phEseStatus.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phEseStatus.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phEseStatus.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phEseTypes.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phEseTypes.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phEseTypes.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phEseTypes.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEsePal_i2c.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEsePal_i2c.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEsePal_i2c.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEsePal_i2c.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEsePal_i2c.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEsePal_i2c.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEsePal_i2c.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEsePal_i2c.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEseProto7816_3.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEseProto7816_3.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEseProto7816_3.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEseProto7816_3.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEseProto7816_3.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEseProto7816_3.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEseProto7816_3.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEseProto7816_3.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEse_Api.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEse_Api.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEse_Api.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEse_Api.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEse_Api.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEse_Api.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEse_Api.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEse_Api.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEse_Internal.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEse_Internal.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEse_Internal.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEse_Internal.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/apduComm.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/apduComm.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/apduComm.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/apduComm.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/smCom.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/smCom.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/smCom.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/smCom.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/smCom.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/smCom.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/smCom.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/smCom.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/smComT1oI2C.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/smComT1oI2C.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/smComT1oI2C.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/smComT1oI2C.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/smComT1oI2C.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/smComT1oI2C.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/smComT1oI2C.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/smComT1oI2C.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/mbedtls/src/ecdh_alt.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/mbedtls/src/ecdh_alt.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/mbedtls/src/ecdh_alt.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/mbedtls/src/ecdh_alt.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/mbedtls/src/rsa_alt.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/mbedtls/src/rsa_alt.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/mbedtls/src/rsa_alt.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/mbedtls/src/rsa_alt.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/generic/sm_timer.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/platform/generic/sm_timer.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/generic/sm_timer.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/platform/generic/sm_timer.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/inc/i2c_a7.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/platform/inc/i2c_a7.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/inc/i2c_a7.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/platform/inc/i2c_a7.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/inc/se05x_apis.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/platform/inc/se05x_apis.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/inc/se05x_apis.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/platform/inc/se05x_apis.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/inc/sm_printf.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/platform/inc/sm_printf.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/inc/sm_printf.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/platform/inc/sm_printf.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/inc/sm_timer.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/platform/inc/sm_timer.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/inc/sm_timer.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/platform/inc/sm_timer.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/se05x_i2c.cpp b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/platform/se05x_i2c.cpp
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/se05x_i2c.cpp
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/platform/se05x_i2c.cpp
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/se05x_power.cpp b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/platform/se05x_power.cpp
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/se05x_power.cpp
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/platform/se05x_power.cpp
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/se05x/src/se05x_ECC_curves.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/se05x/src/se05x_ECC_curves.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/se05x/src/se05x_ECC_curves.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/se05x/src/se05x_ECC_curves.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/se05x/src/se05x_mw.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/se05x/src/se05x_mw.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/se05x/src/se05x_mw.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/se05x/src/se05x_mw.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/se05x/src/se05x_tlv.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/se05x/src/se05x_tlv.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/se05x/src/se05x_tlv.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/se05x/src/se05x_tlv.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/se05x_03_xx_xx/se05x_04_xx_APDU_apis.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/se05x_03_xx_xx/se05x_04_xx_APDU_apis.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/se05x_03_xx_xx/se05x_04_xx_APDU_apis.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/se05x_03_xx_xx/se05x_04_xx_APDU_apis.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/se05x_03_xx_xx/se05x_04_xx_APDU_impl.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/se05x_03_xx_xx/se05x_04_xx_APDU_impl.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/se05x_03_xx_xx/se05x_04_xx_APDU_impl.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/se05x_03_xx_xx/se05x_04_xx_APDU_impl.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/se05x_03_xx_xx/se05x_APDU.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/se05x_03_xx_xx/se05x_APDU.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/se05x_03_xx_xx/se05x_APDU.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/se05x_03_xx_xx/se05x_APDU.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/se05x_03_xx_xx/se05x_APDU.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/se05x_03_xx_xx/se05x_APDU.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/se05x_03_xx_xx/se05x_APDU.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/se05x_03_xx_xx/se05x_APDU.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/se05x_03_xx_xx/se05x_APDU_apis.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/se05x_03_xx_xx/se05x_APDU_apis.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/se05x_03_xx_xx/se05x_APDU_apis.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/se05x_03_xx_xx/se05x_APDU_apis.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/se05x_03_xx_xx/se05x_APDU_impl.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/se05x_03_xx_xx/se05x_APDU_impl.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/se05x_03_xx_xx/se05x_APDU_impl.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/hostlib/hostLib/se05x_03_xx_xx/se05x_APDU_impl.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/mbedtls_cli_srv/CMakeLists.txt b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/mbedtls_cli_srv/CMakeLists.txt
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/mbedtls_cli_srv/CMakeLists.txt
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/mbedtls_cli_srv/CMakeLists.txt
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/ecc/ex_sss_ecc.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/ex/ecc/ex_sss_ecc.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/ecc/ex_sss_ecc.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/ex/ecc/ex_sss_ecc.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/inc/ex_scp03_puf.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/ex/inc/ex_scp03_puf.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/inc/ex_scp03_puf.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/ex/inc/ex_scp03_puf.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/inc/ex_sss.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/ex/inc/ex_sss.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/inc/ex_sss.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/ex/inc/ex_sss.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/inc/ex_sss_auth.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/ex/inc/ex_sss_auth.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/inc/ex_sss_auth.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/ex/inc/ex_sss_auth.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/inc/ex_sss_boot.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/ex/inc/ex_sss_boot.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/inc/ex_sss_boot.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/ex/inc/ex_sss_boot.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/inc/ex_sss_main_inc.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/ex/inc/ex_sss_main_inc.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/inc/ex_sss_main_inc.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/ex/inc/ex_sss_main_inc.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/inc/ex_sss_main_inc_linux.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/ex/inc/ex_sss_main_inc_linux.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/inc/ex_sss_main_inc_linux.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/ex/inc/ex_sss_main_inc_linux.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/inc/ex_sss_objid.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/ex/inc/ex_sss_objid.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/inc/ex_sss_objid.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/ex/inc/ex_sss_objid.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/inc/ex_sss_ports.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/ex/inc/ex_sss_ports.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/inc/ex_sss_ports.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/ex/inc/ex_sss_ports.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/inc/ex_sss_scp03_keys.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/ex/inc/ex_sss_scp03_keys.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/inc/ex_sss_scp03_keys.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/ex/inc/ex_sss_scp03_keys.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/inc/ex_sss_tp_scp03_keys.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/ex/inc/ex_sss_tp_scp03_keys.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/inc/ex_sss_tp_scp03_keys.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/ex/inc/ex_sss_tp_scp03_keys.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/mbedtls/ex_sss_ssl2.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/ex/mbedtls/ex_sss_ssl2.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/mbedtls/ex_sss_ssl2.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/ex/mbedtls/ex_sss_ssl2.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/src/ex_sss_boot.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/ex/src/ex_sss_boot.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/src/ex_sss_boot.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/ex/src/ex_sss_boot.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/src/ex_sss_boot_connectstring.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/ex/src/ex_sss_boot_connectstring.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/src/ex_sss_boot_connectstring.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/ex/src/ex_sss_boot_connectstring.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/src/ex_sss_boot_int.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/ex/src/ex_sss_boot_int.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/src/ex_sss_boot_int.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/ex/src/ex_sss_boot_int.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/src/ex_sss_scp03_auth.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/ex/src/ex_sss_scp03_auth.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/src/ex_sss_scp03_auth.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/ex/src/ex_sss_scp03_auth.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/src/ex_sss_se05x.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/ex/src/ex_sss_se05x.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/src/ex_sss_se05x.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/ex/src/ex_sss_se05x.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/src/ex_sss_se05x_auth.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/ex/src/ex_sss_se05x_auth.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/src/ex_sss_se05x_auth.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/ex/src/ex_sss_se05x_auth.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sscp.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sscp.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sscp.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sscp.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_api.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_api.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_api.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_api.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_api_ver.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_api_ver.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_api_ver.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_api_ver.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_config.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_config.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_config.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_config.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_ftr_default.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_ftr_default.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_ftr_default.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_ftr_default.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_keyid_map.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_keyid_map.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_keyid_map.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_keyid_map.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_lpc55s_apis.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_lpc55s_apis.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_lpc55s_apis.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_lpc55s_apis.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_mbedtls_apis.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_mbedtls_apis.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_mbedtls_apis.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_mbedtls_apis.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_mbedtls_types.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_mbedtls_types.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_mbedtls_types.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_mbedtls_types.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_openssl_apis.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_openssl_apis.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_openssl_apis.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_openssl_apis.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_openssl_types.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_openssl_types.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_openssl_types.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_openssl_types.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_policy.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_policy.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_policy.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_policy.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_se05x_apis.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_se05x_apis.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_se05x_apis.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_se05x_apis.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_se05x_policy.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_se05x_policy.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_se05x_policy.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_se05x_policy.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_se05x_scp03.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_se05x_scp03.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_se05x_scp03.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_se05x_scp03.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_se05x_types.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_se05x_types.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_se05x_types.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_se05x_types.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_sscp.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_sscp.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_sscp.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_sscp.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_user_apis.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_user_apis.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_user_apis.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_user_apis.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_user_types.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_user_types.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_user_types.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_user_types.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_util_asn1_der.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_util_asn1_der.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_util_asn1_der.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_util_asn1_der.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_util_rsa_sign_utils.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_util_rsa_sign_utils.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_util_rsa_sign_utils.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/inc/fsl_sss_util_rsa_sign_utils.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/plugin/mbedtls/ecdh_alt_ax.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/plugin/mbedtls/ecdh_alt_ax.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/plugin/mbedtls/ecdh_alt_ax.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/plugin/mbedtls/ecdh_alt_ax.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/plugin/mbedtls/ecdsa_verify_alt.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/plugin/mbedtls/ecdsa_verify_alt.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/plugin/mbedtls/ecdsa_verify_alt.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/plugin/mbedtls/ecdsa_verify_alt.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/plugin/mbedtls/ecdsa_verify_alt.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/plugin/mbedtls/ecdsa_verify_alt.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/plugin/mbedtls/ecdsa_verify_alt.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/plugin/mbedtls/ecdsa_verify_alt.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/plugin/mbedtls/ecp_alt.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/plugin/mbedtls/ecp_alt.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/plugin/mbedtls/ecp_alt.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/plugin/mbedtls/ecp_alt.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/plugin/mbedtls/port/ksdk/ecp_alt.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/plugin/mbedtls/port/ksdk/ecp_alt.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/plugin/mbedtls/port/ksdk/ecp_alt.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/plugin/mbedtls/port/ksdk/ecp_alt.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/plugin/mbedtls/port/ksdk/ecp_curves_alt.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/plugin/mbedtls/port/ksdk/ecp_curves_alt.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/plugin/mbedtls/port/ksdk/ecp_curves_alt.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/plugin/mbedtls/port/ksdk/ecp_curves_alt.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/plugin/mbedtls/rsa_alt.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/plugin/mbedtls/rsa_alt.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/plugin/mbedtls/rsa_alt.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/plugin/mbedtls/rsa_alt.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/plugin/mbedtls/sss_mbedtls.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/plugin/mbedtls/sss_mbedtls.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/plugin/mbedtls/sss_mbedtls.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/plugin/mbedtls/sss_mbedtls.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/plugin/mbedtls/sss_mbedtls.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/plugin/mbedtls/sss_mbedtls.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/plugin/mbedtls/sss_mbedtls.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/plugin/mbedtls/sss_mbedtls.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/plugin/mbedtls/sss_mbedtls_rsa.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/plugin/mbedtls/sss_mbedtls_rsa.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/plugin/mbedtls/sss_mbedtls_rsa.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/plugin/mbedtls/sss_mbedtls_rsa.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/plugin/mbedtls/sss_mbedtls_x86_config.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/plugin/mbedtls/sss_mbedtls_x86_config.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/plugin/mbedtls/sss_mbedtls_x86_config.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/plugin/mbedtls/sss_mbedtls_x86_config.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/port/default/fsl_sss_types.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/port/default/fsl_sss_types.h
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/port/default/fsl_sss_types.h
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/port/default/fsl_sss_types.h
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/fsl_sss_apis.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/src/fsl_sss_apis.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/fsl_sss_apis.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/src/fsl_sss_apis.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/fsl_sss_util_asn1_der.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/src/fsl_sss_util_asn1_der.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/fsl_sss_util_asn1_der.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/src/fsl_sss_util_asn1_der.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/fsl_sss_util_rsa_sign_utils.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/src/fsl_sss_util_rsa_sign_utils.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/fsl_sss_util_rsa_sign_utils.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/src/fsl_sss_util_rsa_sign_utils.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/keystore/keystore_cmn.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/src/keystore/keystore_cmn.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/keystore/keystore_cmn.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/src/keystore/keystore_cmn.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/keystore/keystore_openssl.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/src/keystore/keystore_openssl.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/keystore/keystore_openssl.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/src/keystore/keystore_openssl.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/keystore/keystore_pc.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/src/keystore/keystore_pc.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/keystore/keystore_pc.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/src/keystore/keystore_pc.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/mbedtls/fsl_sss_mbedtls_apis.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/src/mbedtls/fsl_sss_mbedtls_apis.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/mbedtls/fsl_sss_mbedtls_apis.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/src/mbedtls/fsl_sss_mbedtls_apis.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/openssl/fsl_sss_openssl_apis.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/src/openssl/fsl_sss_openssl_apis.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/openssl/fsl_sss_openssl_apis.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/src/openssl/fsl_sss_openssl_apis.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/se05x/fsl_sss_se05x_apis.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/src/se05x/fsl_sss_se05x_apis.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/se05x/fsl_sss_se05x_apis.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/src/se05x/fsl_sss_se05x_apis.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/se05x/fsl_sss_se05x_eckey.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/src/se05x/fsl_sss_se05x_eckey.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/se05x/fsl_sss_se05x_eckey.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/src/se05x/fsl_sss_se05x_eckey.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/se05x/fsl_sss_se05x_mw.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/src/se05x/fsl_sss_se05x_mw.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/se05x/fsl_sss_se05x_mw.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/src/se05x/fsl_sss_se05x_mw.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/se05x/fsl_sss_se05x_policy.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/src/se05x/fsl_sss_se05x_policy.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/se05x/fsl_sss_se05x_policy.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/src/se05x/fsl_sss_se05x_policy.c
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/se05x/fsl_sss_se05x_scp03.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/src/se05x/fsl_sss_se05x_scp03.c
+similarity index 100%
+rename from targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/se05x/fsl_sss_se05x_scp03.c
+rename to targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/src/se05x/fsl_sss_se05x_scp03.c
+-- 
+2.25.1
+

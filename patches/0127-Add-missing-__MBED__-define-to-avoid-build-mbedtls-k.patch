@@ -1,0 +1,89 @@
+From 3b2f1241d3347b9f6679ac0b822f405bb5a664e7 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Wed, 2 Feb 2022 10:02:13 +0100
+Subject: [PATCH 127/138] Add missing __MBED__ define to avoid build mbedtls
+ keystore
+
+---
+ .../sss/src/mbedtls/fsl_sss_mbedtls_apis.c       | 16 ++++++++--------
+ 1 file changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/mbedtls/fsl_sss_mbedtls_apis.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/mbedtls/fsl_sss_mbedtls_apis.c
+index b8d4e82cfc..614e8f0abb 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/mbedtls/fsl_sss_mbedtls_apis.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/mbedtls/fsl_sss_mbedtls_apis.c
+@@ -226,7 +226,7 @@ sss_status_t sss_mbedtls_key_object_allocate_handle(sss_mbedtls_object_t *keyObj
+         retval = kStatus_SSS_Fail;
+         goto cleanup;
+     }
+-#if defined(MBEDTLS_FS_IO) && !AX_EMBEDDED
++#if defined(MBEDTLS_FS_IO) && !AX_EMBEDDED && !__MBED__
+     if (options == kKeyObject_Mode_Persistent) {
+         uint32_t i;
+         sss_mbedtls_object_t **ks;
+@@ -257,7 +257,7 @@ cleanup:
+ sss_status_t sss_mbedtls_key_object_get_handle(sss_mbedtls_object_t *keyObject, uint32_t keyId)
+ {
+     sss_status_t retval = kStatus_SSS_Fail;
+-#if defined(MBEDTLS_FS_IO) && !AX_EMBEDDED
++#if defined(MBEDTLS_FS_IO) && !AX_EMBEDDED && !__MBED__
+     uint32_t i;
+     ENSURE_OR_GO_CLEANUP(keyObject);
+     ENSURE_OR_GO_CLEANUP(keyObject->keyStore);
+@@ -663,7 +663,7 @@ sss_status_t sss_mbedtls_key_store_allocate(sss_mbedtls_key_store_t *keyStore, u
+     ENSURE_OR_GO_CLEANUP(keyStore);
+     ENSURE_OR_GO_CLEANUP(keyStore->session);
+ 
+-#if defined(MBEDTLS_FS_IO) && !AX_EMBEDDED
++#if defined(MBEDTLS_FS_IO) && !AX_EMBEDDED && !__MBED__
+     /* This function is called once per session so keystore
+     object and shadow objects Should be equal to Null */
+     ENSURE_OR_GO_CLEANUP(keyStore->objects == NULL);
+@@ -692,7 +692,7 @@ sss_status_t sss_mbedtls_key_store_save(sss_mbedtls_key_store_t *keyStore)
+     ENSURE_OR_GO_CLEANUP(keyStore);
+     ENSURE_OR_GO_CLEANUP(keyStore->session);
+ 
+-#if defined(MBEDTLS_FS_IO) && !AX_EMBEDDED
++#if defined(MBEDTLS_FS_IO) && !AX_EMBEDDED && !__MBED__
+     ENSURE_OR_GO_CLEANUP(keyStore->session->szRootPath)
+     ENSURE_OR_GO_CLEANUP(keyStore->objects)
+     uint32_t i;
+@@ -712,7 +712,7 @@ sss_status_t sss_mbedtls_key_store_load(sss_mbedtls_key_store_t *keyStore)
+     sss_status_t retval = kStatus_SSS_Fail;
+     ENSURE_OR_GO_CLEANUP(keyStore);
+     ENSURE_OR_GO_CLEANUP(keyStore->session);
+-#if defined(MBEDTLS_FS_IO) && !AX_EMBEDDED
++#if defined(MBEDTLS_FS_IO) && !AX_EMBEDDED && !__MBED__
+     if (keyStore->objects == NULL) {
+         sss_mbedtls_key_store_allocate(keyStore, 0);
+     }
+@@ -921,7 +921,7 @@ sss_status_t sss_mbedtls_key_store_erase_key(sss_mbedtls_key_store_t *keyStore,
+     ENSURE_OR_GO_EXIT((keyObject->accessRights & kAccessPermission_SSS_Delete));
+ 
+     if (keyObject->keyMode == kKeyObject_Mode_Persistent) {
+-#if defined(MBEDTLS_FS_IO) && !AX_EMBEDDED
++#if defined(MBEDTLS_FS_IO) && !AX_EMBEDDED && !__MBED__
+         unsigned int i = 0;
+         /* first check if key exists delete key from shadow KS*/
+         retval = ks_common_remove_fat(keyObject->keyStore->keystore_shadow, keyObject->keyId);
+@@ -946,7 +946,7 @@ sss_status_t sss_mbedtls_key_store_erase_key(sss_mbedtls_key_store_t *keyStore,
+         retval = kStatus_SSS_Success;
+     }
+ 
+-#if defined(MBEDTLS_FS_IO) && !AX_EMBEDDED
++#if defined(MBEDTLS_FS_IO) && !AX_EMBEDDED && !__MBED__
+ cleanup:
+ #endif
+ exit:
+@@ -956,7 +956,7 @@ exit:
+ 
+ void sss_mbedtls_key_store_context_free(sss_mbedtls_key_store_t *keyStore)
+ {
+-#if defined(MBEDTLS_FS_IO) && !AX_EMBEDDED
++#if defined(MBEDTLS_FS_IO) && !AX_EMBEDDED && !__MBED__
+     if (NULL != keyStore->objects) {
+         uint32_t i;
+         for (i = 0; i < keyStore->max_object_count; i++) {
+-- 
+2.25.1
+

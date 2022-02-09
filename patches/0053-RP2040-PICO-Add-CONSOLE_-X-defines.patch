@@ -1,7 +1,7 @@
 From fd61ad4b39de956dc88a00ad8a37509b95be5291 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Tue, 13 Apr 2021 10:03:51 +0200
-Subject: [PATCH 053/110] RP2040 PICO: Add CONSOLE_*X defines
+Subject: [PATCH 053/138] RP2040 PICO: Add CONSOLE_*X defines
 
 ---
  targets/TARGET_RASPBERRYPI/TARGET_RP2040/PeripheralNames.h  | 6 +++---
@@ -48,5 +48,5 @@ index bad8f487c6..784cfff18f 100644
      LED1 = p6,
      LED2 = p6,
 -- 
-2.34.1
+2.25.1
 

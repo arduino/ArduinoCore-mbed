@@ -1,0 +1,1183 @@
+From 97718d517e09cab6dfdd1bbd1e4f530b8af30c51 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Tue, 18 Jan 2022 14:59:17 +0100
+Subject: [PATCH 121/138] Port sss hostLib to mbed-os
+
+---
+ .../hostlib/hostLib/libCommon/log/nxLog.c     |  41 +-
+ .../hostlib/hostLib/libCommon/smCom/smCom.c   |  44 +-
+ .../hostLib/platform/generic/sm_timer.c       |   9 +
+ .../hostlib/hostLib/platform/inc/ax_reset.h   |  45 --
+ .../hostlib/hostLib/platform/inc/se05x_apis.h |   2 +
+ .../hostlib/hostLib/platform/linux/i2c_a7.c   | 385 ------------------
+ .../hostLib/platform/rsp/se05x_reset.c        | 155 -------
+ .../hostlib/hostLib/platform/se05x_i2c.cpp    |  59 +++
+ .../hostlib/hostLib/platform/se05x_power.cpp  |  42 ++
+ .../COMPONENT_SE050/sss/ex/ecc/ex_sss_ecc.c   |   4 +
+ .../sss/ex/mbedtls/ex_sss_ssl2.c              |   3 +
+ .../sss/inc/fsl_sss_se05x_types.h             |   9 +-
+ .../sss/port/default/fsl_sss_types.h          |   7 +-
+ .../sss/src/keystore/keystore_pc.c            |   2 +-
+ .../sss/src/se05x/fsl_sss_se05x_apis.c        |  38 +-
+ 15 files changed, 241 insertions(+), 604 deletions(-)
+ delete mode 100644 targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/inc/ax_reset.h
+ delete mode 100644 targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/linux/i2c_a7.c
+ delete mode 100644 targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/rsp/se05x_reset.c
+ create mode 100644 targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/se05x_i2c.cpp
+ create mode 100644 targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/se05x_power.cpp
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/log/nxLog.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/log/nxLog.c
+index cfcfda378b..c3122bb21d 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/log/nxLog.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/log/nxLog.c
+@@ -20,7 +20,7 @@ extern "C" {
+ #include "semphr.h"
+ #endif
+ 
+-#if (__GNUC__ && !AX_EMBEDDED) || (USE_RTOS)
++#if (__GNUC__ && !AX_EMBEDDED) || (USE_RTOS) || (__MBED__)
+ #define USE_LOCK 1
+ #else
+ #define USE_LOCK 0
+@@ -107,10 +107,15 @@ static const char *szLevel[] = {"ERROR", "WARN ", "INFO ", "DEBUG"};
+ 
+ #if USE_RTOS
+ static SemaphoreHandle_t gLogginglock;
+-#elif (__GNUC__ && !AX_EMBEDDED)
++#elif (__GNUC__ && !AX_EMBEDDED && !__MBED__)
+ #include<pthread.h>
+ /* Only for base session with os */
+ static pthread_mutex_t gLogginglock;
++#elif __MBED__
++#include "cmsis_os2.h"
++#include "mbed_rtos_storage.h"
++    static osSemaphoreId_t gLogginglock;
++    static mbed_rtos_storage_semaphore_t gLogginglock_mem;
+ #endif
+ static void nLog_AcquireLock();
+ static void nLog_ReleaseLock();
+@@ -125,10 +130,14 @@ static void nLog_AcquireLock()
+         if (xSemaphoreTake(gLogginglock, portMAX_DELAY) != pdTRUE) {
+             PRINTF("Acquiring logging semaphore failed");
+         }
+-#elif (__GNUC__ && !AX_EMBEDDED)
++#elif (__GNUC__ && !AX_EMBEDDED && !__MBED__)
+         if (pthread_mutex_lock(&gLogginglock) != 0) {
+             PRINTF("Acquiring logging mutext failed");
+         }
++#elif __MBED__
++        if (osSemaphoreAcquire(gLogginglock, 0) != osOK) {
++            PRINTF("Acquiring logging mutext failed\n");
++        }
+ #endif
+     }
+ #endif
+@@ -142,10 +151,14 @@ static void nLog_ReleaseLock()
+         if (xSemaphoreGive(gLogginglock) != pdTRUE) {
+             PRINTF("Releasing logging semaphore failed");
+         }
+-#elif (__GNUC__ && !AX_EMBEDDED)
++#elif (__GNUC__ && !AX_EMBEDDED && !__MBED__)
+         if (pthread_mutex_unlock(&gLogginglock) != 0) {
+             PRINTF("Releasing logging semaphore failed");
+         }
++#elif __MBED__
++        if (osSemaphoreRelease(gLogginglock) != osOK) {
++            PRINTF("Releasing logging semaphore failed\n");
++        }
+ #endif
+     }
+ #endif
+@@ -160,11 +173,22 @@ uint8_t nLog_Init()
+         PRINTF("xSemaphoreCreateMutex failed");
+         return 1;
+     }
+-#elif (__GNUC__ && !AX_EMBEDDED)
++#elif (__GNUC__ && !AX_EMBEDDED && !__MBED__)
+     if (pthread_mutex_init(&gLogginglock, NULL) != 0) {
+         PRINTF("pthread_mutex_init failed");
+         return 1;
+     }
++#elif __MBED__
++    osSemaphoreAttr_t attr;
++    attr.name = NULL;
++    attr.attr_bits = 0;
++    attr.cb_mem = &gLogginglock_mem;
++    attr.cb_size = sizeof gLogginglock_mem;
++    gLogginglock = osSemaphoreNew(1, 0, &attr);
++    if (gLogginglock == NULL) {
++        PRINTF("xSemaphoreCreateMutex failed");
++        return 1;
++    }
+ #endif
+     lockInitialised = true;
+ #endif
+@@ -179,8 +203,13 @@ void nLog_DeInit()
+     	vSemaphoreDelete(gLogginglock);
+         gLogginglock = NULL;
+     }
+-#elif (__GNUC__ && !AX_EMBEDDED)
++#elif (__GNUC__ && !AX_EMBEDDED && !__MBED__)
+     pthread_mutex_destroy(&gLogginglock);
++#elif __MBED__
++    if (gLogginglock != NULL) {
++        osSemaphoreRelease(gLogginglock);
++        gLogginglock = NULL;
++    }
+ #endif
+     lockInitialised = false;
+ #endif
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/smCom.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/smCom.c
+index 0412ae65d1..f7dfc1943c 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/smCom.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/smCom.c
+@@ -25,13 +25,18 @@
+ 
+ #if USE_RTOS
+     static SemaphoreHandle_t gSmComlock; 
+-#elif (__GNUC__ && !AX_EMBEDDED)
++#elif (__GNUC__ && !AX_EMBEDDED && !__MBED__)
+ #include<pthread.h>
+     /* Only for base session with os */
+     static pthread_mutex_t gSmComlock;
++#elif __MBED__
++#include "cmsis_os2.h"
++#include "mbed_rtos_storage.h"
++    static osSemaphoreId_t gSmComlock;
++    static mbed_rtos_storage_semaphore_t gSmComlock_mem;
+ #endif
+ 
+-#if (__GNUC__ && !AX_EMBEDDED) || (USE_RTOS)
++#if (__GNUC__ && !AX_EMBEDDED) || (USE_RTOS) || (__MBED__)
+ #define USE_LOCK 1
+ #else
+ #define USE_LOCK 0
+@@ -50,7 +55,7 @@
+         LOG_D("LOCK Released");                                  \
+     else                                                         \
+         LOG_D("LOCK Releasing failed");
+-#elif (__GNUC__ && !AX_EMBEDDED)
++#elif (__GNUC__ && !AX_EMBEDDED && !__MBED__)
+ #define LOCK_TXN()                                               \
+     LOG_D("Trying to Acquire Lock thread: %ld", pthread_self()); \
+     pthread_mutex_lock(&gSmComlock);                             \
+@@ -60,6 +65,19 @@
+     LOG_D("Trying to Released Lock by thread: %ld", pthread_self()); \
+     pthread_mutex_unlock(&gSmComlock);                               \
+     LOG_D("LOCK Released by thread: %ld", pthread_self());
++#elif __MBED__
++#define LOCK_TXN()                                               \
++    LOG_D("Trying to Acquire Lock");                             \
++    if (osSemaphoreAcquire(gSmComlock, 0) == osOK)               \
++        LOG_D("LOCK Acquired");                                  \
++    else                                                         \
++        LOG_D("LOCK Acquisition failed");
++#define UNLOCK_TXN()                                             \
++    LOG_D("Trying to Released Lock");                            \
++    if (osSemaphoreRelease(gSmComlock) == osOK)                  \
++        LOG_D("LOCK Released");                                  \
++    else                                                         \
++        LOG_D("LOCK Releasing failed");
+ #else
+ #define LOCK_TXN() LOG_D("no lock mode");
+ #define UNLOCK_TXN() LOG_D("no lock mode");
+@@ -81,12 +99,23 @@ U16 smCom_Init(ApduTransceiveFunction_t pTransceive, ApduTransceiveRawFunction_t
+         LOG_E("\n xSemaphoreCreateMutex failed");
+         return ret;
+     }
+-#elif (__GNUC__ && !AX_EMBEDDED)
++#elif (__GNUC__ && !AX_EMBEDDED && !__MBED__)
+     if (pthread_mutex_init(&gSmComlock, NULL) != 0)
+     {
+         LOG_E("\n mutex init has failed");
+         return ret;
+     } 
++#elif __MBED__
++    osSemaphoreAttr_t attr;
++    attr.name = NULL;
++    attr.attr_bits = 0;
++    attr.cb_mem = &gSmComlock_mem;
++    attr.cb_size = sizeof gSmComlock_mem;
++    gSmComlock = osSemaphoreNew(1, 0, &attr);
++    if (gSmComlock == NULL) {
++        LOG_E("\n xSemaphoreCreateMutex failed");
++        return 1;
++    }
+ #endif
+     pSmCom_Transceive = pTransceive;
+     pSmCom_TransceiveRaw = pTransceiveRaw;
+@@ -101,8 +130,13 @@ void smCom_DeInit(void)
+     	vSemaphoreDelete(gSmComlock);
+         gSmComlock = NULL;
+     } 
+-#elif (__GNUC__ && !AX_EMBEDDED)
++#elif (__GNUC__ && !AX_EMBEDDED && !__MBED__)
+     pthread_mutex_destroy(&gSmComlock);
++#elif __MBED__
++    if (gSmComlock != NULL) {
++        osSemaphoreRelease(gSmComlock);
++        gSmComlock = NULL;
++    }
+ #endif
+     pSmCom_Transceive = NULL;
+     pSmCom_TransceiveRaw = NULL;
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/generic/sm_timer.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/generic/sm_timer.c
+index 4196d778b3..78fbe9574c 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/generic/sm_timer.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/generic/sm_timer.c
+@@ -24,6 +24,11 @@
+ #include "task.h"
+ #endif
+ 
++#if defined(__MBED__)
++#include "mbed_thread.h"
++#include "mbed_wait_api.h"
++#endif
++
+ /* initializes the system tick counter
+  * return 0 on succes, 1 on failure */
+ uint32_t sm_initSleep()
+@@ -51,6 +56,8 @@ void sm_sleep(uint32_t msec)
+     usleep(microsec);
+ #elif defined(USE_RTOS) && USE_RTOS == 1
+     vTaskDelay(1 >= pdMS_TO_TICKS(msec) ? 1 : pdMS_TO_TICKS(msec));
++#elif defined(__MBED__)
++    thread_sleep_for(msec);
+ #else
+     clock_t goal = msec + clock();
+     while (goal > clock());
+@@ -70,6 +77,8 @@ void sm_usleep(uint32_t microsec)
+     usleep(microsec);
+ #elif defined(__OpenBSD__)
+ 	#warning "No sm_usleep implemented"
++#elif defined(__MBED__)
++    wait_us(microsec);
+ #else
+ 	//#warning "No sm_usleep implemented"
+ #endif
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/inc/ax_reset.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/inc/ax_reset.h
+deleted file mode 100644
+index 0ef2fb0f3e..0000000000
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/inc/ax_reset.h
++++ /dev/null
+@@ -1,45 +0,0 @@
+-/*
+- *
+- * Copyright 2018-2019 NXP
+- * SPDX-License-Identifier: Apache-2.0
+- */
+-
+-#ifndef _AX_RESET_H
+-#define _AX_RESET_H
+-
+-#include "sm_types.h"
+-
+-/*
+- * Where applicable, Configure the PINs on the Host
+- *
+- */
+-void axReset_HostConfigure(void);
+-
+-/*
+- * Where applicable, PowerCycle the SE
+- *
+- * Pre-Requistie: @ref axReset_Configure has been called
+- */
+-void axReset_ResetPluseDUT(void);
+-
+-/*
+- * Where applicable, put SE in low power/standby mode
+- *
+- * Pre-Requistie: @ref axReset_Configure has been called
+- */
+-void axReset_PowerDown(void);
+-
+-/*
+- * Where applicable, put SE in powered/active mode
+- *
+- * Pre-Requistie: @ref axReset_Configure has been called
+- */
+-void axReset_PowerUp(void);
+-
+-/*
+- * Where applicable, Unconfigure the PINs on the Host
+- *
+- */
+-void axReset_HostUnconfigure(void);
+-
+-#endif // _AX_RESET_H
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/inc/se05x_apis.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/inc/se05x_apis.h
+index 8db632e675..1c1da67dd5 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/inc/se05x_apis.h
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/inc/se05x_apis.h
+@@ -14,5 +14,7 @@
+ #define SE_RESET_LOGIC 1
+ 
+ void se05x_ic_reset(void);
++void se05x_ic_power_on(void);
++void se05x_ic_power_off(void);
+ 
+ #endif // _SE05X_API_H
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/linux/i2c_a7.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/linux/i2c_a7.c
+deleted file mode 100644
+index f28cf17e39..0000000000
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/linux/i2c_a7.c
++++ /dev/null
+@@ -1,385 +0,0 @@
+-/*
+- *
+- * Copyright 2017-2020 NXP
+- * SPDX-License-Identifier: Apache-2.0
+- */
+-
+-/**
+- * @par Description
+- * MCIMX6UL-EVK / MCIMX8M-EVK board specific & Generic i2c code
+- * @par History
+- *
+- **/
+-#include "i2c_a7.h"
+-#include <stdio.h>
+-#include <string.h>
+-
+-#include <fcntl.h>
+-#include <sys/ioctl.h>
+-#include <unistd.h>
+-#include <sys/stat.h>
+-#include <linux/i2c-dev.h>
+-#include <linux/i2c.h>
+-#include <linux/version.h>
+-#include <errno.h>
+-#include <time.h>
+-
+-// #define NX_LOG_ENABLE_SMCOM_DEBUG 1
+-
+-#include "nxLog_smCom.h"
+-
+-static char* default_axSmDevice_name = "/dev/i2c-1";
+-static int default_axSmDevice_addr = 0x48;      // 7-bit address
+-
+-#define DEV_NAME_BUFFER_SIZE 64
+-
+-/**
+-* Opens the communication channel to I2C device
+-*/
+-i2c_error_t axI2CInit(void **conn_ctx, const char *pDevName)
+-{
+-    unsigned long funcs;
+-    int axSmDevice = 0;
+-    char *pdev_name = NULL;
+-    char *pdev_addr_str = NULL;
+-    U32 dev_addr = 0x00;
+-    char temp[DEV_NAME_BUFFER_SIZE] = { 0, };
+-
+-    if (pDevName != NULL && (strcasecmp("none", pDevName) != 0) ) {
+-        if ((strlen(pDevName) + 1) < DEV_NAME_BUFFER_SIZE) {
+-            memcpy(temp, pDevName, strlen(pDevName));
+-            temp[strlen(pDevName)] = '\0';
+-        }
+-        else {
+-            LOG_E("Connection string passed as argument is too long (%d).", strlen(pDevName));
+-            LOG_I("Pass i2c device address in the format <i2c_port>:<i2c_addr(optional. Default 0x48)>.");
+-            LOG_I("Example ./example /dev/i2c-1:0x48 OR ./example /dev/i2c-1");
+-        }
+-
+-        pdev_name = strtok(temp, ":");
+-        if (pdev_name == NULL) {
+-            perror("Invalid connection string");
+-            LOG_I("Pass i2c device address in the format <i2c_port>:<i2c_addr(optional. Default 0x48)>.");
+-            LOG_I("Example ./example /dev/i2c-1:0x48 OR ./example /dev/i2c-1");
+-            return I2C_FAILED;
+-        }
+-
+-        pdev_addr_str = strtok(NULL, ":");
+-        if (pdev_addr_str != NULL) {
+-            dev_addr = strtol(pdev_addr_str, NULL, 0);
+-        }
+-        else {
+-            dev_addr = default_axSmDevice_addr;
+-        }
+-    }
+-    else {
+-        pdev_name = default_axSmDevice_name;
+-        dev_addr = default_axSmDevice_addr;
+-    }
+-
+-    LOG_D("I2CInit: opening %s\n", pdev_name);
+-
+-    if ((axSmDevice = open(pdev_name, O_RDWR)) < 0)
+-    {
+-        LOG_E("opening failed...");
+-        perror("Failed to open the i2c bus");
+-        LOG_I("Pass i2c device address in the format <i2c_port>:<i2c_addr(optional. Default 0x48)>.");
+-        LOG_I("Example ./example /dev/i2c-1:0x48 OR ./example /dev/i2c-1");
+-        return I2C_FAILED;
+-    }
+-
+-    if (ioctl(axSmDevice, I2C_SLAVE, dev_addr) < 0)
+-    {
+-        LOG_E("I2C driver failed setting address\n");
+-    }
+-
+-    // clear PEC flag
+-    if (ioctl(axSmDevice, I2C_PEC, 0) < 0)
+-    {
+-        LOG_E("I2C driver: PEC flag clear failed\n");
+-    }
+-    else
+-    {
+-        LOG_D("I2C driver: PEC flag cleared\n");
+-    }
+-
+-    // Query functional capacity of I2C driver
+-    if (ioctl(axSmDevice, I2C_FUNCS, &funcs) < 0)
+-    {
+-        LOG_E("Cannot get i2c adapter functionality\n");
+-        close(axSmDevice);
+-        return I2C_FAILED;
+-    }
+-    else
+-    {
+-        if (funcs & I2C_FUNC_I2C)
+-        {
+-            LOG_D("I2C driver supports plain i2c-level commands.\n");
+-#if defined(SCI2C) //if SCI2C is enabled
+-            if ( (funcs & I2C_FUNC_SMBUS_READ_BLOCK_DATA) == I2C_FUNC_SMBUS_READ_BLOCK_DATA )
+-            {
+-                LOG_D("I2C driver supports Read Block.\n");
+-            }
+-            else
+-            {
+-                LOG_E("I2C driver does not support Read Block!\n");
+-                close(axSmDevice);
+-                return I2C_FAILED;
+-            }
+-#endif
+-        }
+-        else
+-        {
+-            LOG_E("I2C driver CANNOT support plain i2c-level commands!\n");
+-            close(axSmDevice);
+-            return I2C_FAILED;
+-        }
+-    }
+-
+-    *conn_ctx = malloc(sizeof(int));
+-    *(int*)(*conn_ctx) = axSmDevice;
+-    return I2C_OK;
+-}
+-
+-/**
+-* Closes the communication channel to I2C device
+-*/
+-void axI2CTerm(void* conn_ctx, int mode)
+-{
+-    AX_UNUSED_ARG(mode);
+-    // printf("axI2CTerm (enter) i2c device =  %d\n", *(int*)(conn_ctx));
+-    if (conn_ctx != NULL) {
+-        if (close(*(int*)(conn_ctx)) != 0) {
+-            LOG_E("Failed to close i2c device %d.\n", *(int*)(conn_ctx));
+-        }
+-        else {
+-            LOG_D("Close i2c device %d.\n", *(int*)(conn_ctx));
+-        }
+-        free(conn_ctx);
+-    }
+-    // printf("axI2CTerm (exit)\n");
+-    return;
+-}
+-
+-#if defined(SCI2C)
+-/**
+- * Write a single byte to the slave device.
+- * In the context of the SCI2C protocol, this command is only invoked
+- * to trigger a wake-up of the attached secure module. As such this
+- * wakeup command 'wakes' the device, but does not receive a valid response.
+- * \note \par bus is currently not used to distinguish between I2C masters.
+-*/
+-i2c_error_t axI2CWriteByte(void* conn_ctx, unsigned char bus, unsigned char addr, unsigned char * pTx)
+-{
+-    int nrWritten = -1;
+-    i2c_error_t rv;
+-    int axSmDevice = *(int*)conn_ctx;
+-
+-    if (bus != I2C_BUS_0)
+-    {
+-        LOG_E("axI2CWriteByte on wrong bus %x (addr %x)\n", bus, addr);
+-    }
+-
+-    nrWritten = write(axSmDevice, pTx, 1);
+-    if (nrWritten < 0)
+-    {
+-        // I2C_LOG_PRINTF("Failed writing data (nrWritten=%d).\n", nrWritten);
+-        rv = I2C_FAILED;
+-    }
+-    else
+-    {
+-        if (nrWritten == 1)
+-        {
+-            rv = I2C_OK;
+-        }
+-        else
+-        {
+-            rv = I2C_FAILED;
+-        }
+-    }
+-
+-    return rv;
+-}
+-#endif // defined(SCI2C)
+-
+-#if defined(SCI2C) || defined(T1oI2C)
+-i2c_error_t axI2CWrite(void* conn_ctx, unsigned char bus, unsigned char addr, unsigned char * pTx, unsigned short txLen)
+-{
+-    int nrWritten = -1;
+-    i2c_error_t rv;
+-    int axSmDevice = *(int*)conn_ctx;
+-#ifdef LOG_I2C
+-    int i = 0;
+-#endif
+-
+-    if(pTx == NULL || txLen > MAX_DATA_LEN)
+-    {
+-        return I2C_FAILED;
+-    }
+-
+-    if (bus != I2C_BUS_0)
+-    {
+-        LOG_E("axI2CWrite on wrong bus %x (addr %x)\n", bus, addr);
+-    }
+-    LOG_MAU8_D("TX (axI2CWrite) > ",pTx,txLen);
+-    nrWritten = write(axSmDevice, pTx, txLen);
+-    if (nrWritten < 0)
+-    {
+-       LOG_E("Failed writing data (nrWritten=%d).\n", nrWritten);
+-       rv = I2C_FAILED;
+-    }
+-    else
+-    {
+-        if (nrWritten == txLen) // okay
+-        {
+-            rv = I2C_OK;
+-        }
+-        else
+-        {
+-            rv = I2C_FAILED;
+-        }
+-    }
+-    LOG_D("Done with rv = %02x ", rv);
+-
+-    return rv;
+-}
+-#endif // defined(SCI2C) || defined(T1oI2C)
+-
+-#if defined(SCI2C)
+-i2c_error_t axI2CWriteRead(void* conn_ctx, unsigned char bus, unsigned char addr, unsigned char * pTx,
+-      unsigned short txLen, unsigned char * pRx, unsigned short * pRxLen)
+-{
+-    struct i2c_rdwr_ioctl_data packets;
+-    struct i2c_msg messages[2];
+-    int r = 0;
+-    int i = 0;
+-    int axSmDevice = *(int*)conn_ctx;
+-
+-    if(pTx == NULL || txLen > MAX_DATA_LEN)
+-    {
+-        return I2C_FAILED;
+-    }
+-
+-    if(pRx == NULL || *pRxLen > MAX_DATA_LEN)
+-    {
+-        return I2C_FAILED;
+-    }
+-
+-    if (bus != I2C_BUS_0) // change if bus 0 is not the correct bus
+-    {
+-        LOG_E("axI2CWriteRead on wrong bus %x (addr %x)\n", bus, addr);
+-    }
+-
+-    messages[0].addr  = default_axSmDevice_addr;
+-    messages[0].flags = 0;
+-    messages[0].len   = txLen;
+-    messages[0].buf   = pTx;
+-
+-    // NOTE:
+-    // By setting the 'I2C_M_RECV_LEN' bit in 'messages[1].flags' one ensures
+-    // the I2C Block Read feature is used.
+-    messages[1].addr  = default_axSmDevice_addr;
+-    messages[1].flags = I2C_M_RD | I2C_M_RECV_LEN;
+-    messages[1].len   = 256;
+-    messages[1].buf   = pRx;
+-    messages[1].buf[0] = 1;
+-
+-    // NOTE:
+-    // By passing the two message structures via the packets structure as
+-    // a parameter to the ioctl call one ensures a Repeated Start is triggered.
+-    packets.msgs      = messages;
+-    packets.nmsgs     = 2;
+-
+-    LOG_MAU8_D("TX (axI2CWriteRead ) > ",&packets.msgs[0].buf[i], txLen);
+-
+-    // Send the request to the kernel and get the result back
+-    r = ioctl(axSmDevice, I2C_RDWR, &packets);
+-
+-    // NOTE:
+-    // The ioctl return value in case of a NACK on the write address is '-1'
+-    // This impacts the error handling routine of the caller.
+-    // If possible distinguish between a general I2C error and a NACK on address
+-    // The way to do this is platform specific (depends on I2C bus driver).
+-    if (r < 0)
+-    {
+-        // LOG_E("axI2CWriteRead: ioctl cmd I2C_RDWR fails with value %d (errno: 0x%08X)\n", r, errno);
+-        // perror("Errorstring: ");
+-#ifdef PLATFORM_IMX
+-    #if LINUX_VERSION_CODE >= KERNEL_VERSION(4,4,0)
+-        #define E_NACK_I2C_IMX ENXIO
+-        // #warning "ENXIO"
+-    #else
+-        #define E_NACK_I2C_IMX EIO
+-        // #warning "EIO"
+-    #endif // LINUX_VERSION_CODE
+-        // In case of IMX, errno == E_NACK_I2C_IMX is not exclusively bound to NACK on address,
+-        // it can also signal a NACK on a data byte
+-        if (errno == E_NACK_I2C_IMX) {
+-            // I2C_LOG_PRINTF("axI2CWriteRead: ioctl signal NACK (errno = %d)\n", errno);
+-            return I2C_NACK_ON_ADDRESS;
+-        }
+-        else {
+-            // printf("axI2CWriteRead: ioctl error (errno = %d)\n", errno);
+-            return I2C_FAILED;
+-        }
+-#else
+-        // I2C_LOG_PRINTF("axI2CWriteRead: ioctl cmd I2C_RDWR fails with value %d (errno: 0x%08X)\n", r, errno);
+-        return I2C_FAILED;
+-#endif // PLATFORM_IMX
+-    }
+-    else
+-    {
+-        int rlen = packets.msgs[1].buf[0]+1;
+-
+-        //I2C_LOG_PRINTF("packets.msgs[1].len is %d \n", packets.msgs[1].len);
+-        LOG_MAU8_D("RX (axI2CWriteRead) < ",&packets.msgs[1].buf[i], rlen);
+-        for (i = 0; i < rlen; i++)
+-        {
+-            pRx[i] = packets.msgs[1].buf[i];
+-        }
+-        *pRxLen = rlen;
+-    }
+-
+-    return I2C_OK;
+-}
+-#endif // defined(SCI2C)
+-
+-#ifdef T1oI2C
+-i2c_error_t axI2CRead(void* conn_ctx, unsigned char bus, unsigned char addr, unsigned char * pRx, unsigned short rxLen)
+-{
+-    int nrRead = -1;
+-    i2c_error_t rv;
+-    int axSmDevice = *(int*)conn_ctx;
+-
+-    if(pRx == NULL || rxLen > MAX_DATA_LEN)
+-    {
+-        return I2C_FAILED;
+-    }
+-
+-    if (bus != I2C_BUS_0)
+-    {
+-        LOG_E("axI2CRead on wrong bus %x (addr %x)\n", bus, addr);
+-    }
+-
+-   nrRead = read(axSmDevice, pRx, rxLen);
+-   if (nrRead < 0)
+-   {
+-      //LOG_E("Failed Read data (nrRead=%d).\n", nrRead);
+-      rv = I2C_FAILED;
+-   }
+-   else
+-   {
+-        if (nrRead == rxLen) // okay
+-        {
+-            rv = I2C_OK;
+-        }
+-        else
+-        {
+-            rv = I2C_FAILED;
+-        }
+-   }
+-    LOG_D("Done with rv = %02x ", rv);
+-    LOG_MAU8_D("TX (axI2CRead): ",pRx,rxLen);
+-    return rv;
+-}
+-#endif // T1oI2C
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/rsp/se05x_reset.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/rsp/se05x_reset.c
+deleted file mode 100644
+index 6d5fc8015d..0000000000
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/rsp/se05x_reset.c
++++ /dev/null
+@@ -1,155 +0,0 @@
+-/*
+- *
+- * Copyright 2019 NXP
+- * SPDX-License-Identifier: Apache-2.0
+- */
+-
+-#include <fcntl.h>
+-#include <unistd.h>
+-#include <string.h>
+-#include <stdio.h>
+-#include "sm_timer.h"
+-#include "ax_reset.h"
+-#include "se05x_apis.h"
+-
+-#define EN_PIN 22
+-
+-void axReset_HostConfigure()
+-{
+-    int fd;
+-    char buf[50];
+-    /* Open export file to export GPIO */
+-    fd = open("/sys/class/gpio/export", O_WRONLY);
+-    if (fd < 0) {
+-        perror("Failed to open GPIO export file ");
+-        return;
+-    }
+-    /* Export GPIO pin to toggle */
+-    snprintf(buf, sizeof(buf), "%d", EN_PIN);
+-    if (write(fd, buf, strlen(buf)) < 1) {
+-        perror("Failed to export Enable pin ");
+-        goto exit;
+-    }
+-    close(fd);
+-
+-    /* Open direction file to configure GPIO direction */
+-    snprintf(buf, sizeof(buf), "/sys/class/gpio/gpio%d/direction", EN_PIN);
+-    fd = open(buf, O_WRONLY);
+-    if (fd < 0) {
+-        sm_usleep(1000 * 1000);
+-        fd = open(buf, O_WRONLY);
+-        if (fd < 0) {
+-            axReset_HostUnconfigure();
+-            perror("Failed to open GPIO direction file ");
+-            return;
+-        }
+-    }
+-    /* Configure direction of exported GPIO */
+-    if (write(fd, "out", 3) < 1) {
+-        perror("Failed to Configure Enable pin ");
+-        axReset_HostUnconfigure();
+-        goto exit;
+-    }
+-
+-exit:
+-    close(fd);
+-    return;
+-}
+-
+-void axReset_HostUnconfigure()
+-{
+-    int fd;
+-    char buf[50];
+-    fd = open("/sys/class/gpio/unexport", O_WRONLY);
+-    if (fd < 0) {
+-        perror("Failed to open unexport file ");
+-        return;
+-    }
+-
+-    snprintf(buf, sizeof(buf), "%d", EN_PIN);
+-    if (write(fd, buf, strlen(buf)) < 1) {
+-        perror("Failed to unexport GPIO ");
+-    }
+-
+-    close(fd);
+-    return;
+-}
+-
+-/*
+- * Where applicable, PowerCycle the SE
+- *
+- * Pre-Requisite: @ref axReset_Configure has been called
+- */
+-void axReset_ResetPluseDUT()
+-{
+-    axReset_PowerDown();
+-    sm_usleep(2000);
+-    axReset_PowerUp();
+-    return;
+-}
+-
+-/*
+- * Where applicable, put SE in low power/standby mode
+- *
+- * Pre-Requisite: @ref axReset_Configure has been called
+- */
+-void axReset_PowerDown()
+-{
+-    int fd;
+-    char buf[50];
+-    char logic[10];
+-    snprintf(buf, sizeof(buf), "/sys/class/gpio/gpio%d/value", EN_PIN);
+-    fd = open(buf, O_WRONLY);
+-    if (fd < 0) {
+-        perror("Failed to open GPIO value file ");
+-        axReset_HostUnconfigure();
+-        return;
+-    }
+-
+-    snprintf(logic, sizeof(logic), "%d", !SE_RESET_LOGIC);
+-    if (write(fd, logic, 1) < 1) {
+-        perror("Failed to toggle GPIO high ");
+-        axReset_HostUnconfigure();
+-    }
+-
+-    close(fd);
+-}
+-
+-/*
+- * Where applicable, put SE in powered/active mode
+- *
+- * Pre-Requisite: @ref axReset_Configure has been called
+- */
+-void axReset_PowerUp()
+-{
+-    int fd;
+-    char buf[50];
+-    char logic[10];
+-    snprintf(buf, sizeof(buf), "/sys/class/gpio/gpio%d/value", EN_PIN);
+-    fd = open(buf, O_WRONLY);
+-    if (fd < 0) {
+-        perror("Failed to open GPIO value file ");
+-        axReset_HostUnconfigure();
+-        return;
+-    }
+-
+-    snprintf(logic, sizeof(logic), "%d", SE_RESET_LOGIC);
+-    if (write(fd, logic, 1) < 1) {
+-        perror("Failed to toggle GPIO high ");
+-        axReset_HostUnconfigure();
+-    }
+-
+-    close(fd);
+-}
+-
+-#if SSS_HAVE_SE05X || SSS_HAVE_LOOPBACK
+-
+-void se05x_ic_reset()
+-{
+-    axReset_ResetPluseDUT();
+-    smComT1oI2C_ComReset();
+-    sm_usleep(3000);
+-    return;
+-}
+-
+-#endif
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/se05x_i2c.cpp b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/se05x_i2c.cpp
+new file mode 100644
+index 0000000000..575e087e81
+--- /dev/null
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/se05x_i2c.cpp
+@@ -0,0 +1,59 @@
++/*
++ * Copyright 2022 Arduino SA
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *     http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++#include "i2c_a7.h"
++#include "mbed.h"
++
++static I2C * se05x_i2c;
++
++i2c_error_t axI2CInit(void **conn_ctx, const char *pDevName)
++{
++    se05x_i2c = new I2C(PB_7, PB_6);
++    if(se05x_i2c != NULL) 
++    {
++        se05x_i2c->frequency(400000);
++        return I2C_OK;
++    }
++    return I2C_FAILED;
++}
++
++void axI2CTerm(void* conn_ctx, int mode)
++{
++    if(se05x_i2c != NULL) 
++    {
++        delete se05x_i2c;
++    }
++}
++
++i2c_error_t axI2CWrite(void* conn_ctx, unsigned char bus, unsigned char addr, unsigned char * pTx, unsigned short txLen)
++{
++    if(se05x_i2c->write(addr, (const char *)pTx, txLen))
++    {
++        return I2C_FAILED;
++    }
++    return I2C_OK;
++}
++
++i2c_error_t axI2CRead(void* conn_ctx, unsigned char bus, unsigned char addr, unsigned char * pRx, unsigned short rxLen)
++{
++    if(se05x_i2c->read(addr, (char *)pRx, rxLen))
++    {
++        return I2C_FAILED;
++    }
++    return I2C_OK;
++}
++
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/se05x_power.cpp b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/se05x_power.cpp
+new file mode 100644
+index 0000000000..1c6af5a24e
+--- /dev/null
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/se05x_power.cpp
+@@ -0,0 +1,42 @@
++/*
++ * Copyright 2022 Arduino SA
++ * SPDX-License-Identifier: Apache-2.0
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *     http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++#include "se05x_apis.h"
++#include "sm_timer.h"
++#include "mbed.h"
++
++#define NICLA_VISION_SE05X_ENA_PIN PG_0
++#define PORTENTA_H7_SE05X_ENA_PIN PI_12
++
++static DigitalOut se05x_ic_enable(PORTENTA_H7_SE05X_ENA_PIN, 0);
++
++void se05x_ic_reset(void)
++{
++    se05x_ic_power_off();
++    sm_sleep(100);
++    se05x_ic_power_on();
++}
++
++void se05x_ic_power_on(void)
++{
++    se05x_ic_enable = 1;
++}
++
++void se05x_ic_power_off(void)
++{
++    se05x_ic_enable = 0;
++}
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/ecc/ex_sss_ecc.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/ecc/ex_sss_ecc.c
+index 97f9854fb7..1a9c072d7b 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/ecc/ex_sss_ecc.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/ecc/ex_sss_ecc.c
+@@ -8,6 +8,8 @@
+ /* Includes                                                                   */
+ /* ************************************************************************** */
+ 
++#if !defined(__MBED__)
++
+ #include <ex_sss.h>
+ #include <ex_sss_boot.h>
+ #include <fsl_sss_se05x_apis.h>
+@@ -173,3 +175,5 @@ cleanup:
+         sss_asymmetric_context_free(&ctx_verify);
+     return status;
+ }
++
++#endif //__MBED__
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/mbedtls/ex_sss_ssl2.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/mbedtls/ex_sss_ssl2.c
+index c7f878a2db..8b6071fac7 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/mbedtls/ex_sss_ssl2.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/ex/mbedtls/ex_sss_ssl2.c
+@@ -22,6 +22,8 @@
+ 
+ /* clang-format off */
+ 
++#if !defined(__MBED__)
++
+ #if defined(SSS_USE_FTR_FILE)
+ #include "fsl_sss_ftr.h"
+ #else
+@@ -2270,3 +2272,4 @@ MBEDTLS_SSL_CLI_C && MBEDTLS_NET_C && MBEDTLS_RSA_C &&
+ MBEDTLS_CTR_DRBG_C MBEDTLS_TIMING_C */
+ 
+ /* clang-format on */
++#endif //__MBED__
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_se05x_types.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_se05x_types.h
+index 26a8e0d3fe..12cb2dd9a3 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_se05x_types.h
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_se05x_types.h
+@@ -25,9 +25,12 @@
+ #include "se05x_const.h"
+ #include "se05x_tlv.h"
+ #include "sm_api.h"
+-#if (__GNUC__ && !AX_EMBEDDED)
++#if (__GNUC__ && !AX_EMBEDDED && !__MBED__)
+ #include <pthread.h>
+ /* Only for base session with os */
++#elif __MBED__
++#include "cmsis_os2.h"
++#include "mbed_rtos_storage.h"
+ #endif
+ /* FreeRTOS includes. */
+ #if USE_RTOS
+@@ -101,8 +104,10 @@ typedef struct _sss_se05x_tunnel_context
+ /** For systems where we potentially have multi-threaded operations, have a lock */
+ #if USE_RTOS
+     SemaphoreHandle_t channelLock;
+-#elif (__GNUC__ && !AX_EMBEDDED)
++#elif (__GNUC__ && !AX_EMBEDDED && !__MBED__)
+     pthread_mutex_t channelLock;
++#elif __MBED__
++    osSemaphoreId_t channelLock;
+ #endif
+ } sss_se05x_tunnel_context_t;
+ 
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/port/default/fsl_sss_types.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/port/default/fsl_sss_types.h
+index 0fff01ab17..969be87673 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/port/default/fsl_sss_types.h
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/port/default/fsl_sss_types.h
+@@ -10,7 +10,7 @@
+ #include <stddef.h>
+ #include <stdint.h>
+ 
+-#ifdef __STDC__
++#if (__STDC__ && !__MBED__)
+ #include <unistd.h>
+ #endif
+ 
+@@ -26,11 +26,16 @@
+ #define ARRAY_SIZE(array) (sizeof(array) / (sizeof(array[0])))
+ #endif
+ 
++#if __MBED__
++#include "mbed_assert.h"
++#define assert_static(e) MBED_ASSERT(e)
++#else
+ #define assert_static(e)                    \
+     {                                       \
+         char assert_static__[(e) ? 1 : -1]; \
+         assert_static__;                    \
+     }
++#endif
+ 
+ /** Compile time assert */
+ #define SSS_ASSERT(condition) assert_static(condition)
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/keystore/keystore_pc.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/keystore/keystore_pc.c
+index 002daae06a..5e344549fd 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/keystore/keystore_pc.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/keystore/keystore_pc.c
+@@ -34,7 +34,7 @@
+ #include "nxLog_sss.h"
+ #include "sm_types.h"
+ 
+-#if (defined(MBEDTLS_FS_IO) && !AX_EMBEDDED) || SSS_HAVE_OPENSSL
++#if (defined(MBEDTLS_FS_IO) && !AX_EMBEDDED && !__MBED__) || SSS_HAVE_OPENSSL
+ 
+ /* ************************************************************************** */
+ /* Local Defines                                                              */
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/se05x/fsl_sss_se05x_apis.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/se05x/fsl_sss_se05x_apis.c
+index 7613140051..cabfdff7d3 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/se05x/fsl_sss_se05x_apis.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/src/se05x/fsl_sss_se05x_apis.c
+@@ -51,7 +51,7 @@ extern "C" {
+     else {                                \
+         LOG_D("LOCK Releasing failed");   \
+     }
+-#elif (__GNUC__ && !AX_EMBEDDED)
++#elif (__GNUC__ && !AX_EMBEDDED && !__MBED__)
+ #define LOCK_TXN(lock)                                           \
+     LOG_D("Trying to Acquire Lock thread: %ld", pthread_self()); \
+     pthread_mutex_lock(&lock);                                   \
+@@ -61,14 +61,31 @@ extern "C" {
+     LOG_D("Trying to Released Lock by thread: %ld", pthread_self()); \
+     pthread_mutex_unlock(&lock);                                     \
+     LOG_D("LOCK Released by thread: %ld", pthread_self());
++#elif __MBED__
++#define LOCK_TXN(lock)                                               \
++    LOG_D("Trying to Acquire Lock");                                 \
++    if (osSemaphoreAcquire(lock, 0) == osOK)                         \
++        LOG_D("LOCK Acquired");                                      \
++    else                                                             \
++        LOG_D("LOCK Acquisition failed");
++#define UNLOCK_TXN(lock)                                             \
++    LOG_D("Trying to Released Lock");                                \
++    if (osSemaphoreRelease(lock) == osOK)                            \
++        LOG_D("LOCK Released");                                      \
++    else                                                             \
++        LOG_D("LOCK Releasing failed");
+ #endif
+ 
+-#if (__GNUC__ && !AX_EMBEDDED) || (USE_RTOS)
++#if (__GNUC__ && !AX_EMBEDDED) || (USE_RTOS) || (__MBED__)
+ #define USE_LOCK 1
+ #else
+ #define USE_LOCK 0
+ #endif
+ 
++#if __MBED__
++static mbed_rtos_storage_semaphore_t channelLock_mem;
++#endif
++
+ static SE05x_ECSignatureAlgo_t se05x_get_ec_sign_hash_mode(sss_algorithm_t algorithm);
+ 
+ /* Used during testing as well */
+@@ -6231,7 +6248,7 @@ sss_status_t sss_se05x_tunnel_context_init(sss_se05x_tunnel_context_t *context,
+         LOG_E("xSemaphoreCreateMutex failed");
+         return kStatus_SSS_Fail;
+     }
+-#elif (__GNUC__ && !AX_EMBEDDED)
++#elif (__GNUC__ && !AX_EMBEDDED && !__MBED__)
+     if (pthread_mutex_init(&context->channelLock, NULL) != 0) {
+         LOG_E("\n mutex init has failed");
+         return kStatus_SSS_Fail;
+@@ -6239,6 +6256,17 @@ sss_status_t sss_se05x_tunnel_context_init(sss_se05x_tunnel_context_t *context,
+     else {
+         LOG_D("Mutex Init successfull");
+     }
++#elif __MBED__
++    osSemaphoreAttr_t attr;
++    attr.name = NULL;
++    attr.attr_bits = 0;
++    attr.cb_mem = &channelLock_mem;
++    attr.cb_size = sizeof channelLock_mem;
++    context->channelLock = osSemaphoreNew(1, 0, &attr);
++    if (context->channelLock == NULL) {
++        LOG_E("xSemaphoreCreateMutex failed");
++        return kStatus_SSS_Fail;
++    }
+ #endif
+     return retval;
+ }
+@@ -6258,8 +6286,10 @@ void sss_se05x_tunnel_context_free(sss_se05x_tunnel_context_t *context)
+ {
+ #if USE_RTOS
+     vSemaphoreDelete(context->channelLock);
+-#elif (__GNUC__ && !AX_EMBEDDED)
++#elif (__GNUC__ && !AX_EMBEDDED && !__MBED__)
+     pthread_mutex_destroy(&context->channelLock);
++#elif __MBED__
++    osSemaphoreRelease(context->channelLock);
+ #endif
+     memset(context, 0, sizeof(*context));
+ }
+-- 
+2.25.1
+

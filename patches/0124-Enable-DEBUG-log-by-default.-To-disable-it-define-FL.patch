@@ -1,0 +1,26 @@
+From 11dca5dd86027089be9bb6aad7beac41e0d86cf6 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Wed, 2 Feb 2022 09:52:58 +0100
+Subject: [PATCH 124/138] Enable DEBUG log by default. To disable it define
+ FLOW_SILENT macro
+
+---
+ .../hostlib/hostLib/libCommon/log/nxLog_DefaultConfig.h         | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/log/nxLog_DefaultConfig.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/log/nxLog_DefaultConfig.h
+index 9e37d5616b..1b0cee9dea 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/log/nxLog_DefaultConfig.h
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/log/nxLog_DefaultConfig.h
+@@ -15,7 +15,7 @@
+  * - 0 => Disable Debug level logging.  This has to be
+  *        enabled individually by other logging
+  *        header/source files */
+-#define NX_LOG_ENABLE_DEFAULT_DEBUG 0
++#define NX_LOG_ENABLE_DEFAULT_DEBUG 1
+ 
+ /* Same as NX_LOG_ENABLE_DEFAULT_DEBUG but for Info Level */
+ #define NX_LOG_ENABLE_DEFAULT_INFO 1
+-- 
+2.25.1
+

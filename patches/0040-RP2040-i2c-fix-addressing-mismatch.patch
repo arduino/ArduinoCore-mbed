@@ -1,7 +1,7 @@
 From 693b0de97bce9480895d8fd7e85caaf2856de9c5 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Mon, 8 Mar 2021 10:53:48 +0100
-Subject: [PATCH 040/110] RP2040: i2c: fix addressing mismatch
+Subject: [PATCH 040/138] RP2040: i2c: fix addressing mismatch
 
 ---
  targets/TARGET_RASPBERRYPI/TARGET_RP2040/i2c_api.c | 13 +++++++++++--
@@ -40,5 +40,5 @@ index 210279b3b0..ae9f0c0fd3 100644
                                                   (size_t)length,
                                                   /* nostop = */(stop == 0));
 -- 
-2.34.1
+2.25.1
 

@@ -1,7 +1,7 @@
 From 2bdb291a44fd149d38662f70a574b1a06380fca7 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Thu, 11 Mar 2021 11:50:18 +0100
-Subject: [PATCH 011/110] STM32: USB: allow dynamic USB speed configuration
+Subject: [PATCH 011/138] STM32: USB: allow dynamic USB speed configuration
  based on bootloader parameters
 
 ---
@@ -141,5 +141,5 @@ index c45150de4b..40f1044216 100644
      instance->events->start_process();
  }
 -- 
-2.34.1
+2.25.1
 

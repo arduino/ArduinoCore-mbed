@@ -1,7 +1,7 @@
 From 50428cf9f8475d6bbddf1b516a2f3e7cec409c8f Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Tue, 11 May 2021 09:41:45 +0200
-Subject: [PATCH 060/110] RP2040: include multicore library in build
+Subject: [PATCH 060/138] RP2040: include multicore library in build
 
 ---
  targets/TARGET_RASPBERRYPI/TARGET_RP2040/.mbedignore      | 1 -
@@ -48,5 +48,5 @@ index 0ceea4def8..6b2321f12f 100644
 \ No newline at end of file
 +}
 -- 
-2.34.1
+2.25.1
 

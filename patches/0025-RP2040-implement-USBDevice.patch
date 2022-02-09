@@ -1,7 +1,7 @@
 From 0c8b279a5eec6de39843ed2f4f346a9ffdb35eab Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Tue, 23 Feb 2021 10:41:45 +0100
-Subject: [PATCH 025/110] RP2040: implement USBDevice
+Subject: [PATCH 025/138] RP2040: implement USBDevice
 
 Code by @ghollingworth
 ---
@@ -633,5 +633,5 @@ index 3f8b505fd3..c9601649d8 100644
              "MBED_MPU_CUSTOM",
              "PICO_TIME_DEFAULT_ALARM_POOL_DISABLED",
 -- 
-2.34.1
+2.25.1
 

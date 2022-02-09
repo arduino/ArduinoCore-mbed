@@ -1,7 +1,7 @@
 From 2689a3d19461b70d35870ca58de9e76c83153fe0 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Fri, 6 Aug 2021 10:29:11 +0200
-Subject: [PATCH 103/110] Gemalto: TX62: handle oob before closing the socket
+Subject: [PATCH 103/138] Gemalto: TX62: handle oob before closing the socket
 
 ---
  .../GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp        | 1 +
@@ -20,5 +20,5 @@ index 147f5ffc15..94975e1b66 100644
              socket->pending_bytes = 0;
              return NSAPI_ERROR_OK;
 -- 
-2.34.1
+2.25.1
 

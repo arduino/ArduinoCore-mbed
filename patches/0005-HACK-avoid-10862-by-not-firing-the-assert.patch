@@ -1,7 +1,7 @@
 From 5722a9ef477e5a3f4470898c7028633f1f004ff6 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Wed, 31 Jul 2019 12:48:04 +0200
-Subject: [PATCH 005/110] HACK: avoid #10862 by not firing the assert
+Subject: [PATCH 005/138] HACK: avoid #10862 by not firing the assert
 
 ---
  drivers/usb/source/USBDevice.cpp | 18 ++++++++++--------
@@ -44,5 +44,5 @@ index 6d3cfc87d4..ddeabcfa15 100644
  }
  
 -- 
-2.34.1
+2.25.1
 

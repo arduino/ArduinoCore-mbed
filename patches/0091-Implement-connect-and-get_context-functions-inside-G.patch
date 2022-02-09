@@ -1,7 +1,7 @@
 From cbb912e27a23f31ed2a13345006346668b9c01ec Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Tue, 13 Jul 2021 13:16:06 +0200
-Subject: [PATCH 091/110] Implement connect() and get_context() functions
+Subject: [PATCH 091/138] Implement connect() and get_context() functions
  inside GEMALTO stack
 
 ---
@@ -177,5 +177,5 @@ index da6e7676d6..0645b2b87c 100644
  protected:
  #if !NSAPI_PPP_AVAILABLE
 -- 
-2.34.1
+2.25.1
 

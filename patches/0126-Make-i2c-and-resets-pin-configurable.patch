@@ -1,0 +1,46 @@
+From 877b8109c62677b86b73dd5cef05c039dff065eb Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Wed, 2 Feb 2022 10:10:46 +0100
+Subject: [PATCH 126/138] Make i2c and resets pin configurable
+
+---
+ .../COMPONENT_SE050/hostlib/hostLib/platform/se05x_i2c.cpp   | 4 ++--
+ .../COMPONENT_SE050/hostlib/hostLib/platform/se05x_power.cpp | 5 +----
+ 2 files changed, 3 insertions(+), 6 deletions(-)
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/se05x_i2c.cpp b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/se05x_i2c.cpp
+index 575e087e81..07ef0db92b 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/se05x_i2c.cpp
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/se05x_i2c.cpp
+@@ -22,10 +22,10 @@ static I2C * se05x_i2c;
+ 
+ i2c_error_t axI2CInit(void **conn_ctx, const char *pDevName)
+ {
+-    se05x_i2c = new I2C(PB_7, PB_6);
++    se05x_i2c = new I2C(MBED_CONF_TARGET_SE050_SDA, MBED_CONF_TARGET_SE050_SCL);
+     if(se05x_i2c != NULL) 
+     {
+-        se05x_i2c->frequency(400000);
++        se05x_i2c->frequency(MBED_CONF_TARGET_SE050_I2C_FREQ);
+         return I2C_OK;
+     }
+     return I2C_FAILED;
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/se05x_power.cpp b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/se05x_power.cpp
+index 1c6af5a24e..0d7ffcac8c 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/se05x_power.cpp
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/platform/se05x_power.cpp
+@@ -19,10 +19,7 @@
+ #include "sm_timer.h"
+ #include "mbed.h"
+ 
+-#define NICLA_VISION_SE05X_ENA_PIN PG_0
+-#define PORTENTA_H7_SE05X_ENA_PIN PI_12
+-
+-static DigitalOut se05x_ic_enable(PORTENTA_H7_SE05X_ENA_PIN, 0);
++static DigitalOut se05x_ic_enable(MBED_CONF_TARGET_SE050_ENA, 0);
+ 
+ void se05x_ic_reset(void)
+ {
+-- 
+2.25.1
+

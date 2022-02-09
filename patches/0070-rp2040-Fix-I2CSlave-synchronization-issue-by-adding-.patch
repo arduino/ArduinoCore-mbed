@@ -1,7 +1,7 @@
 From 8bbd9dbe99e5be417b55723bed4c054a2f113e43 Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Thu, 7 Oct 2021 18:11:59 +0200
-Subject: [PATCH 070/110] rp2040: Fix I2CSlave synchronization issue by adding
+Subject: [PATCH 070/138] rp2040: Fix I2CSlave synchronization issue by adding
  a timeout for the read
 
 ---
@@ -42,5 +42,5 @@ index 2b776562a1..ec52728f63 100644
      DEBUG_PRINTF("i2c_slave read %d bytes\r\n", read_len);
  
 -- 
-2.34.1
+2.25.1
 

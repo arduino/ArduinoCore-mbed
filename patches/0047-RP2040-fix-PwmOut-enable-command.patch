@@ -1,7 +1,7 @@
 From c2a7e5dde882c1cb31917e282169cc0a8d463348 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Tue, 16 Mar 2021 09:54:26 +0100
-Subject: [PATCH 047/110] RP2040: fix PwmOut enable command
+Subject: [PATCH 047/138] RP2040: fix PwmOut enable command
 
 ---
  targets/TARGET_RASPBERRYPI/TARGET_RP2040/pwmout_api.c | 1 +
@@ -20,5 +20,5 @@ index cc2b935bc7..e4bc4daa80 100644
  
  /** Read the current float-point output duty-cycle
 -- 
-2.34.1
+2.25.1
 

@@ -1,7 +1,7 @@
 From a34424eedf45eaf87e2bae704153a35cba21716b Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Wed, 3 Mar 2021 18:58:02 +0100
-Subject: [PATCH 034/110] RP2040: Protect flash operations in critical sections
+Subject: [PATCH 034/138] RP2040: Protect flash operations in critical sections
  + fix addresses
 
 ---
@@ -99,5 +99,5 @@ index 85e8f5c81f..01f71958c5 100644
 +#endif
 \ No newline at end of file
 -- 
-2.34.1
+2.25.1
 

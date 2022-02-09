@@ -1,7 +1,7 @@
 From d1ded30e5559b403dd49378bfaf9e7fab87d4ffa Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Mon, 9 Nov 2020 10:00:01 +0100
-Subject: [PATCH 007/110] TLSSocketWrapper: add method to retrieve certificates
+Subject: [PATCH 007/138] TLSSocketWrapper: add method to retrieve certificates
  from filesystem
 
 ---
@@ -90,5 +90,5 @@ index cebaf04703..8202151eb7 100644
  {
      return set_client_cert_key(client_cert_pem, strlen(client_cert_pem) + 1, client_private_key_pem, strlen(client_private_key_pem) + 1);
 -- 
-2.34.1
+2.25.1
 

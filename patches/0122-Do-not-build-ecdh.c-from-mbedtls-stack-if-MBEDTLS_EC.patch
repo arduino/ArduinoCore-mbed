@@ -1,0 +1,32 @@
+From 6028f880d17340e000e1b5fa8018c3694ec61078 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Wed, 19 Jan 2022 14:17:07 +0100
+Subject: [PATCH 122/138] Do not build ecdh.c from mbedtls stack if
+ MBEDTLS_ECDH_ALT is defined
+
+---
+ connectivity/mbedtls/source/ecdh.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/connectivity/mbedtls/source/ecdh.c b/connectivity/mbedtls/source/ecdh.c
+index 9dfa868063..6cb53b4015 100644
+--- a/connectivity/mbedtls/source/ecdh.c
++++ b/connectivity/mbedtls/source/ecdh.c
+@@ -27,7 +27,7 @@
+ #include "common.h"
+ 
+ #if defined(MBEDTLS_ECDH_C)
+-
++#if !defined(MBEDTLS_ECDH_ALT)
+ #include "mbedtls/ecdh.h"
+ #include "mbedtls/platform_util.h"
+ #include "mbedtls/error.h"
+@@ -726,4 +726,5 @@ int mbedtls_ecdh_calc_secret( mbedtls_ecdh_context *ctx, size_t *olen,
+ #endif
+ }
+ 
++#endif /* MBEDTLS_ECDH_ALT */
+ #endif /* MBEDTLS_ECDH_C */
+-- 
+2.25.1
+

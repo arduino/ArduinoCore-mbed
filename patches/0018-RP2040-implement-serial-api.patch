@@ -1,7 +1,7 @@
 From 374ca188ae04f1fc9cd2f2739448e37b290dfd35 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Fri, 12 Feb 2021 15:49:55 +0100
-Subject: [PATCH 018/110] RP2040: implement serial api
+Subject: [PATCH 018/138] RP2040: implement serial api
 
 ---
  .../TARGET_RP2040/PeripheralPins.c            |  85 +++++++
@@ -514,5 +514,5 @@ index 5bdddb968d..596670be3d 100644
      },
      "__build_tools_metadata__": {
 -- 
-2.34.1
+2.25.1
 

@@ -1,0 +1,28 @@
+From b1fb8c15671daecb88e22bcb320db93abfef1fe6 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Wed, 2 Feb 2022 14:26:18 +0100
+Subject: [PATCH 130/138] NICLA_VISION: Add configuration macros used for APDU
+ communication protocol
+
+---
+ targets/targets.json | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/targets/targets.json b/targets/targets.json
+index 5e036861cf..f2429fba17 100644
+--- a/targets/targets.json
++++ b/targets/targets.json
+@@ -3514,7 +3514,9 @@
+             "MBEDTLS_SHA1_C",
+             "CM4_BOOT_BY_APPLICATION",
+             "QSPI_NO_SAMPLE_SHIFT",
+-            "CYW43XXX_UNBUFFERED_UART"
++            "CYW43XXX_UNBUFFERED_UART",
++            "T1oI2C",
++            "T1oI2C_UM11225"
+         ],
+         "device_has_add": [
+             "USBDEVICE",
+-- 
+2.25.1
+

@@ -1,0 +1,34 @@
+From 92234090ae976558fdc7f517a8f836db1110ca42 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Wed, 19 Jan 2022 14:18:07 +0100
+Subject: [PATCH 123/138] Enable MBEDTLS alternative implementation over SSS
+
+---
+ .../COMPONENT_SE050/sss/inc/fsl_sss_ftr_default.h             | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_ftr_default.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_ftr_default.h
+index 7ad9a873d2..0113d794bc 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_ftr_default.h
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/sss/inc/fsl_sss_ftr_default.h
+@@ -172,7 +172,7 @@
+  */
+ 
+ /** Use SSS Layer ALT implementation */
+-#define SSS_HAVE_MBEDTLS_ALT_SSS 0
++#define SSS_HAVE_MBEDTLS_ALT_SSS 1
+ 
+ /** Legacy implementation */
+ #define SSS_HAVE_MBEDTLS_ALT_A71CH 0
+@@ -180,7 +180,7 @@
+ /** Not using any mbedTLS_ALT
+  *
+  * When this is selected, cloud demos can not work with mbedTLS */
+-#define SSS_HAVE_MBEDTLS_ALT_NONE 1
++#define SSS_HAVE_MBEDTLS_ALT_NONE 0
+ 
+ #if (( 0                             \
+     + SSS_HAVE_MBEDTLS_ALT_SSS       \
+-- 
+2.25.1
+

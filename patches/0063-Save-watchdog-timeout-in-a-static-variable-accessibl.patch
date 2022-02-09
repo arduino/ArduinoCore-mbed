@@ -1,7 +1,7 @@
 From d6281c2458a4b8dadad5856a27342e0b32a331c0 Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Fri, 4 Jun 2021 14:45:38 +0200
-Subject: [PATCH 063/110] Save watchdog timeout in a static variable accessible
+Subject: [PATCH 063/138] Save watchdog timeout in a static variable accessible
  from Arduino APIs
 
 ---
@@ -38,5 +38,5 @@ index b7abac8917..9263eb48d5 100644
  
  watchdog_features_t hal_watchdog_get_platform_features(void)
 -- 
-2.34.1
+2.25.1
 

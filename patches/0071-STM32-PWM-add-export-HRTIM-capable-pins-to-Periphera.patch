@@ -1,7 +1,7 @@
 From cda8dd2906f3463ee2b368d4622d86291ef0e5ef Mon Sep 17 00:00:00 2001
 From: Riccardo Rizzo <r.rizzo@arduino.cc>
 Date: Mon, 28 Jun 2021 15:03:50 +0200
-Subject: [PATCH 071/110] STM32: PWM: add export HRTIM capable pins to
+Subject: [PATCH 071/138] STM32: PWM: add export HRTIM capable pins to
  PeripheralPins
 
 ---
@@ -139,5 +139,5 @@ index 63f0e87599..44a95f9c02 100644
                      store_uart(pin, name, sig)
                  if "SPI" in sig:
 -- 
-2.34.1
+2.25.1
 

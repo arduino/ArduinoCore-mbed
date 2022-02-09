@@ -1,7 +1,7 @@
 From d7f2002260d93cbd4424dca524ac0b5ac8855d9e Mon Sep 17 00:00:00 2001
 From: Giampaolo Mancini <giampaolo@trampolineup.com>
 Date: Wed, 8 Jan 2020 16:42:46 +0100
-Subject: [PATCH 014/110] Add support for Arduino Edge Control
+Subject: [PATCH 014/138] Add support for Arduino Edge Control
 
 ---
  .../TARGET_EDGE_CONTROL/PinNames.h            | 207 ++++++++++++++++++
@@ -293,5 +293,5 @@ index f79bc4f63f..0bc010dbea 100644
          "core": "Cortex-M4F",
          "components_add": [
 -- 
-2.34.1
+2.25.1
 

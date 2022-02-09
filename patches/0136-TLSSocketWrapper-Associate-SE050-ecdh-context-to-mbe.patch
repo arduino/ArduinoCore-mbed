@@ -1,0 +1,30 @@
+From 83821906a0030586667e13946a23acfbce81b01f Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Mon, 21 Feb 2022 11:34:40 +0100
+Subject: [PATCH 136/138] TLSSocketWrapper: Associate SE050 ecdh context to
+ mbedtls
+
+---
+ connectivity/netsocket/source/TLSSocketWrapper.cpp | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/connectivity/netsocket/source/TLSSocketWrapper.cpp b/connectivity/netsocket/source/TLSSocketWrapper.cpp
+index 0826d05346..58f47b54c8 100644
+--- a/connectivity/netsocket/source/TLSSocketWrapper.cpp
++++ b/connectivity/netsocket/source/TLSSocketWrapper.cpp
+@@ -307,6 +307,12 @@ nsapi_error_t TLSSocketWrapper::start_handshake(bool first_call)
+     _transport->set_blocking(false);
+     _transport->sigio(mbed::callback(this, &TLSSocketWrapper::event));
+ 
++#if defined(COMPONENT_SE050) && defined(MBEDTLS_ECDH_ALT) && SSS_HAVE_ALT_SSS
++    if ((_sss_key_pair_ptr != nullptr) && (_sss_ks_ptr != nullptr)) {
++        sss_mbedtls_associate_ecdhctx(_ssl.handshake, _sss_key_pair_ptr, _sss_ks_ptr);
++    }
++#endif
++
+     // Defines MBEDTLS_SSL_CONF_RECV/SEND/RECV_TIMEOUT define global functions which should be the same for all
+     // callers of mbedtls_ssl_set_bio_ctx and there should be only one ssl context. If these rules don't apply,
+     // these defines can't be used.
+-- 
+2.25.1
+

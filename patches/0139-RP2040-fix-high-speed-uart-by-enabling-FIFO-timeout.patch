@@ -1,0 +1,49 @@
+From 9f9ee8b95b2a8c0d89dd8254cab720c319828aa4 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Mon, 7 Feb 2022 17:52:46 +0100
+Subject: [PATCH] RP2040: fix high speed uart by enabling FIFO + timeout
+
+---
+ .../pico-sdk/rp2_common/hardware_uart/include/hardware/uart.h | 3 ++-
+ targets/TARGET_RASPBERRYPI/TARGET_RP2040/serial_api.c         | 4 ++--
+ 2 files changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_uart/include/hardware/uart.h b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_uart/include/hardware/uart.h
+index c957a33528..2eafc7ac50 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_uart/include/hardware/uart.h
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_uart/include/hardware/uart.h
+@@ -213,7 +213,8 @@ static inline void uart_set_format(uart_inst_t *uart, uint data_bits, uint stop_
+  */
+ static inline void uart_set_irq_enables(uart_inst_t *uart, bool rx_has_data, bool tx_needs_data) {
+     uart_get_hw(uart)->imsc = (!!tx_needs_data << UART_UARTIMSC_TXIM_LSB) |
+-                              (!!rx_has_data << UART_UARTIMSC_RXIM_LSB);
++                              (!!rx_has_data << UART_UARTIMSC_RXIM_LSB) |
++                              (1 << UART_UARTIMSC_RTIM_LSB);
+     if (rx_has_data) {
+         // Set minimum threshold
+         hw_write_masked(&uart_get_hw(uart)->ifls, 0 << UART_UARTIFLS_RXIFLSEL_LSB,
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/serial_api.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/serial_api.c
+index 8d95f6c2a3..a6f01a6063 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/serial_api.c
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/serial_api.c
+@@ -60,7 +60,7 @@ void serial_init(serial_t *obj, PinName tx, PinName rx)
+     gpio_set_function(rx, GPIO_FUNC_UART);
+ 
+     //uart_set_translate_crlf(obj->dev, false);
+-    uart_set_fifo_enabled(obj->dev, false);
++    uart_set_fifo_enabled(obj->dev, true);
+ 
+     if (tx == STDIO_UART_TX) {
+         memmove(&stdio_uart, obj, sizeof(serial_t));
+@@ -77,7 +77,7 @@ void serial_baud(serial_t *obj, int baudrate)
+ {
+     obj->baud = (uint32_t)baudrate;
+     uart_init(obj->dev, obj->baud);
+-    uart_set_fifo_enabled(obj->dev, false);
++    uart_set_fifo_enabled(obj->dev, true);
+ }
+ 
+ void serial_format(serial_t *obj, int data_bits, SerialParity parity, int stop_bits)
+-- 
+2.25.1
+

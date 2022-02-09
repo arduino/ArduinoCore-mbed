@@ -1,7 +1,7 @@
 From d3f3b312f45a11c3bbbd7bee580f04ed9d726e86 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Thu, 5 Aug 2021 15:14:13 +0200
-Subject: [PATCH 101/110] GEMALTO: fix some corner cases
+Subject: [PATCH 101/138] GEMALTO: fix some corner cases
 
 ---
  .../GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp   | 6 ++++--
@@ -53,5 +53,5 @@ index 034011d2d2..06952694e2 100644
          len = (nsapi_size_or_error_t)size;
      }
 -- 
-2.34.1
+2.25.1
 

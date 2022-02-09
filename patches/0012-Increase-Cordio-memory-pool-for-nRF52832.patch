@@ -1,7 +1,7 @@
 From 66c314a029c7db96c88c9155ec2db93f4f48ab72 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Thu, 10 Dec 2020 09:43:14 +0100
-Subject: [PATCH 012/110] Increase Cordio memory pool for nRF52832
+Subject: [PATCH 012/138] Increase Cordio memory pool for nRF52832
 
 completes 9354bc2a958966739adb0b9584c966bc13e675d5
 ---
@@ -22,5 +22,5 @@ index 05e5a45eee..3a3d85128d 100644
          "wsf-pool-buffer-size": {
              "help": "Defines the memory allocated for the wsf memory pool.",
 -- 
-2.34.1
+2.25.1
 

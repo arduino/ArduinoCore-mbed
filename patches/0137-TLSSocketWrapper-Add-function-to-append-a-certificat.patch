@@ -1,0 +1,87 @@
+From 8b8098c97702bfdac98f7b20a4c84ba1012b4b61 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Tue, 22 Feb 2022 14:16:16 +0100
+Subject: [PATCH 137/138] TLSSocketWrapper: Add function to append a
+ certificate to an existing ca chain
+
+---
+ .../include/netsocket/TLSSocketWrapper.h      | 23 +++++++++++++++
+ .../netsocket/source/TLSSocketWrapper.cpp     | 28 +++++++++++++++++++
+ 2 files changed, 51 insertions(+)
+
+diff --git a/connectivity/netsocket/include/netsocket/TLSSocketWrapper.h b/connectivity/netsocket/include/netsocket/TLSSocketWrapper.h
+index 968bb9170a..13365428fd 100644
+--- a/connectivity/netsocket/include/netsocket/TLSSocketWrapper.h
++++ b/connectivity/netsocket/include/netsocket/TLSSocketWrapper.h
+@@ -126,6 +126,29 @@ public:
+      */
+     nsapi_error_t set_root_ca_cert(const char *root_ca_pem);
+ 
++    /** Appends the certificate to an existing ca chain.
++     *
++     * @note Must be called before calling connect()
++     *
++     * @param root_ca Root CA Certificate in any Mbed TLS-supported format.
++     * @param len     Length of certificate (including terminating 0 for PEM).
++     * @retval NSAPI_ERROR_OK on success.
++     * @retval NSAPI_ERROR_NO_MEMORY in case there is not enough memory to allocate certificate.
++     * @retval NSAPI_ERROR_PARAMETER in case the provided root_ca parameter failed parsing.
++     */
++    nsapi_error_t append_root_ca_cert(const void *root_ca, size_t len);
++
++    /** Appends the certificate to an existing ca chain.
++     *
++     * @note Must be called before calling connect()
++     *
++     * @param root_ca_pem Root CA Certificate in PEM format.
++     * @retval NSAPI_ERROR_OK on success.
++     * @retval NSAPI_ERROR_NO_MEMORY in case there is not enough memory to allocate certificate.
++     * @retval NSAPI_ERROR_PARAMETER in case the provided root_ca parameter failed parsing.
++     */
++    nsapi_error_t append_root_ca_cert(const char *root_ca_pem);
++
+     /** Sets the certification of Root CA.
+      *
+      * @note Must be called before calling connect()
+diff --git a/connectivity/netsocket/source/TLSSocketWrapper.cpp b/connectivity/netsocket/source/TLSSocketWrapper.cpp
+index 58f47b54c8..6665f64cc0 100644
+--- a/connectivity/netsocket/source/TLSSocketWrapper.cpp
++++ b/connectivity/netsocket/source/TLSSocketWrapper.cpp
+@@ -136,6 +136,34 @@ nsapi_error_t TLSSocketWrapper::set_root_ca_cert(const char *root_ca_pem)
+     return set_root_ca_cert(root_ca_pem, strlen(root_ca_pem) + 1);
+ }
+ 
++nsapi_error_t TLSSocketWrapper::append_root_ca_cert(const void *root_ca, size_t len)
++{
++#if !defined(MBEDTLS_X509_CRT_PARSE_C)
++    return NSAPI_ERROR_UNSUPPORTED;
++#else
++    mbedtls_x509_crt *crt;
++
++    crt = get_ca_chain();
++    if (!crt) {
++        return NSAPI_ERROR_NO_MEMORY;
++    }
++
++    /* Parse CA certification */
++    int ret;
++    if ((ret = mbedtls_x509_crt_parse(crt, static_cast<const unsigned char *>(root_ca),
++                                      len)) != 0) {
++        print_mbedtls_error("mbedtls_x509_crt_parse", ret);
++        return NSAPI_ERROR_PARAMETER;
++    }
++    return NSAPI_ERROR_OK;
++#endif
++}
++
++nsapi_error_t TLSSocketWrapper::append_root_ca_cert(const char *root_ca_pem)
++{
++    return append_root_ca_cert(root_ca_pem, strlen(root_ca_pem) + 1);
++}
++
+ nsapi_error_t TLSSocketWrapper::set_root_ca_cert_path(const char *root_ca)
+ {
+ #if !defined(MBEDTLS_X509_CRT_PARSE_C) || !defined(MBEDTLS_FS_IO)
+-- 
+2.25.1
+

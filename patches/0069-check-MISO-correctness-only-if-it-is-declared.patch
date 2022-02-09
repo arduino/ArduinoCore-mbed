@@ -1,7 +1,7 @@
 From 9806b6cf13f2c7ac60335baac8e83601cfdec78e Mon Sep 17 00:00:00 2001
 From: Josep Comas <extern@jcomas.net>
 Date: Sat, 31 Jul 2021 18:57:41 +0200
-Subject: [PATCH 069/110] check MISO correctness only if it is declared
+Subject: [PATCH 069/138] check MISO correctness only if it is declared
 
 It is very common  to have displays without MISO pin connected to MCU, for example, https://www.waveshare.com/pico-lcd-1.3.htm hangs calling spi_init(&spi, p11, NC, p10, NC);
 ---
@@ -26,5 +26,5 @@ index 73129835fa..271cf58d1c 100644
          MBED_ASSERT(spi_sclk == spi_ssel);
      }
 -- 
-2.34.1
+2.25.1
 

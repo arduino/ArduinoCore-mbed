@@ -1,0 +1,39 @@
+From 958d8b763ceadd44a82d907e2d09194fb4e2b299 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Wed, 2 Feb 2022 14:30:07 +0100
+Subject: [PATCH 131/138] NICLA_VISION: Add configuration for reset pin and i2c
+
+---
+ targets/targets.json | 16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
+
+diff --git a/targets/targets.json b/targets/targets.json
+index f2429fba17..43e830d147 100644
+--- a/targets/targets.json
++++ b/targets/targets.json
+@@ -3491,6 +3491,22 @@
+             "usb_speed": {
+                 "help": "USE_USB_OTG_FS or USE_USB_OTG_HS or USE_USB_HS_IN_FS",
+                 "value": "USE_USB_OTG_HS"
++            },
++            "se050_ena": {
++                "help": "SE050 ENA Pin",
++                "value" : "PG_0"
++            },
++            "se050_sda": {
++                "help": "SE050 I2C SDA Pin",
++                "value" : "PF_0"
++            },
++            "se050_scl": {
++                "help": "SE050 I2C SCL Pin",
++                "value" : "PF_1"
++            },
++            "se050_i2c_freq": {
++                "help": "SE050 I2C bus frequency",
++                "value" : "1000000"
+             }
+         },
+         "overrides": {
+-- 
+2.25.1
+

@@ -1,7 +1,7 @@
 From 868131e9898d877b463c698f375e6975b27a0711 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Mon, 15 Mar 2021 15:28:08 +0100
-Subject: [PATCH 045/110] RP2040: add Raspberry Pico target
+Subject: [PATCH 045/138] RP2040: add Raspberry Pico target
 
 ---
  .../TARGET_RASPBERRY_PI_PICO/PinNames.h       | 70 +++++++++++++++++++
@@ -151,5 +151,5 @@ index 4e02c7ebdc..6821974873 100644
          "version": "1",
          "public": false
 -- 
-2.34.1
+2.25.1
 

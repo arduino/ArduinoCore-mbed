@@ -1,0 +1,53 @@
+From abbf7d3e64a63f7c41b23e5ecaf932d3c337e21f Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Wed, 2 Feb 2022 09:53:57 +0100
+Subject: [PATCH 125/138] Add 1ms delays to let communication work also with
+ debug disabled
+
+---
+ .../hostLib/libCommon/smCom/T1oI2C/phNxpEsePal_i2c.c      | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEsePal_i2c.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEsePal_i2c.c
+index 4ee1665c42..5f375185d2 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEsePal_i2c.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_SE050/hostlib/hostLib/libCommon/smCom/T1oI2C/phNxpEsePal_i2c.c
+@@ -134,7 +134,7 @@ int phPalEse_i2c_read(void *pDevHandle, uint8_t *pBuffer, int nNbBytesToRead)
+     ;
+     int numRead = 0;
+     LOG_D("%s Read Requested %d bytes ", __FUNCTION__, nNbBytesToRead);
+-    //sm_sleep(ESE_POLL_DELAY_MS);
++    sm_sleep(ESE_POLL_DELAY_MS);
+     while (numRead != nNbBytesToRead) {
+         ret = axI2CRead(pDevHandle, I2C_BUS_0, SMCOM_I2C_ADDRESS, pBuffer, nNbBytesToRead);
+         if (ret != I2C_OK) {
+@@ -143,7 +143,7 @@ int phPalEse_i2c_read(void *pDevHandle, uint8_t *pBuffer, int nNbBytesToRead)
+                 retryCount++;
+                 /* 1ms delay to give ESE polling delay */
+                 /*i2c driver back off delay is providing 1ms wait time so ignoring waiting time at this level*/
+-                //sm_sleep(ESE_POLL_DELAY_MS);
++                sm_sleep(ESE_POLL_DELAY_MS);
+                 LOG_D("_i2c_read() failed. Going to retry, counter:%d  !", retryCount);
+                 continue;
+             }
+@@ -186,7 +186,7 @@ int phPalEse_i2c_write(void *pDevHandle, uint8_t *pBuffer, int nNbBytesToWrite)
+                 retryCount++;
+                 /* 1ms delay to give ESE polling delay */
+                 /*i2c driver back off delay is providing 1ms wait time so ignoring waiting time at this level*/
+-                //sm_sleep(ESE_POLL_DELAY_MS);
++                sm_sleep(ESE_POLL_DELAY_MS);
+                 LOG_D("_i2c_write() failed. Going to retry, counter:%d  !", retryCount);
+                 continue;
+             }
+@@ -194,7 +194,7 @@ int phPalEse_i2c_write(void *pDevHandle, uint8_t *pBuffer, int nNbBytesToWrite)
+         }
+         else {
+             numWrote = nNbBytesToWrite;
+-            //sm_sleep(ESE_POLL_DELAY_MS);
++            sm_sleep(ESE_POLL_DELAY_MS);
+             break;
+         }
+     } while (ret != I2C_OK);
+-- 
+2.25.1
+

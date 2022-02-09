@@ -1,0 +1,24 @@
+From 86184757e34954fe60e2c81f9d3c08c86566dbbc Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Wed, 19 Jan 2022 10:24:06 +0100
+Subject: [PATCH 119/138] TEMP: Remove log from .gitignore file
+
+---
+ .gitignore | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/.gitignore b/.gitignore
+index 3e907cf52c..7a68e77ae8 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -90,7 +90,6 @@ tags
+ features/FEATURE_BLE/targets/TARGET_CORDIO/stack_backup/
+ 
+ .pytest_cache
+-log
+ 
+ # Icetea related file
+ test_suite.json
+-- 
+2.25.1
+

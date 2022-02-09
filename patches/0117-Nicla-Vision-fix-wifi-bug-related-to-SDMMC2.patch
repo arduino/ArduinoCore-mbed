@@ -1,0 +1,76 @@
+From 04f1d23ea3bc8fcb747191ef147c139e1da1b951 Mon Sep 17 00:00:00 2001
+From: giulcioffi <g.cioffi@arduino.cc>
+Date: Mon, 6 Dec 2021 15:16:08 +0100
+Subject: [PATCH 117/138] Nicla Vision: fix wifi bug related to SDMMC2
+
+Enable flow control + enable SDMMC2 clk before any operation
+
+Restore original clock speed
+---
+ .../src/bus_protocols/whd_bus_sdio_protocol.c             | 5 +++--
+ .../TARGET_NICLA_VISION/COMPONENT_WHD/port/cyhal_sdio.c   | 8 +++++---
+ 2 files changed, 8 insertions(+), 5 deletions(-)
+
+diff --git a/connectivity/drivers/wifi/COMPONENT_WHD/wifi-host-driver/src/bus_protocols/whd_bus_sdio_protocol.c b/connectivity/drivers/wifi/COMPONENT_WHD/wifi-host-driver/src/bus_protocols/whd_bus_sdio_protocol.c
+index 5944bf6e7a..150d3baa66 100755
+--- a/connectivity/drivers/wifi/COMPONENT_WHD/wifi-host-driver/src/bus_protocols/whd_bus_sdio_protocol.c
++++ b/connectivity/drivers/wifi/COMPONENT_WHD/wifi-host-driver/src/bus_protocols/whd_bus_sdio_protocol.c
+@@ -732,8 +732,9 @@ whd_result_t whd_bus_sdio_read_backplane_value(whd_driver_t whd_driver, uint32_t
+ 
+     address &= SBSDIO_SB_OFT_ADDR_MASK;
+ 
+-    if (register_length == 4)
++    if (register_length == 4) {
+         address |= SBSDIO_SB_ACCESS_2_4B_FLAG;
++    }
+ 
+     CHECK_RETURN(whd_bus_sdio_transfer(whd_driver, BUS_READ, BACKPLANE_FUNCTION, address, register_length, value,
+                                        RESPONSE_NEEDED) );
+@@ -1002,7 +1003,7 @@ static whd_result_t whd_bus_sdio_download_firmware(whd_driver_t whd_driver)
+     }
+     if (result != WHD_SUCCESS)
+     {
+-        WPRINT_WHD_ERROR( ("Error while waiting for high throughput clock\n") );
++        WPRINT_WHD_ERROR( ("Error while reading csr value: %d\n", csr_val) );
+         /* Reachable after hitting assert */
+         return result;
+     }
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_NICLA_VISION/COMPONENT_WHD/port/cyhal_sdio.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_NICLA_VISION/COMPONENT_WHD/port/cyhal_sdio.c
+index 9044e87180..521917c8de 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_NICLA_VISION/COMPONENT_WHD/port/cyhal_sdio.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_NICLA_VISION/COMPONENT_WHD/port/cyhal_sdio.c
+@@ -251,7 +251,7 @@ cy_rslt_t cyhal_sdio_init(cyhal_sdio_t *obj, cyhal_gpio_t cmd, cyhal_gpio_t clk,
+     __HAL_RCC_SDMMC2_RELEASE_RESET();
+ 
+     /* Enable the SDIO Clock */
+-    __HAL_RCC_SDMMC2_CLK_ENABLE();
++    //__HAL_RCC_SDMMC2_CLK_ENABLE();
+ 
+ #if !(defined(DUAL_CORE) && defined(CORE_CM4))
+     /* Disable DCache for STM32H7 family */
+@@ -414,8 +414,8 @@ restart:
+     /* Send the command */
+     //WPRINT_WHD_DEBUG(("%d bs=%d argument=%x\n",num++,block_size,argument));
+     SDMMC2->ARG = argument;
+-    cmd = (uint32_t)(SDIO_CMD_53 | SDMMC_RESPONSE_SHORT | SDMMC_WAIT_NO | SDMMC_CPSM_ENABLE | SDMMC_CMD_CMDTRANS);
+-    SDMMC2->CMD = cmd;
++    cmd = (uint32_t)(SDIO_CMD_53 | SDMMC_RESPONSE_SHORT | SDMMC_WAIT_NO | SDMMC_CPSM_ENABLE);
++    SDMMC2->CMD |= cmd;
+ 
+     /* Wait for the whole transfer to complete */
+     //WPRINT_WHD_DEBUG(("cy_rtos_get_semaphore: %d\n", sdio_transfer_finished_semaphore));
+@@ -432,9 +432,11 @@ restart:
+     /* Check if there were any SDIO errors */
+     if ((SDIO->STA & (SDIO_STA_DTIMEOUT | SDIO_STA_CTIMEOUT)) != 0) {
+         WPRINT_WHD_DEBUG(("sdio errors SDIO_STA_DTIMEOUT | SDIO_STA_CTIMEOUT\n"));
++        SDMMC2->CMD = 0;
+         goto restart;
+     } else if (((SDIO->STA & (SDIO_STA_CCRCFAIL | SDIO_STA_DCRCFAIL | SDIO_STA_TXUNDERR | SDIO_STA_RXOVERR)) != 0)) {
+         WPRINT_WHD_DEBUG(("sdio errors SDIO_STA_CCRCFAIL | SDIO_STA_DCRCFAIL | SDIO_STA_TXUNDERR | SDIO_STA_RXOVER \n"));
++        SDMMC2->CMD = 0;
+         goto restart;
+     }
+ 
+-- 
+2.25.1
+
