@@ -1,5 +1,5 @@
 export FLAVOUR="nicla"
-export VARIANTS=("NICLA")
-export FQBNS=("nicla_sense")
-export LIBRARIES=("SPI Wire Scheduler Nicla_System")
-export BOOTLOADERS=("NICLA")
+export VARIANTS=("NICLA NICLA_VISION")
+export FQBNS=("nicla_sense nicla_vision")
+export LIBRARIES=("SPI Wire Scheduler Nicla_System WiFi ea_malloc openamp_arduino Portenta_System ThreadDebug GC2145 PDM KernelDebug RPC USBHID Portenta_Camera rpclib USBHOST mbed-memory-status USBMSD SocketWrapper MRI")
+export BOOTLOADERS=("NICLA NICLA_VISION")
