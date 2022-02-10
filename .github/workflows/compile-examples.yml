@@ -80,6 +80,7 @@ jobs:
               - libraries/USBHOST
               - libraries/USBMSD/examples/AccessFlashAsUSBDisk
               - libraries/WiFi
+              - libraries/GSM
           - board:
               fqbn: arduino:mbed:nanorp2040connect
             additional-sketch-paths: |
