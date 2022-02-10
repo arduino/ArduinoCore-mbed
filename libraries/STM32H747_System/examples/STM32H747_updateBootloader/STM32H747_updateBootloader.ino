@@ -1,5 +1,9 @@
 #include "FlashIAP.h"
-#include "bootloader.h"
+#if defined(ARDUINO_PORTENTA_H7_M7)
+#include "portenta_bootloader.h"
+#elif defined(ARDUINO_NICLA_VISION)
+#include "nicla_vision_bootloader.h"
+#endif
 
 #ifndef CORE_CM7  
   #error Update the bootloader by uploading the sketch to the M7 core instead of the M4 core.
@@ -16,7 +20,7 @@ void setup() {
   while (!Serial) {}
 
   uint8_t currentBootloaderVersion = bootloader_data[1];
-  uint8_t availableBootloaderVersion = (envie_bootloader_mbed_bin + bootloader_data_offset)[1];
+  uint8_t availableBootloaderVersion = (bootloader_mbed_bin + bootloader_data_offset)[1];
 
   Serial.println("Magic Number (validation): " + String(bootloader_data[0], HEX));
   Serial.println("Bootloader version: " + String(currentBootloaderVersion));
@@ -87,7 +91,7 @@ String getClockSource(uint8_t flag) {
 }
 
 void applyUpdate(uint32_t address) {
-  long len = envie_bootloader_mbed_bin_len;
+  long len = bootloader_mbed_bin_len;
 
   flash.init();
 
@@ -112,7 +116,7 @@ void applyUpdate(uint32_t address) {
     }
 
     // Program page
-    flash.program(&envie_bootloader_mbed_bin[page_size * pages_flashed], addr, page_size);
+    flash.program(&bootloader_mbed_bin[page_size * pages_flashed], addr, page_size);
 
     addr += page_size;
     if (addr >= next_sector) {
