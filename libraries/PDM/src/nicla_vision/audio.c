@@ -12,7 +12,6 @@
 
 #include <stdio.h>
 #include "stm32h7xx_hal.h"
-#include "pdm2pcm_glo.h"
 #include "audio.h"
 #include "stdbool.h"
 #include "Arduino.h"
