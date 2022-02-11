@@ -1,8 +1,6 @@
 #include <GPS.h>
 #include <GSM.h>
 
-REDIRECT_STDOUT_TO(Serial);
-
 #include "arduino_secrets.h"
 char pin[]      = SECRET_PIN;
 char apn[]      = SECRET_APN;
@@ -26,6 +24,8 @@ void setup() {
 }
 
 void loop() {
+  // Print out raw NMEA strings.
+  // For parsed output look at the MicroNMEA_integration example.
   if(GPS.available()){
     Serial.print((char) GPS.read());
     delay(1);
