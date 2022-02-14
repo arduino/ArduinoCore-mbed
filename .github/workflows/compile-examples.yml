@@ -69,7 +69,7 @@ jobs:
               - libraries/PDM
               - libraries/doom
               - libraries/KernelDebug
-              - libraries/Portenta_Camera/examples
+              - libraries/Camera/examples
               - libraries/Portenta_lvgl/examples/Portenta_lvgl
               - libraries/Portenta_SDCARD
               - libraries/Portenta_SDRAM
