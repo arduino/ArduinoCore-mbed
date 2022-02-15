@@ -1,5 +1,0 @@
-#!/bin/bash
-
-adb push $2 /tmp
-FILENAME=`basename $2`
-adb shell openocd -f /home/fio/extra/openocd_script.cfg -c "\"init; halt; flash write_image /tmp/$FILENAME 0x8100000; reset; shutdown\""

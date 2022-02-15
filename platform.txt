@@ -199,13 +199,11 @@ tools.imgtool.flags=sign --key "{build.keys.keychain}/{build.keys.sign_key}" --e
 # ADB WRAPPER
 #
 
-#tools.adb.path={runtime.tools.adb.path}
-# temp
-tools.adb.path={runtime.platform.path}/extras/
-tools.adb.cmd=adb-wrapper
+tools.adb.path={runtime.tools.adb.path}
+tools.adb.cmd=adb
 tools.adb.upload.params.verbose=-v
 tools.adb.upload.params.quiet=
-tools.adb.upload.pattern="{path}/{cmd}" flash "{build.path}/{build.project_name}.bin"
+tools.adb.upload.pattern="{path}/{cmd}" push "{build.path}/{build.project_name}.elf" "/tmp/arduino/m4-user-sketch.elf"
 
 #
 # GDB (Debugger)
