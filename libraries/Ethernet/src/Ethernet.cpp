@@ -84,4 +84,9 @@ unsigned long arduino::EthernetClass::getTime() {
   return 0;
 }
 
+void arduino::EthernetClass::MACAddress(uint8_t *mac_address)
+{
+  macAddress(mac_address);
+}
+
 arduino::EthernetClass Ethernet;
