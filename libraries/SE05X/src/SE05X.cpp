@@ -333,6 +333,8 @@ int SE05XClass::readBinaryObject(int objectId, byte data[], size_t dataMaxLen, s
         LOG_E("sss_key_store_get_key Failed");
         return 0;
     }
+
+    return 1;
 }
 
 int SE05XClass::writeBinaryObject(int objectId, const byte data[], size_t length)
@@ -349,6 +351,8 @@ int SE05XClass::writeBinaryObject(int objectId, const byte data[], size_t length
         LOG_E("sss_key_store_set_key Failed");
         return 0;
     }
+
+    return 1;
 }
 
 int SE05XClass::initObject(size_t objectId, sss_object_t * object, sss_key_part_t objectPart, sss_key_object_mode_t objectMode, sss_cipher_type_t objectChiper) 
