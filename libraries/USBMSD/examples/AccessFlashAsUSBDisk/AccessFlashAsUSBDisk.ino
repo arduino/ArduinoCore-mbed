@@ -2,7 +2,7 @@
    QSPI as USB Mass Storage
    This example shows how to expose a QSPIF BlockDevice (16MB external flash on the Portenta H7)
    as an USB stick. It can be adapted to any kind of BlockDevice (FlashIAP or either RAM via HeapBlockDevice)
-   Before loading this example, make sure you execute PortentaWiFiFirmwareUpdater sketch
+   Before loading this example, make sure you execute WiFiFirmwareUpdater sketch
    to create and format the proper partitions.
 */
 
@@ -22,7 +22,7 @@ void USBMSD::begin()
   int err = wifi.mount(&wifi_data);
   if (err) {
     while (!Serial);
-    Serial.println("Please run PortentaWiFiFirmwareUpdater before");
+    Serial.println("Please run WiFiFirmwareUpdater before");
     return;
   }
   ota.mount(&ota_data);

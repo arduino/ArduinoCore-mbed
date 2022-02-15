@@ -33,7 +33,7 @@ void setup() {
 
   int err = ota_data_fs.mount(&ota_data);
   if (err) {
-    Serial.println("Please run PortentaWiFiFirmwareUpdater once");
+    Serial.println("Please run WiFiFirmwareUpdater once");
     while (1) {
       delay(10000);
     }

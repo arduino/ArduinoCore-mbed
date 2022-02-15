@@ -228,7 +228,7 @@ void wiced_filesystem_mount_error(void) {
 }
 
 void wiced_filesystem_firmware_error(void) {
-  Serial.println("Please run the \"PortentaWiFiFirmwareUpdater\" sketch once to install the WiFi firmware.");
+  Serial.println("Please run the \"WiFiFirmwareUpdater\" sketch once to install the WiFi firmware.");
   whd_print_logbuffer();
   while (1) {}
 }
