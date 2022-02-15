@@ -1,14 +1,14 @@
-From 415969b9ecbccd11833284032b939978394bc6b5 Mon Sep 17 00:00:00 2001
+From 7ec48c32338a6aba090a90aafc45602d8c02e050 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Tue, 18 Jan 2022 16:53:27 +0100
-Subject: [PATCH] Add Portenta X8 target
+Subject: [PATCH 100/101] Add Portenta X8 target
 
 ---
  .../TARGET_PORTENTA_X8/CMakeLists.txt         |  16 +
  .../TARGET_PORTENTA_X8/PeripheralPins.c       | 570 ++++++++++++++++++
  .../TARGET_PORTENTA_X8/PinNames.h             | 381 ++++++++++++
- targets/targets.json                          |  32 +
- 4 files changed, 999 insertions(+)
+ targets/targets.json                          |  34 +-
+ 4 files changed, 1000 insertions(+), 1 deletion(-)
  create mode 100644 targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_X8/CMakeLists.txt
  create mode 100644 targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_X8/PeripheralPins.c
  create mode 100644 targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_X8/PinNames.h
@@ -999,10 +999,10 @@ index 0000000000..1cce05b2e2
 +
 +#endif
 diff --git a/targets/targets.json b/targets/targets.json
-index b28205d060..c64a6491ab 100644
+index ffd3eb1efd..3dc63e01a9 100644
 --- a/targets/targets.json
 +++ b/targets/targets.json
-@@ -3252,6 +3252,38 @@
+@@ -3509,6 +3509,37 @@
              "MPU"
          ]
      },
@@ -1035,12 +1035,21 @@ index b28205d060..c64a6491ab 100644
 +            "lse_available": 1,
 +            "lpticker_delay_ticks": 0,
 +            "i2c_timing_value_algo": true
-+        },
-+        "device_name": "STM32H747XIHx"
++        }
 +    },
-     "MCU_STM32H7A3xIQ": {
+     "MCU_STM32H750xB": {
          "inherits": [
              "MCU_STM32H7"
+@@ -3527,7 +3558,8 @@
+         ],
+         "overrides": {
+             "system_power_supply": "PWR_LDO_SUPPLY"
+-        }
++        },
++        "device_name": "STM32H747XIHx"
+     },
+     "MCU_STM32H7A3xIQ": {
+         "inherits": [
 -- 
 2.34.1
 
