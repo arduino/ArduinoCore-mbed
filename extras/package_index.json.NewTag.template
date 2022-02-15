@@ -230,7 +230,7 @@
             },
             {
               "packager": "arduino",
-              "version": "1.5.1",
+              "version": "32.0.0",
               "name": "adb"
             }
           ]
