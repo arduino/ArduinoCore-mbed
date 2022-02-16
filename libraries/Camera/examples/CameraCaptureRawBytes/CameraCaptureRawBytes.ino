@@ -1,21 +1,24 @@
 #include "camera.h"
-//#include "gc2145.h"
-#include "himax.h"
 
-FrameBuffer fb;
+#ifdef ARDUINO_NICLA_VISION
+  #include "gc2145.h"
+  GC2145 galaxyCore;
+  Camera cam(galaxyCore);
+  #define IMAGE_MODE CAMERA_RGB565
+#else
+  #include "himax.h"
+  HM01B0 himax;
+  Camera cam(himax);
+  #define IMAGE_MODE CAMERA_GRAYSCALE
+#endif
+
 /*
 Other buffer instantiation options:
   FrameBuffer fb(0x30000000);
   FrameBuffer fb(320,240,2);
 */
+FrameBuffer fb;
 
-HM01B0 himax;
-Camera cam(himax);
-
-/*
-GC2145 galaxyCore;
-Camera cam(galaxyCore);
-*/
 
 void blink_error(uint32_t count = 0xFFFFFFFF)
 {
@@ -32,7 +35,7 @@ void setup() {
   Serial.begin(921600);
 
   // Init the cam QVGA, 30FPS
-  if (cam.begin(CAMERA_R320x240, CAMERA_GRAYSCALE, 30) != 0) {
+  if (cam.begin(CAMERA_R320x240, IMAGE_MODE, 30) != 0) {
     blink_error();
   }
 
