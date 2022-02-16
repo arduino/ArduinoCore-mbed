@@ -355,6 +355,24 @@ int SE05XClass::writeBinaryObject(int objectId, const byte data[], size_t length
     return 1;
 }
 
+int SE05XClass::deleteBinaryObject(int objectId)
+{
+    sss_status_t        status;
+    sss_object_t        binObject;
+
+    if(!initObject(objectId, &binObject, kSSS_KeyPart_Default, kKeyObject_Mode_Persistent, kSSS_CipherType_Binary)) {
+        return 0;
+    }
+
+    status = sss_key_store_erase_key(&_boot_ctx.ks, &binObject);
+    if(status != kStatus_SSS_Success )  {
+        LOG_E("sss_key_store_erase_key Failed");
+        return 0;
+    }
+
+    return 1;
+}
+
 int SE05XClass::initObject(size_t objectId, sss_object_t * object, sss_key_part_t objectPart, sss_key_object_mode_t objectMode, sss_cipher_type_t objectChiper) 
 {
     sss_status_t status;
