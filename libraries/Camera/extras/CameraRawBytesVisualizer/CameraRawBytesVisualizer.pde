@@ -12,10 +12,12 @@ import java.nio.ByteOrder;
 
 Serial myPort;
 
-// must match resolution used in the sketch
+// must match resolution used in the Arduino sketch
 final int cameraWidth = 320;
 final int cameraHeight = 240;
-final int cameraBytesPerPixel = 1;
+final boolean useGrayScale = true;
+
+final int cameraBytesPerPixel = useGrayScale ? 1 : 2;
 final int cameraPixelCount = cameraWidth * cameraHeight;
 final int bytesPerFrame = cameraPixelCount * cameraBytesPerPixel;
 
@@ -27,15 +29,15 @@ boolean shouldRedraw = false;
 void setup() {
   size(640, 480);
 
-  // if you have only ONE serial port active
+  // If you have only ONE serial port active you may use this:
   //myPort = new Serial(this, Serial.list()[0], 921600);          // if you have only ONE serial port active
 
-  // if you know the serial port name
+  // If you know the serial port name
   //myPort = new Serial(this, "COM5", 921600);                    // Windows
   //myPort = new Serial(this, "/dev/ttyACM0", 921600);            // Linux
-  myPort = new Serial(this, "/dev/cu.usbmodem14401", 921600);     // Mac
+  myPort = new Serial(this, "/dev/cu.usbmodem14201", 921600);     // Mac
 
-  // wait for full frame of bytes
+  // wait for a full frame of bytes
   myPort.buffer(bytesPerFrame);  
 
   myImage = createImage(cameraWidth, cameraHeight, ALPHA);
@@ -60,7 +62,19 @@ void draw() {
   }
 }
 
-void serialEvent(Serial myPort) {
+int[] convertRGB565ToRGB888(short pixelValue){  
+  //RGB565
+  int r = (pixelValue >> (6+5)) & 0x01F;
+  int g = (pixelValue >> 5) & 0x03F;
+  int b = (pixelValue) & 0x01F;
+  //RGB888 - amplify
+  r <<= 3;
+  g <<= 2;
+  b <<= 3; 
+  return new int[]{r,g,b};
+}
+
+void serialEvent(Serial myPort) {  
   lastUpdate = millis();
   
   // read the received bytes
@@ -69,21 +83,26 @@ void serialEvent(Serial myPort) {
   // Access raw bytes via byte buffer  
   ByteBuffer bb = ByteBuffer.wrap(frameBuffer);
   
-  /* 
-    Ensure proper endianness of the data for > 8 bit values.
-    When using > 8bit values uncomment the following line and
-    adjust the translation to the pixel color. 
-  */     
-  //bb.order(ByteOrder.BIG_ENDIAN);
+  // Ensure proper endianness of the data for > 8 bit values.
+  // The 1 byte bb.get() function will always return the bytes in the correct order.
+  bb.order(ByteOrder.BIG_ENDIAN);
 
   int i = 0;
 
   while (bb.hasRemaining()) {
-    // read 8-bit pixel
-    byte pixelValue = bb.get();
+    if(useGrayScale){
+      // read 8-bit pixel data
+      byte pixelValue = bb.get();
 
-    // set pixel color
-    myImage.pixels[i++] = color(Byte.toUnsignedInt(pixelValue));    
+      // set pixel color
+      myImage.pixels[i++] = color(Byte.toUnsignedInt(pixelValue));
+    } else {
+      // read 16-bit pixel data
+      int[] rgbValues = convertRGB565ToRGB888(bb.getShort());
+
+      // set pixel RGB color
+      myImage.pixels[i++] = color(rgbValues[0], rgbValues[1], rgbValues[2]);
+    }       
   }
   
   myImage.updatePixels();
