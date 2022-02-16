@@ -19,6 +19,8 @@ Other buffer instantiation options:
 */
 FrameBuffer fb;
 
+unsigned long lastUpdate = 0;
+
 
 void blinkLED(uint32_t count = 0xFFFFFFFF)
 {
@@ -43,8 +45,14 @@ void setup() {
 }
 
 void loop() {
+
+  // Time out after 2 seconds and ask for new data
+  bool timeoutDetected = millis() - lastUpdate > 2000;
+  
   // Wait for sync byte.
-  while (Serial.read() != 1) { };
+  if(!timeoutDetected && Serial.read() != 1) return;  
+
+  lastUpdate = millis();
   
   // Grab frame and write to serial
   if (cam.GrabFrame(fb, 3000) == 0) {
