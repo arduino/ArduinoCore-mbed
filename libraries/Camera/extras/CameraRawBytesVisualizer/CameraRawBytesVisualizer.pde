@@ -19,9 +19,13 @@ final int cameraHeight = 240;
 // Must match the image mode in the Arduino sketch
 final boolean useGrayScale = true;
 
+// Must match the baud rate in the Arduino sketch
+final int baudRate = 921600;
+
 final int cameraBytesPerPixel = useGrayScale ? 1 : 2;
 final int cameraPixelCount = cameraWidth * cameraHeight;
 final int bytesPerFrame = cameraPixelCount * cameraBytesPerPixel;
+final int timeout =  int((bytesPerFrame / float(baudRate / 10)) * 1000 * 2); // Twice the transfer rate
 
 PImage myImage;
 byte[] frameBuffer = new byte[bytesPerFrame];
@@ -30,14 +34,15 @@ boolean shouldRedraw = false;
 
 void setup() {
   size(640, 480);
+  println(timeout);
 
   // If you have only ONE serial port active you may use this:
-  //myPort = new Serial(this, Serial.list()[0], 921600);          // if you have only ONE serial port active
+  //myPort = new Serial(this, Serial.list()[0], baudRate);          // if you have only ONE serial port active
 
   // If you know the serial port name
-  //myPort = new Serial(this, "COM5", 921600);                    // Windows
-  //myPort = new Serial(this, "/dev/ttyACM0", 921600);            // Linux
-  myPort = new Serial(this, "/dev/cu.usbmodem14201", 921600);     // Mac
+  //myPort = new Serial(this, "COM5", baudRate);                    // Windows
+  //myPort = new Serial(this, "/dev/ttyACM0", baudRate);            // Linux
+  myPort = new Serial(this, "/dev/cu.usbmodem14301", baudRate);     // Mac
 
   // wait for a full frame of bytes
   myPort.buffer(bytesPerFrame);  
@@ -49,8 +54,8 @@ void setup() {
 }
 
 void draw() {
-  // Time out after 2 seconds and ask for new data
-  if(millis() - lastUpdate > 2000) {
+  // Time out after a few seconds and ask for new data
+  if(millis() - lastUpdate > timeout) {
     println("Connection timed out.");    
     myPort.clear();
     myPort.write(1);
