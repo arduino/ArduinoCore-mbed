@@ -64,6 +64,7 @@ jobs:
             additional-libraries: |
               - name: lvgl
                 version: 7.11.0
+              - name: MicroNMEA
             additional-sketch-paths: |
               - libraries/PDM
               - libraries/doom
@@ -80,6 +81,7 @@ jobs:
               - libraries/USBHOST
               - libraries/USBMSD/examples/AccessFlashAsUSBDisk
               - libraries/WiFi
+              - libraries/GSM
           - board:
               fqbn: arduino:mbed:nanorp2040connect
             additional-sketch-paths: |
