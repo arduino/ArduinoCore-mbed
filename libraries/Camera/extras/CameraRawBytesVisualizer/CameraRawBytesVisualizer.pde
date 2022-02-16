@@ -15,6 +15,8 @@ Serial myPort;
 // must match resolution used in the Arduino sketch
 final int cameraWidth = 320;
 final int cameraHeight = 240;
+
+// Must match the image mode in the Arduino sketch
 final boolean useGrayScale = true;
 
 final int cameraBytesPerPixel = useGrayScale ? 1 : 2;
