@@ -20,7 +20,7 @@ Other buffer instantiation options:
 FrameBuffer fb;
 
 
-void blink_error(uint32_t count = 0xFFFFFFFF)
+void blinkLED(uint32_t count = 0xFFFFFFFF)
 {
   pinMode(LED_BUILTIN, OUTPUT);
   while (count--) {
@@ -36,10 +36,10 @@ void setup() {
 
   // Init the cam QVGA, 30FPS
   if (cam.begin(CAMERA_R320x240, IMAGE_MODE, 30) != 0) {
-    blink_error();
+    blinkLED();
   }
 
-  blink_error(5);
+  blinkLED(5);
 }
 
 void loop() {
@@ -50,6 +50,6 @@ void loop() {
   if (cam.GrabFrame(fb, 3000) == 0) {
     Serial.write(fb.getBuffer(), cam.FrameSize());
   } else {
-    blink_error();
+    blinkLED();
   }
 }
