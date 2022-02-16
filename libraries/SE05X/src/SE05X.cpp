@@ -373,6 +373,23 @@ int SE05XClass::deleteBinaryObject(int objectId)
     return 1;
 }
 
+int SE05XClass::getObjectHandle(int objectId, sss_object_t * object)
+{
+    sss_status_t status;
+
+    if(kStatus_SSS_Success != sss_key_object_init(object, &_boot_ctx.ks)) {
+        LOG_E("sss_key_object_init Failed");
+        return 0;
+    }
+
+    if(kStatus_SSS_Success != sss_key_object_get_handle(object, objectId)) {
+        LOG_E("sss_key_object_get_handle Failed");
+        return 0;
+    }
+
+    return 1;
+}
+
 int SE05XClass::initObject(size_t objectId, sss_object_t * object, sss_key_part_t objectPart, sss_key_object_mode_t objectMode, sss_cipher_type_t objectChiper) 
 {
     sss_status_t status;

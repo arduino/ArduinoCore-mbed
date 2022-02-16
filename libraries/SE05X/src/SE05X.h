@@ -62,6 +62,8 @@ public:
     int writeBinaryObject(int ObjectId, const byte data[], size_t length);
     int deleteBinaryObject(int objectId);
 
+    int getObjectHandle(int objectId, sss_object_t * object);
+
 private:
     int initObject(size_t objectId, sss_object_t * object, sss_key_part_t objectPart, sss_key_object_mode_t objectMode, sss_cipher_type_t objectChiper);
 
