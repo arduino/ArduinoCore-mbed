@@ -1,0 +1,43 @@
+/*
+  WiFiSSLSE050Client.h
+  Copyright (c) 2022 Arduino SA.  All right reserved.
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+*/
+
+#include <AIoTC_Config.h>
+#ifdef BOARD_HAS_SE050
+
+#include "WiFiSSLSE050Client.h"
+#include "SE05X.h"
+
+arduino::WiFiSSLSE050Client::WiFiSSLSE050Client() {
+  onBeforeConnect(mbed::callback(this, &WiFiSSLSE050Client::setRootCA));
+};
+
+void arduino::WiFiSSLSE050Client::setEccSlot(int KeySlot, const char cert[], int certLen) {
+
+  if(!SE05X.getObjectHandle(KeySlot, &_keyObject)) {
+    //return 0;
+  }
+
+  _client_cert_len = certLen;
+  _client_cert = (byte*)malloc((size_t)_client_cert_len);
+
+  memcpy(_client_cert, cert, _client_cert_len);
+}
+
+
+#endif /* BOARD_HAS_SE050 */
