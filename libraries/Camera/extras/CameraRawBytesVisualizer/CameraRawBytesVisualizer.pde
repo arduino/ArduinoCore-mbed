@@ -33,8 +33,7 @@ int lastUpdate = 0;
 boolean shouldRedraw = false;
 
 void setup() {
-  size(640, 480);
-  println(timeout);
+  size(640, 480);  
 
   // If you have only ONE serial port active you may use this:
   //myPort = new Serial(this, Serial.list()[0], baudRate);          // if you have only ONE serial port active
