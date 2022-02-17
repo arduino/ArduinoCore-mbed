@@ -376,33 +376,24 @@ int Camera::Reset()
 #endif
     return 0;
 }
-/*
+
 int Camera::ProbeSensor()
 {
     uint8_t addr;
-#ifdef ARDUINO_PORTENTA_H7_M7
+
     for (addr=1; addr<127; addr++) {
-        Wire.beginTransmission(addr);
-        if (Wire.endTransmission() == 0) {
-            break;
-        }
-    }
-#endif //ARDUINO_PORTENTA_H7_M7
-#ifdef ARDUINO_NICLA_VISION
-    for (addr=1; addr<127; addr++) {
-        Wire2.beginTransmission(addr);
-        if (Wire2.endTransmission() == 0) {
+        CameraWire.beginTransmission(addr);
+        if (CameraWire.endTransmission() == 0) {
             break;
         }
     }
     if (_debug) {
-        _debug->print("Current addr: ");
-        _debug->println(addr);
+        _debug->print("Sensor address: 0x");
+        _debug->println(addr, HEX);
     }
-#endif //ARDUINO_NICLA_VISION
     return addr;
 }
-*/
+
 int Camera::begin(int32_t resolution, int32_t pixformat, int32_t framerate)
 {  
     if (resolution >= CAMERA_RMAX || pixformat >= CAMERA_PMAX) {
@@ -416,16 +407,6 @@ int Camera::begin(int32_t resolution, int32_t pixformat, int32_t framerate)
     // Reset the image sensor.
     Reset();
 
-    /*
-    if (ProbeSensor() != this->sensor->GetID()) {
-        if (_debug) {
-            _debug->print("SensorID: 0x");
-            _debug->println(this->sensor->GetID(), HEX);
-        }
-        return -1;
-    }
-    */
-
     if (sensor->GetClockFrequency() != DCMI_TIM_FREQUENCY) {
         // Reconfigure the sensor clock frequency.
         camera_extclk_config(sensor->GetClockFrequency());
@@ -433,6 +414,14 @@ int Camera::begin(int32_t resolution, int32_t pixformat, int32_t framerate)
     }
 
     if (this->sensor->Init() != 0) {
+        return -1;
+    }
+
+    if (ProbeSensor() != this->sensor->GetID()) {
+        if (_debug) {
+            _debug->print("Detected SensorID: 0x");
+            _debug->println(this->sensor->GetID(), HEX);
+        }
         return -1;
     }
 
