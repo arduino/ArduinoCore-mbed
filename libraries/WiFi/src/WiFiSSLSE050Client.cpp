@@ -21,7 +21,6 @@
 #ifdef BOARD_HAS_SE050
 
 #include "WiFiSSLSE050Client.h"
-#include "SE05X.h"
 
 arduino::WiFiSSLSE050Client::WiFiSSLSE050Client() {
   onBeforeConnect(mbed::callback(this, &WiFiSSLSE050Client::setRootCA));
@@ -32,7 +31,7 @@ void arduino::WiFiSSLSE050Client::setEccSlot(int KeySlot, const byte cert[], int
   if(!SE05X.getObjectHandle(KeySlot, &_keyObject)) {
     //return 0;
   }
-
+  _deviceCtx = SE05X.getDeviceCtx();
   _client_cert_len = certLen;
   _client_cert = (byte*)malloc((size_t)_client_cert_len);
 

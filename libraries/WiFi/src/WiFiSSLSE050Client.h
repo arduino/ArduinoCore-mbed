@@ -23,6 +23,7 @@
 #include <AIoTC_Config.h>
 #ifdef BOARD_HAS_SE050
 
+#include "SE05X.h"
 #include "WiFiClient.h"
 
 extern const char CA_CERTIFICATES[];
@@ -50,6 +51,7 @@ private:
   byte* _client_cert;
   int _client_cert_len;
   sss_object_t _keyObject;
+  ex_sss_boot_ctx_t * _deviceCtx;
 
   int setRootCA() {
     Serial.println("SET ROOT CA CERT");
