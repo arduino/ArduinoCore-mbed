@@ -390,6 +390,10 @@ int SE05XClass::getObjectHandle(int objectId, sss_object_t * object)
     return 1;
 }
 
+ex_sss_boot_ctx_t* SE05XClass::getDeviceCtx(void) {
+    return &_boot_ctx;
+}
+
 int SE05XClass::initObject(size_t objectId, sss_object_t * object, sss_key_part_t objectPart, sss_key_object_mode_t objectMode, sss_cipher_type_t objectChiper) 
 {
     sss_status_t status;
