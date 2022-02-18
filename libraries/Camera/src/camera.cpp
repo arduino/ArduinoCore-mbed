@@ -394,10 +394,10 @@ int Camera::ProbeSensor()
     return addr;
 }
 
-int Camera::begin(int32_t resolution, int32_t pixformat, int32_t framerate)
+bool Camera::begin(int32_t resolution, int32_t pixformat, int32_t framerate)
 {  
     if (resolution >= CAMERA_RMAX || pixformat >= CAMERA_PMAX) {
-        return -1;
+        return false;
     }
 
     // Configure the initial sensor clock.
@@ -414,7 +414,7 @@ int Camera::begin(int32_t resolution, int32_t pixformat, int32_t framerate)
     }
 
     if (this->sensor->Init() != 0) {
-        return -1;
+        return false;
     }
 
     if (ProbeSensor() != this->sensor->GetID()) {
@@ -422,28 +422,28 @@ int Camera::begin(int32_t resolution, int32_t pixformat, int32_t framerate)
             _debug->print("Detected SensorID: 0x");
             _debug->println(this->sensor->GetID(), HEX);
         }
-        return -1;
+        return false;
     }
 
     if (camera_dcmi_config() != 0) {
-        return -1;
+        return false;
     }
 
     // NOTE: The pixel format must be set first before the resolution,
     // to lookup the BPP for this format to set the DCMI cropping.
     if (SetPixelFormat(pixformat) != 0) {
-        return -1;
+        return false;
     }
 
     if (SetResolution(resolution) != 0) {
-        return -1;
+        return false;
     }
 
     if (SetFrameRate(framerate) != 0) {
-        return -1;
+        return false;
     }
 
-    return 0;
+    return true;
 }
 
 int Camera::GetID()

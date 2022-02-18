@@ -99,7 +99,7 @@ class Camera {
         FrameBuffer *_framebuffer;
     public:
         Camera(ImageSensor &sensor);
-        int begin(int32_t resolution=CAMERA_R320x240, int32_t pixformat=CAMERA_GRAYSCALE, int32_t framerate=30);
+        bool begin(int32_t resolution=CAMERA_R320x240, int32_t pixformat=CAMERA_GRAYSCALE, int32_t framerate=30);
         int GetID();
         int SetFrameRate(int32_t framerate);
         int SetResolution(int32_t resolution);
