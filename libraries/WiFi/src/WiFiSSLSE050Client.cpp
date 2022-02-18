@@ -27,7 +27,7 @@ arduino::WiFiSSLSE050Client::WiFiSSLSE050Client() {
   onBeforeConnect(mbed::callback(this, &WiFiSSLSE050Client::setRootCA));
 };
 
-void arduino::WiFiSSLSE050Client::setEccSlot(int KeySlot, const char cert[], int certLen) {
+void arduino::WiFiSSLSE050Client::setEccSlot(int KeySlot, const byte cert[], int certLen) {
 
   if(!SE05X.getObjectHandle(KeySlot, &_keyObject)) {
     //return 0;

@@ -44,7 +44,7 @@ public:
     return connectSSL(host, port);
   }
 
-  void setEccSlot(int KeySlot, const char cert[], int certLen);
+  void setEccSlot(int KeySlot, const byte cert[], int certLen);
 
 private:
   byte* _client_cert;
