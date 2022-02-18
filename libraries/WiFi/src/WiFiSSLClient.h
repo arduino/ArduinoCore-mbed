@@ -38,13 +38,18 @@ public:
     return connectSSL(ip, port);
   }
   int connect(const char* host, uint16_t port) {
-    return connectSSL(host, port);
+    return connectSSL(host, port, _disableSNI);
+  }
+    void disableSNI(bool statusSNI) {
+    _disableSNI = statusSNI;
   }
 
 private:
   int setRootCA() {
     return ((TLSSocket*)sock)->set_root_ca_cert_path("/wlan/");
   }
+
+  bool _disableSNI;
 };
 
 }
