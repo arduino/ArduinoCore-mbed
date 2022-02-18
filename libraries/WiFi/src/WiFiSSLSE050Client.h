@@ -60,13 +60,13 @@ private:
     }
 
     Serial.println("SET CLIENT CERT");
-    if( NSAPI_ERROR_OK != ((TLSSocket*)sock)->set_client_cert_key((void*)_client_cert, (size_t)_client_cert_len, &_keyObject)) {
+    if( NSAPI_ERROR_OK != ((TLSSocket*)sock)->set_client_cert_key((void*)_client_cert, (size_t)_client_cert_len, &_keyObject, _deviceCtx)) {
       Serial.println("SET CLIENT CERT ERROR");
     }
   }
 
   int setClientCertKey() {
-    return ((TLSSocket*)sock)->set_client_cert_key((void*)_client_cert, (size_t)_client_cert_len, &_keyObject);
+    return ((TLSSocket*)sock)->set_client_cert_key((void*)_client_cert, (size_t)_client_cert_len, &_keyObject, _deviceCtx);
   }
 };
 
