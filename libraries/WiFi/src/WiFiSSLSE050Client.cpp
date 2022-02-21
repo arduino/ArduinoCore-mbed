@@ -28,14 +28,9 @@ arduino::WiFiSSLSE050Client::WiFiSSLSE050Client() {
 
 void arduino::WiFiSSLSE050Client::setEccSlot(int KeySlot, const byte cert[], int certLen) {
 
-  if(!SE05X.getObjectHandle(KeySlot, &_keyObject)) {
-    //return 0;
-  }
-  _deviceCtx = SE05X.getDeviceCtx();
+  _keySlot = KeySlot;
   _client_cert_len = certLen;
-  _client_cert = (byte*)malloc((size_t)_client_cert_len);
-
-  memcpy(_client_cert, cert, _client_cert_len);
+  _client_cert = cert;
 }
 
 
