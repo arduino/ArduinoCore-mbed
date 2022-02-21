@@ -48,25 +48,25 @@ public:
   void setEccSlot(int KeySlot, const byte cert[], int certLen);
 
 private:
-  byte* _client_cert;
+  const byte* _client_cert;
   int _client_cert_len;
+  int _keySlot;
   sss_object_t _keyObject;
-  ex_sss_boot_ctx_t * _deviceCtx;
 
-  int setRootCA() {
-    Serial.println("SET ROOT CA CERT");
+  int setRootCAClientCertKey() {
     if( NSAPI_ERROR_OK != ((TLSSocket*)sock)->set_root_ca_cert_path("/wlan/")) {
-      Serial.println("SET ROOT CA CERT ERROR");
+      return 0;
     }
 
-    Serial.println("SET CLIENT CERT");
-    if( NSAPI_ERROR_OK != ((TLSSocket*)sock)->set_client_cert_key((void*)_client_cert, (size_t)_client_cert_len, &_keyObject, _deviceCtx)) {
-      Serial.println("SET CLIENT CERT ERROR");
+    if(!SE05X.getObjectHandle(_keySlot, &_keyObject)) {
+      return 0;
     }
-  }
 
-  int setClientCertKey() {
-    return ((TLSSocket*)sock)->set_client_cert_key((void*)_client_cert, (size_t)_client_cert_len, &_keyObject, _deviceCtx);
+    if( NSAPI_ERROR_OK != ((TLSSocket*)sock)->set_client_cert_key((void*)_client_cert, (size_t)_client_cert_len, &_keyObject, SE05X.getDeviceCtx())) {
+      return 0;
+    }
+
+    return 1;
   }
 };
 
