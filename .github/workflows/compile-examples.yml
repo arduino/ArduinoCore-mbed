@@ -38,6 +38,7 @@ jobs:
           - fqbn: arduino:mbed:envie_m7
           - fqbn: arduino:mbed:nanorp2040connect
           - fqbn: arduino:mbed:nicla_sense
+          - fqbn: arduino:mbed:nicla_vision
 
         # compile only the examples compatible with each board
         include:
@@ -96,6 +97,18 @@ jobs:
             additional-libraries: |
               - name: Arduino_BHY2
               - name: ArduinoBLE
+          - board:
+              fqbn: arduino:mbed:nicla_vision
+            additional-sketch-paths: |
+              - libraries/PDM
+              - libraries/Camera/examples
+              - libraries/STM32H747_System
+              - libraries/RPC
+              - libraries/ThreadDebug
+              - libraries/USBHID
+              - libraries/USBHOST
+              - libraries/USBMSD/examples/AccessFlashAsUSBDisk
+              - libraries/WiFi
 
     steps:
       - name: Checkout repository
