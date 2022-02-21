@@ -9,3 +9,13 @@ int PinNameToIndex(PinName P) {
   }
   return NOT_A_PIN;
 }
+
+#ifdef __cplusplus__
+extern "C" {
+#endif
+PinName digitalPinToPinName(pin_size_t P) {
+  return (P >= PINS_COUNT ? NC : g_APinDescription[P].name);
+};
+#ifdef __cplusplus__
+}
+#endif

@@ -29,9 +29,7 @@ struct _AnalogPinDescription
 #ifdef __cplusplus__
 extern "C" {
 #endif
-inline PinName digitalPinToPinName(pin_size_t P) {
-	return (P >= PINS_COUNT ? NC : g_APinDescription[P].name);
-};
+PinName digitalPinToPinName(pin_size_t P);
 #ifdef __cplusplus__
 }
 #endif
