@@ -60,6 +60,7 @@ public:
 
     int readBinaryObject(int ObjectId, byte data[], size_t dataMaxLen, size_t * length);
     int writeBinaryObject(int ObjectId, const byte data[], size_t length);
+    int existsBinaryObject(int objectId);
     int deleteBinaryObject(int objectId);
 
     int getObjectHandle(int objectId, sss_object_t * object);

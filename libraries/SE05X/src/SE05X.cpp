@@ -355,6 +355,17 @@ int SE05XClass::writeBinaryObject(int objectId, const byte data[], size_t length
     return 1;
 }
 
+int SE05XClass::existsBinaryObject(int objectId)
+{
+    sss_object_t        binObject;
+
+    if(!getObjectHandle(objectId, &binObject)) {
+        return 0;
+    }
+
+    return 1;
+}
+
 int SE05XClass::deleteBinaryObject(int objectId)
 {
     sss_status_t        status;
