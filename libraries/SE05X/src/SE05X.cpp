@@ -384,6 +384,17 @@ int SE05XClass::deleteBinaryObject(int objectId)
     return 1;
 }
 
+int SE05XClass::deleteAllObjects(void)
+{
+    sss_se05x_session_t *pSession = (sss_se05x_session_t *)&_boot_ctx.session;
+
+    if(SW_OK != Se05x_API_DeleteAll_Iterative(&pSession->s_ctx)) {
+        return 0;
+    }
+
+    return 1;
+}
+
 int SE05XClass::getObjectHandle(int objectId, sss_object_t * object)
 {
     sss_status_t status;

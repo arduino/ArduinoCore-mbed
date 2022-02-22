@@ -24,6 +24,7 @@
 #include "ex_sss_boot.h"
 #include "fsl_sss_api.h"
 #include "se05x_apis.h"
+#include "se05x_APDU.h"
 
 #if defined SE05X_PRINT_ERROR
 #define LOG_E Serial.println
@@ -62,6 +63,7 @@ public:
     int writeBinaryObject(int ObjectId, const byte data[], size_t length);
     int existsBinaryObject(int objectId);
     int deleteBinaryObject(int objectId);
+    int deleteAllObjects();
 
     int getObjectHandle(int objectId, sss_object_t * object);
 
