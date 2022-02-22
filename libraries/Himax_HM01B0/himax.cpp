@@ -294,8 +294,17 @@ static const uint16_t himax_qqvga_regs[][2] = {
 };
 
 HM01B0::HM01B0(arduino::MbedI2C &i2c) : 
-    _i2c(&i2c)
+    _i2c(&i2c),
+    md_irq(PC_15),
+    _md_callback(NULL)
 {
+}
+
+void HM01B0::irqHandler()
+{
+  if (_md_callback) {
+    _md_callback();
+  }
 }
 
 int HM01B0::init()
@@ -412,14 +421,7 @@ int HM01B0::setTestPattern(bool enable, bool walking)
     return 0;
 }
 
-int HM01B0::enableMD(bool enable)
-{
-  int ret = clearMD();
-  ret |= reg_write(HM01B0_I2C_ADDR, MD_CTRL, enable ? 1:0, true);
-  return ret;
-}
-
-int HM01B0::setMDThreshold(uint32_t threshold)
+int HM01B0::setMotionDetectionThreshold(uint32_t threshold)
 {
   // Set motion detection threshold/sensitivity.
   // The recommended threshold range is 0x03 to 0xF0.
@@ -432,26 +434,57 @@ int HM01B0::setMDThreshold(uint32_t threshold)
   return reg_write(HM01B0_I2C_ADDR, MD_THL, (threshold < 3) ? 3 : (threshold > 0xF0) ? 0xF0 : threshold, true);
 }
 
-int HM01B0::setLROI(uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2)
+int HM01B0::setMotionDetectionWindow(uint32_t x, uint32_t y, uint32_t w, uint32_t h)
 {
   int ret = 0;
-  ret |= reg_write(HM01B0_I2C_ADDR, MD_LROI_X_START_H, (x1>>8), true);
-  ret |= reg_write(HM01B0_I2C_ADDR, MD_LROI_X_START_L, (x1&0xff), true);
-  ret |= reg_write(HM01B0_I2C_ADDR, MD_LROI_Y_START_H, (y1>>8), true);
-  ret |= reg_write(HM01B0_I2C_ADDR, MD_LROI_Y_START_L, (y1&0xff), true);
-  ret |= reg_write(HM01B0_I2C_ADDR, MD_LROI_X_END_H,   (x2>>8), true);
-  ret |= reg_write(HM01B0_I2C_ADDR, MD_LROI_X_END_L,   (x2&0xff), true);
-  ret |= reg_write(HM01B0_I2C_ADDR, MD_LROI_Y_END_H,   (y2>>8), true);
-  ret |= reg_write(HM01B0_I2C_ADDR, MD_LROI_Y_END_L,   (y2&0xff), true);
+  ret |= reg_write(HM01B0_I2C_ADDR, MD_LROI_X_START_H, (x>>8), true);
+  ret |= reg_write(HM01B0_I2C_ADDR, MD_LROI_X_START_L, (x&0xff), true);
+  ret |= reg_write(HM01B0_I2C_ADDR, MD_LROI_Y_START_H, (y>>8), true);
+  ret |= reg_write(HM01B0_I2C_ADDR, MD_LROI_Y_START_L, (y&0xff), true);
+  ret |= reg_write(HM01B0_I2C_ADDR, MD_LROI_X_END_H,   (w>>8), true);
+  ret |= reg_write(HM01B0_I2C_ADDR, MD_LROI_X_END_L,   (w&0xff), true);
+  ret |= reg_write(HM01B0_I2C_ADDR, MD_LROI_Y_END_H,   (h>>8), true);
+  ret |= reg_write(HM01B0_I2C_ADDR, MD_LROI_Y_END_L,   (h&0xff), true);
   return ret;
 }
 
-int HM01B0::pollMD()
+int HM01B0::enableMotionDetection(md_callback_t callback)
+{
+  md_irq.rise(0);
+  _md_callback = callback;
+  md_irq.rise(mbed::Callback<void()>(this, &HM01B0::irqHandler));
+  md_irq.enable_irq();
+
+  int ret = clearMotionDetection();
+  ret |= reg_write(HM01B0_I2C_ADDR, MD_CTRL, 1, true);
+  return ret;
+}
+
+int HM01B0::disableMotionDetection()
+{
+  _md_callback = NULL;
+  int ret = clearMotionDetection();
+  ret |= reg_write(HM01B0_I2C_ADDR, MD_CTRL, 0, true);
+  return ret;
+}
+
+int HM01B0::motionDetected()
+{
+  int ret = 0;
+
+  ret = pollMotionDetection();
+  if (ret == 1) {
+    clearMotionDetection();
+  }
+  return ret;
+}
+
+int HM01B0::pollMotionDetection()
 {
   return reg_read(HM01B0_I2C_ADDR, MD_INTERRUPT, true);
 }
 
-int HM01B0::clearMD()
+int HM01B0::clearMotionDetection()
 {
   return reg_write(HM01B0_I2C_ADDR, I2C_CLEAR, 0x01, true);
 }

@@ -20,11 +20,15 @@
 #define __HIMAX_H
 
 #include "camera.h"
+#include "drivers/InterruptIn.h"
 
 class HM01B0: public ImageSensor {
    private:
         Stream *_debug;
         arduino::MbedI2C *_i2c;
+        mbed::InterruptIn md_irq;
+        md_callback_t _md_callback;
+        void irqHandler();
    public:
         HM01B0(arduino::MbedI2C &i2c = CameraWire);
         int init();
@@ -37,11 +41,14 @@ class HM01B0: public ImageSensor {
         int reg_write(uint8_t dev_addr, uint16_t reg_addr, uint8_t reg_data, bool wide_addr = false);
         uint8_t reg_read(uint8_t dev_addr, uint16_t reg_addr, bool wide_addr = false);
         int setTestPattern(bool enable, bool walking);
-        int enableMD(bool enable);
-        int setMDThreshold(uint32_t threshold);
-        int setLROI(uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2);
-        int pollMD();
-        int clearMD();
+        int enableMotionDetection(md_callback_t callback=NULL);
+        int disableMotionDetection();
+        int setMotionDetectionWindow(uint32_t x, uint32_t y, uint32_t w, uint32_t h);
+        int setMotionDetectionThreshold(uint32_t threshold);
+        int motionDetected();
+        int pollMotionDetection();
+        int clearMotionDetection();
+
         uint8_t printRegs();
         void debug(Stream &stream);
 };

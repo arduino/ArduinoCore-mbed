@@ -354,7 +354,6 @@ bool FrameBuffer::isAllocated()
     return _isAllocated;
 }
 
-
 Camera::Camera(ImageSensor &sensor) : 
     pixformat(-1),
     resolution(-1),
@@ -611,6 +610,40 @@ int Camera::grabFrame(FrameBuffer &fb, uint32_t timeout)
 
     return 0;
 }
+
+int Camera::setMotionDetectionThreshold(uint32_t threshold)
+{
+  return this->sensor->setMotionDetectionThreshold(threshold);
+}
+
+int Camera::setMotionDetectionWindow(uint32_t x, uint32_t y, uint32_t w, uint32_t h)
+{
+  uint32_t width, height;
+
+  width = restab[this->resolution][0];
+  height= restab[this->resolution][1];
+
+  if (((x+w) > width) || ((y+h) > height)) {
+      return -1;
+  }
+  return this->sensor->setMotionDetectionWindow(x, y, x+w, y+h);
+}
+
+int Camera::enableMotionDetection(md_callback_t callback)
+{
+  return this->sensor->enableMotionDetection(callback);
+}
+
+int Camera::disableMotionDetection()
+{
+  return this->sensor->disableMotionDetection();
+}
+
+int Camera::motionDetected()
+{
+  return this->sensor->motionDetected();
+}
+
 
 void Camera::debug(Stream &stream)
 {

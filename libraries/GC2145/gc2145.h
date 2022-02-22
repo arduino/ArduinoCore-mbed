@@ -38,6 +38,11 @@ class GC2145: public ImageSensor {
         int setPixelFormat(int32_t pixformat);
         int reg_write(uint8_t dev_addr, uint16_t reg_addr, uint8_t reg_data, bool wide_addr = false);
         uint8_t reg_read(uint8_t dev_addr, uint16_t reg_addr, bool wide_addr = false);
+        int enableMotionDetection(md_callback_t callback) { return 0; };
+        int disableMotionDetection() { return 0; };
+        int setMotionDetectionWindow(uint32_t x, uint32_t y, uint32_t w, uint32_t h) { return 0; };
+        int setMotionDetectionThreshold(uint32_t threshold) { return 0; };
+        int motionDetected() { return 0; };
         void debug(Stream &stream);
 };
  
