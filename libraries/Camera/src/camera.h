@@ -71,8 +71,6 @@ class ImageSensor {
         virtual int setFrameRate(int32_t framerate) = 0;
         virtual int setResolution(int32_t resolution) = 0;
         virtual int setPixelFormat(int32_t pixelformat) = 0;
-        virtual int reg_write(uint8_t dev_addr, uint16_t reg_addr, uint8_t reg_data, bool wide_addr) = 0;
-        virtual uint8_t reg_read(uint8_t dev_addr, uint16_t reg_addr, bool wide_addr) = 0;
         virtual int enableMotionDetection(md_callback_t callback) = 0;
         virtual int disableMotionDetection() = 0;
         virtual int setMotionDetectionWindow(uint32_t x, uint32_t y, uint32_t w, uint32_t h) = 0;

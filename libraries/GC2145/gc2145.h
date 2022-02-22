@@ -26,6 +26,8 @@ class GC2145: public ImageSensor {
         int setWindow(uint16_t reg, uint16_t x, uint16_t y, uint16_t w, uint16_t h);
         Stream *_debug;
         arduino::MbedI2C *_i2c;
+        int regWrite(uint8_t dev_addr, uint16_t reg_addr, uint8_t reg_data, bool wide_addr = false);
+        uint8_t regRead(uint8_t dev_addr, uint16_t reg_addr, bool wide_addr = false);
 
    public:
         GC2145(arduino::MbedI2C &i2c = CameraWire);
@@ -36,8 +38,6 @@ class GC2145: public ImageSensor {
         int setFrameRate(int32_t framerate);
         int setResolution(int32_t resolution);
         int setPixelFormat(int32_t pixformat);
-        int reg_write(uint8_t dev_addr, uint16_t reg_addr, uint8_t reg_data, bool wide_addr = false);
-        uint8_t reg_read(uint8_t dev_addr, uint16_t reg_addr, bool wide_addr = false);
         int enableMotionDetection(md_callback_t callback) { return 0; };
         int disableMotionDetection() { return 0; };
         int setMotionDetectionWindow(uint32_t x, uint32_t y, uint32_t w, uint32_t h) { return 0; };

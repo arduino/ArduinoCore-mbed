@@ -29,6 +29,9 @@ class HM01B0: public ImageSensor {
         mbed::InterruptIn md_irq;
         md_callback_t _md_callback;
         void irqHandler();
+        int regWrite(uint8_t dev_addr, uint16_t reg_addr, uint8_t reg_data, bool wide_addr = false);
+        uint8_t regRead(uint8_t dev_addr, uint16_t reg_addr, bool wide_addr = false);
+
    public:
         HM01B0(arduino::MbedI2C &i2c = CameraWire);
         int init();
@@ -38,8 +41,6 @@ class HM01B0: public ImageSensor {
         int setFrameRate(int32_t framerate);
         int setResolution(int32_t resolution);
         int setPixelFormat(int32_t pixformat);
-        int reg_write(uint8_t dev_addr, uint16_t reg_addr, uint8_t reg_data, bool wide_addr = false);
-        uint8_t reg_read(uint8_t dev_addr, uint16_t reg_addr, bool wide_addr = false);
         int setTestPattern(bool enable, bool walking);
         int enableMotionDetection(md_callback_t callback=NULL);
         int disableMotionDetection();

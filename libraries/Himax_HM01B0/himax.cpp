@@ -317,12 +317,12 @@ int HM01B0::init()
     }
 
     for (uint32_t i=0; himax_default_regs[i][0]; i++) {
-        reg_write(HM01B0_I2C_ADDR, himax_default_regs[i][0], himax_default_regs[i][1], true);
+        regWrite(HM01B0_I2C_ADDR, himax_default_regs[i][0], himax_default_regs[i][1], true);
     }
 
-    reg_write(HM01B0_I2C_ADDR, PCLK_POLARITY, (0x20 | PCLK_FALLING_EDGE), true);
+    regWrite(HM01B0_I2C_ADDR, PCLK_POLARITY, (0x20 | PCLK_FALLING_EDGE), true);
 
-    reg_write(HM01B0_I2C_ADDR, MODE_SELECT, HIMAX_Streaming, true);
+    regWrite(HM01B0_I2C_ADDR, MODE_SELECT, HIMAX_Streaming, true);
 
     HAL_Delay(200);
 
@@ -333,9 +333,9 @@ int HM01B0::reset()
 {
     uint32_t max_timeout=100;
     do {
-        reg_write(HM01B0_I2C_ADDR, SW_RESET, HIMAX_RESET, true);
+        regWrite(HM01B0_I2C_ADDR, SW_RESET, HIMAX_RESET, true);
         delay(1);
-    } while (reg_read(HM01B0_I2C_ADDR, MODE_SELECT, true) != HIMAX_Standby && ((--max_timeout)>0) );
+    } while (regRead(HM01B0_I2C_ADDR, MODE_SELECT, true) != HIMAX_Standby && ((--max_timeout)>0) );
 
     return (max_timeout > 0) ? 0 : -1;
 }
@@ -347,17 +347,17 @@ int HM01B0::setResolution(int32_t resolution)
   switch (resolution) {
     case CAMERA_R160x120:
       for(uint32_t i = 0; himax_qqvga_regs[i][0]; i++) {
-        ret |= reg_write(HM01B0_I2C_ADDR, himax_qqvga_regs[i][0], himax_qqvga_regs[i][1], true);
+        ret |= regWrite(HM01B0_I2C_ADDR, himax_qqvga_regs[i][0], himax_qqvga_regs[i][1], true);
       }
       break;
     case CAMERA_R320x240:
       for(uint32_t i = 0; himax_qvga_regs[i][0]; i++) {
-        ret |= reg_write(HM01B0_I2C_ADDR, himax_qvga_regs[i][0], himax_qvga_regs[i][1], true);
+        ret |= regWrite(HM01B0_I2C_ADDR, himax_qvga_regs[i][0], himax_qvga_regs[i][1], true);
       }
       break;
     case CAMERA_R320x320:
       for(uint32_t i = 0; himax_full_regs[i][0]; i++) {
-        ret |= reg_write(HM01B0_I2C_ADDR, himax_full_regs[i][0], himax_full_regs[i][1], true);
+        ret |= regWrite(HM01B0_I2C_ADDR, himax_full_regs[i][0], himax_full_regs[i][1], true);
       }
       break;  
     default:
@@ -371,7 +371,7 @@ int HM01B0::setFrameRate(int32_t framerate)
 {
   uint8_t osc_div = 0;
   // binning is enabled for QQVGA
-  uint8_t binning = reg_read(HM01B0_I2C_ADDR, BINNING_MODE, true) & 0x03;
+  uint8_t binning = regRead(HM01B0_I2C_ADDR, BINNING_MODE, true) & 0x03;
 
   switch (framerate) {
     case 15:
@@ -391,7 +391,7 @@ int HM01B0::setFrameRate(int32_t framerate)
       return -1;
   }
 
-  return reg_write(HM01B0_I2C_ADDR, OSC_CLK_DIV, 0x08 | osc_div, true);
+  return regWrite(HM01B0_I2C_ADDR, OSC_CLK_DIV, 0x08 | osc_div, true);
 }
 
 int HM01B0::setPixelFormat(int32_t pixformat)
@@ -402,19 +402,19 @@ int HM01B0::setPixelFormat(int32_t pixformat)
 int HM01B0::setTestPattern(bool enable, bool walking)
 {
     uint8_t reg = 0;
-    reg_write(HM01B0_I2C_ADDR, PCLK_POLARITY, (0x20 | PCLK_FALLING_EDGE), true);
-    reg_write(HM01B0_I2C_ADDR, 0x2100,  0, true); //AE
-    reg_write(HM01B0_I2C_ADDR, 0x1000,  0, true); //BLC
-    reg_write(HM01B0_I2C_ADDR, 0x1008,  0, true); //DPC
-    reg_write(HM01B0_I2C_ADDR, 0x0205,  0, true); //AGAIN
-    reg_write(HM01B0_I2C_ADDR, 0x020e,  1, true); //DGAINH
-    reg_write(HM01B0_I2C_ADDR, 0x020f,  0, true); //DGAINL
+    regWrite(HM01B0_I2C_ADDR, PCLK_POLARITY, (0x20 | PCLK_FALLING_EDGE), true);
+    regWrite(HM01B0_I2C_ADDR, 0x2100,  0, true); //AE
+    regWrite(HM01B0_I2C_ADDR, 0x1000,  0, true); //BLC
+    regWrite(HM01B0_I2C_ADDR, 0x1008,  0, true); //DPC
+    regWrite(HM01B0_I2C_ADDR, 0x0205,  0, true); //AGAIN
+    regWrite(HM01B0_I2C_ADDR, 0x020e,  1, true); //DGAINH
+    regWrite(HM01B0_I2C_ADDR, 0x020f,  0, true); //DGAINL
 
     if (enable) {
         reg = 1 | (walking ? (1 << 4) : 0);
     }
-    reg_write(HM01B0_I2C_ADDR, 0x0601,  reg, true);
-    reg_write(HM01B0_I2C_ADDR, 0x0104,  1, true); //group hold
+    regWrite(HM01B0_I2C_ADDR, 0x0601,  reg, true);
+    regWrite(HM01B0_I2C_ADDR, 0x0104,  1, true); //group hold
 
     HAL_Delay(100);
 
@@ -431,20 +431,20 @@ int HM01B0::setMotionDetectionThreshold(uint32_t threshold)
   //
   // In other words, motion is detected if the abs difference of the ROI mean and the
   // average ROI mean of the last 8 or 16 frames is higher than (ROI mean * threshold / 64).
-  return reg_write(HM01B0_I2C_ADDR, MD_THL, (threshold < 3) ? 3 : (threshold > 0xF0) ? 0xF0 : threshold, true);
+  return regWrite(HM01B0_I2C_ADDR, MD_THL, (threshold < 3) ? 3 : (threshold > 0xF0) ? 0xF0 : threshold, true);
 }
 
 int HM01B0::setMotionDetectionWindow(uint32_t x, uint32_t y, uint32_t w, uint32_t h)
 {
   int ret = 0;
-  ret |= reg_write(HM01B0_I2C_ADDR, MD_LROI_X_START_H, (x>>8), true);
-  ret |= reg_write(HM01B0_I2C_ADDR, MD_LROI_X_START_L, (x&0xff), true);
-  ret |= reg_write(HM01B0_I2C_ADDR, MD_LROI_Y_START_H, (y>>8), true);
-  ret |= reg_write(HM01B0_I2C_ADDR, MD_LROI_Y_START_L, (y&0xff), true);
-  ret |= reg_write(HM01B0_I2C_ADDR, MD_LROI_X_END_H,   (w>>8), true);
-  ret |= reg_write(HM01B0_I2C_ADDR, MD_LROI_X_END_L,   (w&0xff), true);
-  ret |= reg_write(HM01B0_I2C_ADDR, MD_LROI_Y_END_H,   (h>>8), true);
-  ret |= reg_write(HM01B0_I2C_ADDR, MD_LROI_Y_END_L,   (h&0xff), true);
+  ret |= regWrite(HM01B0_I2C_ADDR, MD_LROI_X_START_H, (x>>8), true);
+  ret |= regWrite(HM01B0_I2C_ADDR, MD_LROI_X_START_L, (x&0xff), true);
+  ret |= regWrite(HM01B0_I2C_ADDR, MD_LROI_Y_START_H, (y>>8), true);
+  ret |= regWrite(HM01B0_I2C_ADDR, MD_LROI_Y_START_L, (y&0xff), true);
+  ret |= regWrite(HM01B0_I2C_ADDR, MD_LROI_X_END_H,   (w>>8), true);
+  ret |= regWrite(HM01B0_I2C_ADDR, MD_LROI_X_END_L,   (w&0xff), true);
+  ret |= regWrite(HM01B0_I2C_ADDR, MD_LROI_Y_END_H,   (h>>8), true);
+  ret |= regWrite(HM01B0_I2C_ADDR, MD_LROI_Y_END_L,   (h&0xff), true);
   return ret;
 }
 
@@ -456,7 +456,7 @@ int HM01B0::enableMotionDetection(md_callback_t callback)
   md_irq.enable_irq();
 
   int ret = clearMotionDetection();
-  ret |= reg_write(HM01B0_I2C_ADDR, MD_CTRL, 1, true);
+  ret |= regWrite(HM01B0_I2C_ADDR, MD_CTRL, 1, true);
   return ret;
 }
 
@@ -464,7 +464,7 @@ int HM01B0::disableMotionDetection()
 {
   _md_callback = NULL;
   int ret = clearMotionDetection();
-  ret |= reg_write(HM01B0_I2C_ADDR, MD_CTRL, 0, true);
+  ret |= regWrite(HM01B0_I2C_ADDR, MD_CTRL, 0, true);
   return ret;
 }
 
@@ -481,12 +481,12 @@ int HM01B0::motionDetected()
 
 int HM01B0::pollMotionDetection()
 {
-  return reg_read(HM01B0_I2C_ADDR, MD_INTERRUPT, true);
+  return regRead(HM01B0_I2C_ADDR, MD_INTERRUPT, true);
 }
 
 int HM01B0::clearMotionDetection()
 {
-  return reg_write(HM01B0_I2C_ADDR, I2C_CLEAR, 0x01, true);
+  return regWrite(HM01B0_I2C_ADDR, I2C_CLEAR, 0x01, true);
 }
 
 uint8_t HM01B0::printRegs()
@@ -495,12 +495,12 @@ uint8_t HM01B0::printRegs()
         printf("0x%04X: 0x%02X  0x%02X \n",
                 himax_default_regs[i][0],
                 himax_default_regs[i][1],
-                reg_read(HM01B0_I2C_ADDR, himax_default_regs[i][0], true));
+                regRead(HM01B0_I2C_ADDR, himax_default_regs[i][0], true));
     }
     return 0;
 }
 
-int HM01B0::reg_write(uint8_t dev_addr, uint16_t reg_addr, uint8_t reg_data, bool wide_addr)
+int HM01B0::regWrite(uint8_t dev_addr, uint16_t reg_addr, uint8_t reg_data, bool wide_addr)
 {
     _i2c->beginTransmission(dev_addr);
     uint8_t buf[3] = {(uint8_t) (reg_addr >> 8), (uint8_t) (reg_addr & 0xFF), reg_data};
@@ -511,7 +511,7 @@ int HM01B0::reg_write(uint8_t dev_addr, uint16_t reg_addr, uint8_t reg_data, boo
     return _i2c->endTransmission();
 }
 
-uint8_t HM01B0::reg_read(uint8_t dev_addr, uint16_t reg_addr, bool wide_addr)
+uint8_t HM01B0::regRead(uint8_t dev_addr, uint16_t reg_addr, bool wide_addr)
 {
     uint8_t reg_data = 0;
     uint8_t buf[2] = {(uint8_t) (reg_addr >> 8), (uint8_t) (reg_addr & 0xFF)};

@@ -721,7 +721,7 @@ int GC2145::init()
 
     // Write default regsiters
     for (int i = 0; default_regs[i][0]; i++) {
-        ret |= reg_write(GC2145_I2C_ADDR, default_regs[i][0], default_regs[i][1]);
+        ret |= regWrite(GC2145_I2C_ADDR, default_regs[i][0], default_regs[i][1]);
     }
 
     return ret;
@@ -732,23 +732,23 @@ int GC2145::setWindow(uint16_t reg, uint16_t x, uint16_t y, uint16_t w, uint16_t
     int ret = 0;
 
     // P0 regs
-    ret |= reg_write(GC2145_I2C_ADDR, 0xFE, 0x00);
+    ret |= regWrite(GC2145_I2C_ADDR, 0xFE, 0x00);
 
     // Y/row offset
-    ret |= reg_write(GC2145_I2C_ADDR, reg++, y >> 8);
-    ret |= reg_write(GC2145_I2C_ADDR, reg++, y & 0xff);
+    ret |= regWrite(GC2145_I2C_ADDR, reg++, y >> 8);
+    ret |= regWrite(GC2145_I2C_ADDR, reg++, y & 0xff);
 
     // X/col offset
-    ret |= reg_write(GC2145_I2C_ADDR, reg++, x >> 8);
-    ret |= reg_write(GC2145_I2C_ADDR, reg++, x & 0xff);
+    ret |= regWrite(GC2145_I2C_ADDR, reg++, x >> 8);
+    ret |= regWrite(GC2145_I2C_ADDR, reg++, x & 0xff);
 
     // Window height
-    ret |= reg_write(GC2145_I2C_ADDR, reg++, h >> 8);
-    ret |= reg_write(GC2145_I2C_ADDR, reg++, h & 0xff);
+    ret |= regWrite(GC2145_I2C_ADDR, reg++, h >> 8);
+    ret |= regWrite(GC2145_I2C_ADDR, reg++, h & 0xff);
 
     // Window width
-    ret |= reg_write(GC2145_I2C_ADDR, reg++, w >> 8);
-    ret |= reg_write(GC2145_I2C_ADDR, reg++, w & 0xff);
+    ret |= regWrite(GC2145_I2C_ADDR, reg++, w >> 8);
+    ret |= regWrite(GC2145_I2C_ADDR, reg++, w & 0xff);
 
     return ret;
 }
@@ -813,11 +813,11 @@ int GC2145::setResolution(int32_t resolution)
     ret |= setWindow(0x91, x, y, w, h);
 
     // Enable crop
-    ret |= reg_write(GC2145_I2C_ADDR, 0x90, 0x01);
+    ret |= regWrite(GC2145_I2C_ADDR, 0x90, 0x01);
 
     // Set Sub-sampling ratio and mode
-    ret |= reg_write(GC2145_I2C_ADDR, 0x99, ((r_ratio << 4) | c_ratio));
-    ret |= reg_write(GC2145_I2C_ADDR, 0x9A, 0x0E);
+    ret |= regWrite(GC2145_I2C_ADDR, 0x99, ((r_ratio << 4) | c_ratio));
+    ret |= regWrite(GC2145_I2C_ADDR, 0x9A, 0x0E);
 
     return ret;
 
@@ -829,27 +829,27 @@ int GC2145::setPixelFormat(int32_t pixformat)
     uint8_t reg;
 
     // P0 regs
-    ret |= reg_write(GC2145_I2C_ADDR, 0xFE, 0x00);
+    ret |= regWrite(GC2145_I2C_ADDR, 0xFE, 0x00);
 
     // Read current output format reg
-    reg = reg_read(GC2145_I2C_ADDR, REG_OUTPUT_FMT);
+    reg = regRead(GC2145_I2C_ADDR, REG_OUTPUT_FMT);
 
     switch (pixformat) {
         case CAMERA_RGB565:
-            ret |= reg_write(GC2145_I2C_ADDR,
+            ret |= regWrite(GC2145_I2C_ADDR,
                     REG_OUTPUT_FMT, REG_OUTPUT_SET_FMT(reg, REG_OUTPUT_FMT_RGB565));
             break;
         case CAMERA_GRAYSCALE:
             // TODO: There's no support for extracting GS from YUV so we use Bayer for 1BPP for now.
-            //ret |= reg_write(GC2145_I2C_ADDR,
+            //ret |= regWrite(GC2145_I2C_ADDR,
             //        REG_OUTPUT_FMT, REG_OUTPUT_SET_FMT(reg, REG_OUTPUT_FMT_YCBYCR));
             //break;
         case CAMERA_BAYER:
             // There's no BAYER support so it will just look off.
             // Make sure odd/even row are switched to work with our bayer conversion.
-            ret |= reg_write(GC2145_I2C_ADDR,
+            ret |= regWrite(GC2145_I2C_ADDR,
                     REG_SYNC_MODE, REG_SYNC_MODE_DEF | REG_SYNC_MODE_ROW_SWITCH);
-            ret |= reg_write(GC2145_I2C_ADDR,
+            ret |= regWrite(GC2145_I2C_ADDR,
                     REG_OUTPUT_FMT, REG_OUTPUT_SET_FMT(reg, REG_OUTPUT_FMT_BAYER));
             break;
         default:
@@ -859,7 +859,7 @@ int GC2145::setPixelFormat(int32_t pixformat)
     return ret;
 }
 
-int GC2145::reg_write(uint8_t dev_addr, uint16_t reg_addr, uint8_t reg_data, bool wide_addr)
+int GC2145::regWrite(uint8_t dev_addr, uint16_t reg_addr, uint8_t reg_data, bool wide_addr)
 {
     _i2c->beginTransmission(dev_addr);
     uint8_t buf[3] = {(uint8_t) (reg_addr >> 8), (uint8_t) (reg_addr & 0xFF), reg_data};
@@ -870,7 +870,7 @@ int GC2145::reg_write(uint8_t dev_addr, uint16_t reg_addr, uint8_t reg_data, boo
     return _i2c->endTransmission();
 }
 
-uint8_t GC2145::reg_read(uint8_t dev_addr, uint16_t reg_addr, bool wide_addr)
+uint8_t GC2145::regRead(uint8_t dev_addr, uint16_t reg_addr, bool wide_addr)
 {
     uint8_t reg_data = 0;
     uint8_t buf[2] = {(uint8_t) (reg_addr >> 8), (uint8_t) (reg_addr & 0xFF)};
