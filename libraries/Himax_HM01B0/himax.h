@@ -27,22 +27,22 @@ class HM01B0: public ImageSensor {
         arduino::MbedI2C *_i2c;
    public:
         HM01B0(arduino::MbedI2C &i2c = CameraWire);
-        int Init();
-        int Reset();
-        int GetID() { return HM01B0_I2C_ADDR; };
-        uint32_t GetClockFrequency() { return 6000000; };
-        int SetFrameRate(int32_t framerate);
-        int SetResolution(int32_t resolution);
-        int SetPixelFormat(int32_t pixformat);
+        int init();
+        int reset();
+        int getID() { return HM01B0_I2C_ADDR; };
+        uint32_t getClockFrequency() { return 6000000; };
+        int setFrameRate(int32_t framerate);
+        int setResolution(int32_t resolution);
+        int setPixelFormat(int32_t pixformat);
         int reg_write(uint8_t dev_addr, uint16_t reg_addr, uint8_t reg_data, bool wide_addr = false);
         uint8_t reg_read(uint8_t dev_addr, uint16_t reg_addr, bool wide_addr = false);
-        int SetTestPattern(bool enable, bool walking);
-        int EnableMD(bool enable);
-        int SetMDThreshold(uint32_t threshold);
-        int SetLROI(uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2);
-        int PollMD();
-        int ClearMD();
-        uint8_t PrintRegs();
+        int setTestPattern(bool enable, bool walking);
+        int enableMD(bool enable);
+        int setMDThreshold(uint32_t threshold);
+        int setLROI(uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2);
+        int pollMD();
+        int clearMD();
+        uint8_t printRegs();
         void debug(Stream &stream);
 };
 #endif /* __HIMAX_H */

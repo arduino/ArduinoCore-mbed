@@ -364,7 +364,7 @@ Camera::Camera(ImageSensor &sensor) :
 {
 }
 
-int Camera::Reset()
+int Camera::reset()
 {
 #ifdef ARDUINO_PORTENTA_H7_M7
     // Reset sensor.
@@ -377,7 +377,7 @@ int Camera::Reset()
     return 0;
 }
 
-int Camera::ProbeSensor()
+int Camera::probeSensor()
 {
     uint8_t addr;
 
@@ -405,22 +405,22 @@ bool Camera::begin(int32_t resolution, int32_t pixformat, int32_t framerate)
     HAL_Delay(10);
 
     // Reset the image sensor.
-    Reset();
+    reset();
 
-    if (sensor->GetClockFrequency() != DCMI_TIM_FREQUENCY) {
+    if (sensor->getClockFrequency() != DCMI_TIM_FREQUENCY) {
         // Reconfigure the sensor clock frequency.
-        camera_extclk_config(sensor->GetClockFrequency());
+        camera_extclk_config(sensor->getClockFrequency());
         HAL_Delay(10);
     }
 
-    if (this->sensor->Init() != 0) {
+    if (this->sensor->init() != 0) {
         return false;
     }
 
-    if (ProbeSensor() != this->sensor->GetID()) {
+    if (probeSensor() != this->sensor->getID()) {
         if (_debug) {
             _debug->print("Detected SensorID: 0x");
-            _debug->println(this->sensor->GetID(), HEX);
+            _debug->println(this->sensor->getID(), HEX);
         }
         return false;
     }
@@ -431,37 +431,37 @@ bool Camera::begin(int32_t resolution, int32_t pixformat, int32_t framerate)
 
     // NOTE: The pixel format must be set first before the resolution,
     // to lookup the BPP for this format to set the DCMI cropping.
-    if (SetPixelFormat(pixformat) != 0) {
+    if (setPixelFormat(pixformat) != 0) {
         return false;
     }
 
-    if (SetResolution(resolution) != 0) {
+    if (setResolution(resolution) != 0) {
         return false;
     }
 
-    if (SetFrameRate(framerate) != 0) {
+    if (setFrameRate(framerate) != 0) {
         return false;
     }
 
     return true;
 }
 
-int Camera::GetID()
+int Camera::getID()
 {
     if (this->sensor == NULL) {
         return -1;
     }
 
-    return this->sensor->GetID();
+    return this->sensor->getID();
 }
 
-int Camera::SetFrameRate(int32_t framerate)
+int Camera::setFrameRate(int32_t framerate)
 {
     if (this->sensor == NULL) {
         return -1;
     }
 
-    if (this->sensor->SetFrameRate(framerate) == 0) {
+    if (this->sensor->setFrameRate(framerate) == 0) {
         this->framerate = framerate;
         return 0;
     }
@@ -469,7 +469,7 @@ int Camera::SetFrameRate(int32_t framerate)
     return -1;
 }
 
-int Camera::SetResolution(int32_t resolution)
+int Camera::setResolution(int32_t resolution)
 {
     if (this->sensor == NULL || resolution >= CAMERA_RMAX
             || pixformat >= CAMERA_PMAX || pixformat == -1) {
@@ -486,45 +486,45 @@ int Camera::SetResolution(int32_t resolution)
     uint32_t bpl = restab[resolution][0] * pixtab[pixformat];
     HAL_DCMI_ConfigCROP(&hdcmi, 0, 0, bpl - 1, restab[resolution][1] - 1);
 
-    if (this->sensor->SetResolution(resolution) == 0) {
+    if (this->sensor->setResolution(resolution) == 0) {
         this->resolution = resolution;
         return 0;
     }
     return -1;
 }
 
-int Camera::SetPixelFormat(int32_t pixformat)
+int Camera::setPixelFormat(int32_t pixformat)
 {
     if (this->sensor == NULL || pixformat >= CAMERA_PMAX) {
         return -1;
     }
 
-    if (this->sensor->SetPixelFormat(pixformat) == 0) {
+    if (this->sensor->setPixelFormat(pixformat) == 0) {
         this->pixformat = pixformat;
         return 0;
     }
     return -1;
 }
 
-int Camera::SetStandby(bool enable)
+int Camera::setStandby(bool enable)
 {
     if (this->sensor == NULL) {
         return -1;
     }
 
-    return this->sensor->SetStandby(enable);
+    return this->sensor->setStandby(enable);
 }
 
-int Camera::SetTestPattern(bool enable, bool walking)
+int Camera::setTestPattern(bool enable, bool walking)
 {
     if (this->sensor == NULL) {
         return -1;
     }
 
-    return this->sensor->SetTestPattern(enable, walking);
+    return this->sensor->setTestPattern(enable, walking);
 }
 
-int Camera::FrameSize()
+int Camera::frameSize()
 {
     if (this->sensor == NULL
             || this->pixformat == -1
@@ -535,7 +535,7 @@ int Camera::FrameSize()
     return restab[this->resolution][0] * restab[this->resolution][1] * pixtab[this->pixformat];
 }
 
-int Camera::GrabFrame(FrameBuffer &fb, uint32_t timeout)
+int Camera::grabFrame(FrameBuffer &fb, uint32_t timeout)
 {
     if (this->sensor == NULL
             || this->pixformat == -1
@@ -543,7 +543,7 @@ int Camera::GrabFrame(FrameBuffer &fb, uint32_t timeout)
         return -1;
     }
 
-    uint32_t framesize = FrameSize();
+    uint32_t framesize = frameSize();
 
     if (fb.isAllocated()) {
         //A buffer has already been allocated

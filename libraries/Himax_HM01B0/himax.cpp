@@ -298,12 +298,12 @@ HM01B0::HM01B0(arduino::MbedI2C &i2c) :
 {
 }
 
-int HM01B0::Init()
+int HM01B0::init()
 {
     _i2c->begin();
     _i2c->setClock(100000);
 
-    if (Reset() != 0 ) {
+    if (reset() != 0 ) {
         return -1;
     }
 
@@ -320,7 +320,7 @@ int HM01B0::Init()
     return 0;
 }
 
-int HM01B0::Reset()
+int HM01B0::reset()
 {
     uint32_t max_timeout=100;
     do {
@@ -331,7 +331,7 @@ int HM01B0::Reset()
     return (max_timeout > 0) ? 0 : -1;
 }
 
-int HM01B0::SetResolution(int32_t resolution)
+int HM01B0::setResolution(int32_t resolution)
 {
   int ret = 0;
 
@@ -358,7 +358,7 @@ int HM01B0::SetResolution(int32_t resolution)
   return ret;
 }
 
-int HM01B0::SetFrameRate(int32_t framerate)
+int HM01B0::setFrameRate(int32_t framerate)
 {
   uint8_t osc_div = 0;
   // binning is enabled for QQVGA
@@ -385,12 +385,12 @@ int HM01B0::SetFrameRate(int32_t framerate)
   return reg_write(HM01B0_I2C_ADDR, OSC_CLK_DIV, 0x08 | osc_div, true);
 }
 
-int HM01B0::SetPixelFormat(int32_t pixformat)
+int HM01B0::setPixelFormat(int32_t pixformat)
 {
     return (pixformat == CAMERA_GRAYSCALE) ? 0 : -1;
 }
 
-int HM01B0::SetTestPattern(bool enable, bool walking)
+int HM01B0::setTestPattern(bool enable, bool walking)
 {
     uint8_t reg = 0;
     reg_write(HM01B0_I2C_ADDR, PCLK_POLARITY, (0x20 | PCLK_FALLING_EDGE), true);
@@ -412,14 +412,14 @@ int HM01B0::SetTestPattern(bool enable, bool walking)
     return 0;
 }
 
-int HM01B0::EnableMD(bool enable)
+int HM01B0::enableMD(bool enable)
 {
-  int ret = ClearMD();
+  int ret = clearMD();
   ret |= reg_write(HM01B0_I2C_ADDR, MD_CTRL, enable ? 1:0, true);
   return ret;
 }
 
-int HM01B0::SetMDThreshold(uint32_t threshold)
+int HM01B0::setMDThreshold(uint32_t threshold)
 {
   // Set motion detection threshold/sensitivity.
   // The recommended threshold range is 0x03 to 0xF0.
@@ -432,7 +432,7 @@ int HM01B0::SetMDThreshold(uint32_t threshold)
   return reg_write(HM01B0_I2C_ADDR, MD_THL, (threshold < 3) ? 3 : (threshold > 0xF0) ? 0xF0 : threshold, true);
 }
 
-int HM01B0::SetLROI(uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2)
+int HM01B0::setLROI(uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2)
 {
   int ret = 0;
   ret |= reg_write(HM01B0_I2C_ADDR, MD_LROI_X_START_H, (x1>>8), true);
@@ -446,17 +446,17 @@ int HM01B0::SetLROI(uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2)
   return ret;
 }
 
-int HM01B0::PollMD()
+int HM01B0::pollMD()
 {
   return reg_read(HM01B0_I2C_ADDR, MD_INTERRUPT, true);
 }
 
-int HM01B0::ClearMD()
+int HM01B0::clearMD()
 {
   return reg_write(HM01B0_I2C_ADDR, I2C_CLEAR, 0x01, true);
 }
 
-uint8_t HM01B0::PrintRegs()
+uint8_t HM01B0::printRegs()
 {
     for (uint32_t i=0; himax_default_regs[i][0]; i++) {
         printf("0x%04X: 0x%02X  0x%02X \n",

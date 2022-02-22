@@ -712,7 +712,7 @@ GC2145::GC2145(arduino::MbedI2C &i2c) :
 {
 }
 
-int GC2145::Init()
+int GC2145::init()
 {
     _i2c->begin();
     _i2c->setClock(100000);
@@ -727,7 +727,7 @@ int GC2145::Init()
     return ret;
 }
 
-int GC2145::SetWindow(uint16_t reg, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
+int GC2145::setWindow(uint16_t reg, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 {
     int ret = 0;
 
@@ -753,17 +753,17 @@ int GC2145::SetWindow(uint16_t reg, uint16_t x, uint16_t y, uint16_t w, uint16_t
     return ret;
 }
 
-int GC2145::Reset()
+int GC2145::reset()
 {
     return 0;
 }
 
-int GC2145::SetFrameRate(int32_t framerate)
+int GC2145::setFrameRate(int32_t framerate)
 {
     return 0;
 }
 
-int GC2145::SetResolution(int32_t resolution)
+int GC2145::setResolution(int32_t resolution)
 {
     int ret = 0;
 
@@ -807,10 +807,10 @@ int GC2145::SetResolution(int32_t resolution)
     uint16_t win_y = ((GC_MAX_WIN_H - win_h) / 2);
 
     // Set readout window first.
-    ret |= SetWindow(0x09, win_x, win_y, win_w + 16, win_h + 8);
+    ret |= setWindow(0x09, win_x, win_y, win_w + 16, win_h + 8);
 
     // Set cropping window next.
-    ret |= SetWindow(0x91, x, y, w, h);
+    ret |= setWindow(0x91, x, y, w, h);
 
     // Enable crop
     ret |= reg_write(GC2145_I2C_ADDR, 0x90, 0x01);
@@ -823,7 +823,7 @@ int GC2145::SetResolution(int32_t resolution)
 
 }
 
-int GC2145::SetPixelFormat(int32_t pixformat)
+int GC2145::setPixelFormat(int32_t pixformat)
 {
     int ret = 0;
     uint8_t reg;

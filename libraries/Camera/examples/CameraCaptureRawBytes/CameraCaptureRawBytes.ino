@@ -33,7 +33,7 @@ void blinkLED(uint32_t count = 0xFFFFFFFF)
   }
 }
 
-void setup() {   
+void setup() {
   // Init the cam QVGA, 30FPS
   if (!cam.begin(CAMERA_R320x240, IMAGE_MODE, 30)) {
     blinkLED();
@@ -57,8 +57,8 @@ void loop() {
   lastUpdate = millis();
   
   // Grab frame and write to serial
-  if (cam.GrabFrame(fb, 3000) == 0) {
-    Serial.write(fb.getBuffer(), cam.FrameSize());
+  if (cam.grabFrame(fb, 3000) == 0) {
+    Serial.write(fb.getBuffer(), cam.frameSize());
   } else {
     blinkLED(20);
   }

@@ -62,18 +62,18 @@ class FrameBuffer {
 class ImageSensor {
     public:
         virtual ~ImageSensor() { }
-        virtual int Init() = 0;
-        virtual int Reset() = 0;
-        virtual int GetID() = 0;
-        virtual uint32_t GetClockFrequency() = 0;
-        virtual int SetFrameRate(int32_t framerate) = 0;
-        virtual int SetResolution(int32_t resolution) = 0;
-        virtual int SetPixelFormat(int32_t pixelformat) = 0;
+        virtual int init() = 0;
+        virtual int reset() = 0;
+        virtual int getID() = 0;
+        virtual uint32_t getClockFrequency() = 0;
+        virtual int setFrameRate(int32_t framerate) = 0;
+        virtual int setResolution(int32_t resolution) = 0;
+        virtual int setPixelFormat(int32_t pixelformat) = 0;
         virtual int reg_write(uint8_t dev_addr, uint16_t reg_addr, uint8_t reg_data, bool wide_addr) = 0;
         virtual uint8_t reg_read(uint8_t dev_addr, uint16_t reg_addr, bool wide_addr) = 0;
         virtual void debug(Stream &stream) = 0;
 
-        int SetStandby(bool enable) {
+        int setStandby(bool enable) {
             return -1;
         }
 
@@ -81,7 +81,7 @@ class ImageSensor {
             return -1;
         }
 
-        int SetTestPattern(bool enable, bool walking) {
+        int setTestPattern(bool enable, bool walking) {
             return -1;
         }
 };
@@ -92,22 +92,22 @@ class Camera {
         int32_t resolution;
         int32_t framerate;
         ImageSensor *sensor;
-        int Reset();
-        int ProbeSensor();
+        int reset();
+        int probeSensor();
         Stream *_debug;
         arduino::MbedI2C *_i2c;
         FrameBuffer *_framebuffer;
     public:
         Camera(ImageSensor &sensor);
         bool begin(int32_t resolution=CAMERA_R320x240, int32_t pixformat=CAMERA_GRAYSCALE, int32_t framerate=30);
-        int GetID();
-        int SetFrameRate(int32_t framerate);
-        int SetResolution(int32_t resolution);
-        int SetPixelFormat(int32_t pixelformat);
-        int SetStandby(bool enable);
-        int SetTestPattern(bool enable, bool walking);
-        int FrameSize();
-        int GrabFrame(FrameBuffer &fb, uint32_t timeout=5000);
+        int getID();
+        int setFrameRate(int32_t framerate);
+        int setResolution(int32_t resolution);
+        int setPixelFormat(int32_t pixelformat);
+        int setStandby(bool enable);
+        int setTestPattern(bool enable, bool walking);
+        int frameSize();
+        int grabFrame(FrameBuffer &fb, uint32_t timeout=5000);
         void debug(Stream &stream);
 };
 
