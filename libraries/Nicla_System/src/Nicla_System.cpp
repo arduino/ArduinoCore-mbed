@@ -32,6 +32,8 @@ bool nicla::begin()
   th.start(&nicla::pingI2CThd);
 #endif
   started = true;
+
+  return true;
 }
 
 void nicla::enableCD()
