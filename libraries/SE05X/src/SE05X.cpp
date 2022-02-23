@@ -19,6 +19,17 @@
 
 #include "SE05X.h"
 
+#define SE05X_EC_KEY_RAW_LENGTH          64
+#define SE05X_EC_KEY_HEADER_LENGTH       27
+#define SE05X_EC_KEY_DER_LENGTH          SE05X_EC_KEY_HEADER_LENGTH + SE05X_EC_KEY_RAW_LENGTH
+#define SE05X_EC_SIGNATURE_RAW_LENGTH    64
+#define SE05X_EC_SIGNATURE_HEADER_LENGTH 6
+#define SE05X_EC_SIGNATURE_DER_LENGTH    SE05X_EC_SIGNATURE_HEADER_LENGTH + SE05X_EC_SIGNATURE_RAW_LENGTH
+#define SE05X_SHA256_LENGTH              32
+#define SE05X_SN_LENGTH                  18
+#define SE05X_DER_BUFFER_SIZE            256
+#define SE05X_TEMP_OBJECT                9999
+
 SE05XClass::SE05XClass()
 : _cipher_type {kSSS_CipherType_EC_NIST_P}
 , _algorithm_type {kAlgorithm_SSS_ECDSA_SHA256}
@@ -34,12 +45,12 @@ SE05XClass::~SE05XClass()
 
 static void getECKeyXyValuesFromDER(byte* derKey, size_t derLen, byte* rawKey)
 {
-  memcpy(rawKey, &derKey[derLen-64], 64);
+  memcpy(rawKey, &derKey[derLen - SE05X_EC_KEY_RAW_LENGTH], SE05X_EC_KEY_RAW_LENGTH);
 }
 
 static void setECKeyXyVauesInDER(const byte* rawKey, byte* derKey)
 {
-  static const byte ecc_der_header_nist256[27] =
+  static const byte ecc_der_header_nist256[SE05X_EC_KEY_HEADER_LENGTH] =
   {
     0x30, 0x59, 0x30, 0x13, 0x06, 0x07, 0x2a, 0x86,
     0x48, 0xce, 0x3d, 0x02, 0x01, 0x06, 0x08, 0x2a,
@@ -47,8 +58,8 @@ static void setECKeyXyVauesInDER(const byte* rawKey, byte* derKey)
     0x42, 0x00, 0x04
   };
 
-  memcpy(&derKey[0], &ecc_der_header_nist256[0], 27);
-  memcpy(&derKey[27], &rawKey[0], 64);
+  memcpy(&derKey[0], &ecc_der_header_nist256[0], SE05X_EC_KEY_HEADER_LENGTH);
+  memcpy(&derKey[SE05X_EC_KEY_HEADER_LENGTH], &rawKey[0], SE05X_EC_KEY_RAW_LENGTH);
 }
 
 static void getECSignatureRsValuesFromDER(byte* derSignature, size_t derLen, byte* rawSignature)
@@ -61,32 +72,32 @@ static void getECSignatureRsValuesFromDER(byte* derSignature, size_t derLen, byt
 
   byte * out = rawSignature;
 
-  if(rLen == 32)
+  if(rLen == (SE05X_EC_SIGNATURE_RAW_LENGTH / 2))
   {
-    memcpy(out, &derSignature[4], 32);
+    memcpy(out, &derSignature[4], (SE05X_EC_SIGNATURE_RAW_LENGTH / 2));
   }
-  else if ((rLen == 33) && (derSignature[4] == 0))
+  else if ((rLen == ((SE05X_EC_SIGNATURE_RAW_LENGTH / 2) + 1)) && (derSignature[4] == 0))
   {
-    memcpy(out, &derSignature[5], 32);
+    memcpy(out, &derSignature[5], (SE05X_EC_SIGNATURE_RAW_LENGTH / 2));
   }
 
-  out += 32;
+  out += (SE05X_EC_SIGNATURE_RAW_LENGTH / 2);
 
-  if(sLen == 32)
+  if(sLen == (SE05X_EC_SIGNATURE_RAW_LENGTH / 2))
   {
-    memcpy(out, &derSignature[3 + rLen + 3], 32);
+    memcpy(out, &derSignature[3 + rLen + 3], (SE05X_EC_SIGNATURE_RAW_LENGTH / 2));
   }
-  else if ((sLen == 33) && (derSignature[3 + rLen + 3] == 0))
+  else if ((sLen == ((SE05X_EC_SIGNATURE_RAW_LENGTH / 2) + 1)) && (derSignature[3 + rLen + 3] == 0))
   {
-    memcpy(out, &derSignature[3 + rLen + 4], 32);
+    memcpy(out, &derSignature[3 + rLen + 4], (SE05X_EC_SIGNATURE_RAW_LENGTH / 2));
   }
 }
 
 static void setECSignatureRsValuesInDER(const byte* rawSignature, byte* signature)
 {
-    byte rLen = 32;
-    byte sLen = 32;
-    byte rawSignatureLen = 64;
+    byte rLen = (SE05X_EC_SIGNATURE_RAW_LENGTH / 2);
+    byte sLen = (SE05X_EC_SIGNATURE_RAW_LENGTH / 2);
+    byte rawSignatureLen = SE05X_EC_SIGNATURE_RAW_LENGTH;
 
     signature[0] = 0x30;
     signature[1] = (uint8_t)(rawSignatureLen + 4);
@@ -150,7 +161,7 @@ int SE05XClass::readConfiguration(byte data[])
 String SE05XClass::serialNumber()
 {
     String result = (char*)NULL;
-    byte UID[18];
+    byte UID[SE05X_SN_LENGTH];
     size_t uidLen = 18;
 
     sss_session_prop_get_au8(&_boot_ctx.session, kSSS_SessionProp_UID, UID, &uidLen);
@@ -240,7 +251,7 @@ int SE05XClass::generatePrivateKey(int keyId, byte pubKeyDer[], size_t pubKeyDer
 
 int SE05XClass::generatePrivateKey(int slot, byte publicKey[])
 {
-    byte publicKeyDer[256];
+    byte publicKeyDer[SE05X_DER_BUFFER_SIZE];
     size_t publicKeyDerLen;
 
     if ((_cipher_type != kSSS_CipherType_EC_NIST_P) || (_algorithm_type != kAlgorithm_SSS_ECDSA_SHA256)) {
@@ -279,7 +290,7 @@ int SE05XClass::generatePublicKey(int keyId, byte pubKeyDer[], size_t pubKeyDerM
 
 int SE05XClass::generatePublicKey(int slot, byte publicKey[])
 {
-    byte publicKeyDer[256];
+    byte publicKeyDer[SE05X_DER_BUFFER_SIZE];
     size_t publicKeyDerLen;
 
     if ((_cipher_type != kSSS_CipherType_EC_NIST_P) || (_algorithm_type != kAlgorithm_SSS_ECDSA_SHA256)) {
@@ -407,14 +418,14 @@ int SE05XClass::Sign(int keyId, const byte hash[], size_t hashLen, byte sig[], s
 
 int SE05XClass::ecSign(int slot, const byte message[], byte signature[])
 {
-    byte signatureDer[256];
+    byte signatureDer[SE05X_DER_BUFFER_SIZE];
     size_t signatureDerLen;
 
     if ((_cipher_type != kSSS_CipherType_EC_NIST_P) || (_algorithm_type != kAlgorithm_SSS_ECDSA_SHA256)) {
         return 0;
     }
 
-    if (!Sign(slot, message, 32, signatureDer, sizeof(signatureDer), &signatureDerLen)) {
+    if (!Sign(slot, message, SE05X_SHA256_LENGTH, signatureDer, sizeof(signatureDer), &signatureDerLen)) {
         return 0;
     }
 
@@ -454,8 +465,8 @@ int SE05XClass::Verify(int keyId, const byte hash[], size_t hashLen, const byte 
 
 int SE05XClass::ecdsaVerify(const byte message[], const byte signature[], const byte pubkey[])
 {
-    byte pubKeyDER[91];
-    byte signatureDER[70];
+    byte pubKeyDER[SE05X_EC_KEY_DER_LENGTH];
+    byte signatureDER[SE05X_EC_SIGNATURE_DER_LENGTH];
     int  result;
 
     if ((_cipher_type != kSSS_CipherType_EC_NIST_P) || (_algorithm_type != kAlgorithm_SSS_ECDSA_SHA256)) {
@@ -463,15 +474,15 @@ int SE05XClass::ecdsaVerify(const byte message[], const byte signature[], const 
     }
 
     setECKeyXyVauesInDER(pubkey, pubKeyDER);
-    if (!importPublicKey(0xA5A5, pubKeyDER, sizeof(pubKeyDER))) {
+    if (!importPublicKey(SE05X_TEMP_OBJECT, pubKeyDER, sizeof(pubKeyDER))) {
         return 0;
     }
 
     setECSignatureRsValuesInDER(signature, signatureDER);
 
-    result = Verify(0xA5A5, message, 32, signatureDER, 70);
+    result = Verify(SE05X_TEMP_OBJECT, message, SE05X_SHA256_LENGTH, signatureDER, SE05X_EC_SIGNATURE_DER_LENGTH);
 
-    if (!deleteBinaryObject(0xA5A5)) {
+    if (!deleteBinaryObject(SE05X_TEMP_OBJECT)) {
         return 0;
     }
     return result;
