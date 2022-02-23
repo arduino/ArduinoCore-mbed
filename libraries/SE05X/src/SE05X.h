@@ -69,6 +69,17 @@ public:
 
     ex_sss_boot_ctx_t* getDeviceCtx(void);
 
+    int generatePrivateKey(int slot, byte publicKey[]);
+    int generatePublicKey(int slot, byte publicKey[]);
+    int ecdsaVerify(const byte message[], const byte signature[], const byte pubkey[]);
+    int ecSign(int slot, const byte message[], byte signature[]);
+    int readSlot(int slot, byte data[], int length);
+    int writeSlot(int slot, const byte data[], int length);
+    inline int locked() { return 1; }
+    inline int writeConfiguration(const byte data[]) { return 1; }
+    inline int readConfiguration(byte data[]) { return 1; }
+    inline int lock() { return 1; }
+
 private:
     int initObject(size_t objectId, sss_object_t * object, sss_key_part_t objectPart, sss_key_object_mode_t objectMode, sss_cipher_type_t objectChiper);
 

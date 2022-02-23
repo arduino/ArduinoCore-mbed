@@ -29,6 +29,72 @@ SE05XClass::~SE05XClass()
 
 }
 
+static void getECKeyXyValuesFromDER(byte* derKey, size_t derLen, byte* rawKey)
+{
+  memcpy(rawKey, &derKey[derLen-64], 64);
+}
+
+static void setECKeyXyVauesInDER(const byte* rawKey, byte* derKey)
+{
+  static const byte ecc_der_header_nist256[27] =
+  {
+    0x30, 0x59, 0x30, 0x13, 0x06, 0x07, 0x2a, 0x86,
+    0x48, 0xce, 0x3d, 0x02, 0x01, 0x06, 0x08, 0x2a,
+    0x86, 0x48, 0xce, 0x3d, 0x03, 0x01, 0x07, 0x03,
+    0x42, 0x00, 0x04
+  };
+
+  memcpy(&derKey[0], &ecc_der_header_nist256[0], 27);
+  memcpy(&derKey[27], &rawKey[0], 64);
+}
+
+static void getECSignatureRsValuesFromDER(byte* derSignature, size_t derLen, byte* rawSignature)
+{
+  byte rLen;
+  byte sLen;
+
+  rLen = derSignature[3];
+  sLen = derSignature[3 + rLen + 2];
+
+  byte * out = rawSignature;
+
+  if(rLen == 32)
+  {
+    memcpy(out, &derSignature[4], 32);
+  }
+  else if ((rLen == 33) && (derSignature[4] == 0))
+  {
+    memcpy(out, &derSignature[5], 32);
+  }
+
+  out += 32;
+
+  if(sLen == 32)
+  {
+    memcpy(out, &derSignature[3 + rLen + 3], 32);
+  }
+  else if ((sLen == 33) && (derSignature[3 + rLen + 3] == 0))
+  {
+    memcpy(out, &derSignature[3 + rLen + 4], 32);
+  }
+}
+
+static void setECSignatureRsValuesInDER(const byte* rawSignature, byte* signature)
+{
+    byte rLen = 32;
+    byte sLen = 32;
+    byte rawSignatureLen = 64;
+
+    signature[0] = 0x30;
+    signature[1] = (uint8_t)(rawSignatureLen + 4);
+    signature[2] = 0x02;
+    signature[3] = (uint8_t)rLen;
+    memcpy(&signature[4], &rawSignature[0], rLen);
+    signature[3 + rLen + 1] = 0x02;
+    signature[3 + rLen + 2] = (uint8_t)sLen;
+    memcpy(&signature[3 + rLen + 3], &rawSignature[rLen], sLen);
+}
+
 int SE05XClass::begin()
 {
     sss_status_t status;
@@ -153,6 +219,19 @@ int SE05XClass::generatePrivateKey(int keyId, byte pubKeyDer[], size_t pubKeyDer
     return 1;
 }
 
+int SE05XClass::generatePrivateKey(int slot, byte publicKey[])
+{
+    byte publicKeyDer[256];
+    size_t publicKeyDerLen;
+
+    if (!generatePrivateKey(slot, publicKeyDer, sizeof(publicKeyDer), &publicKeyDerLen)) {
+        return 0;
+    }
+
+    getECKeyXyValuesFromDER(publicKeyDer, publicKeyDerLen, publicKey);
+    return 1;
+}
+
 int SE05XClass::generatePublicKey(int keyId, byte pubKeyDer[], size_t pubKeyDerMaxLen, size_t * pubKeyDerlen)
 {
     sss_status_t status;
@@ -172,6 +251,19 @@ int SE05XClass::generatePublicKey(int keyId, byte pubKeyDer[], size_t pubKeyDerM
         return 0;
     }
 
+    return 1;
+}
+
+int SE05XClass::generatePublicKey(int slot, byte publicKey[])
+{
+    byte publicKeyDer[256];
+    size_t publicKeyDerLen;
+
+    if (!generatePublicKey(slot, publicKeyDer, sizeof(publicKeyDer), &publicKeyDerLen)) {
+        return 0;
+    }
+
+    getECKeyXyValuesFromDER(publicKeyDer, publicKeyDerLen, publicKey);
     return 1;
 }
 
@@ -288,6 +380,19 @@ int SE05XClass::Sign(int keyId, const byte hash[], size_t hashLen, byte sig[], s
     return 1;
 }
 
+int SE05XClass::ecSign(int slot, const byte message[], byte signature[])
+{
+    byte signatureDer[256];
+    size_t signatureDerLen;
+    if (!Sign(slot, message, 32, signatureDer, sizeof(signatureDer), &signatureDerLen)) {
+        return 0;
+    }
+
+    /* Get r s values from DER buffer */
+    getECSignatureRsValuesFromDER(signatureDer, signatureDerLen, signature);
+    return 1;
+}
+
 int SE05XClass::Verify(int keyId, const byte hash[], size_t hashLen, byte sig[], size_t sigLen)
 {
     sss_status_t        status;
@@ -317,6 +422,27 @@ int SE05XClass::Verify(int keyId, const byte hash[], size_t hashLen, byte sig[],
     return 1;
 }
 
+int SE05XClass::ecdsaVerify(const byte message[], const byte signature[], const byte pubkey[])
+{
+    byte pubKeyDER[91];
+    byte signatureDER[70];
+    int  result;
+
+    setECKeyXyVauesInDER(pubkey, pubKeyDER);
+    if (!importPublicKey(0xA5A5, pubKeyDER, sizeof(pubKeyDER))) {
+        return 0;
+    }
+
+    setECSignatureRsValuesInDER(signature, signatureDER);
+
+    result = Verify(0xA5A5, message, 32, signatureDER, 70);
+
+    if (!deleteBinaryObject(0xA5A5)) {
+        return 0;
+    }
+    return result;
+}
+
 int SE05XClass::readBinaryObject(int objectId, byte data[], size_t dataMaxLen, size_t * length)
 {
     sss_status_t        status;
@@ -337,6 +463,12 @@ int SE05XClass::readBinaryObject(int objectId, byte data[], size_t dataMaxLen, s
     return 1;
 }
 
+int SE05XClass::readSlot(int slot, byte data[], int length)
+{
+    size_t              binSizeBits;
+    return readBinaryObject(slot, data, length, &binSizeBits);
+}
+
 int SE05XClass::writeBinaryObject(int objectId, const byte data[], size_t length)
 {
     sss_status_t        status;
@@ -353,6 +485,16 @@ int SE05XClass::writeBinaryObject(int objectId, const byte data[], size_t length
     }
 
     return 1;
+}
+
+int SE05XClass::writeSlot(int slot, const byte data[], int length)
+{
+    if (existsBinaryObject(slot)) {
+        if (!deleteBinaryObject(slot)) {
+            return 0;
+        }
+    }
+    return writeBinaryObject(slot, data, length);
 }
 
 int SE05XClass::existsBinaryObject(int objectId)
