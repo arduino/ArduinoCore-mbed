@@ -413,8 +413,15 @@ nicla_vision.vid.1=0x2341
 nicla_vision.pid.1=0x035f
 nicla_vision.vid.2=0x2341
 nicla_vision.pid.2=0x045f
+nicla_vision.upload_port.0.vid=0x2341
+nicla_vision.upload_port.0.pid=0x025f
+nicla_vision.upload_port.1.vid=0x2341
+nicla_vision.upload_port.1.pid=0x035f
+nicla_vision.upload_port.2.vid=0x2341
+nicla_vision.upload_port.2.pid=0x045f
 
 nicla_vision.upload.tool=dfu-util
+nicla_vision.upload.tool.default=dfu-util
 nicla_vision.upload.protocol=
 nicla_vision.upload.transport=
 nicla_vision.upload.vid=0x2341
