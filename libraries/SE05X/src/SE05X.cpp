@@ -605,30 +605,14 @@ ex_sss_boot_ctx_t* SE05XClass::getDeviceCtx(void) {
 
 int SE05XClass::initObject(size_t objectId, sss_object_t * object, sss_key_part_t objectPart, sss_key_object_mode_t objectMode, sss_cipher_type_t objectChiper) 
 {
-    sss_status_t status;
-
-    if(kStatus_SSS_Success != sss_key_object_init(object, &_boot_ctx.ks)) {
-        SE05X_PRINT_ERROR("sss_key_object_init Failed");
-        return 0;
+    if (getObjectHandle(objectId, object)) {
+        return 1;
     }
 
-    status = sss_key_object_get_handle(object, objectId);
-
-    if(status != kStatus_SSS_Success )  {
-        SE05X_PRINT_ERROR("sss_key_object_get_handle Failed");
-        status = sss_key_object_allocate_handle(object,
-                                                objectId,
-                                                objectPart,
-                                                objectChiper,
-                                                0, // Unused
-                                                objectMode);
-    }
-
-    if(status != kStatus_SSS_Success)  {
+    if(kStatus_SSS_Success != sss_key_object_allocate_handle(object, objectId, objectPart, objectChiper, 0, objectMode)) {
         SE05X_PRINT_ERROR("sss_key_object_allocate_handle Failed");
         return 0;
     }
-
     return 1;
 }
 
