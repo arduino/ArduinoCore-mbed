@@ -107,17 +107,17 @@ int SE05XClass::begin()
     se05x_ic_power_on();
 
     if (nLog_Init() != 0) {
-        LOG_E("Lock initialisation failed");
+        SE05X_PRINT_ERROR("Lock initialisation failed");
         return 0;
     }
 
     if (kStatus_SSS_Success != ex_sss_boot_open(&_boot_ctx, "portName")) {
-        LOG_E("ex_sss_session_open Failed");
+        SE05X_PRINT_ERROR("ex_sss_session_open Failed");
         return 0;
     }
 
     if (kStatus_SSS_Success != ex_sss_key_store_and_object_init(&_boot_ctx)) {
-        LOG_E("ex_sss_key_store_and_object_init Failed");
+        SE05X_PRINT_ERROR("ex_sss_key_store_and_object_init Failed");
         return 0;
     }
 
@@ -231,7 +231,7 @@ int SE05XClass::generatePrivateKey(int keyId, byte pubKeyDer[], size_t pubKeyDer
     }
 
     if (status != kStatus_SSS_Success) {
-        LOG_E("sss_key_store_get_key Failed");
+        SE05X_PRINT_ERROR("sss_key_store_get_key Failed");
         return 0;
     }
 
@@ -270,7 +270,7 @@ int SE05XClass::generatePublicKey(int keyId, byte pubKeyDer[], size_t pubKeyDerM
     status = sss_key_store_get_key(&_boot_ctx.ks, &keyObject, pubKeyDer, pubKeyDerlen, &derSzBits);
 
     if (status != kStatus_SSS_Success) {
-        LOG_E("sss_key_store_get_key Failed");
+        SE05X_PRINT_ERROR("sss_key_store_get_key Failed");
         return 0;
     }
 
@@ -306,7 +306,7 @@ int SE05XClass::importPublicKey(int keyId, const byte pubKeyDer[], size_t pubKey
     status = sss_key_store_set_key(&_boot_ctx.ks, &keyObject, pubKeyDer, pubKeyDerLen, _key_size_bits, NULL, 0);
 
     if(status != kStatus_SSS_Success )  {
-        LOG_E("sss_key_store_set_key Failed");
+        SE05X_PRINT_ERROR("sss_key_store_set_key Failed");
         return 0;
     }
 
@@ -320,7 +320,7 @@ int SE05XClass::beginSHA256()
     status = sss_digest_context_init(&_digest_ctx, &_boot_ctx.session, kAlgorithm_SSS_SHA256, kMode_SSS_Digest);
 
     if (status != kStatus_SSS_Success) {
-        LOG_E("sss_digest_context_init Failed!!!");
+        SE05X_PRINT_ERROR("sss_digest_context_init Failed!!!");
         return 0;
     }
 
@@ -334,7 +334,7 @@ int SE05XClass::updateSHA256(const byte in[], size_t inLen)
     status =  sss_digest_update(&_digest_ctx, in, inLen);
 
     if (status != kStatus_SSS_Success) {
-        LOG_E("sss_digest_update Failed!!!");
+        SE05X_PRINT_ERROR("sss_digest_update Failed!!!");
         return 0;
     }
 
@@ -360,7 +360,7 @@ int SE05XClass::SHA256(const byte in[], size_t inLen, byte out[], size_t outMaxL
 
     status = sss_digest_context_init(&_digest_ctx, &_boot_ctx.session, kAlgorithm_SSS_SHA256, kMode_SSS_Digest);
     if (status != kStatus_SSS_Success) {
-        LOG_E("sss_digest_context_init Failed!!!");
+        SE05X_PRINT_ERROR("sss_digest_context_init Failed!!!");
         return 0;
     }
 
@@ -368,7 +368,7 @@ int SE05XClass::SHA256(const byte in[], size_t inLen, byte out[], size_t outMaxL
     status = sss_digest_one_go(&_digest_ctx, in, inLen, out, outLen);
     sss_digest_context_free(&_digest_ctx);
     if (status != kStatus_SSS_Success) {
-        LOG_E("sss_digest_one_go Failed!!!");
+        SE05X_PRINT_ERROR("sss_digest_one_go Failed!!!");
         return 0;
     }
 
@@ -392,13 +392,13 @@ int SE05XClass::Sign(int keyId, const byte hash[], size_t hashLen, byte sig[], s
                                          kMode_SSS_Sign);
 
     if(status != kStatus_SSS_Success)  {
-        LOG_E("sss_asymmetric_context_init Failed");
+        SE05X_PRINT_ERROR("sss_asymmetric_context_init Failed");
         return 0;
     }
 
     * sigLen = sigMaxLen;
     if(kStatus_SSS_Success != sss_asymmetric_sign_digest(&ctx_asymm, (uint8_t *)hash, hashLen, (uint8_t *)sig, sigLen)) {
-        LOG_E("sss_asymmetric_sign_digest Failed");
+        SE05X_PRINT_ERROR("sss_asymmetric_sign_digest Failed");
         return 0;
     }
 
@@ -440,12 +440,12 @@ int SE05XClass::Verify(int keyId, const byte hash[], size_t hashLen, const byte 
                                          kMode_SSS_Verify);
 
     if(status != kStatus_SSS_Success)  {
-        LOG_E("sss_asymmetric_context_init Failed");
+        SE05X_PRINT_ERROR("sss_asymmetric_context_init Failed");
         return 0;
     }
 
     if(kStatus_SSS_Success != sss_asymmetric_verify_digest(&ctx_asymm, (uint8_t *)hash, hashLen, (uint8_t *)sig, sigLen)) {
-        LOG_E("sss_asymmetric_verify_digest Failed");
+        SE05X_PRINT_ERROR("sss_asymmetric_verify_digest Failed");
         return 0;
     }
 
@@ -490,7 +490,7 @@ int SE05XClass::readBinaryObject(int objectId, byte data[], size_t dataMaxLen, s
     * length = dataMaxLen;
     status = sss_key_store_get_key(&_boot_ctx.ks, &binObject, data, length, &binSizeBits);
     if(status != kStatus_SSS_Success )  {
-        LOG_E("sss_key_store_get_key Failed");
+        SE05X_PRINT_ERROR("sss_key_store_get_key Failed");
         return 0;
     }
 
@@ -514,7 +514,7 @@ int SE05XClass::writeBinaryObject(int objectId, const byte data[], size_t length
 
     status = sss_key_store_set_key(&_boot_ctx.ks, &binObject, data, length, length * 8, NULL, 0);
     if(status != kStatus_SSS_Success )  {
-        LOG_E("sss_key_store_set_key Failed");
+        SE05X_PRINT_ERROR("sss_key_store_set_key Failed");
         return 0;
     }
 
@@ -553,7 +553,7 @@ int SE05XClass::deleteBinaryObject(int objectId)
 
     status = sss_key_store_erase_key(&_boot_ctx.ks, &binObject);
     if(status != kStatus_SSS_Success )  {
-        LOG_E("sss_key_store_erase_key Failed");
+        SE05X_PRINT_ERROR("sss_key_store_erase_key Failed");
         return 0;
     }
 
@@ -576,12 +576,12 @@ int SE05XClass::getObjectHandle(int objectId, sss_object_t * object)
     sss_status_t status;
 
     if(kStatus_SSS_Success != sss_key_object_init(object, &_boot_ctx.ks)) {
-        LOG_E("sss_key_object_init Failed");
+        SE05X_PRINT_ERROR("sss_key_object_init Failed");
         return 0;
     }
 
     if(kStatus_SSS_Success != sss_key_object_get_handle(object, objectId)) {
-        LOG_E("sss_key_object_get_handle Failed");
+        SE05X_PRINT_ERROR("sss_key_object_get_handle Failed");
         return 0;
     }
 
@@ -597,14 +597,14 @@ int SE05XClass::initObject(size_t objectId, sss_object_t * object, sss_key_part_
     sss_status_t status;
 
     if(kStatus_SSS_Success != sss_key_object_init(object, &_boot_ctx.ks)) {
-        LOG_E("sss_key_object_init Failed");
+        SE05X_PRINT_ERROR("sss_key_object_init Failed");
         return 0;
     }
 
     status = sss_key_object_get_handle(object, objectId);
 
     if(status != kStatus_SSS_Success )  {
-        LOG_E("sss_key_object_get_handle Failed");
+        SE05X_PRINT_ERROR("sss_key_object_get_handle Failed");
         status = sss_key_object_allocate_handle(object,
                                                 objectId,
                                                 objectPart,
@@ -614,7 +614,7 @@ int SE05XClass::initObject(size_t objectId, sss_object_t * object, sss_key_part_
     }
 
     if(status != kStatus_SSS_Success)  {
-        LOG_E("sss_key_object_allocate_handle Failed");
+        SE05X_PRINT_ERROR("sss_key_object_allocate_handle Failed");
         return 0;
     }
 

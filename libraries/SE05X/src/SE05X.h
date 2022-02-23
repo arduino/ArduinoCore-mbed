@@ -26,10 +26,10 @@
 #include "se05x_apis.h"
 #include "se05x_APDU.h"
 
-#if defined SE05X_PRINT_ERROR
-#define LOG_E Serial.println
+#if defined SE05X_PRINT_ERROR_ENABLE
+#define SE05X_PRINT_ERROR Serial.println
 #else
-#define LOG_E
+#define SE05X_PRINT_ERROR
 #endif
 
 class SE05XClass
