@@ -393,7 +393,7 @@ int SE05XClass::ecSign(int slot, const byte message[], byte signature[])
     return 1;
 }
 
-int SE05XClass::Verify(int keyId, const byte hash[], size_t hashLen, byte sig[], size_t sigLen)
+int SE05XClass::Verify(int keyId, const byte hash[], size_t hashLen, const byte sig[], size_t sigLen)
 {
     sss_status_t        status;
     sss_object_t        keyObject;

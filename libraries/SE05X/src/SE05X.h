@@ -57,7 +57,7 @@ public:
     int SHA256(const byte in[], size_t inLen, byte out[], size_t outMaxLen, size_t * outLen);
 
     int Sign(int keyId, const byte hash[], size_t hashLen, byte sig[], size_t maxSigLen, size_t * sigLen);
-    int Verify(int keyId, const byte hash[], size_t hashLen, byte sig[],size_t sigLen);
+    int Verify(int keyId, const byte hash[], size_t hashLen, const byte sig[],size_t sigLen);
 
     int readBinaryObject(int ObjectId, byte data[], size_t dataMaxLen, size_t * length);
     int writeBinaryObject(int ObjectId, const byte data[], size_t length);
