@@ -20,6 +20,9 @@
 #include "SE05X.h"
 
 SE05XClass::SE05XClass()
+: _cipher_type {kSSS_CipherType_EC_NIST_P}
+, _algorithm_type {kAlgorithm_SSS_ECDSA_SHA256}
+, _key_size_bits {256}
 {
 
 }
@@ -126,6 +129,24 @@ void SE05XClass::end()
     se05x_ic_power_off();
 }
 
+int SE05XClass::writeConfiguration(const byte data[])
+{
+    _cipher_type = (sss_cipher_type_t)data[0];
+    _algorithm_type = (sss_algorithm_t)(data[1] << 8 | data[2]);
+    _key_size_bits = (size_t)(data[3] << 8 | data[4]);
+    return 1;
+}
+
+int SE05XClass::readConfiguration(byte data[])
+{
+    data[0] = (byte)_cipher_type;
+    data[1] = (byte)_algorithm_type >> 8;
+    data[2] = (byte)_algorithm_type;
+    data[3] = (byte)_key_size_bits >> 8;
+    data[4] = (byte)_key_size_bits;
+    return 1;
+}
+
 String SE05XClass::serialNumber()
 {
     String result = (char*)NULL;
@@ -195,15 +216,13 @@ int SE05XClass::generatePrivateKey(int keyId, byte pubKeyDer[], size_t pubKeyDer
 {
     sss_status_t status;
     sss_object_t keyObject;
-    size_t       keySizeBits;
     size_t       derSzBits;
 
-    if(!initObject(keyId, &keyObject, kSSS_KeyPart_Pair, kKeyObject_Mode_Persistent, kSSS_CipherType_EC_NIST_P)) {
+    if(!initObject(keyId, &keyObject, kSSS_KeyPart_Pair, kKeyObject_Mode_Persistent, _cipher_type)) {
         return 0;
     }
 
-    keySizeBits = 256;
-    status = sss_key_store_generate_key(&_boot_ctx.ks, &keyObject, keySizeBits, NULL);
+    status = sss_key_store_generate_key(&_boot_ctx.ks, &keyObject, _key_size_bits, NULL);
 
     if (status == kStatus_SSS_Success) {
         derSzBits = pubKeyDerMaxLen * 8;
@@ -224,6 +243,10 @@ int SE05XClass::generatePrivateKey(int slot, byte publicKey[])
     byte publicKeyDer[256];
     size_t publicKeyDerLen;
 
+    if ((_cipher_type != kSSS_CipherType_EC_NIST_P) || (_algorithm_type != kAlgorithm_SSS_ECDSA_SHA256)) {
+        return 0;
+    }
+
     if (!generatePrivateKey(slot, publicKeyDer, sizeof(publicKeyDer), &publicKeyDerLen)) {
         return 0;
     }
@@ -238,7 +261,7 @@ int SE05XClass::generatePublicKey(int keyId, byte pubKeyDer[], size_t pubKeyDerM
     sss_object_t keyObject;
     size_t       derSzBits;
 
-    if(!initObject(keyId, &keyObject, kSSS_KeyPart_Pair, kKeyObject_Mode_Persistent, kSSS_CipherType_EC_NIST_P)) {
+    if(!initObject(keyId, &keyObject, kSSS_KeyPart_Pair, kKeyObject_Mode_Persistent, _cipher_type)) {
         return 0;
     }
 
@@ -259,6 +282,10 @@ int SE05XClass::generatePublicKey(int slot, byte publicKey[])
     byte publicKeyDer[256];
     size_t publicKeyDerLen;
 
+    if ((_cipher_type != kSSS_CipherType_EC_NIST_P) || (_algorithm_type != kAlgorithm_SSS_ECDSA_SHA256)) {
+        return 0;
+    }
+
     if (!generatePublicKey(slot, publicKeyDer, sizeof(publicKeyDer), &publicKeyDerLen)) {
         return 0;
     }
@@ -271,14 +298,12 @@ int SE05XClass::importPublicKey(int keyId, const byte pubKeyDer[], size_t pubKey
 {
     sss_status_t        status;
     sss_object_t        keyObject;
-    size_t              keySizeBits;
 
-    if(!initObject(keyId, &keyObject, kSSS_KeyPart_Public, kKeyObject_Mode_Persistent, kSSS_CipherType_EC_NIST_P)) {
+    if(!initObject(keyId, &keyObject, kSSS_KeyPart_Public, kKeyObject_Mode_Persistent, _cipher_type)) {
         return 0;
     }
 
-    keySizeBits = 256;
-    status = sss_key_store_set_key(&_boot_ctx.ks, &keyObject, pubKeyDer, pubKeyDerLen, keySizeBits, NULL, 0);
+    status = sss_key_store_set_key(&_boot_ctx.ks, &keyObject, pubKeyDer, pubKeyDerLen, _key_size_bits, NULL, 0);
 
     if(status != kStatus_SSS_Success )  {
         LOG_E("sss_key_store_set_key Failed");
@@ -356,14 +381,14 @@ int SE05XClass::Sign(int keyId, const byte hash[], size_t hashLen, byte sig[], s
     sss_object_t        keyObject;
     sss_asymmetric_t    ctx_asymm;
 
-    if(!initObject(keyId, &keyObject, kSSS_KeyPart_Private, kKeyObject_Mode_Persistent, kSSS_CipherType_EC_NIST_P)) {
+    if(!initObject(keyId, &keyObject, kSSS_KeyPart_Private, kKeyObject_Mode_Persistent, _cipher_type)) {
         return 0;
     }
 
     status = sss_asymmetric_context_init(&ctx_asymm,
                                          &_boot_ctx.session,
                                          &keyObject,
-                                         kAlgorithm_SSS_ECDSA_SHA256,
+                                         _algorithm_type,
                                          kMode_SSS_Sign);
 
     if(status != kStatus_SSS_Success)  {
@@ -384,6 +409,11 @@ int SE05XClass::ecSign(int slot, const byte message[], byte signature[])
 {
     byte signatureDer[256];
     size_t signatureDerLen;
+
+    if ((_cipher_type != kSSS_CipherType_EC_NIST_P) || (_algorithm_type != kAlgorithm_SSS_ECDSA_SHA256)) {
+        return 0;
+    }
+
     if (!Sign(slot, message, 32, signatureDer, sizeof(signatureDer), &signatureDerLen)) {
         return 0;
     }
@@ -399,14 +429,14 @@ int SE05XClass::Verify(int keyId, const byte hash[], size_t hashLen, const byte 
     sss_object_t        keyObject;
     sss_asymmetric_t    ctx_asymm;
 
-    if(!initObject(keyId, &keyObject, kSSS_KeyPart_Public, kKeyObject_Mode_Persistent, kSSS_CipherType_EC_NIST_P)) {
+    if(!initObject(keyId, &keyObject, kSSS_KeyPart_Public, kKeyObject_Mode_Persistent, _cipher_type)) {
         return 0;
     }
 
     status = sss_asymmetric_context_init(&ctx_asymm,
                                          &_boot_ctx.session,
                                          &keyObject,
-                                         kAlgorithm_SSS_ECDSA_SHA256,
+                                         _algorithm_type,
                                          kMode_SSS_Verify);
 
     if(status != kStatus_SSS_Success)  {
@@ -427,6 +457,10 @@ int SE05XClass::ecdsaVerify(const byte message[], const byte signature[], const 
     byte pubKeyDER[91];
     byte signatureDER[70];
     int  result;
+
+    if ((_cipher_type != kSSS_CipherType_EC_NIST_P) || (_algorithm_type != kAlgorithm_SSS_ECDSA_SHA256)) {
+        return 0;
+    }
 
     setECKeyXyVauesInDER(pubkey, pubKeyDER);
     if (!importPublicKey(0xA5A5, pubKeyDER, sizeof(pubKeyDER))) {

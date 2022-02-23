@@ -76,8 +76,8 @@ public:
     int readSlot(int slot, byte data[], int length);
     int writeSlot(int slot, const byte data[], int length);
     inline int locked() { return 1; }
-    inline int writeConfiguration(const byte data[]) { return 1; }
-    inline int readConfiguration(byte data[]) { return 1; }
+    inline int writeConfiguration(const byte data[]);
+    inline int readConfiguration(byte data[]);
     inline int lock() { return 1; }
 
 private:
@@ -86,6 +86,9 @@ private:
 private:
     ex_sss_boot_ctx_t _boot_ctx;
     sss_digest_t _digest_ctx;
+    sss_cipher_type_t _cipher_type;
+    sss_algorithm_t _algorithm_type;
+    size_t _key_size_bits;
 };
 
 extern SE05XClass SE05X;
