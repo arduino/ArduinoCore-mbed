@@ -46,15 +46,21 @@ public:
   }
 
   void setEccSlot(int KeySlot, const byte cert[], int certLen);
+  void appendCustomCACert(const char ca_cert[]);
 
 private:
   const byte* _client_cert;
+  const char* _ca_cert;
   int _client_cert_len;
   int _keySlot;
   sss_object_t _keyObject;
 
   int setRootCAClientCertKey() {
     if( NSAPI_ERROR_OK != ((TLSSocket*)sock)->set_root_ca_cert_path("/wlan/")) {
+      return 0;
+    }
+
+    if( NSAPI_ERROR_OK != ((TLSSocket*)sock)->append_root_ca_cert(_ca_cert)) {
       return 0;
     }
 
