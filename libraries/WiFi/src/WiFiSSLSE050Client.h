@@ -22,27 +22,19 @@
 
 
 #include "SE05X.h"
-#include "WiFiClient.h"
+#include "WiFiSSLClient.h"
 
 extern const char CA_CERTIFICATES[];
 
 namespace arduino {
 
-class WiFiSSLSE050Client : public arduino::WiFiClient {
+class WiFiSSLSE050Client : public arduino::WiFiSSLClient {
 
 public:
   WiFiSSLSE050Client();
   virtual ~WiFiSSLSE050Client() {
     stop();
   }
-
-  int connect(IPAddress ip, uint16_t port) {
-    return connectSSL(ip, port);
-  }
-  int connect(const char* host, uint16_t port) {
-    return connectSSL(host, port);
-  }
-
   void setEccSlot(int KeySlot, const byte cert[], int certLen);
   void appendCustomCACert(const char ca_cert[]);
 
