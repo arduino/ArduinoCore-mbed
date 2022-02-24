@@ -17,9 +17,6 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#include <AIoTC_Config.h>
-#ifdef BOARD_HAS_SE050
-
 #include "WiFiSSLSE050Client.h"
 
 arduino::WiFiSSLSE050Client::WiFiSSLSE050Client() {
@@ -37,5 +34,3 @@ void arduino::WiFiSSLSE050Client::appendCustomCACert(const char ca_cert[]) {
 
   _ca_cert = ca_cert;
 }
-
-#endif /* BOARD_HAS_SE050 */

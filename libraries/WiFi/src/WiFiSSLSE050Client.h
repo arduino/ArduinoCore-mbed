@@ -20,8 +20,6 @@
 #ifndef WIFISSLSE050CLIENT_H
 #define WIFISSLSE050CLIENT_H
 
-#include <AIoTC_Config.h>
-#ifdef BOARD_HAS_SE050
 
 #include "SE05X.h"
 #include "WiFiClient.h"
@@ -77,7 +75,5 @@ private:
 };
 
 }
-
-#endif
 
 #endif /* WIFISSLSE050CLIENT_H */
