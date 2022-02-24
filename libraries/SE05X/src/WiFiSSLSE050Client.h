@@ -36,7 +36,6 @@ public:
     stop();
   }
   void setEccSlot(int KeySlot, const byte cert[], int certLen);
-  void appendCustomCACert(const char ca_cert[]);
 
 private:
   const byte* _client_cert;
@@ -50,7 +49,7 @@ private:
       return 0;
     }
 
-    if( NSAPI_ERROR_OK != ((TLSSocket*)sock)->append_root_ca_cert(_ca_cert)) {
+    if( NSAPI_ERROR_OK != ((TLSSocket*)sock)->append_root_ca_cert(_ca_cert_custom)) {
       return 0;
     }
 

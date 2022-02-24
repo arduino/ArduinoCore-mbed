@@ -29,8 +29,3 @@ void arduino::WiFiSSLSE050Client::setEccSlot(int KeySlot, const byte cert[], int
   _client_cert_len = certLen;
   _client_cert = cert;
 }
-
-void arduino::WiFiSSLSE050Client::appendCustomCACert(const char ca_cert[]) {
-
-  _ca_cert = ca_cert;
-}
