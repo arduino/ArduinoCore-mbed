@@ -21,6 +21,9 @@
 #define MBEDSSLCLIENT_H
 
 #include "MbedClient.h"
+#include <FATFileSystem.h>
+#include <MBRBlockDevice.h>
+#include <QSPIFBlockDevice.h>
 
 extern const char CA_CERTIFICATES[];
 
@@ -44,9 +47,38 @@ public:
     _disableSNI = statusSNI;
   }
 
+  void appendCustomCACert(const char* ca_cert) {
+    _ca_cert_custom = ca_cert;
+  }
+
+protected:
+  const char* _ca_cert_custom = NULL;
+
 private:
   int setRootCA() {
-    return ((TLSSocket*)sock)->set_root_ca_cert_path("/wlan/");
+    mbed::BlockDevice* root = mbed::BlockDevice::get_default_instance();
+    int err = root->init();
+    if( err != QSPIF_BD_ERROR_OK) {
+      return err;
+    }
+
+    mbed::MBRBlockDevice wifi_data(root, 1);
+    mbed::FATFileSystem wifi("wlan");
+
+    err = wifi.mount(&wifi_data);
+    if (err) {
+      return err;
+    }
+
+    err = ((TLSSocket*)sock)->set_root_ca_cert_path("/wlan/");
+    if( err != NSAPI_ERROR_OK) {
+      return err;
+    }
+
+    if(_ca_cert_custom != NULL) {
+      err = ((TLSSocket*)sock)->append_root_ca_cert(_ca_cert_custom);
+    }
+    return err;
   }
 
   bool _disableSNI;
