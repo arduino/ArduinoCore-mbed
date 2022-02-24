@@ -20,36 +20,17 @@
 #ifndef WIFISSLCLIENT_H
 #define WIFISSLCLIENT_H
 
-#include "WiFiClient.h"
+#include "WiFi.h"
+#include "MbedSSLClient.h"
 
 extern const char CA_CERTIFICATES[];
 
 namespace arduino {
 
-class WiFiSSLClient : public arduino::WiFiClient {
-
-public:
-  WiFiSSLClient();
-  virtual ~WiFiSSLClient() {
-    stop();
+class WiFiSSLClient : public arduino::MbedSSLClient {
+  NetworkInterface *getNetwork() {
+    return WiFi.getNetwork();
   }
-
-  int connect(IPAddress ip, uint16_t port) {
-    return connectSSL(ip, port);
-  }
-  int connect(const char* host, uint16_t port) {
-    return connectSSL(host, port, _disableSNI);
-  }
-    void disableSNI(bool statusSNI) {
-    _disableSNI = statusSNI;
-  }
-
-private:
-  int setRootCA() {
-    return ((TLSSocket*)sock)->set_root_ca_cert_path("/wlan/");
-  }
-
-  bool _disableSNI;
 };
 
 }
