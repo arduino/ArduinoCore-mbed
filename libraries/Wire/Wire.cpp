@@ -189,3 +189,6 @@ arduino::MbedI2C Wire(I2C_SDA, I2C_SCL);
 #if WIRE_HOWMANY > 1
 arduino::MbedI2C Wire1(I2C_SDA1, I2C_SCL1);
 #endif
+#if WIRE_HOWMANY > 2
+arduino::MbedI2C Wire2(I2C_SDA2, I2C_SCL2);
+#endif

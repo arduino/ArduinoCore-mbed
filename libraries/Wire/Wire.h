@@ -95,5 +95,8 @@ extern arduino::MbedI2C Wire;
 #if WIRE_HOWMANY > 1
 extern arduino::MbedI2C Wire1;
 #endif
+#if WIRE_HOWMANY > 2
+extern arduino::MbedI2C Wire2;
+#endif
 
 typedef arduino::MbedI2C TwoWire;
