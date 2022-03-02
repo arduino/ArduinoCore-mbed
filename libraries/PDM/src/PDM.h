@@ -24,6 +24,12 @@
 
 #include "utility/PDMDoubleBuffer.h"
 
+#ifdef ARDUINO_NICLA_VISION
+#define IF_NOT_IMPLEMENTED __attribute__ ((error("setGain() not implemented for this board")))
+#else
+#define IF_NOT_IMPLEMENTED
+#endif
+
 class PDMClass
 {
 public:
@@ -40,7 +46,7 @@ public:
 
   //PORTENTA_H7 min -12 max 51
   //NANO 33 BLE SENSe min 0 max 80
-  void setGain(int gain);
+  void IF_NOT_IMPLEMENTED setGain(int gain);
   void setBufferSize(int bufferSize);
   size_t getBufferSize();
 
