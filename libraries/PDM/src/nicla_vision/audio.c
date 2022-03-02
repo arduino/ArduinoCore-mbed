@@ -292,7 +292,7 @@ static int DFSDM_Init(void)
     hdfsdm1_channel2.Init.Awd.FilterOrder          = DFSDM_CHANNEL_FASTSINC_ORDER;
     hdfsdm1_channel2.Init.Awd.Oversampling         = 125; /* 2MHz/125 = 16kHz */
     hdfsdm1_channel2.Init.Offset                   = 0;
-    hdfsdm1_channel2.Init.RightBitShift            = 0x02;
+    hdfsdm1_channel2.Init.RightBitShift            = 0;
     if(HAL_OK != HAL_DFSDM_ChannelInit(&hdfsdm1_channel2))
     {
         return 0;
