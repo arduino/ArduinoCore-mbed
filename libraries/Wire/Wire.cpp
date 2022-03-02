@@ -69,16 +69,9 @@ void arduino::MbedI2C::beginTransmission(uint8_t address) {
 }
 
 uint8_t arduino::MbedI2C::endTransmission(bool stopBit) {
-	#ifndef TARGET_PORTENTA_H7
-	if (usedTxBuffer == 0) {
-		// we are scanning, return 0 if the addresed device responds with an ACK
-		char buf[1];
-		int ret = master->read(_address, buf, 1, !stopBit);
-		return ret;
-	}
-	#endif
 	if (master->write(_address, (const char *) txBuffer, usedTxBuffer, !stopBit) == 0) return 0;
-	return 2;
+	if (usedTxBuffer == 0) return 2;   // received NAK on transmit of address (without data)
+	return 3;   // received NAK on transmit of data 
 }
 
 uint8_t arduino::MbedI2C::endTransmission(void) {
