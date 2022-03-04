@@ -60,14 +60,18 @@ void AUDIO_SAI_DMA_IRQHandler(void)
 void HAL_SAI_RxHalfCpltCallback(SAI_HandleTypeDef *hsai)
 {
     xfer_status |= DMA_XFER_HALF;
+#ifdef CORE_CM7
     SCB_InvalidateDCache_by_Addr((uint32_t *)(&PDM_BUFFER[0]), PDM_BUFFER_SIZE / 2);
+#endif
     PDMIrqHandler(true);
 }
 
 void HAL_SAI_RxCpltCallback(SAI_HandleTypeDef *hsai)
 {
     xfer_status |= DMA_XFER_FULL;
+#ifdef CORE_CM7
     SCB_InvalidateDCache_by_Addr((uint32_t *)(&PDM_BUFFER[PDM_BUFFER_SIZE / 2]), PDM_BUFFER_SIZE / 2);
+#endif
     PDMIrqHandler(false);
 }
 
