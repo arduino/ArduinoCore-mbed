@@ -58,7 +58,7 @@ int PDMClass::begin(int channels, int sampleRate) {
   _samplerate = sampleRate;
 
   if (_gain == -1) {
-    _gain = 24;
+    _gain = 3;
   }
 
   g_pcmbuf = (uint16_t*)_doubleBuffer.data();
@@ -104,9 +104,7 @@ void PDMClass::onReceive(void(*function)(void))
 void PDMClass::setGain(int gain)
 {
   _gain = gain;
-  if(_init == 1) {
-    py_audio_gain_set(gain);
-  }
+  py_audio_gain_set(gain);
 }
 
 void PDMClass::setBufferSize(int bufferSize)

@@ -35,6 +35,8 @@ static uint32_t HAL_RCC_DFSDM1_CLK_ENABLED=0;
 
 static uint32_t DFSDM1_Init = 0;
 
+static int attenuation = 5;
+
 ALIGN_32BYTES(int32_t                      RecBuff[PDM_BUFFER_SIZE]);
 
 #define SaturaLH(N, L, H) (((N)<(L))?(L):(((N)>(H))?(H):(N)))
@@ -391,6 +393,7 @@ int py_audio_init(size_t channels, uint32_t frequency)
 
 void py_audio_gain_set(int gain_db)
 {
+  attenuation = 8 - gain_db;
 }
 
 void py_audio_deinit()
@@ -414,7 +417,7 @@ void audio_pendsv_callback(void)
         xfer_status &= ~(DMA_XFER_HALF);
         
         for (int i=0; i<PDM_BUFFER_SIZE/2; i++) {
-            ((int16_t*)g_pcmbuf)[i]     = SaturaLH((RecBuff[i] >> 8), -32768, 32767);
+            ((int16_t*)g_pcmbuf)[i]     = SaturaLH((RecBuff[i] >> attenuation), -32768, 32767);
         }
     } else if ((xfer_status & DMA_XFER_FULL)) { // Check for transfer complete.
         // Clear buffer state.
@@ -422,7 +425,7 @@ void audio_pendsv_callback(void)
         
         for(int i = 0; i < PDM_BUFFER_SIZE/2; i++)
         {
-            ((int16_t*)g_pcmbuf)[i]     = SaturaLH((RecBuff[PDM_BUFFER_SIZE/2 + i] >> 8), -32768, 32767);
+            ((int16_t*)g_pcmbuf)[i]     = SaturaLH((RecBuff[PDM_BUFFER_SIZE/2 + i] >> attenuation), -32768, 32767);
         }
     }
 }
