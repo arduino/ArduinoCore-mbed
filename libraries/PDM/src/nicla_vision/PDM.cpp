@@ -103,6 +103,10 @@ void PDMClass::onReceive(void(*function)(void))
 
 void PDMClass::setGain(int gain)
 {
+  _gain = gain;
+  if(_init == 1) {
+    py_audio_gain_set(gain);
+  }
 }
 
 void PDMClass::setBufferSize(int bufferSize)
