@@ -43,6 +43,9 @@
             },
             {
               "name": "Nicla Sense ME"
+            },
+            {
+              "name": "Arduino Nicla Vision"
             }
           ],
           "toolsDependencies": [
@@ -264,6 +267,9 @@
           "boards": [
             {
               "name": "Nicla Sense ME"
+            },
+            {
+              "name": "Nicla Vision"
             }
           ],
           "toolsDependencies": [
