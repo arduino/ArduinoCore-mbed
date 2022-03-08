@@ -101,9 +101,8 @@ jobs:
               fqbn: arduino:mbed:nicla_vision
             additional-sketch-paths: |
               - libraries/PDM
-              - libraries/Camera/examples
+              - libraries/Camera/examples/CameraCaptureRawBytes
               - libraries/STM32H747_System
-              - libraries/RPC
               - libraries/ThreadDebug
               - libraries/USBHID
               - libraries/USBHOST
