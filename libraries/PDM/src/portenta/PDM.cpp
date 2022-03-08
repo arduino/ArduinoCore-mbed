@@ -20,7 +20,7 @@
   Boston, MA  02111-1307  USA
 */
 
-#ifdef ARDUINO_PORTENTA_H7_M7
+#ifdef TARGET_PORTENTA_H7
 
 #include "PDM.h"
 #include "mbed.h"
