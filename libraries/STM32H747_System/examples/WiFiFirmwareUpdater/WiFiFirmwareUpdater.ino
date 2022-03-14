@@ -10,9 +10,7 @@
 
 QSPIFBlockDevice root(QSPI_SO0, QSPI_SO1, QSPI_SO2, QSPI_SO3,  QSPI_SCK, QSPI_CS, QSPIF_POLARITY_MODE_1, 40000000);
 mbed::MBRBlockDevice wifi_data(&root, 1);
-mbed::MBRBlockDevice ota_data(&root, 2);
 mbed::FATFileSystem wifi_data_fs("wlan");
-mbed::FATFileSystem ota_data_fs("fs");
 
 long getFileSize(FILE *fp) {
     fseek(fp, 0, SEEK_END);
@@ -22,13 +20,26 @@ long getFileSize(FILE *fp) {
     return size;
 }
 
+void printProgress(uint32_t offset, uint32_t size, uint32_t threshold, bool reset) {
+  static int percent_done = 0;
+  if (reset == true) {
+    percent_done = 0;
+    Serial.println("Flashed " + String(percent_done) + "%");
+  } else {
+    uint32_t percent_done_new = offset * 100 / size;
+    if (percent_done_new >= percent_done + threshold) {
+      percent_done = percent_done_new;
+      Serial.println("Flashed " + String(percent_done) + "%");
+    }
+  }
+}
+
 void setup() {
 
   Serial.begin(115200);
   while (!Serial);
 
   mbed::MBRBlockDevice::partition(&root, 1, 0x0B, 0, 1024 * 1024);
-  mbed::MBRBlockDevice::partition(&root, 2, 0x0B, 1024 * 1024, 14 * 1024 * 1024);
   // use space from 15.5MB to 16 MB for another fw, memory mapped
 
   int err =  wifi_data_fs.mount(&wifi_data);
@@ -40,14 +51,6 @@ void setup() {
                   " or was overwritten with another firmware.\n");
     Serial.println("Formatting the filsystem to install the firmware and certificates...\n");
     err = wifi_data_fs.reformat(&wifi_data);
-  }
-
-  err =  ota_data_fs.mount(&ota_data);
-  if (err) {
-    // Reformat if we can't mount the filesystem
-    // this should only happen on the first boot
-    Serial.println("No filesystem for OTA firmware was found, creating");
-    err = ota_data_fs.reformat(&ota_data);
   }
 
   DIR *dir;
@@ -81,18 +84,65 @@ void setup() {
   extern const unsigned char wifi_firmware_image_data[];
   extern const resource_hnd_t wifi_firmware_image;
   FILE* fp = fopen("/wlan/4343WA1.BIN", "wb");
-  int ret = fwrite(wifi_firmware_image_data, 421098, 1, fp);
+  const int file_size = 421098;
+  int chunck_size = 1024;
+  int byte_count = 0;
+
+  Serial.println("Flashing /wlan/4343WA1.BIN file");
+  printProgress(byte_count, file_size, 10, true);
+  while (byte_count < file_size) {
+    if(byte_count + chunck_size > file_size)
+      chunck_size = file_size - byte_count;
+    int ret = fwrite(&wifi_firmware_image_data[byte_count], chunck_size, 1, fp);
+    if (ret != 1) {
+      Serial.println("Error writing firmware data");
+      break;
+    }
+    byte_count += chunck_size;
+    printProgress(byte_count, file_size, 10, false);
+  }
   fclose(fp);
 
-  root.program(wifi_firmware_image_data, 15 * 1024 * 1024 + 1024 * 512, 421098);
+  chunck_size = 1024;
+  byte_count = 0;
+  const uint32_t offset = 15 * 1024 * 1024 + 1024 * 512;
 
+  Serial.println("Flashing memory mapped firmware");
+  printProgress(byte_count, file_size, 10, true);
+  while (byte_count < file_size) {
+    if(byte_count + chunck_size > file_size)
+      chunck_size = file_size - byte_count;
+    int ret = root.program(wifi_firmware_image_data, offset + byte_count, chunck_size);
+    if (ret != 0) {
+      Serial.println("Error writing firmware data");
+      break;
+    }
+    byte_count += chunck_size;
+    printProgress(byte_count, file_size, 10, false);
+  }
+
+  chunck_size = 128;
+  byte_count = 0;
   fp = fopen("/wlan/cacert.pem", "wb");
-  ret = fwrite(cacert_pem, cacert_pem_len, 1, fp);
+
+  Serial.println("Flashing certificates");
+  printProgress(byte_count, cacert_pem_len, 10, true);
+  while (byte_count < cacert_pem_len) {
+    if(byte_count + chunck_size > cacert_pem_len)
+      chunck_size = cacert_pem_len - byte_count;
+    int ret = fwrite(&cacert_pem[byte_count], chunck_size, 1 ,fp);
+    if (ret != 1) {
+      Serial.println("Error writing certificates");
+      break;
+    }
+    byte_count += chunck_size;
+    printProgress(byte_count, cacert_pem_len, 10, false);
+  }
   fclose(fp);
 
   fp = fopen("/wlan/cacert.pem", "rb");
   char buffer[128];
-  ret = fread(buffer, 1, 128, fp);
+  int ret = fread(buffer, 1, 128, fp);
   Serial.write(buffer, ret);
   while (ret == 128) {
     ret = fread(buffer, 1, 128, fp);
