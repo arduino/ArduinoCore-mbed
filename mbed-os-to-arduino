@@ -141,6 +141,12 @@ generate_defines () {
 	echo -n "Generating defines..."
 	cut -f2 -d":" < "$BOARDNAME".macros.txt | tr ' ' '\n'  | sed 's#\"#\\"#g' | sort > "$ARDUINOVARIANT"/defines.txt
 	echo "-DMBED_NO_GLOBAL_USING_DIRECTIVE=1" >> "$ARDUINOVARIANT"/defines.txt
+	MAJOR=$(echo $VERSION| cut -d'.' -f 1)
+	MINOR=$(echo $VERSION| cut -d'.' -f 2)
+	PATCH=$(echo $VERSION| cut -d'.' -f 3)
+	echo "-DCORE_MAJOR=$MAJOR" >> "$ARDUINOVARIANT"/defines.txt
+	echo "-DCORE_MINOR=$MINOR" >> "$ARDUINOVARIANT"/defines.txt
+	echo "-DCORE_PATCH=$PATCH" >> "$ARDUINOVARIANT"/defines.txt
 	if [ -f "$ARDUINOVARIANT"/variant.cpp ]; then
 		echo '-DUSE_ARDUINO_PINOUT' >> "$ARDUINOVARIANT"/defines.txt
 	fi
