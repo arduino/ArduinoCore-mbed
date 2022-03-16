@@ -1,6 +1,8 @@
 #include "FlashIAP.h"
 #if defined(ARDUINO_PORTENTA_H7_M7)
 #include "portenta_bootloader.h"
+#include "portenta_lite_bootloader.h"
+#include "portenta_lite_connected_bootloader.h"
 #elif defined(ARDUINO_NICLA_VISION)
 #include "nicla_vision_bootloader.h"
 #endif
@@ -14,6 +16,9 @@ mbed::FlashIAP flash;
 
 uint32_t bootloader_data_offset = 0x1F000;
 uint8_t* bootloader_data = (uint8_t*)(BOOTLOADER_ADDR + bootloader_data_offset);
+
+bool video_available = false;
+bool wifi_available = false;
 
 void setup() {  
   Serial.begin(115200);
@@ -32,6 +37,9 @@ void setup() {
   Serial.println("QSPI size: " + String(bootloader_data[7]) + " MB");
   Serial.println("Has Video output: " + String(bootloader_data[8] == 1 ? "Yes" : "No"));
   Serial.println("Has Crypto chip: " + String(bootloader_data[9] == 1 ? "Yes" : "No"));
+
+  video_available = bootloader_data[8];
+  wifi_available = bootloader_data[5];
 
   if (availableBootloaderVersion > currentBootloaderVersion) {
     Serial.print("\nA new bootloader version is available: v" + String(availableBootloaderVersion));
@@ -92,6 +100,15 @@ String getClockSource(uint8_t flag) {
 
 void applyUpdate(uint32_t address) {
   long len = bootloader_mbed_bin_len;
+#if defined(ARDUINO_PORTENTA_H7_M7)
+  if (!video_available) {
+    if (wifi_available) {
+      len = bootloader_mbed_lite_connected_bin_len;
+    } else {
+      len = bootloader_mbed_lite_bin_len;
+    }
+  }
+#endif
 
   flash.init();
 
@@ -116,7 +133,19 @@ void applyUpdate(uint32_t address) {
     }
 
     // Program page
+#if defined(ARDUINO_PORTENTA_H7_M7)
+  if (video_available) {
     flash.program(&bootloader_mbed_bin[page_size * pages_flashed], addr, page_size);
+  } else {
+    if (wifi_available) {
+      flash.program(&bootloader_mbed_lite_connected_bin[page_size * pages_flashed], addr, page_size);
+    } else {
+      flash.program(&bootloader_mbed_lite_bin[page_size * pages_flashed], addr, page_size);
+    }
+  }
+#else
+  flash.program(&bootloader_mbed_bin[page_size * pages_flashed], addr, page_size);
+#endif
 
     addr += page_size;
     if (addr >= next_sector) {
