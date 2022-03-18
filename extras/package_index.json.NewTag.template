@@ -204,6 +204,11 @@
               "packager": "arduino",
               "version": "0.10.0-arduino1",
               "name": "dfu-util"
+            },
+            {
+              "packager": "arduino",
+              "version": "1.8.0_Arduino",
+              "name": "imgtool"
             }
           ]
         },
