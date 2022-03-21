@@ -260,6 +260,7 @@ static const uint16_t himax_full_regs[][2] = {
     {LINE_LEN_PCK_H,        (HIMAX_LINE_LEN_PCK_FULL>>8)},
     {LINE_LEN_PCK_L,        (HIMAX_LINE_LEN_PCK_FULL&0xFF)},
     {GRP_PARAM_HOLD,        0x01},
+    {0x0000,                0x00}, // EOF
 };
 
 static const uint16_t himax_qvga_regs[][2] = {
