@@ -97,16 +97,21 @@ void setup() {
   }
 
   if (currentBootloaderIdentifier == availableBootloaderIdentifier) {
-    if (availableBootloaderVersion > currentBootloaderVersion) {
-      Serial.print("\nA new bootloader version is available: v" + String(availableBootloaderVersion));
-      Serial.println(" (Your version: v" + String(currentBootloaderVersion) + ")");
+    if (bootloader_data[0] != 0xA0) {
+      Serial.println("\nA new bootloader version (v" + String(availableBootloaderVersion) + ") is available.");
       Serial.println("Do you want to update the bootloader? Y/[n]");
-    } else if (availableBootloaderVersion < currentBootloaderVersion) {
-      Serial.println("\nA newer bootloader version is already installed: v" + String(currentBootloaderVersion));
-      Serial.println("Do you want to downgrade the bootloader to v" + String(availableBootloaderVersion) + "? Y/[n]");
     } else {
-      Serial.println("\nThe latest version of the bootloader is already installed (v" + String(currentBootloaderVersion) + ").");
-      Serial.println("Do you want to update the bootloader anyway? Y/[n]");
+      if (availableBootloaderVersion > currentBootloaderVersion) {
+        Serial.print("\nA new bootloader version is available: v" + String(availableBootloaderVersion));
+        Serial.println(" (Your version: v" + String(currentBootloaderVersion) + ")");
+        Serial.println("Do you want to update the bootloader? Y/[n]");
+      } else if (availableBootloaderVersion < currentBootloaderVersion) {
+        Serial.println("\nA newer bootloader version is already installed: v" + String(currentBootloaderVersion));
+        Serial.println("Do you want to downgrade the bootloader to v" + String(availableBootloaderVersion) + "? Y/[n]");
+      } else {
+        Serial.println("\nThe latest version of the bootloader is already installed (v" + String(currentBootloaderVersion) + ").");
+        Serial.println("Do you want to update the bootloader anyway? Y/[n]");
+      }
     }
   } else {
     Serial.println("\nA different bootloader type is available: v" + String(availableBootloaderVersion));
@@ -125,6 +130,7 @@ void setup() {
   } else {
     Serial.println("It's now safe to reboot or disconnect your board.");
   }
+
 }
 
 String getUSBSpeed(uint8_t flag) {
