@@ -1,0 +1,225 @@
+From 5eb7ccf560f91c68025fbb28709ae7f71cf7406e Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Thu, 26 Aug 2021 15:40:48 +0200
+Subject: [PATCH 145/149] Optimize HAL_RCCEx_PeriphCLKConfig using only HAL
+ enabled modules
+
+---
+ .../stm32h7xx_hal_rcc_ex.c                    | 42 +++++++++++++------
+ 1 file changed, 30 insertions(+), 12 deletions(-)
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/STM32Cube_FW/STM32H7xx_HAL_Driver/stm32h7xx_hal_rcc_ex.c b/targets/TARGET_STM/TARGET_STM32H7/STM32Cube_FW/STM32H7xx_HAL_Driver/stm32h7xx_hal_rcc_ex.c
+index afde46b3b8..c349750263 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/STM32Cube_FW/STM32H7xx_HAL_Driver/stm32h7xx_hal_rcc_ex.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/STM32Cube_FW/STM32H7xx_HAL_Driver/stm32h7xx_hal_rcc_ex.c
+@@ -111,8 +111,8 @@ HAL_StatusTypeDef HAL_RCCEx_PeriphCLKConfig(RCC_PeriphCLKInitTypeDef  *PeriphClk
+   HAL_StatusTypeDef ret = HAL_OK;      /* Intermediate status */
+   HAL_StatusTypeDef status = HAL_OK;   /* Final status */
+ 
++#if defined(HAL_SPDIFRX_MODULE_ENABLED)
+   /*---------------------------- SPDIFRX configuration -------------------------------*/
+-
+   if(((PeriphClkInit->PeriphClockSelection) & RCC_PERIPHCLK_SPDIFRX) == RCC_PERIPHCLK_SPDIFRX)
+   {
+ 
+@@ -159,7 +159,9 @@ HAL_StatusTypeDef HAL_RCCEx_PeriphCLKConfig(RCC_PeriphCLKInitTypeDef  *PeriphClk
+       status = ret;
+     }
+   }
++#endif
+ 
++#if defined(HAL_SAI_MODULE_ENABLED)
+   /*---------------------------- SAI1 configuration -------------------------------*/
+   if(((PeriphClkInit->PeriphClockSelection) & RCC_PERIPHCLK_SAI1) == RCC_PERIPHCLK_SAI1)
+   {
+@@ -211,8 +213,9 @@ HAL_StatusTypeDef HAL_RCCEx_PeriphCLKConfig(RCC_PeriphCLKInitTypeDef  *PeriphClk
+       status = ret;
+     }
+   }
++#endif
+ 
+-#if defined(SAI3)
++#if defined(SAI3) && defined(HAL_SAI_MODULE_ENABLED)
+   /*---------------------------- SAI2/3 configuration -------------------------------*/
+   if(((PeriphClkInit->PeriphClockSelection) & RCC_PERIPHCLK_SAI23) == RCC_PERIPHCLK_SAI23)
+   {
+@@ -267,7 +270,7 @@ HAL_StatusTypeDef HAL_RCCEx_PeriphCLKConfig(RCC_PeriphCLKInitTypeDef  *PeriphClk
+ 
+ #endif /* SAI3 */
+ 
+-#if defined(RCC_CDCCIP1R_SAI2ASEL)
++#if defined(RCC_CDCCIP1R_SAI2ASEL) && defined(HAL_SAI_MODULE_ENABLED)
+   /*---------------------------- SAI2A configuration -------------------------------*/
+   if(((PeriphClkInit->PeriphClockSelection) & RCC_PERIPHCLK_SAI2A) == RCC_PERIPHCLK_SAI2A)
+   {
+@@ -326,8 +329,7 @@ HAL_StatusTypeDef HAL_RCCEx_PeriphCLKConfig(RCC_PeriphCLKInitTypeDef  *PeriphClk
+   }
+ #endif  /*SAI2A*/
+ 
+-#if defined(RCC_CDCCIP1R_SAI2BSEL)
+-
++#if defined(RCC_CDCCIP1R_SAI2BSEL) && defined(HAL_SAI_MODULE_ENABLED)
+   /*---------------------------- SAI2B configuration -------------------------------*/
+   if(((PeriphClkInit->PeriphClockSelection) & RCC_PERIPHCLK_SAI2B) == RCC_PERIPHCLK_SAI2B)
+   {
+@@ -386,7 +388,7 @@ HAL_StatusTypeDef HAL_RCCEx_PeriphCLKConfig(RCC_PeriphCLKInitTypeDef  *PeriphClk
+   }
+ #endif  /*SAI2B*/
+ 
+-#if defined(SAI4)
++#if defined(SAI4) && defined(HAL_SAI_MODULE_ENABLED)
+   /*---------------------------- SAI4A configuration -------------------------------*/
+   if(((PeriphClkInit->PeriphClockSelection) & RCC_PERIPHCLK_SAI4A) == RCC_PERIPHCLK_SAI4A)
+   {
+@@ -421,7 +423,7 @@ HAL_StatusTypeDef HAL_RCCEx_PeriphCLKConfig(RCC_PeriphCLKInitTypeDef  *PeriphClk
+       /* HSI, HSE, or CSI oscillator is used as source of SAI2 clock */
+       /* SAI1 clock source configuration done later after clock selection check */
+       break;
+- 
++
+ #if defined(RCC_VER_3_0)
+     case RCC_SAI4ACLKSOURCE_SPDIF:
+       /* SPDIF clock is used as source of SAI4A clock */
+@@ -505,7 +507,7 @@ HAL_StatusTypeDef HAL_RCCEx_PeriphCLKConfig(RCC_PeriphCLKInitTypeDef  *PeriphClk
+   }
+ #endif  /*SAI4*/
+ 
+-#if defined(QUADSPI)
++#if defined(QUADSPI) && defined(HAL_QSPI_MODULE_ENABLED)
+   /*---------------------------- QSPI configuration -------------------------------*/
+   if(((PeriphClkInit->PeriphClockSelection) & RCC_PERIPHCLK_QSPI) == RCC_PERIPHCLK_QSPI)
+   {
+@@ -601,6 +603,7 @@ HAL_StatusTypeDef HAL_RCCEx_PeriphCLKConfig(RCC_PeriphCLKInitTypeDef  *PeriphClk
+   }
+ #endif  /*OCTOSPI*/
+ 
++#if defined(HAL_SPI_MODULE_ENABLED)
+   /*---------------------------- SPI1/2/3 configuration -------------------------------*/
+   if(((PeriphClkInit->PeriphClockSelection) & RCC_PERIPHCLK_SPI123) == RCC_PERIPHCLK_SPI123)
+   {
+@@ -761,8 +764,9 @@ HAL_StatusTypeDef HAL_RCCEx_PeriphCLKConfig(RCC_PeriphCLKInitTypeDef  *PeriphClk
+       status = ret;
+     }
+   }
++#endif
+ 
+-#if defined(DSI)
++#if defined(DSI) && defined(HAL_DSI_MODULE_ENABLED)
+   /*---------------------------- DSI configuration -------------------------------*/
+   if(((PeriphClkInit->PeriphClockSelection) & RCC_PERIPHCLK_DSI) == RCC_PERIPHCLK_DSI)
+   {
+@@ -799,7 +803,7 @@ HAL_StatusTypeDef HAL_RCCEx_PeriphCLKConfig(RCC_PeriphCLKInitTypeDef  *PeriphClk
+   }
+ #endif /*DSI*/
+ 
+-#if defined(FDCAN1) || defined(FDCAN2)
++#if (defined(FDCAN1) || defined(FDCAN2)) && defined(HAL_FDCAN_MODULE_ENABLED)
+   /*---------------------------- FDCAN configuration -------------------------------*/
+   if(((PeriphClkInit->PeriphClockSelection) & RCC_PERIPHCLK_FDCAN) == RCC_PERIPHCLK_FDCAN)
+   {
+@@ -1111,6 +1115,7 @@ HAL_StatusTypeDef HAL_RCCEx_PeriphCLKConfig(RCC_PeriphCLKInitTypeDef  *PeriphClk
+     }
+   }
+ 
++#if defined(HAL_LPTIM_MODULE_ENABLED)
+   /*---------------------------- LPTIM1 configuration -------------------------------*/
+   if(((PeriphClkInit->PeriphClockSelection) & RCC_PERIPHCLK_LPTIM1) == RCC_PERIPHCLK_LPTIM1)
+   {
+@@ -1269,6 +1274,7 @@ HAL_StatusTypeDef HAL_RCCEx_PeriphCLKConfig(RCC_PeriphCLKInitTypeDef  *PeriphClk
+       status = ret;
+     }
+   }
++#endif
+ 
+   /*------------------------------ I2C1/2/3/5* Configuration ------------------------*/
+ #if defined(I2C5)
+@@ -1325,6 +1331,7 @@ HAL_StatusTypeDef HAL_RCCEx_PeriphCLKConfig(RCC_PeriphCLKInitTypeDef  *PeriphClk
+ 
+   }
+ 
++#if defined(HAL_ADC_MODULE_ENABLED)
+   /*---------------------------- ADC configuration -------------------------------*/
+   if(((PeriphClkInit->PeriphClockSelection) & RCC_PERIPHCLK_ADC) == RCC_PERIPHCLK_ADC)
+   {
+@@ -1365,6 +1372,7 @@ HAL_StatusTypeDef HAL_RCCEx_PeriphCLKConfig(RCC_PeriphCLKInitTypeDef  *PeriphClk
+       status = ret;
+     }
+   }
++#endif
+ 
+   /*------------------------------ USB Configuration -------------------------*/
+   if(((PeriphClkInit->PeriphClockSelection) & RCC_PERIPHCLK_USB) == RCC_PERIPHCLK_USB)
+@@ -1448,7 +1456,7 @@ HAL_StatusTypeDef HAL_RCCEx_PeriphCLKConfig(RCC_PeriphCLKInitTypeDef  *PeriphClk
+     }
+   }
+ 
+-#if defined(LTDC)
++#if defined(LTDC) && defined(HAL_LTDC_MODULE_ENABLED)
+   /*-------------------------------------- LTDC Configuration -----------------------------------*/
+   if(((PeriphClkInit->PeriphClockSelection) & RCC_PERIPHCLK_LTDC) == RCC_PERIPHCLK_LTDC)
+   {
+@@ -1459,6 +1467,7 @@ HAL_StatusTypeDef HAL_RCCEx_PeriphCLKConfig(RCC_PeriphCLKInitTypeDef  *PeriphClk
+   }
+ #endif /* LTDC */
+ 
++#if defined(HAL_RNG_MODULE_ENABLED)
+   /*------------------------------ RNG Configuration -------------------------*/
+   if(((PeriphClkInit->PeriphClockSelection) & RCC_PERIPHCLK_RNG) == RCC_PERIPHCLK_RNG)
+   {
+@@ -1503,7 +1512,9 @@ HAL_StatusTypeDef HAL_RCCEx_PeriphCLKConfig(RCC_PeriphCLKInitTypeDef  *PeriphClk
+     }
+ 
+   }
++#endif
+ 
++#if defined(HAL_SWPMI_MODULE_ENABLED)
+   /*------------------------------ SWPMI1 Configuration ------------------------*/
+   if(((PeriphClkInit->PeriphClockSelection) & RCC_PERIPHCLK_SWPMI1) == RCC_PERIPHCLK_SWPMI1)
+   {
+@@ -1513,7 +1524,9 @@ HAL_StatusTypeDef HAL_RCCEx_PeriphCLKConfig(RCC_PeriphCLKInitTypeDef  *PeriphClk
+     /* Configure the SWPMI1 interface clock source */
+     __HAL_RCC_SWPMI1_CONFIG(PeriphClkInit->Swpmi1ClockSelection);
+   }
+-#if defined(HRTIM1)
++#endif
++
++#if defined(HRTIM1) && defined(HAL_HRTIM_MODULE_ENABLED)
+   /*------------------------------ HRTIM1 clock Configuration ----------------*/
+   if(((PeriphClkInit->PeriphClockSelection) & RCC_PERIPHCLK_HRTIM1) == RCC_PERIPHCLK_HRTIM1)
+   {
+@@ -1524,6 +1537,8 @@ HAL_StatusTypeDef HAL_RCCEx_PeriphCLKConfig(RCC_PeriphCLKInitTypeDef  *PeriphClk
+     __HAL_RCC_HRTIM1_CONFIG(PeriphClkInit->Hrtim1ClockSelection);
+   }
+ #endif  /*HRTIM1*/
++
++#if defined(HAL_DFSDM_MODULE_ENABLED)
+   /*------------------------------ DFSDM1 Configuration ------------------------*/
+   if(((PeriphClkInit->PeriphClockSelection) & RCC_PERIPHCLK_DFSDM1) == RCC_PERIPHCLK_DFSDM1)
+   {
+@@ -1545,6 +1560,7 @@ HAL_StatusTypeDef HAL_RCCEx_PeriphCLKConfig(RCC_PeriphCLKInitTypeDef  *PeriphClk
+     __HAL_RCC_DFSDM2_CONFIG(PeriphClkInit->Dfsdm2ClockSelection);
+   }
+ #endif  /* DFSDM2 */
++#endif  /* HAL_DFSDM_MODULE_ENABLED */
+ 
+   /*------------------------------------ TIM configuration --------------------------------------*/
+   if(((PeriphClkInit->PeriphClockSelection) & RCC_PERIPHCLK_TIM) == RCC_PERIPHCLK_TIM)
+@@ -1566,6 +1582,7 @@ HAL_StatusTypeDef HAL_RCCEx_PeriphCLKConfig(RCC_PeriphCLKInitTypeDef  *PeriphClk
+     __HAL_RCC_CLKP_CONFIG(PeriphClkInit->CkperClockSelection);
+   }
+ 
++#if defined(HAL_CEC_MODULE_ENABLED)
+   /*------------------------------ CEC Configuration ------------------------*/
+   if(((PeriphClkInit->PeriphClockSelection) & RCC_PERIPHCLK_CEC) == RCC_PERIPHCLK_CEC)
+   {
+@@ -1575,6 +1592,7 @@ HAL_StatusTypeDef HAL_RCCEx_PeriphCLKConfig(RCC_PeriphCLKInitTypeDef  *PeriphClk
+     /* Configure the CEC interface clock source */
+     __HAL_RCC_CEC_CONFIG(PeriphClkInit->CecClockSelection);
+   }
++#endif
+ 
+   if (status == HAL_OK)
+   {
+-- 
+2.25.1
+

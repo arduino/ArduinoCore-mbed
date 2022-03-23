@@ -1,0 +1,79 @@
+From 0bead2417c30bc898b0563ed1c131925d4732df4 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Tue, 24 Aug 2021 17:02:47 +0200
+Subject: [PATCH 142/149] Add build options to allow to disable device
+ functionalities i.e DEVICE_ANALOGOUT
+
+---
+ targets/TARGET_STM/TARGET_STM32H7/objects.h | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/objects.h b/targets/TARGET_STM/TARGET_STM32H7/objects.h
+index 6f17147886..8415007dd9 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/objects.h
++++ b/targets/TARGET_STM/TARGET_STM32H7/objects.h
+@@ -50,10 +50,13 @@ struct port_s {
+     __IO uint32_t *reg_out;
+ };
+ 
++#if DEVICE_TRNG
+ struct trng_s {
+     RNG_HandleTypeDef handle;
+ };
++#endif
+ 
++#if DEVICE_PWMOUT
+ struct pwmout_s {
+     PWMName pwm;
+     PinName pin;
+@@ -63,7 +66,9 @@ struct pwmout_s {
+     uint8_t channel;
+     uint8_t inverted;
+ };
++#endif
+ 
++#if DEVICE_SPI
+ struct spi_s {
+     SPI_HandleTypeDef handle;
+     IRQn_Type spiIRQ;
+@@ -77,6 +82,7 @@ struct spi_s {
+     uint8_t transfer_type;
+ #endif
+ };
++#endif
+ 
+ struct serial_s {
+     UARTName uart;
+@@ -130,12 +136,14 @@ struct i2c_s {
+ #endif
+ };
+ 
++#if DEVICE_ANALOGIN
+ struct analogin_s {
+     ADC_HandleTypeDef handle;
+     PinName pin;
+     uint8_t channel;
+     uint8_t differential;
+ };
++#endif
+ 
+ #if DEVICE_QSPI
+ struct qspi_s {
+@@ -177,12 +185,14 @@ struct qspi_s {
+ #endif /* DUAL_CORE */
+ #include "gpio_object.h"
+ 
++#if DEVICE_ANALOGOUT
+ struct dac_s {
+     DACName dac;
+     PinName pin;
+     uint32_t channel;
+     DAC_HandleTypeDef handle;
+ };
++#endif
+ 
+ struct flash_s {
+     /*  nothing to be stored for now */
+-- 
+2.25.1
+

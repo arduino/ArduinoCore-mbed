@@ -1,0 +1,33 @@
+From 3140a297ab09a2797a3899ba9f3db1e03413bbbb Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Thu, 26 Aug 2021 15:42:18 +0200
+Subject: [PATCH 146/149] MCUboot:PORTENTA_H7_M7:Remove HSI,CSI,LSI,HSI48
+ support from HAL_RCC_OscConfig
+
+---
+ .../STM32Cube_FW/STM32H7xx_HAL_Driver/stm32h7xx_hal_rcc.c       | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/STM32Cube_FW/STM32H7xx_HAL_Driver/stm32h7xx_hal_rcc.c b/targets/TARGET_STM/TARGET_STM32H7/STM32Cube_FW/STM32H7xx_HAL_Driver/stm32h7xx_hal_rcc.c
+index b5e93c78b9..eb5485dc7d 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/STM32Cube_FW/STM32H7xx_HAL_Driver/stm32h7xx_hal_rcc.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/STM32Cube_FW/STM32H7xx_HAL_Driver/stm32h7xx_hal_rcc.c
+@@ -469,6 +469,7 @@ __weak HAL_StatusTypeDef HAL_RCC_OscConfig(RCC_OscInitTypeDef  *RCC_OscInitStruc
+       }
+     }
+   }
++#if !defined(TARGET_PORTENTA_H7_M7) || !defined(MCUBOOT_BOOTLOADER_BUILD)
+   /*----------------------------- HSI Configuration --------------------------*/
+   if(((RCC_OscInitStruct->OscillatorType) & RCC_OSCILLATORTYPE_HSI) == RCC_OSCILLATORTYPE_HSI)
+   {
+@@ -687,6 +688,7 @@ __weak HAL_StatusTypeDef HAL_RCC_OscConfig(RCC_OscInitTypeDef  *RCC_OscInitStruc
+       }
+     }
+   }
++#endif
+   /*------------------------------ LSE Configuration -------------------------*/
+   if(((RCC_OscInitStruct->OscillatorType) & RCC_OSCILLATORTYPE_LSE) == RCC_OSCILLATORTYPE_LSE)
+   {
+-- 
+2.25.1
+

@@ -1,0 +1,41 @@
+From 812d3d082e49c375c9d500e448eb4b200720c717 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Mon, 14 Mar 2022 09:39:31 +0100
+Subject: [PATCH 148/149] Add build option DEVICE_SERIAL_FC preventing build if
+ flow control is disabled
+
+---
+ drivers/source/SerialBase.cpp | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/drivers/source/SerialBase.cpp b/drivers/source/SerialBase.cpp
+index 7c21d12e9c..33a049c844 100644
+--- a/drivers/source/SerialBase.cpp
++++ b/drivers/source/SerialBase.cpp
+@@ -71,9 +71,11 @@ int SerialBase::readable()
+ {
+     lock();
+     int ret = serial_readable(&_serial);
++#if DEVICE_SERIAL_FC
+     if (sw_flow_control == true && _rts_pin != nullptr) {
+         *_rts_pin = !!!ret;
+     }
++#endif
+     unlock();
+     return ret;
+ }
+@@ -83,9 +85,11 @@ int SerialBase::writeable()
+ {
+     lock();
+     int ret = serial_writable(&_serial);
++#if DEVICE_SERIAL_FC
+     if (sw_flow_control) {
+         ret = ret & !(*_cts_pin);
+     }
++#endif
+     unlock();
+     return ret;
+ }
+-- 
+2.25.1
+

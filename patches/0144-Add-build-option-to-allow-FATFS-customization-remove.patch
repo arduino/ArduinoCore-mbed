@@ -1,0 +1,71 @@
+From fd50f44f3a155ead9cd4ff61fb436acb5eefcdc0 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Tue, 24 Aug 2021 17:04:35 +0200
+Subject: [PATCH 144/149] Add build option to allow FATFS customization: remove
+ mkfs
+
+---
+ storage/filesystem/fat/include/fat/FATFileSystem.h | 4 ++++
+ storage/filesystem/fat/source/FATFileSystem.cpp    | 3 ++-
+ 2 files changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/storage/filesystem/fat/include/fat/FATFileSystem.h b/storage/filesystem/fat/include/fat/FATFileSystem.h
+index 581662b2ce..f15e081502 100644
+--- a/storage/filesystem/fat/include/fat/FATFileSystem.h
++++ b/storage/filesystem/fat/include/fat/FATFileSystem.h
+@@ -45,6 +45,7 @@ public:
+     FATFileSystem(const char *name = NULL, BlockDevice *bd = NULL);
+     virtual ~FATFileSystem();
+ 
++#if MBED_CONF_FAT_CHAN_FF_USE_MKFS
+     /** Format a logical drive, FDISK partitioning rule.
+      *
+      *  The block device to format should be mounted when this function is called.
+@@ -62,6 +63,7 @@ public:
+      *  @return         0 on success, negative error code on failure.
+      */
+     static int format(BlockDevice *bd, bd_size_t cluster_size = 0);
++#endif
+ 
+     /** Mount a file system to a block device.
+      *
+@@ -76,6 +78,7 @@ public:
+      */
+     virtual int unmount();
+ 
++#if MBED_CONF_FAT_CHAN_FF_USE_MKFS
+     /** Reformat a file system, results in an empty and mounted file system.
+      *
+      *  @param bd
+@@ -108,6 +111,7 @@ public:
+         // Required for virtual inheritance shenanigans.
+         return reformat(bd, 0);
+     }
++#endif
+ 
+     /** Remove a file from the file system.
+      *
+diff --git a/storage/filesystem/fat/source/FATFileSystem.cpp b/storage/filesystem/fat/source/FATFileSystem.cpp
+index 3006a24530..ee0db9bde1 100644
+--- a/storage/filesystem/fat/source/FATFileSystem.cpp
++++ b/storage/filesystem/fat/source/FATFileSystem.cpp
+@@ -340,7 +340,7 @@ int FATFileSystem::unmount()
+     unlock();
+     return fat_error_remap(res);
+ }
+-
++#if MBED_CONF_FAT_CHAN_FF_USE_MKFS
+ /* See http://elm-chan.org/fsw/ff/en/mkfs.html for details of f_mkfs() and
+  * associated arguments. */
+ int FATFileSystem::format(BlockDevice *bd, bd_size_t cluster_size)
+@@ -464,6 +464,7 @@ int FATFileSystem::reformat(BlockDevice *bd, int allocation_unit)
+     unlock();
+     return err;
+ }
++#endif
+ 
+ int FATFileSystem::remove(const char *path)
+ {
+-- 
+2.25.1
+

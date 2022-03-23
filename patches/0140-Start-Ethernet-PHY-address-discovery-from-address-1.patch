@@ -1,0 +1,25 @@
+From 3909b95887ef7b4b05c6411ef2c9a3ae6e997214 Mon Sep 17 00:00:00 2001
+From: giulcioffi <g.cioffi@arduino.cc>
+Date: Wed, 16 Mar 2022 12:04:13 +0100
+Subject: [PATCH 140/149] Start Ethernet PHY address discovery from address 1
+
+---
+ .../drivers/emac/TARGET_STM/TARGET_STM32H7/lan8742/lan8742.c    | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/connectivity/drivers/emac/TARGET_STM/TARGET_STM32H7/lan8742/lan8742.c b/connectivity/drivers/emac/TARGET_STM/TARGET_STM32H7/lan8742/lan8742.c
+index 0fd341cdc4..82789c40c9 100644
+--- a/connectivity/drivers/emac/TARGET_STM/TARGET_STM32H7/lan8742/lan8742.c
++++ b/connectivity/drivers/emac/TARGET_STM/TARGET_STM32H7/lan8742/lan8742.c
+@@ -117,7 +117,7 @@ int32_t LAN8742_Init(lan8742_Object_t *pObj)
+         pObj->DevAddr = LAN8742_MAX_DEV_ADDR + 1;
+ 
+         /* Get the device address from special mode register */
+-        for (addr = 0; addr <= LAN8742_MAX_DEV_ADDR; addr ++) {
++        for (addr = 1; addr <= LAN8742_MAX_DEV_ADDR; addr ++) {
+             if (pObj->IO.ReadReg(addr, LAN8742_SMR, &regvalue) < 0) {
+                 status = LAN8742_STATUS_READ_ERROR;
+                 /* Can't read from this device address
+-- 
+2.25.1
+

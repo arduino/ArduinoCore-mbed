@@ -1,0 +1,69 @@
+From 204cd6a65e368022528c3087dfd420026219fcf1 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Fri, 18 Mar 2022 14:57:45 +0100
+Subject: [PATCH 149/149] MCUboot:PORTENTA_H7_M7:Remove FATFS mkdir and rename
+
+---
+ storage/filesystem/fat/include/fat/FATFileSystem.h | 4 ++++
+ storage/filesystem/fat/source/FATFileSystem.cpp    | 2 ++
+ 2 files changed, 6 insertions(+)
+
+diff --git a/storage/filesystem/fat/include/fat/FATFileSystem.h b/storage/filesystem/fat/include/fat/FATFileSystem.h
+index f15e081502..24a6799686 100644
+--- a/storage/filesystem/fat/include/fat/FATFileSystem.h
++++ b/storage/filesystem/fat/include/fat/FATFileSystem.h
+@@ -120,6 +120,7 @@ public:
+      */
+     virtual int remove(const char *path);
+ 
++#if !defined(TARGET_PORTENTA_H7_M7) || !defined(MCUBOOT_BOOTLOADER_BUILD)
+     /** Rename a file in the file system.
+      *
+      *  @param path     The current name of the file to rename.
+@@ -127,6 +128,7 @@ public:
+      *  @return         0 on success, negative error code on failure.
+      */
+     virtual int rename(const char *path, const char *newpath);
++#endif
+ 
+     /** Store information about the file in a stat structure.
+      *
+@@ -136,6 +138,7 @@ public:
+      */
+     virtual int stat(const char *path, struct stat *st);
+ 
++#if !defined(TARGET_PORTENTA_H7_M7) || !defined(MCUBOOT_BOOTLOADER_BUILD)
+     /** Create a directory in the file system.
+      *
+      *  @param path     The name of the directory to create.
+@@ -143,6 +146,7 @@ public:
+      *  @return         0 on success, negative error code on failure.
+      */
+     virtual int mkdir(const char *path, mode_t mode);
++#endif
+ 
+     /** Store information about the mounted file system in a statvfs structure.
+      *
+diff --git a/storage/filesystem/fat/source/FATFileSystem.cpp b/storage/filesystem/fat/source/FATFileSystem.cpp
+index ee0db9bde1..62bb099804 100644
+--- a/storage/filesystem/fat/source/FATFileSystem.cpp
++++ b/storage/filesystem/fat/source/FATFileSystem.cpp
+@@ -483,6 +483,7 @@ int FATFileSystem::remove(const char *path)
+     return fat_error_remap(res);
+ }
+ 
++#if !defined(TARGET_PORTENTA_H7_M7) || !defined(MCUBOOT_BOOTLOADER_BUILD)
+ int FATFileSystem::rename(const char *oldpath, const char *newpath)
+ {
+     Deferred<const char *> oldfpath = fat_path_prefix(_id, oldpath);
+@@ -511,6 +512,7 @@ int FATFileSystem::mkdir(const char *path, mode_t mode)
+     }
+     return fat_error_remap(res);
+ }
++#endif
+ 
+ int FATFileSystem::stat(const char *path, struct stat *st)
+ {
+-- 
+2.25.1
+

@@ -1,0 +1,42 @@
+From fca7038344f647884151c5df3542236c349246b5 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Thu, 17 Mar 2022 10:05:32 +0100
+Subject: [PATCH 141/149] COMPONENT_SE050: Add defines to exclude DES functions
+ if MBEDTLS_DES_C module is not enabled
+
+---
+ .../COMPONENT_SE050/sss/src/mbedtls/fsl_sss_mbedtls_apis.c    | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/src/mbedtls/fsl_sss_mbedtls_apis.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/src/mbedtls/fsl_sss_mbedtls_apis.c
+index 614e8f0abb..20cd12d46c 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/src/mbedtls/fsl_sss_mbedtls_apis.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/COMPONENT_SE050/sss/src/mbedtls/fsl_sss_mbedtls_apis.c
+@@ -1265,6 +1265,7 @@ sss_status_t sss_mbedtls_cipher_one_go(sss_mbedtls_symmetric_t *context,
+         mbedtls_ret = mbedtls_aes_setkey_enc(
+             &aes_ctx, context->keyObject->contents, (unsigned int)(context->keyObject->contents_size * 8));
+     } break;
++#if defined(MBEDTLS_DES_C)
+     case kAlgorithm_SSS_DES_CBC:
+     case kAlgorithm_SSS_DES_ECB:
+     case kAlgorithm_SSS_DES3_CBC:
+@@ -1277,6 +1278,7 @@ sss_status_t sss_mbedtls_cipher_one_go(sss_mbedtls_symmetric_t *context,
+             mbedtls_ret = mbedtls_des_setkey_dec(&des_ctx, context->keyObject->contents);
+         }
+         break;
++#endif
+ #endif //SSS_HAVE_TESTCOUNTERPART
+     default:
+         goto exit;
+@@ -1356,7 +1358,7 @@ sss_status_t sss_mbedtls_cipher_one_go(sss_mbedtls_symmetric_t *context,
+     case kAlgorithm_SSS_AES_CBC:
+         mbedtls_aes_free(&aes_ctx);
+         break;
+-#if SSS_HAVE_TESTCOUNTERPART
++#if SSS_HAVE_TESTCOUNTERPART && defined(MBEDTLS_DES_C)
+     case kAlgorithm_SSS_DES_CBC:
+     case kAlgorithm_SSS_DES_ECB:
+     case kAlgorithm_SSS_DES3_CBC:
+-- 
+2.25.1
+
