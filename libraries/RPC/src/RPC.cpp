@@ -149,13 +149,13 @@ int RPCClass::begin(long unsigned int np, uint16_t nd) {
   // Ideally this should execute only once
   disableCM4Autoboot();
 
-	eventThread = new rtos::Thread(osPriorityHigh);
+	eventThread = new rtos::Thread(osPriorityHigh, 4096);
 	eventThread->start(&eventHandler);
 
-  dispatcherThread = new rtos::Thread(osPriorityNormal);
+  dispatcherThread = new rtos::Thread(osPriorityNormal, 4096);
   dispatcherThread->start(mbed::callback(this, &RPCClass::dispatch));
 
-  responseThread = new rtos::Thread(osPriorityNormal);
+  responseThread = new rtos::Thread(osPriorityNormal, 4096);
   responseThread->start(mbed::callback(this, &RPCClass::response));
 
 	/* Initialize OpenAmp and libmetal libraries */
@@ -196,13 +196,13 @@ int RPCClass::begin(long unsigned int np, uint16_t nd) {
 
 int RPCClass::begin(long unsigned int np, uint16_t nd) {
 
-  eventThread = new rtos::Thread(osPriorityHigh);
+  eventThread = new rtos::Thread(osPriorityHigh, 4096);
   eventThread->start(&eventHandler);
 
-  dispatcherThread = new rtos::Thread(osPriorityNormal);
+  dispatcherThread = new rtos::Thread(osPriorityNormal, 4096);
   dispatcherThread->start(mbed::callback(this, &RPCClass::dispatch));
 
-  responseThread = new rtos::Thread(osPriorityNormal);
+  responseThread = new rtos::Thread(osPriorityNormal, 4096);
   responseThread->start(mbed::callback(this, &RPCClass::response));
 
   /* Initialize OpenAmp and libmetal libraries */

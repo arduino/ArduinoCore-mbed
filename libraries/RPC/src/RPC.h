@@ -81,6 +81,10 @@ class RPCClass : public Stream, public rpc::detail::dispatcher {
         delete client;
       }
 
+    void setTimeout(uint32_t milliseconds) {
+      _timeout = milliseconds;
+    }
+
 		template <typename... Args>
     	RPCLIB_MSGPACK::object_handle call(std::string const &func_name,
                                        Args... args) {
@@ -98,8 +102,15 @@ class RPCClass : public Stream, public rpc::detail::dispatcher {
     		}
     		mtx.unlock();
 
+    		clients[i]->setTimeout(_timeout);
+    		has_timed_out = false;
+
     		// thread start and client .call
     		clients[i]->call(func_name, args...);
+
+    		if (clients[i]->timedOut()) {
+    			has_timed_out = true;
+    		}
     		RPCLIB_MSGPACK::object_handle ret = std::move(clients[i]->result);
 
     		mtx.lock();
@@ -110,6 +121,10 @@ class RPCClass : public Stream, public rpc::detail::dispatcher {
     	}
 
 		rpc::client* clients[10];
+
+		bool timedOut() {
+			return has_timed_out;
+		}
 
 	private:
 		RingBufferN<256> rx_buffer;
@@ -132,6 +147,9 @@ class RPCClass : public Stream, public rpc::detail::dispatcher {
 		rtos::Mutex mtx;
 
 		mbed::Callback<void()> _rx;
+
+		uint32_t _timeout = osWaitForever;
+		bool has_timed_out = false;
 
 		//rpc::detail::response response;
 		RPCLIB_MSGPACK::object_handle call_result;

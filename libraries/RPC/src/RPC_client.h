@@ -28,11 +28,12 @@ class client {
 
       send_msgpack(buffer);
 
-      osSignalWait(0, osWaitForever);
-
-      //getResult(result);
-
+      auto e = osSignalWait(0, timeout);
       delete buffer;
+
+      if (e.status != osEventSignal) {
+        has_timed_out = true;
+      }
 
       RPCLIB_MSGPACK::object_handle q = std::move(result);
       return q;
@@ -62,10 +63,21 @@ class client {
       delete buffer;
     }
 
+    void setTimeout(uint32_t milliseconds) {
+      timeout = milliseconds;
+    }
+
+    bool timedOut() {
+      return has_timed_out;
+    }
+
   protected:
     osThreadId callThreadId;
     friend class arduino::RPCClass;
     RPCLIB_MSGPACK::object_handle result;
+
+    uint32_t timeout = osWaitForever;
+    bool has_timed_out = false;
 
   private:
     enum class request_type { call = 0, notification = 2 };;
