@@ -27,7 +27,9 @@ uint8_t BQ25120A::readByte(uint8_t address, uint8_t subAddress)
   Wire1.write(subAddress);
   Wire1.endTransmission(false);
   Wire1.requestFrom(address, 1);
-  while(!Wire1.available()) {}
+  uint32_t timeout = 1000;
+  uint32_t start_time = millis();
+  while(!Wire1.available() && (millis() - start_time) < timeout) {}
   uint8_t ret = Wire1.read();
   nicla::i2c_mutex.unlock();
   return ret;
