@@ -36,18 +36,6 @@ bool nicla::begin()
   return true;
 }
 
-void nicla::enableCD()
-{
-  pinMode(p25, OUTPUT);
-  digitalWrite(p25, HIGH);
-}
-
-void nicla::disableCD()
-{
-  pinMode(p25, OUTPUT);
-  digitalWrite(p25, LOW);
-}
-
   /*
       LDO reg:
       |   B7   |  B6   |  B5   |  B4   |  B3   |  B2   | B1  | B0  |
@@ -68,49 +56,38 @@ void nicla::disableCD()
 
 bool nicla::enable3V3LDO()
 {
-  enableCD();
   uint8_t ldo_reg = 0xE4;
   _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_LDO_CTRL, ldo_reg);
   if (_pmic.readByte(BQ25120A_ADDRESS, BQ25120A_LDO_CTRL) != ldo_reg) {
-    disableCD();
     return false;
   }
-  disableCD();
   return true;
 }
 
 bool nicla::enable1V8LDO()
 {
-  enableCD();
   uint8_t ldo_reg = 0xA8;
   _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_LDO_CTRL, ldo_reg);
   if (_pmic.readByte(BQ25120A_ADDRESS, BQ25120A_LDO_CTRL) != ldo_reg) {
-    disableCD();
     return false;
   }
-  disableCD();
   return true;
 }
 
 bool nicla::disableLDO()
 {
-  enableCD();
   uint8_t ldo_reg = _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_LDO_CTRL);
   ldo_reg &= 0x7F;
   _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_LDO_CTRL, ldo_reg);
   if (_pmic.readByte(BQ25120A_ADDRESS, BQ25120A_LDO_CTRL) != ldo_reg) {
-    disableCD();
     return false;
   }
-  disableCD();
   return true;
 }
 
 uint8_t nicla::readLDOreg()
 {
-  enableCD();
   uint8_t ldo_reg = _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_LDO_CTRL);
-  disableCD();
   return ldo_reg;
 }
 

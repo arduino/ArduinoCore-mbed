@@ -27,8 +27,6 @@ public:
 
 private:
   static void pingI2CThd();
-  static void enableCD();
-  static void disableCD();
   static uint8_t readLDOreg();
   static rtos::Mutex i2c_mutex;
 };
