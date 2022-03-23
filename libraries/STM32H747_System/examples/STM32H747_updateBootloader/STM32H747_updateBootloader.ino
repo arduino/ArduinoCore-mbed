@@ -1,32 +1,59 @@
 #include "FlashIAP.h"
+#include "QSPIFBlockDevice.h"
+#include "MBRBlockDevice.h"
+#include "LittleFileSystem.h"
+#include "FATFileSystem.h"
 #if defined(ARDUINO_PORTENTA_H7_M7)
 #include "portenta_bootloader.h"
 #include "portenta_lite_bootloader.h"
 #include "portenta_lite_connected_bootloader.h"
+#include "mcuboot_bootloader.h"
+#include "ecdsa-p256-encrypt-key.h"
+#include "ecdsa-p256-signing-key.h"
 #elif defined(ARDUINO_NICLA_VISION)
 #include "nicla_vision_bootloader.h"
 #endif
 
-#ifndef CORE_CM7  
+#ifndef CORE_CM7
   #error Update the bootloader by uploading the sketch to the M7 core instead of the M4 core.
 #endif
 
 #define BOOTLOADER_ADDR   (0x8000000)
+#define SIGNING_KEY_ADDR  (0x8000300)
+#define ENCRYPT_KEY_ADDR  (0x8000400)
+#define ENCRYPT_KEY_SIZE  (0x0000100)
+#define SIGNING_KEY_SIZE  (0x0000100)
+
 mbed::FlashIAP flash;
+QSPIFBlockDevice root(QSPI_SO0, QSPI_SO1, QSPI_SO2, QSPI_SO3,  QSPI_SCK, QSPI_CS, QSPIF_POLARITY_MODE_1, 40000000);
+
+bool writeLoader = false;
+bool writeKeys = false;
+bool video_available = false;
+bool wifi_available = false;
+bool MCUboot = false;
 
 uint32_t bootloader_data_offset = 0x1F000;
 uint8_t* bootloader_data = (uint8_t*)(BOOTLOADER_ADDR + bootloader_data_offset);
 
-bool video_available = false;
-bool wifi_available = false;
+uint32_t bootloader_identification_offset = 0x2F0;
+uint8_t* bootloader_identification = (uint8_t*)(BOOTLOADER_ADDR + bootloader_identification_offset);
 
-void setup() {  
+const unsigned char* bootloader_ptr = &bootloader_mbed_bin[0];
+long bootloader_len = bootloader_mbed_bin_len;
+
+void setup() {
   Serial.begin(115200);
   while (!Serial) {}
 
   uint8_t currentBootloaderVersion = bootloader_data[1];
-  uint8_t availableBootloaderVersion = (bootloader_mbed_bin + bootloader_data_offset)[1];
+  String currentBootloaderIdentifier = String(bootloader_identification, 15);
 
+  if(!currentBootloaderIdentifier.equals("MCUboot Arduino")) {
+    currentBootloaderIdentifier = "Arduino loader";
+  }
+
+  Serial.println(currentBootloaderIdentifier);
   Serial.println("Magic Number (validation): " + String(bootloader_data[0], HEX));
   Serial.println("Bootloader version: " + String(currentBootloaderVersion));
   Serial.println("Clock source: " + getClockSource(bootloader_data[2]));
@@ -41,37 +68,69 @@ void setup() {
   video_available = bootloader_data[8];
   wifi_available = bootloader_data[5];
 
-  if (availableBootloaderVersion > currentBootloaderVersion) {
-    Serial.print("\nA new bootloader version is available: v" + String(availableBootloaderVersion));
-    Serial.println(" (Your version: v" + String(currentBootloaderVersion) + ")");
-    Serial.println("Do you want to update the bootloader? Y/[n]");
-  } else if(availableBootloaderVersion < currentBootloaderVersion){ 
-    Serial.println("\nA newer bootloader version is already installed: v" + String(currentBootloaderVersion));    
-    Serial.println("Do you want to downgrade the bootloader to v" + String(availableBootloaderVersion) + "? Y/[n]");
-  } else {
-    Serial.println("\nThe latest version of the bootloader is already installed (v" + String(currentBootloaderVersion) + ").");
-    Serial.println("Do you want to update the bootloader anyway? Y/[n]");
-  }
-  
-  bool confirmation = false;
-  while (confirmation == false) {
-    if (Serial.available()) {
-      char choice = Serial.read();
-      switch (choice) {
-        case 'y':
-        case 'Y':
-          applyUpdate(BOOTLOADER_ADDR);
-          confirmation = true;
-          break;
-        case 'n':
-        case 'N':
-          confirmation = true;
-          break;
-        default:
-          continue;
+#if defined(ARDUINO_PORTENTA_H7_M7)
+  Serial.println("\nDo you want to update the default Arduino bootloader? Y/[n]");
+  Serial.println("If No, MCUBoot bootloader will be updated.");
+  if(waitResponse()) {
+    bootloader_ptr = &bootloader_mbed_bin[0];
+    bootloader_len = bootloader_mbed_bin_len;
+    if (!video_available) {
+      if (wifi_available) {
+        bootloader_ptr = &bootloader_mbed_lite_connected_bin[0];
+        bootloader_len = bootloader_mbed_lite_connected_bin_len;
+      } else {
+        bootloader_ptr = &bootloader_mbed_lite_bin[0];
+        bootloader_len = bootloader_mbed_lite_bin_len;
       }
     }
+  } else {
+    bootloader_ptr = &mcuboot_bin[0];
+    bootloader_len = mcuboot_bin_len;
   }
+#endif
+
+  uint8_t availableBootloaderVersion = (bootloader_ptr + bootloader_data_offset)[1];
+  String availableBootloaderIdentifier = String(bootloader_ptr + bootloader_identification_offset, 15);
+
+  if(!availableBootloaderIdentifier.equals("MCUboot Arduino")) {
+    availableBootloaderIdentifier = "Arduino loader";
+  }
+
+  if (currentBootloaderIdentifier == availableBootloaderIdentifier) {
+    if (bootloader_data[0] != 0xA0) {
+      Serial.println("\nA new bootloader version (v" + String(availableBootloaderVersion) + ") is available.");
+      Serial.println("Do you want to update the bootloader? Y/[n]");
+    } else {
+      if (availableBootloaderVersion > currentBootloaderVersion) {
+        Serial.print("\nA new bootloader version is available: v" + String(availableBootloaderVersion));
+        Serial.println(" (Your version: v" + String(currentBootloaderVersion) + ")");
+        Serial.println("Do you want to update the bootloader? Y/[n]");
+      } else if (availableBootloaderVersion < currentBootloaderVersion) {
+        Serial.println("\nA newer bootloader version is already installed: v" + String(currentBootloaderVersion));
+        Serial.println("Do you want to downgrade the bootloader to v" + String(availableBootloaderVersion) + "? Y/[n]");
+      } else {
+        Serial.println("\nThe latest version of the bootloader is already installed (v" + String(currentBootloaderVersion) + ").");
+        Serial.println("Do you want to update the bootloader anyway? Y/[n]");
+      }
+    }
+  } else {
+    Serial.println("\nA different bootloader type is available: v" + String(availableBootloaderVersion));
+    Serial.println("Do you want to update the bootloader? Y/[n]");
+  }
+  writeLoader = waitResponse();
+
+  if (writeLoader) {
+    if(availableBootloaderIdentifier.equals("MCUboot Arduino")) {
+      setupMCUBootOTAData();
+      Serial.println("\nThe bootloader comes with a set of default keys to evaluate signing and encryption process");
+      Serial.println("Do you want to load default keys? Y/[n]");
+      writeKeys = waitResponse();
+    }
+    applyUpdate(BOOTLOADER_ADDR);
+  } else {
+    Serial.println("It's now safe to reboot or disconnect your board.");
+  }
+
 }
 
 String getUSBSpeed(uint8_t flag) {
@@ -98,17 +157,91 @@ String getClockSource(uint8_t flag) {
   }
 }
 
-void applyUpdate(uint32_t address) {
-  long len = bootloader_mbed_bin_len;
-#if defined(ARDUINO_PORTENTA_H7_M7)
-  if (!video_available) {
-    if (wifi_available) {
-      len = bootloader_mbed_lite_connected_bin_len;
-    } else {
-      len = bootloader_mbed_lite_bin_len;
+void printProgress(uint32_t offset, uint32_t size, uint32_t threshold, bool reset) {
+  static int percent_done = 0;
+  if (reset == true) {
+    percent_done = 0;
+    Serial.println("Flashed " + String(percent_done) + "%");
+  } else {
+    uint32_t percent_done_new = offset * 100 / size;
+    if (percent_done_new >= percent_done + threshold) {
+      percent_done = percent_done_new;
+      Serial.println("Flashed " + String(percent_done) + "%");
     }
   }
-#endif
+}
+
+bool waitResponse() {
+  bool confirmation = false;
+  while (confirmation == false) {
+    if (Serial.available()) {
+      char choice = Serial.read();
+      switch (choice) {
+        case 'y':
+        case 'Y':
+          confirmation = true;
+          return true;
+          break;
+        case 'n':
+        case 'N':
+          confirmation = true;
+          return false;
+          break;
+        default:
+          continue;
+      }
+    }
+  }
+}
+
+void setupMCUBootOTAData() {
+  mbed::MBRBlockDevice ota_data(&root, 2);
+  mbed::FATFileSystem ota_data_fs("fs");
+  
+  int err = ota_data_fs.reformat(&ota_data);
+  if (err) {
+    Serial.println("Error creating MCUBoot files in OTA partition");
+  }
+
+  FILE* fp = fopen("/fs/scratch.bin", "wb");
+  const int scratch_file_size = 128 * 1024;
+  const char buffer[128] = {0xFF};
+  int size = 0;
+
+  Serial.println("\nCreating scratch file");
+  printProgress(size, scratch_file_size, 10, true);
+  while (size < scratch_file_size) {
+    int ret = fwrite(buffer, sizeof(buffer), 1, fp);
+    if (ret != 1) {
+      Serial.println("Error writing scratch file");
+      break;
+    }
+    size += sizeof(buffer);
+    printProgress(size, scratch_file_size, 10, false);
+  }
+  fclose(fp);
+
+  fp = fopen("/fs/update.bin", "wb");
+  const int update_file_size = 15 * 128 * 1024;
+  size = 0;
+
+  Serial.println("\nCreating update file");
+  printProgress(size, update_file_size, 10, true);
+  while (size < update_file_size) {
+    int ret = fwrite(buffer, sizeof(buffer), 1, fp);
+    if (ret != 1) {
+      Serial.println("Error writing scratch file");
+      break;
+    }
+    size += sizeof(buffer);
+    printProgress(size, update_file_size, 5, false);
+  }
+
+  fclose(fp);
+}
+
+void applyUpdate(uint32_t address) {
+  long len = bootloader_len;
 
   flash.init();
 
@@ -133,19 +266,7 @@ void applyUpdate(uint32_t address) {
     }
 
     // Program page
-#if defined(ARDUINO_PORTENTA_H7_M7)
-  if (video_available) {
-    flash.program(&bootloader_mbed_bin[page_size * pages_flashed], addr, page_size);
-  } else {
-    if (wifi_available) {
-      flash.program(&bootloader_mbed_lite_connected_bin[page_size * pages_flashed], addr, page_size);
-    } else {
-      flash.program(&bootloader_mbed_lite_bin[page_size * pages_flashed], addr, page_size);
-    }
-  }
-#else
-  flash.program(&bootloader_mbed_bin[page_size * pages_flashed], addr, page_size);
-#endif
+    flash.program(&bootloader_ptr[page_size * pages_flashed], addr, page_size);
 
     addr += page_size;
     if (addr >= next_sector) {
@@ -161,12 +282,20 @@ void applyUpdate(uint32_t address) {
       }
     }
   }
+
+#if defined(ARDUINO_PORTENTA_H7_M7)
+  if (writeKeys) {
+    flash.program(&enc_priv_key, ENCRYPT_KEY_ADDR, ENCRYPT_KEY_SIZE);
+    flash.program(&ecdsa_pub_key, SIGNING_KEY_ADDR, SIGNING_KEY_SIZE);
+  }
+#endif
+
   Serial.println("Flashed 100%");
 
   delete[] page_buffer;
 
   flash.deinit();
-  Serial.println("Bootloader update complete. You may now disconnect the board.");
+  Serial.println("\nBootloader update complete. It's now safe to reboot or disconnect your board.");
 }
 
 void loop() {

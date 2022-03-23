@@ -1,9 +1,18 @@
 uint8_t* bootloader_data = (uint8_t*)(0x801F000);
+uint8_t* bootloader_identification = (uint8_t*)(0x80002F0);
 
 void setup() {  
   Serial.begin(115200);
   while (!Serial) {}
- 
+
+  uint8_t currentBootloaderVersion = bootloader_data[1];
+  String currentBootloaderIdentifier = String(bootloader_identification, 15);
+
+  if(!currentBootloaderIdentifier.equals("MCUboot Arduino")) {
+    currentBootloaderIdentifier = "Arduino loader";
+  }
+
+  Serial.println(currentBootloaderIdentifier);
   Serial.println("Magic Number (validation): " + String(bootloader_data[0], HEX));
   Serial.println("Bootloader version: " + String(bootloader_data[1]));
   Serial.println("Clock source: " + getClockSource(bootloader_data[2]));
