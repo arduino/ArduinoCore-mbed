@@ -74,9 +74,6 @@ static const uint8_t A7  = PIN_A7;
 #define D20 (20u)
 #define D21 (21u)
 
-//DACs
-#define DAC           (A6)
-
 // Serial
 #define PIN_SERIAL_RX (22ul)
 #define PIN_SERIAL_TX (21ul)
@@ -86,10 +83,10 @@ static const uint8_t A7  = PIN_A7;
 #define SERIAL1_RX			(digitalPinToPinName(PIN_SERIAL_RX))
 
 // SPI
-#define PIN_SPI_MISO  (10u)
-#define PIN_SPI_MOSI  (8u)
-#define PIN_SPI_SCK   (9u)
-#define PIN_SPI_SS    (7u)
+#define PIN_SPI_MISO  (0u)
+#define PIN_SPI_MOSI  (A6)
+#define PIN_SPI_SCK   (A5)
+#define PIN_SPI_SS    (1u)
 
 static const uint8_t SS   = PIN_SPI_SS;   // SPI Slave SS not used. Set here only for reference.
 static const uint8_t MOSI = PIN_SPI_MOSI;
@@ -97,8 +94,8 @@ static const uint8_t MISO = PIN_SPI_MISO;
 static const uint8_t SCK  = PIN_SPI_SCK;
 
 // Wire
-#define PIN_WIRE_SDA        (11u)
-#define PIN_WIRE_SCL        (12u)
+#define PIN_WIRE_SDA        (38u)
+#define PIN_WIRE_SCL        (29u)
 
 #define RPC_SERIAL				1
 #define HAS_UNIQUE_ISERIAL_DESCRIPTOR
@@ -111,17 +108,12 @@ static const uint8_t SCK  = PIN_SPI_SCK;
 uint8_t getUniqueSerialNumber(uint8_t* name);
 void _ontouch1200bps_();
 
-#define WIRE_HOWMANY		0
+#define WIRE_HOWMANY		1
 
-#define I2C_SDA				(digitalPinToPinName(PIN_WIRE_SDA))
-#define I2C_SCL				(digitalPinToPinName(PIN_WIRE_SCL))
+#define I2C_SDA				(PC_9)		// marked as PWM8
+#define I2C_SCL				(PA_8)		// marked as PWM6
 
-#define I2C_SDA_INTERNAL	(PB_7)
-#define I2C_SCL_INTERNAL	(PB_6)
-#define I2C_SDA1			I2C_SDA_INTERNAL
-#define I2C_SCL1			I2C_SCL_INTERNAL
-
-#define SPI_HOWMANY			0
+#define SPI_HOWMANY			1
 
 #define SPI_MISO			(digitalPinToPinName(PIN_SPI_MISO))
 #define SPI_MOSI			(digitalPinToPinName(PIN_SPI_MOSI))
