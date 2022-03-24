@@ -45,6 +45,7 @@ public:
     FATFileSystem(const char *name = NULL, BlockDevice *bd = NULL);
     virtual ~FATFileSystem();
 
+#if MBED_CONF_FAT_CHAN_FF_USE_MKFS
     /** Format a logical drive, FDISK partitioning rule.
      *
      *  The block device to format should be mounted when this function is called.
@@ -62,6 +63,7 @@ public:
      *  @return         0 on success, negative error code on failure.
      */
     static int format(BlockDevice *bd, bd_size_t cluster_size = 0);
+#endif
 
     /** Mount a file system to a block device.
      *
@@ -76,6 +78,7 @@ public:
      */
     virtual int unmount();
 
+#if MBED_CONF_FAT_CHAN_FF_USE_MKFS
     /** Reformat a file system, results in an empty and mounted file system.
      *
      *  @param bd
@@ -108,6 +111,7 @@ public:
         // Required for virtual inheritance shenanigans.
         return reformat(bd, 0);
     }
+#endif
 
     /** Remove a file from the file system.
      *
@@ -116,6 +120,7 @@ public:
      */
     virtual int remove(const char *path);
 
+#if !defined(TARGET_PORTENTA_H7_M7) || !defined(MCUBOOT_BOOTLOADER_BUILD)
     /** Rename a file in the file system.
      *
      *  @param path     The current name of the file to rename.
@@ -123,6 +128,7 @@ public:
      *  @return         0 on success, negative error code on failure.
      */
     virtual int rename(const char *path, const char *newpath);
+#endif
 
     /** Store information about the file in a stat structure.
      *
@@ -132,6 +138,7 @@ public:
      */
     virtual int stat(const char *path, struct stat *st);
 
+#if !defined(TARGET_PORTENTA_H7_M7) || !defined(MCUBOOT_BOOTLOADER_BUILD)
     /** Create a directory in the file system.
      *
      *  @param path     The name of the directory to create.
@@ -139,6 +146,7 @@ public:
      *  @return         0 on success, negative error code on failure.
      */
     virtual int mkdir(const char *path, mode_t mode);
+#endif
 
     /** Store information about the mounted file system in a statvfs structure.
      *
