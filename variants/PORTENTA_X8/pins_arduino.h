@@ -115,9 +115,9 @@ void _ontouch1200bps_();
 
 #define SPI_HOWMANY			1
 
-#define SPI_MISO			(digitalPinToPinName(PIN_SPI_MISO))
-#define SPI_MOSI			(digitalPinToPinName(PIN_SPI_MOSI))
-#define SPI_SCK				(digitalPinToPinName(PIN_SPI_SCK))
+#define SPI_MISO			(digitalPinToPinName(PIN_SPI_MISO))		// marked as 0
+#define SPI_MOSI			(digitalPinToPinName(PIN_SPI_MOSI))		// marked as A6
+#define SPI_SCK				(digitalPinToPinName(PIN_SPI_SCK))		// marked as A5
 
 #define digitalPinToPort(P)		(digitalPinToPinName(P)/32)
 

@@ -51,7 +51,7 @@ PinDescription g_APinDescription[] = {
   { PB_10,       NULL, NULL, NULL }, // D26
   { PA_11,       NULL, NULL, NULL }, // D27
   { PD_15,       NULL, NULL, NULL }, // D28
-  { PA_15,       NULL, NULL, NULL }, // D29
+  { PA_8,        NULL, NULL, NULL }, // D29
   { PC_6,        NULL, NULL, NULL }, // D30
   { PA_12,       NULL, NULL, NULL }, // D31
   { PC_8,        NULL, NULL, NULL }, // D32
@@ -61,6 +61,10 @@ PinDescription g_APinDescription[] = {
   { PC_1,        NULL, NULL, NULL }, // D34
   { PE_5,        NULL, NULL, NULL }, // D35
 
+  // DUAL CONNECTION
+  { PG_6,        NULL, NULL, NULL }, // D36
+  { PG_7,        NULL, NULL, NULL }, // D37
+  { PC_9,        NULL, NULL, NULL }, // D38
 };
 
 extern "C" {
