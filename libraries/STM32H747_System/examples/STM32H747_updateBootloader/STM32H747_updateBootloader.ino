@@ -70,8 +70,18 @@ void setup() {
 
 #if defined(ARDUINO_PORTENTA_H7_M7)
   Serial.println("\nDo you want to update the default Arduino bootloader? Y/[n]");
-  Serial.println("If No, MCUBoot bootloader will be updated.");
-  if(waitResponse()) {
+  Serial.println("If No, MCUboot bootloader will be updated.");
+  if(!waitResponse()) {
+    Serial.println("\nMCUboot has been selected. Do you want to proceed? Y/[n]");
+    if (waitResponse()) {
+      MCUboot = true;
+      bootloader_ptr = &mcuboot_bin[0];
+      bootloader_len = mcuboot_bin_len;
+    } else {
+      Serial.println("\nProceeding with the default Arduino bootloader...");
+    }
+  }
+  if (!MCUboot) {
     bootloader_ptr = &bootloader_mbed_bin[0];
     bootloader_len = bootloader_mbed_bin_len;
     if (!video_available) {
@@ -83,9 +93,6 @@ void setup() {
         bootloader_len = bootloader_mbed_lite_bin_len;
       }
     }
-  } else {
-    bootloader_ptr = &mcuboot_bin[0];
-    bootloader_len = mcuboot_bin_len;
   }
 #endif
 
@@ -122,8 +129,16 @@ void setup() {
   if (writeLoader) {
     if(availableBootloaderIdentifier.equals("MCUboot Arduino")) {
       setupMCUBootOTAData();
+
       Serial.println("\nThe bootloader comes with a set of default keys to evaluate signing and encryption process");
-      Serial.println("Do you want to load default keys? Y/[n]");
+      Serial.println("If you load the keys, you will need to upload the future sketches with Security Settings -> Signing + Encryption.");
+      Serial.println("If you select Security Settings -> None, the sketches will not be executed.");
+      Serial.println("Do you want to load the keys? Y/[n]");
+      if (waitResponse()) {
+        Serial.println("\nPlease notice that loading the keys will enable MCUboot Sketch swap. This will increase the sketch update time after the upload.");
+        Serial.println("A violet LED will blink until the sketch is ready to run.");
+        Serial.println("Do you want to proceed loading the default keys? Y/[n]");
+      }
       writeKeys = waitResponse();
     }
     applyUpdate(BOOTLOADER_ADDR);
@@ -200,7 +215,7 @@ void setupMCUBootOTAData() {
   
   int err = ota_data_fs.reformat(&ota_data);
   if (err) {
-    Serial.println("Error creating MCUBoot files in OTA partition");
+    Serial.println("Error creating MCUboot files in OTA partition");
   }
 
   FILE* fp = fopen("/fs/scratch.bin", "wb");
