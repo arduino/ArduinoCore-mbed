@@ -13,7 +13,7 @@ edge_control.build.fpu=-mfpu=fpv4-sp-d16
 edge_control.build.float-abi=-mfloat-abi=softfp
 edge_control.build.board=EDGE_CONTROL
 edge_control.build.ldscript=linker_script.ld
-edge_control.build.postbuild.cmd=imgtool exit
+edge_control.build.postbuild.cmd="{tools.imgtool.path}/{tools.imgtool.cmd}" exit
 edge_control.compiler.mbed.arch.define=-DARDUINO_ARCH_NRF52840
 edge_control.compiler.mbed.defines={build.variant.path}/defines.txt
 edge_control.compiler.mbed.ldflags={build.variant.path}/ldflags.txt
