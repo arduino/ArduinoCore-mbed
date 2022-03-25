@@ -126,6 +126,10 @@ jobs:
       - name: Compile examples
         uses: arduino/compile-sketches@v1
         with:
+          cli-compile-flags: |
+            # Use build path containing spaces to check for path quoting problems in compilation patterns
+            - --build-path
+            - ${{ runner.temp }}/path with spaces
           github-token: ${{ secrets.GITHUB_TOKEN }}
           fqbn: ${{ matrix.board.fqbn }}
           libraries: |
