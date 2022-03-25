@@ -53,8 +53,7 @@ class client {
 
       auto args_obj = std::make_tuple(args...);
       auto call_obj = std::make_tuple(
-                        static_cast<uint8_t>(client::request_type::notification), (const int)callThreadId, func_name,
-                        args_obj);
+                        static_cast<uint8_t>(client::request_type::notification), func_name, args_obj);
 
       auto buffer = new RPCLIB_MSGPACK::sbuffer;
       RPCLIB_MSGPACK::pack(*buffer, call_obj);
