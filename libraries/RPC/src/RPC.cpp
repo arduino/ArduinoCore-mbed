@@ -11,8 +11,8 @@ void rpc::client::send_msgpack(RPCLIB_MSGPACK::sbuffer *buffer) {
   OPENAMP_send(&rp_endpoints[ENDPOINT_RAW], (const uint8_t*)buffer->data(), buffer->size());
 }
 
-static RingBufferN<256> intermediate_buffer;
-static RingBufferN<256> intermediate_buffer_resp;
+static RingBufferN<RPMSG_BUFFER_SIZE> intermediate_buffer;
+static RingBufferN<RPMSG_BUFFER_SIZE> intermediate_buffer_resp;
 //static uint8_t intermediate_buffer_resp[256];
 static rtos::Mutex rx_mtx;
 

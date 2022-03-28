@@ -17,7 +17,7 @@
         "VIRTIO_SLAVE_ONLY",
         "NO_ATOMIC_64_SUPPORT",
         "METAL_MAX_DEVICE_REGIONS=2",
-        "RPMSG_BUFFER_SIZE=100"
+        "RPMSG_BUFFER_SIZE=2048"
       ]
     }
   }
