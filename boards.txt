@@ -258,6 +258,8 @@ portenta_x8.bootloader.programmer=-f interface/stlink.cfg
 portenta_x8.bootloader.extra_action.preflash=stm32h7x option_write 0 0x01c 0xb86aaf0
 portenta_x8.bootloader.file=PORTENTA_X7/STM32H747AII6_CM7.elf
 
+portenta_x8.build.postbuild.cmd="{tools.imgtool.path}/{tools.imgtool.cmd}" exit
+
 ##############################################################
 
 nano33ble.name=Arduino Nano 33 BLE
