@@ -253,14 +253,14 @@ static inline void uart_set_fifo_enabled(uart_inst_t *uart, bool enabled) {
 // ----------------------------------------------------------------------------
 // Generic input/output
 
-/*! \brief Determine if space is available in the TX FIFO
+/*! \brief Determine if the TX FIFO is empty.
  *  \ingroup hardware_uart
  *
  * \param uart UART instance. \ref uart0 or \ref uart1
  * \return false if no space available, true otherwise
  */
 static inline bool uart_is_writable(uart_inst_t *uart) {
-    return !(uart_get_hw(uart)->fr & UART_UARTFR_TXFF_BITS);
+    return (uart_get_hw(uart)->fr & UART_UARTFR_TXFE_BITS);
 }
 
 /*! \brief Wait for the UART TX fifo to be drained
