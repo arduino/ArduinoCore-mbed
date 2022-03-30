@@ -239,6 +239,8 @@ void _ontouch1200bps_();
 //#define LSM6DS_DEFAULT_SPI SPI1
 //#define LSM6DS_INT         PA_1
 
+#define CRYPTO_WIRE   Wire1
+
 #define digitalPinToPort(P)		(digitalPinToPinName(P)/32)
 
 #define SERIAL_PORT_USBVIRTUAL      SerialUSB
