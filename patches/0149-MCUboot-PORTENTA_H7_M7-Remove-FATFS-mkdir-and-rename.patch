@@ -1,7 +1,7 @@
-From 204cd6a65e368022528c3087dfd420026219fcf1 Mon Sep 17 00:00:00 2001
+From f52fb039b673a3c137340680e42a14246444e7b9 Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Fri, 18 Mar 2022 14:57:45 +0100
-Subject: [PATCH 149/149] MCUboot:PORTENTA_H7_M7:Remove FATFS mkdir and rename
+Subject: [PATCH 149/150] MCUboot:PORTENTA_H7_M7:Remove FATFS mkdir and rename
 
 ---
  storage/filesystem/fat/include/fat/FATFileSystem.h | 4 ++++

@@ -1,7 +1,7 @@
-From 812d3d082e49c375c9d500e448eb4b200720c717 Mon Sep 17 00:00:00 2001
+From f9a49286a17f8394ff0071fb8cc2cd5c0de9cf68 Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Mon, 14 Mar 2022 09:39:31 +0100
-Subject: [PATCH 148/149] Add build option DEVICE_SERIAL_FC preventing build if
+Subject: [PATCH 148/150] Add build option DEVICE_SERIAL_FC preventing build if
  flow control is disabled
 
 ---

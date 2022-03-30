@@ -1,7 +1,7 @@
-From fca7038344f647884151c5df3542236c349246b5 Mon Sep 17 00:00:00 2001
+From 15dbc037d15641b09507b65deb9dba43a3c193f3 Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Thu, 17 Mar 2022 10:05:32 +0100
-Subject: [PATCH 141/149] COMPONENT_SE050: Add defines to exclude DES functions
+Subject: [PATCH 141/150] COMPONENT_SE050: Add defines to exclude DES functions
  if MBEDTLS_DES_C module is not enabled
 
 ---

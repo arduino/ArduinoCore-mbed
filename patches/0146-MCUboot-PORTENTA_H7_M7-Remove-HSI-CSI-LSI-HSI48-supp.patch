@@ -1,7 +1,7 @@
-From 3140a297ab09a2797a3899ba9f3db1e03413bbbb Mon Sep 17 00:00:00 2001
+From 6df4a3d8af6d4b954bda1635006ea62ec9df0dd7 Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Thu, 26 Aug 2021 15:42:18 +0200
-Subject: [PATCH 146/149] MCUboot:PORTENTA_H7_M7:Remove HSI,CSI,LSI,HSI48
+Subject: [PATCH 146/150] MCUboot:PORTENTA_H7_M7:Remove HSI,CSI,LSI,HSI48
  support from HAL_RCC_OscConfig
 
 ---

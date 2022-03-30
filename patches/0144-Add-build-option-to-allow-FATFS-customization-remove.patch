@@ -1,7 +1,7 @@
-From fd50f44f3a155ead9cd4ff61fb436acb5eefcdc0 Mon Sep 17 00:00:00 2001
+From e15600c6af3c5d042af46864ebb19032d8a997ad Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Tue, 24 Aug 2021 17:04:35 +0200
-Subject: [PATCH 144/149] Add build option to allow FATFS customization: remove
+Subject: [PATCH 144/150] Add build option to allow FATFS customization: remove
  mkfs
 
 ---

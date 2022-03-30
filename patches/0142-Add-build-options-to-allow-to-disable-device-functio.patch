@@ -1,7 +1,7 @@
-From 0bead2417c30bc898b0563ed1c131925d4732df4 Mon Sep 17 00:00:00 2001
+From 006f588decaf7e097f6b0cb67460a97b2643cb04 Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Tue, 24 Aug 2021 17:02:47 +0200
-Subject: [PATCH 142/149] Add build options to allow to disable device
+Subject: [PATCH 142/150] Add build options to allow to disable device
  functionalities i.e DEVICE_ANALOGOUT
 
 ---
