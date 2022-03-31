@@ -178,8 +178,8 @@ int RPCClass::begin(long unsigned int np, uint16_t nd) {
 	* The rpmsg service is initiate by the remote processor, on H7 new_service_cb
 	* callback is received on service creation. Wait for the callback
 	*/
-  OPENAMP_Wait_EndPointready(&rp_endpoints[ENDPOINT_RAW], HAL_GetTick() + 500);
-  OPENAMP_Wait_EndPointready(&rp_endpoints[ENDPOINT_RESPONSE], HAL_GetTick() + 500);
+  OPENAMP_Wait_EndPointready(&rp_endpoints[ENDPOINT_RAW], millis() + 500);
+  OPENAMP_Wait_EndPointready(&rp_endpoints[ENDPOINT_RESPONSE], millis() + 500);
 
 	// Send first dummy message to enable the channel
 	uint8_t message = 0x00;
@@ -241,7 +241,7 @@ void RPCClass::response() {
   }
 
   while (true) {
-    osEvent v = osSignalWait(0, osWaitForever);
+    osSignalWait(0, osWaitForever);
 
 {
       RPCLIB_MSGPACK::unpacker pac;
@@ -286,7 +286,7 @@ void RPCClass::dispatch() {
   dispatcherThreadId = osThreadGetId();
 
   while (true) {
-    osEvent v = osSignalWait(0, osWaitForever);
+    osSignalWait(0, osWaitForever);
 
 {
     RPCLIB_MSGPACK::unpacker pac;
