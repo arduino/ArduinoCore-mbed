@@ -1,5 +1,8 @@
-#include "RPC.h"
+#ifndef __SERIAL_RPC__
+#define __SERIAL_RPC__
+
 #include "Arduino.h"
+#include <vector>
 
 namespace arduino {
 
@@ -29,6 +32,9 @@ public:
 	  }
 	}
 
+	int begin(long unsigned int = 0, uint16_t = 0);
+	size_t write(uint8_t* buf, size_t len);
+
 	size_t write(uint8_t c) {
 		return write(&c, 1);
 	}
@@ -43,28 +49,9 @@ public:
 		return write((uint8_t*)buf, len);
 	}
 
-	size_t write(uint8_t* buf, size_t len) {
-		tx_buffer.clear();
-		for (size_t i=0; i < len; i++) {
-			tx_buffer.push_back(buf[i]);
-		}
-		RPC.send("tty", tx_buffer);
-		return len;
-	}
-
 	using Print::write;
 
-	int begin(long unsigned int = 0, uint16_t = 0) {
-		if (RPC.begin() == 0) {
-			return 0;
-		}
-		RPC.bind("tty", mbed::callback(this, &SerialRPCClass::onWrite));
-		return 1;
-	}
-
-	operator bool() {
-		return RPC;
-	}
+	operator bool();
 
     void attach(void (*fptr)(void))
     {
@@ -81,3 +68,5 @@ private:
 }
 
 extern arduino::SerialRPCClass SerialRPC;
+
+#endif

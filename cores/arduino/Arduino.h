@@ -115,6 +115,7 @@ extern analogin_config_t adcCurrentConfig;
 #if defined(RPC_SERIAL)
 #undef Serial
 #if __has_include("RPC.h")
+#include "SerialRPC.h"
 #define Serial SerialRPC
 #else
 extern ErrorSerialClass ErrorSerial;
