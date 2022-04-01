@@ -1,3 +1,4 @@
+#include "RPC.h"
 #include "SerialRPC.h"
 
 /*
