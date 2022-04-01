@@ -243,21 +243,23 @@ unsigned long pulseIn(PinName pin, PinStatus state, unsigned long timeout)
 
     unsigned long startMicros = micros();
 
+    uint32_t target = state ? mask : 0;
+
     // wait for any previous pulse to end
-    while ((*reg_in & mask) == state) {
+    while ((*reg_in & mask) == target) {
         if (micros() - startMicros > timeout)
             return 0;
     }
 
     // wait for the pulse to start
-    while ((*reg_in & mask) != state) {
+    while ((*reg_in & mask) != target) {
         if (micros() - startMicros > timeout)
             return 0;
     }
 
     unsigned long start = micros();
     // wait for the pulse to stop
-    while ((*reg_in & mask) == state) {
+    while ((*reg_in & mask) == target) {
         if (micros() - startMicros > timeout)
             return 0;
     }
