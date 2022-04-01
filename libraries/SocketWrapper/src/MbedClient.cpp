@@ -21,7 +21,6 @@ void arduino::MbedClient::readSocket() {
     do {
       if (rxBuffer.availableForStore() == 0) {
         yield();
-        delay(100);
         continue;
       }
       mutex->lock();
@@ -34,7 +33,6 @@ void arduino::MbedClient::readSocket() {
       }
       if (ret == NSAPI_ERROR_WOULD_BLOCK || ret == 0) {
         yield();
-        delay(100);
         mutex->unlock();
         continue;
       }
@@ -71,7 +69,7 @@ void arduino::MbedClient::configureSocket(Socket *_s) {
   }
   mutex->lock();
   if (reader_th == nullptr) {
-    reader_th = new rtos::Thread;
+    reader_th = new rtos::Thread(osPriorityNormal - 2);
     reader_th->start(mbed::callback(this, &MbedClient::readSocket));
   }
   mutex->unlock();
