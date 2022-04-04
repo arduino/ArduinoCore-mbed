@@ -83,6 +83,7 @@ typedef struct _AnalogPinDescription AnalogPinDescription;
 // Pins table to be instantiated into variant.cpp
 extern PinDescription g_APinDescription[];
 extern AnalogPinDescription g_AAnalogPinDescription[];
+extern AnalogPinDescription g_AAnalogOutPinDescription[];
 
 #ifdef ANALOG_CONFIG
 #include "hal/analogin_api.h"

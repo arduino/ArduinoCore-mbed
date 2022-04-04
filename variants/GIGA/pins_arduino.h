@@ -56,6 +56,9 @@ static const uint8_t A12  = PIN_A12;
 static const uint8_t A13  = PIN_A13;
 #define ADC_RESOLUTION 12
 
+//DACs
+#define DAC           1
+
 // Digital pins
 // -----------
 #define D0  (0u)

@@ -61,10 +61,12 @@ void analogWrite(pin_size_t pin, int val)
     return;
   }
 #ifdef DAC
-    if (pin == DAC) {
+  for (int i=0; i<NUM_ANALOG_OUTPUTS; i++) {
+    if (digitalPinToPinName(pin) == g_AAnalogOutPinDescription[i].name) {
       analogWriteDAC(digitalPinToPinName(pin), val);
       return;
     }
+  }
 #endif
   float percent = (float)val/(float)((1 << write_resolution)-1);
   mbed::PwmOut* pwm = digitalPinToPwm(pin);

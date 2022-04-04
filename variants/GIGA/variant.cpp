@@ -20,6 +20,11 @@ AnalogPinDescription g_AAnalogPinDescription[] = {
   { PA_5,         NULL },    // A13  DAC1_OUT2
 };
 
+AnalogPinDescription g_AAnalogOutPinDescription[] = {
+  { PA_4,         NULL },    // A12  DAC1_OUT1
+  { PA_5,         NULL },    // A13  DAC1_OUT2
+};
+
 PinDescription g_APinDescription[] = {
   // D0 - D21
   { PB_7,         NULL, NULL, NULL },    // D0  RX
