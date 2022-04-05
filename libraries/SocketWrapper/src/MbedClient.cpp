@@ -78,6 +78,15 @@ void arduino::MbedClient::configureSocket(Socket *_s) {
 }
 
 int arduino::MbedClient::connect(SocketAddress socketAddress) {
+
+  if (sock && reader_th) {
+    // trying to reuse a connection, let's call stop() to cleanup the state
+    char c;
+    if (sock->recv(&c, 1) < 0) {
+      stop();
+    }
+  }
+
   if (sock == nullptr) {
     sock = new TCPSocket();
     _own_socket = true;
