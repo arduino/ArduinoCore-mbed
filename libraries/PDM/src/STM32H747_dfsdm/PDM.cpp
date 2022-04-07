@@ -20,7 +20,7 @@
   Boston, MA  02111-1307  USA
 */
 
-#ifdef ARDUINO_GIGA
+#if defined(ARDUINO_NICLA_VISION) || defined(ARDUINO_GIGA)
 
 #include "PDM.h"
 #include "mbed.h"
