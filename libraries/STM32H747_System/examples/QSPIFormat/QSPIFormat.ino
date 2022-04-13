@@ -47,11 +47,11 @@ void setup() {
   Serial.println("Available partition schemes:");
   Serial.println("\nPartition scheme 1");
   Serial.println("Partition 1: WiFi firmware and certificates 1MB");
-  Serial.println("Partition 2: OTA and user data 14MB");
+  Serial.println("Partition 2: OTA and user data 13MB");
   Serial.println("\nPartition scheme 2");
   Serial.println("Partition 1: WiFi firmware and certificates 1MB");
   Serial.println("Partition 2: OTA 5MB");
-  Serial.println("Partition 3: User data 9MB"),
+  Serial.println("Partition 3: User data 8MB"),
   Serial.println("\nDo you want to use partition scheme 1? Y/[n]");
   Serial.println("If No, partition scheme 2 will be used.");
   bool default_scheme = waitResponse();
@@ -62,12 +62,12 @@ void setup() {
   if (true == waitResponse()) {
     mbed::MBRBlockDevice::partition(&root, 1, 0x0B, 0, 1024 * 1024);
     if(default_scheme) {
-      mbed::MBRBlockDevice::partition(&root, 3, 0x0B, 6 * 1024 * 1024, 0);
+      mbed::MBRBlockDevice::partition(&root, 3, 0x0B, 14 * 1024 * 1024, 14 * 1024 * 1024);
       mbed::MBRBlockDevice::partition(&root, 2, 0x0B, 1024 * 1024, 14 * 1024 * 1024);
       // use space from 15.5MB to 16 MB for another fw, memory mapped
     } else {
-      mbed::MBRBlockDevice::partition(&root, 2, 0x0B, 1024 * 1024, 5 * 1024 * 1024);
-      mbed::MBRBlockDevice::partition(&root, 3, 0x0B, 6 * 1024 * 1024, 9 * 1024 * 1024);
+      mbed::MBRBlockDevice::partition(&root, 2, 0x0B, 1024 * 1024, 6 * 1024 * 1024);
+      mbed::MBRBlockDevice::partition(&root, 3, 0x0B, 6 * 1024 * 1024, 14 * 1024 * 1024);
       // use space from 15.5MB to 16 MB for another fw, memory mapped
     }
 
