@@ -1,5 +1,5 @@
 /*
-   This example exposes the first MB of Rp2040 flash as a USB disk.
+   This example exposes the second MB of Nicla Vision flash as a USB disk.
    The user can interact with this disk as a bidirectional communication with the board
    For example, the board could save data in a file to be retrieved later with a drag and drop.
    If the user does a double tap, the firmware goes to datalogger mode (green led on).
@@ -9,15 +9,15 @@
    The log files are saved in flash with an increasing number suffix data_0.txt, data_1.txt, etc.
    If you want to transfer the log files to the PC, you can reset the board and
    wait for 10 seconds (blue led blinking).
-   You can find the video tutorial on LSM6DSOX MLC at: https://docs.arduino.cc/tutorials/nano-rp2040-connect/rp2040-imu-advanced 
 */
 
 #include "PluggableUSBMSD.h"
-#include "FlashIAPBlockDevice.h"
-#include "WiFiNINA.h"
+#include "QSPIFBlockDevice.h"
+#include "MBRBlockDevice.h"
+#include "FATFileSystem.h"
 #include "LSM6DSOXSensor.h"
 
-#define INT_1 INT_IMU
+#define INT_1 LSM6DS_INT
 #define SENSOR_ODR 104.0f // In Hertz
 #define ACC_FS 2 // In g
 #define GYR_FS 2000 // In dps
@@ -42,11 +42,14 @@ int32_t gyr_value[3];
 char buff[FLASH_BUFF_LEN];
 uint32_t pos = 0;
 
-static FlashIAPBlockDevice bd(XIP_BASE + 0x100000, 0x100000);
+QSPIFBlockDevice root(QSPI_SO0, QSPI_SO1, QSPI_SO2, QSPI_SO3,  QSPI_SCK, QSPI_CS, QSPIF_POLARITY_MODE_1, 40000000);
+// Partition 1 is allocated to WiFi
+mbed::MBRBlockDevice lsm_data(&root, 2);
+static mbed::FATFileSystem lsm_fs("lsm");
 
-LSM6DSOXSensor AccGyr(&Wire, LSM6DSOX_I2C_ADD_L);
+LSM6DSOXSensor AccGyr(&SPI1, PIN_SPI_SS1);
 
-USBMSD MassStorage(&bd);
+USBMSD MassStorage(&root);
 
 rtos::Thread acquisition_th;
 
@@ -59,15 +62,20 @@ void INT1Event_cb()
 
 void USBMSD::begin()
 {
-  int err = getFileSystem().mount(&bd);
+  int err = lsm_fs.mount(&lsm_data);
   if (err) {
-    err = getFileSystem().reformat(&bd);
+    Serial.println("mount failed");
+    err = lsm_fs.reformat(&lsm_data);
+    if (err) {
+      Serial.println("Reformat failed");
+      return;
+    }
   }
 }
 
 mbed::FATFileSystem &USBMSD::getFileSystem()
 {
-  static mbed::FATFileSystem fs("fs");
+  static mbed::FATFileSystem fs("lsm");
   return fs;
 }
 
@@ -75,9 +83,9 @@ void led_green_thd()
 {
   while (1) {
     if (demo_state == DATA_LOGGER_RUNNING_STATE) {
-      digitalWrite(LEDG, HIGH);
-      delay(100);
       digitalWrite(LEDG, LOW);
+      delay(100);
+      digitalWrite(LEDG, HIGH);
       delay(100);
     }
   }
@@ -130,12 +138,11 @@ void setup()
   MassStorage.begin();
   pinMode(LEDB, OUTPUT);
   pinMode(LEDG, OUTPUT);
-  digitalWrite(LEDB, LOW);
-  digitalWrite(LEDG, LOW);
+  digitalWrite(LEDB, HIGH);
+  digitalWrite(LEDG, HIGH);
 
-  // Initialize I2C bus.
-  Wire.begin();
-  Wire.setClock(400000);
+  // Initialize SPI1 bus.
+  SPI1.begin();
 
   //Interrupts.
   attachInterrupt(INT_1, INT1Event_cb, RISING);
@@ -170,14 +177,14 @@ void loop()
         case DATA_STORAGE_STATE: {
             // Go to DATA_LOGGER_IDLE_STATE state
             demo_state = DATA_LOGGER_IDLE_STATE;
-            digitalWrite(LEDG, HIGH);
+            digitalWrite(LEDG, LOW);
             Serial.println("From DATA_STORAGE_STATE To DATA_LOGGER_IDLE_STATE");
             break;
           }
         case DATA_LOGGER_IDLE_STATE: {
             char filename[32];
             // Go to DATA_LOGGER_RUNNING_STATE state
-            snprintf(filename, 32, "/fs/data_%lu.txt", file_count);
+            snprintf(filename, 32, "/lsm/data_%lu.txt", file_count);
             Serial.print("Start writing file ");
             Serial.println(filename);
             // open a file to write some data
@@ -189,7 +196,7 @@ void loop()
               fflush(f);
               Serial.println("From DATA_LOGGER_IDLE_STATE To DATA_LOGGER_RUNNING_STATE");
               demo_state = DATA_LOGGER_RUNNING_STATE;
-              digitalWrite(LEDG, LOW);
+              digitalWrite(LEDG, HIGH);
               timestamp_count = 0;
               pos = 0;
               acc_available = false;
@@ -217,7 +224,7 @@ void loop()
             demo_state = DATA_LOGGER_IDLE_STATE;
             // Wait for the led thread ends the blinking
             delay(250);
-            digitalWrite(LEDG, HIGH);
+            digitalWrite(LEDG, LOW);
             Serial.println("From DATA_LOGGER_RUNNING_STATE To DATA_LOGGER_IDLE_STATE");
             break;
           }
@@ -232,8 +239,6 @@ void loop()
 
     // Check the number of samples inside FIFO
     AccGyr.Get_FIFO_Num_Samples(&fifo_samples);
-
-    // Serial.println(fifo_samples);
 
     // If we reach the threshold we can empty the FIFO
     if (fifo_samples > FIFO_SAMPLE_THRESHOLD) {
@@ -251,9 +256,9 @@ void loop()
     AccGyr.Disable_X();
     AccGyr.Disable_G();
     while (1) {
-      digitalWrite(LEDB, HIGH);
-      delay(100);
       digitalWrite(LEDB, LOW);
+      delay(100);
+      digitalWrite(LEDB, HIGH);
       delay(100);
     }
   }

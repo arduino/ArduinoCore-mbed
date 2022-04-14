@@ -27,7 +27,6 @@ void printMLCStatus(uint8_t status);
 
 void setup()
 {
-  uint8_t mlc_out[8];
   // Led.
   pinMode(LEDB, OUTPUT);
   pinMode(LEDG, OUTPUT);
