@@ -60,7 +60,7 @@ class MbedI2C : public HardwareI2C
     virtual size_t write(int data) {
       return write ((uint8_t)data);
     };
-    virtual size_t write(int data) {
+    virtual size_t write(unsigned int data) {
       return write ((uint8_t)data);
     };
     virtual size_t write(const uint8_t* data, int len);
