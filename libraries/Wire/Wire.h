@@ -57,10 +57,10 @@ class MbedI2C : public HardwareI2C
     virtual void onRequest(void(*)(void));
 
     virtual size_t write(uint8_t data);
-    virtual size_t write(int data) {
+    virtual size_t write(intmax_t data) {
       return write ((uint8_t)data);
     };
-    virtual size_t write(unsigned int data) {
+    virtual size_t write(uintmax_t data) {
       return write ((uint8_t)data);
     };
     virtual size_t write(const uint8_t* data, int len);
