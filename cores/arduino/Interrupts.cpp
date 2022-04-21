@@ -29,6 +29,7 @@ void detachInterrupt(PinName interruptNum) {
 void detachInterrupt(pin_size_t interruptNum) {
   if ((interruptNum < PINS_COUNT) && (digitalPinToInterruptObj(interruptNum) != NULL)) {
     delete digitalPinToInterruptObj(interruptNum);
+    digitalPinToInterruptObj(interruptNum) = nullptr;
   }
 }
 
@@ -57,7 +58,9 @@ void attachInterruptParam(pin_size_t interruptNum, voidFuncPtrParam func, PinSta
   if (interruptNum >= PINS_COUNT) {
     return;
   }
-  detachInterrupt(interruptNum);
+  if (digitalPinToInterruptObj(interruptNum) != nullptr) {
+    detachInterrupt(interruptNum);
+  }
   mbed::InterruptIn* irq = new mbed::InterruptIn(digitalPinToPinName(interruptNum));
   if (mode == CHANGE) {
     irq->rise(mbed::callback(func, param));
