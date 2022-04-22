@@ -71,4 +71,7 @@ typedef enum {
 /* Redeclare Common.h functions with the updated PinMode */
 void pinMode(pin_size_t pinNumber, PinMode pinMode);
 
+/* Redeclare analogReference with deprecated attribute */
+void __attribute__((warning("Unused in this architecture"))) analogReference(uint8_t mode);
+
 #endif
