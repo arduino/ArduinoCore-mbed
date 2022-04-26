@@ -18,6 +18,7 @@ namespace arduino {
       ~ArduinoTimer();
       void start();
       void stop();
+      void reset();
 
     private:
       mbed_timer* timer = NULL;

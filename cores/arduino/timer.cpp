@@ -31,3 +31,7 @@ void ArduinoTimer::start() {
 void ArduinoTimer::stop() {
   timer->obj->stop();
 }
+
+void ArduinoTimer::reset() {
+  timer->obj->reset();
+}
