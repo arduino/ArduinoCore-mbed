@@ -2,6 +2,7 @@
   "target_overrides": {
     "*": {
       "target.printf_lib": "std",
+      "target.macros_add": [ "MBEDTLS_ENTROPY_NV_SEED" ],
       "platform.stdio-buffered-serial": false,
       "platform.stdio-baud-rate": 115200,
       "platform.default-serial-baud-rate": 115200,
