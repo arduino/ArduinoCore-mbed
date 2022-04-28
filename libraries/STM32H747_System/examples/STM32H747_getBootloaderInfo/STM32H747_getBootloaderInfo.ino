@@ -19,7 +19,7 @@ void setup() {
   Serial.println("USB Speed: " + getUSBSpeed(bootloader_data[3]));
   Serial.println("Has Ethernet: " + String(bootloader_data[4] == 1 ? "Yes" : "No"));
   Serial.println("Has WiFi module: " + String(bootloader_data[5] == 1 ? "Yes" : "No"));
-  Serial.println("RAM size: " + String(bootloader_data[6]) + " MB");
+  Serial.println("RAM size: " + getRAMSize(bootloader_data[6]));
   Serial.println("QSPI size: " + String(bootloader_data[7]) + " MB");
   Serial.println("Has Video output: " + String(bootloader_data[8] == 1 ? "Yes" : "No"));
   Serial.println("Has Crypto chip: " + String(bootloader_data[9] == 1 ? "Yes" : "No"));
@@ -47,6 +47,13 @@ String getClockSource(uint8_t flag) {
   default:
     return "N/A";
   }
+}
+
+String getRAMSize(uint8_t flag) {
+  if (flag == 0) {
+    return "N/A";
+  }
+  return (String(flag) + "MB");
 }
 
 void loop() {  
