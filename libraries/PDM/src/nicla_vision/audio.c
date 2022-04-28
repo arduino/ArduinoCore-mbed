@@ -279,7 +279,7 @@ void dfsdm_init()
     HAL_GPIO_Init(AUDIO_DFSDM1_D1_PORT, &GPIO_InitStruct);
 }
 
-static int DFSDM_Init(void)
+static int DFSDM_Init(uint32_t frequency)
 {
     __HAL_DFSDM_CHANNEL_RESET_HANDLE_STATE(&hdfsdm1_channel2);
     hdfsdm1_channel2.Instance                      = DFSDM1_Channel2;
@@ -292,7 +292,7 @@ static int DFSDM_Init(void)
     hdfsdm1_channel2.Init.SerialInterface.Type     = DFSDM_CHANNEL_SPI_RISING;
     hdfsdm1_channel2.Init.SerialInterface.SpiClock = DFSDM_CHANNEL_SPI_CLOCK_INTERNAL;
     hdfsdm1_channel2.Init.Awd.FilterOrder          = DFSDM_CHANNEL_FASTSINC_ORDER;
-    hdfsdm1_channel2.Init.Awd.Oversampling         = 125; /* 2MHz/125 = 16kHz */
+    hdfsdm1_channel2.Init.Awd.Oversampling         = 2000000/frequency; /* 2MHz/125 = 16kHz */
     hdfsdm1_channel2.Init.Offset                   = 0;
     hdfsdm1_channel2.Init.RightBitShift            = 0;
     if(HAL_OK != HAL_DFSDM_ChannelInit(&hdfsdm1_channel2))
@@ -311,7 +311,7 @@ static int DFSDM_Init(void)
     hdfsdm1_filter0.Init.InjectedParam.ExtTrigger     = DFSDM_FILTER_EXT_TRIG_TIM1_TRGO;
     hdfsdm1_filter0.Init.InjectedParam.ExtTriggerEdge = DFSDM_FILTER_EXT_TRIG_RISING_EDGE;
     hdfsdm1_filter0.Init.FilterParam.SincOrder        = DFSDM_FILTER_FASTSINC_ORDER;
-    hdfsdm1_filter0.Init.FilterParam.Oversampling     = 125; /* 2MHz/125 = 16kHz */
+    hdfsdm1_filter0.Init.FilterParam.Oversampling     = 2000000/frequency; /* 2MHz/125 = 16kHz */
     hdfsdm1_filter0.Init.FilterParam.IntOversampling  = 1;
     if(HAL_OK != HAL_DFSDM_FilterInit(&hdfsdm1_filter0))
     {
@@ -363,7 +363,7 @@ int py_audio_init(size_t channels, uint32_t frequency)
 
     dfsdm_init();
 
-    if (!DFSDM_Init()) {
+    if (!DFSDM_Init(frequency)) {
         return 0;
     }
 
