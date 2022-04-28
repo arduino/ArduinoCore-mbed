@@ -21,7 +21,6 @@ void arduino::MbedClient::readSocket() {
     do {
       if (rxBuffer.availableForStore() == 0) {
         yield();
-        delay(100);
         continue;
       }
       mutex->lock();
@@ -34,7 +33,6 @@ void arduino::MbedClient::readSocket() {
       }
       if (ret == NSAPI_ERROR_WOULD_BLOCK || ret == 0) {
         yield();
-        delay(100);
         mutex->unlock();
         continue;
       }
@@ -71,7 +69,7 @@ void arduino::MbedClient::configureSocket(Socket *_s) {
   }
   mutex->lock();
   if (reader_th == nullptr) {
-    reader_th = new rtos::Thread;
+    reader_th = new rtos::Thread(osPriorityNormal - 2);
     reader_th->start(mbed::callback(this, &MbedClient::readSocket));
   }
   mutex->unlock();
@@ -80,6 +78,15 @@ void arduino::MbedClient::configureSocket(Socket *_s) {
 }
 
 int arduino::MbedClient::connect(SocketAddress socketAddress) {
+
+  if (sock && reader_th) {
+    // trying to reuse a connection, let's call stop() to cleanup the state
+    char c;
+    if (sock->recv(&c, 1) < 0) {
+      stop();
+    }
+  }
+
   if (sock == nullptr) {
     sock = new TCPSocket();
     _own_socket = true;
@@ -206,7 +213,7 @@ size_t arduino::MbedClient::write(const uint8_t *buf, size_t size) {
   int ret = NSAPI_ERROR_WOULD_BLOCK;
   do {
     ret = sock->send(buf, size);
-  } while (ret != size && connected());
+  } while ((ret != size && ret == NSAPI_ERROR_WOULD_BLOCK) && connected());
   configureSocket(sock);
   return size;
 }
