@@ -200,8 +200,7 @@ void PDMClass::IrqHandler(bool halftranfer)
   int shadowIndex = rawBufferIndex ^ 1;
   dma_channel_set_write_addr(dmaChannel, rawBuffer[shadowIndex], true);
 
-  // wait for buffer if it's full
-  if (!_doubleBuffer.available() ) {
+  if (!_doubleBuffer.available()) {
     // fill final buffer with PCM samples
     if (filter.Decimation == 128) {
       Open_PDM_Filter_128(rawBuffer[rawBufferIndex], finalBuffer, 1, &filter);
@@ -218,6 +217,10 @@ void PDMClass::IrqHandler(bool halftranfer)
     finalBuffer = (int16_t*)_doubleBuffer.data();
     _doubleBuffer.swap(filter.nSamples * sizeof(int16_t));
     rawBufferIndex = shadowIndex;
+  }
+
+  if (_onReceive) {
+    _onReceive();
   }
 }
 
