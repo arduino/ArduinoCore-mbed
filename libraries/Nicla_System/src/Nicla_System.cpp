@@ -85,6 +85,17 @@ bool nicla::disableLDO()
   return true;
 }
 
+bool nicla::enterShipMode()
+{
+  //    STATUS reg:
+  //    | B7 | B6 |      B5     | B4 | B3 | B2 | B1 | B0 |
+  //    | RO | RO | EN_SHIPMODE | RO | RO | RO | RO | RO |
+
+  uint8_t status_reg = _pmic.getStatus();
+  status_reg |= 0x20;
+  _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_STATUS, status_reg);
+}
+
 uint8_t nicla::readLDOreg()
 {
   uint8_t ldo_reg = _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_LDO_CTRL);

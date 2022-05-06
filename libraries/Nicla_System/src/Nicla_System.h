@@ -15,6 +15,7 @@ public:
   static bool enable3V3LDO();
   static bool enable1V8LDO();
   static bool disableLDO();
+  static bool enterShipMode();
 
   static RGBled leds;
   static BQ25120A _pmic;
