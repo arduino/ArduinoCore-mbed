@@ -1,7 +1,7 @@
 From 595d3a1549244e709c75980a4d8f9a8cfcedb529 Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Wed, 2 Feb 2022 15:04:02 +0100
-Subject: [PATCH 132/138] NICLA_VISION: DISABLE debug log with FLOW_SILENT
+Subject: [PATCH 132/157] NICLA_VISION: DISABLE debug log with FLOW_SILENT
  macro
 
 ---
@@ -23,5 +23,5 @@ index 43e830d147..e0e4a8b6d8 100644
          "device_has_add": [
              "USBDEVICE",
 -- 
-2.25.1
+2.36.0
 

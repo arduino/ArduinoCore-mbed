@@ -1,7 +1,7 @@
 From 406c6ddcf2456647c316c7b4054149de15de7476 Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Tue, 18 Jan 2022 14:00:46 +0100
-Subject: [PATCH 120/138] Initial import of plug & trust library to
+Subject: [PATCH 120/157] Initial import of plug & trust library to
  COMPONENT_SE050
 
 ---
@@ -81110,5 +81110,5 @@ index 0000000000..50b2affed4
 +
 +#endif // SSS_HAVE_APPLET_SE05X_IOT
 -- 
-2.25.1
+2.36.0
 

@@ -1,7 +1,7 @@
 From 39818b178814b19fb63fc841edbee18facc0ebd8 Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Tue, 9 Nov 2021 09:20:36 +0100
-Subject: [PATCH 087/138] RP2040: Watchdog: get_reload_value returns 0 if wd is
+Subject: [PATCH 087/157] RP2040: Watchdog: get_reload_value returns 0 if wd is
  not properly configured
 
 ---
@@ -50,5 +50,5 @@ index 9263eb48d5..7526f6b608 100644
      return load_value;
  }
 -- 
-2.25.1
+2.36.0
 

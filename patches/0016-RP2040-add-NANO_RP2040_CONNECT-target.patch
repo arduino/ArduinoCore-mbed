@@ -1,7 +1,7 @@
 From da155e47b873ca2844201f68e8733dd7a2f85bf2 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Mon, 3 May 2021 10:56:43 +0200
-Subject: [PATCH 016/138] RP2040: add NANO_RP2040_CONNECT target
+Subject: [PATCH 016/157] RP2040: add NANO_RP2040_CONNECT target
 
 ---
  targets/CMakeLists.txt                        |   1 +
@@ -1031,5 +1031,5 @@ index 0bc010dbea..5bdddb968d 100644
          "version": "1",
          "public": false
 -- 
-2.25.1
+2.36.0
 

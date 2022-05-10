@@ -1,7 +1,7 @@
 From 9b076fd634a90f5e3da3b8171656881c8d1b7bc3 Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Tue, 20 Jul 2021 11:48:06 +0200
-Subject: [PATCH 098/138] Add time functions to Gemalto stack
+Subject: [PATCH 098/157] Add time functions to Gemalto stack
 
 ---
  .../cellular/framework/API/CellularDevice.h   |   6 +
@@ -235,5 +235,5 @@ index f8f892fccd..459bba8eb1 100644
      static BufferedSerial serial(MBED_CONF_GEMALTO_CINTERION_TX, MBED_CONF_GEMALTO_CINTERION_RX, MBED_CONF_GEMALTO_CINTERION_BAUDRATE);
  #if defined(MBED_CONF_GEMALTO_CINTERION_RTS) && defined(MBED_CONF_GEMALTO_CINTERION_CTS)
 -- 
-2.25.1
+2.36.0
 

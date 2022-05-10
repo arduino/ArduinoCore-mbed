@@ -1,7 +1,7 @@
 From b80637a1c74c2bd6a1782fd1f668e1ef13b8dbfe Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Wed, 30 Jun 2021 11:50:21 +0200
-Subject: [PATCH 064/138] RP2040: us_ticker: fix missing interrupts after 32bit
+Subject: [PATCH 064/157] RP2040: us_ticker: fix missing interrupts after 32bit
  wrap
 
 ---
@@ -67,5 +67,5 @@ index 00edf82830..b3b8497188 100644
 +    hardware_alarm_unclaim(alarm_num);
  }
 -- 
-2.25.1
+2.36.0
 

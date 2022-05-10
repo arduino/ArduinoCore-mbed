@@ -1,7 +1,7 @@
 From 171db2502ace376ee4b9326694bc927098b7249e Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Wed, 11 Aug 2021 12:14:57 +0200
-Subject: [PATCH 077/138] STM32: analogin: use critical section to protect PLL
+Subject: [PATCH 077/157] STM32: analogin: use critical section to protect PLL
  configuration
 
 ---
@@ -31,5 +31,5 @@ index 3fb41a7997..905e86006e 100644
      LL_HSEM_ReleaseLock(HSEM, CFG_HW_RCC_SEMID, HSEM_CR_COREID_CURRENT);
  #endif /* DUAL_CORE */
 -- 
-2.25.1
+2.36.0
 

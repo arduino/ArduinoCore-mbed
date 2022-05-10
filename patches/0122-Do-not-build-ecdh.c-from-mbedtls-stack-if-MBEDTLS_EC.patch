@@ -1,7 +1,7 @@
 From 6028f880d17340e000e1b5fa8018c3694ec61078 Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Wed, 19 Jan 2022 14:17:07 +0100
-Subject: [PATCH 122/138] Do not build ecdh.c from mbedtls stack if
+Subject: [PATCH 122/157] Do not build ecdh.c from mbedtls stack if
  MBEDTLS_ECDH_ALT is defined
 
 ---
@@ -28,5 +28,5 @@ index 9dfa868063..6cb53b4015 100644
 +#endif /* MBEDTLS_ECDH_ALT */
  #endif /* MBEDTLS_ECDH_C */
 -- 
-2.25.1
+2.36.0
 

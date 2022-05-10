@@ -1,7 +1,7 @@
 From 11b7e751ac1c3b05d81d2a0b428c355e78d9afab Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Mon, 16 Aug 2021 17:19:45 +0200
-Subject: [PATCH 076/138] STM32H7: CM4: avoid vtor relocation via define
+Subject: [PATCH 076/157] STM32H7: CM4: avoid vtor relocation via define
 
 ---
  .../STM32Cube_FW/system_stm32h7xx_dualcore_boot_cm4_cm7.c       | 2 +-
@@ -21,5 +21,5 @@ index 8e0017de2a..b4a4cc7826 100644
    SCB->VTOR = NVIC_FLASH_VECTOR_ADDRESS; // MBED
  #endif
 -- 
-2.25.1
+2.36.0
 

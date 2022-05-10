@@ -1,7 +1,7 @@
 From 7a040207fa7a36319e1d2e26516210d9cdc44d6c Mon Sep 17 00:00:00 2001
 From: Alexander Entinger <cto@lxrobotics.com>
 Date: Mon, 15 Feb 2021 15:51:03 +0100
-Subject: [PATCH 022/138] RP2040: add SPI support
+Subject: [PATCH 022/157] RP2040: add SPI support
 
 ---
  .../TARGET_RP2040/PeripheralPins.c            |  16 +--
@@ -207,5 +207,5 @@ index 596670be3d..98997cd193 100644
      },
      "NANO_RP2040_CONNECT": {
 -- 
-2.25.1
+2.36.0
 

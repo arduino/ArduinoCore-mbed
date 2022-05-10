@@ -1,7 +1,7 @@
 From 88e1023c6fb7197e529d3054b2dcb4bbdee8b73f Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Mon, 28 Mar 2022 11:02:58 +0200
-Subject: [PATCH 140/150] Fix Ethernet pins configuration
+Subject: [PATCH 140/157] Fix Ethernet pins configuration
 
 ---
  .../TARGET_PORTENTA_H7/stm32h7_eth_init.c     | 32 ++++++++++++++++---
@@ -65,5 +65,5 @@ index 3fbac0555f..643fc5acd3 100644
          GPIO_InitStruct.Pull = GPIO_NOPULL;
          GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
 -- 
-2.25.1
+2.36.0
 

@@ -1,7 +1,7 @@
 From 43be92f77f5c5e4ea6c6b9b3b9f9b1adc08bc2e3 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Thu, 10 Dec 2020 19:39:01 +0100
-Subject: [PATCH 010/138] Initial: support Portenta Beta
+Subject: [PATCH 010/157] Initial: support Portenta Beta
 
 TODO: add 27mhz clock configuration
 ---
@@ -22,5 +22,5 @@ index 8732ee0ba8..f79bc4f63f 100644
              "network-default-interface-type": "ETHERNET",
              "i2c_timing_value_algo": true
 -- 
-2.25.1
+2.36.0
 

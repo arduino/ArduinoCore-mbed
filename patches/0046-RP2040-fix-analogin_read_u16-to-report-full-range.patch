@@ -1,7 +1,7 @@
 From 9a0d8c43633c430586d416dcd36ec10df0dd0b6a Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Mon, 15 Mar 2021 15:48:37 +0100
-Subject: [PATCH 046/138] RP2040: fix analogin_read_u16 to report full range
+Subject: [PATCH 046/157] RP2040: fix analogin_read_u16 to report full range
 
 ---
  targets/TARGET_RASPBERRYPI/TARGET_RP2040/analogin_api.c | 6 +++---
@@ -39,5 +39,5 @@ index 4e95f4551f..e1773a065c 100644
  
  const PinMap *analogin_pinmap()
 -- 
-2.25.1
+2.36.0
 

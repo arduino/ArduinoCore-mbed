@@ -1,7 +1,7 @@
 From 06c1a6b204b856ef30ab78fdb8b4c5f20f6a6186 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Wed, 17 Feb 2021 14:57:44 +0100
-Subject: [PATCH 113/138] Initial: add Nicla Vision target
+Subject: [PATCH 113/157] Initial: add Nicla Vision target
 
 Add missing repo for BLE
 ---
@@ -35036,5 +35036,5 @@ index 7902341c2f..eb83ff264e 100644
          "inherits": ["PORTENTA_H7"],
          "core": "Cortex-M4F",
 -- 
-2.25.1
+2.36.0
 

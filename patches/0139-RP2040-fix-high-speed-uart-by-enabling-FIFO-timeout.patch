@@ -1,7 +1,8 @@
-From 9f9ee8b95b2a8c0d89dd8254cab720c319828aa4 Mon Sep 17 00:00:00 2001
+From 9ab6d5b194ad85cdf94af3f503a31fc259aa5ae5 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Mon, 7 Feb 2022 17:52:46 +0100
-Subject: [PATCH] RP2040: fix high speed uart by enabling FIFO + timeout
+Subject: [PATCH 139/157] RP2040: fix high speed uart by enabling FIFO +
+ timeout
 
 ---
  .../pico-sdk/rp2_common/hardware_uart/include/hardware/uart.h | 3 ++-
@@ -45,5 +46,5 @@ index 8d95f6c2a3..a6f01a6063 100644
  
  void serial_format(serial_t *obj, int data_bits, SerialParity parity, int stop_bits)
 -- 
-2.25.1
+2.36.0
 

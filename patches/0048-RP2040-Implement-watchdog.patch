@@ -1,7 +1,7 @@
 From 91ff42a82016c6739e43025adee4efd0072aae77 Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Mon, 15 Mar 2021 16:33:00 +0100
-Subject: [PATCH 048/138] RP2040: Implement watchdog
+Subject: [PATCH 048/157] RP2040: Implement watchdog
 
 ---
  .../TARGET_RP2040/watchdog_api.c              | 46 +++++++++++++++++++
@@ -74,5 +74,5 @@ index 6821974873..c9ddc9708f 100644
          ]
      },
 -- 
-2.25.1
+2.36.0
 

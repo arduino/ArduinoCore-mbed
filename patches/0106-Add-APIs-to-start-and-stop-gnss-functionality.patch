@@ -1,7 +1,7 @@
 From d306af5c6878e9ab76f7b665bd96152d8dccdf42 Mon Sep 17 00:00:00 2001
 From: Riccardo Rizzo <r.rizzo@arduino.cc>
 Date: Tue, 7 Sep 2021 12:33:02 +0200
-Subject: [PATCH 106/138] Add APIs to start and stop gnss functionality
+Subject: [PATCH 106/157] Add APIs to start and stop gnss functionality
 
 the usage of start and stop should allows for switching the usage of gnss with respect for lte gsm operations
 ---
@@ -97,5 +97,5 @@ index 163fa3193f..ffaed50184 100644
      mbed::Callback<void(char*)> _gnss_cb;
  
 -- 
-2.25.1
+2.36.0
 

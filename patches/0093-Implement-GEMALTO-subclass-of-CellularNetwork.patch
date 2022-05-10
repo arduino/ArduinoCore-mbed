@@ -1,7 +1,7 @@
 From c891a8f2eb9781002bc5c599f0d6ec362cdc1e4a Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Tue, 13 Jul 2021 18:17:13 +0200
-Subject: [PATCH 093/138] Implement GEMALTO subclass of CellularNetwork
+Subject: [PATCH 093/157] Implement GEMALTO subclass of CellularNetwork
 
 ---
  .../framework/device/CellularStateMachine.cpp |  6 ----
@@ -149,5 +149,5 @@ index 0000000000..8d5f49cf5a
 +
 +#endif // GEMALTO_CINTERION_CELLULARNETWORK_H_
 -- 
-2.25.1
+2.36.0
 

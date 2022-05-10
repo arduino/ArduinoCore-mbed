@@ -1,7 +1,7 @@
 From e317b33bcfdba8f083937eaf10d655c33689e2f5 Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Mon, 21 Feb 2022 11:33:44 +0100
-Subject: [PATCH 135/138] TLSSocketWrapper: Force correct cipher suite for
+Subject: [PATCH 135/157] TLSSocketWrapper: Force correct cipher suite for
  SE050 integration
 
 ---
@@ -23,5 +23,5 @@ index 48135fabf4..0826d05346 100644
      _sss_ks_ptr = &deviceCtx->ks;
  
 -- 
-2.25.1
+2.36.0
 

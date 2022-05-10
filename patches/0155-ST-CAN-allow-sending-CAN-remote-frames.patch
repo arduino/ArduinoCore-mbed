@@ -1,0 +1,29 @@
+From e8e2086a58f7a824c12f9f8c1a04c7ae4e05200f Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Tue, 10 May 2022 18:07:10 +0200
+Subject: [PATCH 155/157] ST: CAN: allow sending CAN remote frames
+
+---
+ targets/TARGET_STM/can_api.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/targets/TARGET_STM/can_api.c b/targets/TARGET_STM/can_api.c
+index ad00e39a2b..a5715f2b0d 100644
+--- a/targets/TARGET_STM/can_api.c
++++ b/targets/TARGET_STM/can_api.c
+@@ -408,7 +408,11 @@ int can_write(can_t *obj, CAN_Message msg, int cc)
+         TxHeader.IdType = FDCAN_EXTENDED_ID;
+     }
+ 
+-    TxHeader.TxFrameType = FDCAN_DATA_FRAME;
++    if (msg.type == CANData) {
++        TxHeader.TxFrameType = FDCAN_DATA_FRAME;
++    } else {
++        TxHeader.TxFrameType = FDCAN_REMOTE_FRAME;
++    }
+     TxHeader.DataLength = msg.len << 16;
+     TxHeader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
+     TxHeader.BitRateSwitch = FDCAN_BRS_OFF;
+-- 
+2.36.0
+

@@ -1,7 +1,7 @@
 From b2a9bdcffe701c86842ad701ec8c43a7e5930e04 Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Fri, 30 Jul 2021 17:22:36 +0200
-Subject: [PATCH 086/138] RP2040: Add basic RTC support
+Subject: [PATCH 086/157] RP2040: Add basic RTC support
 
 ---
  .../hardware_rtc/include/hardware/rtc.h       |  2 +-
@@ -147,5 +147,5 @@ index 89205a0716..7902341c2f 100644
              "WATCHDOG",
              "USBDEVICE",
 -- 
-2.25.1
+2.36.0
 

@@ -1,7 +1,7 @@
 From 769b6335b99407afc5243f0b0e929bfce008def7 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Fri, 27 Nov 2020 10:34:42 +0100
-Subject: [PATCH 080/138] Add NICLA target
+Subject: [PATCH 080/157] Add NICLA target
 
 ---
  .../blockdevice/COMPONENT_SD/mbed_lib.json    |   8 +-
@@ -307,5 +307,5 @@ index 687c15a05a..9b20540219 100644
          "inherits": [
              "Target"
 -- 
-2.25.1
+2.36.0
 

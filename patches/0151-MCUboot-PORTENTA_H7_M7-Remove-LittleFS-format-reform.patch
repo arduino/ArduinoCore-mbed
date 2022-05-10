@@ -1,0 +1,102 @@
+From 5c6217a65136ee255e5ba67bc86dd0909b25cc78 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Mon, 4 Apr 2022 10:12:28 +0200
+Subject: [PATCH 151/157] MCUboot:PORTENTA_H7_M7:Remove LittleFS format,
+ reformat, rename
+
+---
+ .../filesystem/littlefs/include/littlefs/LittleFileSystem.h | 6 ++++++
+ storage/filesystem/littlefs/source/LittleFileSystem.cpp     | 4 ++++
+ 2 files changed, 10 insertions(+)
+
+diff --git a/storage/filesystem/littlefs/include/littlefs/LittleFileSystem.h b/storage/filesystem/littlefs/include/littlefs/LittleFileSystem.h
+index c1e3a3c299..0051f18da6 100644
+--- a/storage/filesystem/littlefs/include/littlefs/LittleFileSystem.h
++++ b/storage/filesystem/littlefs/include/littlefs/LittleFileSystem.h
+@@ -65,6 +65,7 @@ public:
+ 
+     virtual ~LittleFileSystem();
+ 
++#if !defined(TARGET_PORTENTA_H7_M7) || !defined(MCUBOOT_BOOTLOADER_BUILD)
+     /** Format a block device with the LittleFileSystem.
+      *
+      *  The block device to format should be mounted when this function is called.
+@@ -94,6 +95,7 @@ public:
+                       lfs_size_t block_size = MBED_LFS_BLOCK_SIZE,
+                       lfs_size_t lookahead = MBED_LFS_LOOKAHEAD);
+ 
++#endif
+     /** Mount a file system to a block device.
+      *
+      *  @param bd       Block device to mount to.
+@@ -107,6 +109,7 @@ public:
+      */
+     virtual int unmount();
+ 
++#if !defined(TARGET_PORTENTA_H7_M7) || !defined(MCUBOOT_BOOTLOADER_BUILD)
+     /** Reformat a file system. Results in an empty and mounted file system.
+      *
+      *  @param bd
+@@ -118,6 +121,7 @@ public:
+      *  @return         0 on success, negative error code on failure
+      */
+     virtual int reformat(mbed::BlockDevice *bd);
++#endif
+ 
+     /** Remove a file from the file system.
+      *
+@@ -126,6 +130,7 @@ public:
+      */
+     virtual int remove(const char *path);
+ 
++#if !defined(TARGET_PORTENTA_H7_M7) || !defined(MCUBOOT_BOOTLOADER_BUILD)
+     /** Rename a file in the file system.
+      *
+      *  @param path     The name of the file to rename.
+@@ -133,6 +138,7 @@ public:
+      *  @return         0 on success, negative error code on failure
+      */
+     virtual int rename(const char *path, const char *newpath);
++#endif
+ 
+     /** Store information about the file in a stat structure
+      *
+diff --git a/storage/filesystem/littlefs/source/LittleFileSystem.cpp b/storage/filesystem/littlefs/source/LittleFileSystem.cpp
+index 752fa99aa5..3b808cf017 100644
+--- a/storage/filesystem/littlefs/source/LittleFileSystem.cpp
++++ b/storage/filesystem/littlefs/source/LittleFileSystem.cpp
+@@ -241,6 +241,7 @@ int LittleFileSystem::unmount()
+     return res;
+ }
+ 
++#if !defined(TARGET_PORTENTA_H7_M7) || !defined(MCUBOOT_BOOTLOADER_BUILD)
+ int LittleFileSystem::format(BlockDevice *bd,
+                              lfs_size_t read_size, lfs_size_t prog_size,
+                              lfs_size_t block_size, lfs_size_t lookahead)
+@@ -338,6 +339,7 @@ int LittleFileSystem::reformat(BlockDevice *bd)
+     _mutex.unlock();
+     return 0;
+ }
++#endif
+ 
+ int LittleFileSystem::remove(const char *filename)
+ {
+@@ -349,6 +351,7 @@ int LittleFileSystem::remove(const char *filename)
+     return lfs_toerror(err);
+ }
+ 
++#if !defined(TARGET_PORTENTA_H7_M7) || !defined(MCUBOOT_BOOTLOADER_BUILD)
+ int LittleFileSystem::rename(const char *oldname, const char *newname)
+ {
+     _mutex.lock();
+@@ -358,6 +361,7 @@ int LittleFileSystem::rename(const char *oldname, const char *newname)
+     _mutex.unlock();
+     return lfs_toerror(err);
+ }
++#endif
+ 
+ int LittleFileSystem::mkdir(const char *name, mode_t mode)
+ {
+-- 
+2.36.0
+

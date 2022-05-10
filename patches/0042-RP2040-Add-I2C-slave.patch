@@ -1,7 +1,7 @@
 From 9f83b82d9a12b90a498eda5d1b2f0dc1b97d49d1 Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Thu, 25 Feb 2021 12:44:31 +0100
-Subject: [PATCH 042/138] RP2040: Add I2C slave
+Subject: [PATCH 042/157] RP2040: Add I2C slave
 
 ---
  .../TARGET_RP2040/i2c_api.c                   | 145 +++++++++++++++++-
@@ -269,5 +269,5 @@ index 05e1580d8b..4e02c7ebdc 100644
              "PORT_IN",
              "PORT_OUT",
 -- 
-2.25.1
+2.36.0
 

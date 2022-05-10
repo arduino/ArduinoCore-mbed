@@ -1,7 +1,7 @@
 From 565b2630241f74b3b98e28c0cdd23edae227fd87 Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Thu, 4 Mar 2021 11:05:14 +0100
-Subject: [PATCH 035/138] RP2040: Check alignment + avoid passing const buf to
+Subject: [PATCH 035/157] RP2040: Check alignment + avoid passing const buf to
  flash_range_program()
 
 ---
@@ -50,5 +50,5 @@ index 01f71958c5..fb1a28dd7f 100644
      return 0;
  
 -- 
-2.25.1
+2.36.0
 

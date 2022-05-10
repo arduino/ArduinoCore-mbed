@@ -1,7 +1,7 @@
 From 36cce1ae5736533f43eb5abdef37dd83c585f51a Mon Sep 17 00:00:00 2001
 From: Giampaolo Mancini <giampaolo@trampolineup.com>
 Date: Thu, 3 Feb 2022 09:50:08 +0100
-Subject: [PATCH 110/138] Implement Udp_RemClient for TX62
+Subject: [PATCH 110/157] Implement Udp_RemClient for TX62
 
 ---
  .../GEMALTO_CINTERION_CellularStack.cpp       | 48 +++++++++++++++++--
@@ -68,5 +68,5 @@ index 2993285049..1eca8f54e0 100644
              char *ip_start = ip_address;
              char *ip_stop;
 -- 
-2.25.1
+2.36.0
 

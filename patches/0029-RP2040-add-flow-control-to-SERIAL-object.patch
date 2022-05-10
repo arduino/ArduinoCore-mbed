@@ -1,7 +1,7 @@
 From 13b653de264b6dc463062fb82a4af831b6163dcb Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Tue, 23 Feb 2021 16:48:58 +0100
-Subject: [PATCH 029/138] RP2040: add flow control to SERIAL object
+Subject: [PATCH 029/157] RP2040: add flow control to SERIAL object
 
 ---
  targets/targets.json | 1 +
@@ -20,5 +20,5 @@ index 5d7c81b24a..54897ff1bd 100644
              "USBDEVICE"
          ]
 -- 
-2.25.1
+2.36.0
 

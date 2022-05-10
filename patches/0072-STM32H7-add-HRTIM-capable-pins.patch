@@ -1,7 +1,7 @@
 From d15ad9a562ad15948d7e54337f8b57b400e4c70a Mon Sep 17 00:00:00 2001
 From: Riccardo Rizzo <r.rizzo@arduino.cc>
 Date: Mon, 28 Jun 2021 15:05:40 +0200
-Subject: [PATCH 072/138] STM32H7: add HRTIM capable pins
+Subject: [PATCH 072/157] STM32H7: add HRTIM capable pins
 
 ---
  targets/TARGET_STM/PeripheralPins.h              |  8 ++++++++
@@ -62,5 +62,5 @@ index 26cd944066..9e7339bcdb 100644
  //*** SERIAL ***
  
 -- 
-2.25.1
+2.36.0
 

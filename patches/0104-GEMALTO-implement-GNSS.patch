@@ -1,7 +1,7 @@
 From 1f912a74751705c0a85538504242f06757f4293c Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Wed, 11 Aug 2021 12:15:43 +0200
-Subject: [PATCH 104/138] GEMALTO: implement GNSS
+Subject: [PATCH 104/157] GEMALTO: implement GNSS
 
 ---
  .../GEMALTO_CINTERION_CellularStack.cpp       | 36 +++++++++++++++++++
@@ -96,5 +96,5 @@ index b0ae8d23e1..163fa3193f 100644
      hostbyname_cb_t _dns_callback;
      nsapi_version_t _dns_version;
 -- 
-2.25.1
+2.36.0
 

@@ -1,7 +1,7 @@
 From c9ea188ab6fedefa03443a6cb336e70e809a34da Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Thu, 26 Aug 2021 15:40:48 +0200
-Subject: [PATCH 145/150] Optimize HAL_RCCEx_PeriphCLKConfig using only HAL
+Subject: [PATCH 145/157] Optimize HAL_RCCEx_PeriphCLKConfig using only HAL
  enabled modules
 
 ---
@@ -221,5 +221,5 @@ index afde46b3b8..c349750263 100644
    if (status == HAL_OK)
    {
 -- 
-2.25.1
+2.36.0
 

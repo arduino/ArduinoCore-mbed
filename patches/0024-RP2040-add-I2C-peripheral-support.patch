@@ -1,7 +1,7 @@
 From d6cbdb2efee07a2ae881023b42522a71d9b54eb9 Mon Sep 17 00:00:00 2001
 From: Alexander Entinger <cto@lxrobotics.com>
 Date: Tue, 16 Feb 2021 06:29:59 +0100
-Subject: [PATCH 024/138] RP2040: add I2C peripheral support
+Subject: [PATCH 024/157] RP2040: add I2C peripheral support
 
 ---
  .../TARGET_RP2040/i2c_api.c                   | 88 +++++++++++++++++++
@@ -129,5 +129,5 @@ index 98997cd193..3f8b505fd3 100644
              "PORT_OUT",
              "SERIAL",
 -- 
-2.25.1
+2.36.0
 

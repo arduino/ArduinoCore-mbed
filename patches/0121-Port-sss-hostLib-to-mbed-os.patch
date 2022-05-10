@@ -1,7 +1,7 @@
 From 97718d517e09cab6dfdd1bbd1e4f530b8af30c51 Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Tue, 18 Jan 2022 14:59:17 +0100
-Subject: [PATCH 121/138] Port sss hostLib to mbed-os
+Subject: [PATCH 121/157] Port sss hostLib to mbed-os
 
 ---
  .../hostlib/hostLib/libCommon/log/nxLog.c     |  41 +-
@@ -1179,5 +1179,5 @@ index 7613140051..cabfdff7d3 100644
      memset(context, 0, sizeof(*context));
  }
 -- 
-2.25.1
+2.36.0
 

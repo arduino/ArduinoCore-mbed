@@ -1,7 +1,7 @@
 From 4b16b9a73aad76923101b705c35becf67a2fa447 Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Tue, 24 Aug 2021 17:03:39 +0200
-Subject: [PATCH 143/150] MCUboot:PORTENTA_H7_M7:Change ST HAL configuration
+Subject: [PATCH 143/157] MCUboot:PORTENTA_H7_M7:Change ST HAL configuration
  removing unnecessary modules
 
 ---
@@ -98,5 +98,5 @@ index afcfc24210..524bb2dd52 100644
  /* ########################## Oscillator Values adaptation ####################*/
  /**
 -- 
-2.25.1
+2.36.0
 

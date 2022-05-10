@@ -1,7 +1,7 @@
 From 94a3f41e7ad63ba27576c1fedc8ab5841434b00d Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Tue, 23 Feb 2021 16:52:04 +0100
-Subject: [PATCH 030/138] RP2040: add lp and us timer
+Subject: [PATCH 030/157] RP2040: add lp and us timer
 
 lptimer is deactivated since it's meant to run at 1hz :|
 ---
@@ -251,5 +251,5 @@ index 54897ff1bd..7859268c9c 100644
          ]
      },
 -- 
-2.25.1
+2.36.0
 

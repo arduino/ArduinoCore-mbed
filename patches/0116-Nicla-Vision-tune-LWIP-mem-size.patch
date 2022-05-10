@@ -1,7 +1,7 @@
 From 50fde62150c50372001e6bf9e1245efbb9d6869d Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Fri, 24 Dec 2021 09:53:40 +0100
-Subject: [PATCH 116/138] Nicla Vision: tune LWIP mem size
+Subject: [PATCH 116/157] Nicla Vision: tune LWIP mem size
 
 ---
  connectivity/lwipstack/mbed_lib.json | 3 +++
@@ -22,5 +22,5 @@ index 6e725819b4..71df8d5449 100644
              "mem-size": 36560
          },
 -- 
-2.25.1
+2.36.0
 

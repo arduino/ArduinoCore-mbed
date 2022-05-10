@@ -1,7 +1,7 @@
 From e9c4f48ec5636ff31b1a45b629c948e7430d694a Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Thu, 23 Sep 2021 15:16:10 +0200
-Subject: [PATCH 084/138] BlockDevice: add mbed namespace to function
+Subject: [PATCH 084/157] BlockDevice: add mbed namespace to function
  signatures
 
 ---
@@ -50,5 +50,5 @@ index bdbcae9e38..8b7e89b2d4 100644
  {
      uint8_t param_table[SFDP_BASIC_PARAMS_TBL_SIZE]; /* Up To 20 DWORDS = 80 Bytes */
 -- 
-2.25.1
+2.36.0
 

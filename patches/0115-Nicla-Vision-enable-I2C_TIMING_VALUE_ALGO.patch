@@ -1,7 +1,7 @@
 From 3497578cddc9b5b048e1a9c35cac17ff3bf9cdd1 Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Mon, 20 Sep 2021 17:30:54 +0200
-Subject: [PATCH 115/138] Nicla Vision: enable I2C_TIMING_VALUE_ALGO
+Subject: [PATCH 115/157] Nicla Vision: enable I2C_TIMING_VALUE_ALGO
 
 ---
  targets/targets.json | 3 ++-
@@ -22,5 +22,5 @@ index 4458fbb207..884f508e46 100644
          "components_add": [
              "QSPIF",
 -- 
-2.25.1
+2.36.0
 
