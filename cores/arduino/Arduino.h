@@ -112,6 +112,17 @@ extern analogin_config_t adcCurrentConfig;
 #define Serial3 _UART3_
 #define Serial4 _UART4_
 
+#if defined(RPC_SERIAL)
+#undef Serial
+#if __has_include("RPC.h")
+#include "SerialRPC.h"
+#define Serial SerialRPC
+#else
+extern ErrorSerialClass ErrorSerial;
+#define Serial ErrorSerial
+#endif
+#endif
+
 #include "overloads.h"
 #endif
 

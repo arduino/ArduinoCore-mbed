@@ -1,5 +1,8 @@
-#include "RPC.h"
+#ifndef __SERIAL_RPC__
+#define __SERIAL_RPC__
+
 #include "Arduino.h"
+#include <vector>
 
 namespace arduino {
 
@@ -29,10 +32,16 @@ public:
 	  }
 	}
 
+	int begin(long unsigned int = 0, uint16_t = 0);
+	size_t write(uint8_t* buf, size_t len);
+
 	size_t write(uint8_t c) {
 		return write(&c, 1);
 	}
 
+	size_t write(const uint8_t* buf, size_t len) override {
+		return write((uint8_t*)buf, len);
+	}
 	size_t write(const char* buf, size_t len) {
 		return write((uint8_t*)buf, len);
 	}
@@ -40,28 +49,9 @@ public:
 		return write((uint8_t*)buf, len);
 	}
 
-	size_t write(uint8_t* buf, size_t len) {
-		tx_buffer.clear();
-		for (size_t i=0; i < len; i++) {
-			tx_buffer.push_back(buf[i]);
-		}
-		RPC.call("on_write", tx_buffer);
-		return len;
-	}
-
 	using Print::write;
 
-	int begin() {
-		if (RPC.begin() == 0) {
-			return 0;
-		}
-		RPC.bind("on_write", mbed::callback(this, &SerialRPCClass::onWrite));
-		return 1;
-	}
-
-	operator bool() {
-		return RPC;
-	}
+	operator bool();
 
     void attach(void (*fptr)(void))
     {
@@ -73,8 +63,10 @@ public:
 private:
    	mbed::Callback<void()> _rx;
 	RingBufferN<1024> rx_buffer;
-	std::vector<uint8_t> tx_buffer;
+	std::vector<char> tx_buffer;
 };
 }
 
 extern arduino::SerialRPCClass SerialRPC;
+
+#endif

@@ -202,6 +202,9 @@
           "boards": [
             {
               "name": "Arduino Portenta H7"
+            },
+            {
+              "name": "Arduino Portenta X8"
             }
           ],
           "toolsDependencies": [
@@ -224,6 +227,11 @@
               "packager": "arduino",
               "version": "1.8.0-arduino",
               "name": "imgtool"
+            },
+            {
+              "packager": "arduino",
+              "version": "32.0.0",
+              "name": "adb"
             }
           ]
         },

@@ -11,8 +11,8 @@ void rpc::client::send_msgpack(RPCLIB_MSGPACK::sbuffer *buffer) {
   OPENAMP_send(&rp_endpoints[ENDPOINT_RAW], (const uint8_t*)buffer->data(), buffer->size());
 }
 
-static RingBufferN<256> intermediate_buffer;
-static RingBufferN<256> intermediate_buffer_resp;
+static RingBufferN<RPMSG_BUFFER_SIZE> intermediate_buffer;
+static RingBufferN<RPMSG_BUFFER_SIZE> intermediate_buffer_resp;
 //static uint8_t intermediate_buffer_resp[256];
 static rtos::Mutex rx_mtx;
 
@@ -139,7 +139,7 @@ static void disableCM4Autoboot() {
   }
 }
 
-int RPCClass::begin() {
+int RPCClass::begin(long unsigned int np, uint16_t nd) {
 
 	OpenAMP_MPU_Config();
 
@@ -149,13 +149,13 @@ int RPCClass::begin() {
   // Ideally this should execute only once
   disableCM4Autoboot();
 
-	eventThread = new rtos::Thread(osPriorityHigh);
+	eventThread = new rtos::Thread(osPriorityHigh, 4096);
 	eventThread->start(&eventHandler);
 
-  dispatcherThread = new rtos::Thread(osPriorityNormal);
+  dispatcherThread = new rtos::Thread(osPriorityNormal, 4096);
   dispatcherThread->start(mbed::callback(this, &RPCClass::dispatch));
 
-  responseThread = new rtos::Thread(osPriorityNormal);
+  responseThread = new rtos::Thread(osPriorityNormal, 4096);
   responseThread->start(mbed::callback(this, &RPCClass::response));
 
 	/* Initialize OpenAmp and libmetal libraries */
@@ -178,8 +178,8 @@ int RPCClass::begin() {
 	* The rpmsg service is initiate by the remote processor, on H7 new_service_cb
 	* callback is received on service creation. Wait for the callback
 	*/
-  OPENAMP_Wait_EndPointready(&rp_endpoints[ENDPOINT_RAW], HAL_GetTick() + 500);
-  OPENAMP_Wait_EndPointready(&rp_endpoints[ENDPOINT_RESPONSE], HAL_GetTick() + 500);
+  OPENAMP_Wait_EndPointready(&rp_endpoints[ENDPOINT_RAW], millis() + 500);
+  OPENAMP_Wait_EndPointready(&rp_endpoints[ENDPOINT_RESPONSE], millis() + 500);
 
 	// Send first dummy message to enable the channel
 	uint8_t message = 0x00;
@@ -194,15 +194,15 @@ int RPCClass::begin() {
 
 #ifdef CORE_CM4
 
-int RPCClass::begin() {
+int RPCClass::begin(long unsigned int np, uint16_t nd) {
 
-  eventThread = new rtos::Thread(osPriorityHigh);
+  eventThread = new rtos::Thread(osPriorityHigh, 4096);
   eventThread->start(&eventHandler);
 
-  dispatcherThread = new rtos::Thread(osPriorityNormal);
+  dispatcherThread = new rtos::Thread(osPriorityNormal, 4096);
   dispatcherThread->start(mbed::callback(this, &RPCClass::dispatch));
 
-  responseThread = new rtos::Thread(osPriorityNormal);
+  responseThread = new rtos::Thread(osPriorityNormal, 4096);
   responseThread->start(mbed::callback(this, &RPCClass::response));
 
   /* Initialize OpenAmp and libmetal libraries */
@@ -241,7 +241,7 @@ void RPCClass::response() {
   }
 
   while (true) {
-    osEvent v = osSignalWait(0, osWaitForever);
+    osSignalWait(0, osWaitForever);
 
 {
       RPCLIB_MSGPACK::unpacker pac;
@@ -286,7 +286,7 @@ void RPCClass::dispatch() {
   dispatcherThreadId = osThreadGetId();
 
   while (true) {
-    osEvent v = osSignalWait(0, osWaitForever);
+    osSignalWait(0, osWaitForever);
 
 {
     RPCLIB_MSGPACK::unpacker pac;
