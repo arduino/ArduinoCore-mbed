@@ -14,7 +14,7 @@ extern "C" {
 #include "pdm.pio.h"
 
 // Hardware peripherals used
-uint dmaChannel = 0;
+const uint dmaChannel = dma_claim_unused_channel(true);
 PIO pio = pio0;
 uint sm = 0;
 
