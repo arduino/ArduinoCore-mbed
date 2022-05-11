@@ -1,0 +1,48 @@
+From 6959b7db85d808b747949b528289eb9220eae0d5 Mon Sep 17 00:00:00 2001
+From: Giampaolo Mancini <giampaolo@trampolineup.com>
+Date: Fri, 29 Apr 2022 17:13:01 +0200
+Subject: [PATCH 159/159] Enable Watchdog for NICLA
+
+---
+ .../TARGET_MCU_NRF52832/config/sdk_config.h          | 12 ++++++++++++
+ targets/targets.json                                 |  1 +
+ 2 files changed, 13 insertions(+)
+
+diff --git a/targets/TARGET_NORDIC/TARGET_NRF5x/TARGET_NRF52/TARGET_MCU_NRF52832/config/sdk_config.h b/targets/TARGET_NORDIC/TARGET_NRF5x/TARGET_NRF52/TARGET_MCU_NRF52832/config/sdk_config.h
+index b1112d715a..dea0276ddb 100644
+--- a/targets/TARGET_NORDIC/TARGET_NRF5x/TARGET_NRF52/TARGET_MCU_NRF52832/config/sdk_config.h
++++ b/targets/TARGET_NORDIC/TARGET_NRF5x/TARGET_NRF52/TARGET_MCU_NRF52832/config/sdk_config.h
+@@ -4487,6 +4487,18 @@
+ #define NRFX_WDT_CONFIG_LOG_LEVEL 3
+ #endif
+ 
++
++// <e> NRFX_WDT_CONFIG_NO_IRQ - Remove WDT IRQ handling from WDT driver.
++//==========================================================
++
++// <0=> Include WDT IRQ handling
++// <1=> Remove WDT IRQ handling
++
++#ifndef NRFX_WDT_CONFIG_NO_IRQ
++#define NRFX_WDT_CONFIG_NO_IRQ 1
++#endif
++
++
+ // <o> NRFX_WDT_CONFIG_INFO_COLOR  - ANSI escape code prefix.
+  
+ // <0=> Default 
+diff --git a/targets/targets.json b/targets/targets.json
+index 45a6e1f001..a42b64a071 100644
+--- a/targets/targets.json
++++ b/targets/targets.json
+@@ -6763,6 +6763,7 @@
+         "components_add": [
+             "FLASHIAP"
+         ],
++        "device_has_add": ["WATCHDOG"],
+         "release_versions": ["5"],
+         "device_name": "nRF52832_xxAA",
+         "macros_add": [
+-- 
+2.36.0
+
