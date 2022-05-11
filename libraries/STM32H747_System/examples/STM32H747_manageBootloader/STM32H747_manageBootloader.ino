@@ -69,8 +69,8 @@ void setup() {
   wifi_available = bootloader_data[5];
 
 #if defined(ARDUINO_PORTENTA_H7_M7)
-  Serial.println("\nDo you want to update the default Arduino bootloader? Y/[n]");
-  Serial.println("If No, MCUboot bootloader will be updated.");
+  Serial.println("\nDo you want to install/update the default Arduino bootloader? Y/[n]");
+  Serial.println("Choosing \"No\", will install/update the MCUboot bootloader.");
   if(!waitResponse()) {
     Serial.println("\nMCUboot has been selected. Do you want to proceed? Y/[n]");
     if (waitResponse()) {
