@@ -1,6 +1,7 @@
 {
   "macros": [
-    "NRFX_GPIOTE_CONFIG_NUM_OF_LOW_POWER_EVENTS=8"
+    "NRFX_GPIOTE_CONFIG_NUM_OF_LOW_POWER_EVENTS=8",
+    "NRFX_WDT_ENABLED=1"
   ],
   "target_overrides": {
     "*": {
