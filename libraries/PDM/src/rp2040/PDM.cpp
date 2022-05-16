@@ -14,7 +14,7 @@ extern "C" {
 #include "pdm.pio.h"
 
 // Hardware peripherals used
-uint dmaChannel = 0;
+const uint dmaChannel = dma_claim_unused_channel(true);
 PIO pio = pio0;
 uint sm = 0;
 
@@ -200,27 +200,24 @@ void PDMClass::IrqHandler(bool halftranfer)
   int shadowIndex = rawBufferIndex ^ 1;
   dma_channel_set_write_addr(dmaChannel, rawBuffer[shadowIndex], true);
 
-  if (_doubleBuffer.available()) {
-    // buffer overflow, stop
-    return end();
-  }
+  if (!_doubleBuffer.available()) {
+    // fill final buffer with PCM samples
+    if (filter.Decimation == 128) {
+      Open_PDM_Filter_128(rawBuffer[rawBufferIndex], finalBuffer, 1, &filter);
+    } else {
+      Open_PDM_Filter_64(rawBuffer[rawBufferIndex], finalBuffer, 1, &filter);
+    }
 
-  // fill final buffer with PCM samples
-  if (filter.Decimation == 128) {
-    Open_PDM_Filter_128(rawBuffer[rawBufferIndex], finalBuffer, 1, &filter);
-  } else {
-    Open_PDM_Filter_64(rawBuffer[rawBufferIndex], finalBuffer, 1, &filter);
-  }
+    if (_cutSamples) {
+      memset(finalBuffer, 0, _cutSamples);
+      _cutSamples = 0;
+    }
 
-  if (_cutSamples) {
-    memset(finalBuffer, 0, _cutSamples);
-    _cutSamples = 0;
+    // swap final buffer and raw buffers' indexes
+    finalBuffer = (int16_t*)_doubleBuffer.data();
+    _doubleBuffer.swap(filter.nSamples * sizeof(int16_t));
+    rawBufferIndex = shadowIndex;
   }
-
-  // swap final buffer and raw buffers' indexes
-  finalBuffer = (int16_t*)_doubleBuffer.data();
-  _doubleBuffer.swap(filter.nSamples * sizeof(int16_t));
-  rawBufferIndex = shadowIndex;
 
   if (_onReceive) {
     _onReceive();
