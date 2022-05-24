@@ -1,0 +1,34 @@
+From d9e87b69a5f817da0ce653485acf7cc0cba23df5 Mon Sep 17 00:00:00 2001
+From: giulcioffi <g.cioffi@arduino.cc>
+Date: Fri, 13 May 2022 09:50:07 +0200
+Subject: [PATCH 167/171] RP2040: Change uart is_writable() logic to handle
+ FIFO
+
+---
+ .../pico-sdk/rp2_common/hardware_uart/include/hardware/uart.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_uart/include/hardware/uart.h b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_uart/include/hardware/uart.h
+index bce0d2f0f8..a274207ee4 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_uart/include/hardware/uart.h
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_uart/include/hardware/uart.h
+@@ -255,14 +255,14 @@ static inline void uart_set_fifo_enabled(uart_inst_t *uart, bool enabled) {
+ // ----------------------------------------------------------------------------
+ // Generic input/output
+ 
+-/*! \brief Determine if space is available in the TX FIFO
++/*! \brief Determine if the TX FIFO is empty.
+  *  \ingroup hardware_uart
+  *
+  * \param uart UART instance. \ref uart0 or \ref uart1
+  * \return false if no space available, true otherwise
+  */
+ static inline bool uart_is_writable(uart_inst_t *uart) {
+-    return !(uart_get_hw(uart)->fr & UART_UARTFR_TXFF_BITS);
++    return (uart_get_hw(uart)->fr & UART_UARTFR_TXFE_BITS);
+ }
+ 
+ /*! \brief Wait for the UART TX fifo to be drained
+-- 
+2.36.0
+

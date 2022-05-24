@@ -1,0 +1,34 @@
+From 0943923f6723151a487a0d7eb881ad6309121469 Mon Sep 17 00:00:00 2001
+From: giulcioffi <g.cioffi@arduino.cc>
+Date: Fri, 13 May 2022 09:53:51 +0200
+Subject: [PATCH 169/171] RP2040: adapt linker script to mbed
+
+---
+ .../pico-sdk/rp2_common/pico_standard_link/crt0.S  | 14 --------------
+ 1 file changed, 14 deletions(-)
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_standard_link/crt0.S b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_standard_link/crt0.S
+index d22620507e..704a5d9795 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_standard_link/crt0.S
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_standard_link/crt0.S
+@@ -322,17 +322,3 @@ __get_current_exception:
+     mrs  r0, ipsr
+     uxtb r0, r0
+     bx   lr
+-
+-// ----------------------------------------------------------------------------
+-// Stack/heap dummies to set size
+-
+-.section .stack
+-// align to allow for memory protection (although this alignment is pretty much ignored by linker script)
+-.align 5
+-    .equ StackSize, PICO_STACK_SIZE
+-.space StackSize
+-
+-.section .heap
+-.align 2
+-    .equ HeapSize, PICO_HEAP_SIZE
+-.space HeapSize
+-- 
+2.36.0
+

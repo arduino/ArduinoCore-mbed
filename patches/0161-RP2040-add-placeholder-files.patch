@@ -1,0 +1,41 @@
+From e986c7f5704a510b8d01a137b06890cda947d24d Mon Sep 17 00:00:00 2001
+From: giulcioffi <g.cioffi@arduino.cc>
+Date: Fri, 13 May 2022 10:34:03 +0200
+Subject: [PATCH 161/171] RP2040: add placeholder files
+
+---
+ .../TARGET_RP2040/pico-sdk/boards/include/placeholder.h           | 0
+ .../pico-sdk/common/pico_stdlib/include/placeholder.h             | 0
+ .../TARGET_RP2040/pico-sdk/common/pico_time/include/placeholder.h | 0
+ .../rp2040/hardware_structs/include/hardware/placeholder.h        | 0
+ .../pico-sdk/rp2_common/hardware_spi/include/placeholder.h        | 0
+ .../pico-sdk/rp2_common/pico_float/include/placeholder.h          | 0
+ 6 files changed, 0 insertions(+), 0 deletions(-)
+ create mode 100644 targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/boards/include/placeholder.h
+ create mode 100644 targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/common/pico_stdlib/include/placeholder.h
+ create mode 100644 targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/common/pico_time/include/placeholder.h
+ create mode 100644 targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2040/hardware_structs/include/hardware/placeholder.h
+ create mode 100644 targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_spi/include/placeholder.h
+ create mode 100644 targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_float/include/placeholder.h
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/boards/include/placeholder.h b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/boards/include/placeholder.h
+new file mode 100644
+index 0000000000..e69de29bb2
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/common/pico_stdlib/include/placeholder.h b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/common/pico_stdlib/include/placeholder.h
+new file mode 100644
+index 0000000000..e69de29bb2
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/common/pico_time/include/placeholder.h b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/common/pico_time/include/placeholder.h
+new file mode 100644
+index 0000000000..e69de29bb2
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2040/hardware_structs/include/hardware/placeholder.h b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2040/hardware_structs/include/hardware/placeholder.h
+new file mode 100644
+index 0000000000..e69de29bb2
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_spi/include/placeholder.h b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_spi/include/placeholder.h
+new file mode 100644
+index 0000000000..e69de29bb2
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_float/include/placeholder.h b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_float/include/placeholder.h
+new file mode 100644
+index 0000000000..e69de29bb2
+-- 
+2.36.0
+

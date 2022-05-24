@@ -1,0 +1,37 @@
+From 91eed560561dbc597d5b0c2e77ea43beeb24dbc7 Mon Sep 17 00:00:00 2001
+From: giulcioffi <g.cioffi@arduino.cc>
+Date: Fri, 13 May 2022 09:52:35 +0200
+Subject: [PATCH 168/171] RP2040: don't initalize contructors during
+ runtime_init()
+
+---
+ .../pico-sdk/rp2_common/pico_runtime/runtime.c      | 13 -------------
+ 1 file changed, 13 deletions(-)
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_runtime/runtime.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_runtime/runtime.c
+index 50920bcad0..6a43cb5e18 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_runtime/runtime.c
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_runtime/runtime.c
+@@ -160,19 +160,6 @@ void runtime_init(void) {
+     spin_locks_reset();
+     irq_init_priorities();
+     alarm_pool_init_default();
+-
+-    // Start and end points of the constructor list,
+-    // defined by the linker script.
+-    extern void (*__init_array_start)(void);
+-    extern void (*__init_array_end)(void);
+-
+-    // Call each function in the list.
+-    // We have to take the address of the symbols, as __init_array_start *is*
+-    // the first function pointer, not the address of it.
+-    for (void (**p)(void) = &__init_array_start; p < &__init_array_end; ++p) {
+-        (*p)();
+-    }
+-
+ }
+ 
+ void __exit(__unused int status) {
+-- 
+2.36.0
+

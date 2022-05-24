@@ -1,0 +1,150 @@
+From 0cf54ddf757f09d31b1897c7ec3d0c6288eab024 Mon Sep 17 00:00:00 2001
+From: giulcioffi <g.cioffi@arduino.cc>
+Date: Fri, 13 May 2022 09:46:41 +0200
+Subject: [PATCH 164/171] RP2040: Prepend '_' to clashing functions names
+
+---
+ .../pico-sdk/rp2_common/hardware_gpio/gpio.c              | 8 ++++----
+ .../rp2_common/hardware_gpio/include/hardware/gpio.h      | 2 +-
+ .../TARGET_RP2040/pico-sdk/rp2_common/hardware_i2c/i2c.c  | 2 +-
+ .../rp2_common/hardware_i2c/include/hardware/i2c.h        | 2 +-
+ .../rp2_common/hardware_rtc/include/hardware/rtc.h        | 2 +-
+ .../TARGET_RP2040/pico-sdk/rp2_common/hardware_rtc/rtc.c  | 2 +-
+ .../rp2_common/hardware_spi/include/hardware/spi.h        | 2 +-
+ .../TARGET_RP2040/pico-sdk/rp2_common/hardware_spi/spi.c  | 2 +-
+ 8 files changed, 11 insertions(+), 11 deletions(-)
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_gpio/gpio.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_gpio/gpio.c
+index 2816b97185..f4c604eb25 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_gpio/gpio.c
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_gpio/gpio.c
+@@ -138,7 +138,7 @@ enum gpio_drive_strength gpio_get_drive_strength(uint gpio) {
+             >> PADS_BANK0_GPIO0_DRIVE_LSB);
+ }
+ 
+-static void gpio_irq_handler(void) {
++static void _gpio_irq_handler(void) {
+     io_irq_ctrl_hw_t *irq_ctrl_base = get_core_num() ?
+                                            &iobank0_hw->proc1_irq_ctrl : &iobank0_hw->proc0_irq_ctrl;
+     for (uint gpio = 0; gpio < NUM_BANK0_GPIOS; gpio++) {
+@@ -182,7 +182,7 @@ void gpio_set_irq_enabled_with_callback(uint gpio, uint32_t events, bool enabled
+     // TODO: Do we want to support a callback per GPIO pin?
+     // Install IRQ handler
+     _callbacks[get_core_num()] = callback;
+-    irq_set_exclusive_handler(IO_IRQ_BANK0, gpio_irq_handler);
++    irq_set_exclusive_handler(IO_IRQ_BANK0, _gpio_irq_handler);
+     irq_set_enabled(IO_IRQ_BANK0, true);
+ }
+ 
+@@ -211,7 +211,7 @@ void gpio_set_input_enabled(uint gpio, bool enabled) {
+         hw_clear_bits(&padsbank0_hw->io[gpio], PADS_BANK0_GPIO0_IE_BITS);
+ }
+ 
+-void gpio_init(uint gpio) {
++void _gpio_init(uint gpio) {
+     sio_hw->gpio_oe_clr = 1ul << gpio;
+     sio_hw->gpio_clr = 1ul << gpio;
+     gpio_set_function(gpio, GPIO_FUNC_SIO);
+@@ -220,7 +220,7 @@ void gpio_init(uint gpio) {
+ void gpio_init_mask(uint gpio_mask) {
+     for(uint i=0;i<32;i++) {
+         if (gpio_mask & 1) {
+-            gpio_init(i);
++            _gpio_init(i);
+         }
+         gpio_mask >>= 1;
+     }
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_gpio/include/hardware/gpio.h b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_gpio/include/hardware/gpio.h
+index 7037e85d99..87e75e7a5a 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_gpio/include/hardware/gpio.h
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_gpio/include/hardware/gpio.h
+@@ -412,7 +412,7 @@ void gpio_acknowledge_irq(uint gpio, uint32_t events);
+  *
+  * \param gpio GPIO number
+  */
+-void gpio_init(uint gpio);
++void _gpio_init(uint gpio);
+ 
+ /*! \brief Initialise multiple GPIOs (enabled I/O and set func to GPIO_FUNC_SIO)
+  *  \ingroup hardware_gpio
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_i2c/i2c.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_i2c/i2c.c
+index 95bcfea110..b89ddb58f4 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_i2c/i2c.c
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_i2c/i2c.c
+@@ -31,7 +31,7 @@ static inline bool i2c_reserved_addr(uint8_t addr) {
+     return (addr & 0x78) == 0 || (addr & 0x78) == 0x78;
+ }
+ 
+-uint i2c_init(i2c_inst_t *i2c, uint baudrate) {
++uint _i2c_init(i2c_inst_t *i2c, uint baudrate) {
+     i2c_reset(i2c);
+     i2c_unreset(i2c);
+     i2c->restart_on_next = false;
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_i2c/include/hardware/i2c.h b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_i2c/include/hardware/i2c.h
+index 23ff8f1697..73b2d0aca5 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_i2c/include/hardware/i2c.h
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_i2c/include/hardware/i2c.h
+@@ -95,7 +95,7 @@ extern i2c_inst_t i2c1_inst;
+  * \param baudrate Baudrate in Hz (e.g. 100kHz is 100000)
+  * \return Actual set baudrate
+  */
+-uint i2c_init(i2c_inst_t *i2c, uint baudrate);
++uint _i2c_init(i2c_inst_t *i2c, uint baudrate);
+ 
+ /*! \brief   Disable the I2C HW block
+  *  \ingroup hardware_i2c
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_rtc/include/hardware/rtc.h b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_rtc/include/hardware/rtc.h
+index 8757e36e0b..f9ec793d4c 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_rtc/include/hardware/rtc.h
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_rtc/include/hardware/rtc.h
+@@ -42,7 +42,7 @@ typedef void (*rtc_callback_t)(void);
+ /*! \brief Initialise the RTC system
+  *  \ingroup hardware_rtc
+  */
+-void rtc_init(void);
++void _rtc_init(void);
+ 
+ /*! \brief Set the RTC to the specified time
+  *  \ingroup hardware_rtc
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_rtc/rtc.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_rtc/rtc.c
+index 5429acd4b7..ea4e0c8733 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_rtc/rtc.c
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_rtc/rtc.c
+@@ -19,7 +19,7 @@ bool rtc_running(void) {
+     return (rtc_hw->ctrl & RTC_CTRL_RTC_ACTIVE_BITS);
+ }
+ 
+-void rtc_init(void) {
++void _rtc_init(void) {
+     // Get clk_rtc freq and make sure it is running
+     uint rtc_freq = clock_get_hz(clk_rtc);
+     assert(rtc_freq != 0);
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_spi/include/hardware/spi.h b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_spi/include/hardware/spi.h
+index e8dc95251a..eea7062131 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_spi/include/hardware/spi.h
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_spi/include/hardware/spi.h
+@@ -110,7 +110,7 @@ typedef enum {
+  * \param baudrate Baudrate requested in Hz
+  * \return the actual baud rate set
+  */
+-uint spi_init(spi_inst_t *spi, uint baudrate);
++uint _spi_init(spi_inst_t *spi, uint baudrate);
+ 
+ /*! \brief Deinitialise SPI instances
+  *  \ingroup hardware_spi
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_spi/spi.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_spi/spi.c
+index 880b534315..036b842fc0 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_spi/spi.c
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_spi/spi.c
+@@ -18,7 +18,7 @@ static inline void spi_unreset(spi_inst_t *spi) {
+     unreset_block_wait(spi == spi0 ? RESETS_RESET_SPI0_BITS : RESETS_RESET_SPI1_BITS);
+ }
+ 
+-uint spi_init(spi_inst_t *spi, uint baudrate) {
++uint _spi_init(spi_inst_t *spi, uint baudrate) {
+     spi_reset(spi);
+     spi_unreset(spi);
+ 
+-- 
+2.36.0
+

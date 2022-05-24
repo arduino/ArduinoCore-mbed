@@ -1,0 +1,91 @@
+From fdda5455cffab22425dfe63e614ba91d92de3ca8 Mon Sep 17 00:00:00 2001
+From: giulcioffi <g.cioffi@arduino.cc>
+Date: Fri, 13 May 2022 09:59:06 +0200
+Subject: [PATCH 162/171] RP2040: Fix multiple definitions errors and clashes
+
+---
+ targets/TARGET_RASPBERRYPI/TARGET_RP2040/.mbedignore      | 1 +
+ .../TARGET_RP2040/pico-sdk/host/boot_stage2.c             | 4 +---
+ .../Device/RaspberryPi/RP2040/Source/system_RP2040.c      | 2 +-
+ .../pico-sdk/rp2_common/pico_runtime/runtime.c            | 8 ++++----
+ 4 files changed, 7 insertions(+), 8 deletions(-)
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/.mbedignore b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/.mbedignore
+index 0581f97d6e..b5d6dbeacf 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/.mbedignore
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/.mbedignore
+@@ -5,6 +5,7 @@ pico-sdk/rp2_common/pico_printf*
+ pico-sdk/boards/include/boards/*
+ pico-sdk/common/pico_base/include/pico/*
+ pico-sdk/rp2_common/boot_stage2/*
++pico-sdk/rp2_common/pico_bootsel_via_double_reset/*
+ pico-sdk/rp2_common/pico_malloc/*
+ pico-sdk/rp2_common/pico_stdlib/
+ pico-sdk/rp2_common/pico_mem_ops/*
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/host/boot_stage2.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/host/boot_stage2.c
+index 52794b155c..cfa374bdb6 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/host/boot_stage2.c
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/host/boot_stage2.c
+@@ -1,3 +1 @@
+-void main() {
+-
+-}
+\ No newline at end of file
++// empty
+\ No newline at end of file
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/cmsis/stub/CMSIS/Device/RaspberryPi/RP2040/Source/system_RP2040.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/cmsis/stub/CMSIS/Device/RaspberryPi/RP2040/Source/system_RP2040.c
+index 055a0752c1..01b4c6d357 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/cmsis/stub/CMSIS/Device/RaspberryPi/RP2040/Source/system_RP2040.c
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/cmsis/stub/CMSIS/Device/RaspberryPi/RP2040/Source/system_RP2040.c
+@@ -33,7 +33,7 @@
+ /*---------------------------------------------------------------------------
+   System Core Clock Variable
+  *---------------------------------------------------------------------------*/
+-uint32_t SystemCoreClock; /* System Clock Frequency (Core Clock)*/
++uint32_t SystemCoreClock  = 125000000; /* System Clock Frequency (Core Clock)*/
+ 
+ /*---------------------------------------------------------------------------
+   System Core Clock function
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_runtime/runtime.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_runtime/runtime.c
+index 575e23e08b..50920bcad0 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_runtime/runtime.c
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_runtime/runtime.c
+@@ -175,7 +175,7 @@ void runtime_init(void) {
+ 
+ }
+ 
+-void _exit(__unused int status) {
++void __exit(__unused int status) {
+ #if PICO_ENTER_USB_BOOT_ON_EXIT
+     reset_usb_boot(0,0);
+ #else
+@@ -214,7 +214,7 @@ void *_sbrk(int incr) {
+ 
+ // exit is not useful... no desire to pull in __call_exitprocs
+ void exit(int status) {
+-    _exit(status);
++    __exit(status);
+ }
+ 
+ // incorrect warning from GCC 6
+@@ -225,7 +225,7 @@ void __assert_func(const char *file, int line, const char *func, const char *fai
+            failedexpr, file, line, func ? ", function: " : "",
+            func ? func : "");
+ 
+-    _exit(1);
++    __exit(1);
+ }
+ 
+ #pragma GCC diagnostic pop
+@@ -280,7 +280,7 @@ void __attribute__((noreturn)) __printflike(1, 0) panic(const char *fmt, ...) {
+ #endif
+     }
+ 
+-    _exit(1);
++    __exit(1);
+ }
+ #endif
+ 
+-- 
+2.36.0
+

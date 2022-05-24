@@ -1,0 +1,24 @@
+From 859e1c3a147efb70e19a90d2f9006b5d11e342d1 Mon Sep 17 00:00:00 2001
+From: giulcioffi <g.cioffi@arduino.cc>
+Date: Wed, 20 Apr 2022 15:47:27 +0200
+Subject: [PATCH 170/171] RP2040: watchdog: return timeout value in ms
+
+---
+ targets/TARGET_RASPBERRYPI/TARGET_RP2040/watchdog_api.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/watchdog_api.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/watchdog_api.c
+index 7526f6b608..7fc05cb0a4 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/watchdog_api.c
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/watchdog_api.c
+@@ -41,6 +41,7 @@ uint32_t hal_watchdog_get_reload_value(void)
+             load_value = 0xffffffu;
+         }
+     }
++    load_value = load_value / 1000 / 2;
+     return load_value;
+ }
+ 
+-- 
+2.36.0
+

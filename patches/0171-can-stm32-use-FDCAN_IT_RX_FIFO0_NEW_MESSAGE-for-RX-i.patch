@@ -1,0 +1,51 @@
+From fb9e38d41f947ac9844dd877a1b8e613bbea1eec Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Wed, 18 May 2022 15:59:30 +0200
+Subject: [PATCH 171/171] can: stm32: use FDCAN_IT_RX_FIFO0_NEW_MESSAGE for RX
+ interrupt
+
+---
+ targets/TARGET_STM/can_api.c | 13 -------------
+ 1 file changed, 13 deletions(-)
+
+diff --git a/targets/TARGET_STM/can_api.c b/targets/TARGET_STM/can_api.c
+index a5715f2b0d..1edf1d9bde 100644
+--- a/targets/TARGET_STM/can_api.c
++++ b/targets/TARGET_STM/can_api.c
+@@ -550,21 +550,12 @@ static void can_irq(CANName name, int id)
+             irq_handler(can_irq_contexts[id], IRQ_TX);
+         }
+     }
+-#if (defined FDCAN_IT_RX_BUFFER_NEW_MESSAGE)
+-    if (__HAL_FDCAN_GET_IT_SOURCE(&CanHandle, FDCAN_IT_RX_BUFFER_NEW_MESSAGE)) {
+-        if (__HAL_FDCAN_GET_FLAG(&CanHandle, FDCAN_IT_RX_BUFFER_NEW_MESSAGE)) {
+-            __HAL_FDCAN_CLEAR_FLAG(&CanHandle, FDCAN_IT_RX_BUFFER_NEW_MESSAGE);
+-            irq_handler(can_irq_contexts[id], IRQ_RX);
+-        }
+-    }
+-#else
+     if (__HAL_FDCAN_GET_IT_SOURCE(&CanHandle, FDCAN_IT_RX_FIFO0_NEW_MESSAGE)) {
+         if (__HAL_FDCAN_GET_FLAG(&CanHandle, FDCAN_IT_RX_FIFO0_NEW_MESSAGE)) {
+             __HAL_FDCAN_CLEAR_FLAG(&CanHandle, FDCAN_IT_RX_FIFO0_NEW_MESSAGE);
+             irq_handler(can_irq_contexts[id], IRQ_RX);
+         }
+     }
+-#endif
+     if (__HAL_FDCAN_GET_IT_SOURCE(&CanHandle, FDCAN_IT_ERROR_WARNING)) {
+         if (__HAL_FDCAN_GET_FLAG(&CanHandle, FDCAN_FLAG_ERROR_WARNING)) {
+             __HAL_FDCAN_CLEAR_FLAG(&CanHandle, FDCAN_FLAG_ERROR_WARNING);
+@@ -632,11 +623,7 @@ void can_irq_set(can_t *obj, CanIrqType type, uint32_t enable)
+             interrupts = FDCAN_IT_TX_COMPLETE;
+             break;
+         case IRQ_RX:
+-#if (defined FDCAN_IT_RX_BUFFER_NEW_MESSAGE)
+-            interrupts = FDCAN_IT_RX_BUFFER_NEW_MESSAGE;
+-#else
+             interrupts = FDCAN_IT_RX_FIFO0_NEW_MESSAGE;
+-#endif
+             break;
+         case IRQ_ERROR:
+             interrupts = FDCAN_IT_ERROR_WARNING;
+-- 
+2.36.0
+

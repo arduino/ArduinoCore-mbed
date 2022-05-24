@@ -1,0 +1,63 @@
+From 6dd64418f0e683c963324e483020fb9469c73a97 Mon Sep 17 00:00:00 2001
+From: giulcioffi <g.cioffi@arduino.cc>
+Date: Fri, 13 May 2022 09:49:28 +0200
+Subject: [PATCH 166/171] RP2040: i2c read() modification to make it compliant
+ with mbed APIs
+
+---
+ .../hardware_i2c/include/hardware/i2c.h       | 29 +++++++++++++++++--
+ 1 file changed, 26 insertions(+), 3 deletions(-)
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_i2c/include/hardware/i2c.h b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_i2c/include/hardware/i2c.h
+index 73b2d0aca5..258bad6a57 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_i2c/include/hardware/i2c.h
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_i2c/include/hardware/i2c.h
+@@ -11,6 +11,7 @@
+ #include "pico/time.h"
+ #include "hardware/structs/i2c.h"
+ #include "hardware/regs/dreq.h"
++#include "stdio.h"
+ 
+ // PICO_CONFIG: PARAM_ASSERTIONS_ENABLED_I2C, Enable/disable assertions in the I2C module, type=bool, default=0, group=hardware_i2c
+ #ifndef PARAM_ASSERTIONS_ENABLED_I2C
+@@ -304,12 +305,34 @@ static inline void i2c_write_raw_blocking(i2c_inst_t *i2c, const uint8_t *src, s
+  * Reads directly from the I2C RX FIFO which is mainly useful for
+  * slave-mode operation.
+  */
+-static inline void i2c_read_raw_blocking(i2c_inst_t *i2c, uint8_t *dst, size_t len) {
++static inline size_t i2c_read_raw_blocking(i2c_inst_t *i2c, uint8_t *dst, size_t len) {
++    size_t bytes_read = 0;
++
+     for (size_t i = 0; i < len; ++i) {
+-        while (!i2c_get_read_available(i2c))
++
++        while (!i2c_get_read_available(i2c)) {
+             tight_loop_contents();
+-        *dst++ = (uint8_t)i2c_get_hw(i2c)->data_cmd;
++        }
++
++        *dst = i2c_get_hw(i2c)->data_cmd;
++        bytes_read++;
++
++        //printf("dst %d ,", *dst);
++
++        //Check stop condition
++        int stop = (i2c->hw->raw_intr_stat & 0x00000200) >> 9;
++        if (stop && !i2c_get_read_available(i2c)) {
++            //Clear stop
++            int clear_stop = i2c_get_hw(i2c)->clr_stop_det;
++            printf("clear_stop reg: %d\n", clear_stop);
++            break;
++        } else {
++            *dst++;
++        }
++
+     }
++
++    return bytes_read;
+ }
+ 
+ /*! \brief Return the DREQ to use for pacing transfers to/from a particular I2C instance
+-- 
+2.36.0
+

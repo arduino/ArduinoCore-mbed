@@ -1,0 +1,82 @@
+From eefa7a72adf578167b6eab9f3ed96220a6599fcc Mon Sep 17 00:00:00 2001
+From: giulcioffi <g.cioffi@arduino.cc>
+Date: Fri, 13 May 2022 09:47:37 +0200
+Subject: [PATCH 165/171] RP2040: Change standard interrupt names and linker
+ script to be CMSIS compliant
+
+---
+ .../TARGET_RP2040/.mbedignore                 |  1 +
+ .../rp2_common/pico_standard_link/crt0.S      | 22 +++++++++----------
+ 2 files changed, 12 insertions(+), 11 deletions(-)
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/.mbedignore b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/.mbedignore
+index b5d6dbeacf..7207322652 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/.mbedignore
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/.mbedignore
+@@ -5,6 +5,7 @@ pico-sdk/rp2_common/pico_printf*
+ pico-sdk/boards/include/boards/*
+ pico-sdk/common/pico_base/include/pico/*
+ pico-sdk/rp2_common/boot_stage2/*
++pico-sdk/rp2_common/cmsis/*
+ pico-sdk/rp2_common/pico_bootsel_via_double_reset/*
+ pico-sdk/rp2_common/pico_malloc/*
+ pico-sdk/rp2_common/pico_stdlib/
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_standard_link/crt0.S b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_standard_link/crt0.S
+index f57ddfdefc..d22620507e 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_standard_link/crt0.S
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_standard_link/crt0.S
+@@ -29,7 +29,7 @@ __vectors:
+ .word __StackTop
+ .word _reset_handler
+ .word isr_nmi
+-.word isr_hardfault
++.word HardFault_Handler
+ .word isr_invalid // Reserved, should never fire
+ .word isr_invalid // Reserved, should never fire
+ .word isr_invalid // Reserved, should never fire
+@@ -37,11 +37,11 @@ __vectors:
+ .word isr_invalid // Reserved, should never fire
+ .word isr_invalid // Reserved, should never fire
+ .word isr_invalid // Reserved, should never fire
+-.word isr_svcall
++.word SVC_Handler
+ .word isr_invalid // Reserved, should never fire
+ .word isr_invalid // Reserved, should never fire
+-.word isr_pendsv
+-.word isr_systick
++.word PendSV_Handler
++.word SysTick_Handler
+ .word isr_irq0
+ .word isr_irq1
+ .word isr_irq2
+@@ -95,10 +95,10 @@ __default_isrs_start:
+ // these are separated out for clarity
+ decl_isr_bkpt isr_invalid
+ decl_isr_bkpt isr_nmi
+-decl_isr_bkpt isr_hardfault
+-decl_isr_bkpt isr_svcall
+-decl_isr_bkpt isr_pendsv
+-decl_isr_bkpt isr_systick
++decl_isr_bkpt HardFault_Handler
++decl_isr_bkpt SVC_Handler
++decl_isr_bkpt PendSV_Handler
++decl_isr_bkpt SysTick_Handler
+ 
+ .global __default_isrs_end
+ __default_isrs_end:
+@@ -250,9 +250,9 @@ bss_fill_test:
+ platform_entry: // symbol for stack traces
+     // Use 32-bit jumps, in case these symbols are moved out of branch range
+     // (e.g. if main is in SRAM and crt0 in flash)
+-    ldr r1, =runtime_init
+-    blx r1
+-    ldr r1, =main
++    //ldr r1, =runtime_init
++    //blx r1
++    ldr r1, =_start
+     blx r1
+     ldr r1, =exit
+     blx r1
+-- 
+2.36.0
+
