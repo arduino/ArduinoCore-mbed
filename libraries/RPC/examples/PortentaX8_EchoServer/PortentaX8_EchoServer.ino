@@ -3,7 +3,7 @@
 
 /*
  * This sketch demonstrates how to interact with the Portenta X8 Serial port (over USB)
- * On the board, launch both 'proxy' and 'example' binaries (from https://github.com/bcmi-labs/portentax8-m4-proxy)
+ * On the board, launch both 'proxy' and 'example' binaries (from https://github.com/arduino/portentax8-m4-proxy)
  * The M4 provides the 'subtract' API (which will be invoked by 'example'
  * It also provides a full duplex Serial-like interface that is proxies through the serial monitor
  * Last but not leas, when you write 'echo' the corresponding function in 'example' will be triggered
