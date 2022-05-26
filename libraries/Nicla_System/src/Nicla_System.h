@@ -16,6 +16,7 @@ public:
   static bool enable1V8LDO();
   static bool disableLDO();
   static bool enterShipMode();
+  static bool enableCharge(uint8_t mA = 20);
 
   static RGBled leds;
   static BQ25120A _pmic;
@@ -28,8 +29,9 @@ public:
 
 private:
   static void pingI2CThd();
-  static uint8_t readLDOreg();
+  static void checkChgReg();
   static rtos::Mutex i2c_mutex;
+  static uint8_t _chg_reg;
 };
 
 #endif
