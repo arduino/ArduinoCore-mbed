@@ -8,6 +8,8 @@
 #include <mbed.h>
 #include <I2C.h>
 
+#define USE_FASTCHG_TO_KICK_WATCHDOG 1
+
 class nicla {
 
 public:
@@ -16,6 +18,7 @@ public:
   static bool enable1V8LDO();
   static bool disableLDO();
   static bool enterShipMode();
+  static uint8_t readLDOreg();
   static bool enableCharge(uint8_t mA = 20);
 
   static RGBled leds;

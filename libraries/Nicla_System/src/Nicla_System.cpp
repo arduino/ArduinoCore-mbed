@@ -99,6 +99,11 @@ bool nicla::enterShipMode()
   _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_STATUS, status_reg);
 }
 
+uint8_t nicla::readLDOreg()
+{
+  return _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_LDO_CTRL);
+}
+
 bool nicla::enableCharge(uint8_t mA)
 {
   digitalWrite(p25, LOW);
