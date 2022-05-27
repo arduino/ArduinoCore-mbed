@@ -20,7 +20,7 @@ git clone git@github.com:arduino/ArduinoCore-API
 
 ### Update the `api` symlink
 
-Create a symlink to `ArduinoCore-API/api` in `$sketchbook/hardware/arduino/mbed/cores/arduino`.
+Create a symlink to `ArduinoCore-API/api` in `$sketchbook/hardware/arduino-git/mbed/cores/arduino`.
 
 ### Test things out
 
