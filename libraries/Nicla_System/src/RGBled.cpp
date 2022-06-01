@@ -71,6 +71,12 @@ void RGBled::setColor(RGBColors color)
   _red = 0x20;
   }
 
+  if(color == white) {
+  _blue = 0xFF;
+  _green = 0xFF;
+  _red = 0xFF;
+  }
+
   setColor(_red, _green, _blue);
 
 }
