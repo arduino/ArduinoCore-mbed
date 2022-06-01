@@ -13,20 +13,23 @@ RGBled nicla::leds;
 BQ25120A nicla::_pmic;
 rtos::Mutex nicla::i2c_mutex;
 bool nicla::started = false;
+uint8_t nicla::_chg_reg = 0;
 
 void nicla::pingI2CThd() {
   while(1) {
     // already protected by a mutex on Wire operations
-    readLDOreg();
+    checkChgReg();
     delay(10000);
   }
 }
 
 bool nicla::begin()
 {
+  pinMode(p25, OUTPUT);
   pinMode(P0_10, OUTPUT);
   digitalWrite(P0_10, HIGH);
   Wire1.begin();
+  _chg_reg = _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_FAST_CHG);
 #ifndef NO_NEED_FOR_WATCHDOG_THREAD
   static rtos::Thread th(osPriorityHigh, 1024, nullptr, "ping_thread");
   th.start(&nicla::pingI2CThd);
@@ -98,8 +101,26 @@ bool nicla::enterShipMode()
 
 uint8_t nicla::readLDOreg()
 {
-  uint8_t ldo_reg = _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_LDO_CTRL);
-  return ldo_reg;
+  return _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_LDO_CTRL);
+}
+
+bool nicla::enableCharge(uint8_t mA)
+{
+  digitalWrite(p25, LOW);
+  if (mA < 35) {
+    _chg_reg = ((mA-5) << 2);
+  } else {
+    _chg_reg = (((mA-40)/10) << 2) | 0x80;
+  }
+  _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_FAST_CHG, _chg_reg);
+  return _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_FAST_CHG) == _chg_reg;
+}
+
+void nicla::checkChgReg()
+{
+  if (_chg_reg != _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_FAST_CHG)) {
+    _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_FAST_CHG, _chg_reg);
+  }
 }
 
 I2CLed  LEDR(red);

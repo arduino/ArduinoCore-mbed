@@ -101,7 +101,7 @@ recipe.hooks.objcopy.postobjcopy.1.pattern={build.postbuild.cmd}
 ## Compute size
 recipe.size.pattern="{compiler.path}{compiler.size.cmd}" -A "{build.path}/{build.project_name}.elf"
 recipe.size.regex.data=^(?:\.data|\.bss)\s+([0-9]+).*
-recipe.size.regex=^(?:\.data|\.text)\S*?\s+([0-9]+).*
+recipe.size.regex=^(?:\.data|\.text|\.rodata)\S*?\s+([0-9]+).*
 
 ## Save hex
 recipe.output.tmp_file={build.project_name}.bin

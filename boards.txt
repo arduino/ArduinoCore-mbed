@@ -414,7 +414,7 @@ pico.upload.transport=
 pico.upload.use_1200bps_touch=true
 pico.upload.wait_for_upload_port=false
 pico.upload.native_usb=true
-pico.upload.maximum_size=16777216
+pico.upload.maximum_size=2097152
 pico.upload.maximum_data_size=270336
 
 pico.bootloader.tool=openocd

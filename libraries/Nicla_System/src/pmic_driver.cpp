@@ -11,16 +11,19 @@ uint8_t BQ25120A::getStatus()
 
 void BQ25120A::writeByte(uint8_t address, uint8_t subAddress, uint8_t data)
 {
+  digitalWrite(p25, HIGH);
   nicla::i2c_mutex.lock();
   Wire1.beginTransmission(address);
   Wire1.write(subAddress);
   Wire1.write(data);
   Wire1.endTransmission();
   nicla::i2c_mutex.unlock();
+  digitalWrite(p25, LOW);
 }
 
 uint8_t BQ25120A::readByte(uint8_t address, uint8_t subAddress)
 {
+  digitalWrite(p25, HIGH);
   nicla::i2c_mutex.lock();
   char response = 0xFF;
   Wire1.beginTransmission(address);
@@ -32,5 +35,6 @@ uint8_t BQ25120A::readByte(uint8_t address, uint8_t subAddress)
   while(!Wire1.available() && (millis() - start_time) < timeout) {}
   uint8_t ret = Wire1.read();
   nicla::i2c_mutex.unlock();
+  digitalWrite(p25, LOW);
   return ret;
 }
