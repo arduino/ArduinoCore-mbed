@@ -71,12 +71,12 @@
             },
             {
               "packager": "arduino",
-              "version": "1.0.2",
+              "version": "1.0.5",
               "name": "rp2040tools"
             },
             {
               "packager": "arduino",
-              "version": "1.8.0-arduino",
+              "version": "1.8.0-arduino.1",
               "name": "imgtool"
             }
           ]
@@ -121,12 +121,12 @@
             },
             {
               "packager": "arduino",
-              "version": "1.0.2",
+              "version": "1.0.5",
               "name": "rp2040tools"
             },
             {
               "packager": "arduino",
-              "version": "1.8.0-arduino",
+              "version": "1.8.0-arduino.1",
               "name": "imgtool"
             }
           ]
@@ -177,12 +177,12 @@
             },
             {
               "packager": "arduino",
-              "version": "1.0.2",
+              "version": "1.0.5",
               "name": "rp2040tools"
             },
             {
               "packager": "arduino",
-              "version": "1.8.0-arduino",
+              "version": "1.8.0-arduino.1",
               "name": "imgtool"
             }
           ]
@@ -225,7 +225,7 @@
             },
             {
               "packager": "arduino",
-              "version": "1.8.0-arduino",
+              "version": "1.8.0-arduino.1",
               "name": "imgtool"
             },
             {
@@ -275,12 +275,12 @@
             },
             {
               "packager": "arduino",
-              "version": "1.0.2",
+              "version": "1.0.5",
               "name": "rp2040tools"
             },
             {
               "packager": "arduino",
-              "version": "1.8.0-arduino",
+              "version": "1.8.0-arduino.1",
               "name": "imgtool"
             }
           ]
@@ -328,12 +328,12 @@
             },
             {
               "packager": "arduino",
-              "version": "1.0.2",
+              "version": "1.0.5",
               "name": "rp2040tools"
             },
             {
               "packager": "arduino",
-              "version": "1.8.0-arduino",
+              "version": "1.8.0-arduino.1",
               "name": "imgtool"
             }
           ]
