@@ -2,6 +2,12 @@
 
 The repository contains the Arduino APIs and IDE integration files targeting a generic mbed-enabled board
 
+## FAQ
+### Source-Code Level Debugging
+**Question**: "I want to debug my ArduinoCore-mbed based sketch using traditional debugging tools, i.e. gdb via SWD interface. However, the debugger is unable to locate the sources for all files, particular the mbed-os files."
+
+**Answer**: This is due to the fact that we pre-compile the mbed-os code into a static library `libmbed.a`. Information on how to recompile `libmbed.a` for source code debugging can be found [here](#recompiling-libmbed-with-source-level-debug-support).
+
 ## Installation
 
 ### Clone the repository in `$sketchbook/hardware/arduino-git`
