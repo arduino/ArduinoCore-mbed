@@ -39,11 +39,11 @@ To install ARM build tools, use the `Boards Manager` option in the Arduino IDE t
 
 ## mbed-os-to-arduino script
 
-The backbone of the packaging process is https://github.com/arduino/ArduinoCore-mbed/blob/master/mbed-os-to-arduino script. It basically compiles a blank mbed-os project for any supported target board, recovering the files that will be needed at compile time and copying them to the right location.
+The backbone of the packaging process is the https://github.com/arduino/ArduinoCore-mbed/blob/master/mbed-os-to-arduino script. It basically compiles a blank Mbed OS project for any supported target board, recovering the files that will be needed at compile time and copying them to the right location.
 
 It can be used for a variety of tasks including:
 
-**Recompiling libmbed with source level debug support**
+### Recompiling libmbed with source level debug support
 
 ```
 cd $sketchbook/hardware/arduino-git/mbed
@@ -52,7 +52,7 @@ cd $sketchbook/hardware/arduino-git/mbed
 
 In this case `-a` applies all the patches from `patches` folder into a mainline `mbed-os` tree, and `-g` restores the debug info.
 
-**Selecting a different optimization profile**
+### Selecting a different optimization profile
 
 ```
 cd $sketchbook/hardware/arduino-git/mbed
@@ -61,7 +61,7 @@ PROFILE=release ./mbed-os-to-arduino -a NANO_RP2040_CONNECT:NANO_RP2040_CONNECT
 
 The `PROFILE` environment variable tunes the compilation profiles (defaults to `DEVELOP`). Other available profiles are `DEBUG` and `RELEASE`.
 
-**Selecting a different mbed-os tree**
+### Selecting a different Mbed OS tree
 
 ```
 cd $sketchbook/hardware/arduino-git/mbed
@@ -70,11 +70,11 @@ cd $sketchbook/hardware/arduino-git/mbed
 
 `-r` flag allows using a custom `mbed-os` fork in place of the mainline one; useful during new target development.
 
-**Adding a new target (variant)**
+### Adding a new target ([core variant](https://arduino.github.io/arduino-cli/latest/platform-specification/#core-variants))
 
 Adding a target is a mostly automatic procedure.
 
-For boards already supported by `mbed-os` , the bare minimum is
+For boards already supported by Mbed OS, the bare minimum is:
 
 ```
 cd $sketchbook/hardware/arduino-git/mbed
@@ -85,10 +85,10 @@ mkdir -p variants/$ALREADY_SUPPORTED_BOARD_NAME/{libs,conf}
 # ./mbed-os-to-arduino LPC546XX:LPC546XX
 ```
 
-This will produce almost all the files needed. To complete the port, add the board specifications to `boards.txt` (giving it an unique name) and provide `pins_arduino.h` and `variants.cpp` in `variants/$ALREADY_SUPPORTED_BOARD_NAME` folder.
+This will produce almost all the files needed. To complete the port, add the board specifications to [`boards.txt`](https://arduino.github.io/arduino-cli/latest/platform-specification/#boardstxt) (giving it a unique ID) and provide `pins_arduino.h` and `variants.cpp` in `variants/$ALREADY_SUPPORTED_BOARD_NAME` folder.
 Feel free to take inspirations from the existing variants :)
 
-For boards not supported by mainline `mbed-os`, the same applies but you should provide the path of your `mbed-os` fork
+For boards not supported by mainline Mbed OS, the same applies but you should provide the path of your Mbed OS fork
 
 ```
 cd $sketchbook/hardware/arduino-git/mbed
