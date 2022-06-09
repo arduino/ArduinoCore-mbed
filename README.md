@@ -102,6 +102,12 @@ mkdir -p variants/$BRAND_NEW_BOARD_NAME/{libs,conf}
 ./mbed-os-to-arduino -r /path/to/mbed-os/fork/that/supports/new/board $BRAND_NEW_BOARD_NAME:$BRAND_NEW_BOARD_NAME
 ```
 
+### Customizing Mbed OS build without modifying the code
+
+Most Mbed OS defines can be tuned using a project file called `mbed_app.json` . In case you need to tune a build you can add that file to your variant's `conf` folder. One example is https://github.com/arduino/ArduinoCore-mbed/blob/master/variants/PORTENTA_H7_M7/conf/mbed_app.json .
+Providing an invalid json or replacing a non-existing property will make the build fail silently, so it's always better to validate that file with a standard Mbed OS project.
+
+
 ## Using this core as an mbed library
 
 You can use this core as a standard mbed library; all APIs are under `arduino` namespace (so they must be called like `arduino::digitalWrite()` )
