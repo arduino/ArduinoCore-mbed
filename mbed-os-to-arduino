@@ -112,6 +112,12 @@ apply_patches () {
 			cd -
 		fi
 		echo " done."
+		if [ "$RESTORE_GDB_INFO" -eq 1 ]; then
+			echo "Restoring gdb info (this increases libmbed binary size, not suitable for release)"
+			cd mbed-os
+			git checkout tools/profiles/develop.json
+			cd -
+		fi
 	fi
 }
 
@@ -277,11 +283,12 @@ patch_spi_h () {
 # MAIN LOOP #
 #############
 
-while getopts "cuar:b:p:" opt; do
+while getopts "cuagr:b:p:" opt; do
 	case $opt in
 	c ) export MBED_CLEAN=1 ;;
 	u ) export MBED_UPDATE=1 ;;
 	a ) export APPLY_PATCHES=1 ;;
+	g ) export RESTORE_GDB_INFO=1 ;;
 	r ) export LOCAL_REPO="$OPTARG" ;;
 	b ) export REMOTE_BRANCH="$OPTARG" ;;
 	p )
@@ -329,6 +336,7 @@ export MBED_CORE_LOCATION=${MBED_CORE_LOCATION:-$PWD}
 export MBED_CLEAN=${MBED_CLEAN:-0}
 export MBED_UPDATE=${MBED_UPDATE:-0}
 export APPLY_PATCHES=${APPLY_PATCHES:-0}
+export RESTORE_GDB_INFO=${RESTORE_GDB_INFO:-0}
 export LOCAL_REPO=${LOCAL_REPO:-""}
 export REMOTE_BRANCH=${REMOTE_BRANCH:-""}
 
@@ -336,6 +344,7 @@ echo
 echo MBED_CLEAN=$MBED_CLEAN
 echo MBED_UPDATE=$MBED_UPDATE
 echo APPLY_PATCHES=$APPLY_PATCHES
+echo RESTORE_GDB_INFO=$RESTORE_GDB_INFO
 echo LOCAL_REPO="$LOCAL_REPO"
 echo REMOTE_BRANCH="$REMOTE_BRANCH"
 echo MBED_CORE_LOCATION="$MBED_CORE_LOCATION"

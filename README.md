@@ -2,6 +2,12 @@
 
 The repository contains the Arduino APIs and IDE integration files targeting a generic mbed-enabled board
 
+## FAQ
+### Source-Code Level Debugging
+**Question**: "I want to debug my ArduinoCore-mbed based sketch using traditional debugging tools, i.e. gdb via SWD interface. However, the debugger is unable to locate the sources for all files, particular the mbed-os files."
+
+**Answer**: This is due to the fact that we pre-compile the mbed-os code into a static library `libmbed.a`. Information on how to recompile `libmbed.a` for source code debugging can be found [here](#recompiling-libmbed-with-source-level-debug-support). The [Arduino Documentation](https://docs.arduino.cc/) also contains articles explaining how to debug via [Segger J-Link](https://docs.arduino.cc/tutorials/portenta-breakout/breakout-jlink-setup) and [Lauterbach TRACE32](https://docs.arduino.cc/tutorials/portenta-h7/lauterbach-debugger).
+
 ## Installation
 
 ### Clone the repository in `$sketchbook/hardware/arduino-git`
@@ -37,31 +43,70 @@ fork/exec /bin/arm-none-eabi-g++: no such file or directory
 ```
 To install ARM build tools, use the `Boards Manager` option in the Arduino IDE to add the `Arduino mbed-enabled Boards` package.
 
+## mbed-os-to-arduino script
 
-## Adding an mbed target
+The backbone of the packaging process is the https://github.com/arduino/ArduinoCore-mbed/blob/master/mbed-os-to-arduino script. It basically compiles a blank Mbed OS project for any supported target board, recovering the files that will be needed at compile time and copying them to the right location.
 
-Adding a target is a mostly automatic procedure that involves running https://github.com/arduino/ArduinoCore-mbed/blob/master/mbed-os-to-arduino after setting the `BOARDNAME` and `ARDUINOCORE` env variables.
-Actions marked as TODO must be executed manually.
+It can be used for a variety of tasks including:
 
-**Minimum Example**:
+### Recompiling libmbed with source level debug support
+
 ```
 cd $sketchbook/hardware/arduino-git/mbed
-./mbed-os-to-arduino -r /home/alex/projects/arduino/cores/mbed-os-h747 PORTENTA_H7_M7:PORTENTA_H7_M7
+./mbed-os-to-arduino -a -g PORTENTA_H7_M7:PORTENTA_H7_M7
 ```
 
-### How to build a debug version of the Arduino mbed libraries
-* Modify `mbed-os-to-arduino `
-```diff
-mbed_compile () {
--       PROFILE_FLAG=""
-        if [ x"$PROFILE" != x ]; then
-                PROFILE_FLAG=--profile="$ARDUINOVARIANT"/conf/profile/$PROFILE.json
-                export PROFILE=-${PROFILE^^}
-+       else
-+               export PROFILE="-DEBUG"
-+               PROFILE_FLAG="--profile=debug"
-        fi
+In this case `-a` applies all the patches from `patches` folder into a mainline `mbed-os` tree, and `-g` restores the debug info.
+
+### Selecting a different optimization profile
+
 ```
+cd $sketchbook/hardware/arduino-git/mbed
+PROFILE=release ./mbed-os-to-arduino -a NANO_RP2040_CONNECT:NANO_RP2040_CONNECT
+```
+
+The `PROFILE` environment variable tunes the compilation profiles (defaults to `DEVELOP`). Other available profiles are `DEBUG` and `RELEASE`.
+
+### Selecting a different Mbed OS tree
+
+```
+cd $sketchbook/hardware/arduino-git/mbed
+./mbed-os-to-arduino -r /path/to/my/mbed-os-fork NICLA_VISION:NICLA_VISION
+```
+
+`-r` flag allows using a custom `mbed-os` fork in place of the mainline one; useful during new target development.
+
+### Adding a new target ([core variant](https://arduino.github.io/arduino-cli/latest/platform-specification/#core-variants))
+
+Adding a target is a mostly automatic procedure.
+
+For boards already supported by Mbed OS, the bare minimum is:
+
+```
+cd $sketchbook/hardware/arduino-git/mbed
+mkdir -p variants/$ALREADY_SUPPORTED_BOARD_NAME/{libs,conf}
+./mbed-os-to-arduino $ALREADY_SUPPORTED_BOARD_NAME:$ALREADY_SUPPORTED_BOARD_NAME
+# for example, to create a core for LPC546XX
+# mkdir -p variants/LPC546XX/{libs,conf}
+# ./mbed-os-to-arduino LPC546XX:LPC546XX
+```
+
+This will produce almost all the files needed. To complete the port, add the board specifications to [`boards.txt`](https://arduino.github.io/arduino-cli/latest/platform-specification/#boardstxt) (giving it a unique ID) and provide `pins_arduino.h` and `variants.cpp` in `variants/$ALREADY_SUPPORTED_BOARD_NAME` folder.
+Feel free to take inspirations from the existing variants :)
+
+For boards not supported by mainline Mbed OS, the same applies but you should provide the path of your Mbed OS fork
+
+```
+cd $sketchbook/hardware/arduino-git/mbed
+mkdir -p variants/$BRAND_NEW_BOARD_NAME/{libs,conf}
+./mbed-os-to-arduino -r /path/to/mbed-os/fork/that/supports/new/board $BRAND_NEW_BOARD_NAME:$BRAND_NEW_BOARD_NAME
+```
+
+### Customizing Mbed OS build without modifying the code
+
+Most Mbed OS defines can be tuned using a project file called `mbed_app.json` . In case you need to tune a build you can add that file to your variant's `conf` folder. One example is https://github.com/arduino/ArduinoCore-mbed/blob/master/variants/PORTENTA_H7_M7/conf/mbed_app.json .
+Providing an invalid json or replacing a non-existing property will make the build fail silently, so it's always better to validate that file with a standard Mbed OS project.
+
 
 ## Using this core as an mbed library
 
