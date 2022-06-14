@@ -86,6 +86,9 @@ public:
      */
   int begin(const char* ssid, const char* passphrase);
 	
+  // Inherit config methods from the parent class
+  using MbedSocketClass::config;
+
   void config(const char* localip, const char* netmask, const char* gateway);
 
   int beginAP(const char* ssid, const char* passphrase, uint8_t channel = DEFAULT_AP_CHANNEL);
