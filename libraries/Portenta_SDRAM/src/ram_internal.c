@@ -43,12 +43,17 @@ static HAL_StatusTypeDef FMC_SDRAM_Clock_Config(void)
   RCC_PeriphCLKInitStruct.PeriphClockSelection = RCC_PERIPHCLK_FMC;
   RCC_PeriphCLKInitStruct.FmcClockSelection = RCC_FMCCLKSOURCE_PLL2;
   RCC_PeriphCLKInitStruct.PLL2.PLL2RGE = RCC_PLL1VCIRANGE_2;
+#ifdef ARDUINO_GIGA
+  RCC_PeriphCLKInitStruct.PLL2.PLL2M = 3;
+  RCC_PeriphCLKInitStruct.PLL2.PLL2N = 120;
+#else
   RCC_PeriphCLKInitStruct.PLL2.PLL2M = 5;
   RCC_PeriphCLKInitStruct.PLL2.PLL2N = 160;
+#endif
   RCC_PeriphCLKInitStruct.PLL2.PLL2FRACN = 0;
   RCC_PeriphCLKInitStruct.PLL2.PLL2P = 2;
   RCC_PeriphCLKInitStruct.PLL2.PLL2R = 4;
-  RCC_PeriphCLKInitStruct.PLL2.PLL2Q = 4;
+  RCC_PeriphCLKInitStruct.PLL2.PLL2Q = 3;
   RCC_PeriphCLKInitStruct.PLL2.PLL2VCOSEL = RCC_PLL2VCOWIDE;
   return HAL_RCCEx_PeriphCLKConfig(&RCC_PeriphCLKInitStruct);
 }

@@ -17,6 +17,20 @@ struct envie_edid_mode envie_known_modes[NUM_KNOWN_MODES] = {
 		.hactive = 800, .hback_porch = 104, .hfront_porch = 24, .hsync_len = 80, 
 		.vactive = 600, .vback_porch = 17, .vfront_porch = 3, .vsync_len = 4,
 	},
+	[EDID_MODE_480x800_60Hz] = {
+		.name = "480x800@60Hz", .pixel_clock = 38000, .refresh = 60,
+		.hactive = 480, .hback_porch = 30, .hfront_porch = 320, .hsync_len = 24, 
+		.vactive = 800, .vback_porch = 50, .vfront_porch = 20, .vsync_len = 4,
+		.hpol = 1, .vpol = 1,
+	},
+	/*
+	[EDID_MODE_480x800_60Hz] = {
+		.name = "480x800@60Hz", .pixel_clock = 32750, .refresh = 60,
+		.hactive = 480, .hback_porch = 72, .hfront_porch = 24, .hsync_len = 48, 
+		.vactive = 800, .vback_porch = 18, .vfront_porch = 3, .vsync_len = 10,
+		.hpol = 0, .vpol = 0,
+	},
+	*/
 	[EDID_MODE_1024x768_60Hz] = {
 		.name = "1024x768@60Hz", .pixel_clock = 57800, .refresh = 60,
 		.hactive = 1024, .hback_porch = 80, .hfront_porch = 24, .hsync_len = 68, .hpol = 0,

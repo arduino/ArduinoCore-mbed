@@ -185,6 +185,77 @@ void portenta_init_video() {
   #endif
 }
 
+#include "Portenta_Video.h"
+#include "video_modes.h"
+
+void giga_init_video() {
+  // put your setup code here, to run once:
+  int ret = -1;
+
+  SDRAM.begin();
+
+  extern struct envie_edid_mode envie_known_modes[];
+  struct edid _edid;
+  int mode = EDID_MODE_480x800_60Hz;
+  struct display_timing dt;
+  dt.pixelclock = envie_known_modes[mode].pixel_clock;
+  dt.hactive = envie_known_modes[mode].hactive;
+  dt.hsync_len = envie_known_modes[mode].hsync_len;
+  dt.hback_porch = envie_known_modes[mode].hback_porch;
+  dt.hfront_porch = envie_known_modes[mode].hfront_porch;
+  dt.vactive = envie_known_modes[mode].vactive;
+  dt.vsync_len = envie_known_modes[mode].vsync_len;
+  dt.vback_porch = envie_known_modes[mode].vback_porch;
+  dt.vfront_porch = envie_known_modes[mode].vfront_porch;
+  dt.hpol = envie_known_modes[mode].hpol;
+  dt.vpol = envie_known_modes[mode].vpol;
+
+  stm32_dsi_config(0, &_edid, &dt);
+
+  lv_init();
+
+  lcd_x_size = stm32_getXSize();
+  lcd_y_size = stm32_getYSize();
+
+  fb = (uint16_t *)getNextFrameBuffer();
+  getNextFrameBuffer();
+
+  static lv_color_t buf[800 * 480 / 6];
+
+  // Compatibility with v7 and v8 APIs
+  #if LVGL_VERSION_MAJOR == 8
+    static lv_disp_draw_buf_t  disp_buf;
+    lv_disp_draw_buf_init(&disp_buf, buf, NULL, lcd_x_size * lcd_y_size / 6);
+
+    /*Initialize the display*/
+    lv_disp_drv_init(&disp_drv);
+    disp_drv.flush_cb = my_disp_flush;
+    #if LVGL_VERSION_MINOR < 1
+    disp_drv.gpu_fill_cb = gpu_fill;
+    #endif
+    disp_drv.draw_buf = &disp_buf;
+    disp_drv.hor_res = lcd_x_size;
+    disp_drv.ver_res = lcd_y_size;
+
+    lv_disp_drv_register(&disp_drv);
+
+  #else
+    static lv_disp_buf_t disp_buf;
+    lv_disp_buf_init(&disp_buf, buf, NULL, lcd_x_size * lcd_y_size / 6);
+
+    /*Initialize the display*/
+    lv_disp_drv_init(&disp_drv);
+    disp_drv.flush_cb = my_disp_flush;
+    disp_drv.gpu_fill_cb = gpu_fill;
+    disp_drv.gpu_blend_cb = gpu_blend;
+    disp_drv.buffer = &disp_buf;
+    
+    lv_disp_drv_register(&disp_drv);
+
+  #endif
+}
+
+
 
 //Get debug info
 void printInfo()  {

@@ -20,6 +20,14 @@
 #define LV_HOR_RES_MAX          (720)
 #define LV_VER_RES_MAX          (480)
 
+// TODO: fixme: make these values coherent with recognized edid
+#ifdef TARGET_GIGA
+#undef LV_HOR_RES_MAX
+#undef LV_VER_RES_MAX
+#define LV_HOR_RES_MAX          (480)
+#define LV_VER_RES_MAX          (800)
+#endif
+
 /* Color depth:
  * - 1:  1 byte per pixel
  * - 8:  RGB233
