@@ -16,7 +16,7 @@ static lv_disp_drv_t disp_drv;
 static void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p)
 {
 
-#if ARDUINO_PORTENTA_H7_M7
+#if defined(__CORTEX_M7)
   SCB_CleanInvalidateDCache();
   SCB_InvalidateICache();
 #endif
@@ -63,7 +63,7 @@ static void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t
 static void gpu_blend(lv_disp_drv_t * disp_drv, lv_color_t * dest, const lv_color_t * src, uint32_t length, lv_opa_t opa)
 {
 
-#if ARDUINO_PORTENTA_H7_M7
+#if defined(__CORTEX_M7)
   SCB_CleanInvalidateDCache();
 #endif
 
@@ -98,7 +98,7 @@ static void gpu_blend(lv_disp_drv_t * disp_drv, lv_color_t * dest, const lv_colo
 static void gpu_fill(lv_disp_drv_t * disp_drv, lv_color_t * dest_buf, lv_coord_t dest_width,
                      const lv_area_t * fill_area, lv_color_t color)
 {
-#if ARDUINO_PORTENTA_H7_M7
+#if defined(__CORTEX_M7)
   SCB_CleanInvalidateDCache();
 #endif
 
