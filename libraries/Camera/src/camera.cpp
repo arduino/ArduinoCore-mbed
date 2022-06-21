@@ -408,21 +408,22 @@ int Camera::reset()
     return 0;
 }
 
-int Camera::probeSensor()
+ScanResults<uint8_t> Camera::i2cScan()
 {
     uint8_t addr;
+    ScanResults<uint8_t> res;
 
     for (addr=1; addr<127; addr++) {
         CameraWire.beginTransmission(addr);
         if (CameraWire.endTransmission() == 0) {
-            break;
+            res.push(addr);
         }
     }
     if (_debug) {
         _debug->print("Sensor address: 0x");
         _debug->println(addr, HEX);
     }
-    return addr;
+    return res;
 }
 
 bool Camera::begin(int32_t resolution, int32_t pixformat, int32_t framerate)
@@ -445,10 +446,13 @@ bool Camera::begin(int32_t resolution, int32_t pixformat, int32_t framerate)
     }
 
     if (this->sensor->init() != 0) {
+        if (_debug) {
+            _debug->print("Sensor init failed");
+        }
         return false;
     }
 
-    if (probeSensor() != this->sensor->getID()) {
+    if (i2cScan() != this->sensor->getID()) {
         if (_debug) {
             _debug->print("Detected SensorID: 0x");
             _debug->println(this->sensor->getID(), HEX);

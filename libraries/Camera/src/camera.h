@@ -88,6 +88,27 @@ class ImageSensor {
         }
 };
 
+template <typename T> class ScanResults {
+public:
+    bool operator==(T toBeFound) {
+        for (int i = 0; i < howMany; i++) {
+            if (toBeFound == data[i]) {
+                return true;
+            }
+        }
+        return false;
+    }
+    bool operator!=(T toBeFound) {
+        return !(*this == toBeFound);
+    }
+    void push(T obj) {
+        data[howMany++] = obj;
+    }
+private:
+    T data[20];
+    int howMany = 0;
+};
+
 class Camera {
     private:
         int32_t pixformat;
@@ -95,7 +116,7 @@ class Camera {
         int32_t framerate;
         ImageSensor *sensor;
         int reset();
-        int probeSensor();
+        ScanResults<uint8_t> i2cScan();
         Stream *_debug;
         arduino::MbedI2C *_i2c;
         FrameBuffer *_framebuffer;
