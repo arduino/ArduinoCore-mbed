@@ -27,9 +27,21 @@ extern PinName digitalPinToPinName(pin_size_t P);
 // ----
 #define PIN_LED     (24u)
 #define LED_BUILTIN PIN_LED
+#define LED_RESET   PIN_LED
 #define LEDR        (23u)
 #define LEDG        (24u)
 #define LEDB        (25u)
+#define LED_USER    LEDB
+
+#define LED_D0      (7u)
+#define LED_D1      (9u)
+#define LED_D2      (8u)
+#define LED_D3      (153u)
+
+#define LED_RELAY1  LED_D0
+#define LED_RELAY2  LED_D1
+#define LED_RELAY3  LED_D2
+#define LED_RELAY4  LED_D3
 
 // Analog pins
 // -----------
@@ -80,6 +92,13 @@ static const uint8_t A7  = PIN_A7;
 #define D19 (19u)
 #define D20 (20u)
 #define D21 (21u)
+
+#define RELAY1 (D0)
+#define RELAY2 (D1)
+#define RELAY3 (D2)
+#define RELAY4 (D3)
+
+#define BTN_USER (94u)
 
 //DACs
 #define DAC           (A6)
