@@ -366,6 +366,7 @@ int py_audio_init(size_t channels, uint32_t frequency)
 
     HAL_RCCEx_GetPeriphCLKConfig(&rcc_ex_clk_init_struct);
 
+    rcc_ex_clk_init_struct.PeriphClockSelection = RCC_PERIPHCLK_DFSDM1;
     rcc_ex_clk_init_struct.Dfsdm1ClockSelection = RCC_DFSDM1CLKSOURCE_D2PCLK1;
 
     HAL_RCCEx_PeriphCLKConfig(&rcc_ex_clk_init_struct);
