@@ -135,11 +135,17 @@ extern "C" {
 #include "nrf_rtc.h"
 #include "nrf_uarte.h"
 #include "nrf_uart.h"
+#include "nrf_clock.h"
 
 void initVariant() {
   // turn power LED on
   pinMode(LED_PWR, OUTPUT);
   digitalWrite(LED_PWR, HIGH);
+
+  if (nrf_clock_int_enable_check(NRF_CLOCK_INT_LF_STARTED_MASK)) {
+    // NINA B306 01B modules (without 32k xtal)
+    nrf_clock_int_disable(NRF_CLOCK_INT_LF_STARTED_MASK);
+  }
 
   // Errata Nano33BLE - I2C pullup is controlled by the SWO pin.
   // Configure the TRACEMUX to disable routing SWO signal to pin.
