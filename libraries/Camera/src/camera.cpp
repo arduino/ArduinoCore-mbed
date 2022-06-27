@@ -605,7 +605,7 @@ int Camera::grabFrame(FrameBuffer &fb, uint32_t timeout)
 
     HAL_DCMI_Suspend(&hdcmi);
 
-    #ifndef ARDUINO_PORTENTA_H7_M4  // do not invalidate if Portenta M4 Core
+    #if defined(__CORTEX_M7)  // only invalidate buffer for Cortex M7
        // Invalidate buffer after DMA transfer.
        SCB_InvalidateDCache_by_Addr((uint32_t*) framebuffer, framesize);
     #endif
