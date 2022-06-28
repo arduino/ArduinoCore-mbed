@@ -28,7 +28,7 @@
 #define ALIGN_PTR(p,a)   ((p & (a-1)) ?(((uintptr_t)p + a) & ~(uintptr_t)(a-1)) : p)
 
 // Include all image sensor drivers here.
-#ifdef ARDUINO_PORTENTA_H7_M7
+#if defined (ARDUINO_PORTENTA_H7_M7) || defined (ARDUINO_PORTENTA_H7_M4)
 
 #define DCMI_TIM                    (TIM1)
 #define DCMI_TIM_PIN                (GPIO_PIN_1)
@@ -65,7 +65,7 @@ arduino::MbedI2C CameraWire(I2C_SDA2, I2C_SCL2);
 
 // DCMI GPIO pins struct
 static const struct { GPIO_TypeDef *port; uint16_t pin; } dcmi_pins[] = {
-#ifdef ARDUINO_PORTENTA_H7_M7
+#if defined (ARDUINO_PORTENTA_H7_M7) || defined (ARDUINO_PORTENTA_H7_M4)
     {GPIOA,     GPIO_PIN_4  },
     {GPIOA,     GPIO_PIN_6  },
     {GPIOI,     GPIO_PIN_4  },
@@ -146,7 +146,7 @@ void HAL_DCMI_MspInit(DCMI_HandleTypeDef *hdcmi)
     hgpio.Speed     = GPIO_SPEED_FREQ_VERY_HIGH;
     hgpio.Alternate = GPIO_AF13_DCMI;
 
-#ifdef ARDUINO_PORTENTA_H7_M7
+#if defined (ARDUINO_PORTENTA_H7_M7) || defined (ARDUINO_PORTENTA_H7_M4)
     /* Enable GPIO clocks */
     __HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_GPIOH_CLK_ENABLE();
@@ -365,7 +365,7 @@ Camera::Camera(ImageSensor &sensor) :
 
 int Camera::reset()
 {
-#ifdef ARDUINO_PORTENTA_H7_M7
+#if defined (ARDUINO_PORTENTA_H7_M7) || defined (ARDUINO_PORTENTA_H7_M4)
     // Reset sensor.
     digitalWrite(PC_13, LOW);
     HAL_Delay(10);
@@ -605,9 +605,10 @@ int Camera::grabFrame(FrameBuffer &fb, uint32_t timeout)
 
     HAL_DCMI_Suspend(&hdcmi);
 
-    // Invalidate buffer after DMA transfer.
-    SCB_InvalidateDCache_by_Addr((uint32_t*) framebuffer, framesize);
-
+    #if defined(__CORTEX_M7)  // only invalidate buffer for Cortex M7
+       // Invalidate buffer after DMA transfer.
+       SCB_InvalidateDCache_by_Addr((uint32_t*) framebuffer, framesize);
+    #endif
     return 0;
 }
 
