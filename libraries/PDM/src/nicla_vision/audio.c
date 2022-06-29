@@ -148,6 +148,7 @@ void HAL_DFSDM_FilterMspInit(DFSDM_Filter_HandleTypeDef* hdfsdm_filter)
     hdma_dfsdm1_flt0.Init.Mode = DMA_CIRCULAR;
     hdma_dfsdm1_flt0.Init.Priority = DMA_PRIORITY_LOW;
     hdma_dfsdm1_flt0.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+    HAL_DMA_DeInit(&hdma_dfsdm1_flt0);
     if (HAL_DMA_Init(&hdma_dfsdm1_flt0) != HAL_OK)
     {
       Error_Handler();
@@ -214,7 +215,10 @@ void HAL_DFSDM_FilterMspDeInit(DFSDM_Filter_HandleTypeDef* hdfsdm_filter)
   if(DFSDM1_Init == 0)
     {
     /* Peripheral clock disable */
-    __HAL_RCC_DFSDM1_CLK_DISABLE();
+    if (HAL_RCC_DFSDM1_CLK_ENABLED > 0) {
+      __HAL_RCC_DFSDM1_CLK_DISABLE();
+      HAL_RCC_DFSDM1_CLK_ENABLED--;
+    }
   
     /**DFSDM1 GPIO Configuration    
     PD10     ------> DFSDM1_CKOUT
@@ -245,7 +249,10 @@ void HAL_DFSDM_ChannelMspDeInit(DFSDM_Channel_HandleTypeDef* hdfsdm_channel)
   if(DFSDM1_Init == 0)
     {
     /* Peripheral clock disable */
-    __HAL_RCC_DFSDM1_CLK_DISABLE();
+    if (HAL_RCC_DFSDM1_CLK_ENABLED > 0) {
+      __HAL_RCC_DFSDM1_CLK_DISABLE();
+      HAL_RCC_DFSDM1_CLK_ENABLED--;
+    }
   
     /**DFSDM1 GPIO Configuration    
     PD10     ------> DFSDM1_CKOUT
@@ -295,6 +302,7 @@ static int DFSDM_Init(uint32_t frequency)
     hdfsdm1_channel2.Init.Awd.Oversampling         = 2000000/frequency; /* 2MHz/125 = 16kHz */
     hdfsdm1_channel2.Init.Offset                   = 0;
     hdfsdm1_channel2.Init.RightBitShift            = 0;
+    HAL_DFSDM_ChannelDeInit(&hdfsdm1_channel2);
     if(HAL_OK != HAL_DFSDM_ChannelInit(&hdfsdm1_channel2))
     {
         return 0;
@@ -313,6 +321,7 @@ static int DFSDM_Init(uint32_t frequency)
     hdfsdm1_filter0.Init.FilterParam.SincOrder        = DFSDM_FILTER_FASTSINC_ORDER;
     hdfsdm1_filter0.Init.FilterParam.Oversampling     = 2000000/frequency; /* 2MHz/125 = 16kHz */
     hdfsdm1_filter0.Init.FilterParam.IntOversampling  = 1;
+    HAL_DFSDM_FilterDeInit(&hdfsdm1_filter0);
     if(HAL_OK != HAL_DFSDM_FilterInit(&hdfsdm1_filter0))
     {
         return 0;
@@ -357,6 +366,7 @@ int py_audio_init(size_t channels, uint32_t frequency)
 
     HAL_RCCEx_GetPeriphCLKConfig(&rcc_ex_clk_init_struct);
 
+    rcc_ex_clk_init_struct.PeriphClockSelection = RCC_PERIPHCLK_DFSDM1;
     rcc_ex_clk_init_struct.Dfsdm1ClockSelection = RCC_DFSDM1CLKSOURCE_D2PCLK1;
 
     HAL_RCCEx_PeriphCLKConfig(&rcc_ex_clk_init_struct);
@@ -398,13 +408,29 @@ void py_audio_gain_set(int gain_db)
 
 void py_audio_deinit()
 {
-    py_audio_stop_streaming();
-    HAL_DFSDM_FilterDeInit(&hdfsdm1_filter0);
-
     // Disable IRQs
+    HAL_NVIC_DisableIRQ(DFSDM1_FLT0_IRQn);
+    HAL_NVIC_DisableIRQ(DFSDM1_FLT1_IRQn);
     HAL_NVIC_DisableIRQ(AUDIO_DFSDM1_DMA_IRQ);
 
+    if (hdfsdm1_channel2.Instance != NULL) {
+      HAL_DFSDM_ChannelDeInit(&hdfsdm1_channel2);
+      hdfsdm1_channel2.Instance = NULL;
+    }
+
+    if (hdfsdm1_filter0.Instance != NULL) {
+      //HAL_DFSDM_FilterRegularStop_DMA(&hdfsdm1_filter0);
+      HAL_DFSDM_FilterDeInit(&hdfsdm1_filter0);
+      hdfsdm1_filter0.Instance = NULL;
+    }
+
+    if (hdma_dfsdm1_flt0.Instance != NULL) {
+      HAL_DMA_DeInit(&hdma_dfsdm1_flt0);
+      hdma_dfsdm1_flt0.Instance = NULL;
+    }
+
     //free(g_pcmbuf);
+    xfer_status = 0;
     g_pcmbuf = NULL;
 }
 
