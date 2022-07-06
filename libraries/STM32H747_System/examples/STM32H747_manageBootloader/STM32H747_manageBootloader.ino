@@ -222,7 +222,8 @@ void setupMCUBootOTAData() {
   
   int err = ota_data_fs.reformat(&ota_data);
   if (err) {
-    Serial.println("Error creating MCUboot files in OTA partition");
+    Serial.println("Error creating MCUboot files in OTA partition.");
+    Serial.println("Run QSPIformat.ino sketch to format the QSPI flash and fix the issue.");
   }
 
   FILE* fp = fopen("/fs/scratch.bin", "wb");
