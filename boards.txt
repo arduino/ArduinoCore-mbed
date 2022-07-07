@@ -522,7 +522,7 @@ nicla_vision.upload.interface=0
 nicla_vision.upload.use_1200bps_touch=true
 nicla_vision.upload.wait_for_upload_port=true
 nicla_vision.upload.native_usb=true
-nicla_vision.upload.maximum_size=786432
+nicla_vision.upload.maximum_size=1966080
 nicla_vision.upload.maximum_data_size=523624
 
 nicla_vision.debug.tool=gdb
