@@ -21,48 +21,16 @@
 #define ETHERNETSSLCLIENT_H
 
 #include "EthernetClient.h"
-
-#include <FATFileSystem.h>
-#include <MBRBlockDevice.h>
-#include <QSPIFBlockDevice.h>
+#include "MbedSSLClient.h"
 
 extern const char CA_CERTIFICATES[];
 
 namespace arduino {
 
-class EthernetSSLClient : public arduino::EthernetClient {
-
-public:
-  EthernetSSLClient();
-  virtual ~EthernetSSLClient() {
-    stop();
+class EthernetSSLClient : public arduino::MbedSSLClient {
+  NetworkInterface *getNetwork() {
+    return Ethernet.getNetwork();
   }
-
-  int connect(IPAddress ip, uint16_t port) {
-    return connectSSL(ip, port);
-  }
-  int connect(const char* host, uint16_t port) {
-    return connectSSL(host, port, _disableSNI);
-  }
-  void disableSNI(bool statusSNI) {
-    _disableSNI = statusSNI;
-  }
-
-private:
-  int setRootCA() {
-
-    QSPIFBlockDevice root;
-    mbed::MBRBlockDevice wifi_data(&root, 1);
-    mbed::FATFileSystem wifi("wlan");
-
-    int err = wifi.mount(&wifi_data);
-    if (err)
-      return err;
-
-    return ((TLSSocket*)sock)->set_root_ca_cert_path("/wlan/");
-  }
-
-  bool _disableSNI;
 };
 
 }
