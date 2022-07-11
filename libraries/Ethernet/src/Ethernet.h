@@ -42,6 +42,14 @@ enum EthernetHardwareStatus {
 
 namespace arduino {
 
+enum {  // compatibility with Arduino ::maintain()
+    DHCP_CHECK_NONE         = 0,
+    DHCP_CHECK_RENEW_FAIL   = 1,
+    DHCP_CHECK_RENEW_OK     = 2,
+    DHCP_CHECK_REBIND_FAIL  = 3,
+    DHCP_CHECK_REBIND_OK    = 4
+};
+
 typedef void *(*voidPrtFuncPtr)(void);
 
 class EthernetClass : public MbedSocketClass {
@@ -106,6 +114,8 @@ public:
   friend class EthernetUDP;
 
   NetworkInterface *getNetwork();
+
+  constexpr static int maintain () { return DHCP_CHECK_NONE; }
 
 private:
   volatile EthernetLinkStatus _currentNetworkStatus = Unknown;
