@@ -97,6 +97,7 @@ jobs:
             additional-libraries: |
               - name: Arduino_BHY2
               - name: ArduinoBLE
+              - name: PacketSerial
           - board:
               fqbn: arduino:mbed:nicla_vision
             additional-sketch-paths: |
