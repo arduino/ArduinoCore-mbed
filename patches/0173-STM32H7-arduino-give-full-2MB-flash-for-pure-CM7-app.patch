@@ -1,0 +1,44 @@
+From 7ef7506b2752eb14d9f5c08ea079e809e43c97fc Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Tue, 19 Jul 2022 11:18:08 +0200
+Subject: [PATCH] STM32H7: arduino: give full 2MB flash for pure CM7
+ applications
+
+---
+ targets/targets.json | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/targets/targets.json b/targets/targets.json
+index fa9880e3ca..c998e1d8f0 100644
+--- a/targets/targets.json
++++ b/targets/targets.json
+@@ -3362,7 +3362,7 @@
+         ],
+         "core": "Cortex-M7FD",
+         "mbed_rom_start": "0x08000000",
+-        "mbed_rom_size": "0x100000",
++        "mbed_rom_size": "0x200000",
+         "mbed_ram_start": "0x24000000",
+         "mbed_ram_size": "0x80000",
+         "macros_add": [
+@@ -3494,7 +3494,7 @@
+         "inherits": ["PORTENTA_H7"],
+         "core": "Cortex-M7FD",
+         "mbed_rom_start": "0x08000000",
+-        "mbed_rom_size" : "0x100000",
++        "mbed_rom_size" : "0x200000",
+         "mbed_ram_start": "0x24000000",
+         "mbed_ram_size" : "0x80000",
+         "extra_labels_add": [
+@@ -3540,7 +3540,7 @@
+         "overrides": {
+             "system_power_supply": "PWR_LDO_SUPPLY",
+             "clock_source": "USE_PLL_HSE_EXTC",
+-            "lse_available": 0,
++            "lse_available": 1,
+             "lpticker_delay_ticks": 0,
+             "network-default-interface-type": "WIFI",
+             "i2c_timing_value_algo": true,
+-- 
+2.36.0
+
