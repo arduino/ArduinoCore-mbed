@@ -34,20 +34,28 @@ extern "C" {
  * * Memory to memory
  */
 
-// this is not defined in generated dreq.h
-#define DREQ_FORCE  63
+// these are not defined in generated dreq.h
+#define DREQ_DMA_TIMER0 DMA_CH0_CTRL_TRIG_TREQ_SEL_VALUE_TIMER0
+#define DREQ_DMA_TIMER1 DMA_CH0_CTRL_TRIG_TREQ_SEL_VALUE_TIMER1
+#define DREQ_DMA_TIMER2 DMA_CH0_CTRL_TRIG_TREQ_SEL_VALUE_TIMER2
+#define DREQ_DMA_TIMER3 DMA_CH0_CTRL_TRIG_TREQ_SEL_VALUE_TIMER3
+#define DREQ_FORCE      DMA_CH0_CTRL_TRIG_TREQ_SEL_VALUE_PERMANENT
 
 // PICO_CONFIG: PARAM_ASSERTIONS_ENABLED_DMA, Enable/disable DMA assertions, type=bool, default=0, group=hardware_dma
 #ifndef PARAM_ASSERTIONS_ENABLED_DMA
 #define PARAM_ASSERTIONS_ENABLED_DMA 0
 #endif
 
-static inline void check_dma_channel_param(uint channel) {
+static inline void check_dma_channel_param(__unused uint channel) {
 #if PARAM_ASSERTIONS_ENABLED(DMA)
     // this method is used a lot by inline functions so avoid code bloat by deferring to function
     extern void check_dma_channel_param_impl(uint channel);
     check_dma_channel_param_impl(channel);
 #endif
+}
+
+static inline void check_dma_timer_param(__unused uint timer_num) {
+    valid_params_if(DMA, timer_num < NUM_DMA_TIMERS);
 }
 
 inline static dma_channel_hw_t *dma_channel_hw_addr(uint channel) {
@@ -93,6 +101,16 @@ void dma_channel_unclaim(uint channel);
  * \return the dma channel number or -1 if required was false, and none were free
  */
 int dma_claim_unused_channel(bool required);
+
+/*! \brief Determine if a dma channel is claimed
+ *  \ingroup hardware_dma
+ *
+ * \param channel the dma channel
+ * \return true if the channel is claimed, false otherwise
+ * \see dma_channel_claim
+ * \see dma_channel_claim_mask
+ */
+bool dma_channel_is_claimed(uint channel);
 
 /** \brief DMA channel configuration
  *  \defgroup channel_config channel_config
@@ -186,7 +204,7 @@ static inline void channel_config_set_chain_to(dma_channel_config *c, uint chain
  */
 static inline void channel_config_set_transfer_data_size(dma_channel_config *c, enum dma_channel_transfer_size size) {
     assert(size == DMA_SIZE_8 || size == DMA_SIZE_16 || size == DMA_SIZE_32);
-    c->ctrl = (c->ctrl & ~DMA_CH0_CTRL_TRIG_DATA_SIZE_BITS) | (size << DMA_CH0_CTRL_TRIG_DATA_SIZE_LSB);
+    c->ctrl = (c->ctrl & ~DMA_CH0_CTRL_TRIG_DATA_SIZE_BITS) | (((uint)size) << DMA_CH0_CTRL_TRIG_DATA_SIZE_LSB);
 }
 
 /*! \brief  Set address wrapping parameters
@@ -353,7 +371,7 @@ static inline void dma_channel_set_read_addr(uint channel, const volatile void *
     }
 }
 
-/*! \brief  Set the DMA initial read address
+/*! \brief  Set the DMA initial write address
  *  \ingroup hardware_dma
  *
  * \param channel DMA channel
@@ -409,7 +427,8 @@ static inline void dma_channel_configure(uint channel, const dma_channel_config 
  * \param read_addr Sets the initial read address
  * \param transfer_count Number of transfers to make. Not bytes, but the number of transfers of channel_config_set_transfer_data_size() to be sent.
  */
-inline static void __attribute__((always_inline)) dma_channel_transfer_from_buffer_now(uint channel, void *read_addr,
+inline static void __attribute__((always_inline)) dma_channel_transfer_from_buffer_now(uint channel, 
+                                                                                       const volatile void *read_addr,
                                                                                        uint32_t transfer_count) {
 //    check_dma_channel_param(channel);
     dma_channel_hw_t *hw = dma_channel_hw_addr(channel);
@@ -424,7 +443,7 @@ inline static void __attribute__((always_inline)) dma_channel_transfer_from_buff
  * \param write_addr Sets the initial write address
  * \param transfer_count Number of transfers to make. Not bytes, but the number of transfers of channel_config_set_transfer_data_size() to be sent.
  */
-inline static void dma_channel_transfer_to_buffer_now(uint channel, void *write_addr, uint32_t transfer_count) {
+inline static void dma_channel_transfer_to_buffer_now(uint channel, volatile void *write_addr, uint32_t transfer_count) {
     dma_channel_hw_t *hw = dma_channel_hw_addr(channel);
     hw->write_addr = (uintptr_t) write_addr;
     hw->al1_transfer_count_trig = transfer_count;
@@ -464,7 +483,7 @@ static inline void dma_channel_abort(uint channel) {
     while (dma_hw->abort & (1ul << channel)) tight_loop_contents();
 }
 
-/*! \brief  Enable single DMA channel interrupt 0
+/*! \brief  Enable single DMA channel's interrupt via DMA_IRQ_0
  *  \ingroup hardware_dma
  *
  * \param channel DMA channel
@@ -479,7 +498,7 @@ static inline void dma_channel_set_irq0_enabled(uint channel, bool enabled) {
         hw_clear_bits(&dma_hw->inte0, 1u << channel);
 }
 
-/*! \brief  Enable multiple DMA channels interrupt 0
+/*! \brief  Enable multiple DMA channels' interrupts via DMA_IRQ_0
  *  \ingroup hardware_dma
  *
  * \param channel_mask Bitmask of all the channels to enable/disable. Channel 0 = bit 0, channel 1 = bit 1 etc.
@@ -493,7 +512,7 @@ static inline void dma_set_irq0_channel_mask_enabled(uint32_t channel_mask, bool
     }
 }
 
-/*! \brief  Enable single DMA channel interrupt 1
+/*! \brief  Enable single DMA channel's interrupt via DMA_IRQ_1
  *  \ingroup hardware_dma
  *
  * \param channel DMA channel
@@ -508,7 +527,7 @@ static inline void dma_channel_set_irq1_enabled(uint channel, bool enabled) {
         hw_clear_bits(&dma_hw->inte1, 1u << channel);
 }
 
-/*! \brief  Enable multiple DMA channels interrupt 0
+/*! \brief  Enable multiple DMA channels' interrupts via DMA_IRQ_1
  *  \ingroup hardware_dma
  *
  * \param channel_mask Bitmask of all the channels to enable/disable. Channel 0 = bit 0, channel 1 = bit 1 etc.
@@ -520,6 +539,105 @@ static inline void dma_set_irq1_channel_mask_enabled(uint32_t channel_mask, bool
     } else {
         hw_clear_bits(&dma_hw->inte1, channel_mask);
     }
+}
+
+/*! \brief  Enable single DMA channel interrupt on either DMA_IRQ_0 or DMA_IRQ_1
+ *  \ingroup hardware_dma
+ *
+ * \param irq_index the IRQ index; either 0 or 1 for DMA_IRQ_0 or DMA_IRQ_1
+ * \param channel DMA channel
+ * \param enabled true to enable interrupt via irq_index for specified channel, false to disable.
+ */
+static inline void dma_irqn_set_channel_enabled(uint irq_index, uint channel, bool enabled) {
+    invalid_params_if(DMA, irq_index > 1);
+    if (irq_index) {
+        dma_channel_set_irq1_enabled(channel, enabled);
+    } else {
+        dma_channel_set_irq0_enabled(channel, enabled);
+    }
+}
+
+/*! \brief  Enable multiple DMA channels' interrupt via either DMA_IRQ_0 or DMA_IRQ_1
+ *  \ingroup hardware_dma
+ *
+ * \param irq_index the IRQ index; either 0 or 1 for DMA_IRQ_0 or DMA_IRQ_1
+ * \param channel_mask Bitmask of all the channels to enable/disable. Channel 0 = bit 0, channel 1 = bit 1 etc.
+ * \param enabled true to enable all the interrupts specified in the mask, false to disable all the interrupts specified in the mask.
+ */
+static inline void dma_irqn_set_channel_mask_enabled(uint irq_index, uint32_t channel_mask,  bool enabled) {
+    invalid_params_if(DMA, irq_index > 1);
+    if (irq_index) {
+        dma_set_irq1_channel_mask_enabled(channel_mask, enabled);
+    } else {
+        dma_set_irq0_channel_mask_enabled(channel_mask, enabled);
+    }
+}
+
+/*! \brief  Determine if a particular channel is a cause of DMA_IRQ_0
+ *  \ingroup hardware_dma
+ *
+ * \param channel DMA channel
+ * \return true if the channel is a cause of DMA_IRQ_0, false otherwise
+ */
+static inline bool dma_channel_get_irq0_status(uint channel) {
+    check_dma_channel_param(channel);
+    return dma_hw->ints0 & (1u << channel);
+}
+
+/*! \brief  Determine if a particular channel is a cause of DMA_IRQ_1
+ *  \ingroup hardware_dma
+ *
+ * \param channel DMA channel
+ * \return true if the channel is a cause of DMA_IRQ_1, false otherwise
+ */
+static inline bool dma_channel_get_irq1_status(uint channel) {
+    check_dma_channel_param(channel);
+    return dma_hw->ints1 & (1u << channel);
+}
+
+/*! \brief  Determine if a particular channel is a cause of DMA_IRQ_N
+ *  \ingroup hardware_dma
+ *
+ * \param irq_index the IRQ index; either 0 or 1 for DMA_IRQ_0 or DMA_IRQ_1
+ * \param channel DMA channel
+ * \return true if the channel is a cause of the DMA_IRQ_N, false otherwise
+ */
+static inline bool dma_irqn_get_channel_status(uint irq_index, uint channel) {
+    invalid_params_if(DMA, irq_index > 1);
+    check_dma_channel_param(channel);
+    return (irq_index ? dma_hw->ints1 : dma_hw->ints0) & (1u << channel);
+}
+
+/*! \brief  Acknowledge a channel IRQ, resetting it as the cause of DMA_IRQ_0
+ *  \ingroup hardware_dma
+ *
+ * \param channel DMA channel
+ */
+static inline void dma_channel_acknowledge_irq0(uint channel) {
+    check_dma_channel_param(channel);
+    hw_set_bits(&dma_hw->ints0, (1u << channel));
+}
+
+/*! \brief  Acknowledge a channel IRQ, resetting it as the cause of DMA_IRQ_1
+ *  \ingroup hardware_dma
+ *
+ * \param channel DMA channel
+ */
+static inline void dma_channel_acknowledge_irq1(uint channel) {
+    check_dma_channel_param(channel);
+    hw_set_bits(&dma_hw->ints1, (1u << channel));
+}
+
+/*! \brief  Acknowledge a channel IRQ, resetting it as the cause of DMA_IRQ_N
+ *  \ingroup hardware_dma
+ *
+ * \param irq_index the IRQ index; either 0 or 1 for DMA_IRQ_0 or DMA_IRQ_1
+ * \param channel DMA channel
+ */
+static inline void dma_irqn_acknowledge_channel(uint irq_index, uint channel) {
+    invalid_params_if(DMA, irq_index > 1);
+    check_dma_channel_param(channel);
+    hw_set_bits(irq_index ? &dma_hw->ints1 : &dma_hw->ints0, (1u << channel));
 }
 
 /*! \brief  Check if DMA channel is busy
@@ -540,6 +658,8 @@ inline static bool dma_channel_is_busy(uint channel) {
  */
 inline static void dma_channel_wait_for_finish_blocking(uint channel) {
     while (dma_channel_is_busy(channel)) tight_loop_contents();
+    // stop the compiler hoisting a non volatile buffer access above the DMA completion.
+    __compiler_memory_barrier();
 }
 
 /*! \brief Enable the DMA sniffing targeting the specified channel
@@ -595,8 +715,73 @@ inline static void dma_sniffer_set_byte_swap_enabled(bool swap) {
  *  \ingroup hardware_dma
  *
  */
-inline static void dma_sniffer_disable() {
+inline static void dma_sniffer_disable(void) {
     dma_hw->sniff_ctrl = 0;
+}
+
+/*! \brief Mark a dma timer as used
+ *  \ingroup hardware_dma
+ *
+ * Method for cooperative claiming of hardware. Will cause a panic if the timer
+ * is already claimed. Use of this method by libraries detects accidental
+ * configurations that would fail in unpredictable ways.
+ *
+ * \param timer the dma timer
+ */
+void dma_timer_claim(uint timer);
+
+/*! \brief Mark a dma timer as no longer used
+ *  \ingroup hardware_dma
+ *
+ * Method for cooperative claiming of hardware.
+ *
+ * \param timer the dma timer to release
+ */
+void dma_timer_unclaim(uint timer);
+
+/*! \brief Claim a free dma timer
+ *  \ingroup hardware_dma
+ *
+ * \param required if true the function will panic if none are available
+ * \return the dma timer number or -1 if required was false, and none were free
+ */
+int dma_claim_unused_timer(bool required);
+
+/*! \brief Determine if a dma timer is claimed
+ *  \ingroup hardware_dma
+ *
+ * \param timer the dma timer
+ * \return true if the timer is claimed, false otherwise
+ * \see dma_timer_claim
+ */
+bool dma_timer_is_claimed(uint timer);
+
+/*! \brief Set the divider for the given DMA timer
+ *  \ingroup hardware_dma
+ *
+ * The timer will run at the system_clock_freq * numerator / denominator, so this is the speed
+ * that data elements will be transferred at via a DMA channel using this timer as a DREQ
+ *
+ * \param timer the dma timer
+ * \param numerator the fraction's numerator
+ * \param denominator the fraction's denominator
+ */
+static inline void dma_timer_set_fraction(uint timer, uint16_t numerator, uint16_t denominator) {
+    check_dma_timer_param(timer);
+    dma_hw->timer[timer] = (((uint32_t)numerator) << DMA_TIMER0_X_LSB) | (((uint32_t)denominator) << DMA_TIMER0_Y_LSB);
+}
+
+/*! \brief Return the DREQ number for a given DMA timer
+ *  \ingroup hardware_dma
+ *
+ * \param timer_num DMA timer number 0-3
+ */
+static inline uint dma_get_timer_dreq(uint timer_num) {
+    static_assert(DREQ_DMA_TIMER1 == DREQ_DMA_TIMER0 + 1, "");
+    static_assert(DREQ_DMA_TIMER2 == DREQ_DMA_TIMER0 + 2, "");
+    static_assert(DREQ_DMA_TIMER3 == DREQ_DMA_TIMER0 + 3, "");
+    check_dma_timer_param(timer_num);
+    return DREQ_DMA_TIMER0 + timer_num;
 }
 
 #ifndef NDEBUG

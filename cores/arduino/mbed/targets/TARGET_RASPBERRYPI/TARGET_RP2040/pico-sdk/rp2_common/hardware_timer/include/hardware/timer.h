@@ -50,7 +50,7 @@ extern "C" {
 #define PARAM_ASSERTIONS_ENABLED_TIMER 0
 #endif
 
-static inline void check_hardware_alarm_num_param(uint alarm_num) {
+static inline void check_hardware_alarm_num_param(__unused uint alarm_num) {
     invalid_params_if(TIMER, alarm_num >= NUM_TIMERS);
 }
 
@@ -62,7 +62,7 @@ static inline void check_hardware_alarm_num_param(uint alarm_num) {
 *
 * \return the 32 bit timestamp
 */
-static inline uint32_t time_us_32() {
+static inline uint32_t time_us_32(void) {
     return timer_hw->timerawl;
 }
 
@@ -75,21 +75,28 @@ static inline uint32_t time_us_32() {
 *
 * \return the 64 bit timestamp
 */
-uint64_t time_us_64();
+uint64_t time_us_64(void);
 
 /*! \brief Busy wait wasting cycles for the given (32 bit) number of microseconds
  *  \ingroup hardware_timer
  *
- * \param delay_us delay amount
+ * \param delay_us delay amount in microseconds
  */
 void busy_wait_us_32(uint32_t delay_us);
 
 /*! \brief Busy wait wasting cycles for the given (64 bit) number of microseconds
  *  \ingroup hardware_timer
  *
- * \param delay_us delay amount
+ * \param delay_us delay amount in microseconds
  */
 void busy_wait_us(uint64_t delay_us);
+
+/*! \brief Busy wait wasting cycles for the given number of milliseconds
+ *  \ingroup hardware_timer
+ *
+ * \param delay_ms delay amount in milliseconds
+ */
+void busy_wait_ms(uint32_t delay_ms);
 
 /*! \brief Busy wait wasting cycles until after the specified timestamp
  *  \ingroup hardware_timer
@@ -106,7 +113,7 @@ void busy_wait_until(absolute_time_t t);
  */
 static inline bool time_reached(absolute_time_t t) {
     uint64_t target = to_us_since_boot(t);
-    uint32_t hi_target = target >> 32u;
+    uint32_t hi_target = (uint32_t)(target >> 32u);
     uint32_t hi = timer_hw->timerawh;
     return (hi >= hi_target && (timer_hw->timerawl >= (uint32_t) target || hi != hi_target));
 }
@@ -115,7 +122,7 @@ static inline bool time_reached(absolute_time_t t) {
  *  \ingroup hardware_timer
  *
  * \param alarm_num the hardware alarm number
- * \sa hardware_alarm_set_callback
+ * \sa hardware_alarm_set_callback()
  */
 typedef void (*hardware_alarm_callback_t)(uint alarm_num);
 
@@ -137,6 +144,15 @@ void hardware_alarm_claim(uint alarm_num);
  */
 void hardware_alarm_unclaim(uint alarm_num);
 
+/*! \brief Determine if a hardware alarm has been claimed
+ *  \ingroup hardware_timer
+ *
+ * \param alarm_num the hardware alarm number
+ * \return true if claimed, false otherwise
+ * \see hardware_alarm_claim
+ */
+bool hardware_alarm_is_claimed(uint alarm_num);
+
 /*! \brief Enable/Disable a callback for a hardware timer on this core
  *  \ingroup hardware_timer
  *
@@ -151,12 +167,13 @@ void hardware_alarm_unclaim(uint alarm_num);
  * \param alarm_num the hardware alarm number
  * \param callback the callback to install, or NULL to unset
  *
- * \sa hardware_alarm_set_target
+ * \sa hardware_alarm_set_target()
  */
 void hardware_alarm_set_callback(uint alarm_num, hardware_alarm_callback_t callback);
 
 /**
  * \brief Set the current target for the specified hardware alarm
+ * \ingroup hardware_timer
  *
  * This will replace any existing target
  *
@@ -168,6 +185,7 @@ bool hardware_alarm_set_target(uint alarm_num, absolute_time_t t);
 
 /**
  * \brief Cancel an existing target (if any) for a given hardware_alarm
+ * \ingroup hardware_timer
  *
  * @param alarm_num
  */

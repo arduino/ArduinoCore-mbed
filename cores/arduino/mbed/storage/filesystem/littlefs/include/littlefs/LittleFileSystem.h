@@ -65,6 +65,7 @@ public:
 
     virtual ~LittleFileSystem();
 
+#if !defined(TARGET_PORTENTA_H7_M7) || !defined(MCUBOOT_BOOTLOADER_BUILD)
     /** Format a block device with the LittleFileSystem.
      *
      *  The block device to format should be mounted when this function is called.
@@ -94,6 +95,7 @@ public:
                       lfs_size_t block_size = MBED_LFS_BLOCK_SIZE,
                       lfs_size_t lookahead = MBED_LFS_LOOKAHEAD);
 
+#endif
     /** Mount a file system to a block device.
      *
      *  @param bd       Block device to mount to.
@@ -107,6 +109,7 @@ public:
      */
     virtual int unmount();
 
+#if !defined(TARGET_PORTENTA_H7_M7) || !defined(MCUBOOT_BOOTLOADER_BUILD)
     /** Reformat a file system. Results in an empty and mounted file system.
      *
      *  @param bd
@@ -118,6 +121,7 @@ public:
      *  @return         0 on success, negative error code on failure
      */
     virtual int reformat(mbed::BlockDevice *bd);
+#endif
 
     /** Remove a file from the file system.
      *
@@ -126,6 +130,7 @@ public:
      */
     virtual int remove(const char *path);
 
+#if !defined(TARGET_PORTENTA_H7_M7) || !defined(MCUBOOT_BOOTLOADER_BUILD)
     /** Rename a file in the file system.
      *
      *  @param path     The name of the file to rename.
@@ -133,6 +138,7 @@ public:
      *  @return         0 on success, negative error code on failure
      */
     virtual int rename(const char *path, const char *newpath);
+#endif
 
     /** Store information about the file in a stat structure
      *

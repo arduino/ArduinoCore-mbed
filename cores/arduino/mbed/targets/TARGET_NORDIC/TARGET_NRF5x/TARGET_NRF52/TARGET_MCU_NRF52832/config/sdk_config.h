@@ -4487,6 +4487,18 @@
 #define NRFX_WDT_CONFIG_LOG_LEVEL 3
 #endif
 
+
+// <e> NRFX_WDT_CONFIG_NO_IRQ - Remove WDT IRQ handling from WDT driver.
+//==========================================================
+
+// <0=> Include WDT IRQ handling
+// <1=> Remove WDT IRQ handling
+
+#ifndef NRFX_WDT_CONFIG_NO_IRQ
+#define NRFX_WDT_CONFIG_NO_IRQ 1
+#endif
+
+
 // <o> NRFX_WDT_CONFIG_INFO_COLOR  - ANSI escape code prefix.
  
 // <0=> Default 

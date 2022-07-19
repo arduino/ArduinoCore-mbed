@@ -216,6 +216,7 @@
 #define MBED_CONF_LWIP_MEM_SIZE                                                 16000                                                                                            // set by library:lwip[PORTENTA_H7]
 #define MBED_CONF_LWIP_ND6_QUEUEING                                             0                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_ND6_RDNSS_MAX_DNS_SERVERS                                0                                                                                                // set by library:lwip
+#define MBED_CONF_LWIP_NETBUF_RECVINFO_ENABLED                                  0                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_NUM_NETBUF                                               8                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_NUM_PBUF                                                 8                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_PBUF_POOL_SIZE                                           5                                                                                                // set by library:lwip

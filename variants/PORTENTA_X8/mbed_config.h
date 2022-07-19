@@ -171,6 +171,7 @@
 #define MBED_CONF_LWIP_MEM_SIZE                                           2310                                                                                             // set by library:lwip[STM]
 #define MBED_CONF_LWIP_ND6_QUEUEING                                       0                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_ND6_RDNSS_MAX_DNS_SERVERS                          0                                                                                                // set by library:lwip
+#define MBED_CONF_LWIP_NETBUF_RECVINFO_ENABLED                            0                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_NUM_NETBUF                                         8                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_NUM_PBUF                                           8                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_PBUF_POOL_SIZE                                     5                                                                                                // set by library:lwip
@@ -213,6 +214,7 @@
 #define MBED_CONF_PLATFORM_CALLBACK_NONTRIVIAL                            1                                                                                                // set by application[*]
 #define MBED_CONF_PLATFORM_CRASH_CAPTURE_ENABLED                          0                                                                                                // set by library:platform
 #define MBED_CONF_PLATFORM_CTHUNK_COUNT_MAX                               8                                                                                                // set by library:platform
+#define MBED_CONF_PLATFORM_DEEPSLEEP_STATS_VERBOSE                        0                                                                                                // set by library:platform[STM]
 #define MBED_CONF_PLATFORM_DEFAULT_SERIAL_BAUD_RATE                       115200                                                                                           // set by application[*]
 #define MBED_CONF_PLATFORM_ERROR_ALL_THREADS_INFO                         0                                                                                                // set by library:platform
 #define MBED_CONF_PLATFORM_ERROR_FILENAME_CAPTURE_ENABLED                 0                                                                                                // set by library:platform

@@ -96,7 +96,7 @@ enum gpio_function {
     GPIO_FUNC_PIO1 = 7,
     GPIO_FUNC_GPCK = 8,
     GPIO_FUNC_USB = 9,
-    GPIO_FUNC_NULL = 0xf,
+    GPIO_FUNC_NULL = 0x1f,
 };
 
 #define GPIO_OUT 1
@@ -124,6 +124,13 @@ enum gpio_irq_level {
     GPIO_IRQ_EDGE_RISE = 0x8u,
 };
 
+/*! Callback function type for GPIO events
+ *  \ingroup hardware_gpio
+ *
+ * \param gpio Which GPIO caused this interrupt
+ * \param events Which events caused this interrupt. See \ref gpio_set_irq_enabled for details.
+ * \sa gpio_set_irq_enabled_with_callback()
+ */
 typedef void (*gpio_irq_callback_t)(uint gpio, uint32_t events);
 
 enum gpio_override {
@@ -131,6 +138,31 @@ enum gpio_override {
     GPIO_OVERRIDE_INVERT = 1,      ///< invert peripheral signal selected via \ref gpio_set_function
     GPIO_OVERRIDE_LOW = 2,         ///< drive low/disable output
     GPIO_OVERRIDE_HIGH = 3,        ///< drive high/enable output
+};
+
+/*! \brief Slew rate limiting levels for GPIO outputs
+ *  \ingroup hardware_gpio
+ *
+ * Slew rate limiting increases the minimum rise/fall time when a GPIO output
+ * is lightly loaded, which can help to reduce electromagnetic emissions.
+ * \sa gpio_set_slew_rate
+ */
+enum gpio_slew_rate {
+    GPIO_SLEW_RATE_SLOW = 0,  ///< Slew rate limiting enabled
+    GPIO_SLEW_RATE_FAST = 1   ///< Slew rate limiting disabled
+};
+
+/*! \brief Drive strength levels for GPIO outputs
+ *  \ingroup hardware_gpio
+ *
+ * Drive strength levels for GPIO outputs.
+ * \sa gpio_set_drive_strength
+ */
+enum gpio_drive_strength {
+    GPIO_DRIVE_STRENGTH_2MA = 0, ///< 2 mA nominal drive strength
+    GPIO_DRIVE_STRENGTH_4MA = 1, ///< 4 mA nominal drive strength
+    GPIO_DRIVE_STRENGTH_8MA = 2, ///< 8 mA nominal drive strength
+    GPIO_DRIVE_STRENGTH_12MA = 3 ///< 12 mA nominal drive strength
 };
 
 // ----------------------------------------------------------------------------
@@ -146,6 +178,12 @@ enum gpio_override {
  */
 void gpio_set_function(uint gpio, enum gpio_function fn);
 
+/*! \brief Determine current GPIO function
+ *  \ingroup hardware_gpio
+ *
+ * \param gpio GPIO number
+ * \return Which GPIO function is currently selected from list \ref gpio_function
+ */
 enum gpio_function gpio_get_function(uint gpio);
 
 /*! \brief Select up and down pulls on specific GPIO
@@ -207,6 +245,16 @@ static inline void gpio_disable_pulls(uint gpio) {
     gpio_set_pulls(gpio, false, false);
 }
 
+/*! \brief Set GPIO IRQ override
+ *  \ingroup hardware_gpio
+ *
+ * Optionally invert a GPIO IRQ signal, or drive it high or low
+ *
+ * \param gpio GPIO number
+ * \param value See \ref gpio_override
+ */
+void gpio_set_irqover(uint gpio, uint value);
+
 /*! \brief Set GPIO output override
  *  \ingroup hardware_gpio
  *
@@ -239,6 +287,65 @@ void gpio_set_oeover(uint gpio, uint value);
  */
 void gpio_set_input_enabled(uint gpio, bool enabled);
 
+/*! \brief Enable/disable GPIO input hysteresis (Schmitt trigger)
+ *  \ingroup hardware_gpio
+ *
+ * Enable or disable the Schmitt trigger hysteresis on a given GPIO. This is
+ * enabled on all GPIOs by default. Disabling input hysteresis can lead to
+ * inconsistent readings when the input signal has very long rise or fall
+ * times, but slightly reduces the GPIO's input delay.
+ *
+ * \sa gpio_is_input_hysteresis_enabled
+ * \param gpio GPIO number
+ * \param enabled true to enable input hysteresis on specified GPIO
+ */
+void gpio_set_input_hysteresis_enabled(uint gpio, bool enabled);
+
+/*! \brief Determine whether input hysteresis is enabled on a specified GPIO
+ *  \ingroup hardware_gpio
+ *
+ * \sa gpio_set_input_hysteresis_enabled
+ * \param gpio GPIO number
+ */
+bool gpio_is_input_hysteresis_enabled(uint gpio);
+
+
+/*! \brief Set slew rate for a specified GPIO
+ *  \ingroup hardware_gpio
+ *
+ * \sa gpio_get_slew_rate
+ * \param gpio GPIO number
+ * \param slew GPIO output slew rate
+ */
+void gpio_set_slew_rate(uint gpio, enum gpio_slew_rate slew);
+
+/*! \brief Determine current slew rate for a specified GPIO
+ *  \ingroup hardware_gpio
+ *
+ * \sa gpio_set_slew_rate
+ * \param gpio GPIO number
+ * \return Current slew rate of that GPIO
+ */
+enum gpio_slew_rate gpio_get_slew_rate(uint gpio);
+
+/*! \brief Set drive strength for a specified GPIO
+ *  \ingroup hardware_gpio
+ *
+ * \sa gpio_get_drive_strength
+ * \param gpio GPIO number
+ * \param drive GPIO output drive strength
+ */
+void gpio_set_drive_strength(uint gpio, enum gpio_drive_strength drive);
+
+/*! \brief Determine current slew rate for a specified GPIO
+ *  \ingroup hardware_gpio
+ *
+ * \sa gpio_set_drive_strength
+ * \param gpio GPIO number
+ * \return Current drive strength of that GPIO
+ */
+enum gpio_drive_strength gpio_get_drive_strength(uint gpio);
+
 /*! \brief Enable or disable interrupts for specified GPIO
  *  \ingroup hardware_gpio
  *
@@ -267,7 +374,7 @@ void gpio_set_irq_enabled(uint gpio, uint32_t events, bool enabled);
  * the processor that calls the function.
  *
  * \param gpio GPIO number
- * \param events Which events will cause an interrupt See \ref gpio_set_irq_enabled for details.
+ * \param events Which events will cause an interrupt. See \ref gpio_set_irq_enabled for details.
  * \param enabled Enable or disable flag
  * \param callback user function to call on GPIO irq. Note only one of these can be set per processor.
  *
@@ -300,7 +407,7 @@ void gpio_acknowledge_irq(uint gpio, uint32_t events);
 /*! \brief Initialise a GPIO for (enabled I/O and set func to GPIO_FUNC_SIO)
  *  \ingroup hardware_gpio
  *
- * Clear the output enable (i.e. set to input)
+ * Clear the output enable (i.e. set to input).
  * Clear any output value.
  *
  * \param gpio GPIO number
@@ -310,7 +417,7 @@ void _gpio_init(uint gpio);
 /*! \brief Initialise multiple GPIOs (enabled I/O and set func to GPIO_FUNC_SIO)
  *  \ingroup hardware_gpio
  *
- * Clear the output enable (i.e. set to input)
+ * Clear the output enable (i.e. set to input).
  * Clear any output value.
  *
  * \param gpio_mask Mask with 1 bit per GPIO number to initialize
@@ -335,7 +442,7 @@ static inline bool gpio_get(uint gpio) {
  *
  * \return Bitmask of raw GPIO values, as bits 0-29
  */
-static inline uint32_t gpio_get_all() {
+static inline uint32_t gpio_get_all(void) {
     return sio_hw->gpio_in;
 }
 
@@ -406,6 +513,26 @@ static inline void gpio_put(uint gpio, bool value) {
         gpio_set_mask(mask);
     else
         gpio_clr_mask(mask);
+}
+
+/*! \brief Determine whether a GPIO is currently driven high or low
+ *  \ingroup hardware_gpio
+ *
+ * This function returns the high/low output level most recently assigned to a
+ * GPIO via gpio_put() or similar. This is the value that is presented outward
+ * to the IO muxing, *not* the input level back from the pad (which can be
+ * read using gpio_get()).
+ *
+ * To avoid races, this function must not be used for read-modify-write
+ * sequences when driving GPIOs -- instead functions like gpio_put() should be
+ * used to atomically update GPIOs. This accessor is intended for debug use
+ * only.
+ *
+ * \param gpio GPIO number
+ * \return true if the GPIO output level is high, false if low.
+ */
+static inline bool gpio_get_out_level(uint gpio) {
+    return !!(sio_hw->gpio_out & (1u << gpio));
 }
 
 // ----------------------------------------------------------------------------
@@ -490,7 +617,7 @@ static inline uint gpio_get_dir(uint gpio) {
     return gpio_is_dir_out(gpio); // note GPIO_OUT is 1/true and GPIO_IN is 0/false anyway
 }
 
-extern void gpio_debug_pins_init();
+extern void gpio_debug_pins_init(void);
 
 #ifdef __cplusplus
 }

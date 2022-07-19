@@ -223,6 +223,7 @@
 #define MBED_CONF_LWIP_MEM_SIZE                                                 1600                                                                                             // set by library:lwip
 #define MBED_CONF_LWIP_ND6_QUEUEING                                             0                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_ND6_RDNSS_MAX_DNS_SERVERS                                0                                                                                                // set by library:lwip
+#define MBED_CONF_LWIP_NETBUF_RECVINFO_ENABLED                                  0                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_NUM_NETBUF                                               8                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_NUM_PBUF                                                 8                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_PBUF_POOL_SIZE                                           5                                                                                                // set by library:lwip
@@ -383,6 +384,7 @@
 #define LL_MAX_PER_SCAN                                                         3                                                                                                // defined by library:cordio-nordic-ll
 #define MBEDTLS_CIPHER_MODE_CTR                                                                                                                                                  // defined by library:SecureStore
 #define NRFX_GPIOTE_CONFIG_NUM_OF_LOW_POWER_EVENTS                              8                                                                                                // defined by application
+#define NRFX_WDT_ENABLED                                                        1                                                                                                // defined by application
 #define NSAPI_PPP_AVAILABLE                                                     (MBED_CONF_PPP_ENABLED || MBED_CONF_LWIP_PPP_ENABLED)                                            // defined by library:ppp
 #define NSDYNMEM_TRACKER_ENABLED                                                MBED_CONF_NANOSTACK_LIBSERVICE_NSDYNMEM_TRACKER_ENABLED                                          // defined by library:nanostack-libservice
 #define UNITY_INCLUDE_CONFIG_H                                                                                                                                                   // defined by library:utest

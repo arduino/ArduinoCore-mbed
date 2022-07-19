@@ -216,6 +216,7 @@
 #define MBED_CONF_LWIP_MEM_SIZE                                                 16000                                                                                            // set by library:lwip[NICLA_VISION]
 #define MBED_CONF_LWIP_ND6_QUEUEING                                             0                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_ND6_RDNSS_MAX_DNS_SERVERS                                0                                                                                                // set by library:lwip
+#define MBED_CONF_LWIP_NETBUF_RECVINFO_ENABLED                                  0                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_NUM_NETBUF                                               8                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_NUM_PBUF                                                 8                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_PBUF_POOL_SIZE                                           5                                                                                                // set by library:lwip
@@ -379,7 +380,7 @@
 #define MBED_CONF_TARGET_LPTICKER_LPTIM                                         1                                                                                                // set by target:MCU_STM32H7
 #define MBED_CONF_TARGET_LPTICKER_LPTIM_CLOCK                                   1                                                                                                // set by target:MCU_STM32
 #define MBED_CONF_TARGET_LPUART_CLOCK_SOURCE                                    USE_LPUART_CLK_HSI                                                                               // set by target:NICLA_VISION
-#define MBED_CONF_TARGET_LSE_AVAILABLE                                          0                                                                                                // set by target:NICLA_VISION
+#define MBED_CONF_TARGET_LSE_AVAILABLE                                          1                                                                                                // set by target:NICLA_VISION
 #define MBED_CONF_TARGET_LSE_BYPASS                                             1                                                                                                // set by target:NICLA_VISION
 #define MBED_CONF_TARGET_LSE_DRIVE_LOAD_LEVEL                                   RCC_LSEDRIVE_LOW                                                                                 // set by target:MCU_STM32H7
 #define MBED_CONF_TARGET_MPU_ROM_END                                            0x0fffffff                                                                                       // set by target:Target

@@ -233,6 +233,9 @@
 -iwithprefixbefore/mbed/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/common/pico_sync/include/pico
 -iwithprefixbefore/mbed/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/common/pico_time
 -iwithprefixbefore/mbed/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/common/pico_time/include
+-iwithprefixbefore/mbed/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/common/pico_usb_reset_interface
+-iwithprefixbefore/mbed/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/common/pico_usb_reset_interface/include
+-iwithprefixbefore/mbed/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/common/pico_usb_reset_interface/include/pico
 -iwithprefixbefore/mbed/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/common/pico_util
 -iwithprefixbefore/mbed/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/common/pico_util/include
 -iwithprefixbefore/mbed/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/common/pico_util/include/pico
@@ -262,6 +265,9 @@
 -iwithprefixbefore/mbed/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_dma
 -iwithprefixbefore/mbed/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_dma/include
 -iwithprefixbefore/mbed/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_dma/include/hardware
+-iwithprefixbefore/mbed/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_exception
+-iwithprefixbefore/mbed/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_exception/include
+-iwithprefixbefore/mbed/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_exception/include/hardware
 -iwithprefixbefore/mbed/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_flash
 -iwithprefixbefore/mbed/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_flash/include
 -iwithprefixbefore/mbed/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_flash/include/hardware
