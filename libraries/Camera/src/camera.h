@@ -21,6 +21,7 @@
 #include "Wire.h"
 
 #define HM01B0_I2C_ADDR         (0x24)
+#define HM0360_I2C_ADDR         (0x24)
 #define GC2145_I2C_ADDR         (0x3C)
 
 enum {
