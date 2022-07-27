@@ -65,7 +65,7 @@ public:
   int begin(uint8_t *mac, IPAddress ip);
   int begin(uint8_t *mac, IPAddress ip, IPAddress dns);
   int begin(uint8_t *mac, IPAddress ip, IPAddress dns, IPAddress gateway);
-  int begin(uint8_t *mac, IPAddress ip, IPAddress dns, IPAddress gateway, IPAddress subnet);
+  int begin(uint8_t *mac, IPAddress ip, IPAddress dns, IPAddress gateway, IPAddress subnet, unsigned long timeout = 60000, unsigned long responseTimeout = 4000);
 
   int begin(IPAddress ip) {
     return begin(nullptr, ip);

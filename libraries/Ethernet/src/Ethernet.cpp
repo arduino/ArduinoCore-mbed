@@ -42,14 +42,14 @@ int arduino::EthernetClass::begin(uint8_t *mac, IPAddress ip, IPAddress dns, IPA
   return ret;
 }
 
-int arduino::EthernetClass::begin(uint8_t *mac, IPAddress ip, IPAddress dns, IPAddress gateway, IPAddress subnet) {
+int arduino::EthernetClass::begin(uint8_t *mac, IPAddress ip, IPAddress dns, IPAddress gateway, IPAddress subnet, unsigned long timeout, unsigned long responseTimeout) {
   config(ip, dns, gateway, subnet);
 
   eth_if->set_dhcp(false);
   eth_if->set_network(_ip, _netmask, _gateway);
   eth_if->add_dns_server(_dnsServer1, nullptr);
 
-  auto ret = begin(mac);
+  auto ret = begin(mac, timeout, responseTimeout);
   return ret;
 }
 
