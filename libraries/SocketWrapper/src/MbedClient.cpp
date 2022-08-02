@@ -60,6 +60,7 @@ void arduino::MbedClient::setSocket(Socket *_sock) {
 void arduino::MbedClient::configureSocket(Socket *_s) {
   _s->set_timeout(_timeout);
   _s->set_blocking(false);
+  _s->getpeername(&address);
   
   if (event == nullptr) {
     event = new rtos::EventFlags;
@@ -99,7 +100,6 @@ int arduino::MbedClient::connect(SocketAddress socketAddress) {
     return 0;
   }
 
-  address = socketAddress;
   nsapi_error_t returnCode = static_cast<TCPSocket *>(sock)->connect(socketAddress);
   int ret = 0;
 
@@ -149,8 +149,6 @@ int arduino::MbedClient::connectSSL(SocketAddress socketAddress) {
   if (static_cast<TLSSocket *>(sock)->open(getNetwork()) != NSAPI_ERROR_OK) {
     return 0;
   }
-
-  address = socketAddress;
 
 restart_connect:
   nsapi_error_t returnCode = static_cast<TLSSocket *>(sock)->connect(socketAddress);
@@ -304,7 +302,7 @@ IPAddress arduino::MbedClient::remoteIP() {
 }
 
 uint16_t arduino::MbedClient::remotePort() {
-  return 0;
+  return address.get_port();
 }
 
 void arduino::MbedClient::setTimeout(unsigned long timeout) {
