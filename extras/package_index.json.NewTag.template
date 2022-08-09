@@ -76,7 +76,7 @@
             },
             {
               "packager": "arduino",
-              "version": "1.8.0-arduino.1",
+              "version": "1.8.0-arduino.2",
               "name": "imgtool"
             }
           ]
@@ -225,7 +225,7 @@
             },
             {
               "packager": "arduino",
-              "version": "1.8.0-arduino.1",
+              "version": "1.8.0-arduino.2",
               "name": "imgtool"
             },
             {
