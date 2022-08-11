@@ -162,9 +162,10 @@ static uint8_t sec2enum(nsapi_security_t sec) {
 
 int8_t arduino::WiFiClass::scanNetworks() {
   uint8_t count = 10;
-  if (ap_list == nullptr) {
-    ap_list = new WiFiAccessPoint[count];
+  if (ap_list != nullptr) {
+    free(ap_list);
   }
+  ap_list = new WiFiAccessPoint[count];
   return wifi_if->scan(ap_list, count);
 }
 
