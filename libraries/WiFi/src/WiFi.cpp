@@ -28,7 +28,11 @@ int arduino::WiFiClass::begin(const char* ssid, const char* passphrase) {
 
   nsapi_error_t result = wifi_if->connect(ssid, passphrase, ap_list[connected_ap].get_security());
 
+  if(result == NSAPI_ERROR_IS_CONNECTED) {
+    wifi_if->disconnect();
+  }
   _currentNetworkStatus = (result == NSAPI_ERROR_OK && setSSID(ssid)) ? WL_CONNECTED : WL_CONNECT_FAILED;
+
   return _currentNetworkStatus;
 }
 
