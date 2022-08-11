@@ -209,6 +209,7 @@ private:
   void ensureDefaultAPNetworkConfiguration();
   static void* handleAPEvents(whd_interface_t ifp, const whd_event_header_t* event_header, const uint8_t* event_data, void* handler_user_data);
   bool isVisible(const char* ssid);
+  static void statusCallback(nsapi_event_t status, intptr_t param);
 };
 
 }

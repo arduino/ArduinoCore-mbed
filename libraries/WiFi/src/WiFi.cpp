@@ -17,6 +17,8 @@ int arduino::WiFiClass::begin(const char* ssid, const char* passphrase) {
     return 0;
   }
 
+  wifi_if->attach(&arduino::WiFiClass::statusCallback);
+
   scanNetworks();
   // use scan result to populate security field
   if (!isVisible(ssid)) {
@@ -208,6 +210,15 @@ NetworkInterface* arduino::WiFiClass::getNetwork() {
 
 unsigned long arduino::WiFiClass::getTime() {
   return 0;
+}
+
+void arduino::WiFiClass::statusCallback(nsapi_event_t status, intptr_t param)
+{
+  if (((param == NSAPI_STATUS_DISCONNECTED) ||
+       (param == NSAPI_STATUS_CONNECTING)) &&
+       (WiFi.status() == WL_CONNECTED)) {
+    WiFi._currentNetworkStatus = WL_CONNECTION_LOST;
+  }
 }
 
 #if defined(COMPONENT_4343W_FS)
