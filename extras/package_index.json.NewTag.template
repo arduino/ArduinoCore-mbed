@@ -123,11 +123,6 @@
               "packager": "arduino",
               "version": "1.0.6",
               "name": "rp2040tools"
-            },
-            {
-              "packager": "arduino",
-              "version": "1.8.0-arduino.1",
-              "name": "imgtool"
             }
           ]
         },
@@ -179,11 +174,6 @@
               "packager": "arduino",
               "version": "1.0.6",
               "name": "rp2040tools"
-            },
-            {
-              "packager": "arduino",
-              "version": "1.8.0-arduino.1",
-              "name": "imgtool"
             }
           ]
         },
@@ -277,11 +267,6 @@
               "packager": "arduino",
               "version": "1.0.6",
               "name": "rp2040tools"
-            },
-            {
-              "packager": "arduino",
-              "version": "1.8.0-arduino.1",
-              "name": "imgtool"
             }
           ]
         },
@@ -330,11 +315,6 @@
               "packager": "arduino",
               "version": "1.0.6",
               "name": "rp2040tools"
-            },
-            {
-              "packager": "arduino",
-              "version": "1.8.0-arduino.1",
-              "name": "imgtool"
             }
           ]
         }
