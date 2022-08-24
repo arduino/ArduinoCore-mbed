@@ -1,0 +1,25 @@
+From 0c7a86e2041971dc3d247c54e85870b6056c03fb Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Thu, 7 Oct 2021 17:02:45 +0200
+Subject: [PATCH 176/176] Portenta: use LSE for low power ticker
+
+---
+ targets/targets.json | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/targets/targets.json b/targets/targets.json
+index c998e1d8f0..7274f5d03e 100644
+--- a/targets/targets.json
++++ b/targets/targets.json
+@@ -3483,7 +3483,7 @@
+         "overrides": {
+             "system_power_supply": "PWR_SMPS_1V8_SUPPLIES_LDO",
+             "clock_source": "USE_PLL_HSE_EXTC",
+-            "lse_available": 0,
++            "lse_available": 1,
+             "lpticker_delay_ticks": 0,
+             "network-default-interface-type": "ETHERNET",
+             "i2c_timing_value_algo": true
+-- 
+2.37.1
+
