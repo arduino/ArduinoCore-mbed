@@ -235,6 +235,8 @@ void fixup3V1Rail() {
   i2c.write(8 << 1, data, sizeof(data));
 }
 
+extern "C" void lp_ticker_reconfigure_with_lsi();
+
 void initVariant() {
   RTCHandle.Instance = RTC;
   // Turn off LED from bootloader
@@ -244,6 +246,19 @@ void initVariant() {
   // Disable the FMC bank1 (enabled after reset)
   // See https://github.com/STMicroelectronics/STM32CubeH7/blob/beced99ac090fece04d1e0eb6648b8075e156c6c/Projects/STM32H747I-DISCO/Applications/OpenAMP/OpenAMP_RTOS_PingPong/Common/Src/system_stm32h7xx.c#L215
   FMC_Bank1_R->BTCR[0] = 0x000030D2;
+  // Check that the selected lsi clock is ok
+  if (__HAL_RCC_GET_LPTIM4_SOURCE() == RCC_LPTIM4CLKSOURCE_LSI) {
+    // rtc is not mounted, no need to do other actions
+    return;
+  }
+  // Use micros() to check the lptim precision
+  // if the error is > 1% , reconfigure the clock using lsi
+  uint32_t start_ms = millis();
+  uint32_t start_us = micros();
+  while (micros() - start_us < 100000);
+  if (millis() - start_ms != 100) {
+    lp_ticker_reconfigure_with_lsi();
+  }
 }
 
 #ifdef SERIAL_CDC
