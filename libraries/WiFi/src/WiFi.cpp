@@ -17,6 +17,8 @@ int arduino::WiFiClass::begin(const char* ssid, const char* passphrase) {
     return 0;
   }
 
+  wifi_if->attach(&arduino::WiFiClass::statusCallback);
+
   scanNetworks();
   // use scan result to populate security field
   if (!isVisible(ssid)) {
@@ -26,7 +28,11 @@ int arduino::WiFiClass::begin(const char* ssid, const char* passphrase) {
 
   nsapi_error_t result = wifi_if->connect(ssid, passphrase, ap_list[connected_ap].get_security());
 
+  if(result == NSAPI_ERROR_IS_CONNECTED) {
+    wifi_if->disconnect();
+  }
   _currentNetworkStatus = (result == NSAPI_ERROR_OK && setSSID(ssid)) ? WL_CONNECTED : WL_CONNECT_FAILED;
+
   return _currentNetworkStatus;
 }
 
@@ -160,9 +166,10 @@ static uint8_t sec2enum(nsapi_security_t sec) {
 
 int8_t arduino::WiFiClass::scanNetworks() {
   uint8_t count = 10;
-  if (ap_list == nullptr) {
-    ap_list = new WiFiAccessPoint[count];
+  if (ap_list != nullptr) {
+    free(ap_list);
   }
+  ap_list = new WiFiAccessPoint[count];
   return wifi_if->scan(ap_list, count);
 }
 
@@ -208,6 +215,15 @@ NetworkInterface* arduino::WiFiClass::getNetwork() {
 
 unsigned long arduino::WiFiClass::getTime() {
   return 0;
+}
+
+void arduino::WiFiClass::statusCallback(nsapi_event_t status, intptr_t param)
+{
+  if (((param == NSAPI_STATUS_DISCONNECTED) ||
+       (param == NSAPI_STATUS_CONNECTING)) &&
+       (WiFi.status() == WL_CONNECTED)) {
+    WiFi._currentNetworkStatus = WL_CONNECTION_LOST;
+  }
 }
 
 #if defined(COMPONENT_4343W_FS)
