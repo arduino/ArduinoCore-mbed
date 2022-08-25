@@ -208,11 +208,7 @@ do {                \
 void LCD_ST7701_Init(void)
 {
   pinMode(PD_3, OUTPUT);
-  pinMode(PD_3, HIGH);
-  delay(200);
-  pinMode(PD_3, LOW);
-  delay(200);
-  pinMode(PD_3, HIGH);
+  digitalWrite(PD_3, HIGH);
 
   DCS_Short_Write_NP(MIPI_DCS_SOFT_RESET);
   Delay(200);
