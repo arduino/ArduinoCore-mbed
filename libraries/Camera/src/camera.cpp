@@ -54,6 +54,19 @@ arduino::MbedI2C CameraWire(I2C_SDA, I2C_SCL);
 #define DCMI_TIM_FREQUENCY          (12000000)
 arduino::MbedI2C CameraWire(I2C_SDA2, I2C_SCL2);
 
+#elif defined(ARDUINO_GIGA)
+
+#define DCMI_TIM                    (TIM1)
+#define DCMI_TIM_PIN                (GPIO_PIN_9)
+#define DCMI_TIM_PORT               (GPIOJ)
+#define DCMI_TIM_AF                 (GPIO_AF1_TIM1)
+#define DCMI_TIM_CHANNEL            (TIM_CHANNEL_3)
+#define DCMI_TIM_CLK_ENABLE()       __TIM1_CLK_ENABLE()
+#define DCMI_TIM_CLK_DISABLE()      __TIM1_CLK_DISABLE()
+#define DCMI_TIM_PCLK_FREQ()        HAL_RCC_GetPCLK2Freq()
+#define DCMI_TIM_FREQUENCY          (6000000)
+arduino::MbedI2C CameraWire(I2C_SDA1, I2C_SCL1);
+
 #endif
 
 #define DCMI_IRQ_PRI                NVIC_EncodePriority(NVIC_PRIORITYGROUP_4, 2, 0)
@@ -89,6 +102,18 @@ static const struct { GPIO_TypeDef *port; uint16_t pin; } dcmi_pins[] = {
     {GPIOE,     GPIO_PIN_5 },
     {GPIOE,     GPIO_PIN_6 },
     {GPIOG,     GPIO_PIN_9 },
+#elif defined(ARDUINO_GIGA)
+    {GPIOH,     GPIO_PIN_9  },
+    {GPIOH,     GPIO_PIN_10  },
+    {GPIOH,     GPIO_PIN_11  },
+    {GPIOG,     GPIO_PIN_11  },
+    {GPIOH,     GPIO_PIN_14  },
+    {GPIOI,     GPIO_PIN_4  },
+    {GPIOI,     GPIO_PIN_6  },
+    {GPIOI,     GPIO_PIN_7 },
+    {GPIOA,     GPIO_PIN_6 },
+    {GPIOH,     GPIO_PIN_8 },
+    {GPIOI,     GPIO_PIN_5 },
 #endif
 };
 #define NUM_DCMI_PINS   (sizeof(dcmi_pins)/sizeof(dcmi_pins[0]))
@@ -158,6 +183,13 @@ void HAL_DCMI_MspInit(DCMI_HandleTypeDef *hdcmi)
     __HAL_RCC_GPIOD_CLK_ENABLE();
     __HAL_RCC_GPIOC_CLK_ENABLE();
     __HAL_RCC_GPIOA_CLK_ENABLE();
+#elif defined(ARDUINO_GIGA)
+    /* Enable GPIO clocks */
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+    __HAL_RCC_GPIOG_CLK_ENABLE();
+    __HAL_RCC_GPIOH_CLK_ENABLE();
+    __HAL_RCC_GPIOI_CLK_ENABLE();
+    __HAL_RCC_GPIOJ_CLK_ENABLE();
 #endif
     for (uint32_t i=0; i<NUM_DCMI_PINS; i++) {
         hgpio.Pin = dcmi_pins[i].pin;
