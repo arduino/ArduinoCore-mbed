@@ -197,7 +197,7 @@ void arduino::GPSClass::end()
     _engine = !checkGNSSEngine("^SGPSC: \"Engine\",\"0\"");
   }
 
-  _serial->write("^SSIO=7,0\r\n", sizeof("^SSIO=7,0\r\n"));
+  _serial->write("AT^SSIO=7,0\r\n", sizeof("AT^SSIO=7,0\r\n"));
   readAndDrop();
 }
 
