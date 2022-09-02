@@ -1,0 +1,194 @@
+From ff38953e8e678c697b52ddbe62bc99fe445a1c74 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Thu, 7 Oct 2021 17:00:27 +0200
+Subject: [PATCH 175/176] STM32: lpticker: allow dynamic configuration
+
+Step1: allow automatic fallback to LSI if LSE is not functional
+Step2: expose two reconfiguration APIs, so the user can check if LSE is precise enough and eventually revert to LSI
+---
+ targets/TARGET_STM/lp_ticker.c | 121 ++++++++++++++++++++++-----------
+ 1 file changed, 83 insertions(+), 38 deletions(-)
+
+diff --git a/targets/TARGET_STM/lp_ticker.c b/targets/TARGET_STM/lp_ticker.c
+index d5292566e5..6dc806ccf6 100644
+--- a/targets/TARGET_STM/lp_ticker.c
++++ b/targets/TARGET_STM/lp_ticker.c
+@@ -126,20 +126,35 @@
+ 
+ 
+ LPTIM_HandleTypeDef LptimHandle;
++static uint8_t using_lse = MBED_CONF_TARGET_LSE_AVAILABLE;
+ 
+-const ticker_info_t *lp_ticker_get_info()
++static const ticker_info_t *lp_ticker_get_info_lse()
+ {
+-    static const ticker_info_t info = {
+-#if MBED_CONF_TARGET_LSE_AVAILABLE
++    const static ticker_info_t info = {
+         LSE_VALUE / MBED_CONF_TARGET_LPTICKER_LPTIM_CLOCK,
+-#else
++        16
++    };
++    return &info;
++}
++
++static const ticker_info_t *lp_ticker_get_info_lsi()
++{
++    const static ticker_info_t info = {
+         LSI_VALUE / MBED_CONF_TARGET_LPTICKER_LPTIM_CLOCK,
+-#endif
+         16
+     };
+     return &info;
+ }
+ 
++const ticker_info_t *lp_ticker_get_info()
++{
++    if (using_lse) {
++        return lp_ticker_get_info_lse();
++    } else {
++        return lp_ticker_get_info_lsi();
++    }
++}
++
+ volatile uint8_t  lp_Fired = 0;
+ /*  Flag and stored counter to handle delayed programing at low level */
+ volatile bool lp_delayed_prog = false;
+@@ -154,71 +169,101 @@ volatile bool sleep_manager_locked = false;
+ static int LPTICKER_inited = 0;
+ static void LPTIM_IRQHandler(void);
+ 
+-void lp_ticker_init(void)
+-{
+-    /* Check if LPTIM is already configured */
+-    if (LPTICKER_inited) {
+-        lp_ticker_disable_interrupt();
+-        return;
+-    }
+-    LPTICKER_inited = 1;
+-
+-    RCC_PeriphCLKInitTypeDef RCC_PeriphCLKInitStruct = {0};
+-    RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+-
+-#if MBED_CONF_TARGET_LSE_AVAILABLE
++static void configureClocksLSE(RCC_PeriphCLKInitTypeDef* RCC_PeriphCLKInitStruct,
++    RCC_OscInitTypeDef* RCC_OscInitStruct){
+ 
+     /* Enable LSE clock */
+-    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSE;
++    RCC_OscInitStruct->OscillatorType = RCC_OSCILLATORTYPE_LSE;
+ #if MBED_CONF_TARGET_LSE_BYPASS
+-    RCC_OscInitStruct.LSEState = RCC_LSE_BYPASS;
++    RCC_OscInitStruct->LSEState = RCC_LSE_BYPASS;
+ #else
+-    RCC_OscInitStruct.LSEState = RCC_LSE_ON;
++    RCC_OscInitStruct->LSEState = RCC_LSE_ON;
+ #endif
+-    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
++    RCC_OscInitStruct->PLL.PLLState = RCC_PLL_NONE;
+ 
+     /* Select the LSE clock as LPTIM peripheral clock */
+-    RCC_PeriphCLKInitStruct.PeriphClockSelection = RCC_PERIPHCLK_LPTIM;
++    RCC_PeriphCLKInitStruct->PeriphClockSelection = RCC_PERIPHCLK_LPTIM;
+ #if (TARGET_STM32L0)
+-    RCC_PeriphCLKInitStruct.LptimClockSelection = RCC_LPTIMCLKSOURCE_LSE;
++    RCC_PeriphCLKInitStruct->LptimClockSelection = RCC_LPTIMCLKSOURCE_LSE;
+ #else
+ #if (LPTIM_MST_BASE == LPTIM1_BASE)
+-    RCC_PeriphCLKInitStruct.Lptim1ClockSelection = RCC_LPTIMCLKSOURCE_LSE;
++    RCC_PeriphCLKInitStruct->Lptim1ClockSelection = RCC_LPTIMCLKSOURCE_LSE;
+ #elif (LPTIM_MST_BASE == LPTIM3_BASE) || (LPTIM_MST_BASE == LPTIM4_BASE) || (LPTIM_MST_BASE == LPTIM5_BASE)
+-    RCC_PeriphCLKInitStruct.Lptim345ClockSelection = RCC_LPTIMCLKSOURCE_LSE;
++    RCC_PeriphCLKInitStruct->Lptim345ClockSelection = RCC_LPTIMCLKSOURCE_LSE;
+ #endif /* LPTIM_MST_BASE == LPTIM1 */
+ #endif /* TARGET_STM32L0 */
+-#else /* MBED_CONF_TARGET_LSE_AVAILABLE */
++}
++
++static void configureClocksLSI(RCC_PeriphCLKInitTypeDef* RCC_PeriphCLKInitStruct,
++    RCC_OscInitTypeDef* RCC_OscInitStruct){
+ 
+     /* Enable LSI clock */
+ #if TARGET_STM32WB
+-    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI1;
++    RCC_OscInitStruct->OscillatorType = RCC_OSCILLATORTYPE_LSI1;
+ #else
+-    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI;
++    RCC_OscInitStruct->OscillatorType = RCC_OSCILLATORTYPE_LSI;
+ #endif
+-    RCC_OscInitStruct.LSIState = RCC_LSI_ON;
+-    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
++    RCC_OscInitStruct->LSIState = RCC_LSI_ON;
++    RCC_OscInitStruct->PLL.PLLState = RCC_PLL_NONE;
+ 
+     /* Select the LSI clock as LPTIM peripheral clock */
+-    RCC_PeriphCLKInitStruct.PeriphClockSelection = RCC_PERIPHCLK_LPTIM;
++    RCC_PeriphCLKInitStruct->PeriphClockSelection = RCC_PERIPHCLK_LPTIM;
+ #if (TARGET_STM32L0)
+-    RCC_PeriphCLKInitStruct.LptimClockSelection = RCC_LPTIMCLKSOURCE_LSI;
++    RCC_PeriphCLKInitStruct->LptimClockSelection = RCC_LPTIMCLKSOURCE_LSI;
+ #else
+ #if (LPTIM_MST_BASE == LPTIM1_BASE)
+-    RCC_PeriphCLKInitStruct.Lptim1ClockSelection = RCC_LPTIMCLKSOURCE_LSI;
++    RCC_PeriphCLKInitStruct->Lptim1ClockSelection = RCC_LPTIMCLKSOURCE_LSI;
+ #elif (LPTIM_MST_BASE == LPTIM3_BASE) || (LPTIM_MST_BASE == LPTIM4_BASE) || (LPTIM_MST_BASE == LPTIM5_BASE)
+-    RCC_PeriphCLKInitStruct.Lptim345ClockSelection = RCC_LPTIMCLKSOURCE_LSI;
++    RCC_PeriphCLKInitStruct->Lptim345ClockSelection = RCC_LPTIMCLKSOURCE_LSI;
+ #endif /* LPTIM_MST_BASE == LPTIM1 */
+ #endif /* TARGET_STM32L0 */
++}
++
++void lp_ticker_reconfigure_with_lsi() {
++    lp_ticker_disable_interrupt();
++    LPTICKER_inited = 0;
++    using_lse = 0;
++    lp_ticker_init();
++}
++
++void lp_ticker_reconfigure_with_lse() {
++    lp_ticker_disable_interrupt();
++    LPTICKER_inited = 0;
++    using_lse = 1;
++    lp_ticker_init();
++}
++
++void lp_ticker_init(void)
++{
++    /* Check if LPTIM is already configured */
++    if (LPTICKER_inited) {
++        lp_ticker_disable_interrupt();
++        return;
++    }
++    LPTICKER_inited = 1;
++
++    RCC_PeriphCLKInitTypeDef RCC_PeriphCLKInitStruct = {0};
++    RCC_OscInitTypeDef RCC_OscInitStruct = {0};
++
++    if (using_lse) {
++        configureClocksLSE(&RCC_PeriphCLKInitStruct, &RCC_OscInitStruct);
++    } else {
++        configureClocksLSI(&RCC_PeriphCLKInitStruct, &RCC_OscInitStruct);
++    }
+ 
+-#endif /* MBED_CONF_TARGET_LSE_AVAILABLE */
+ #if defined(DUAL_CORE) && (TARGET_STM32H7)
+     while (LL_HSEM_1StepLock(HSEM, CFG_HW_RCC_SEMID)) {
+     }
+ #endif /* DUAL_CORE */
+     if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
+-        error("HAL_RCC_OscConfig ERROR\n");
+-        return;
++
++        // retry with LSI
++        using_lse = 0;
++        configureClocksLSI(&RCC_PeriphCLKInitStruct, &RCC_OscInitStruct);
++        if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
++            error("HAL_RCC_OscConfig ERROR\n");
++            return;
++        }
+     }
+ 
+     if (HAL_RCCEx_PeriphCLKConfig(&RCC_PeriphCLKInitStruct) != HAL_OK) {
+-- 
+2.37.1
+
