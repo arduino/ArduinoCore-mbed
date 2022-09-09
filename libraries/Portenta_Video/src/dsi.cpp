@@ -256,12 +256,12 @@ int stm32_dsi_config(uint8_t bus, struct edid *edid, struct display_timing *dt) 
 	HAL_DSI_ConfigVideoMode(&dsi, &hdsivideo_handle);
 
 	/* Configure DSI PHY HS2LP and LP2HS timings */
-	dsiPhyInit.ClockLaneHS2LPTime = 28;
-	dsiPhyInit.ClockLaneLP2HSTime = 33;
-	dsiPhyInit.DataLaneHS2LPTime = 15;
-	dsiPhyInit.DataLaneLP2HSTime = 25;
+	dsiPhyInit.ClockLaneHS2LPTime = 35;
+	dsiPhyInit.ClockLaneLP2HSTime = 35;
+	dsiPhyInit.DataLaneHS2LPTime = 35;
+	dsiPhyInit.DataLaneLP2HSTime = 35;
 	dsiPhyInit.DataLaneMaxReadTime = 0;
-	dsiPhyInit.StopWaitTime = 0;
+	dsiPhyInit.StopWaitTime = 10;
 	HAL_DSI_ConfigPhyTimer(&dsi, &dsiPhyInit);
 
 	/*************************End DSI Initialization*******************************/
