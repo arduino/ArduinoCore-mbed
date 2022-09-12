@@ -380,7 +380,7 @@
 #define MBED_CONF_TARGET_LPTICKER_LPTIM                                         1                                                                                                // set by target:MCU_STM32H7
 #define MBED_CONF_TARGET_LPTICKER_LPTIM_CLOCK                                   1                                                                                                // set by target:MCU_STM32
 #define MBED_CONF_TARGET_LPUART_CLOCK_SOURCE                                    USE_LPUART_CLK_LSE|USE_LPUART_CLK_PCLK1|USE_LPUART_CLK_PCLK3                                     // set by target:MCU_STM32
-#define MBED_CONF_TARGET_LSE_AVAILABLE                                          0                                                                                                // set by target:PORTENTA_H7
+#define MBED_CONF_TARGET_LSE_AVAILABLE                                          1                                                                                                // set by target:PORTENTA_H7
 #define MBED_CONF_TARGET_LSE_BYPASS                                             1                                                                                                // set by target:PORTENTA_H7
 #define MBED_CONF_TARGET_LSE_DRIVE_LOAD_LEVEL                                   RCC_LSEDRIVE_LOW                                                                                 // set by target:MCU_STM32H7
 #define MBED_CONF_TARGET_MPU_ROM_END                                            0x0fffffff                                                                                       // set by target:Target

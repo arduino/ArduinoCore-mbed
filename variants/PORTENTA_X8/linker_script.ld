@@ -1,6 +1,6 @@
 MEMORY
 {
-    FLASH (rx) : ORIGIN = CM4_BINARY_START, LENGTH = CM4_BINARY_END - CM4_BINARY_START
+    FLASH (rx) : ORIGIN = CM4_BINARY_START, LENGTH = 0x100000
     RAM (rwx) : ORIGIN = 0x10000000 + (((166 * 4) + 7) & 0xFFFFFFF8), LENGTH = 0x48000 - (((166 * 4) + 7) & 0xFFFFFFF8)
     RAM_D3 (xrw) : ORIGIN = 0x38000000, LENGTH = 64K
 }
@@ -93,6 +93,12 @@ SECTIONS
          . = ABSOLUTE(0x3800FC00);
          *(.pdm_buffer)
      } > RAM_D3
+     _dtcm_lma = __etext + SIZEOF(.data);
+     .dtcm : AT(_dtcm_lma) {
+         _sdtcm = .;
+         *(.dtcm*)
+         _edtcm = .;
+     } > DTCMRAM
     .heap (COPY):
     {
         __end__ = .;

@@ -96,6 +96,12 @@ SECTIONS
          . = ABSOLUTE(0x3800FC00);
          *(.pdm_buffer)
      } > RAM_D3
+     _dtcm_lma = __etext + SIZEOF(.data);
+     .dtcm : AT(_dtcm_lma) {
+         _sdtcm = .;
+         *(.dtcm*)
+         _edtcm = .;
+     } > DTCMRAM
     .heap (COPY):
     {
         __end__ = .;
