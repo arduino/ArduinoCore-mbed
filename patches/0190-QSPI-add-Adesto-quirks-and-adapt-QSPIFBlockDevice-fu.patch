@@ -1,0 +1,177 @@
+From c85131fabe8ea3de63057430955a75784a57dd39 Mon Sep 17 00:00:00 2001
+From: giulcioffi <g.cioffi@arduino.cc>
+Date: Tue, 29 Mar 2022 16:43:31 +0200
+Subject: [PATCH 190/194] QSPI: add Adesto quirks and adapt QSPIFBlockDevice
+ functions
+
+---
+ .../include/QSPIF/QSPIFBlockDevice.h          |  2 +
+ .../source/QSPIFBlockDevice.cpp               | 83 +++++++++++++++----
+ storage/blockdevice/source/SFDP.cpp           |  3 +
+ 3 files changed, 74 insertions(+), 14 deletions(-)
+
+diff --git a/storage/blockdevice/COMPONENT_QSPIF/include/QSPIF/QSPIFBlockDevice.h b/storage/blockdevice/COMPONENT_QSPIF/include/QSPIF/QSPIFBlockDevice.h
+index 695a396197..191000e274 100644
+--- a/storage/blockdevice/COMPONENT_QSPIF/include/QSPIF/QSPIFBlockDevice.h
++++ b/storage/blockdevice/COMPONENT_QSPIF/include/QSPIF/QSPIFBlockDevice.h
+@@ -380,6 +380,8 @@ private:
+ 
+     // S25FS512S needs a quirk
+     bool _S25FS512S_quirk;
++    // AT25SF128A needs a quirk
++    bool _AT25SF128A_quirk;
+ 
+     // Clear block protection
+     qspif_clear_protection_method_t _clear_protection_method;
+diff --git a/storage/blockdevice/COMPONENT_QSPIF/source/QSPIFBlockDevice.cpp b/storage/blockdevice/COMPONENT_QSPIF/source/QSPIFBlockDevice.cpp
+index 197be5e56b..05968ba7b1 100644
+--- a/storage/blockdevice/COMPONENT_QSPIF/source/QSPIFBlockDevice.cpp
++++ b/storage/blockdevice/COMPONENT_QSPIF/source/QSPIFBlockDevice.cpp
+@@ -179,6 +179,8 @@ QSPIFBlockDevice::QSPIFBlockDevice(PinName io0, PinName io1, PinName io2, PinNam
+ 
+     // Quirk for Cypress S25FS512S
+     _S25FS512S_quirk = false;
++    // Quirk for AT25SF128A
++    _AT25SF128A_quirk = false;
+ }
+ 
+ int QSPIFBlockDevice::init()
+@@ -622,14 +624,44 @@ int QSPIFBlockDevice::_sfdp_parse_basic_param_table(Callback<int(mbed::bd_addr_t
+ {
+     uint8_t param_table[SFDP_BASIC_PARAMS_TBL_SIZE]; /* Up To 20 DWORDS = 80 Bytes */
+ 
+-    int status = sfdp_reader(
+-                     sfdp_info.bptbl.addr,
+-                     SFDP_READ_CMD_ADDR_TYPE,
+-                     SFDP_READ_CMD_INST,
+-                     SFDP_READ_CMD_DUMMY_CYCLES,
+-                     param_table,
+-                     sfdp_info.bptbl.size
+-                 );
++    int status = -1;
++
++    if (_AT25SF128A_quirk) {
++        /*
++         * Skip registers from address 0x54 to 0x5F.
++         * Reading those registers will corrupt future reads.
++        */
++        status = sfdp_reader(
++                        sfdp_info.bptbl.addr,
++                        SFDP_READ_CMD_ADDR_TYPE,
++                        SFDP_READ_CMD_INST,
++                        SFDP_READ_CMD_DUMMY_CYCLES,
++                        param_table,
++                        0x24 // from 0x30 to 0x53
++                    );
++        if (status != QSPI_STATUS_OK) {
++            tr_error("Init - Read SFDP First Table Failed");
++            return -1;
++        }
++
++        status = sfdp_reader(
++                        0x60,
++                        SFDP_READ_CMD_ADDR_TYPE,
++                        SFDP_READ_CMD_INST,
++                        SFDP_READ_CMD_DUMMY_CYCLES,
++                        &param_table[0x30],
++                        0x0C  // from 0x60 to 0x6B
++                    );
++    } else {
++        status = sfdp_reader(
++                        sfdp_info.bptbl.addr,
++                        SFDP_READ_CMD_ADDR_TYPE,
++                        SFDP_READ_CMD_INST,
++                        SFDP_READ_CMD_DUMMY_CYCLES,
++                        param_table,
++                        sfdp_info.bptbl.size
++                    );
++    }
+     if (status != QSPI_STATUS_OK) {
+         tr_error("Init - Read SFDP First Table Failed");
+         return -1;
+@@ -704,8 +736,14 @@ int QSPIFBlockDevice::_sfdp_set_quad_enabled(uint8_t *basic_param_table_ptr)
+     uint8_t status_reg_setup[QSPI_MAX_STATUS_REGISTERS] = {0};
+     uint8_t status_regs[QSPI_MAX_STATUS_REGISTERS] = {0};
+ 
+-    // QUAD Enable procedure is specified by 3 bits
+-    uint8_t qer_value = (basic_param_table_ptr[QSPIF_BASIC_PARAM_TABLE_QER_BYTE] & 0x70) >> 4;
++    uint8_t qer_value = 0;
++
++    if (_AT25SF128A_quirk) {
++        qer_value = 1;
++    } else {
++        // QUAD Enable procedure is specified by 3 bits
++        qer_value = (basic_param_table_ptr[QSPIF_BASIC_PARAM_TABLE_QER_BYTE] & 0x70) >> 4;
++    }
+ 
+     switch (qer_value) {
+         case 0:
+@@ -1018,15 +1056,26 @@ int QSPIFBlockDevice::_sfdp_detect_reset_protocol_and_reset(uint8_t *basic_param
+     int status = QSPIF_BD_ERROR_OK;
+ 
+ #if RESET_SEQUENCE_FROM_SFDP
+-    uint8_t examined_byte = basic_param_table_ptr[QSPIF_BASIC_PARAM_TABLE_SOFT_RESET_BYTE];
++    uint8_t examined_byte = 0;
++    if (_AT25SF128A_quirk) {
++        // Table ptr is at offset 0x30
++        // in AT25SF128A SW Reset byte is at address 0x64
++        examined_byte = basic_param_table_ptr[0x34];
++    } else {
++        examined_byte = basic_param_table_ptr[QSPIF_BASIC_PARAM_TABLE_SOFT_RESET_BYTE];
++    }
+ 
+     // Ignore bit indicating need to exit 0-4-4 mode - should not enter 0-4-4 mode from QSPIFBlockDevice
+     if (examined_byte & SOFT_RESET_RESET_INST_BITMASK) {
+ #endif
+ 
+ #if !MBED_CONF_QSPIF_ENABLE_AND_RESET     // i.e. direct reset, or determined from SFDP
+-        // Issue instruction 0xF0 to reset the device
+-        qspi_status_t qspi_status = _qspi_send_general_command(0xF0, QSPI_NO_ADDRESS_COMMAND, // Send reset instruction
++        // Issue instruction to reset the device
++        uint8_t reset_cmd = 0xF0;
++        if (_AT25SF128A_quirk) {
++            reset_cmd = 0x99;
++        }
++        qspi_status_t qspi_status = _qspi_send_general_command(reset_cmd, QSPI_NO_ADDRESS_COMMAND, // Send reset instruction
+                                                                NULL, 0, NULL, 0);
+         status = (qspi_status == QSPI_STATUS_OK) ? QSPIF_BD_ERROR_OK : QSPIF_BD_ERROR_PARSING_FAILED;
+ #endif
+@@ -1121,6 +1170,12 @@ int QSPIFBlockDevice::_handle_vendor_quirks()
+                 _S25FS512S_quirk = true;
+             }
+             break;
++        case 0x1f:
++            // Adesto device
++            tr_debug("Applying quirks for Adesto AT25SF128A");
++            _write_status_reg_2_inst = 0x31;
++            _AT25SF128A_quirk = true;
++            break;
+     }
+ 
+     return 0;
+@@ -1595,7 +1650,7 @@ qspi_status_t QSPIFBlockDevice::_qspi_write_status_registers(uint8_t *reg_buffer
+             return QSPI_STATUS_ERROR;
+         }
+         status = _qspi_send_general_command(_write_status_reg_2_inst, QSPI_NO_ADDRESS_COMMAND,
+-                                            (char *) &reg_buffer[0], 1,
++                                            (char *) &reg_buffer[1], 1,
+                                             NULL, 0);
+         if (QSPI_STATUS_OK == status) {
+             tr_debug("Writing Status Register 2 Success: value = 0x%x",
+diff --git a/storage/blockdevice/source/SFDP.cpp b/storage/blockdevice/source/SFDP.cpp
+index e523c3449c..9fa6e59aca 100644
+--- a/storage/blockdevice/source/SFDP.cpp
++++ b/storage/blockdevice/source/SFDP.cpp
+@@ -145,6 +145,9 @@ int sfdp_parse_single_param_header(sfdp_prm_hdr *phdr_ptr, sfdp_hdr_info &hdr_in
+             case 0x06:
+                 tr_info("UNSUPPORTED:Parameter header: eXtended Serial Peripheral Interface (xSPI) Profile 2.0");
+                 break;
++            case 0x1F:
++                tr_info("Adesto header");
++                break;
+             case 0x87:
+                 tr_info("UNSUPPORTED:Parameter header: SCCR Map for SPI Memory Devices");
+                 break;
+-- 
+2.38.1
+

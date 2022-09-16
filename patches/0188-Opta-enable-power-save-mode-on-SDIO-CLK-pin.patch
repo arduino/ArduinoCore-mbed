@@ -1,0 +1,25 @@
+From dc0195d4a7ddd4482373540b5f24ae0f3d2bf44a Mon Sep 17 00:00:00 2001
+From: giulcioffi <g.cioffi@arduino.cc>
+Date: Mon, 8 Nov 2021 12:58:01 +0100
+Subject: [PATCH 188/194] Opta: enable power save mode on SDIO CLK pin
+
+---
+ .../TARGET_OPTA/COMPONENT_WHD/port/cyhal_sdio.c                 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_OPTA/COMPONENT_WHD/port/cyhal_sdio.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_OPTA/COMPONENT_WHD/port/cyhal_sdio.c
+index 34aa5498e1..2174d7f58f 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_OPTA/COMPONENT_WHD/port/cyhal_sdio.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_OPTA/COMPONENT_WHD/port/cyhal_sdio.c
+@@ -92,7 +92,7 @@ static cy_rslt_t sdio_enable_high_speed(void)
+ 
+     sdio_init_structure.ClockDiv       = SDMMC_HSpeed_CLK_DIV;
+     sdio_init_structure.ClockEdge      = SDMMC_CLOCK_EDGE_RISING;
+-    sdio_init_structure.ClockPowerSave = SDMMC_CLOCK_POWER_SAVE_DISABLE;
++    sdio_init_structure.ClockPowerSave = SDMMC_CLOCK_POWER_SAVE_ENABLE;
+     sdio_init_structure.BusWide        = SDMMC_BUS_WIDE_4B;
+     sdio_init_structure.HardwareFlowControl = SDMMC_HARDWARE_FLOW_CONTROL_ENABLE;
+ 
+-- 
+2.38.1
+

@@ -1,0 +1,29 @@
+From 4d173452ca002468213fb406e2759cac23a0b955 Mon Sep 17 00:00:00 2001
+From: giulcioffi <g.cioffi@arduino.cc>
+Date: Mon, 18 Oct 2021 16:45:48 +0200
+Subject: [PATCH 187/194] QSPI: Disable fast mode for vendor ID 0xc22018
+
+---
+ .../blockdevice/COMPONENT_QSPIF/source/QSPIFBlockDevice.cpp | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/storage/blockdevice/COMPONENT_QSPIF/source/QSPIFBlockDevice.cpp b/storage/blockdevice/COMPONENT_QSPIF/source/QSPIFBlockDevice.cpp
+index 898141f780..20af57f257 100644
+--- a/storage/blockdevice/COMPONENT_QSPIF/source/QSPIFBlockDevice.cpp
++++ b/storage/blockdevice/COMPONENT_QSPIF/source/QSPIFBlockDevice.cpp
+@@ -1092,8 +1092,10 @@ int QSPIFBlockDevice::_handle_vendor_quirks()
+             // 2. Require setting a "fast mode" bit in config register 2 to operate at higher clock rates
+             // 3. Should never attempt to enable 4-byte addressing (it causes reads and writes to fail)
+             tr_debug("Applying quirks for macronix");
+-            _needs_fast_mode = true;
+-            _num_status_registers = 3;
++            if (vendor_device_ids[1] != 0x20) {
++                _needs_fast_mode = true;
++                _num_status_registers = 3;
++            }
+             _read_status_reg_2_inst = QSPIF_INST_RDCR;
+             _attempt_4_byte_addressing = false;
+             break;
+-- 
+2.38.1
+

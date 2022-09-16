@@ -523,3 +523,65 @@ nicla_vision.bootloader.config=-f target/stm32h7x_dual_bank.cfg
 nicla_vision.bootloader.programmer=-f interface/stlink.cfg
 nicla_vision.bootloader.extra_action.preflash=stm32h7x option_write 0 0x01c 0xb86aaf0
 nicla_vision.bootloader.file=NICLA_VISION/bootloader.elf
+
+##############################################################
+
+opta.name=Opta
+opta.build.core=arduino
+opta.build.crossprefix=arm-none-eabi-
+opta.build.compiler_path={runtime.tools.arm-none-eabi-gcc-7-2017q4.path}/bin/
+
+opta.build.variant=OPTA
+opta.build.mcu=cortex-m7
+opta.build.fpu=-mfpu=fpv5-d16
+opta.build.float-abi=-mfloat-abi=softfp
+opta.build.extra_flags=
+opta.build.architecture=cortex-m7
+opta.build.board=OPTA
+opta.build.ldscript=linker_script.ld
+opta.build.postbuild.cmd="{tools.imgtool.path}/{tools.imgtool.cmd}" exit
+opta.compiler.mbed.arch.define=
+opta.compiler.mbed.defines={build.variant.path}/defines.txt
+opta.compiler.mbed.ldflags={build.variant.path}/ldflags.txt
+opta.compiler.mbed.cflags={build.variant.path}/cflags.txt
+opta.compiler.mbed.cxxflags={build.variant.path}/cxxflags.txt
+opta.compiler.mbed.includes={build.variant.path}/includes.txt
+opta.compiler.mbed.extra_ldflags=-lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
+opta.compiler.mbed="{build.variant.path}/libs/libmbed.a"
+opta.vid.0=0x2341
+opta.pid.0=0x0264
+opta.vid.1=0x2341
+opta.pid.1=0x0364
+opta.vid.2=0x2341
+opta.pid.2=0x0464
+opta.vid.3=0x2341
+opta.pid.3=0x0564
+opta.upload_port.0.vid=0x2341
+opta.upload_port.0.pid=0x0264
+opta.upload_port.1.vid=0x2341
+opta.upload_port.1.pid=0x0364
+opta.upload_port.2.vid=0x2341
+opta.upload_port.2.pid=0x0464
+opta.upload_port.3.vid=0x2341
+opta.upload_port.3.pid=0x0564
+
+opta.upload.tool=dfu-util
+opta.upload.tool.default=dfu-util
+opta.upload.protocol=
+opta.upload.transport=
+opta.upload.vid=0x2341
+opta.upload.pid=0x0364
+opta.upload.address=0x08040000
+opta.upload.interface=0
+opta.upload.use_1200bps_touch=true
+opta.upload.wait_for_upload_port=true
+opta.upload.native_usb=true
+opta.upload.maximum_size=786432
+opta.upload.maximum_data_size=523624
+
+opta.debug.tool=gdb
+opta.bootloader.tool=openocd
+opta.bootloader.config=-f target/stm32h7x_dual_bank.cfg
+opta.bootloader.programmer=-f interface/stlink.cfg
+opta.bootloader.extra_action.preflash=stm32h7x option_write 0 0x01c 0xb86aaf0
+opta.bootloader.file=OPTA/bootloader.elf
