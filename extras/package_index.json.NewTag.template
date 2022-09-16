@@ -317,6 +317,46 @@
               "name": "rp2040tools"
             }
           ]
+        },
+        {
+          "name": "Arduino Mbed OS Opta Boards",
+          "architecture": "mbed_opta",
+          "version": "%%VERSION%%",
+          "category": "Arduino",
+          "url": "http://downloads.arduino.cc/cores/staging/%%OPTA_FILENAME%%",
+          "archiveFileName": "%%OPTA_FILENAME%%",
+          "checksum": "SHA-256:%%OPTA_CHECKSUM%%",
+          "size": "%%OPTA_SIZE%%",
+          "help": {
+            "online": "https://github.com/arduino/ArduinoCore-mbed/issues"
+          },
+          "boards": [
+            {
+              "name": "Arduino Finder Opta"
+            }
+          ],
+          "toolsDependencies": [
+            {
+              "packager": "arduino",
+              "name": "openocd",
+              "version": "0.11.0-arduino2"
+            },
+            {
+              "packager": "arduino",
+              "name": "arm-none-eabi-gcc",
+              "version": "7-2017q4"
+            },
+            {
+              "packager": "arduino",
+              "version": "0.10.0-arduino1",
+              "name": "dfu-util"
+            },
+            {
+              "packager": "arduino",
+              "version": "1.8.0-arduino.2",
+              "name": "imgtool"
+            }
+          ]
         }
       ],
       "tools": []
