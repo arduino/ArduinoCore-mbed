@@ -539,7 +539,6 @@ opta.build.extra_flags=
 opta.build.architecture=cortex-m7
 opta.build.board=OPTA
 opta.build.ldscript=linker_script.ld
-opta.build.postbuild.cmd="{tools.imgtool.path}/{tools.imgtool.cmd}" exit
 opta.compiler.mbed.arch.define=
 opta.compiler.mbed.defines={build.variant.path}/defines.txt
 opta.compiler.mbed.ldflags={build.variant.path}/ldflags.txt
