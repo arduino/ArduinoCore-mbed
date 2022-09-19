@@ -300,7 +300,13 @@ const uint8_t *arduino::PluggableUSBDevice::configuration_desc(uint8_t index)
 
 arduino::PluggableUSBDevice& PluggableUSBD()
 {
+#ifndef BOARD_VENDORID
+    uint16_t vid = _getVid_();
+    uint16_t pid = _getPid_();
+    static arduino::PluggableUSBDevice obj(vid, pid);
+#else
     static arduino::PluggableUSBDevice obj(BOARD_VENDORID, BOARD_PRODUCTID);
+#endif
     return obj;
 }
 
