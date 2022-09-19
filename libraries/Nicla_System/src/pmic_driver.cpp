@@ -25,7 +25,6 @@ uint8_t BQ25120A::readByte(uint8_t address, uint8_t subAddress)
 {
   digitalWrite(p25, HIGH);
   nicla::i2c_mutex.lock();
-  char response = 0xFF;
   Wire1.beginTransmission(address);
   Wire1.write(subAddress);
   Wire1.endTransmission(false);
