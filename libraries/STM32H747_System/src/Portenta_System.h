@@ -12,6 +12,7 @@ public:
   Portenta_System() {};
   virtual bool begin();
   virtual bool enterLowPower();
+  bool getSecureFlashData(void* buf, size_t size);
 };
 
 }
