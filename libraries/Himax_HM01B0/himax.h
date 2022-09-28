@@ -41,7 +41,7 @@ class HM01B0: public ImageSensor {
         int setFrameRate(int32_t framerate);
         int setResolution(int32_t resolution);
         int setPixelFormat(int32_t pixformat);
-        int setTestPattern(bool enable, bool walking);
+        int setTestPattern(bool enable, bool walking) override;
         int enableMotionDetection(md_callback_t callback=NULL);
         int disableMotionDetection();
         int setMotionDetectionWindow(uint32_t x, uint32_t y, uint32_t w, uint32_t h);

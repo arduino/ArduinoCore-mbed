@@ -79,11 +79,11 @@ class ImageSensor {
         virtual int motionDetected() = 0;
         virtual void debug(Stream &stream) = 0;
 
-        int setStandby(bool enable) {
+        virtual int setStandby(bool enable) {
             return -1;
         }
 
-        int setTestPattern(bool enable, bool walking) {
+        virtual int setTestPattern(bool enable, bool walking) {
             return -1;
         }
 };
