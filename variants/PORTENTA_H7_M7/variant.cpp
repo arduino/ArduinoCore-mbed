@@ -1,5 +1,6 @@
 #include "Arduino.h"
 #include "pinDefinitions.h"
+#include "mbed.h"
 
 RTC_HandleTypeDef RTCHandle;
 
@@ -235,6 +236,68 @@ void fixup3V1Rail() {
   i2c.write(8 << 1, data, sizeof(data));
 }
 
+#include "QSPIFBlockDevice.h"
+
+class SecureQSPIFBlockDevice: public QSPIFBlockDevice {
+  public:
+    virtual int readSecure(void *buffer, mbed::bd_addr_t addr, mbed::bd_size_t size) {
+      int ret = 0;
+      ret &= _qspi.command_transfer(0xB1, -1, nullptr, 0, nullptr, 0);
+      ret &= read(buffer, addr, size);
+      ret &= _qspi.command_transfer(0xC1, -1, nullptr, 0, nullptr, 0);
+      return ret;
+    }
+};
+
+#include "portenta_info.h"
+
+static uint8_t *_boardInfo = (uint8_t*)(0x801F000);
+static bool has_otp_info = false;
+
+// 8Kbit secure OTP area (on MX25L12833F)
+bool getSecureFlashData() {
+    static SecureQSPIFBlockDevice root;
+    static PortentaBoardInfo* info = new PortentaBoardInfo();
+    root.init();
+    auto ret = root.readSecure(info, 0, sizeof(PortentaBoardInfo));
+    if (info->magic == OTP_QSPI_MAGIC) {
+      _boardInfo = (uint8_t*)info;
+      has_otp_info = true;
+    } else {
+      delete info;
+    }
+    return ret == 0;
+}
+
+uint8_t* boardInfo() {
+    return _boardInfo;
+}
+
+uint16_t boardRevision() {
+    return (((PortentaBoardInfo*)_boardInfo)->revision);
+}
+
+uint8_t bootloaderVersion() {
+    return _boardInfo[1];
+}
+
+uint32_t lowSpeedClockInUse() {
+    return __HAL_RCC_GET_LPTIM4_SOURCE();
+}
+
+#define BOARD_REVISION(x,y)   (x << 8 | y)
+
+extern "C" bool isLSEAvailableAndPrecise() {
+  if (has_otp_info && (boardRevision() >= BOARD_REVISION(4,10))) {
+    return true;
+  }
+  if (__HAL_RCC_GET_LPTIM4_SOURCE() == RCC_LPTIM4CLKSOURCE_LSI || bootloaderVersion() < 24) {
+    // LSE is either not mounted, imprecise or the BL already configures RTC clock with LSI (and we are doomed)
+    return false;
+  }
+  return true;
+}
+
 extern "C" void lp_ticker_reconfigure_with_lsi();
 
 void initVariant() {
@@ -246,11 +309,19 @@ void initVariant() {
   // Disable the FMC bank1 (enabled after reset)
   // See https://github.com/STMicroelectronics/STM32CubeH7/blob/beced99ac090fece04d1e0eb6648b8075e156c6c/Projects/STM32H747I-DISCO/Applications/OpenAMP/OpenAMP_RTOS_PingPong/Common/Src/system_stm32h7xx.c#L215
   FMC_Bank1_R->BTCR[0] = 0x000030D2;
+
+  getSecureFlashData();
+  if (has_otp_info && (boardRevision() >= BOARD_REVISION(4,10))) {
+    // LSE works and also keeps counting in VBAT mode
+    return;
+  }
+
   // Check that the selected lsi clock is ok
   if (__HAL_RCC_GET_LPTIM4_SOURCE() == RCC_LPTIM4CLKSOURCE_LSI) {
     // rtc is not mounted, no need to do other actions
     return;
   }
+
   // Use micros() to check the lptim precision
   // if the error is > 1% , reconfigure the clock using lsi
   uint32_t start_ms = millis();
@@ -258,6 +329,8 @@ void initVariant() {
   while (micros() - start_us < 100000);
   if (millis() - start_ms != 100) {
     lp_ticker_reconfigure_with_lsi();
+    // reconfiguring RTC clock would trigger a backup subsystem reset;
+    // keep the clock configured in the BL
   }
 }
 
