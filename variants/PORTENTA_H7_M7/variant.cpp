@@ -288,7 +288,7 @@ uint32_t lowSpeedClockInUse() {
 #define BOARD_REVISION(x,y)   (x << 8 | y)
 
 extern "C" bool isLSEAvailableAndPrecise() {
-  if (has_otp_info && (boardRevision() >= BOARD_REVISION(4,10))) {
+  if (has_otp_info && (boardRevision() >= BOARD_REVISION(4,3))) {
     return true;
   }
   if (__HAL_RCC_GET_LPTIM4_SOURCE() == RCC_LPTIM4CLKSOURCE_LSI || bootloaderVersion() < 24) {
