@@ -417,11 +417,11 @@ ScanResults<uint8_t> Camera::i2cScan()
         CameraWire.beginTransmission(addr);
         if (CameraWire.endTransmission() == 0) {
             res.push(addr);
+            if (_debug) {
+                _debug->print("Sensor address: 0x");
+                _debug->println(addr, HEX);
+            }
         }
-    }
-    if (_debug) {
-        _debug->print("Sensor address: 0x");
-        _debug->println(addr, HEX);
     }
     return res;
 }
