@@ -33,8 +33,8 @@ public:
   GPSClass();
   ~GPSClass();
 
-  void begin(unsigned long baudrate);
-  void begin(unsigned long baudrate = 115200UL, uint16_t config = 0);
+  void begin(unsigned long baudrate = 115200);
+  void begin(unsigned long baudrate, uint16_t config);
   void end(void);
   int available(void);
   int peek(void);

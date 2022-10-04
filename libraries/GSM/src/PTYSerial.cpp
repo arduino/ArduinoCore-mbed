@@ -127,17 +127,20 @@ int PTYSerial::get_port() {
 }
 int PTYSerial::write(const void *buffer) {
     const char *buf_ptr = static_cast<const char *>(buffer);
+    tr_info("%s", buffer);
     return write(buf_ptr, sizeof(buffer));
 }
 
 int PTYSerial::write(const void *buffer, size_t length) {
     const char *buf_ptr = static_cast<const char *>(buffer);
+    tr_info("%s", buffer);
     int ret = _parent->populate_tx_buffer(buf_ptr, length, this->get_port());
     return ret;
 }
 
 int PTYSerial::write(const void *buffer, size_t length, int id) {
     const char *buf_ptr = static_cast<const char *>(buffer);
+    tr_info("%s", buffer);
     int ret = _parent->populate_tx_buffer(buf_ptr, length, id);
     return ret;
 }
