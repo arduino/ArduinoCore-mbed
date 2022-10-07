@@ -10,50 +10,6 @@ arduino::GPSClass::~GPSClass()
 {
 }
 
-void arduino::GPSClass::begin(unsigned long baudrate, uint16_t config)
-{
-  auto cmux = arduino::CMUXClass::get_default_instance();
-
-  auto serial = cmux->get_serial(1);
-  _serial = (arduino::PTYSerial *)serial;
-  nextSerialPort++;
-
-  _serial->write("ATE0\r\n", sizeof("ATE0\r\n"));
-  readAndDrop();
-
-  // burn any incoming message on gps rx buffer
-  readAndDrop();
-
-  do
-  {
-    _serial->write("AT^SPIO=0\r\n", sizeof("AT^SPIO=0\r\n"));
-    readAndDrop();
-
-    _serial->write("AT^SPIO=1\r\n", sizeof("AT^SPIO=1\r\n"));
-    readAndDrop();
-
-    _serial->write("AT^SCPIN=1,7,1,0\r\n", sizeof("AT^SCPIN=1,7,1,0\r\n"));
-    readAndDrop();
-
-    _serial->write("AT^SSIO=7,1\r\n", sizeof("AT^SSIO=7,1\r\n"));
-    readAndDrop();
-
-    _serial->write("AT^SGIO=7\r\n", sizeof("AT^SGIO=7\r\n"));
-  } while (!checkGNSSEngine("^SGIO: 1"));
-
-  _serial->write("AT^SGPSC=Engine/StartMode,0\r\n", sizeof("AT^SGPSC=Engine/StartMode,0\r\n"));
-  checkGNSSEngine("^SGPSC: \"Engine/StartMode\",\"0\"");
-
-  while (!_engine)
-  {
-    _serial->write("AT^SGPSC=Engine,3\r\n", sizeof("AT^SGPSC=Engine,3\r\n"));
-    _engine = checkGNSSEngine("^SGPSC: \"Engine\",\"3\"");
-  }
-
-  _serial->write("AT^SGPSC=Nmea/Urc,on\r\n", sizeof("AT^SGPSC=Nmea/Urc,on\r\n"));
-  readAndDrop();
-}
-
 int arduino::GPSClass::available(void)
 {
   return _serial->available();
@@ -100,15 +56,21 @@ bool arduino::GPSClass::checkGNSSEngine(const char *prefix)
 
 void arduino::GPSClass::readAndDrop()
 {
-   char buf[256];
+  char buf[256];
+  uint32_t start = millis();
   int dataRead = 0;
-  while((dataRead = available()) <= 0);
+  while (!available() && millis() - start < 1000) {}
 
   String tmp = "";
-  while((dataRead =_serial->read(buf, 1)) > 0);
+  while(_serial->read(buf, 1) > 0);
 }
 
-void arduino::GPSClass::begin(unsigned long baudrate)
+void arduino::GPSClass::begin(unsigned long baudrate) {
+  begin(baudrate, 0);
+}
+
+
+void arduino::GPSClass::begin(unsigned long baudrate, uint16_t config)
 {
   auto cmux = arduino::CMUXClass::get_default_instance();
 
@@ -117,9 +79,6 @@ void arduino::GPSClass::begin(unsigned long baudrate)
   nextSerialPort++;
 
   _serial->write("ATE0\r\n", sizeof("ATE0\r\n"));
-  readAndDrop();
-
-  // burn any incoming message on gps rx buffer
   readAndDrop();
 
   do
@@ -207,7 +166,7 @@ arduino::GPSClass::operator bool()
   return checkGNSSEngine("\"Engine\",\"3\"");
 }
 
-static Stream *trace_stream = nullptr;
+extern Stream *trace_stream;
 static void arduino_print(const char *c)
 {
   if (trace_stream)
