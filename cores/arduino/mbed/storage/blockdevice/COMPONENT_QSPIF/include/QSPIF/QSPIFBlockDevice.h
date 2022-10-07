@@ -340,9 +340,11 @@ private:
         QSPIF_BP_CLEAR_SR, // Clear protection bits in status register 1
     };
 
+protected:
     // QSPI Driver Object
     mbed::QSPI _qspi;
 
+private:
     // Static List of different QSPI based Flash devices csel that already exist
     // Each QSPI Flash device csel can have only 1 QSPIFBlockDevice instance
     // _devices_mutex is used to lock csel list - only one QSPIFBlockDevice instance per csel is allowed

@@ -12,6 +12,8 @@ public:
   Portenta_System() {};
   virtual bool begin();
   virtual bool enterLowPower();
+  String getBoardRevision();
+  uint16_t getCarrierSpecs();
 };
 
 }

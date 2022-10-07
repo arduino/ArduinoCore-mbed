@@ -4,12 +4,14 @@
 #include "LittleFileSystem.h"
 #include "FATFileSystem.h"
 #if defined(ARDUINO_PORTENTA_H7_M7)
+#include "portenta_info.h"
 #include "portenta_bootloader.h"
 #include "portenta_lite_bootloader.h"
 #include "portenta_lite_connected_bootloader.h"
 #include "mcuboot_bootloader.h"
 #include "ecdsa-p256-encrypt-key.h"
 #include "ecdsa-p256-signing-key.h"
+#define GET_OTP_BOARD_INFO
 #elif defined(ARDUINO_NICLA_VISION)
 #include "nicla_vision_bootloader.h"
 #endif
@@ -42,6 +44,8 @@ uint8_t* bootloader_identification = (uint8_t*)(BOOTLOADER_ADDR + bootloader_ide
 const unsigned char* bootloader_ptr = &bootloader_mbed_bin[0];
 long bootloader_len = bootloader_mbed_bin_len;
 
+uint8_t* boardInfo();
+
 void setup() {
   Serial.begin(115200);
   while (!Serial) {}
@@ -64,6 +68,20 @@ void setup() {
   Serial.println("QSPI size: " + String(bootloader_data[7]) + " MB");
   Serial.println("Has Video output: " + String(bootloader_data[8] == 1 ? "Yes" : "No"));
   Serial.println("Has Crypto chip: " + String(bootloader_data[9] == 1 ? "Yes" : "No"));
+
+#ifdef GET_OTP_BOARD_INFO
+  auto info = *((PortentaBoardInfo*)boardInfo());
+  if (info.magic == 0xB5) {
+    Serial.println("Secure info version: " + String(info.version));
+    Serial.println("Secure board revision: " + String(info.revision >> 8) + "." + String(info.revision & 0xFF));
+    Serial.println("Secure carrier identification: " + String(info.carrier >> 8) + "." + String(info.revision & 0xFF));
+    Serial.println("Secure vid: 0x" + String(info.vid, HEX));
+    Serial.println("Secure pid: 0x" + String(info.pid, HEX));
+    Serial.println("Secure mac: " + String(info.mac_address[0], HEX) + ":" + String(info.mac_address[1], HEX) + ":" +
+                                    String(info.mac_address[2], HEX) + ":" + String(info.mac_address[3], HEX) + ":" +
+                                    String(info.mac_address[4], HEX) + ":" + String(info.mac_address[5], HEX));
+  }
+#endif
 
   video_available = bootloader_data[8];
   wifi_available = bootloader_data[5];
