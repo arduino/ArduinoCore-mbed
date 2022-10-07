@@ -11,6 +11,7 @@
 #include "mcuboot_bootloader.h"
 #include "ecdsa-p256-encrypt-key.h"
 #include "ecdsa-p256-signing-key.h"
+#define GET_OTP_BOARD_INFO
 #elif defined(ARDUINO_NICLA_VISION)
 #include "nicla_vision_bootloader.h"
 #endif
@@ -68,6 +69,7 @@ void setup() {
   Serial.println("Has Video output: " + String(bootloader_data[8] == 1 ? "Yes" : "No"));
   Serial.println("Has Crypto chip: " + String(bootloader_data[9] == 1 ? "Yes" : "No"));
 
+#ifdef GET_OTP_BOARD_INFO
   auto info = *((PortentaBoardInfo*)boardInfo());
   if (info.magic == 0xB5) {
     Serial.println("Secure info version: " + String(info.version));
@@ -79,6 +81,7 @@ void setup() {
                                     String(info.mac_address[2], HEX) + ":" + String(info.mac_address[3], HEX) + ":" +
                                     String(info.mac_address[4], HEX) + ":" + String(info.mac_address[5], HEX));
   }
+#endif
 
   video_available = bootloader_data[8];
   wifi_available = bootloader_data[5];

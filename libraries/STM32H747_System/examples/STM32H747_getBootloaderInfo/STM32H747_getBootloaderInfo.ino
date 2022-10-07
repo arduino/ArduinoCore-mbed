@@ -1,8 +1,11 @@
 uint8_t* bootloader_data = (uint8_t*)(0x801F000);
 uint8_t* bootloader_identification = (uint8_t*)(0x80002F0);
 
+#if __has_include("portenta_info.h")
 #include "portenta_info.h"
+#define GET_OTP_BOARD_INFO
 uint8_t* boardInfo();
+#endif
 
 void setup() {  
   Serial.begin(115200);
@@ -27,6 +30,7 @@ void setup() {
   Serial.println("Has Video output: " + String(bootloader_data[8] == 1 ? "Yes" : "No"));
   Serial.println("Has Crypto chip: " + String(bootloader_data[9] == 1 ? "Yes" : "No"));
 
+#ifdef GET_OTP_BOARD_INFO
   auto info = *((PortentaBoardInfo*)boardInfo());
   if (info.magic == 0xB5) {
     Serial.println("Secure info version: " + String(info.version));
@@ -38,6 +42,7 @@ void setup() {
                                     String(info.mac_address[2], HEX) + ":" + String(info.mac_address[3], HEX) + ":" +
                                     String(info.mac_address[4], HEX) + ":" + String(info.mac_address[5], HEX));
   }
+#endif
 }
 
 String getUSBSpeed(uint8_t flag) {
