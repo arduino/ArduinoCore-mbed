@@ -188,7 +188,7 @@ void portenta_init_video() {
 #include "Portenta_Video.h"
 #include "video_modes.h"
 
-void giga_init_video() {
+void giga_init_video(bool landscape) {
   // put your setup code here, to run once:
   int ret = -1;
 
@@ -236,6 +236,10 @@ void giga_init_video() {
     disp_drv.draw_buf = &disp_buf;
     disp_drv.hor_res = lcd_x_size;
     disp_drv.ver_res = lcd_y_size;
+    if (landscape) {
+      disp_drv.rotated = LV_DISP_ROT_90;
+      disp_drv.sw_rotate = 1;
+    }
 
     lv_disp_drv_register(&disp_drv);
 

@@ -28,6 +28,9 @@
 #define LV_VER_RES_MAX          (800)
 #endif
 
+//#define CONFIG_LV_USE_GPU_STM32_DMA2D 1
+//#define CONFIG_LV_GPU_DMA2D_CMSIS_INCLUDE "stm32h747xx.h"
+
 /* Color depth:
  * - 1:  1 byte per pixel
  * - 8:  RGB233
