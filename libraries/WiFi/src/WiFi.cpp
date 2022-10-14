@@ -110,7 +110,9 @@ void arduino::WiFiClass::ensureDefaultAPNetworkConfiguration() {
 }
 
 void arduino::WiFiClass::end() {
-  disconnect();
+  if(_currentNetworkStatus == WL_CONNECTED) {
+    disconnect();
+  }
   _softAP = nullptr;
 }
 
