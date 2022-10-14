@@ -254,18 +254,20 @@ class SecureQSPIFBlockDevice: public QSPIFBlockDevice {
 static uint8_t *_boardInfo = (uint8_t*)(0x801F000);
 static bool has_otp_info = false;
 
+static SecureQSPIFBlockDevice secure_root;
+
 // 8Kbit secure OTP area (on MX25L12833F)
 bool getSecureFlashData() {
-    static SecureQSPIFBlockDevice root;
     static PortentaBoardInfo* info = new PortentaBoardInfo();
-    root.init();
-    auto ret = root.readSecure(info, 0, sizeof(PortentaBoardInfo));
+    secure_root.init();
+    auto ret = secure_root.readSecure(info, 0, sizeof(PortentaBoardInfo));
     if (info->magic == OTP_QSPI_MAGIC) {
       _boardInfo = (uint8_t*)info;
       has_otp_info = true;
     } else {
       delete info;
     }
+    secure_root.deinit();
     return ret == 0;
 }
 
