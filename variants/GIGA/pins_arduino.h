@@ -56,6 +56,10 @@ static const uint8_t A12  = PIN_A12;
 static const uint8_t A13  = PIN_A13;
 #define ADC_RESOLUTION 12
 
+#ifdef __cplusplus
+#include "pure_analog_pins.h"
+#endif
+
 //DACs
 #define DAC           1
 
