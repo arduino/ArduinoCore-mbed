@@ -3,7 +3,6 @@
 #include "Portenta_System.h"
 #include "Wire.h"
 #include "mbed.h"
-#include "SecureQSPI.h"
 
 #define PMIC_ADDRESS 0x08
 
