@@ -169,15 +169,15 @@ static const uint8_t A13  = PIN_A13;
 #define D101 (101u)
 
 // SPI
-#define PIN_SPI_MISO  (12u)
-#define PIN_SPI_MOSI  (11u)
-#define PIN_SPI_SCK   (13u)
-#define PIN_SPI_SS    (10u)
+#define PIN_SPI_MISO  (89u)
+#define PIN_SPI_MOSI  (90u)
+#define PIN_SPI_SCK   (91u)
+#define PIN_SPI_SS    (92u)
 
-#define PIN_SPI_MISO1  (89u)
-#define PIN_SPI_MOSI1  (90u)
-#define PIN_SPI_SCK1   (91u)
-#define PIN_SPI_SS1    (92u)
+#define PIN_SPI_MISO1  (12u)
+#define PIN_SPI_MOSI1  (11u)
+#define PIN_SPI_SCK1   (13u)
+#define PIN_SPI_SS1    (10u)
 
 static const uint8_t SS   = PIN_SPI_SS;   // SPI Slave SS not used. Set here only for reference.
 static const uint8_t MOSI = PIN_SPI_MOSI;
