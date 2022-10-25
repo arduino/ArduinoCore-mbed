@@ -172,7 +172,8 @@ static const uint8_t A13  = PIN_A13;
 #define PIN_SPI_MISO  (89u)
 #define PIN_SPI_MOSI  (90u)
 #define PIN_SPI_SCK   (91u)
-#define PIN_SPI_SS    (92u)
+// Same as SPI1 for backwards compatibility
+#define PIN_SPI_SS    (10u)
 
 #define PIN_SPI_MISO1  (12u)
 #define PIN_SPI_MOSI1  (11u)

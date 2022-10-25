@@ -131,7 +131,9 @@ PinDescription g_APinDescription[] = {
   { PG_9,         NULL, NULL, NULL },    // D89  MISO
   { PD_7,         NULL, NULL, NULL },    // D90  MOSI
   { PB_3,         NULL, NULL, NULL },    // D91  SCK
-  { PA_15,        NULL, NULL, NULL },    // D92  CS
+
+  // USB HOST ENABLE
+  { PA_15,        NULL, NULL, NULL },    // D92  USB HOST ENABLE
 
   // CAN
   { PB_5,         NULL, NULL, NULL },    // D93  CAN RX
