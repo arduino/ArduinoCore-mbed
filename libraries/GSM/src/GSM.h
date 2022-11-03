@@ -69,7 +69,7 @@ public:
      * 
      * return: 0 in case of success, negative number in case of failure
      */
-  int begin(const char* pin, const char* apn, const char* username, const char* password, RadioAccessTechnologyType rat = CATNB, bool restart = true);
+  int begin(const char* pin, const char* apn, const char* username, const char* password, RadioAccessTechnologyType rat = CATNB, uint32_t band = BAND_20, bool restart = true);
 
   /*
      * Disconnect from the network
@@ -104,6 +104,7 @@ private:
   const char* _password = nullptr;
   bool _cmuxGSMenable = _CMUX_ENABLE;
   RadioAccessTechnologyType _rat;
+  FrequencyBand _band;
   NetworkInterface* gsm_if = nullptr;
   mbed::CellularContext* _context = nullptr;
   mbed::CellularDevice* _device = nullptr;

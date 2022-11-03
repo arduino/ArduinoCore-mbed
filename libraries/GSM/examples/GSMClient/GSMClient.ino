@@ -11,14 +11,13 @@ char pass[]     = SECRET_PASSWORD;
 const char  server[] = "www.example.com";
 const char* ip_address;
 int port = 80;
-
 GSMClient client;
 
 void setup() {
   Serial.begin(115200);
   while(!Serial) {}
   Serial.println("Starting Carrier Network registration");
-  if(!GSM.begin(pin, apn, username, pass, CATNB)){
+  if(!GSM.begin(pin, apn, username, pass, CATNB, BAND_20 | BAND_19)){
     Serial.println("The board was not able to register to the network...");
     // do nothing forevermore:
     while(1);
