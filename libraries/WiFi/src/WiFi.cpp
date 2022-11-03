@@ -1,9 +1,10 @@
 #include "WiFi.h"
 
 #define SSID_MAX_LENGTH 32
+#define SSID_MAX_COUNT  64
 
 bool arduino::WiFiClass::isVisible(const char* ssid) {
-  for (int i = 0; i < 10; i++) {
+  for (int i = 0; i < SSID_MAX_COUNT; i++) {
     if (strncmp(ap_list[i].get_ssid(), ssid, SSID_MAX_LENGTH) == 0) {
       connected_ap = i;
       return true;
@@ -167,7 +168,7 @@ static uint8_t sec2enum(nsapi_security_t sec) {
 }
 
 int8_t arduino::WiFiClass::scanNetworks() {
-  uint8_t count = 10;
+  uint8_t count = SSID_MAX_COUNT;
   if (ap_list != nullptr) {
     free(ap_list);
   }
