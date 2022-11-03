@@ -1,0 +1,129 @@
+From d258aa3cec48ecd5c0e625e6f60368353be833d4 Mon Sep 17 00:00:00 2001
+From: Riccardo <r.rizzo@arduino.cc>
+Date: Thu, 3 Nov 2022 12:05:21 +0100
+Subject: [PATCH 184/185] Cellular: add API to set Modem bands
+
+---
+ .../cellular/framework/API/CellularContext.h  | 19 +++++++++++++++++++
+ .../framework/AT/AT_CellularContext.h         |  2 ++
+ .../framework/AT/AT_CellularContext.cpp       | 15 ++++++++++++---
+ 3 files changed, 33 insertions(+), 3 deletions(-)
+
+diff --git a/connectivity/cellular/include/cellular/framework/API/CellularContext.h b/connectivity/cellular/include/cellular/framework/API/CellularContext.h
+index 1061d5d926..325f93db4b 100644
+--- a/connectivity/cellular/include/cellular/framework/API/CellularContext.h
++++ b/connectivity/cellular/include/cellular/framework/API/CellularContext.h
+@@ -35,6 +35,24 @@ enum RadioAccessTechnologyType {
+     CATNB = 8
+ };
+ 
++enum FrequencyBand {
++    BAND_1 = 0x01,
++    BAND_2 = 0x02,
++    BAND_3 = 0x04,
++    BAND_4 = 0x08,
++    BAND_5 = 0x10,
++    BAND_8 = 0x80,
++    BAND_12 = 0x800,
++    BAND_13 = 0x1000,
++    BAND_18 = 0x20000,
++    BAND_19 = 0x40000,
++    BAND_20 = 0x80000,
++    BAND_25 = 0x1000000,
++    BAND_26 = 0x2000000,
++    BAND_28 = 0x8000000
++};
++
++
+ namespace mbed {
+ 
+ /**
+@@ -160,6 +178,7 @@ public: // from NetworkInterface
+                                   const char *pwd = 0) = 0;
+     virtual void set_credentials(const char *apn, const char *uname = 0, const char *pwd = 0) = 0;
+     virtual void set_access_technology(RadioAccessTechnologyType rat = CATM1) = 0;
++    virtual void set_band(FrequencyBand band = BAND_20) = 0;
+     virtual bool is_connected() = 0;
+ 
+     /** Same as NetworkInterface::get_default_instance()
+diff --git a/connectivity/cellular/include/cellular/framework/AT/AT_CellularContext.h b/connectivity/cellular/include/cellular/framework/AT/AT_CellularContext.h
+index 0eb83531b0..eb3bf5afdd 100644
+--- a/connectivity/cellular/include/cellular/framework/AT/AT_CellularContext.h
++++ b/connectivity/cellular/include/cellular/framework/AT/AT_CellularContext.h
+@@ -48,6 +48,7 @@ public:
+                                   const char *pwd = 0);
+     virtual void set_credentials(const char *apn, const char *uname = 0, const char *pwd = 0);
+     virtual void set_access_technology(RadioAccessTechnologyType rat = CATM1);
++    virtual void set_band(FrequencyBand band = BAND_20);
+ 
+ // from CellularContext
+     virtual nsapi_error_t get_pdpcontext_params(pdpContextList_t &params_list);
+@@ -135,6 +136,7 @@ private:
+     PinName _dcd_pin;
+     bool _active_high;
+     RadioAccessTechnologyType _rat;
++    FrequencyBand _band;
+ 
+ protected:
+     char _found_apn[MAX_APN_LENGTH];
+diff --git a/connectivity/cellular/source/framework/AT/AT_CellularContext.cpp b/connectivity/cellular/source/framework/AT/AT_CellularContext.cpp
+index 620af5ac76..087846e9b5 100644
+--- a/connectivity/cellular/source/framework/AT/AT_CellularContext.cpp
++++ b/connectivity/cellular/source/framework/AT/AT_CellularContext.cpp
+@@ -48,7 +48,7 @@ using namespace rtos;
+ using namespace std::chrono_literals;
+ 
+ AT_CellularContext::AT_CellularContext(ATHandler &at, CellularDevice *device, const char *apn, bool cp_req, bool nonip_req) :
+-    _current_op(OP_INVALID), _dcd_pin(NC), _active_high(false), _rat(CATM1), _cp_req(cp_req), _is_connected(false), _at(at)
++    _current_op(OP_INVALID), _dcd_pin(NC), _active_high(false), _rat(CATM1), _band(BAND_20), _cp_req(cp_req), _is_connected(false), _at(at)
+ {
+     tr_info("New CellularContext %s (%p)", apn ? apn : "", this);
+     _nonip_req = nonip_req;
+@@ -284,6 +284,11 @@ void AT_CellularContext::set_access_technology(RadioAccessTechnologyType rat)
+     _rat = rat;
+ }
+ 
++void AT_CellularContext::set_band(FrequencyBand band)
++{
++    _band = band;
++}
++
+ // PDP Context handling
+ void AT_CellularContext::delete_current_context()
+ {
+@@ -440,11 +445,14 @@ bool AT_CellularContext::set_new_context(int cid)
+ 
+ void AT_CellularContext::enable_access_technology()
+ {
++    char *buffer = new char [8];
++    memset(buffer, 0, 8);
++    sprintf(buffer,"%08X", _band);
+     switch (_rat)
+     {
+     case CATM1:
+         _at.at_cmd_discard("^SXRAT", "=","%d", _rat);
+-        _at.cmd_start_stop("^SCFG", "=","%s%d", "Radio/Band/CatM",80000);
++        _at.cmd_start_stop("^SCFG", "=","%s%s", "Radio/Band/CatM",buffer);
+         _at.resp_start("^SCFG");
+         _at.cmd_start_stop("^SCFG", "=","%s%d%d", "Radio/Band/CatNB",0,0);
+         _at.resp_start("^SCFG");
+@@ -452,7 +460,7 @@ void AT_CellularContext::enable_access_technology()
+ 
+     case CATNB:
+         _at.at_cmd_discard("^SXRAT", "=","%d", _rat);
+-        _at.cmd_start_stop("^SCFG", "=","%s%d", "Radio/Band/CatNB",80000);
++        _at.cmd_start_stop("^SCFG", "=","%s%s", "Radio/Band/CatNB",buffer);
+         _at.resp_start("^SCFG");
+         _at.cmd_start_stop("^SCFG", "=","%s%d%d", "Radio/Band/CatM",0,0);
+         _at.resp_start("^SCFG");
+@@ -464,6 +472,7 @@ void AT_CellularContext::enable_access_technology()
+ 
+     _at.cmd_start_stop("^SCFG", "=", "%s%s", "Tcp/withURCs", "on");
+     _at.resp_start("^SCFG");
++    free(buffer);
+ 
+ }
+ 
+-- 
+2.38.1
+
