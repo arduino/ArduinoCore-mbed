@@ -234,6 +234,87 @@ void fixup3V1Rail() {
   i2c.write(8 << 1, data, sizeof(data));
 }
 
+
+#include "QSPIFBlockDevice.h"
+
+// 8Kbit secure OTP area (on MX25L12833F)
+class SecureQSPIFBlockDevice: public QSPIFBlockDevice {
+  public:
+    virtual int readSecure(void *buffer, mbed::bd_addr_t addr, mbed::bd_size_t size) {
+      int ret = 0;
+      ret &= _qspi.command_transfer(0xB1, -1, nullptr, 0, nullptr, 0);
+      ret &= read(buffer, addr, size);
+      ret &= _qspi.command_transfer(0xC1, -1, nullptr, 0, nullptr, 0);
+      return ret;
+    }
+};
+
+#if 0
+// 256byte secure OTP area (on AT25SF128A)
+// TODO: could be imcomplete, to be tested
+class SecureQSPIFBlockDevice: public QSPIFBlockDevice {
+  public:
+    virtual int readSecure(void *buffer, mbed::bd_addr_t addr, mbed::bd_size_t size) {
+      // like normal read with 48h
+      size_t len = size;
+      return _qspi.read(0x48, -1, (unsigned int)addr, (char *)buffer, &len);
+    }
+    virtual int programSecure(void *buffer, mbed::bd_addr_t addr, mbed::bd_size_t size) {
+      // like normal program with 42h
+    }
+    virtual int eraseSecure(void *buffer, mbed::bd_addr_t addr, mbed::bd_size_t size) {
+      // like normal program with 44h
+    }
+};
+#endif
+
+#include "opta_info.h"
+
+static uint8_t *_boardInfo = (uint8_t*)(0x801F000);
+static bool has_otp_info = false;
+
+static SecureQSPIFBlockDevice secure_root;
+
+bool getSecureFlashData() {
+    static OptaBoardInfo* info = new OptaBoardInfo();
+    secure_root.init();
+    auto ret = secure_root.readSecure(info, 0, sizeof(OptaBoardInfo));
+    if (info->magic == OTP_QSPI_MAGIC) {
+      _boardInfo = (uint8_t*)info;
+      has_otp_info = true;
+    } else {
+      delete info;
+    }
+    secure_root.deinit();
+    return ret == 0;
+}
+
+uint8_t* boardInfo() {
+    return _boardInfo;
+}
+
+uint16_t boardRevision() {
+    return (((OptaBoardInfo*)_boardInfo)->revision);
+}
+
+uint16_t _getVid_() {
+    if (has_otp_info) {
+        return ((OptaBoardInfo*)_boardInfo)->vid;
+    } else {
+        return _BOARD_VENDORID;
+    }
+}
+
+uint16_t _getPid_() {
+    if (has_otp_info) {
+        return ((OptaBoardInfo*)_boardInfo)->pid;
+    } else {
+        return _BOARD_PRODUCTID;
+    }
+}
+
+#define BOARD_REVISION(x,y)   (x << 8 | y)
+
 void initVariant() {
   RTCHandle.Instance = RTC;
   // Turn off LED from bootloader
@@ -244,6 +325,7 @@ void initVariant() {
   // Disable the FMC bank1 (enabled after reset)
   // See https://github.com/STMicroelectronics/STM32CubeH7/blob/beced99ac090fece04d1e0eb6648b8075e156c6c/Projects/STM32H747I-DISCO/Applications/OpenAMP/OpenAMP_RTOS_PingPong/Common/Src/system_stm32h7xx.c#L215
   FMC_Bank1_R->BTCR[0] = 0x000030D2;
+  getSecureFlashData();
 }
 
 #ifdef SERIAL_CDC

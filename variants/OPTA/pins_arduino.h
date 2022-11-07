@@ -143,25 +143,9 @@ static const uint8_t SCK  = PIN_SPI_SCK;
 // Use these only if bootloader data is not available / valid
 #define _BOARD_VENDORID		0x2341
 #define _BOARD_PRODUCTID	0x0264
+uint16_t _getVid_();
+uint16_t _getPid_();
 
-static uint8_t* bootloader_data = (uint8_t*)(0x801F000);
-static inline bool _isBootloaderDataValid() {
-    return bootloader_data[0] == 0xA0;
-}
-static inline uint16_t _getVid_() {
-    if (_isBootloaderDataValid()) {
-        return bootloader_data[1] | ((uint16_t)bootloader_data[2] << 8);
-    } else {
-        return _BOARD_VENDORID;
-    }
-}
-static inline uint16_t _getPid_() {
-    if (_isBootloaderDataValid()) {
-        return bootloader_data[3] | ((uint16_t)bootloader_data[4] << 8);
-    } else {
-        return _BOARD_PRODUCTID;
-    }
-}
 #define BOARD_NAME			"Arduino Opta"
 
 #define DFU_MAGIC_SERIAL_ONLY_RESET   0xb0
