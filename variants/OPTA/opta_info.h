@@ -1,6 +1,6 @@
 #define OTP_QSPI_MAGIC    0xB5
 
-typedef struct {
+typedef struct __attribute__((packed)) {
     uint8_t magic;
     uint8_t version;
     union {

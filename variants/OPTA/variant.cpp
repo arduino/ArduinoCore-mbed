@@ -237,6 +237,7 @@ void fixup3V1Rail() {
 
 #include "QSPIFBlockDevice.h"
 
+#if 0
 // 8Kbit secure OTP area (on MX25L12833F)
 class SecureQSPIFBlockDevice: public QSPIFBlockDevice {
   public:
@@ -248,8 +249,9 @@ class SecureQSPIFBlockDevice: public QSPIFBlockDevice {
       return ret;
     }
 };
+#endif
 
-#if 0
+#if 1
 // 256byte secure OTP area (on AT25SF128A)
 // TODO: could be imcomplete, to be tested
 class SecureQSPIFBlockDevice: public QSPIFBlockDevice {
@@ -277,8 +279,11 @@ static SecureQSPIFBlockDevice secure_root;
 
 bool getSecureFlashData() {
     static OptaBoardInfo* info = new OptaBoardInfo();
+    uint8_t temp_buf[sizeof(OptaBoardInfo) + 1];
     secure_root.init();
-    auto ret = secure_root.readSecure(info, 0, sizeof(OptaBoardInfo));
+    // read secure sector 2 ( address 1 << 13 )
+    auto ret = secure_root.readSecure(temp_buf, (1 << 13), sizeof(OptaBoardInfo));
+    memcpy(info, &temp_buf[1], sizeof(OptaBoardInfo));
     if (info->magic == OTP_QSPI_MAGIC) {
       _boardInfo = (uint8_t*)info;
       has_otp_info = true;
@@ -298,19 +303,17 @@ uint16_t boardRevision() {
 }
 
 uint16_t _getVid_() {
-    if (has_otp_info) {
-        return ((OptaBoardInfo*)_boardInfo)->vid;
-    } else {
-        return _BOARD_VENDORID;
+    if (!has_otp_info) {
+      getSecureFlashData();
     }
+    return ((OptaBoardInfo*)_boardInfo)->vid;
 }
 
 uint16_t _getPid_() {
-    if (has_otp_info) {
-        return ((OptaBoardInfo*)_boardInfo)->pid;
-    } else {
-        return _BOARD_PRODUCTID;
+    if (!has_otp_info) {
+      getSecureFlashData();
     }
+    return ((OptaBoardInfo*)_boardInfo)->pid;
 }
 
 #define BOARD_REVISION(x,y)   (x << 8 | y)
@@ -325,7 +328,6 @@ void initVariant() {
   // Disable the FMC bank1 (enabled after reset)
   // See https://github.com/STMicroelectronics/STM32CubeH7/blob/beced99ac090fece04d1e0eb6648b8075e156c6c/Projects/STM32H747I-DISCO/Applications/OpenAMP/OpenAMP_RTOS_PingPong/Common/Src/system_stm32h7xx.c#L215
   FMC_Bank1_R->BTCR[0] = 0x000030D2;
-  getSecureFlashData();
 }
 
 #ifdef SERIAL_CDC
