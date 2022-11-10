@@ -303,17 +303,25 @@ uint16_t boardRevision() {
 }
 
 uint16_t _getVid_() {
+#ifdef FIRST_PROGRAMMING
+    return _BOARD_VENDORID;
+#else
     if (!has_otp_info) {
       getSecureFlashData();
     }
     return ((OptaBoardInfo*)_boardInfo)->vid;
+#endif
 }
 
 uint16_t _getPid_() {
+#ifdef FIRST_PROGRAMMING
+    return _BOARD_PRODUCTID;
+#else
     if (!has_otp_info) {
       getSecureFlashData();
     }
     return ((OptaBoardInfo*)_boardInfo)->pid;
+#endif
 }
 
 #define BOARD_REVISION(x,y)   (x << 8 | y)
