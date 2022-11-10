@@ -280,11 +280,12 @@ wiced_result_t whd_firmware_check_hook(const char* mounted_name, int mount_err) 
 
 #include "whd_version.h"
 const char* arduino::WiFiClass::firmwareVersion() {
-  if (firmware_available) {
-    return WHD_VERSION;
-  } else {
-    return "v0.0.0";
+  if ((wiced_filesystem_init() != WICED_ERROR) && (wiced_filesystem_mount_default() != WICED_ERROR)) {
+    if (firmware_available) {
+      return WHD_VERSION;
+    }
   }
+  return "v0.0.0";
 }
 
 arduino::WiFiClass WiFi(WiFiInterface::get_default_instance());
