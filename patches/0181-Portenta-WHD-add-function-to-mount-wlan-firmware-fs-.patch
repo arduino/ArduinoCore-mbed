@@ -1,0 +1,50 @@
+From cc47c9bdedc7c2841c3200c62dd6aa5658f4587e Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Thu, 10 Nov 2022 14:04:15 +0100
+Subject: [PATCH 181/182] Portenta: WHD: add function to mount wlan firmware fs
+ from WiFi library
+
+---
+ .../COMPONENT_WHD/port/wiced_filesystem.cpp              | 5 +++++
+ .../COMPONENT_WHD/port/wiced_filesystem.h                | 9 +++++++++
+ 2 files changed, 14 insertions(+)
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/wiced_filesystem.cpp b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/wiced_filesystem.cpp
+index bea07abdef..31405c9d77 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/wiced_filesystem.cpp
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/wiced_filesystem.cpp
+@@ -170,6 +170,11 @@ wiced_result_t wiced_filesystem_mount(BlockDevice *device, wiced_filesystem_hand
+     return WICED_ERROR;
+ }
+ 
++wiced_result_t wiced_filesystem_mount_default(void)
++{
++    return wiced_filesystem_mount(mbr_bd, 0, &resource_fs_handle, WIFI_DEFAULT_MOUNT_NAME);
++}
++
+ wiced_result_t wiced_filesystem_file_open(wiced_filesystem_t *fs_handle, wiced_file_t *file_handle_out, const char *filename, wiced_filesystem_open_mode_t mode)
+ {
+     /* This is called by mbed test system */
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/wiced_filesystem.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/wiced_filesystem.h
+index a65aa3c148..77d49d1820 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/wiced_filesystem.h
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/wiced_filesystem.h
+@@ -81,6 +81,15 @@ typedef int wiced_filesystem_handle_type_t;
+  */
+ wiced_result_t wiced_filesystem_init(void);
+ 
++/**
++ * Mount the physical device using default parameters
++ *
++ * This assumes that the device is ready to read/write immediately.
++ *
++ * @return WICED_SUCCESS on success
++ */
++wiced_result_t wiced_filesystem_mount_default(void);
++
+ /**
+  * Open a file for reading or writing
+  *
+-- 
+2.38.1
+

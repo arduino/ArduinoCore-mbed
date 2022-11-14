@@ -1,0 +1,30 @@
+From e110be9600cfa320ed60cc07f7b0917727f49e2e Mon Sep 17 00:00:00 2001
+From: Riccardo <r.rizzo@arduino.cc>
+Date: Mon, 14 Nov 2022 11:12:56 +0100
+Subject: [PATCH 182/182] STM32: fix HRTIM pwm corner cases (0-100%)
+
+---
+ targets/TARGET_STM/pwmout_api.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/targets/TARGET_STM/pwmout_api.c b/targets/TARGET_STM/pwmout_api.c
+index 906dc1dcfd..e20ac918a3 100644
+--- a/targets/TARGET_STM/pwmout_api.c
++++ b/targets/TARGET_STM/pwmout_api.c
+@@ -359,10 +359,10 @@ void pwmout_write(pwmout_t *obj, float value)
+ 
+ #if defined(HRTIM1)
+     if (obj->pwm == PWM_I) {
+-        if (value < (float)0.0) {
+-            value = 0.0;
+-        } else if (value > (float)1.0) {
++        if (value <= (float)0.0) {
+             value = 1.0;
++        } else if (value >= (float)1.0) {
++            value = 0.0;
+         }
+         obj->pulse = (uint32_t)((float)obj->period * value + 0.5);
+         sConfig_compare.CompareValue =  obj->pulse;
+-- 
+2.38.1
+
