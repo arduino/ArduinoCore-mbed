@@ -6,7 +6,8 @@
   Circuit:
   - Arduino Nano 33 BLE board, or
   - Arduino Nano RP2040 Connect, or
-  - Arduino Portenta H7 board plus Portenta Vision Shield
+  - Arduino Portenta H7 board plus Portenta Vision Shield, or
+  - Arduino Nicla Vision
 
   This example code is in the public domain.
 */
