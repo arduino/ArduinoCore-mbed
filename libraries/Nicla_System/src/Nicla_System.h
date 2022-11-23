@@ -20,6 +20,8 @@ public:
   static bool enterShipMode();
   static uint8_t readLDOreg();
   static bool enableCharge(uint8_t mA = 20);
+  static float getBetteryStatus();
+  static uint8_t getFault();
 
   static RGBled leds;
   static BQ25120A _pmic;

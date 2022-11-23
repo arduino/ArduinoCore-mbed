@@ -106,14 +106,33 @@ uint8_t nicla::readLDOreg()
 
 bool nicla::enableCharge(uint8_t mA)
 {
-  digitalWrite(p25, LOW);
   if (mA < 35) {
     _chg_reg = ((mA-5) << 2);
   } else {
     _chg_reg = (((mA-40)/10) << 2) | 0x80;
   }
   _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_FAST_CHG, _chg_reg);
+
+  // For very depleted batteries, set ULVO at the vary minimum to re-enable charging
+  _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_ILIM_UVLO_CTRL, 0x3F);
+
+  // also set max battery voltage to 4.2V (VBREG)
+  // _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_BATTERY_CTRL, (4.2f - 3.6f)*100);
+
   return _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_FAST_CHG) == _chg_reg;
+}
+
+uint8_t nicla::getFault() {
+  return _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_FAULTS);
+}
+
+
+float nicla::getBetteryStatus() {
+  _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_BATT_MON, 1);
+  delay(2);
+  uint8_t data = _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_BATT_MON);
+  float res = 0.6f + (data >> 5) * 0.1f + (data >> 2) * 0.02f - 0.01f;
+  return res;
 }
 
 void nicla::checkChgReg()
