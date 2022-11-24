@@ -71,14 +71,9 @@ void printOptaSecureInfo() {
   info = boardInfo();
   if (info->magic == 0xB5) {
     Serial.println("Secure info version: " + String(info->version));
-    Serial.println("USB Speed: USB 1.1/Full-Speed (12 Mbps)");
     Serial.println("Has Ethernet: " + String(info->_board_functionalities.ethernet == 1 ? "Yes" : "No"));
     Serial.println("Has WiFi module: " + String(info->_board_functionalities.wifi == 1 ? "Yes" : "No"));
     Serial.println("Has RS485: " + String(info->_board_functionalities.rs485 == 1 ? "Yes" : "No"));
-    Serial.println("Has Video output: No");
-    Serial.println("Has SE050 crypto: No");
-    Serial.println("Has ATECC crypto: Yes");
-    Serial.println("RAM size: N/A");
     Serial.println("QSPI size: " + String(info->external_flash_size) + " MB");
     Serial.println("Secure board revision: " + String(info->revision >> 8) + "." + String(info->revision & 0xFF));
     Serial.println("Secure vid: 0x" + String(info->vid, HEX));
