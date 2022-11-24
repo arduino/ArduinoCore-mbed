@@ -3,8 +3,16 @@ uint8_t* bootloader_identification = (uint8_t*)(0x80002F0);
 
 #if __has_include("portenta_info.h")
 #include "portenta_info.h"
-#define GET_OTP_BOARD_INFO
-uint8_t* boardInfo();
+#define GET_PORENTA_OTP_BOARD_INFO
+PortentaBoardInfo *info;
+PortentaBoardInfo* boardInfo();
+#endif
+
+#if __has_include("opta_info.h")
+#include "opta_info.h"
+#define GET_OPTA_OTP_BOARD_INFO
+OptaBoardInfo *info;
+OptaBoardInfo* boardInfo();
 #endif
 
 void setup() {  
@@ -21,6 +29,71 @@ void setup() {
   Serial.println(currentBootloaderIdentifier);
   Serial.println("Magic Number (validation): " + String(bootloader_data[0], HEX));
   Serial.println("Bootloader version: " + String(bootloader_data[1]));
+
+#if defined(GET_PORENTA_OTP_BOARD_INFO)
+  printPortentaSecureInfo();
+#elif defined(GET_OPTA_OTP_BOARD_INFO)
+  printOptaSecureInfo();
+#else
+  printBootloaderInfo();
+#endif
+}
+
+#if defined(GET_PORENTA_OTP_BOARD_INFO)
+void printPortentaSecureInfo() {
+  info = boardInfo();
+  if (info->magic == 0xB5) {
+    Serial.println("Secure info version: " + String(info->version));
+    Serial.println("USB Speed: " + String(info->_board_functionalities.usb_high_speed == 1 ? "USB 2.0/Hi-Speed (480 Mbps)" : "USB 1.1/Full-Speed (12 Mbps)"));
+    Serial.println("Has Ethernet: " + String(info->_board_functionalities.ethernet == 1 ? "Yes" : "No"));
+    Serial.println("Has WiFi module: " + String(info->_board_functionalities.wifi == 1 ? "Yes" : "No"));
+    Serial.println("Has Video output: " + String(info->_board_functionalities.video == 1 ? "Yes" : "No"));
+    Serial.println("Has SE050 crypto: " + String(info->_board_functionalities.nxp_crypto == 1 ? "Yes" : "No"));
+    Serial.println("Has ATECC crypto: " + String(info->_board_functionalities.mchp_crypto == 1 ? "Yes" : "No"));
+    Serial.println("RAM size: " + getRAMSize(info->external_ram_size));
+    Serial.println("QSPI size: " + String(info->external_flash_size) + " MB");
+    Serial.println("Secure board revision: " + String(info->revision >> 8) + "." + String(info->revision & 0xFF));
+    Serial.println("Secure carrier identification: " + String(info->carrier >> 8) + "." + String(info->revision & 0xFF));
+    Serial.println("Secure vid: 0x" + String(info->vid, HEX));
+    Serial.println("Secure pid: 0x" + String(info->pid, HEX));
+    Serial.println("Secure mac: " + String(info->mac_address[0], HEX) + ":" + String(info->mac_address[1], HEX) + ":" +
+                                    String(info->mac_address[2], HEX) + ":" + String(info->mac_address[3], HEX) + ":" +
+                                    String(info->mac_address[4], HEX) + ":" + String(info->mac_address[5], HEX));
+  } else {
+    Serial.println("No secure info available");
+    printBootloaderInfo();
+  }
+}
+#endif
+
+#if defined(GET_OPTA_OTP_BOARD_INFO)
+void printOptaSecureInfo() {
+  info = boardInfo();
+  if (info->magic == 0xB5) {
+    Serial.println("Secure info version: " + String(info->version));
+    Serial.println("USB Speed: USB 1.1/Full-Speed (12 Mbps)");
+    Serial.println("Has Ethernet: " + String(info->_board_functionalities.ethernet == 1 ? "Yes" : "No"));
+    Serial.println("Has WiFi module: " + String(info->_board_functionalities.wifi == 1 ? "Yes" : "No"));
+    Serial.println("Has RS485: " + String(info->_board_functionalities.rs485 == 1 ? "Yes" : "No"));
+    Serial.println("Has Video output: No");
+    Serial.println("Has SE050 crypto: No");
+    Serial.println("Has ATECC crypto: Yes");
+    Serial.println("RAM size: N/A");
+    Serial.println("QSPI size: " + String(info->external_flash_size) + " MB");
+    Serial.println("Secure board revision: " + String(info->revision >> 8) + "." + String(info->revision & 0xFF));
+    Serial.println("Secure vid: 0x" + String(info->vid, HEX));
+    Serial.println("Secure pid: 0x" + String(info->pid, HEX));
+    Serial.println("Secure mac: " + String(info->mac_address[0], HEX) + ":" + String(info->mac_address[1], HEX) + ":" +
+                                    String(info->mac_address[2], HEX) + ":" + String(info->mac_address[3], HEX) + ":" +
+                                    String(info->mac_address[4], HEX) + ":" + String(info->mac_address[5], HEX));
+  } else {
+    Serial.println("No secure info available");
+    printBootloaderInfo();
+  }
+}
+#endif
+
+void printBootloaderInfo() {
   Serial.println("Clock source: " + getClockSource(bootloader_data[2]));
   Serial.println("USB Speed: " + getUSBSpeed(bootloader_data[3]));
   Serial.println("Has Ethernet: " + String(bootloader_data[4] == 1 ? "Yes" : "No"));
@@ -29,20 +102,6 @@ void setup() {
   Serial.println("QSPI size: " + String(bootloader_data[7]) + " MB");
   Serial.println("Has Video output: " + String(bootloader_data[8] == 1 ? "Yes" : "No"));
   Serial.println("Has Crypto chip: " + String(bootloader_data[9] == 1 ? "Yes" : "No"));
-
-#ifdef GET_OTP_BOARD_INFO
-  auto info = *((PortentaBoardInfo*)boardInfo());
-  if (info.magic == 0xB5) {
-    Serial.println("Secure info version: " + String(info.version));
-    Serial.println("Secure board revision: " + String(info.revision >> 8) + "." + String(info.revision & 0xFF));
-    Serial.println("Secure carrier identification: " + String(info.carrier >> 8) + "." + String(info.revision & 0xFF));
-    Serial.println("Secure vid: 0x" + String(info.vid, HEX));
-    Serial.println("Secure pid: 0x" + String(info.pid, HEX));
-    Serial.println("Secure mac: " + String(info.mac_address[0], HEX) + ":" + String(info.mac_address[1], HEX) + ":" +
-                                    String(info.mac_address[2], HEX) + ":" + String(info.mac_address[3], HEX) + ":" +
-                                    String(info.mac_address[4], HEX) + ":" + String(info.mac_address[5], HEX));
-  }
-#endif
 }
 
 String getUSBSpeed(uint8_t flag) {
