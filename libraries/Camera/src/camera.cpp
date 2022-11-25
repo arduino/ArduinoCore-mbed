@@ -39,6 +39,7 @@
 #define DCMI_TIM_CLK_DISABLE()      __TIM1_CLK_DISABLE()
 #define DCMI_TIM_PCLK_FREQ()        HAL_RCC_GetPCLK2Freq()
 #define DCMI_TIM_FREQUENCY          (6000000)
+#define DCMI_RESET_PIN              (PC_13)
 arduino::MbedI2C CameraWire(I2C_SDA, I2C_SCL);
 
 #elif defined(ARDUINO_NICLA_VISION)
@@ -65,6 +66,7 @@ arduino::MbedI2C CameraWire(I2C_SDA2, I2C_SCL2);
 #define DCMI_TIM_CLK_DISABLE()      __TIM1_CLK_DISABLE()
 #define DCMI_TIM_PCLK_FREQ()        HAL_RCC_GetPCLK2Freq()
 #define DCMI_TIM_FREQUENCY          (6000000)
+#define DCMI_RESET_PIN              (PA_1)
 arduino::MbedI2C CameraWire(I2C_SDA1, I2C_SCL1);
 
 #endif
@@ -78,7 +80,7 @@ arduino::MbedI2C CameraWire(I2C_SDA1, I2C_SCL1);
 
 // DCMI GPIO pins struct
 static const struct { GPIO_TypeDef *port; uint16_t pin; } dcmi_pins[] = {
-#if defined (ARDUINO_PORTENTA_H7_M7) || defined (ARDUINO_PORTENTA_H7_M4)
+    #if defined (ARDUINO_PORTENTA_H7_M7) || defined (ARDUINO_PORTENTA_H7_M4)
     {GPIOA,     GPIO_PIN_4  },
     {GPIOA,     GPIO_PIN_6  },
     {GPIOI,     GPIO_PIN_4  },
@@ -90,7 +92,7 @@ static const struct { GPIO_TypeDef *port; uint16_t pin; } dcmi_pins[] = {
     {GPIOH,     GPIO_PIN_11 },
     {GPIOH,     GPIO_PIN_12 },
     {GPIOH,     GPIO_PIN_14 },
-#elif defined(ARDUINO_NICLA_VISION)
+    #elif defined(ARDUINO_NICLA_VISION)
     {GPIOA,     GPIO_PIN_4  },
     {GPIOA,     GPIO_PIN_6  },
     {GPIOC,     GPIO_PIN_6  },
@@ -102,7 +104,7 @@ static const struct { GPIO_TypeDef *port; uint16_t pin; } dcmi_pins[] = {
     {GPIOE,     GPIO_PIN_5 },
     {GPIOE,     GPIO_PIN_6 },
     {GPIOG,     GPIO_PIN_9 },
-#elif defined(ARDUINO_GIGA)
+    #elif defined(ARDUINO_GIGA)
     {GPIOH,     GPIO_PIN_9  },
     {GPIOH,     GPIO_PIN_10  },
     {GPIOH,     GPIO_PIN_11  },
@@ -114,14 +116,13 @@ static const struct { GPIO_TypeDef *port; uint16_t pin; } dcmi_pins[] = {
     {GPIOA,     GPIO_PIN_6 },
     {GPIOH,     GPIO_PIN_8 },
     {GPIOI,     GPIO_PIN_5 },
-#endif
+    #endif
 };
 #define NUM_DCMI_PINS   (sizeof(dcmi_pins)/sizeof(dcmi_pins[0]))
 
 static TIM_HandleTypeDef  htim  = {0};
 static DMA_HandleTypeDef  hdma  = {0};
 static DCMI_HandleTypeDef hdcmi = {0};
-static volatile uint32_t frame_ready = 0;
 
 const uint32_t pixtab[CAMERA_PMAX] = {
     1,
@@ -171,26 +172,27 @@ void HAL_DCMI_MspInit(DCMI_HandleTypeDef *hdcmi)
     hgpio.Speed     = GPIO_SPEED_FREQ_VERY_HIGH;
     hgpio.Alternate = GPIO_AF13_DCMI;
 
-#if defined (ARDUINO_PORTENTA_H7_M7) || defined (ARDUINO_PORTENTA_H7_M4)
+    #if defined (ARDUINO_PORTENTA_H7_M7) || defined (ARDUINO_PORTENTA_H7_M4)
     /* Enable GPIO clocks */
     __HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_GPIOH_CLK_ENABLE();
     __HAL_RCC_GPIOI_CLK_ENABLE();
-#elif defined(ARDUINO_NICLA_VISION)
+    #elif defined(ARDUINO_NICLA_VISION)
     /* Enable GPIO clocks */
     __HAL_RCC_GPIOG_CLK_ENABLE();
     __HAL_RCC_GPIOE_CLK_ENABLE();
     __HAL_RCC_GPIOD_CLK_ENABLE();
     __HAL_RCC_GPIOC_CLK_ENABLE();
     __HAL_RCC_GPIOA_CLK_ENABLE();
-#elif defined(ARDUINO_GIGA)
+    #elif defined(ARDUINO_GIGA)
     /* Enable GPIO clocks */
     __HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_GPIOG_CLK_ENABLE();
     __HAL_RCC_GPIOH_CLK_ENABLE();
     __HAL_RCC_GPIOI_CLK_ENABLE();
     __HAL_RCC_GPIOJ_CLK_ENABLE();
-#endif
+    #endif
+
     for (uint32_t i=0; i<NUM_DCMI_PINS; i++) {
         hgpio.Pin = dcmi_pins[i].pin;
         HAL_GPIO_Init(dcmi_pins[i].port, &hgpio);
@@ -262,7 +264,7 @@ __weak int camera_extclk_config(int frequency)
     return 0;
 }
 
-uint8_t camera_dcmi_config()
+uint8_t camera_dcmi_config(bool bsm_skip)
 {
     // DMA Stream configuration
     hdma.Instance                 = DCMI_DMA_STREAM;
@@ -298,17 +300,16 @@ uint8_t camera_dcmi_config()
     hdcmi.Init.CaptureRate      = DCMI_CR_ALL_FRAME;
     hdcmi.Init.ExtendedDataMode = DCMI_EXTEND_DATA_8B;
     hdcmi.Init.JPEGMode         = DCMI_JPEG_DISABLE;
-    hdcmi.Init.ByteSelectMode   = DCMI_BSM_ALL;         // Capture all received bytes
-    hdcmi.Init.ByteSelectStart  = DCMI_OEBS_ODD;        // Ignored
-    hdcmi.Init.LineSelectMode   = DCMI_LSM_ALL;         // Capture all received lines
-    hdcmi.Init.LineSelectStart  = DCMI_OELS_ODD;        // Ignored
+    hdcmi.Init.ByteSelectMode   = bsm_skip ? DCMI_BSM_OTHER : DCMI_BSM_ALL;
+    hdcmi.Init.ByteSelectStart  = DCMI_OEBS_ODD;    // Ignored unless BSM != ALL
+    hdcmi.Init.LineSelectMode   = DCMI_LSM_ALL;     // Capture all received lines
+    hdcmi.Init.LineSelectStart  = DCMI_OELS_ODD;    // Ignored, unless LSM != ALL
 
     // Link the DMA handle to the DCMI handle.
     __HAL_LINKDMA(&hdcmi, DMA_Handle, hdma);
 
     // Initialize the DCMI
     HAL_DCMI_Init(&hdcmi);
-    __HAL_DCMI_ENABLE_IT(&hdcmi, DCMI_IT_FRAME);
     __HAL_DCMI_DISABLE_IT(&hdcmi, DCMI_IT_LINE);
 
     // Configure and enable DCMI IRQ Channel
@@ -327,14 +328,7 @@ void DMA2_Stream3_IRQHandler(void)
     HAL_DMA_IRQHandler(&hdma);
 }
 
-void HAL_DCMI_FrameEventCallback(DCMI_HandleTypeDef *hdcmi)
-{        
-    frame_ready++;
-}
-
 } // extern "C"
-
-
 
 FrameBuffer::FrameBuffer(int32_t x, int32_t y, int32_t bpp) : 
     _fb_size(x*y*bpp),
@@ -397,14 +391,14 @@ Camera::Camera(ImageSensor &sensor) :
 
 int Camera::reset()
 {
-#if defined (ARDUINO_PORTENTA_H7_M7) || defined (ARDUINO_PORTENTA_H7_M4)
     // Reset sensor.
-    digitalWrite(PC_13, LOW);
+    #if defined(DCMI_RESET_PIN)
+    digitalWrite(DCMI_RESET_PIN, LOW);
     HAL_Delay(10);
 
-    digitalWrite(PC_13, HIGH);
-    HAL_Delay(100);
-#endif
+    digitalWrite(DCMI_RESET_PIN, HIGH);
+    HAL_Delay(20);
+    #endif
     return 0;
 }
 
@@ -460,7 +454,11 @@ bool Camera::begin(int32_t resolution, int32_t pixformat, int32_t framerate)
         return false;
     }
 
-    if (camera_dcmi_config() != 0) {
+    // If the pixel format is Grayscale and sensor is Not monochrome, the
+    // actual pixel format will be YUV (i.e 2 bytes per pixel) and the DCMI
+    // needs to be configured to skip every other byte to extract the Y channel.
+    bool gs_from_yuv = (pixformat == CAMERA_GRAYSCALE) && !this->sensor->getMono();
+    if (camera_dcmi_config(gs_from_yuv) != 0) {
         return false;
     }
 
@@ -518,7 +516,13 @@ int Camera::setResolution(int32_t resolution)
      * @param  YSize DCMI Line number
      */
     HAL_DCMI_EnableCROP(&hdcmi);
-    uint32_t bpl = restab[resolution][0] * pixtab[pixformat];
+    uint32_t bpl = restab[resolution][0];
+    if (pixformat == CAMERA_RGB565 ||
+       (pixformat == CAMERA_GRAYSCALE && !this->sensor->getMono())) {
+        // If the pixel format is Grayscale and sensor is Not monochrome,
+        // the actual pixel format will be YUV (i.e 2 bytes per pixel).
+        bpl *= 2;
+    }
     HAL_DCMI_ConfigCROP(&hdcmi, 0, 0, bpl - 1, restab[resolution][1] - 1);
 
     if (this->sensor->setResolution(resolution) == 0) {
@@ -612,38 +616,31 @@ int Camera::grabFrame(FrameBuffer &fb, uint32_t timeout)
         return -1;
     }
 
-    frame_ready = 0;
-
-    if (HAL_DCMI_Resume(&hdcmi) != HAL_OK) {
-        if (_debug) {
-            _debug->println("HAL_DCMI_Resume FAILED!");
-        }
-    }
-
     // Start the Camera Snapshot Capture.
-    if (HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_SNAPSHOT, (uint32_t) framebuffer, framesize / 4) != HAL_OK) {
+    if (HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_SNAPSHOT,
+                (uint32_t) framebuffer, framesize / 4) != HAL_OK) {
         if (_debug) {
             _debug->println("HAL_DCMI_Start_DMA FAILED!");
         }
     }
 
     // Wait until camera frame is ready.
-    for (uint32_t start = millis(); frame_ready == 0;) {
+    for (uint32_t start = millis(); (hdcmi.Instance->CR & DCMI_CR_CAPTURE);) {
         __WFI();
         if ((millis() - start) > timeout) {
             if (_debug) {
                 _debug->println("Timeout expired!");
             }
-            HAL_DMA_Abort(&hdma);
+            HAL_DCMI_Stop(&hdcmi);
             return -1;
         }
     }
 
-    HAL_DCMI_Suspend(&hdcmi);
+    HAL_DCMI_Stop(&hdcmi);
 
     #if defined(__CORTEX_M7)  // only invalidate buffer for Cortex M7
-       // Invalidate buffer after DMA transfer.
-       SCB_InvalidateDCache_by_Addr((uint32_t*) framebuffer, framesize);
+    // Invalidate buffer after DMA transfer.
+    SCB_InvalidateDCache_by_Addr((uint32_t*) framebuffer, framesize);
     #endif
     return 0;
 }

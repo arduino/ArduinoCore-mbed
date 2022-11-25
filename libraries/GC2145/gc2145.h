@@ -34,6 +34,7 @@ class GC2145: public ImageSensor {
         int init();
         int reset();
         int getID() { return GC2145_I2C_ADDR; };
+        bool getMono() { return false; };
         uint32_t getClockFrequency() { return 12000000; };
         int setFrameRate(int32_t framerate);
         int setResolution(int32_t resolution);

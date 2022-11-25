@@ -37,6 +37,7 @@ class HM01B0: public ImageSensor {
         int init();
         int reset();
         int getID() { return HM01B0_I2C_ADDR; };
+        bool getMono() { return true; };
         uint32_t getClockFrequency() { return 6000000; };
         int setFrameRate(int32_t framerate);
         int setResolution(int32_t resolution);

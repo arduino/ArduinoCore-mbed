@@ -37,6 +37,7 @@ class OV7670: public ImageSensor {
         int init();
         int reset();
         int getID() { return 0x21; };
+        bool getMono() { return false; };
         uint32_t getClockFrequency() { return 12000000; };
         int setFrameRate(int32_t framerate);
         int setResolution(int32_t resolution);

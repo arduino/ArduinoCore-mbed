@@ -68,6 +68,7 @@ class ImageSensor {
         virtual int init() = 0;
         virtual int reset() = 0;
         virtual int getID() = 0;
+        virtual bool getMono() = 0;
         virtual uint32_t getClockFrequency() = 0;
         virtual int setFrameRate(int32_t framerate) = 0;
         virtual int setResolution(int32_t resolution) = 0;
