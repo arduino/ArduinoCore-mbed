@@ -380,6 +380,8 @@ private:
 
     // S25FS512S needs a quirk
     bool _S25FS512S_quirk;
+    // AT25SF128A needs a quirk
+    bool _AT25SF128A_quirk;
 
     // Clear block protection
     qspif_clear_protection_method_t _clear_protection_method;
