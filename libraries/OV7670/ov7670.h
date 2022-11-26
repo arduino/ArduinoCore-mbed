@@ -21,8 +21,12 @@
 
 #include "camera.h"
 
+#ifndef OMV_OV7670_VERSION
 #define OMV_OV7670_VERSION (70)
+#endif
+#ifndef OMV_OV7670_CLKRC
 #define OMV_OV7670_CLKRC   (0x00)
+#endif
 
 class OV7670: public ImageSensor {
    private:

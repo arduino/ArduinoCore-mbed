@@ -366,7 +366,7 @@
 
 static const uint8_t default_regs[][2] = {
     // OV7670 reference registers
-    { CLKRC,            OMV_OV7670_CLKRC },
+    { CLKRC,            CLKRC_PRESCALER_BYPASS | OMV_OV7670_CLKRC },
     { TSLB,             0x04 },
     { COM7,             0x00 },
     { HSTART,           0x13 },
@@ -383,6 +383,7 @@ static const uint8_t default_regs[][2] = {
     { SCALING_DCWCTR,   0x11 },
     { SCALING_PCLK_DIV, 0xf0 },
     { SCALING_PCLK,     0x02 },
+    { COM10,            COM10_VSYNC_NEG},
 
     /* Gamma curve values */
     { SLOP,             0x20 },
@@ -557,7 +558,7 @@ static const uint8_t rgb565_regs[][2] = {
     { COM7,     COM7_RGB_FMT                },    /* Selects RGB mode */
     { RGB444,   0                           },    /* No RGB444 please */
     { COM1,     0x0                         },    /* CCIR601 */
-    { COM15,    COM15_FMT_RGB565 |COM15_OUT_00_FF},
+    { COM15,    COM15_FMT_RGB565 | COM15_OUT_00_FF},
     { MVFP,     MVFP_BLACK_SUN_EN           },
     { COM9,     0x6A                        },     /* 128x gain ceiling; 0x8 is reserved bit */
     { MTX1,     0xb3                        },     /* "matrix coefficient 1" */
@@ -591,16 +592,16 @@ static const uint8_t yuv422_regs[][2] = {
 };
 
 static const uint8_t vga_regs[][2] = {
-    { COM3,         COM3_DCW_EN },
-    { COM14,        0x10 },
-    { 0x72,         0x22 },     // downsample by 4
-    { 0x73,         0xf2 },     // divide by 4
-    { HSTART,       0x16 },
-    { HSTOP,        0x04 },
-    { HREF,         0xa4 },
-    { VSTART,       0x22 },
+    { COM3,         0x00 },
+    { COM14,        0x00 },
+    { 0x72,         0x11 },     // downsample by 4
+    { 0x73,         0xf0 },     // divide by 4
+    { HSTART,       0x12 },
+    { HSTOP,        0x00 },
+    { HREF,         0xb6 },
+    { VSTART,       0x02 },
     { VSTOP,        0x7a },
-    { VREF,         0x0a },
+    { VREF,         0x00 },
     { 0xFF,         0xFF },
 };
 
@@ -620,12 +621,11 @@ static const uint8_t qvga_regs[][2] = {
 };
 #else
 static const uint8_t qvga_regs[][2] = {
-    //{ COM7,         COM7_RES_QVGA },
     { COM3,         COM3_DCW_EN },
-    { COM14,        0x1a },
-    { 0x72,         0x22 },     // downsample by 4
-    { 0x73,         0xf2 },     // divide by 4
-    { HSTART,       0x16 },
+    { COM14,        0x19 },
+    { 0x72,         0x11 },     // downsample by 2
+    { 0x73,         0xf1 },     // divide by 2
+    { HSTART,       0x15 },
     { HSTOP,        0x04 },
     { HREF,         0xa4 },
     { VSTART,       0x02 },
@@ -638,7 +638,7 @@ static const uint8_t qvga_regs[][2] = {
 #if (OMV_OV7670_VERSION == 75)
 static const uint8_t qqvga_regs[][2] = {
     { COM3,         COM3_DCW_EN },
-    { COM14,        0x12 },     // Divide by 4
+    { COM14,        0x11 },     // Divide by 2
     { 0x72,         0x22 },     // This has no effect on OV7675
     { 0x73,         0xf2 },     // This has no effect on OV7675
     { HSTART,       0x16 },
@@ -646,7 +646,7 @@ static const uint8_t qqvga_regs[][2] = {
     { HREF,         0xa4 },
     { VSTART,       0x22 },
     { VSTOP,        0x7a },
-    { VREF,         0xFa },
+    { VREF,         0xfa },
     { 0xFF,         0xFF },
 };
 #else
@@ -678,14 +678,12 @@ int OV7670::init()
     int ret = 0;
     reset();
 
-    delay(10);
-
     // Write default registers
-    for (int i = 0; default_regs[i][0]; i++) {
+    for (int i = 0; default_regs[i][0] != 0xFF; i++) {
         ret |= regWrite(getID(), default_regs[i][0], default_regs[i][1]);
     }
 
-    //regWrite(getID(), COM10, COM10_PCLK_MASK);
+    delay(300);
 
     return ret;
 }
@@ -697,7 +695,9 @@ int OV7670::setWindow(uint16_t reg, uint16_t x, uint16_t y, uint16_t w, uint16_t
 
 int OV7670::reset()
 {
-    return regWrite(getID(), COM7, COM7_RESET);
+    int ret = regWrite(getID(), COM7, COM7_RESET);
+    delay(10);
+    return ret;
 }
 
 int OV7670::setFrameRate(int32_t framerate)
