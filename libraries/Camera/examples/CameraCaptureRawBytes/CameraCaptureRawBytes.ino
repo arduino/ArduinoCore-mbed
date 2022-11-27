@@ -5,11 +5,18 @@
   GC2145 galaxyCore;
   Camera cam(galaxyCore);
   #define IMAGE_MODE CAMERA_RGB565
-#else
-  #include "himax.h"
-  HM01B0 himax;
+#elif defined(ARDUINO_PORTENTA_H7_M7)
+  #include "hm0360.h"
+  HM0360 himax;
   Camera cam(himax);
   #define IMAGE_MODE CAMERA_GRAYSCALE
+#elif defined(ARDUINO_GIGA)
+  #include "ov7670.h"
+  OV7670 ov7670;
+  Camera cam(ov7670);
+  #define IMAGE_MODE CAMERA_RGB565
+#else
+#error "This board is unsupported."
 #endif
 
 /*
