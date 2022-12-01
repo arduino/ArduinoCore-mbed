@@ -275,20 +275,18 @@ class SecureQSPIFBlockDevice: public QSPIFBlockDevice {
 static uint8_t *_boardInfo = (uint8_t*)(0x801F000);
 static bool has_otp_info = false;
 
-static SecureQSPIFBlockDevice secure_root;
-
 bool getSecureFlashData() {
-    static OptaBoardInfo* info = new OptaBoardInfo();
+    static OptaBoardInfo info;
     uint8_t temp_buf[sizeof(OptaBoardInfo) + 1];
+    int ret = 0;
+    static SecureQSPIFBlockDevice secure_root;
     secure_root.init();
     // read secure sector 2 ( address 1 << 13 )
-    auto ret = secure_root.readSecure(temp_buf, (1 << 13), sizeof(OptaBoardInfo));
-    memcpy(info, &temp_buf[1], sizeof(OptaBoardInfo));
-    if (info->magic == OTP_QSPI_MAGIC) {
-      _boardInfo = (uint8_t*)info;
+    ret = secure_root.readSecure(temp_buf, (1 << 13), sizeof(OptaBoardInfo));
+    memcpy(&info, &temp_buf[1], sizeof(OptaBoardInfo));
+    if (info.magic == OTP_QSPI_MAGIC) {
+      _boardInfo = (uint8_t*)&info;
       has_otp_info = true;
-    } else {
-      delete info;
     }
     secure_root.deinit();
     return ret == 0;
