@@ -10,6 +10,16 @@
 
 #define USE_FASTCHG_TO_KICK_WATCHDOG 1
 
+#define BATTERY_FULL            5
+#define BATTERY_ALMOST_FULL     4
+#define BATTERY_HALF            3
+#define BATTERY_ALMOST_EMPTY    2
+#define BATTERY_EMPTY           1
+#define BATTERY_COLD            (1 << 4)
+#define BATTERY_COOL            (2 << 4)
+#define BATTERY_HOT             (3 << 4)
+#define BATTERY_CHARGING        (1 << 7)
+
 class nicla {
 
 public:
@@ -19,9 +29,10 @@ public:
   static bool disableLDO();
   static bool enterShipMode();
   static uint8_t readLDOreg();
-  static bool enableCharge(uint8_t mA = 20);
-  static float getBetteryStatus();
-  static uint8_t getFault();
+  static bool enableCharge(uint8_t mA = 20, bool disable_ntc = true);
+  static int getBatteryStatus();
+  static uint16_t getFault();
+  static bool ntc_disabled;
 
   static RGBled leds;
   static BQ25120A _pmic;
