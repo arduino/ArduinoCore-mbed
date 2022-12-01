@@ -3,7 +3,7 @@ uint8_t* bootloader_identification = (uint8_t*)(0x80002F0);
 
 #if __has_include("portenta_info.h")
 #include "portenta_info.h"
-#define GET_PORENTA_OTP_BOARD_INFO
+#define GET_PORTENTA_OTP_BOARD_INFO
 PortentaBoardInfo *info;
 PortentaBoardInfo* boardInfo();
 #endif
@@ -30,7 +30,7 @@ void setup() {
   Serial.println("Magic Number (validation): " + String(bootloader_data[0], HEX));
   Serial.println("Bootloader version: " + String(bootloader_data[1]));
 
-#if defined(GET_PORENTA_OTP_BOARD_INFO)
+#if defined(GET_PORTENTA_OTP_BOARD_INFO)
   printPortentaSecureInfo();
 #elif defined(GET_OPTA_OTP_BOARD_INFO)
   printOptaSecureInfo();
@@ -39,7 +39,7 @@ void setup() {
 #endif
 }
 
-#if defined(GET_PORENTA_OTP_BOARD_INFO)
+#if defined(GET_PORTENTA_OTP_BOARD_INFO)
 void printPortentaSecureInfo() {
   info = boardInfo();
   if (info->magic == 0xB5) {
