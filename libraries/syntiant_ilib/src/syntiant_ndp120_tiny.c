@@ -305,7 +305,10 @@ enum {
     SYNTIANT_NDP120_GET_NN_GRAPH = 0x67,
     SYNTIANT_NDP120_GET_DEBUG_INFO = 0x68,
     SYNTIANT_NDP120_GET_NN_FLOW = 0x69,
-    SYNTIANT_NDP120_GET_AUDIO_CHUNK_SIZE = 0x6a
+    SYNTIANT_NDP120_GET_AUDIO_CHUNK_SIZE = 0x6a,
+    SYNTIANT_NDP120_INPUT_CONFIG = 0x6b,
+    SYNTIANT_NDP120_SET_SPI_DIRECT = 0x6c,
+    SYNTIANT_NDP120_SWITCH_FLOW_SET_ID = 0x6d
 };
 
 enum {
@@ -1135,32 +1138,9 @@ syntiant_ndp120_tiny_poll(struct syntiant_ndp120_tiny_device_s *ndp,
 
     *notifications = 0;
 
-retry:
-
     s = syntiant_ndp120_tiny_read(
         ndp, SYNTIANT_NDP120_SPI_OP, NDP120_SPI_INTSTS, &intsts);
     if (s) goto error;
-
-    /* this is unlikely, and is probably a result of a reset.
-       ignoring this causes false notifications that often
-       result in a host crash */
-
-    if (intsts == 0xFF) {
-        uint8_t id;
-        uint32_t timeout = 0xffffffff;
-        do {
-            s = syntiant_ndp120_tiny_read(
-                ndp, SYNTIANT_NDP120_SPI_OP, NDP120_SPI_ID0, &id);
-            if (s) goto error;
-            if (id != 0xFF) {
-                goto retry;
-            }
-            timeout--;
-        } while (timeout);
-
-        *notifications = SYNTIANT_NDP120_NOTIFICATION_ERROR;
-        goto error;
-    }
 
     if (clear) {
         s = syntiant_ndp120_tiny_write(
@@ -1794,7 +1774,7 @@ int syntiant_ndp120_tiny_send_audio_extract(struct syntiant_ndp120_tiny_device_s
         }
     }
 
-    /* write secure cmd */
+    /* write cmd */
     s = syntiant_ndp120_tiny_write(ndp, SYNTIANT_NDP120_MCU_OP, addr, cmd);
     addr += (uint32_t) sizeof(cmd);
     if (s) goto error;
@@ -1808,7 +1788,7 @@ int syntiant_ndp120_tiny_send_audio_extract(struct syntiant_ndp120_tiny_device_s
     s = syntiant_ndp120_tiny_write_block(ndp, SYNTIANT_NDP120_MCU_OP, addr, &extract_from, sizeof(extract_from));
     if (s) goto error;
 
-    /* send secure command */
+    /* send command */
     s = syntiant_ndp120_tiny_do_mailbox_req_no_sync(ndp,
         SYNTIANT_NDP120_MB_MCU_CMD, NULL);
     if (s) goto error;
@@ -1820,6 +1800,105 @@ error:
     }
     return s;
 }
+
+int syntiant_ndp120_tiny_spi_direct_config(struct syntiant_ndp120_tiny_device_s *ndp,
+             uint32_t threshold_bytes)
+{
+    uint8_t data_8;
+    int s0;
+    int s = SYNTIANT_NDP120_ERROR_NONE;
+    uint32_t addr = SYNTIANT_NDP120_DL_WINDOW_LOWER;
+    /*uint32_t address = SYNTIANT_NDP120_OPEN_RAM_RESULTS;*/
+    uint32_t cmd = SYNTIANT_NDP120_SET_SPI_DIRECT;
+    uint32_t length = sizeof(threshold_bytes);
+    if (ndp->iif->sync) {
+        s = (ndp->iif->sync)(ndp->iif->d);
+        if (s) {
+            SYNTIANT_NDP120_PRINTF("Error in syntiant_ndp120_tiny_spi_direct_config\n");
+            return s;
+        }
+    }
+
+    /* write cmd */
+    s = syntiant_ndp120_tiny_write(ndp, SYNTIANT_NDP120_MCU_OP, addr, cmd);
+    addr += (uint32_t) sizeof(cmd);
+    if (s) goto error;
+    /* write the length of payload */
+    s = syntiant_ndp120_tiny_write(ndp, SYNTIANT_NDP120_MCU_OP, addr, length);
+    if (s) goto error;
+
+    addr += (uint32_t) sizeof(length);
+    /* write payload */
+    s = syntiant_ndp120_tiny_write_block(ndp, SYNTIANT_NDP120_MCU_OP, addr, &threshold_bytes, sizeof(threshold_bytes));
+    if (s) goto error;
+    /* send command */
+    s = syntiant_ndp120_tiny_do_mailbox_req_no_sync(ndp,
+        SYNTIANT_NDP120_MB_MCU_CMD, NULL);
+    if (s) goto error;
+    /*enabling watermark interrupt*/
+    s = ndp_spi_read(NDP120_SPI_INTCTL, &data_8);
+    if(s) goto error;
+    data_8 = NDP120_SPI_INTCTL_WM_INTEN_INSERT(data_8, 1);
+    ndp_spi_write(NDP120_SPI_INTCTL, data_8);
+
+error:
+    if (ndp->iif->unsync) {
+        s0 = (ndp->iif->unsync)(ndp->iif->d);
+        s = s ? s : s0;
+    }
+    return s;
+}
+
+int
+syntiant_ndp120_tiny_switch_dnn_flow(struct syntiant_ndp120_tiny_device_s *ndp,
+    uint32_t flow_set_id, uint32_t *input_mode)
+{
+    uint8_t data_8;
+    int s0;
+    int s = SYNTIANT_NDP120_ERROR_NONE;
+    uint32_t addr = SYNTIANT_NDP120_DL_WINDOW_LOWER;
+    uint32_t address = SYNTIANT_NDP120_OPEN_RAM_RESULTS;
+    uint32_t cmd[3] = {SYNTIANT_NDP120_SWITCH_FLOW_SET_ID, sizeof(flow_set_id), 0};
+    if (ndp->iif->sync) {
+        s = (ndp->iif->sync)(ndp->iif->d);
+        if (s) {
+            SYNTIANT_NDP120_PRINTF("Error in syntiant_ndp120_tiny_switch_dnn_flow\n");
+            return s;
+        }
+    }
+    cmd[2] = flow_set_id;
+
+    /* write cmd, length of the payload and payload */
+    s = syntiant_ndp120_tiny_write_block(ndp, SYNTIANT_NDP120_MCU_OP, addr,
+        &cmd, sizeof(cmd));
+    if (s) goto error;
+
+    s = syntiant_ndp120_tiny_do_mailbox_req_no_sync(ndp,
+        SYNTIANT_NDP120_MB_MCU_CMD, NULL);
+    if (s) goto error;
+
+    /* read input_mode */
+    s = syntiant_ndp120_tiny_read_block(ndp,SYNTIANT_NDP120_MCU_OP, address, input_mode,
+        sizeof(*input_mode));
+    if (s) goto error;
+
+    if (*input_mode == SYNTIANT_NDP120_TINY_INPUT_CONFIG_SPI) {
+        /*enabling watermark interrupt*/
+        s = ndp_spi_read(NDP120_SPI_INTCTL, &data_8);
+        if (s) goto error;
+        data_8 = NDP120_SPI_INTCTL_WM_INTEN_INSERT(data_8, 1);
+        s = ndp_spi_write(NDP120_SPI_INTCTL, data_8);
+        if (s) goto error;
+    }
+
+error:
+    if (ndp->iif->unsync) {
+        s0 = (ndp->iif->unsync)(ndp->iif->d);
+        s = s ? s : s0;
+    }
+    return s;
+}
+
 
 int
 syntiant_ndp120_tiny_get_info(struct syntiant_ndp120_tiny_device_s *ndp,
@@ -1834,7 +1913,7 @@ syntiant_ndp120_tiny_get_info(struct syntiant_ndp120_tiny_device_s *ndp,
     if (ndp->iif->sync) {
         s = (ndp->iif->sync)(ndp->iif->d);
         if (s) {
-            SYNTIANT_NDP120_PRINTF("Error in syntiant_ndp120_secure_get_info\n");
+            SYNTIANT_NDP120_PRINTF("Error in syntiant_ndp120_tiny_get_info\n");
             return s;
         }
     }
@@ -1977,6 +2056,63 @@ int syntiant_ndp120_tiny_get_debug(struct syntiant_ndp120_tiny_device_s *ndp,
         s = syntiant_ndp120_tiny_read_block(ndp,
                 SYNTIANT_NDP120_MCU_OP, address, mcu_dsp_dbg_cnts,
                 sizeof(*mcu_dsp_dbg_cnts));
+        if (s) goto error;
+    }
+error:
+    if (ndp->iif->unsync) {
+        s0 = (ndp->iif->unsync)(ndp->iif->d);
+        s = s ? s : s0;
+    }
+    return s;
+}
+
+int syntiant_ndp120_tiny_input_config(struct syntiant_ndp120_tiny_device_s *ndp, uint32_t input_mode)
+{
+    int s0;
+    uint8_t data_8;
+    int s = SYNTIANT_NDP120_ERROR_NONE;
+    uint32_t addr = SYNTIANT_NDP120_DL_WINDOW_LOWER;
+    uint32_t address = SYNTIANT_NDP120_OPEN_RAM_RESULTS;
+    uint32_t configured_input = SYNTIANT_NDP120_TINY_GET_INPUT_CONFIG;
+    uint32_t data[3] = {SYNTIANT_NDP120_INPUT_CONFIG, sizeof(input_mode), SYNTIANT_NDP120_TINY_GET_INPUT_CONFIG};
+    if (ndp->iif->sync) {
+        s = (ndp->iif->sync)(ndp->iif->d);
+        if (s) {
+            SYNTIANT_NDP120_PRINTF("Error in syntiant_ndp120_tiny_input_config\n");
+            return s;
+        }
+    }
+    /* write cmd, length of payload, payload */
+    s = syntiant_ndp120_tiny_write_block(ndp, SYNTIANT_NDP120_MCU_OP, addr, &data, sizeof(data));
+    if (s) goto error;
+
+    /* send command */
+    s = syntiant_ndp120_tiny_do_mailbox_req_no_sync(ndp,SYNTIANT_NDP120_MB_MCU_CMD, NULL);
+    if (s) goto error;
+
+    s = syntiant_ndp120_tiny_read_block(ndp,SYNTIANT_NDP120_MCU_OP, address, &configured_input,sizeof(configured_input));
+    if (s) goto error;
+
+    if(configured_input != input_mode) {
+        data[2] =  input_mode;
+        addr = SYNTIANT_NDP120_DL_WINDOW_LOWER;
+        /* write payload */
+        s = syntiant_ndp120_tiny_write_block(ndp, SYNTIANT_NDP120_MCU_OP, addr, &data, sizeof(data));
+        if (s) goto error;
+
+        /* send command */
+        s = syntiant_ndp120_tiny_do_mailbox_req_no_sync(ndp,SYNTIANT_NDP120_MB_MCU_CMD, NULL);
+        if (s) goto error;
+    } else {
+        s = SYNTIANT_NDP120_ERROR_CONFIG;
+        goto error;
+    }
+    if(input_mode == SYNTIANT_NDP120_TINY_INPUT_CONFIG_SPI) {
+        /*enabling watermark interrupt*/
+        s = ndp_spi_read(NDP120_SPI_INTCTL, &data_8);
+        if(s) goto error;
+        data_8 = NDP120_SPI_INTCTL_WM_INTEN_INSERT(data_8, 1);
+        s = ndp_spi_write(NDP120_SPI_INTCTL, data_8);
         if (s) goto error;
     }
 error:

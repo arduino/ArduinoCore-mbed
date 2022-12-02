@@ -29,6 +29,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
+
 #ifndef SYNTIANT_NDP120_TINY_H
 #define SYNTIANT_NDP120_TINY_H
 
@@ -56,9 +57,9 @@ extern "C" {
 /** maximum length (in bytes) of various verison strings
  */
 #define NDP120_MCU_FW_VER_MAX_LEN       (0x20)
-#define NDP120_MCU_DSP_FW_VER_MAX_LEN   (0x3C)
-#define NDP120_MCU_PKG_VER_MAX_LEN      (0x80)
-#define NDP120_MCU_LABELS_MAX_LEN       (0x200)
+#define NDP120_MCU_DSP_FW_VER_MAX_LEN   (0x20)
+#define NDP120_MCU_PKG_VER_MAX_LEN      (0x30)
+#define NDP120_MCU_LABELS_MAX_LEN       (0x2D4)
 #define NDP120_MCU_PBI_VER_MAX_LEN      (0x10)
 
 /**
@@ -87,6 +88,10 @@ extern "C" {
 #define NDP120_SPI_MATCH_WINNER_EXTRACT(x) \
         (((x) & NDP120_SPI_MATCH_WINNER_MASK) >> NDP120_SPI_MATCH_WINNER_SHIFT)
 
+#define NDP120_SPI_INTCTL_WM_INTEN_SHIFT 6
+#define NDP120_SPI_INTCTL_WM_INTEN_INSERT(x, v) \
+        ((x) | ((v) << NDP120_SPI_INTCTL_WM_INTEN_SHIFT))
+
 /* register array ndp120_spi.maddr[4] */
 #define NDP120_SPI_MADDR(i) (0x40U + ((i) << 0))
 #define NDP120_SPI_MADDR_COUNT 4
@@ -107,6 +112,19 @@ extern "C" {
 
 #define SYNTIANT_NDP120_TINY_AUDIO_SAMPLES_PER_WORD 2
 #define SYNTIANT_NDP120_TINY_AUDIO_SAMPLE_RATE 16000
+
+#define SYNTIANT_NDP120_DEF_SPI_SPEED   (1000000)
+#define SYNTIANT_NDP120_MAX_SPI_SPEED   (8000000)
+
+/**
+ * @brief secure input config mode
+ */
+enum syntiant_ndp120_tiny_input_config_mode_e {
+    SYNTIANT_NDP120_TINY_GET_INPUT_CONFIG = 0,
+    SYNTIANT_NDP120_TINY_INPUT_CONFIG_PDM = 1,
+    SYNTIANT_NDP120_TINY_INPUT_CONFIG_SPI = 16
+};
+
 /**
  * @brief Device info structure holding data about deployed model, fimrware etc.
  */
@@ -504,6 +522,8 @@ enum syntiant_ndp_errors_e {
     /**< operation timeout */
     SYNTIANT_NDP120_ERROR_MORE = 9,
     /**< more data is expected */
+    SYNTIANT_NDP120_ERROR_CONFIG = 10,
+    /**< config error */
     SYNTIANT_NDP120_ERROR_DATA_REREAD = 13,
     /**<data has already been read before */
     SYNTIANT_NDP120_ERROR_INVALID_LENGTH  = 16,
@@ -845,6 +865,37 @@ int syntiant_ndp120_tiny_get_audio_chunk_size(struct syntiant_ndp120_tiny_device
 
 int syntiant_ndp120_tiny_send_audio_extract(struct syntiant_ndp120_tiny_device_s *ndp,
                         uint32_t extract_from);
+
+/**
+ * @brief NDP120 tiny spi direct config
+ *
+ * @param ndp NDP state object
+ * @param threshod_bytes indicates the threshold bytes for SPI FIFO in dsp.
+ * @return a @c SYNTIANT_NDP_ERROR_* code
+ */
+int syntiant_ndp120_tiny_spi_direct_config(struct syntiant_ndp120_tiny_device_s *ndp,
+             uint32_t threshold_bytes);
+
+/**
+ * @brief NDP120 tiny input config sets the input mode of the dsp.
+ *
+ * @param ndp NDP state object
+ * @param input_mode indicates the input mode like PDM or SPI.
+ * @return a @c SYNTIANT_NDP_ERROR_* code
+ */
+int syntiant_ndp120_tiny_input_config(struct syntiant_ndp120_tiny_device_s *ndp,
+             uint32_t input_mode);
+
+/**
+ * @brief NDP120 tiny_switch_dnn_flow changes the flow of the dsp indicated by flow_set_id.
+ *
+ * @param ndp NDP state object
+ * @param flow_set_id indicates the flow set id that is to be changed.
+ * @param input_mode gets the input mode after changing the flow.
+ * @return a @c SYNTIANT_NDP_ERROR_* code
+ */
+int syntiant_ndp120_tiny_switch_dnn_flow(struct syntiant_ndp120_tiny_device_s *ndp,
+             uint32_t flow_set_id, uint32_t *input_mode);
 
 #ifdef __cplusplus
 }

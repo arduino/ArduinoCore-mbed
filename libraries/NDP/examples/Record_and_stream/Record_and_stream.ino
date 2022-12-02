@@ -50,9 +50,9 @@ void setup() {
 
   encoder.setOutputStream(Serial);
 
-  NDP.begin("mcu_fw_120_v90.synpkg");
-  NDP.load("dsp_firmware_v90.synpkg");
-  NDP.load("alexa_334_NDP120_B0_v11_v90.synpkg");
+  NDP.begin("mcu_fw_120_v91.synpkg");
+  NDP.load("dsp_firmware_v91.synpkg");
+  NDP.load("alexa_334_NDP120_B0_v11_v91.synpkg");
   NDP.turnOnMicrophone();
   int chunk_size = NDP.getAudioChunkSize();
   if (chunk_size >= sizeof(data)) {
