@@ -3,6 +3,21 @@
 #include "mbed_events.h"
 #include "mbed_shared_queues.h"
 
+#define NDP_SPICTL  0x4000903c
+// register for data transmission
+#define NDP_SPITX_Start 0x40009040
+#define NDP_SPITX_0 0x40009040
+#define NDP_SPITX_1 0x40009044
+#define NDP_SPITX_2 0x40009048
+#define NDP_SPITX_3 0x4000904c
+// register for data reception
+#define NDP_SPIRX_0 0x40009050
+#define NDP_SPIRX_1 0x40009054
+#define NDP_SPIRX_2 0x40009058
+#define NDP_SPIRX_3 0x4000905c
+#define NDP_SPIRX_Start 0x40009050
+#define burstWriteBytes 14
+
 static SPIFBlockDevice spif(SPI_PSELMOSI0, SPI_PSELMISO0, SPI_PSELSCK0, CS_FLASH, 16000000);
 static mbed::LittleFileSystem fs("fs");
 static events::EventQueue queue(10 * EVENTS_EVENT_SIZE);
@@ -524,6 +539,345 @@ int NDPClass::turnOnMicrophone() {
 
 int NDPClass::turnOffMicrophone() {
   return syntiant_ndp120_tiny_pdm_clock_exe_mode(ndp, SYNTIANT_NDP120_PDM_CLK_START_PAUSE);
+}
+
+uint8_t NDPClass::transparentNiclaVoiceSensorRegRead(uint8_t cs_pin, uint8_t cspiSpeedFactor, uint32_t sensor_regaddress, uint8_t len,  uint8_t data_return_array[]){
+  // Nicla Voice board has BMI270 and BMM150 sensors connected to NDP120's Controller SPI (CSPI)
+  // BMI270 is connected with Chip select 0 and BMM150 at Chip select 1 of dedicated NDP120's CSPI hardware
+  // NDP120 has 4, 32 bit buffer where data is read which is equivalent to 16 bytes
+  // Like any other SPI, when address is written, a byte is read which generally is a garbage and should be discarded
+  // BMM150 thus can read as many 15 (16-1 garbage ) bytes in one shot
+  // BMI270 produces one extra dummy byte thus only 14 (16 - 1 dummy -1 garbage) bytes can be read in one shot
+  // Since this API is dedicated for Nicla Voice, cs_pin is used sanitize how many bytes can be read. The return value is length of actual read bytes
+  // if accidently user requested more bytes that can be read
+
+  // Sanitizing len
+  uint8_t actualReadLen = 0;
+  uint8_t startAddress = 0;
+
+  if (len < 1){
+      len = 1;                                          // Min length should be set to 1
+      if (spiSensorDebugTrace) {
+        Serial.println("Length is set to 1.");
+      }
+    }
+  if (cs_pin == 0)  {
+    if (len > 14){
+      len = 14;
+      if (spiSensorDebugTrace) {
+        Serial.println("Length is set to max 14 for BMI270.");
+      }
+    }
+    startAddress = 2;                                 // 2 indicates that address 0 and 1 of first row will be ignored which is garbade and dummy byte
+    actualReadLen = len + 1;                          // Actual length accounting for dummy byte, 0 setting reads one byte, 15 reads all 16
+  }
+  if (cs_pin == 1)  {
+    if (len  >15){
+      len = 15;
+      if (spiSensorDebugTrace) {
+        Serial.println("Length is set to max 15 for BMM150.");
+      }
+    }
+    startAddress = 1;                                 // 1 indicates that address 0 will be ignored which is garbage
+    actualReadLen = len;                              // Actual length is same as len for BMM, 0 setting reads one byte, 15 reads all 16
+  }
+
+  uint32_t sensorRegisterContent_toWrite = 0x00000000;
+  uint32_t sensorRegisterContent_toWrite_aux = 0x00000000;
+  uint32_t sensorRegisterContent_response = 0x00000000;
+  uint32_t sensorRegisterContent_compare = 0x00000000;
+  uint32_t sensorRegisterField = 0x00000000;
+  uint32_t sensorRegisterMask = 0x00000000;
+  uint32_t difference = 0x00000000;
+  uint8_t done = 0;
+
+  // setting address to read from in spitx[0]
+  sensorRegisterContent_toWrite = sensor_regaddress | 0x80; // adding bit 1 at MSB for a Read operation
+  spiTransfer(NULL, 1, NDP_SPITX_0, &sensorRegisterContent_toWrite, NULL, 4);
+  sensorRegisterContent_toWrite = 0x00000000;
+  spiTransfer(NULL, 1, NDP_SPITX_1, &sensorRegisterContent_toWrite, NULL, 4);
+  spiTransfer(NULL, 1, NDP_SPITX_2, &sensorRegisterContent_toWrite, NULL, 4);
+  spiTransfer(NULL, 1, NDP_SPITX_3, &sensorRegisterContent_toWrite, NULL, 4);
+
+  // reset SPI control registers
+  sensorRegisterContent_toWrite = 0x00000008;
+  spiTransfer(NULL, 1, NDP_SPICTL, &sensorRegisterContent_toWrite, NULL, 4);
+
+  // set SPI master
+  sensorRegisterContent_toWrite = 0x08000008;
+  spiTransfer(NULL, 1, NDP_SPICTL, &sensorRegisterContent_toWrite, NULL, 4);
+
+  sensorRegisterContent_toWrite = 0x08000008; // recovering the value zeroed after a spiTransfer() call
+  // place CSPI in STATE standby (spictl=mode=0)
+  ////////////////////////////////////////////////
+  sensorRegisterMask = 0b11 << 13;
+  sensorRegisterField = 0b00 << 13;
+  sensorRegisterContent_toWrite = (sensorRegisterContent_toWrite & ~sensorRegisterMask) | sensorRegisterField; // added
+  sensorRegisterContent_toWrite_aux = sensorRegisterContent_toWrite; // added
+  spiTransfer(NULL, 1, NDP_SPICTL, &sensorRegisterContent_toWrite, NULL, 4);
+  ////////////////////////////////////////////////////////////////////////////////////
+
+  sensorRegisterContent_toWrite = sensorRegisterContent_toWrite_aux; // added
+  // all SPI control output enabled (mssb_oe)
+  sensorRegisterMask = 0b111 << 19;
+  sensorRegisterField = 0b111 << 19;
+  sensorRegisterContent_toWrite = (sensorRegisterContent_toWrite & ~sensorRegisterMask) | sensorRegisterField; // added
+
+  // select target informed by cs_pin (mssb), which can be 0x0, 0x1 or 0x2
+  sensorRegisterMask = 0b11 << 22;
+  sensorRegisterField = cs_pin << 22; //0b00 << 22;
+  sensorRegisterContent_toWrite = (sensorRegisterContent_toWrite & ~sensorRegisterMask) | sensorRegisterField; // added
+
+  // set from disable to 4-wire SPI control (mspi_mode)
+  sensorRegisterMask = 0b11;
+  sensorRegisterField = 0b01;
+  sensorRegisterContent_toWrite = (sensorRegisterContent_toWrite & ~sensorRegisterMask) | sensorRegisterField; // added
+
+  // set clock division (mspi_clkdiv)
+  sensorRegisterMask = 0b1111111111 << 3;
+  sensorRegisterField =  cspiSpeedFactor << 3; //10 << 3;
+  sensorRegisterContent_toWrite = (sensorRegisterContent_toWrite & ~sensorRegisterMask) | sensorRegisterField; // added
+
+  // set CSPI for transmission (mspi_read=0)
+  sensorRegisterMask = 0b1 << 2;
+  sensorRegisterField = 0b0 << 2; // keeping it at zero to ensure transmission of the read address from spitx[0]
+  sensorRegisterContent_toWrite = (sensorRegisterContent_toWrite & ~sensorRegisterMask) | sensorRegisterField; // added
+
+  // move to STATE of selecting slave (spictl=mode=1)
+  sensorRegisterMask = 0b11 << 13;
+  sensorRegisterField = 0b01 << 13;
+  sensorRegisterContent_toWrite = (sensorRegisterContent_toWrite & ~sensorRegisterMask) | sensorRegisterField; // added
+  sensorRegisterContent_toWrite_aux = sensorRegisterContent_toWrite; // added
+  spiTransfer(NULL, 1, NDP_SPICTL, &sensorRegisterContent_toWrite, NULL, 4);
+  ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  sensorRegisterContent_toWrite = sensorRegisterContent_toWrite_aux; // added
+  // set a fake number of tx bytes equal to 4 bytes (numbytes=3)
+  sensorRegisterMask = 0b1111 << 15;
+  sensorRegisterField = (len + 1) << 15;
+  sensorRegisterContent_toWrite = (sensorRegisterContent_toWrite & ~sensorRegisterMask) | sensorRegisterField; // added
+
+  // move to STATE of transferring data to sensor (spictl=mode=2).
+  sensorRegisterMask = 0b11 << 13;
+  sensorRegisterField = 0b10 << 13;
+  sensorRegisterContent_toWrite = (sensorRegisterContent_toWrite & ~sensorRegisterMask) | sensorRegisterField; // added
+  sensorRegisterContent_toWrite_aux = sensorRegisterContent_toWrite; // added
+  spiTransfer(NULL, 1, NDP_SPICTL, &sensorRegisterContent_toWrite, NULL, 4);
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  delay(10);
+
+  sensorRegisterContent_toWrite = sensorRegisterContent_toWrite_aux; // added
+  // move to STATE of selecting slave (spictl=mode=1)
+  sensorRegisterMask = 0b11 << 13;
+  sensorRegisterField = 0b01 << 13;
+  sensorRegisterContent_toWrite = (sensorRegisterContent_toWrite & ~sensorRegisterMask) | sensorRegisterField; // added
+  sensorRegisterContent_toWrite_aux = sensorRegisterContent_toWrite; // added
+  spiTransfer(NULL, 1, NDP_SPICTL, &sensorRegisterContent_toWrite, NULL, 4);
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  sensorRegisterContent_toWrite = sensorRegisterContent_toWrite_aux; // added
+  // place CSPI in STATE standby (spictl=mode=0)
+  sensorRegisterMask = 0b11 << 13;
+  sensorRegisterField = 0b00 << 13;
+  sensorRegisterContent_toWrite = (sensorRegisterContent_toWrite & ~sensorRegisterMask) | sensorRegisterField; // added
+  sensorRegisterContent_toWrite_aux = sensorRegisterContent_toWrite; // added
+  spiTransfer(NULL, 1, NDP_SPICTL, &sensorRegisterContent_toWrite, NULL, 4);
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  // read data from receiving register
+  //spiTransfer(NULL, 1, NDP_SPIRX_0, NULL, &sensorRegisterContent_compare, 4);
+  uint8_t maxRows = (actualReadLen / 4) + 1;
+
+  uint8_t bytesToBeReadInThisRow = 0;
+  uint8_t outputBufferIndex = 0;
+  for (int rows = 0; rows < maxRows;  rows++){
+    spiTransfer(NULL, 1, (NDP_SPIRX_Start + rows * 4), NULL, &sensorRegisterContent_response, 4);
+    bytesToBeReadInThisRow = actualReadLen + 1 - rows * 4;
+    if (bytesToBeReadInThisRow>4) bytesToBeReadInThisRow = 4;
+    for (int byteCount = startAddress; byteCount < bytesToBeReadInThisRow; byteCount++){
+      data_return_array[outputBufferIndex] = (sensorRegisterContent_response >> (8 * byteCount)) & (0xFF);
+      outputBufferIndex++;
+    }
+    startAddress = 0;                                                                                     // setting startAddress to 0 for the next rows
+  }
+
+  return outputBufferIndex;
+}
+
+uint8_t NDPClass::transparentNiclaVoiceSensorRegWrite(uint8_t cs_pin, uint8_t cspiSpeedFactor, uint32_t sensor_regaddress, uint8_t len,  uint8_t data_return_array[]){
+  uint32_t sensorRegisterContent_toWrite = 0x00000000;
+  uint32_t sensorRegisterContent_toWrite_aux = 0x00000000;
+  uint32_t sensorRegisterContent_response = 0x00000000;
+  uint32_t sensorRegisterContent_compare = 0x00000000;
+  uint32_t sensorRegisterField = 0x00000000;
+  uint32_t sensorRegisterMask = 0x00000000;
+  uint8_t done = 0;
+
+  for (int reverseWriteIndex = len; reverseWriteIndex > 0; reverseWriteIndex--){
+    sensorRegisterContent_toWrite = (sensorRegisterContent_toWrite << 8) | data_return_array[reverseWriteIndex-1];
+    if (((reverseWriteIndex) % 4) == 0){
+      if (spiSensorDebugTrace) {
+        Serial.print("Address in NDP  ");
+        Serial.print( NDP_SPITX_Start + reverseWriteIndex, HEX);
+        Serial.print("  ");
+        Serial.println(sensorRegisterContent_toWrite, HEX);
+      }
+      spiTransfer(NULL, 1, NDP_SPITX_Start + reverseWriteIndex, &sensorRegisterContent_toWrite, NULL, 4);
+    }
+  }
+  sensorRegisterContent_toWrite = (sensorRegisterContent_toWrite << 8) | sensor_regaddress;
+  if(spiSensorDebugTrace) {
+    Serial.print("Address in NDP  ");
+    Serial.print( NDP_SPITX_Start, HEX);
+    Serial.print("  ");
+    Serial.println(sensorRegisterContent_toWrite, HEX);
+  }
+  spiTransfer(NULL, 1, NDP_SPITX_Start, &sensorRegisterContent_toWrite, NULL, 4);
+
+  sensorRegisterContent_toWrite = 0x00000000;
+
+  // reset SPI control registers
+  sensorRegisterContent_toWrite = 0x00000008;
+  spiTransfer(NULL, 1, NDP_SPICTL, &sensorRegisterContent_toWrite, NULL, 4);
+
+  // set SPI master
+  sensorRegisterContent_toWrite = 0x08000008;
+  spiTransfer(NULL, 1, NDP_SPICTL, &sensorRegisterContent_toWrite, NULL, 4);
+
+  sensorRegisterContent_toWrite = 0x08000008; // recovering the value zeroed after a spiTransfer() call
+  // place CSPI in STATE standby (spictl=mode=0)
+  sensorRegisterMask = 0b11 << 13;
+  sensorRegisterField = 0b00 << 13;
+  sensorRegisterContent_toWrite = (sensorRegisterContent_toWrite & ~sensorRegisterMask) | sensorRegisterField; // added
+  sensorRegisterContent_toWrite_aux = sensorRegisterContent_toWrite; // added
+  spiTransfer(NULL, 1, NDP_SPICTL, &sensorRegisterContent_toWrite, NULL, 4);
+  ////////////////////////////////////////////////////////////////////////////////////
+
+  sensorRegisterContent_toWrite = sensorRegisterContent_toWrite_aux; // added
+  // all SPI control output enabled (mssb_oe)
+  // Should it be 0b011 for lowest power, should it be disabled after use?
+  sensorRegisterMask = 0b111 << 19;
+  sensorRegisterField = 0b111 << 19;
+  sensorRegisterContent_toWrite = (sensorRegisterContent_toWrite & ~sensorRegisterMask) | sensorRegisterField; // added
+
+  // select target informed by cs_pin (mssb), which can be 0x0, 0x1 or 0x2
+  sensorRegisterMask = 0b11 << 22;
+  sensorRegisterField = cs_pin << 22; //0b00 << 22;
+  sensorRegisterContent_toWrite = (sensorRegisterContent_toWrite & ~sensorRegisterMask) | sensorRegisterField; // added
+
+  // set from disable to 4-wire SPI control (mspi_mode)
+  sensorRegisterMask = 0b11;
+  sensorRegisterField = 0b01;
+  sensorRegisterContent_toWrite = (sensorRegisterContent_toWrite & ~sensorRegisterMask) | sensorRegisterField; // added
+
+  // set CSPI for transmission (mspi_read=0)
+  sensorRegisterMask = 0b1 << 2;
+  sensorRegisterField = 0b0 << 2;
+  sensorRegisterContent_toWrite = (sensorRegisterContent_toWrite & ~sensorRegisterMask) | sensorRegisterField; // added
+
+  // move to STATE of selecting slave (spictl=mode=1)
+  sensorRegisterMask = 0b11 << 13;
+  sensorRegisterField = 0b01 << 13;
+  sensorRegisterContent_toWrite = (sensorRegisterContent_toWrite & ~sensorRegisterMask) | sensorRegisterField; // added
+  sensorRegisterContent_toWrite_aux = sensorRegisterContent_toWrite; // added
+  spiTransfer(NULL, 1, NDP_SPICTL, &sensorRegisterContent_toWrite, NULL, 4);
+  /////////////////////////////////////////////////////////////////////////////////////
+
+  sensorRegisterContent_toWrite = sensorRegisterContent_toWrite_aux; // added
+  // set a fake number of tx bytes equal to a full set of 2 bytes (numbytes=1):
+  sensorRegisterMask = 0b1111 << 15;
+  sensorRegisterField = len << 15;
+  sensorRegisterContent_toWrite = (sensorRegisterContent_toWrite & ~sensorRegisterMask) | sensorRegisterField; // added
+
+  // move to STATE of transferring data to sensor (spictl=mode=2).
+  sensorRegisterMask = 0b11 << 13;
+  sensorRegisterField = 0b10 << 13;
+  sensorRegisterContent_toWrite = (sensorRegisterContent_toWrite & ~sensorRegisterMask) | sensorRegisterField; // added
+  sensorRegisterContent_toWrite_aux = sensorRegisterContent_toWrite; // added
+  spiTransfer(NULL, 1, NDP_SPICTL, &sensorRegisterContent_toWrite, NULL, 4);
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  delay(10);
+
+  spiTransfer(NULL, 1, NDP_SPIRX_0, NULL, &sensorRegisterContent_response, 4);
+
+  sensorRegisterContent_toWrite = sensorRegisterContent_toWrite_aux; // added
+  // move to STATE of selecting slave (spictl=mode=1)
+  sensorRegisterMask = 0b11 << 13;
+  sensorRegisterField = 0b01 << 13;
+  sensorRegisterContent_toWrite = (sensorRegisterContent_toWrite & ~sensorRegisterMask) | sensorRegisterField; // added
+  sensorRegisterContent_toWrite_aux = sensorRegisterContent_toWrite; // added
+  spiTransfer(NULL, 1, NDP_SPICTL, &sensorRegisterContent_toWrite, NULL, 4);
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  sensorRegisterContent_toWrite = sensorRegisterContent_toWrite_aux; // added
+  // place CSPI in STATE standby (spictl=mode=0)
+  sensorRegisterMask = 0b11 << 13;
+  sensorRegisterField = 0b00 << 13;
+  sensorRegisterContent_toWrite = (sensorRegisterContent_toWrite & ~sensorRegisterMask) | sensorRegisterField; // added
+  sensorRegisterContent_toWrite_aux = sensorRegisterContent_toWrite; // added
+  spiTransfer(NULL, 1, NDP_SPICTL, &sensorRegisterContent_toWrite, NULL, 4);
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  return 0;
+}
+
+uint8_t NDPClass::transparentNiclaVoiceBMI270SensorDataInitialization(uint8_t targetDevice, uint8_t ndpCSPISpeedFactor, int numberOfBytes, const uint8_t data_array[]){
+  uint8_t sensor_all_bytes[16]={0};
+  uint32_t sensorRegisterContent_toWrite = 0x00000000;
+  uint32_t sensorRegisterContent_toWrite_aux = 0x00000000;
+
+  uint32_t initialization_addr0_n_addr1 = 0;
+  uint8_t numberOfBytesToBeWritten = burstWriteBytes;
+  uint8_t s;
+  int remainingBytes;
+
+  // need to initialize addresses 0x5b and 0x5c for partial burst write into BMI270 //////////////////////////////////////
+  sensor_all_bytes[0] = 0x00;
+  sensor_all_bytes[1] = 0x00;
+  s = transparentNiclaVoiceSensorRegWrite(targetDevice,ndpCSPISpeedFactor,0x5b, 2,  sensor_all_bytes);
+
+  delay(20); //delay 20ms much longer than 450us
+
+  //Writing 14 bytes at a time (cannot write 16 due to one address byte, and cannot write 15 as even number of bytes to be written)
+  if(spiSensorDebugTrace) {
+    Serial.print("Initiating writing of bytes :");
+    Serial.print(numberOfBytes);
+  }
+
+  for (int i = 0; i < numberOfBytes; i+=burstWriteBytes){
+    remainingBytes = (numberOfBytes - i);
+    if(spiSensorDebugTrace) {
+      Serial.print("remaining bytes :");
+      Serial.println(remainingBytes);
+    }
+    if (remainingBytes <burstWriteBytes){
+      numberOfBytesToBeWritten = remainingBytes;
+      if(spiSensorDebugTrace) {
+        Serial.print("Number of bytes to be written :");
+        Serial.println(numberOfBytesToBeWritten);
+      }
+    }
+
+    for (int partialIndex=0; partialIndex<numberOfBytesToBeWritten; partialIndex++){
+      sensor_all_bytes[partialIndex]=data_array[i + partialIndex ];
+    }
+    s = transparentNiclaVoiceSensorRegWrite(targetDevice,ndpCSPISpeedFactor,0x5E, numberOfBytesToBeWritten,  sensor_all_bytes);
+    delay(20); //delay 20ms much longer than 450us
+
+    // need to update addresses for partial burst write into BMI270 //////////////////////////////////////
+    initialization_addr0_n_addr1 += numberOfBytesToBeWritten >> 1;
+
+    if(spiSensorDebugTrace) {
+      Serial.println(initialization_addr0_n_addr1);
+      Serial.println(initialization_addr0_n_addr1, HEX);
+    }
+    sensor_all_bytes[0] = initialization_addr0_n_addr1 & 0x0F;
+    sensor_all_bytes[1] = (initialization_addr0_n_addr1 >> 4) & 0xFF  ;
+    s = transparentNiclaVoiceSensorRegWrite(targetDevice, ndpCSPISpeedFactor, 0x5b, 2, sensor_all_bytes);
+    delay(20);
+  }
+  return 0;
 }
 
 NDPClass NDP;

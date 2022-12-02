@@ -125,10 +125,13 @@ public:
 
    // SPI speed
    static uint32_t spi_speed_general;
-
-   // Use slower SPI speed when writing samples @ 1MHz
-   static const uint32_t spi_speed_spi_sample_reg_write = 1000000;
    static int pdm_clk_init;
+
+   // sensor related
+   static const bool spiSensorDebugTrace = false;
+   uint8_t transparentNiclaVoiceSensorRegRead(uint8_t cs_pin, uint8_t cspiSpeedFactor, uint32_t sensor_regaddress, uint8_t len,  uint8_t data_return_array[]);
+   uint8_t transparentNiclaVoiceSensorRegWrite(uint8_t cs_pin, uint8_t cspiSpeedFactor, uint32_t sensor_regaddress, uint8_t len,  uint8_t data_return_array[]);
+   uint8_t transparentNiclaVoiceBMI270SensorDataInitialization(uint8_t targetDevice, uint8_t ndpCSPISpeedFactor, int numberOfBytes, const uint8_t data_array[]);
 
 private:
    mbed::Callback<void(char*)> on_match_cb_s;
