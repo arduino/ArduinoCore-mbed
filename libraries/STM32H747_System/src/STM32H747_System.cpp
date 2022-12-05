@@ -1,8 +1,9 @@
 #include "STM32H747_System.h"
 #include "Wire.h"
-#include "mbed.h"
 
 #define PMIC_ADDRESS 0x08
+
+extern RTC_HandleTypeDef RTCHandle;
 
 uint8_t STM32H747::readReg(uint8_t subAddress) {
   char response = 0xFF;
@@ -21,6 +22,18 @@ void STM32H747::setRegister(uint8_t reg, uint8_t val) {
   Wire1.write(reg);
   Wire1.write(val);
   Wire1.endTransmission();
+}
+
+uint32_t STM32H747::readBackupRegister(RTCBackup reg) {
+  return HAL_RTCEx_BKUPRead(&RTCHandle, (uint32_t)reg);
+}
+
+void STM32H747::writeBackupRegister(RTCBackup reg, uint32_t data) {
+  HAL_RTCEx_BKUPWrite(&RTCHandle, (uint32_t)reg, data);
+}
+
+reset_reason_t STM32H747::getResetReason() {
+  return (reset_reason_t)readBackupRegister(RTCBackup::DR8);
 }
 
 /*
