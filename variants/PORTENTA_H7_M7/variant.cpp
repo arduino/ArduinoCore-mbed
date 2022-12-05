@@ -16,7 +16,7 @@ AnalogPinDescription g_AAnalogPinDescription[] = {
 };
 
 AnalogPinDescription g_AAnalogOutPinDescription[] = {
-  { PA_6,         NULL },    // A7    ADC1_INP7
+  { PA_4,         NULL },    // A6    DAC1_OUT1
 };
 
 PinDescription g_APinDescription[] = {

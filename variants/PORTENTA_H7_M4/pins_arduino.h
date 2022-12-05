@@ -71,7 +71,7 @@ static const uint8_t A7  = PIN_A7;
 #define D21 (u21)
 
 //DACs
-#define DAC           1
+#define DAC           A6
 
 // Serial
 #define PIN_SERIAL_RX (13ul)

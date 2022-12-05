@@ -61,7 +61,9 @@ static const uint8_t A13  = PIN_A13;
 #endif
 
 //DACs
-#define DAC           1
+#define DAC           A12
+#define DAC_0         A12
+#define DAC_1         A13
 
 // Digital pins
 // -----------
