@@ -35,6 +35,24 @@ enum RadioAccessTechnologyType {
     CATNB = 8
 };
 
+enum FrequencyBand {
+    BAND_1 = 0x01,
+    BAND_2 = 0x02,
+    BAND_3 = 0x04,
+    BAND_4 = 0x08,
+    BAND_5 = 0x10,
+    BAND_8 = 0x80,
+    BAND_12 = 0x800,
+    BAND_13 = 0x1000,
+    BAND_18 = 0x20000,
+    BAND_19 = 0x40000,
+    BAND_20 = 0x80000,
+    BAND_25 = 0x1000000,
+    BAND_26 = 0x2000000,
+    BAND_28 = 0x8000000
+};
+
+
 namespace mbed {
 
 /**
@@ -160,6 +178,7 @@ public: // from NetworkInterface
                                   const char *pwd = 0) = 0;
     virtual void set_credentials(const char *apn, const char *uname = 0, const char *pwd = 0) = 0;
     virtual void set_access_technology(RadioAccessTechnologyType rat = CATM1) = 0;
+    virtual void set_band(FrequencyBand band = BAND_20) = 0;
     virtual bool is_connected() = 0;
 
     /** Same as NetworkInterface::get_default_instance()

@@ -82,6 +82,15 @@ typedef int wiced_filesystem_handle_type_t;
 wiced_result_t wiced_filesystem_init(void);
 
 /**
+ * Mount the physical device using default parameters
+ *
+ * This assumes that the device is ready to read/write immediately.
+ *
+ * @return WICED_SUCCESS on success
+ */
+wiced_result_t wiced_filesystem_mount_default(void);
+
+/**
  * Open a file for reading or writing
  *
  * @param[in]  fs_handle       - The filesystem handle to use - obtained from wiced_filesystem_mount

@@ -89,19 +89,19 @@ SECTIONS
         _ebss = .;
     } > RAM
     .openamp_section (NOLOAD) : {
-         . = ABSOLUTE(0x38000000);
-         *(.resource_table)
-     } >RAM_D3  AT > FLASH
-     .pdm_section (NOLOAD) : {
-         . = ABSOLUTE(0x3800FC00);
-         *(.pdm_buffer)
-     } > RAM_D3
-     _dtcm_lma = __etext + SIZEOF(.data);
-     .dtcm : AT(_dtcm_lma) {
-         _sdtcm = .;
-         *(.dtcm*)
-         _edtcm = .;
-     } > DTCMRAM
+ 				. = ABSOLUTE(0x38000000);
+ 				*(.resource_table)
+ 				} >RAM_D3  AT > FLASH
+ 				.pdm_section (NOLOAD) : {
+ 				. = ABSOLUTE(0x3800FC00);
+ 				*(.pdm_buffer)
+ 				} > RAM_D3
+ 					_dtcm_lma = __etext + SIZEOF(.data);
+ 					.dtcm : AT(_dtcm_lma) {
+ 					_sdtcm = .;
+ 					*(.dtcm*)
+ 					_edtcm = .;
+ 					} > DTCMRAM
     .heap (COPY):
     {
         __end__ = .;
