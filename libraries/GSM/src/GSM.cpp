@@ -26,7 +26,7 @@ mbed::CellularDevice *mbed::CellularDevice::get_default_instance()
     return &device;
 }
 
-int arduino::GSMClass::begin(const char* pin, const char* apn, const char* username, const char* password, RadioAccessTechnologyType rat, bool restart) {
+int arduino::GSMClass::begin(const char* pin, const char* apn, const char* username, const char* password, RadioAccessTechnologyType rat, uint32_t band, bool restart) {
 
   if(restart || isCmuxEnable()) {
     pinMode(PJ_10, OUTPUT);
@@ -69,9 +69,11 @@ int arduino::GSMClass::begin(const char* pin, const char* apn, const char* usern
   _username = username;
   _password = password;
   _rat = rat;
+  _band = (FrequencyBand) band;
   _context->set_credentials(apn, username, password);
 
   _context->set_access_technology(rat);
+  _context->set_band(_band);
 
   int connect_status = NSAPI_ERROR_AUTH_FAILURE;
   uint8_t retryCount = 0;
