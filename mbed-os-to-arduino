@@ -201,7 +201,7 @@ generate_flags () {
 				} > RAM_D3\n"
 
 				if [[ $ARDUINOVARIANT == *PORTENTA*M7* ]]; then
-					OPENAMP_SECTION=$OPENAMP_SECTION "\
+					OPENAMP_SECTION="${OPENAMP_SECTION} \
 					_dtcm_lma = __etext + SIZEOF(.data);\n \
 					.dtcm : AT(_dtcm_lma) {\n \
 					_sdtcm = .;\n \
