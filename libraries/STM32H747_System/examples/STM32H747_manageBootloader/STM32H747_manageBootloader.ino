@@ -14,6 +14,11 @@
 #define GET_OTP_BOARD_INFO
 #elif defined(ARDUINO_NICLA_VISION)
 #include "nicla_vision_bootloader.h"
+#elif defined(ARDUINO_OPTA)
+#include "opta_bootloader.h"
+#include "mcuboot_opta.h"
+#include "ecdsa-p256-encrypt-key.h"
+#include "ecdsa-p256-signing-key.h"
 #endif
 
 #ifndef CORE_CM7
@@ -86,7 +91,7 @@ void setup() {
   video_available = bootloader_data[8];
   wifi_available = bootloader_data[5];
 
-#if defined(ARDUINO_PORTENTA_H7_M7)
+#if defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_OPTA)
   Serial.println("\nDo you want to install/update the default Arduino bootloader? Y/[n]");
   Serial.println("Choosing \"No\", will install/update the MCUboot bootloader.");
   if(!waitResponse()) {
@@ -102,6 +107,7 @@ void setup() {
   if (!MCUboot) {
     bootloader_ptr = &bootloader_mbed_bin[0];
     bootloader_len = bootloader_mbed_bin_len;
+#if defined(ARDUINO_PORTENTA_H7_M7)
     if (!video_available) {
       if (wifi_available) {
         bootloader_ptr = &bootloader_mbed_lite_connected_bin[0];
@@ -111,6 +117,7 @@ void setup() {
         bootloader_len = bootloader_mbed_lite_bin_len;
       }
     }
+#endif
   }
 #endif
 
@@ -324,7 +331,7 @@ void applyUpdate(uint32_t address) {
     }
   }
 
-#if defined(ARDUINO_PORTENTA_H7_M7)
+#if defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_OPTA)
   if (writeKeys) {
     flash.program(&enc_priv_key, ENCRYPT_KEY_ADDR, ENCRYPT_KEY_SIZE);
     flash.program(&ecdsa_pub_key, SIGNING_KEY_ADDR, SIGNING_KEY_SIZE);
