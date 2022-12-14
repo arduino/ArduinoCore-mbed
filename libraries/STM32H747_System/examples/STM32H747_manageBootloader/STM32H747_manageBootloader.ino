@@ -153,7 +153,6 @@ void setup() {
 
   if (writeLoader) {
     if(availableBootloaderIdentifier.equals("MCUboot Arduino")) {
-      setupMCUBootOTAData();
 
       Serial.println("\nThe bootloader comes with a set of default keys to evaluate signing and encryption process");
       Serial.println("If you load the keys, you will need to upload the future sketches with Security Settings -> Signing + Encryption.");
@@ -163,8 +162,10 @@ void setup() {
         Serial.println("\nPlease notice that loading the keys will enable MCUboot Sketch swap. This will increase the sketch update time after the upload.");
         Serial.println("A violet LED will blink until the sketch is ready to run.");
         Serial.println("Do you want to proceed loading the default keys? Y/[n]");
+        writeKeys = waitResponse();
+      } else {
+        writeKeys = false;
       }
-      writeKeys = waitResponse();
     }
     applyUpdate(BOOTLOADER_ADDR);
   } else {
@@ -333,6 +334,7 @@ void applyUpdate(uint32_t address) {
 
 #if defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_OPTA)
   if (writeKeys) {
+    setupMCUBootOTAData();
     flash.program(&enc_priv_key, ENCRYPT_KEY_ADDR, ENCRYPT_KEY_SIZE);
     flash.program(&ecdsa_pub_key, SIGNING_KEY_ADDR, SIGNING_KEY_SIZE);
   }
