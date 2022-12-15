@@ -229,6 +229,11 @@ void arduino::WiFiClass::statusCallback(nsapi_event_t status, intptr_t param)
   }
 }
 
+void arduino::WiFiClass::MACAddress(uint8_t *mac_address)
+{
+  macAddress(mac_address);
+}
+
 #if defined(COMPONENT_4343W_FS)
 
 #define WIFI_FIRMWARE_PATH "/wlan/4343WA1.BIN"
