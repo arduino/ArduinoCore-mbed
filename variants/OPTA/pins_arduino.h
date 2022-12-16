@@ -146,6 +146,9 @@ static const uint8_t SCK  = PIN_SPI_SCK;
 uint16_t _getVid_();
 uint16_t _getPid_();
 
+// Retrieve (Arduino OUI) Ethernet MAC Address from QSPIF OTP
+uint8_t _getSecureEthMac_(uint8_t *);
+
 #define BOARD_NAME			"Arduino Opta"
 
 #define DFU_MAGIC_SERIAL_ONLY_RESET   0xb0

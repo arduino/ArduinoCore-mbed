@@ -322,6 +322,21 @@ uint16_t _getPid_() {
 #endif
 }
 
+uint8_t _getSecureEthMac_(uint8_t *mac_address) {
+  if (!has_otp_info) {
+    getSecureFlashData();
+  }
+  memcpy(mac_address, ((OptaBoardInfo*)_boardInfo)->mac_address, 6);
+
+  return 6;
+}
+
+uint8_t mbed_otp_mac_address(char *mac)
+{
+  auto ret = _getSecureEthMac_(reinterpret_cast<uint8_t *>(mac));
+  return ret;
+}
+
 #define BOARD_REVISION(x,y)   (x << 8 | y)
 
 void initVariant() {
