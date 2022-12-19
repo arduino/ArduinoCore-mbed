@@ -25,6 +25,13 @@
 Other buffer instantiation options:
   FrameBuffer fb(0x30000000);
   FrameBuffer fb(320,240,2);
+
+If resolution higher than 320x240 is required, please use external RAM via
+  #include "SDRAM.h"
+  FrameBuffer fb(SDRAM_START_ADDRESS);
+  ...
+  // and adding in setup()
+  SDRAM.begin();
 */
 FrameBuffer fb;
 
