@@ -17,7 +17,7 @@
  * GC2145 driver.
  */
 #include "Wire.h"
-#include "ov7670.h"
+#include "ov767x.h"
 
 #define GAIN                    0x00 /* AGC - Gain control gain setting     */
 #define BLUE                    0x01 /* AWB - Blue channel gain setting     */
@@ -537,8 +537,7 @@ static const uint8_t default_regs[][2] = {
     { 0xFF,             0xFF },
 };
 
-#if (OMV_OV7670_VERSION == 75)
-static const uint8_t rgb565_regs[][2] = {
+const uint8_t OV7675::rgb565_regs[][2] = {
     { COM7,         COM7_RGB_FMT },        /* Selects RGB mode */
     { RGB444,       0x00 },                /* No RGB444 please */
     { COM1,         0x00 },                /* CCIR601 */
@@ -553,8 +552,8 @@ static const uint8_t rgb565_regs[][2] = {
     { COM13,        COM13_GAMMA_EN | COM13_UVSAT_AUTO },
     { 0xFF,         0xFF }
 };
-#elif (OMV_OV7670_VERSION == 70)
-static const uint8_t rgb565_regs[][2] = {
+
+const uint8_t OV7670::rgb565_regs[][2] = {
     { COM7,     COM7_RGB_FMT                },    /* Selects RGB mode */
     { RGB444,   0                           },    /* No RGB444 please */
     { COM1,     0x0                         },    /* CCIR601 */
@@ -570,9 +569,6 @@ static const uint8_t rgb565_regs[][2] = {
     { COM13,    COM13_UVSAT_AUTO            },
     { 0xFF,     0xFF }
 };
-#else
-#error "OV767x sensor is Not defined."
-#endif
 
 // TODO: These registers probably need to be fixed too.
 static const uint8_t yuv422_regs[][2] = {
@@ -605,8 +601,7 @@ static const uint8_t vga_regs[][2] = {
     { 0xFF,         0xFF },
 };
 
-#if (OMV_OV7670_VERSION == 75)
-static const uint8_t qvga_regs[][2] = {
+const uint8_t OV7675::qvga_regs[][2] = {
     { COM3,         COM3_DCW_EN },
     { COM14,        0x11 },      // Divide by 2
     { 0x72,         0x22 },      // This has no effect on OV7675
@@ -619,8 +614,8 @@ static const uint8_t qvga_regs[][2] = {
     { VREF,         0xF0 },
     { 0xFF,         0xFF },
 };
-#else
-static const uint8_t qvga_regs[][2] = {
+
+const uint8_t OV7670::qvga_regs[][2] = {
     { COM3,         COM3_DCW_EN },
     { COM14,        0x19 },
     { 0x72,         0x11 },     // downsample by 2
@@ -633,10 +628,8 @@ static const uint8_t qvga_regs[][2] = {
     { VREF,         0x0a },
     { 0XFF,         0XFF },
 };
-#endif
 
-#if (OMV_OV7670_VERSION == 75)
-static const uint8_t qqvga_regs[][2] = {
+const uint8_t OV7675::qqvga_regs[][2] = {
     { COM3,         COM3_DCW_EN },
     { COM14,        0x11 },     // Divide by 2
     { 0x72,         0x22 },     // This has no effect on OV7675
@@ -649,8 +642,8 @@ static const uint8_t qqvga_regs[][2] = {
     { VREF,         0xfa },
     { 0xFF,         0xFF },
 };
-#else
-static const uint8_t qqvga_regs[][2] = {
+
+const uint8_t OV7670::qqvga_regs[][2] = {
     { COM3,         COM3_DCW_EN },
     { COM14,        0x1a},
     { 0x72,         0x22 },     // downsample by 4
@@ -663,7 +656,6 @@ static const uint8_t qqvga_regs[][2] = {
     { VREF,         0x0a },
     { 0XFF,         0XFF },
 };
-#endif
 
 OV7670::OV7670(arduino::MbedI2C &i2c) : 
     _i2c(&i2c)

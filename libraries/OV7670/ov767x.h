@@ -21,9 +21,7 @@
 
 #include "camera.h"
 
-#ifndef OMV_OV7670_VERSION
-#define OMV_OV7670_VERSION (70)
-#endif
+
 #ifndef OMV_OV7670_CLKRC
 #define OMV_OV7670_CLKRC   (0x00)
 #endif
@@ -35,6 +33,9 @@ class OV7670: public ImageSensor {
         arduino::MbedI2C *_i2c;
         int regWrite(uint8_t dev_addr, uint16_t reg_addr, uint8_t reg_data, bool wide_addr = false);
         uint8_t regRead(uint8_t dev_addr, uint16_t reg_addr, bool wide_addr = false);
+        static const uint8_t qqvga_regs[][2];
+        static const uint8_t qvga_regs[][2];
+        static const uint8_t rgb565_regs[][2];
 
    public:
         OV7670(arduino::MbedI2C &i2c = CameraWire);
@@ -53,5 +54,12 @@ class OV7670: public ImageSensor {
         int motionDetected() { return 0; };
         void debug(Stream &stream);
 };
- 
+
+class OV7675: public OV7670 {
+  private:
+        static const uint8_t qqvga_regs[][2];
+        static const uint8_t qvga_regs[][2];
+        static const uint8_t rgb565_regs[][2];
+};
+
 #endif /* __GC2145_H */
