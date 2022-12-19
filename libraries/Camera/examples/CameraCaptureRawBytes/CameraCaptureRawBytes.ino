@@ -11,9 +11,11 @@
   Camera cam(himax);
   #define IMAGE_MODE CAMERA_GRAYSCALE
 #elif defined(ARDUINO_GIGA)
-  #include "ov7670.h"
-  OV7670 ov7670;
-  Camera cam(ov7670);
+  #include "ov767x.h"
+  // uncomment the correct camera in use
+  OV7670 ov767x;
+  // OV7675 ov767x;
+  Camera cam(ov767x);
   #define IMAGE_MODE CAMERA_RGB565
 #else
 #error "This board is unsupported."
