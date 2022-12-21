@@ -77,6 +77,8 @@ public:
      */
   int begin(const char* ssid, uint8_t key_idx, const char* key);
 
+  void MACAddress(uint8_t *mac_address);
+
   /* Start Wifi connection with passphrase
      * the most secure supported mode will be automatically selected
      *
