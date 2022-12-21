@@ -23,7 +23,7 @@
 class nicla {
 
 public:
-  static bool begin();
+  static bool begin(bool mounted_on_mkr = false);
   static bool enable3V3LDO();
   static bool enable1V8LDO();
   static bool disableLDO();

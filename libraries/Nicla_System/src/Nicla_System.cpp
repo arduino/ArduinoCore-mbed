@@ -23,11 +23,14 @@ void nicla::pingI2CThd() {
   }
 }
 
-bool nicla::begin()
+bool nicla::begin(bool mounted_on_mkr)
 {
-  pinMode(p25, OUTPUT);
-  pinMode(P0_10, OUTPUT);
-  digitalWrite(P0_10, HIGH);
+  if (mounted_on_mkr) {
+    // GPIO3 is on MKR RESET pin, so we must configure it HIGH or it will, well, reset the board :)
+    pinMode(p25, OUTPUT);
+    pinMode(P0_10, OUTPUT);
+    digitalWrite(P0_10, HIGH);
+  }
   Wire1.begin();
   _chg_reg = _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_FAST_CHG);
 #ifndef NO_NEED_FOR_WATCHDOG_THREAD
