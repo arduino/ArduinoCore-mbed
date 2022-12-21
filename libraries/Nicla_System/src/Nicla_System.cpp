@@ -104,16 +104,71 @@ uint8_t nicla::readLDOreg()
   return _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_LDO_CTRL);
 }
 
-bool nicla::enableCharge(uint8_t mA)
+bool nicla::ntc_disabled;
+
+bool nicla::enableCharge(uint8_t mA, bool disable_ntc)
 {
-  digitalWrite(p25, LOW);
-  if (mA < 35) {
+  if (mA < 5) {
+    _chg_reg = 0x3;
+  } else if (mA < 35) {
     _chg_reg = ((mA-5) << 2);
   } else {
     _chg_reg = (((mA-40)/10) << 2) | 0x80;
   }
   _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_FAST_CHG, _chg_reg);
+
+  // For very depleted batteries, set ULVO at the very minimum to re-enable charging
+  _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_ILIM_UVLO_CTRL, 0x3F);
+
+  // Disable TS and interrupt on charge
+  ntc_disabled = disable_ntc;
+  if (ntc_disabled) {
+    _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_TS_CONTROL, 1 << 3);
+  }
+
+  // also set max battery voltage to 4.2V (VBREG)
+  // _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_BATTERY_CTRL, (4.2f - 3.6f)*100);
+
   return _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_FAST_CHG) == _chg_reg;
+}
+
+uint16_t nicla::getFault() {
+  uint16_t tmp = _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_FAULTS) << 8;
+  tmp |= (_pmic.readByte(BQ25120A_ADDRESS, BQ25120A_TS_CONTROL) & 0x60);
+  return tmp;
+}
+
+int nicla::getBatteryStatus() {
+  _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_BATT_MON, 1);
+  delay(3);
+  uint8_t data = _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_BATT_MON);
+  float percent = 0.6f + (data >> 5) * 0.1f + ((data >> 2) & 0x7) * 0.02f;
+
+  int res = 0;
+  if (percent >= 0.98) {
+    res |= BATTERY_FULL;
+  } else if (percent >= 0.94){
+    res |= BATTERY_ALMOST_FULL;
+  } else if (percent >= 0.90){
+    res |= BATTERY_HALF;
+  } else if (percent >= 0.86){
+    res |= BATTERY_ALMOST_EMPTY;
+  } else {
+    res |= BATTERY_EMPTY;
+  }
+
+  if (!ntc_disabled) {
+    auto ts = ((_pmic.readByte(BQ25120A_ADDRESS, BQ25120A_TS_CONTROL) >> 5) & 0x3);
+    if (ts == 1) {
+      res |= BATTERY_COLD;
+    } else if (ts == 2) {
+      res |= BATTERY_COOL;
+    } else if (ts == 3) {
+      res |= BATTERY_HOT;
+    }
+  }
+
+  return res;
 }
 
 void nicla::checkChgReg()
