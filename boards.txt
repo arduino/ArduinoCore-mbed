@@ -465,6 +465,54 @@ nicla_sense.bootloader.file=NICLA/bootloader.hex
 
 ##############################################################
 
+nicla_voice.name=Arduino Nicla Voice
+nicla_voice.build.core=arduino
+nicla_voice.build.crossprefix=arm-none-eabi-
+nicla_voice.build.compiler_path={runtime.tools.arm-none-eabi-gcc-7-2017q4.path}/bin/
+
+nicla_voice.build.variant=NICLA
+nicla_voice.build.mcu=cortex-m4
+nicla_voice.build.extra_flags=
+nicla_voice.build.architecture=cortex-m4
+nicla_voice.build.fpu=-mfpu=fpv4-sp-d16
+nicla_voice.build.float-abi=-mfloat-abi=softfp
+nicla_voice.build.board=NICLA
+nicla_voice.build.ldscript=linker_script.ld
+nicla_voice.build.postbuild.cmd="{tools.imgtool.path}/{tools.imgtool.cmd}" exit
+nicla_voice.compiler.mbed.arch.define=-DARDUINO_ARCH_NRF52832
+nicla_voice.compiler.mbed.defines={build.variant.path}/defines.txt
+nicla_voice.compiler.mbed.ldflags={build.variant.path}/ldflags.txt
+nicla_voice.compiler.mbed.cflags={build.variant.path}/cflags.txt
+nicla_voice.compiler.mbed.cxxflags={build.variant.path}/cxxflags.txt
+nicla_voice.compiler.mbed.includes={build.variant.path}/includes.txt
+nicla_voice.compiler.mbed.extra_ldflags=-lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
+nicla_voice.compiler.mbed="{build.variant.path}/libs/libmbed.a"
+nicla_voice.vid.0=0x2341
+nicla_voice.pid.0=0x0065
+nicla_voice.upload_port.0.vid=0x2341
+nicla_voice.upload_port.0.pid=0x0065
+
+nicla_voice.upload.tool=openocd
+nicla_voice.upload.tool.default=openocd
+nicla_voice.upload.protocol=
+nicla_voice.upload.config=-f target/nrf52.cfg
+nicla_voice.upload.programmer=-f interface/cmsis-dap.cfg
+nicla_voice.upload.transport=-c "transport select swd; adapter speed 1000"
+nicla_voice.upload.use_1200bps_touch=false
+nicla_voice.upload.wait_for_upload_port=true
+nicla_voice.upload.native_usb=true
+nicla_voice.upload.maximum_size=527616
+nicla_voice.upload.maximum_data_size=64288
+
+nicla_voice.bootloader.tool=openocd
+nicla_voice.bootloader.tool.default=openocd
+nicla_voice.bootloader.extra_action.preflash=echo INFO:removed_mass-erase
+nicla_voice.bootloader.config=-f target/nrf52.cfg
+nicla_voice.bootloader.programmer=-f interface/cmsis-dap.cfg
+nicla_voice.bootloader.file=NICLA_VOICE/bootloader_application.hex
+
+##############################################################
+
 nicla_vision.name=Arduino Nicla Vision
 nicla_vision.build.core=arduino
 nicla_vision.build.crossprefix=arm-none-eabi-

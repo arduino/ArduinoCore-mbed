@@ -1,7 +1,5 @@
 {
   "macros": [
-    "MBED_HEAP_STATS_ENABLED=1",
-    "MBED_STACK_STATS_ENABLED=1",
     "MBED_MEM_TRACING_ENABLED=1",
     "NRFX_GPIOTE_CONFIG_NUM_OF_LOW_POWER_EVENTS=8",
     "NRFX_WDT_ENABLED=1"
@@ -15,7 +13,7 @@
       "platform.default-serial-baud-rate": 115200,
       "platform.callback-nontrivial": true,
       "rtos.main-thread-stack-size": 3072,
-      "rtos.thread-stack-size": 1024,
+      "rtos.thread-stack-size": 768,
       "rtos.idle-thread-stack-size": 512,
       "target.mbed_app_start": "0x10000",
       "target.components_add" : ["SPIF"],
