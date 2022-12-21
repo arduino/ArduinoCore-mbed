@@ -1,0 +1,25 @@
+#######################################
+# Syntax Coloring Map For Keyboard
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+NDPClass		KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+init		KEYWORD2
+setInterrupt		KEYWORD2
+loadLog	KEYWORD2
+poll		KEYWORD2
+spiTransfer   	KEYWORD2
+setSpiSpeed   	KEYWORD2
+setSpiSpeedSw   	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
