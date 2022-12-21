@@ -106,8 +106,10 @@ void arduino::MbedSPI::begin() {
 }
 
 void arduino::MbedSPI::end() {
-    if (dev->obj != NULL) {
+    if (dev != NULL && dev->obj != NULL) {
         delete dev->obj;
+        delete dev;
+        dev = NULL;
     }
 }
 
