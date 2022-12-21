@@ -83,6 +83,7 @@ public:
    int getInfo();
    int turnOffMicrophone();
    int getDebugInfo();
+   int configureInferenceThreshold(int threshold);
 
    void interrupts() {
       enable_interrupts(true);

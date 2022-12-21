@@ -477,6 +477,12 @@ int NDPClass::configureClock() {
   return (s == 0);
 }
 
+int NDPClass::configureInferenceThreshold(int threshold_bytes)
+{
+  int s = syntiant_ndp120_tiny_spi_direct_config(ndp, threshold_bytes);
+  return s;
+}
+
 int NDPClass::checkMB() {
   uint32_t msg = 0;
   int s = syntiant_ndp120_tiny_mb_cmd(ndp, SYNTIANT_NDP120_MB_MCU_NOP, &msg);
