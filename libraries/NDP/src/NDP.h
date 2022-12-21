@@ -42,6 +42,8 @@
 #include "SPIFBlockDevice.h"
 #include "LittleFileSystem.h"
 #include "syntiant_ndp120_tiny.h"
+#include "syntiant_tiny_cspi.h"
+
 
 class NDPClass
 {
@@ -125,14 +127,17 @@ public:
 
    // SPI speed
    static uint32_t spi_speed_general;
+   static uint32_t spi_speed_initial;
    static int pdm_clk_init;
 
    // sensor related
-   static const bool spiSensorDebugTrace = false;
-   uint8_t transparentNiclaVoiceSensorRegRead(uint8_t cs_pin, uint8_t cspiSpeedFactor, uint32_t sensor_regaddress, uint8_t len,  uint8_t data_return_array[]);
-   uint8_t transparentNiclaVoiceSensorRegWrite(uint8_t cs_pin, uint8_t cspiSpeedFactor, uint32_t sensor_regaddress, uint8_t len,  uint8_t data_return_array[]);
-   uint8_t transparentNiclaVoiceBMI270SensorDataInitialization(uint8_t targetDevice, uint8_t ndpCSPISpeedFactor, int numberOfBytes, const uint8_t data_array[]);
+   int sensorBMI270Read(int reg, int len, uint8_t data_return_array[]);
+   int sensorBMI270Write(int reg, int len, uint8_t data_array[]);
+   int sensorBMI270Write(int reg, int data);
 
+   int sensorBMM150Read(int reg, int len, uint8_t data_return_array[]);
+   int sensorBMM150Write(int reg, int len, uint8_t data_array[]);
+   int sensorBMM150Write(int reg, int data);
 private:
    mbed::Callback<void(char*)> on_match_cb_s;
    mbed::Callback<void(int)> on_match_cb_i;
@@ -149,6 +154,9 @@ private:
    static const size_t LABELS_STRING_LEN = 512;
    static const size_t MAX_LABELS = 32;
    static const int mbwait_timeout = 2000; /* in msec */
+
+   static const int BMI270_SSB = 0;
+   static const int BM150_SSB = 1;
 
    struct syntiant_ndp120_tiny_integration_interfaces_s iif;
    char label_data[LABELS_STRING_LEN] = "";

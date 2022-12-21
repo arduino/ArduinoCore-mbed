@@ -33,7 +33,7 @@ CFLAGS= -g3 -O3 -Wall -Werror -Wc++-compat -fpic -I. -D_FILE_OFFSET_BITS=64
 
 ILIB_LIBRARY=synilib
 ILIB_STATIC_LIBRARY=lib$(ILIB_LIBRARY).a
-ILIB_OBJS := syntiant_ndp120_tiny.o
+ILIB_OBJS := syntiant_ndp120_tiny.o syntiant_tiny_cspi.o
 
 $(ILIB_STATIC_LIBRARY): $(ILIB_OBJS)
 	$(AR) rcs $@ $^

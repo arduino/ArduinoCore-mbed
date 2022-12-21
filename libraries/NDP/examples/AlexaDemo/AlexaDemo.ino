@@ -49,11 +49,11 @@ void setup() {
   NDP.load("alexa_334_NDP120_B0_v11_v91.synpkg");
   Serial.println("packages loaded");
   NDP.getInfo();
-  Serial.println("Configure clock");
+  Serial.println("Configure mic");
   NDP.turnOnMicrophone();
   NDP.interrupts();
 
-  // For maximum low power; please note that it's impossible to print afer calling these functions
+  // For maximum low power; please note that it's impossible to print after calling these functions
   nicla::leds.end();
   if (lowestPower) {
     NRF_UART0->ENABLE = 0;
