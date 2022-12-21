@@ -34,7 +34,7 @@ bool nicla::begin(bool mounted_on_mkr)
   Wire1.begin();
   _chg_reg = _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_FAST_CHG);
 #ifndef NO_NEED_FOR_WATCHDOG_THREAD
-  static rtos::Thread th(osPriorityHigh, 1024, nullptr, "ping_thread");
+  static rtos::Thread th(osPriorityHigh, 768, nullptr, "ping_thread");
   th.start(&nicla::pingI2CThd);
 #endif
   started = true;
