@@ -82,7 +82,7 @@ private:
     voidFuncPtrParamInt onReceiveCb = NULL;
     voidFuncPtr onRequestCb = NULL;
 #ifdef DEVICE_I2CSLAVE
-    rtos::Thread slave_th;
+    rtos::Thread* slave_th;
     void receiveThd();
 #endif
 };

@@ -23,9 +23,9 @@
 #include "Wire.h"
 #include "pinDefinitions.h"
 
-arduino::MbedI2C::MbedI2C(int sda, int scl) : _sda(digitalPinToPinName(sda)), _scl(digitalPinToPinName(scl)), usedTxBuffer(0), slave_th(osPriorityNormal, 2048, nullptr, "I2CSlave") {}
+arduino::MbedI2C::MbedI2C(int sda, int scl) : _sda(digitalPinToPinName(sda)), _scl(digitalPinToPinName(scl)), usedTxBuffer(0) {}
 
-arduino::MbedI2C::MbedI2C(PinName sda, PinName scl) : _sda(sda), _scl(scl), usedTxBuffer(0), slave_th(osPriorityNormal, 2048, nullptr, "I2CSlave") {}
+arduino::MbedI2C::MbedI2C(PinName sda, PinName scl) : _sda(sda), _scl(scl), usedTxBuffer(0) {}
 
 void arduino::MbedI2C::begin() {
 	end();
@@ -37,7 +37,8 @@ void arduino::MbedI2C::begin(uint8_t slaveAddr) {
 	end();
 	slave = new mbed::I2CSlave((PinName)_sda, (PinName)_scl);
 	slave->address(slaveAddr << 1);
-	slave_th.start(mbed::callback(this, &arduino::MbedI2C::receiveThd));
+	slave_th = new rtos::Thread(osPriorityNormal, 2048, nullptr, "I2CSlave");
+	slave_th->start(mbed::callback(this, &arduino::MbedI2C::receiveThd));
 #endif
 }
 
@@ -47,8 +48,9 @@ void arduino::MbedI2C::end() {
 	}
 #ifdef DEVICE_I2CSLAVE
 	if (slave != NULL) {
-		slave_th.terminate();
-		slave_th.free_stack();
+		slave_th->terminate();
+		slave_th->free_stack();
+		delete slave_th;
 		delete slave;
 	}
 #endif
