@@ -28,7 +28,7 @@
 #include "netsocket/UDPSocket.h"
 
 #ifndef WIFI_UDP_BUFFER_SIZE
-#define WIFI_UDP_BUFFER_SIZE 508
+#define WIFI_UDP_BUFFER_SIZE 2048
 #endif
 
 namespace arduino {
