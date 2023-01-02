@@ -1,0 +1,32 @@
+From 17846ae87bbb88df38ef2230566ca18076e7f09f Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Mon, 2 Jan 2023 09:40:40 +0100
+Subject: [PATCH] QSPI: apply Adesto quirk only for AT25SF128A
+
+Fixes https://github.com/arduino/ArduinoCore-mbed/issues/600
+---
+ .../COMPONENT_QSPIF/source/QSPIFBlockDevice.cpp           | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/storage/blockdevice/COMPONENT_QSPIF/source/QSPIFBlockDevice.cpp b/storage/blockdevice/COMPONENT_QSPIF/source/QSPIFBlockDevice.cpp
+index 05968ba7b1..cd21a7354d 100644
+--- a/storage/blockdevice/COMPONENT_QSPIF/source/QSPIFBlockDevice.cpp
++++ b/storage/blockdevice/COMPONENT_QSPIF/source/QSPIFBlockDevice.cpp
+@@ -1172,9 +1172,11 @@ int QSPIFBlockDevice::_handle_vendor_quirks()
+             break;
+         case 0x1f:
+             // Adesto device
+-            tr_debug("Applying quirks for Adesto AT25SF128A");
+-            _write_status_reg_2_inst = 0x31;
+-            _AT25SF128A_quirk = true;
++            if (vendor_device_ids[1] == 0x89) {
++                tr_debug("Applying quirks for Adesto AT25SF128A");
++                _write_status_reg_2_inst = 0x31;
++                _AT25SF128A_quirk = true;
++            }
+             break;
+     }
+ 
+-- 
+2.39.0
+
