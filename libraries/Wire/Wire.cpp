@@ -120,7 +120,7 @@ int arduino::MbedI2C::read() {
 	if (rxBuffer.available()) {
 		return rxBuffer.read_char();
 	}
-	return 0;
+	return -1;
 }
 
 int arduino::MbedI2C::available() {
