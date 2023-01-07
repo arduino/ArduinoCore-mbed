@@ -24,7 +24,7 @@
 
     /* Hard Fault Status Register */
     .equ HFSR, 0xE000ED2C
-    /* This bit is set in HFSR if a hard fault was forced by debug event occuring in handler mode. */
+    /* This bit is set in HFSR if a hard fault was forced by debug event occurring in handler mode. */
     .equ HFSR_DEBUG_EVENT_BIT,  (1 << 31)
 
     /* System register and bits for pending DebugMon interrupt. */

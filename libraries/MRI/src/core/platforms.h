@@ -1,4 +1,4 @@
-/* Copyright 2020 Adam Green (https://github.com/adamgreen/)
+/* Copyright 2022 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -35,13 +35,15 @@ uint8_t   mriPlatform_MemRead8(const void* pv);
 void      mriPlatform_MemWrite32(void* pv, uint32_t value);
 void      mriPlatform_MemWrite16(void* pv, uint16_t value);
 void      mriPlatform_MemWrite8(void* pv, uint8_t value);
+void      mriPlatform_SyncICacheToDCache(void *pv, uint32_t size);
 
 uint32_t  mriPlatform_CommHasReceiveData(void);
 uint32_t  mriPlatform_CommHasTransmitCompleted(void);
 int       mriPlatform_CommReceiveChar(void);
+void      mriPlatform_CommSendBuffer(Buffer* pBuffer);
 void      mriPlatform_CommSendChar(int character);
 
-uint32_t  mriPlatform_HandleGDBComand(Buffer* pBuffer);
+uint32_t  mriPlatform_HandleGDBCommand(Buffer* pBuffer);
 
 typedef enum
 {
@@ -111,7 +113,7 @@ typedef struct
 
 PlatformInstructionType     mriPlatform_TypeOfCurrentInstruction(void);
 PlatformSemihostParameters  mriPlatform_GetSemihostCallParameters(void);
-void                        mriPlatform_SetSemihostCallReturnAndErrnoValues(int returnValue, int err);
+void                        mriPlatform_SetSemihostCallReturnAndErrnoValues(int returnValue, int errNo);
 
 const uint8_t*  mriPlatform_GetUid(void);
 uint32_t        mriPlatform_GetUidSize(void);
@@ -140,6 +142,7 @@ int             mriPlatform_RtosIsSetThreadStateSupported(void);
 void            mriPlatform_RtosSetThreadState(uint32_t threadId, PlatformThreadState state);
 void            mriPlatform_RtosRestorePrevThreadState(void);
 
+void            mriPlatform_HandleFaultFromHighPriorityCode(void);
 
 /* Macroes which allow code to drop the mri namespace prefix. */
 #define Platform_Init                                       mriPlatform_Init
@@ -153,10 +156,13 @@ void            mriPlatform_RtosRestorePrevThreadState(void);
 #define Platform_MemWrite32                                 mriPlatform_MemWrite32
 #define Platform_MemWrite16                                 mriPlatform_MemWrite16
 #define Platform_MemWrite8                                  mriPlatform_MemWrite8
+#define Platform_SyncICacheToDCache                         mriPlatform_SyncICacheToDCache
 #define Platform_CommHasReceiveData                         mriPlatform_CommHasReceiveData
 #define Platform_CommHasTransmitCompleted                   mriPlatform_CommHasTransmitCompleted
 #define Platform_CommReceiveChar                            mriPlatform_CommReceiveChar
+#define Platform_CommSendBuffer                             mriPlatform_CommSendBuffer
 #define Platform_CommSendChar                               mriPlatform_CommSendChar
+#define Platform_HandleGDBCommand                           mriPlatform_HandleGDBCommand
 #define Platform_DetermineCauseOfException                  mriPlatform_DetermineCauseOfException
 #define Platform_GetTrapReason                              mriPlatform_GetTrapReason
 #define Platform_DisplayFaultCauseToGdbConsole              mriPlatform_DisplayFaultCauseToGdbConsole
@@ -194,5 +200,6 @@ void            mriPlatform_RtosRestorePrevThreadState(void);
 #define Platform_RtosIsSetThreadStateSupported              mriPlatform_RtosIsSetThreadStateSupported
 #define Platform_RtosSetThreadState                         mriPlatform_RtosSetThreadState
 #define Platform_RtosRestorePrevThreadState                 mriPlatform_RtosRestorePrevThreadState
+#define Platform_HandleFaultFromHighPriorityCode            mriPlatform_HandleFaultFromHighPriorityCode
 
 #endif /* PLATFORMS_H_ */

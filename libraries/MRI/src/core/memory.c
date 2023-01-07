@@ -191,10 +191,6 @@ static int writeHexBufferToWordMemory(Buffer* pBuffer, void* pvMemory)
 
 
 static int  writeBinaryBufferToByteMemory(Buffer*  pBuffer, void* pvMemory, uint32_t writeByteCount);
-static char unescapeCharIfNecessary(Buffer* pBuffer, char currentChar);
-static int  isEscapePrefixChar(char charToCheck);
-static char readNextCharAndUnescape(Buffer* pBuffer);
-static char unescapeByte(char charToUnescape);
 static int  writeBinaryBufferToHalfWordMemory(Buffer* pBuffer, void* pvMemory);
 static int readBytesFromBinaryBuffer(Buffer*  pBuffer, void* pvMemory, uint32_t writeByteCount);
 static int  writeBinaryBufferToWordMemory(Buffer* pBuffer, void* pvMemory);
@@ -220,14 +216,9 @@ static int writeBinaryBufferToByteMemory(Buffer*  pBuffer, void* pvMemory, uint3
         char currChar;
 
         __try
-        {
-            __throwing_func( currChar = Buffer_ReadChar(pBuffer) );
-            __throwing_func( currChar = unescapeCharIfNecessary(pBuffer, currChar) );
-        }
+            currChar = Buffer_ReadChar(pBuffer);
         __catch
-        {
             __rethrow_and_return(0);
-        }
 
         Platform_MemWrite8(p++, (uint8_t)currChar);
         if (Platform_WasMemoryFaultEncountered())
@@ -235,36 +226,6 @@ static int writeBinaryBufferToByteMemory(Buffer*  pBuffer, void* pvMemory, uint3
     }
 
     return 1;
-}
-
-static char unescapeCharIfNecessary(Buffer* pBuffer, char currentChar)
-{
-    if (isEscapePrefixChar(currentChar))
-        return readNextCharAndUnescape(pBuffer);
-
-    return currentChar;
-}
-
-static int isEscapePrefixChar(char charToCheck)
-{
-    return charToCheck == '}';
-}
-
-static char readNextCharAndUnescape(Buffer* pBuffer)
-{
-    char nextChar;
-
-    __try
-        nextChar = Buffer_ReadChar(pBuffer);
-    __catch
-        __rethrow_and_return('\0');
-
-    return unescapeByte(nextChar);
-}
-
-static char unescapeByte(char charToUnescape)
-{
-    return charToUnescape ^ 0x20;
 }
 
 static int writeBinaryBufferToHalfWordMemory(Buffer* pBuffer, void* pvMemory)
@@ -290,17 +251,10 @@ static int readBytesFromBinaryBuffer(Buffer*  pBuffer, void* pvMemory, uint32_t 
 
     while (writeByteCount-- > 0)
     {
-        char currChar;
         __try
-        {
-            __throwing_func( currChar = Buffer_ReadChar(pBuffer) );
-            __throwing_func( currChar = unescapeCharIfNecessary(pBuffer, currChar) );
-        }
+            *p++ = Buffer_ReadChar(pBuffer);
         __catch
-        {
             __rethrow_and_return(0);
-        }
-        *p++ = (uint8_t)currChar;
     }
 
     return 1;

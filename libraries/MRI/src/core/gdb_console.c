@@ -1,4 +1,4 @@
-/* Copyright 2014 Adam Green (https://github.com/adamgreen/)
+/* Copyright 2022 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
 */
 /* Routines to output text to stdout on the gdb console. */
 #include <string.h>
+#include <core/libc.h>
 #include <core/buffer.h>
 #include <core/platforms.h>
 #include <core/core.h>
@@ -21,10 +22,9 @@
 #include <core/gdb_console.h>
 
 
-static void writeStringToExclusiveGdbCommChannel(const char* pString);
-void WriteStringToGdbConsole(const char* pString)
+size_t WriteStringToGdbConsole(const char* pString)
 {
-    writeStringToExclusiveGdbCommChannel(pString);
+    return WriteSizedStringToGdbConsole(pString, mri_strlen(pString));
 }
 
 /* Send the 'O' command to gdb to output text to its console.
@@ -32,14 +32,16 @@ void WriteStringToGdbConsole(const char* pString)
     Command Format: OXX...
     Where XX is the hexadecimal representation of each character in the string to be sent to the gdb console.
 */
-static void writeStringToExclusiveGdbCommChannel(const char* pString)
+size_t WriteSizedStringToGdbConsole(const char* pString, size_t length)
 {
     Buffer* pBuffer = GetInitializedBuffer();
+    size_t  charsWritten = 0;
 
     Buffer_WriteChar(pBuffer, 'O');
-    Buffer_WriteStringAsHex(pBuffer, pString);
-    if (!Buffer_OverrunDetected(pBuffer))
-        SendPacketToGdb();
+    charsWritten = Buffer_WriteSizedStringAsHex(pBuffer, pString, length);
+    SendPacketToGdb();
+
+    return charsWritten;
 }
 
 
@@ -51,7 +53,7 @@ void WriteHexValueToGdbConsole(uint32_t Value)
     Buffer_Init(&BufferObject, StringBuffer, sizeof(StringBuffer));
     Buffer_WriteString(&BufferObject, "0x");
     Buffer_WriteUIntegerAsHex(&BufferObject, Value);
-    Buffer_WriteChar(&BufferObject, '\0');
+    Buffer_SetEndOfBuffer(&BufferObject);
 
-    WriteStringToGdbConsole(StringBuffer);
+    WriteSizedStringToGdbConsole(Buffer_GetArray(&BufferObject), Buffer_GetLength(&BufferObject));
 }

@@ -1,4 +1,4 @@
-/* Copyright 2020 Adam Green (https://github.com/adamgreen/)
+/* Copyright 2022 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
    limitations under the License.
 */
 /* Handler for gdb's vCont and vCont? commands which support multithreaded single stepping/continuing. */
+#include <core/libc.h>
 #include <core/cmd_vcont.h>
 #include <core/buffer.h>
 #include <core/cmd_common.h>
@@ -23,7 +24,6 @@
 #include <core/mri.h>
 #include <core/platforms.h>
 #include <core/try_catch.h>
-#include <string.h>
 
 
 typedef enum
@@ -128,10 +128,13 @@ static uint32_t handleVContQueryCommand(void)
 */
 static uint32_t handleVContCommand(void)
 {
-    Action            continueAction = { {0, THREAD_ID_NONE}, {0, 0}, ACTION_NONE };
-    Action            stepAction = { {0, THREAD_ID_NONE}, {0, 0}, ACTION_NONE };
     Buffer*           pBuffer = GetBuffer();
     Buffer            replayBuffer = *pBuffer;
+    Action            continueAction;
+    Action            stepAction;
+
+    mri_memset(&continueAction, 0, sizeof(continueAction));
+    mri_memset(&stepAction, 0, sizeof(stepAction));
 
     __try
         firstParsePass(pBuffer, &continueAction, &stepAction);
@@ -239,8 +242,9 @@ static int isActionSpecificToHaltedThreadId(const Action* pAction)
 
 static Action parseAction(Buffer* pBuffer)
 {
-    Action action = { {0, THREAD_ID_NONE}, {0, 0}, ACTION_NONE };
     char   ch = Buffer_ReadChar(pBuffer);
+    Action action;
+    mri_memset(&action, 0, sizeof(action));
     switch (ch)
     {
         case 'c':

@@ -1,4 +1,4 @@
-/* Copyright 2014 Adam Green (https://github.com/adamgreen/)
+/* Copyright 2022 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,16 +17,19 @@
 #define SEMIHOST_H_
 
 #include <core/platforms.h>
+#include <core/cmd_file.h>
 
 /* Real name of functions are in mri namespace. */
 int mriSemihost_IsDebuggeeMakingSemihostCall(void);
 int mriSemihost_HandleSemihostRequest(void);
+int mriSemihost_WriteToFileOrConsole(const TransferParameters* pParameters);
 int mriSemihost_HandleNewlibSemihostRequest(PlatformSemihostParameters* pSemihostParameters);
 int mriSemihost_HandleMbedSemihostRequest(PlatformSemihostParameters* pParameters);
 
 /* Macroes which allow code to drop the mri namespace prefix. */
 #define Semihost_IsDebuggeeMakingSemihostCall   mriSemihost_IsDebuggeeMakingSemihostCall
 #define Semihost_HandleSemihostRequest          mriSemihost_HandleSemihostRequest
+#define Semihost_WriteToFileOrConsole           mriSemihost_WriteToFileOrConsole
 #define Semihost_HandleNewlibSemihostRequest    mriSemihost_HandleNewlibSemihostRequest
 #define Semihost_HandleMbedSemihostRequest      mriSemihost_HandleMbedSemihostRequest
 

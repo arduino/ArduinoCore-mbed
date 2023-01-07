@@ -62,4 +62,27 @@ protected:
     #define debugBreak()  { __asm volatile ("bkpt #0"); }
 #endif
 
+
+// This class can be used instead of Serial for sending output to the PC via GDB.
+class DebugSerial : public Print
+{
+public:
+    DebugSerial();
+
+    // Leaving out input Stream related methods so that compiler throws errors if user tries to use them.
+
+    // Methods that must be implemented for Print subclasses.
+    virtual size_t write(uint8_t);
+    virtual size_t write(const uint8_t *buffer, size_t size);
+    virtual void   flush();
+
+    // Additional methods defined by HardwareSerial that user might call.
+    void begin(unsigned long baud) { begin(baud, SERIAL_8N1); }
+    void begin(unsigned long baudrate, uint16_t config);
+    void end();
+    operator bool() { return true; }
+
+protected:
+} extern DebugSerial;
+
 } // namespace arduino

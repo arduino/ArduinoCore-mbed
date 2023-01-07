@@ -28,7 +28,7 @@
     Where xxxxxxxx is the hexadecimal representation of the ID for the thread to use for future register read/write
     commands.
 */
-uint32_t mriCmd_HandleThreadContextCommand(void)
+uint32_t HandleThreadContextCommand(void)
 {
     Buffer*     pBuffer = GetBuffer();
 

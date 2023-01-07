@@ -1,4 +1,4 @@
-/* Copyright 2020 Adam Green (https://github.com/adamgreen/)
+/* Copyright 2022 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,9 +14,8 @@
 */
 /* Monitor for Remote Inspection - Provides core mri routines to initialize the debug monitor, query its state, and
    invoke it into action when a debug event occurs on the target hardware. */
-#include <string.h>
-#include <signal.h>
 #include <errno.h>
+#include <core/libc.h>
 #include <core/mri.h>
 #include <core/buffer.h>
 #include <core/hex_convert.h>
@@ -25,7 +24,7 @@
 #include <core/token.h>
 #include <core/core.h>
 #include <core/platforms.h>
-#include <core/posix4win.h>
+#include <core/signal.h>
 #include <core/semihost.h>
 #include <core/cmd_common.h>
 #include <core/cmd_file.h>
@@ -49,7 +48,6 @@ typedef struct
     void*                       pvEnteringLeavingContext;
     MriContext*                 pContext;
     Packet                      packet;
-    Buffer                      buffer;
     uint32_t                    tempBreakpointAddress;
     uint32_t                    flags;
     AddressRange                rangeForSingleStepping;
@@ -67,6 +65,7 @@ static MriCore g_mri;
 #define MRI_FLAGS_TEMP_BREAKPOINT       (1 << 3)
 #define MRI_FLAGS_RESET_ON_CONTINUE     (1 << 4)
 #define MRI_FLAGS_RANGED_SINGLE_STEP    (1 << 5)
+#define MRI_FLAGS_ENCOUNTERED_CTRL_C    (1 << 6)
 
 /* Calculates the number of items in a static array at compile time. */
 #define ARRAY_SIZE(X) (sizeof(X)/sizeof(X[0]))
@@ -90,7 +89,7 @@ void mriInit(const char* pDebuggerParameters)
 
 static void clearCoreStructure(void)
 {
-    memset(&g_mri, 0, sizeof(g_mri));
+    mri_memset(&g_mri, 0, sizeof(g_mri));
 }
 
 static void initializePlatformSpecificModulesWithDebuggerParameters(const char* pDebuggerParameters)
@@ -157,7 +156,7 @@ static void setTempBreakpointFlag(void)
 }
 
 
-void mriSetDebuggerHooks(MriDebuggerHookPtr pEnteringHook, MriDebuggerHookPtr pLeavingHook, void* pvContext)
+void mriCoreSetDebuggerHooks(MriDebuggerHookPtr pEnteringHook, MriDebuggerHookPtr pLeavingHook, void* pvContext)
 {
     g_mri.pEnteringHook = pEnteringHook;
     g_mri.pLeavingHook = pLeavingHook;
@@ -165,6 +164,7 @@ void mriSetDebuggerHooks(MriDebuggerHookPtr pEnteringHook, MriDebuggerHookPtr pL
 }
 
 
+static void clearControlCEncounteredFlag(void);
 static int wasTempBreakpointHit(void);
 static void clearTempBreakpoint(void);
 static void clearTempBreakpointFlag(void);
@@ -174,13 +174,13 @@ static void determineSignalValue(void);
 static int  isDebugTrap(void);
 static void prepareForDebuggerExit(void);
 static void clearFirstExceptionFlag(void);
-static int hasResetBeenRequested(void);
 static void waitForAckToBeTransmitted(void);
 void mriDebugException(MriContext* pContext)
 {
     int justSingleStepped;
 
     SetContext(pContext);
+    clearControlCEncounteredFlag();
     justSingleStepped = Platform_IsSingleStepping();
 
     if (wasTempBreakpointHit())
@@ -238,6 +238,11 @@ void mriDebugException(MriContext* pContext)
     prepareForDebuggerExit();
 }
 
+static void clearControlCEncounteredFlag(void)
+{
+    g_mri.flags &= ~MRI_FLAGS_ENCOUNTERED_CTRL_C;
+}
+
 static int wasTempBreakpointHit(void)
 {
     return (isTempBreakpointSet() &&
@@ -263,16 +268,26 @@ static void clearTempBreakpointFlag(void)
 
 static int areSingleSteppingInRange(void)
 {
-    // Ignore ranged single stepping if CTRL+C was pressed or...
-    if (g_mri.signalValue == SIGINT)
-        return 0;
-    // if a debug breakpoint/watchpoint was hit.
-    if (g_mri.signalValue == SIGTRAP)
+    switch (g_mri.signalValue)
     {
-        PlatformTrapReason reason = Platform_GetTrapReason();
-        if (reason.type != MRI_PLATFORM_TRAP_TYPE_UNKNOWN)
+        case SIGINT:
+        case SIGSEGV:
+        case SIGBUS:
+        case SIGILL:
+            /* Ignore ranged single stepping if CTRL+C was pressed, or a fault was encountered, or... */
             return 0;
+        case SIGTRAP:
+        {
+            /* if a debug breakpoint/watchpoint was hit. */
+            PlatformTrapReason reason = Platform_GetTrapReason();
+            if (reason.type != MRI_PLATFORM_TRAP_TYPE_UNKNOWN)
+                return 0;
+            break;
+        }
+        default:
+            break;
     }
+
     return g_mri.flags & MRI_FLAGS_RANGED_SINGLE_STEP;
 }
 
@@ -293,7 +308,7 @@ static int isDebugTrap(void)
 
 static void prepareForDebuggerExit(void)
 {
-    if (hasResetBeenRequested()) {
+    if (WasResetOnNextContinueRequested() && !Platform_IsSingleStepping()) {
         waitForAckToBeTransmitted();
         Platform_ResetDevice();
     }
@@ -303,16 +318,11 @@ static void prepareForDebuggerExit(void)
     clearFirstExceptionFlag();
 }
 
-static int hasResetBeenRequested(void)
-{
-    return (int)(g_mri.flags & MRI_FLAGS_RESET_ON_CONTINUE);
-}
-
 static void waitForAckToBeTransmitted(void)
 {
     while ( !Platform_CommHasTransmitCompleted() )
     {
-        // Waiting for ACK to be sent back to GDB for last command received.
+        /* Waiting for ACK to be sent back to GDB for last command received. */
     }
 }
 
@@ -337,7 +347,7 @@ void GdbCommandHandlingLoop(void)
     } while (!startDebuggeeUpAgain);
 }
 
-__attribute__((weak)) uint32_t  mriPlatform_HandleGDBComand(Buffer* pBuffer);
+__attribute__((weak)) uint32_t Platform_HandleGDBCommand(Buffer* pBuffer);
 static int handleGDBCommand(void)
 {
     Buffer*         pBuffer = GetBuffer();
@@ -372,8 +382,8 @@ static int handleGDBCommand(void)
 
     getPacketFromGDB();
 
-    if (mriPlatform_HandleGDBComand)
-        handlerResult = mriPlatform_HandleGDBComand(pBuffer);
+    if (Platform_HandleGDBCommand)
+        handlerResult = Platform_HandleGDBCommand(pBuffer);
     if (handlerResult == 0)
     {
         Buffer_Reset(pBuffer);
@@ -397,21 +407,21 @@ static int handleGDBCommand(void)
 
 static void getPacketFromGDB(void)
 {
-    InitBuffer();
-    Packet_GetFromGDB(&g_mri.packet, &g_mri.buffer);
+    InitPacketBuffers();
+    Packet_GetFromGDB(&g_mri.packet);
 }
 
 
-void InitBuffer(void)
+void InitPacketBuffers(void)
 {
-    Buffer_Init(&g_mri.buffer, Platform_GetPacketBuffer(), Platform_GetPacketBufferSize());
+    Packet_Init(&g_mri.packet, Platform_GetPacketBuffer(), Platform_GetPacketBufferSize());
 }
 
 
 void PrepareStringResponse(const char* pErrorString)
 {
-    InitBuffer();
-    Buffer_WriteString(&g_mri.buffer, pErrorString);
+    InitPacketBuffers();
+    Buffer_WriteString(GetBuffer(), pErrorString);
 }
 
 
@@ -429,6 +439,21 @@ int WasControlCFlagSentFromGdb(void)
 void RequestResetOnNextContinue(void)
 {
     g_mri.flags |= MRI_FLAGS_RESET_ON_CONTINUE;
+}
+
+int WasControlCEncountered(void)
+{
+    return (int)(g_mri.flags & MRI_FLAGS_ENCOUNTERED_CTRL_C);
+}
+
+void ControlCEncountered(void)
+{
+    g_mri.flags |= MRI_FLAGS_ENCOUNTERED_CTRL_C;
+}
+
+int WasResetOnNextContinueRequested(void)
+{
+    return (int)(g_mri.flags & MRI_FLAGS_RESET_ON_CONTINUE);
 }
 
 void SetSingleSteppingRange(const AddressRange* pRange)
@@ -510,25 +535,25 @@ int GetSemihostErrno(void)
 
 Buffer* GetBuffer(void)
 {
-    return &g_mri.buffer;
+    return &g_mri.packet.dataBuffer;
 }
 
 
 Buffer* GetInitializedBuffer(void)
 {
-    InitBuffer();
-    return &g_mri.buffer;
+    InitPacketBuffers();
+    return GetBuffer();
 }
 
 
 void SendPacketToGdb(void)
 {
-    if (Buffer_OverrunDetected(&g_mri.buffer))
+    if (Buffer_OverrunDetected(GetBuffer()))
     {
-        InitBuffer();
-        Buffer_WriteString(&g_mri.buffer, MRI_ERROR_BUFFER_OVERRUN);
+        InitPacketBuffers();
+        Buffer_WriteString(GetBuffer(), MRI_ERROR_BUFFER_OVERRUN);
     }
 
-    Buffer_SetEndOfBuffer(&g_mri.buffer);
-    Packet_SendToGDB(&g_mri.packet, &g_mri.buffer);
+    Buffer_SetEndOfBuffer(GetBuffer());
+    Packet_SendToGDB(&g_mri.packet);
 }

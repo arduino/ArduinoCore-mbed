@@ -1,4 +1,4 @@
-/* Copyright 2017 Adam Green (https://github.com/adamgreen/)
+/* Copyright 2022 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -41,9 +41,18 @@ uint32_t HandleSingleStepCommand(void)
 
     if (returnValue)
     {
-        if (Platform_RtosIsSetThreadStateSupported())
-            Platform_RtosSetThreadState(Platform_RtosGetHaltedThreadId(), MRI_PLATFORM_THREAD_SINGLE_STEPPING);
+        uint32_t pcBefore = Platform_GetProgramCounter();
         Platform_EnableSingleStep();
+        if (Platform_GetProgramCounter() != pcBefore)
+        {
+            /* Platform code ended up advancing the program counter instead of enabling single step so just return
+               stop response to GDB. */
+            return Send_T_StopResponse();
+        }
+        if (Platform_RtosIsSetThreadStateSupported())
+        {
+            Platform_RtosSetThreadState(Platform_RtosGetHaltedThreadId(), MRI_PLATFORM_THREAD_SINGLE_STEPPING);
+        }
     }
 
     return returnValue;

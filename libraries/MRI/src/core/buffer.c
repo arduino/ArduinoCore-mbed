@@ -1,4 +1,4 @@
-/* Copyright 2020 Adam Green (https://github.com/adamgreen/)
+/* Copyright 2022 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 /*  'Class' which represents a text buffer.  Has routines to both extract and inject strings of various types into the
     buffer while verifying that no overflow takes place. */
 #include <limits.h>
-#include <string.h>
+#include <core/libc.h>
 #include <core/buffer.h>
 #include <core/hex_convert.h>
 #include <core/try_catch.h>
@@ -38,6 +38,15 @@ void Buffer_SetEndOfBuffer(Buffer* pBuffer)
 {
     if (pBuffer->pCurrent < pBuffer->pEnd)
         pBuffer->pEnd = pBuffer->pCurrent;
+}
+
+
+void Buffer_Advance(Buffer* pBuffer, size_t amount)
+{
+    size_t bytesLeft = Buffer_BytesLeft(pBuffer);
+    if (amount > bytesLeft)
+        amount = bytesLeft;
+    pBuffer->pCurrent += amount;
 }
 
 
@@ -147,7 +156,7 @@ uint8_t Buffer_ReadByteAsHex(Buffer* pBuffer)
 
 void Buffer_WriteString(Buffer* pBuffer, const char* pString)
 {
-    Buffer_WriteSizedString(pBuffer, pString, strlen(pString));
+    Buffer_WriteSizedString(pBuffer, pString, mri_strlen(pString));
 }
 
 
@@ -163,10 +172,25 @@ void Buffer_WriteSizedString(Buffer* pBuffer, const char* pString, size_t length
 }
 
 
-void Buffer_WriteStringAsHex(Buffer* pBuffer, const char* pString)
+size_t Buffer_WriteStringAsHex(Buffer* pBuffer, const char* pString)
 {
-    while (*pString)
+    return Buffer_WriteSizedStringAsHex(pBuffer, pString, mri_strlen(pString));
+}
+
+
+size_t Buffer_WriteSizedStringAsHex(Buffer* pBuffer, const char* pString, size_t length)
+{
+    size_t charLimit = Buffer_BytesLeft(pBuffer) / 2;
+    size_t charsWritten;
+
+    if (length > charLimit)
+        length = charLimit;
+    charsWritten = length;
+    while (length--)
         Buffer_WriteByteAsHex(pBuffer, *pString++);
+
+    // Returns the number of source string characters consumed and not number of hex digits written to buffer.
+    return charsWritten;
 }
 
 
@@ -411,7 +435,7 @@ static int doesBufferContainThisString(Buffer* pBuffer, const char* pDesiredStri
 {
     const char* pBufferString = pBuffer->pCurrent;
 
-    return (strncmp(pBufferString, pDesiredString, stringLength) == 0) &&
+    return (mri_strncmp(pBufferString, pDesiredString, stringLength) == 0) &&
            (Buffer_BytesLeft(pBuffer) == stringLength ||
             pBufferString[stringLength] == ':' ||
             pBufferString[stringLength] == ';' ||

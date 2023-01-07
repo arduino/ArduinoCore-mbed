@@ -1,4 +1,4 @@
-/* Copyright 2014 Adam Green (https://github.com/adamgreen/)
+/* Copyright 2022 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
    limitations under the License.
 */
 /* 'Class' used to parse and tokenize a string based on provided list of separators. */
-#include <string.h>
+#include <core/libc.h>
 #include <core/token.h>
 
 #define ARRAY_SIZE(X) (sizeof(X)/sizeof(X[0]))
@@ -34,7 +34,7 @@ void Token_InitWith(Token* pToken, const char* pTheseTokenSeparators)
 
 static void clearTokenObject(Token* pToken)
 {
-    memset(pToken->tokenPointers, 0, sizeof(pToken->tokenPointers));
+    mri_memset(pToken->tokenPointers, 0, sizeof(pToken->tokenPointers));
     pToken->tokenCount = 0;
     pToken->copyOfString[0] = '\0';
 }
@@ -156,7 +156,7 @@ const char* Token_MatchingString(Token* pToken, const char* pTokenToSearchFor)
 
     for (i = 0 ; i < pToken->tokenCount ; i++)
     {
-        if (0 == strcmp(pToken->tokenPointers[i], pTokenToSearchFor))
+        if (0 == mri_strcmp(pToken->tokenPointers[i], pTokenToSearchFor))
             return pToken->tokenPointers[i];
     }
     return NULL;
@@ -169,7 +169,7 @@ const char* Token_MatchingStringPrefix(Token* pToken, const char* pTokenPrefixTo
 
     for (i = 0 ; i < pToken->tokenCount ; i++)
     {
-        if (pToken->tokenPointers[i] == strstr(pToken->tokenPointers[i], pTokenPrefixToSearchFor))
+        if (pToken->tokenPointers[i] == mri_strstr(pToken->tokenPointers[i], pTokenPrefixToSearchFor))
             return pToken->tokenPointers[i];
     }
     return NULL;
@@ -179,7 +179,7 @@ const char* Token_MatchingStringPrefix(Token* pToken, const char* pTokenPrefixTo
 static void adjustTokenPointers(Token* pToken, const char* pOriginalStringCopyBaseAddress);
 void Token_Copy(Token* pTokenCopy, Token* pTokenOriginal)
 {
-    *pTokenCopy = *pTokenOriginal;
+    mri_memcpy(pTokenCopy, pTokenOriginal, sizeof(*pTokenCopy));
 
     adjustTokenPointers(pTokenCopy, pTokenOriginal->copyOfString);
 }

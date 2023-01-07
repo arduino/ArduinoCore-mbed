@@ -1,4 +1,4 @@
-/* Copyright 2020 Adam Green (https://github.com/adamgreen/)
+/* Copyright 2022 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ extern "C" {
     // Source code for armv7-m module which is included here, configured for supporting kernel mode debugging.
     #include <architectures/armv7-m/armv7-m.x>
     #include <architectures/armv7-m/debug_cm3.h>
+    #include <variants/mri_variant.h>
 }
 
 
@@ -134,8 +135,10 @@ static void readThreadContext(MriContext* pContext, uint32_t* pSP, osRtxThread_t
 // Forward declaration of external functions used by KernelDebug.
 // Will be setting initial breakpoint on setup() routine.
 extern "C" void setup();
-// The debugger uses this handler to catch faults, debug events, etc.
+// The debugger uses this handler to handle debug events, etc.
 extern "C" void mriExceptionHandler(void);
+// The debugger uses this handler to handle faults.
+extern "C" void mriFaultHandler(void);
 
 
 
@@ -241,10 +244,10 @@ static void restoreSystemHandlerPriorities(const SystemHandlerPriorities* pPrior
 
 static void switchFaultHandlersToDebugger(void)
 {
-    NVIC_SetVector(HardFault_IRQn,        (uint32_t)&mriExceptionHandler);
-    NVIC_SetVector(MemoryManagement_IRQn, (uint32_t)&mriExceptionHandler);
-    NVIC_SetVector(BusFault_IRQn,         (uint32_t)&mriExceptionHandler);
-    NVIC_SetVector(UsageFault_IRQn,       (uint32_t)&mriExceptionHandler);
+    NVIC_SetVector(HardFault_IRQn,        (uint32_t)&mriFaultHandler);
+    NVIC_SetVector(MemoryManagement_IRQn, (uint32_t)&mriFaultHandler);
+    NVIC_SetVector(BusFault_IRQn,         (uint32_t)&mriFaultHandler);
+    NVIC_SetVector(UsageFault_IRQn,       (uint32_t)&mriFaultHandler);
 }
 
 
@@ -287,27 +290,6 @@ void Platform_CommSendChar(int character)
 
 
 
-static const char g_memoryMapXml[] = "<?xml version=\"1.0\"?>"
-                                     "<!DOCTYPE memory-map PUBLIC \"+//IDN gnu.org//DTD GDB Memory Map V1.0//EN\" \"http://sourceware.org/gdb/gdb-memory-map.dtd\">"
-                                     "<memory-map>"
-                                     "<memory type=\"ram\" start=\"0x00000000\" length=\"0x10000\"> </memory>"
-                                     "<memory type=\"flash\" start=\"0x08000000\" length=\"0x200000\"> <property name=\"blocksize\">0x20000</property></memory>"
-                                     "<memory type=\"ram\" start=\"0x10000000\" length=\"0x48000\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x1ff00000\" length=\"0x20000\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x20000000\" length=\"0x20000\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x24000000\" length=\"0x80000\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x30000000\" length=\"0x48000\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x38000000\" length=\"0x10000\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x38800000\" length=\"0x1000\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x58020000\" length=\"0x2c00\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x58024400\" length=\"0xc00\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x58025400\" length=\"0x800\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x58026000\" length=\"0x800\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x58027000\" length=\"0x400\"> </memory>"
-                                     "<memory type=\"flash\" start=\"0x90000000\" length=\"0x10000000\"> <property name=\"blocksize\">0x200</property></memory>"
-                                     "<memory type=\"ram\" start=\"0x60000000\" length=\"0x800000\"> </memory>"
-                                     "</memory-map>";
-
 extern "C" uint32_t Platform_GetDeviceMemoryMapXmlSize(void)
 {
     return sizeof(g_memoryMapXml) - 1;
@@ -331,12 +313,7 @@ extern "C" uint32_t Platform_GetUidSize(void)
     return 0;
 }
 
-extern "C" int Semihost_IsDebuggeeMakingSemihostCall(void)
-{
-    return 0;
-}
-
-int Semihost_HandleSemihostRequest(void)
+int Semihost_HandleMbedSemihostRequest(PlatformSemihostParameters* pParameters)
 {
     return 0;
 }
@@ -617,3 +594,55 @@ void Platform_RtosSetThreadState(uint32_t threadId, PlatformThreadState state)
 void Platform_RtosRestorePrevThreadState(void)
 {
 }
+
+
+
+
+
+// This class can be used instead of Serial for sending output to the PC via GDB.
+DebugSerial::DebugSerial()
+{
+}
+
+// Methods that must be implemented for Print subclasses.
+size_t DebugSerial::write(uint8_t byte)
+{
+    return write(&byte, sizeof(byte));
+}
+
+size_t DebugSerial::write(const uint8_t *pBuffer, size_t size)
+{
+    const int    STDOUT_FILE_NO = 1;
+    const char*  pCurr = (const char*)pBuffer;
+    int          bytesWritten = 0;
+
+    while (size > 0) {
+        int result = mriNewlib_SemihostWrite(STDOUT_FILE_NO, pCurr, size);
+        if (result == -1) {
+            break;
+        }
+        size -= result;
+        pCurr += result;
+        bytesWritten += result;
+    }
+    return bytesWritten;
+}
+
+void DebugSerial::flush()
+{
+}
+
+void DebugSerial::begin(unsigned long baud, uint16_t mode)
+{
+    // Silence compiler warnings about unused parameters.
+    (void)baud;
+    (void)mode;
+}
+
+void DebugSerial::end()
+{
+}
+
+
+// Instantiate the single instance of this stream.
+class DebugSerial arduino::DebugSerial;

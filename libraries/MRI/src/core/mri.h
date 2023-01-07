@@ -1,4 +1,4 @@
-/* Copyright 2020 Adam Green (https://github.com/adamgreen/)
+/* Copyright 2022 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -123,6 +123,7 @@ int mriNewlib_SemihostRead(int file, char *ptr, int len);
 int mriNewlib_SemihostLSeek(int file, int offset, int whence);
 int mriNewlib_SemihostClose(int file);
 int mriNewlib_SemihostFStat(int file, void *pStat);
+int mriNewlib_SemihostGetErrNo(void);
 
 
 

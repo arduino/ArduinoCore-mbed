@@ -79,7 +79,7 @@ public:
     virtual bool readable() = 0;
     virtual bool writeable() = 0;
 	virtual uint8_t read() = 0;
-	virtual void write(uint8_t c) = 0;
+	virtual void write(const char* pBuffer, size_t bufferLength) = 0;
     virtual void attach(void (*pCallback)()) = 0;
 };
 
@@ -97,7 +97,7 @@ public:
     virtual bool readable();
     virtual bool writeable();
 	virtual uint8_t read();
-	virtual void write(uint8_t c);
+	virtual void write(const char* pBuffer, size_t bufferLength);
     virtual void attach(void (*pCallback)());
 
 protected:
@@ -115,7 +115,7 @@ public:
     virtual bool readable();
     virtual bool writeable();
     virtual uint8_t read();
-    virtual void write(uint8_t c);
+    virtual void write(const char* pBuffer, size_t bufferLength);
     virtual void attach(void (*pCallback)());
 
 protected:
@@ -132,7 +132,7 @@ public:
     virtual bool readable();
     virtual bool writeable();
 	virtual uint8_t read();
-	virtual void write(uint8_t c);
+	virtual void write(const char* pBuffer, size_t bufferLength);
     virtual void attach(void (*pCallback)());
 
 protected:
@@ -152,5 +152,28 @@ protected:
 #ifndef debugBreak
     #define debugBreak()  { __asm volatile ("bkpt #0"); }
 #endif
+
+
+// This class can be used instead of Serial for sending output to the PC via GDB.
+class DebugSerial : public Print
+{
+public:
+    DebugSerial();
+
+    // Leaving out input Stream related methods so that compiler throws errors if user tries to use them.
+
+    // Methods that must be implemented for Print subclasses.
+    virtual size_t write(uint8_t);
+    virtual size_t write(const uint8_t *buffer, size_t size);
+    virtual void   flush();
+
+    // Additional methods defined by HardwareSerial that user might call.
+    void begin(unsigned long baud) { begin(baud, SERIAL_8N1); }
+    void begin(unsigned long baudrate, uint16_t config);
+    void end();
+    operator bool() { return true; }
+
+protected:
+} extern DebugSerial;
 
 } // namespace arduino

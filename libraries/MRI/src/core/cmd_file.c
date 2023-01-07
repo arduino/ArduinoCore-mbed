@@ -13,8 +13,8 @@
    limitations under the License.
 */
 /* Handling and issuing routines for gdb file commands. */
-#include <signal.h>
 #include <string.h>
+#include <core/signal.h>
 #include <core/fileio.h>
 #include <core/core.h>
 #include <core/cmd_common.h>

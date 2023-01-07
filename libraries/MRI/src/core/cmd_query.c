@@ -1,4 +1,4 @@
-/* Copyright 2020 Adam Green (https://github.com/adamgreen/)
+/* Copyright 2022 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
    limitations under the License.
 */
 /* Handler for gdb query commands. */
-#include <string.h>
+#include <core/libc.h>
 #include <core/buffer.h>
 #include <core/core.h>
 #include <core/platforms.h>
@@ -102,8 +102,9 @@ uint32_t HandleQueryCommand(void)
 */
 static uint32_t handleQuerySupportedCommand(void)
 {
-    static const char querySupportResponse[] = "qXfer:memory-map:read+;qXfer:features:read+;PacketSize=";
-    uint32_t          PacketSize = Platform_GetPacketBufferSize();
+    static const char querySupportResponse[] = "qXfer:memory-map:read+;qXfer:features:read+;vContSupported+;PacketSize=";
+    /* Subtract 4 for packet overhead ('$', '#', and 2-byte checksum) as GDB doesn't count those bytes. */
+    uint32_t          PacketSize = Platform_GetPacketBufferSize()-4;
     Buffer*           pBuffer = GetInitializedBuffer();
 
     Buffer_WriteString(pBuffer, querySupportResponse);
@@ -176,7 +177,7 @@ static void readQueryTransferReadArguments(Buffer* pBuffer, AnnexOffsetLength* p
 {
     static const char   readCommand[] = "read";
 
-    memset(pAnnexOffsetLength, 0, sizeof(*pAnnexOffsetLength));
+    mri_memset(pAnnexOffsetLength, 0, sizeof(*pAnnexOffsetLength));
     if (!Buffer_IsNextCharEqualTo(pBuffer, ':') ||
         !Buffer_MatchesString(pBuffer, readCommand, sizeof(readCommand)-1) ||
         !Buffer_IsNextCharEqualTo(pBuffer, ':') )
@@ -249,7 +250,7 @@ static void handleQueryTransferReadCommand(AnnexOffsetLength* pArguments)
         validMemoryMapBytes = pArguments->annexSize - offset;
     }
 
-    InitBuffer();
+    InitPacketBuffers();
     outputBufferSize = Buffer_BytesLeft(pBuffer);
 
     if (length > outputBufferSize)
@@ -294,7 +295,7 @@ static uint32_t handleQueryTransferFeaturesCommand(void)
 
 static void validateAnnexIs(const char* pAnnex, const char* pExpected)
 {
-    if (pAnnex == NULL || 0 != strcmp(pAnnex, pExpected))
+    if (pAnnex == NULL || 0 != mri_strcmp(pAnnex, pExpected))
         __throw(invalidArgumentException);
 }
 

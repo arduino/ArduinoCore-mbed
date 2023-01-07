@@ -36,7 +36,7 @@ uint32_t Context_Count(MriContext* pThis)
     return count;
 }
 
-uint32_t mriContext_Get(const MriContext* pThis, uint32_t index)
+uint32_t Context_Get(const MriContext* pThis, uint32_t index)
 {
     uint32_t i;
     uint32_t count = 0;
@@ -53,7 +53,7 @@ uint32_t mriContext_Get(const MriContext* pThis, uint32_t index)
     __throw_and_return(bufferOverrunException, 0);
 }
 
-void mriContext_Set(MriContext* pThis, uint32_t index, uint32_t newValue)
+void Context_Set(MriContext* pThis, uint32_t index, uint32_t newValue)
 {
     uint32_t i;
     uint32_t count = 0;

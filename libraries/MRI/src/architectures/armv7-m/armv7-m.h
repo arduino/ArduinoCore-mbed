@@ -1,4 +1,4 @@
-/* Copyright 2020 Adam Green (https://github.com/adamgreen/)
+/* Copyright 2022 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -34,9 +34,11 @@
 #define CORTEXM_FLAGS_ACTIVE_DEBUG          (1 << 0)
 #define CORTEXM_FLAGS_FAULT_DURING_DEBUG    (1 << 1)
 #define CORTEXM_FLAGS_SINGLE_STEPPING       (1 << 2)
-#define CORTEXM_FLAGS_RESTORE_BASEPRI       (1 << 3)
+#define CORTEXM_FLAGS_RESTORE_PRI           (1 << 3)
 #define CORTEXM_FLAGS_SVC_STEP              (1 << 4)
 #define CORTEXM_FLAGS_CTRL_C                (1 << 5)
+#define CORTEXM_FLAGS_NO_DEBUG_STACK        (1 << 6)
+#define CORTEXM_FLAGS_PEND_FROM_FAULT       (1 << 7)
 
 /* Special memory area used by the debugger for its stack so that it doesn't interfere with the task's
    stack contents.
@@ -72,6 +74,9 @@
 #define LR      14
 #define PC      15
 #define CPSR    16
+#define MSP     17
+#define PSP     18
+#define PRIMASK 19
 #define BASEPRI 20
 
 
@@ -87,8 +92,9 @@
 #endif
 
 /* NOTE: The largest buffer is required for receiving the 'G' command which receives the contents of the registers from
-   the debugger as two hex digits per byte.  Also need a character for the 'G' command itself. */
-#define CORTEXM_PACKET_BUFFER_SIZE  (1 + 2 * sizeof(uint32_t) * CONTEXT_SIZE)
+   the debugger as two hex digits per byte.  Also need a character for the 'G' command itself and another 4 for the '$',
+   '#', and 2-byte checksum. */
+#define CORTEXM_PACKET_BUFFER_SIZE  (1 + 2 * sizeof(uint32_t) * CONTEXT_SIZE + 4)
 
 typedef struct
 {
@@ -103,8 +109,9 @@ typedef struct
     uint32_t            mmfar;
     uint32_t            bfar;
     uint32_t            originalPC;
-    uint32_t            originalBasePriority;
-    uint32_t            subPriorityBitCount;
+    uint32_t            basepri;
+    uint32_t            primask;
+    uint32_t            priorityBitShift;
     int                 maxStackUsed;
     char                packetBuffer[CORTEXM_PACKET_BUFFER_SIZE];
 } CortexMState;

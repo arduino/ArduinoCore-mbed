@@ -13,7 +13,7 @@
    limitations under the License.
 */
 /* Command handler for gdb commands related to CPU registers. */
-#include <signal.h>
+#include <core/signal.h>
 #include <core/cmd_common.h>
 #include <core/platforms.h>
 #include <core/buffer.h>

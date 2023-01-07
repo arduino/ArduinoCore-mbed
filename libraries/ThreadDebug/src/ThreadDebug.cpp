@@ -34,6 +34,7 @@ extern "C"
     // Source code for armv7-m module which is included here, configured for supporting thread mode debugging.
     #include <architectures/armv7-m/armv7-m.x>
     #include <architectures/armv7-m/debug_cm3.h>
+    #include <variants/mri_variant.h>
 }
 
 
@@ -61,7 +62,7 @@ static const char* g_threadNamesToIgnore[] = {
 // Bit in LR set to 0 when automatic stacking of floating point registers occurs during exception handling.
 #define LR_FLOAT_STACK                      (1 << 4)
 
-// RTX Thread synchronization flag used to indicate that a debug event has occured.
+// RTX Thread synchronization flag used to indicate that a debug event has occurred.
 #define MRI_THREAD_DEBUG_EVENT_FLAG         (1 << 0)
 
 // Lower nibble of EXC_RETURN in LR will have one of these values if interrupted code was running in thread mode.
@@ -75,7 +76,7 @@ static const char* g_threadNamesToIgnore[] = {
 #define ARRAY_SIZE(X) (sizeof(X)/sizeof(X[0]))
 
 // Assert routine that will dump error text to USB GDB connection before entering infinite loop. If user is logging MRI
-// remote communications then they will see the error text in the log before debug stub becomes unresponseive.
+// remote communications then they will see the error text in the log before debug stub becomes unresponsive.
 #undef ASSERT
 #define ASSERT(X) \
     if (!(X)) { \
@@ -94,7 +95,6 @@ static const char* g_threadNamesToIgnore[] = {
 
 // If non-NULL, this is the thread that we want to single step.
 // If NULL, single stepping is not enabled.
-// Accessed by this module and the assembly language handlers in ThreadDebug_asm.S.
 volatile osThreadId_t           mriThreadSingleStepThreadId;
 
 // Structures used to track information about all of the application's threads.  It tracks a thread's original priority
@@ -156,7 +156,7 @@ struct ThreadList
             if (pInfo->state != MRI_PLATFORM_THREAD_FROZEN) {
                 thawThread(pInfo, pInfo->priority, pInfo->basePriority);
             }
-            if (shouldThawIdleThreadDuringSingleStep(pInfo)) {
+            if (needToThawIdleThread(pInfo)) {
                 // Gives RTX a thread to run if single stepping thread is waiting on sync object.
                 thawThread(pInfo, osPriorityIdle+1, osPriorityIdle+1);
             }
@@ -171,11 +171,9 @@ struct ThreadList
         pThread->priority_base = basePriority;
     }
 
-    bool shouldThawIdleThreadDuringSingleStep(ThreadInfo* pInfo)
+    bool needToThawIdleThread(ThreadInfo* pInfo)
     {
-        return pInfo->threadId == osRtxInfo.thread.idle &&
-               pInfo->state == (uint8_t)MRI_PLATFORM_THREAD_FROZEN &&
-               mriThreadSingleStepThreadId != 0;
+        return pInfo->threadId == osRtxInfo.thread.idle && pInfo->state == (uint8_t)MRI_PLATFORM_THREAD_FROZEN;
     }
 
     void sort()
@@ -281,7 +279,7 @@ static uint32_t                 g_maxThreadCount;
 static char                     g_threadExtraInfo[64];
 
 // This flag is set to a non-zero value if the DebugMon handler is to re-enable DWT watchpoints and FPB breakpoints
-// after being disabled by the HardFault handler when a debug event is encounted in handler mode.
+// after being disabled by the HardFault handler when a debug event is encountered in handler mode.
 static volatile uint32_t        g_enableDWTandFPB;
 
 // This flag is set to a non-zero value if a DebugMon interrupt was pended because GDB sent CTRL+C.
@@ -356,6 +354,7 @@ static bool hasEncounteredDebugEvent();
 static void recordAndClearFaultStatusBits();
 static void wakeMriMainToDebugCurrentThread();
 static void stopSingleStepping();
+static void recordRtxHandlers();
 static void recordAndSwitchFaultHandlersToDebugger();
 static const char* getThreadStateName(uint8_t threadState);
 static bool isDebugThreadActive();
@@ -580,9 +579,6 @@ static void readThreadContext(MriContext* pContext, uint32_t* pSP, osThreadId_t 
 
 static void switchRtxHandlersToDebugStubsForSingleStepping()
 {
-    mriThreadOrigSVCall = NVIC_GetVector(SVCall_IRQn);
-    mriThreadOrigPendSV = NVIC_GetVector(PendSV_IRQn);
-    mriThreadOrigSysTick = NVIC_GetVector(SysTick_IRQn);
     NVIC_SetVector(SVCall_IRQn, (uint32_t)mriSVCHandlerStub);
     NVIC_SetVector(PendSV_IRQn, (uint32_t)mriPendSVHandlerStub);
     NVIC_SetVector(SysTick_IRQn, (uint32_t)mriSysTickHandlerStub);
@@ -624,17 +620,14 @@ ThreadDebug::~ThreadDebug()
 
     // IMPORTANT NOTE: You are attempting to destroy the connection to GDB which isn't allowed.
     //                 Don't allow your ThreadDebug object to go out of scope like this.
-    debugBreak();
-    for (;;) {
-        // Loop forever.
-    }
+    ASSERT ( false );
 }
 
 
 
 
 // ---------------------------------------------------------------------------------------------------------------------
-// Global Platform_* functions needed by MRI to initialize and communicate with MRI.
+// Global Platform_* functions needed by MRI to initialize and communicate with GDB.
 // These functions will perform most of their work through the DebugSerial singleton.
 // ---------------------------------------------------------------------------------------------------------------------
 void Platform_Init(Token* pParameterTokens)
@@ -650,7 +643,15 @@ void Platform_Init(Token* pParameterTokens)
     mriThreadSingleStepThreadId = NULL;
     Context_Init(&mriCortexMState.context, g_contextSections, ARRAY_SIZE(g_contextSections));
     Context_Init(&g_threadContext, g_threadContextSections, ARRAY_SIZE(g_threadContextSections));
+    recordRtxHandlers();
     recordAndSwitchFaultHandlersToDebugger();
+}
+
+static void recordRtxHandlers()
+{
+    mriThreadOrigSVCall = NVIC_GetVector(SVCall_IRQn);
+    mriThreadOrigPendSV = NVIC_GetVector(PendSV_IRQn);
+    mriThreadOrigSysTick = NVIC_GetVector(SysTick_IRQn);
 }
 
 static void recordAndSwitchFaultHandlersToDebugger()
@@ -690,47 +691,18 @@ int Platform_CommReceiveChar(void)
 
 void Platform_CommSendChar(int character)
 {
-    g_pComm->write(character);
+    char data = character;
+
+    g_pComm->write(&data, sizeof(data));
+}
+
+void Platform_CommSendBuffer(Buffer* pBuffer)
+{
+    g_pComm->write(Buffer_GetArray(pBuffer), Buffer_GetLength(pBuffer));
 }
 
 
 
-#ifdef STM32H747xx
-static const char g_memoryMapXml[] = "<?xml version=\"1.0\"?>"
-                                     "<!DOCTYPE memory-map PUBLIC \"+//IDN gnu.org//DTD GDB Memory Map V1.0//EN\" \"http://sourceware.org/gdb/gdb-memory-map.dtd\">"
-                                     "<memory-map>"
-#ifndef CORE_CM4
-                                     "<memory type=\"ram\" start=\"0x00000000\" length=\"0x10000\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x10000000\" length=\"0x48000\"> </memory>"
-#endif
-                                     "<memory type=\"flash\" start=\"0x08000000\" length=\"0x200000\"> <property name=\"blocksize\">0x20000</property></memory>"
-                                     "<memory type=\"ram\" start=\"0x1ff00000\" length=\"0x20000\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x20000000\" length=\"0x20000\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x24000000\" length=\"0x80000\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x30000000\" length=\"0x48000\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x38000000\" length=\"0x10000\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x38800000\" length=\"0x1000\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x58020000\" length=\"0x2c00\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x58024400\" length=\"0xc00\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x58025400\" length=\"0x800\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x58026000\" length=\"0x800\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x58027000\" length=\"0x400\"> </memory>"
-                                     "<memory type=\"flash\" start=\"0x90000000\" length=\"0x10000000\"> <property name=\"blocksize\">0x200</property></memory>"
-#ifndef CORE_CM4
-                                     "<memory type=\"ram\" start=\"0x60000000\" length=\"0x800000\"> </memory>"
-#endif
-                                     "</memory-map>";
-#endif
-
-#ifdef NRF52840_XXAA
-static const char g_memoryMapXml[] = "<?xml version=\"1.0\"?>"
-                                     "<!DOCTYPE memory-map PUBLIC \"+//IDN gnu.org//DTD GDB Memory Map V1.0//EN\" \"http://sourceware.org/gdb/gdb-memory-map.dtd\">"
-                                     "<memory-map>"
-                                     "<memory type=\"flash\" start=\"0x00000000\" length=\"0x100000\"> <property name=\"blocksize\">0x1000</property></memory>"
-                                     "<memory type=\"ram\" start=\"0x20000000\" length=\"0x40000\"> </memory>"
-                                     "<memory type=\"ram\" start=\"0x00800000\" length=\"0x40000\"> </memory>"
-                                     "</memory-map>";
-#endif
 
 uint32_t Platform_GetDeviceMemoryMapXmlSize(void)
 {
@@ -755,12 +727,7 @@ uint32_t Platform_GetUidSize(void)
     return 0;
 }
 
-int Semihost_IsDebuggeeMakingSemihostCall(void)
-{
-    return 0;
-}
-
-int Semihost_HandleSemihostRequest(void)
+int Semihost_HandleMbedSemihostRequest(PlatformSemihostParameters* pParameters)
 {
     return 0;
 }
@@ -894,9 +861,8 @@ void Platform_RtosRestorePrevThreadState(void)
 // ---------------------------------------------------------------------------------------------------------------------
 extern "C" void mriDebugMonitorHandler(uint32_t excReturn)
 {
-    while (!isThreadMode(excReturn)) {
-        // DebugMon is running at such low priority that we should be getting ready to return to thread mode.
-    }
+    // DebugMon is running at such low priority that we should be getting ready to return to thread mode.
+    ASSERT ( isThreadMode(excReturn) );
 
     if (g_enableDWTandFPB > 0) {
         enableDWTandITM();
@@ -1124,9 +1090,9 @@ uint32_t UartDebugCommInterface::wrappingIncrement(uint32_t val)
     return (val + 1) & (sizeof(_queue) - 1);
 }
 
-void UartDebugCommInterface::write(uint8_t c)
+void UartDebugCommInterface::write(const char* pBuffer, size_t bufferLength)
 {
-    _serial.write(&c, 1);
+    _serial.write(pBuffer, bufferLength);
 }
 
 void UartDebugCommInterface::attach(void (*pCallback)())
@@ -1177,9 +1143,9 @@ uint8_t UsbDebugCommInterface::read()
     return _pSerial->read();
 }
 
-void UsbDebugCommInterface::write(uint8_t c)
+void UsbDebugCommInterface::write(const char* pBuffer, size_t bufferLength)
 {
-    _pSerial->write(c);
+    _pSerial->send((uint8_t*)pBuffer, bufferLength);
 }
 
 void UsbDebugCommInterface::attach(void (*pCallback)())
@@ -1216,9 +1182,9 @@ uint8_t RPCDebugCommInterface::read()
     return _pSerial->read();
 }
 
-void RPCDebugCommInterface::write(uint8_t c)
+void RPCDebugCommInterface::write(const char* pBuffer, size_t bufferLength)
 {
-    _pSerial->write(c);
+    _pSerial->write(pBuffer, bufferLength);
 }
 
 void RPCDebugCommInterface::attach(void (*pCallback)())
@@ -1226,3 +1192,55 @@ void RPCDebugCommInterface::attach(void (*pCallback)())
     _pSerial->attach(pCallback);
 }
 #endif
+
+
+
+
+
+// This class can be used instead of Serial for sending output to the PC via GDB.
+DebugSerial::DebugSerial()
+{
+}
+
+// Methods that must be implemented for Print subclasses.
+size_t DebugSerial::write(uint8_t byte)
+{
+    return write(&byte, sizeof(byte));
+}
+
+size_t DebugSerial::write(const uint8_t *pBuffer, size_t size)
+{
+    const int    STDOUT_FILE_NO = 1;
+    const char*  pCurr = (const char*)pBuffer;
+    int          bytesWritten = 0;
+
+    while (size > 0) {
+        int result = mriNewlib_SemihostWrite(STDOUT_FILE_NO, pCurr, size);
+        if (result == -1) {
+            break;
+        }
+        size -= result;
+        pCurr += result;
+        bytesWritten += result;
+    }
+    return bytesWritten;
+}
+
+void DebugSerial::flush()
+{
+}
+
+void DebugSerial::begin(unsigned long baud, uint16_t mode)
+{
+    // Silence compiler warnings about unused parameters.
+    (void)baud;
+    (void)mode;
+}
+
+void DebugSerial::end()
+{
+}
+
+
+// Instantiate the single instance of this stream.
+class DebugSerial arduino::DebugSerial;

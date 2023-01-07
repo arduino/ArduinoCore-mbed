@@ -681,6 +681,7 @@ static __INLINE void initFPB(void)
     enableFPB();
 }
 
+#if defined (__MPU_PRESENT) && (__MPU_PRESENT == 1U)
 
 /* Memory Protection Unit Type Register Bits. */
 /* Number of instruction regions supported by MPU.  0 for Cortex-M3 */
@@ -849,6 +850,8 @@ static __INLINE uint32_t getMPURegionAttributeAndSize(void)
 
     return MPU->RASR;
 }
+
+#endif
 
 static __INLINE uint32_t getCurrentlyExecutingExceptionNumber(void)
 {

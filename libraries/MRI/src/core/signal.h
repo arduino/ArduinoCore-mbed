@@ -13,15 +13,21 @@
    limitations under the License.
 */
 /* Monitor for Remote Inspection. */
-#ifndef POSIX4WIN_H_
-#define POSIX4WIN_H_
-#ifdef WIN32
+#ifndef SIGNAL_H_
+#define SIGNAL_H_
 
+#include <signal.h>
 
+#ifndef SIGTRAP
 #define SIGTRAP 5
+#endif
+
+#ifndef SIGBUS
 #define SIGBUS  10
+#endif
+
+#ifndef SIGSTOP
 #define SIGSTOP 18
+#endif
 
-
-#endif /* WIN32 */
-#endif /* POSIX4WIN_H_ */
+#endif /* SIGNAL_H_ */

@@ -1,4 +1,4 @@
-/* Copyright 2014 Adam Green (https://github.com/adamgreen/)
+/* Copyright 2022 Adam Green (https://github.com/adamgreen/)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -21,15 +21,19 @@
 
 typedef struct
 {
-    Buffer*        pBuffer;
+    /* This is the complete buffer with room for '$', '#', and 2-byte checksum. */
+    Buffer         packetBuffer;
+    /* This is a subset of pPacketBuffer, after room has been made for '$', '#', and 2-byte checksum. */
+    Buffer         dataBuffer;
     char           lastChar;
     unsigned char  calculatedChecksum;
     unsigned char  expectedChecksum;
 } Packet;
 
 /* Real name of functions are in mri namespace. */
-void    mriPacket_GetFromGDB(Packet* pPacket, Buffer* pBuffer);
-void    mriPacket_SendToGDB(Packet* pPacket, Buffer* pBuffer);
+void    mriPacket_Init(Packet* pPacket, char* pBufferStart, size_t bufferSize);
+void    mriPacket_GetFromGDB(Packet* pPacket);
+void    mriPacket_SendToGDB(Packet* pPacket);
 
 /* Macroes which allow code to drop the mri namespace prefix. */
 #define Packet_Init         mriPacket_Init
