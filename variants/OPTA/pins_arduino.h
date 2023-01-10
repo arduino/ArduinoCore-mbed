@@ -193,4 +193,22 @@ void _ontouch1200bps_();
 
 #define USB_MAX_POWER	(500)
 
+static GPIO_TypeDef * const GPIO_PORT[] = {
+    GPIOA,
+    GPIOB,
+    GPIOC,
+    GPIOD,
+    GPIOE,
+    GPIOF,
+    GPIOG,
+    GPIOH,
+    GPIOI,
+    GPIOJ,
+    GPIOK,
+};
+
+#include "pin_device.h"
+#define SET_GPIO_PULL_FUNCTION(x, y)        LL_GPIO_SetPinPull(GPIO_PORT[STM_PORT(x)], ll_pin_defines[STM_PIN(x)], y)
+#define NO_PULL         LL_GPIO_PULL_NO 
+
 #endif //__PINS_ARDUINO__

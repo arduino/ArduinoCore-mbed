@@ -45,6 +45,7 @@ class UART : public HardwareSerial {
 		}
 		void begin(unsigned long);
 		void begin(unsigned long baudrate, uint16_t config);
+		void begin(unsigned long baudrate, uint16_t config, bool no_rx_pullup);
 		void end();
 		int available(void);
 		int peek(void);
