@@ -182,7 +182,7 @@ void _ontouch1200bps_();
 
 #define RS485_DEFAULT_TX_PIN        SERIAL2_TX
 #define RS485_DEFAULT_DE_PIN        PB_14
-#define RS485_DEFAULT_RE_PIN        RS485_DEFAULT_DE_PIN
+#define RS485_DEFAULT_RE_PIN        PB_13
 
 #define SerialLoRa		Serial3
 #define LORA_BOOT0      (PG_7)
