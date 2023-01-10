@@ -155,6 +155,20 @@ public:
     bool key_code(uint8_t key, uint8_t modifier = 0);
 
     /**
+    * To send directly a keycode
+    *
+    * @code
+    * //To send ESC
+    *  keyboard.key_code_raw(0x29);
+    * @endcode
+    *
+    * @param modifier bit 0: KEY_CTRL, bit 1: KEY_SHIFT, bit 2: KEY_ALT (default: 0)
+    * @param key character to send
+    * @returns true if there is no error, false otherwise
+    */
+    bool key_code_raw(uint8_t key, uint8_t modifier = 0);
+
+    /**
     * Send a character
     *
     * @param c character to be sent

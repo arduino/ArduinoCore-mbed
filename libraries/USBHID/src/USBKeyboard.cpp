@@ -464,6 +464,11 @@ int USBKeyboard::_putc(int c)
 
 bool USBKeyboard::key_code(uint8_t key, uint8_t modifier)
 {
+    return key_code_raw(keymap[key].usage, modifier);
+}
+
+bool USBKeyboard::key_code_raw(uint8_t key, uint8_t modifier)
+{
     _mutex.lock();
 
     // Send a simulated keyboard keypress. Returns true if successful.
@@ -472,7 +477,7 @@ bool USBKeyboard::key_code(uint8_t key, uint8_t modifier)
     report.data[0] = REPORT_ID_KEYBOARD;
     report.data[1] = modifier;
     report.data[2] = 0;
-    report.data[3] = keymap[key].usage;
+    report.data[3] = key;
     report.data[4] = 0;
     report.data[5] = 0;
     report.data[6] = 0;
