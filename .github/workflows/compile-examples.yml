@@ -39,6 +39,7 @@ jobs:
           - fqbn: arduino:mbed:nanorp2040connect
           - fqbn: arduino:mbed:nicla_sense
           - fqbn: arduino:mbed:nicla_vision
+          - fqbn: arduino:mbed:opta
 
         # compile only the examples compatible with each board
         include:
@@ -107,6 +108,15 @@ jobs:
               - libraries/ThreadDebug
               - libraries/USBHID
               - libraries/USBHOST
+              - libraries/USBMSD/examples/AccessFlashAsUSBDisk
+              - libraries/WiFi
+          - board:
+              fqbn: arduino:mbed:opta
+            additional-sketch-paths: |
+              - libraries/Ethernet
+              - libraries/STM32H747_System
+              - libraries/ThreadDebug
+              - libraries/USBHID
               - libraries/USBMSD/examples/AccessFlashAsUSBDisk
               - libraries/WiFi
 
