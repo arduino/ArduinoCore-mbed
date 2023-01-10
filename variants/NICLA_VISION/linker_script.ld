@@ -28,6 +28,12 @@ SECTIONS
         *(.dtors)
         *(.rodata*)
         KEEP(*(.eh_frame*))
+        *ltrans0*.o(.rodata*)
+        *ltrans1*.o(.rodata*)
+        *ltrans2*.o(.rodata*)
+        *ltrans3*.o(.rodata*)
+        *ltrans4*.o(.rodata*)
+        *lib*.o(.rodata*)
     } > FLASH
     .ARM.extab :
     {
