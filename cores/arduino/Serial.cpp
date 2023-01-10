@@ -126,6 +126,15 @@ void UART::begin(unsigned long baudrate) {
 	}
 }
 
+void UART::begin(unsigned long baudrate, uint16_t config, bool no_rx_pullup) {
+	begin(baudrate, config);
+#if defined(SET_GPIO_PULL_FUNCTION)
+	if (no_rx_pullup) {
+		SET_GPIO_PULL_FUNCTION(_rx, NO_PULL);
+	}
+#endif
+}
+
 void UART::on_rx() {
 #if defined(SERIAL_CDC)
 	if (is_usb) {
