@@ -84,6 +84,7 @@ public:
    int turnOffMicrophone();
    int getDebugInfo();
    int configureInferenceThreshold(int threshold);
+   int sendData(uint8_t *data, unsigned int len);
 
    void interrupts() {
       enable_interrupts(true);

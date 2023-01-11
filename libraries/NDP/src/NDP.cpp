@@ -68,7 +68,7 @@ const char *syntiant_ndp_error_names[] = SYNTIANT_NDP120_ERROR_NAMES;
 /* error handling function */
 #define check_status(message, s, do_exit) do { \
   if (s) { \
-    printf("%s failed %s\n", message, syntiant_ndp_error_names[s]); \
+    printf("%s failed: %s\n", message, syntiant_ndp_error_names[s]); \
     if (on_error_cb) on_error_cb(); \
     if (do_exit) { return 0; } \
   } \
@@ -230,6 +230,17 @@ int NDPClass::getAudioChunkSize(void) {
   return audio_sample_chunk_size;
 }
 
+
+int NDPClass::sendData(uint8_t *data, unsigned int len) 
+{
+  int s = syntiant_ndp120_tiny_send_data(ndp, data,
+                                         len,
+                                         SYNTIANT_NDP120_SEND_DATA_TYPE_STREAMING, 0);
+  return s;
+}
+
+
+
 int NDPClass::extractData(uint8_t *data, unsigned int *len) {
   int s;
   unsigned int l = audio_sample_chunk_size;
@@ -331,6 +342,13 @@ int NDPClass::load(const char* fw, int bl) {
       chunk_size = file_length;
     }
   }
+
+  if (s) {
+    strcpy(tmp, "Error: Loading ");
+    strcat(tmp, fw);
+    check_status(tmp, s, 1);
+  }
+
   fclose(package);
   loaded++;
   if (file_data) {
