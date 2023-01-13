@@ -363,6 +363,11 @@ int NDPClass::load(const char* fw, int bl) {
 
   // after loading FW & DSP, we can configure the clk and increase SPI speed
   if (loaded == 2) {
+    /* this delay can go away in an upcoming tiny ilib release
+     * and instead be a loop waiting for DSP to start */
+    delay(750);
+    /* poll to process the DSP running indication */
+    poll();
     configureClock();
     SPI1.endTransaction();
     SPI1.beginTransaction(SPISettings(spi_speed_general, MSBFIRST, SPI_MODE0));
