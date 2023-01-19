@@ -50,6 +50,7 @@ edge_control.bootloader.file=EDGE_CONTROL/bootloader.hex
 ##############################################################
 
 menu.split=Flash split
+menu.target_board=Target board
 menu.security=Security setting
 
 envie_m7.name=Arduino Portenta H7 (M7 core)
@@ -145,7 +146,7 @@ envie_m7_thread_debug.build.board=PORTENTA_H7_M7
 
 ##############################################################
 
-envie_m4.name=Arduino Portenta H7 (M4 core)
+envie_m4.name=STM32H747 M4 coprocessor
 envie_m4.build.core=arduino
 envie_m4.build.crossprefix=arm-none-eabi-
 envie_m4.build.compiler_path={runtime.tools.arm-none-eabi-gcc-7-2017q4.path}/bin/
@@ -153,6 +154,15 @@ envie_m4.build.compiler_path={runtime.tools.arm-none-eabi-gcc-7-2017q4.path}/bin
 envie_m4.menu.split.50_50=1MB M7 + 1MB M4
 envie_m4.menu.split.75_25=1.5MB M7 + 0.5MB M4
 envie_m4.menu.split.100_0=2MB M7 + M4 in SDRAM
+
+envie_m4.menu.target_board.portenta=Portenta H7
+envie_m4.menu.target_board.portenta.compiler.mbed.arch.define=-DPORTENTA_H7_PINS
+envie_m4.menu.target_board.opta=Opta
+envie_m4.menu.target_board.opta.compiler.mbed.arch.define=-DOPTA_PINS
+envie_m4.menu.target_board.nvision=Nicla Vision
+envie_m4.menu.target_board.nvision.compiler.mbed.arch.define=-DNVISION_PINS
+envie_m4.menu.target_board.giga=Giga
+envie_m4.menu.target_board.giga.compiler.mbed.arch.define=-DGIGA_PINS
 
 envie_m4.build.variant=PORTENTA_H7_M4
 envie_m4.build.mcu=cortex-m4
@@ -165,7 +175,7 @@ envie_m4.menu.split.100_0.build.extra_ldflags=-DCM4_BINARY_START=0x60000000 -DCM
 envie_m4.build.architecture=cortex-m4
 envie_m4.build.board=PORTENTA_H7_M4
 envie_m4.build.ldscript=linker_script.ld
-envie_m4.compiler.mbed.arch.define=
+#envie_m4.compiler.mbed.arch.define=
 envie_m4.compiler.mbed.defines={build.variant.path}/defines.txt
 envie_m4.compiler.mbed.ldflags={build.variant.path}/ldflags.txt
 envie_m4.compiler.mbed.cflags={build.variant.path}/cflags.txt
@@ -173,7 +183,6 @@ envie_m4.compiler.mbed.cxxflags={build.variant.path}/cxxflags.txt
 envie_m4.compiler.mbed.includes={build.variant.path}/includes.txt
 envie_m4.compiler.mbed.extra_ldflags=-lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
 envie_m4.compiler.mbed="{build.variant.path}/libs/libmbed.a"
-#envie_m4.compiler.mbed="{build.variant.path}/libs/libmbed.a" "{build.variant.path}/libs/libopenamp.a"
 envie_m4.vid.0=0x2341
 envie_m4.pid.0=0x005b
 envie_m4.build.vid=0x2341
@@ -206,7 +215,7 @@ envie_m4.bootloader.tool.default=openocd
 envie_m4.bootloader.config=-f target/stm32h7x_dual_bank.cfg
 envie_m4.bootloader.programmer=-f interface/stlink.cfg
 envie_m4.bootloader.extra_action.preflash=stm32h7x option_write 0 0x01c 0xb86aaf0
-envie_m4.bootloader.file=PORTENTA_H7/portentah7_bootloader_mbed_hs_v2.elf
+envie_m4.bootloader.file=
 
 ##############################################################
 
