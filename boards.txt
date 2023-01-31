@@ -674,6 +674,7 @@ giga.build.postbuild.cmd="{tools.imgtool.path}/{tools.imgtool.cmd}" exit
 giga.build.architecture=cortex-m7
 giga.build.board=GIGA
 giga.build.ldscript=linker_script.ld
+giga.build.extra_ldflags=-DCM4_BINARY_START=0x08180000
 giga.compiler.mbed.arch.define=
 giga.compiler.mbed.defines={build.variant.path}/defines.txt
 giga.compiler.mbed.ldflags={build.variant.path}/ldflags.txt
@@ -706,7 +707,7 @@ giga.upload.interface=0
 giga.upload.use_1200bps_touch=true
 giga.upload.wait_for_upload_port=true
 giga.upload.native_usb=true
-giga.upload.maximum_size=786432
+giga.upload.maximum_size=1966080
 giga.upload.maximum_data_size=523624
 
 giga.debug.tool=gdb
