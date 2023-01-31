@@ -234,6 +234,9 @@ void _ontouch1200bps_();
 #define I2C_SDA2			(digitalPinToPinName(9))
 #define I2C_SCL2			(digitalPinToPinName(8))
 
+#define PIN_WIRE_SCL         (21u)
+#define PIN_WIRE_SDA         (20u)
+
 #define SPI_HOWMANY			2
 
 #define SPI_MISO			(digitalPinToPinName(PIN_SPI_MISO))
