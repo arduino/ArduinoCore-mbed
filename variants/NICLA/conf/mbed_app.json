@@ -24,7 +24,7 @@
       "ble.ble-gap-host-max-advertising-start-commands": 1,
       "ble.ble-gap-host-privacy-resolved-cache-size": 1,
       "ble.ble-feature-gatt-client": false,
-      "ble.ble-feature-security": false,
+      "ble.ble-feature-security": true,
       "ble.ble-feature-secure-connections": false,
       "ble.ble-feature-signing": false,
       "ble.ble-feature-whitelist": false,
