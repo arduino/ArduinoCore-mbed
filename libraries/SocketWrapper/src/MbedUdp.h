@@ -31,6 +31,10 @@
 #define WIFI_UDP_BUFFER_SIZE 508
 #endif
 
+#ifndef UDP_TX_PACKET_MAX_SIZE
+#define UDP_TX_PACKET_MAX_SIZE  WIFI_UDP_BUFFER_SIZE
+#endif
+
 namespace arduino {
 
 class MbedUDP : public UDP {

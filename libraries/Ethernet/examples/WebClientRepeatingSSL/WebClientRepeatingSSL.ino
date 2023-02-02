@@ -17,6 +17,10 @@ char server[] = "www.arduino.cc";
 int port = 443;
 // IPAddress server(64,131,82,241);
 
+// Set the static IP address to use if the DHCP fails to assign
+IPAddress ip(192, 168, 0, 177);
+IPAddress myDns(192, 168, 0, 1);
+
 unsigned long lastConnectionTime = 0; // last time you connected to the server, in milliseconds
 const unsigned long postingInterval = 10 * 1000; // delay between updates, in milliseconds
 
