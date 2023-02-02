@@ -46,11 +46,14 @@ jobs:
         include:
           - board:
               fqbn: arduino:mbed:nano33ble
+            additional-libraries: |
+              - name: ArduinoBLE
             additional-sketch-paths: |
               - libraries/PDM
               - libraries/ThreadDebug
               - libraries/USBHID
               - libraries/USBMSD/examples/Nano33BLE_FlashMassStorage
+              - ~/Arduino/libraries/ArduinoBLE
           - board:
               fqbn: arduino:mbed:envie_m4
             additional-libraries: |
@@ -68,10 +71,12 @@ jobs:
               - name: lvgl
                 version: 7.11.0
               - name: MicroNMEA
+              - name: ArduinoBLE
             additional-sketch-paths: |
               - libraries/PDM
               - libraries/doom
               - libraries/KernelDebug
+              - libraries/MCUboot
               - libraries/Camera/examples
               - libraries/Portenta_lvgl/examples/Portenta_lvgl
               - libraries/Portenta_SDCARD
@@ -85,12 +90,18 @@ jobs:
               - libraries/USBMSD/examples/AccessFlashAsUSBDisk
               - libraries/WiFi
               - libraries/GSM
+              - ~/Arduino/libraries/ArduinoBLE
           - board:
               fqbn: arduino:mbed:nanorp2040connect
+            additional-libraries: |
+              - name: ArduinoBLE
+              - name: STM32duino LSM6DSOX
             additional-sketch-paths: |
+              - libraries/MLC/examples/RP2040_DataLogger_FIFO
               - libraries/PDM
               - libraries/USBHID
               - ~/Arduino/libraries/WiFiNINA
+              - ~/Arduino/libraries/ArduinoBLE
           - board:
               fqbn: arduino:mbed:nicla_sense
             additional-sketch-paths: |
@@ -105,6 +116,7 @@ jobs:
             additional-sketch-paths: |
               - libraries/PDM
               - libraries/Camera/examples/CameraCaptureRawBytes
+              - libraries/SE05X
               - libraries/STM32H747_System
               - libraries/ThreadDebug
               - libraries/USBHID
