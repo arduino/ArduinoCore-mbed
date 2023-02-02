@@ -37,6 +37,11 @@
   Last edit: 2nd February 2023
 */
 
+//This sketch is only for the Nicla Sense ME, not the Nicla Vision
+#ifdef ARDUINO_NICLA_VISION
+  #error "Run the standard Blink.ino sketch for the Nicla Vision"
+
+
 // Intialise library which communicates with RGB driver
 // Functions accessible under 'nicla' namespace
 #include "Nicla_System.h"       
