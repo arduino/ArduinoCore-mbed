@@ -94,6 +94,17 @@ void digitalWrite(pin_size_t pin, PinStatus val)
     return;
   }
   mbed::DigitalInOut* gpio = digitalPinToGpio(pin);
+
+  /* Check if this pin has been previously configured as a PWM pin.
+   * If it has, delete the GPIO allocation as well as the PWM allocation
+   * to enforce a full re-initialisation of the GPIO module.
+   */
+  mbed::PwmOut * pwm = digitalPinToPwm(pin);
+  if ((gpio != NULL) && (pwm != NULL)) {
+    delete gpio; gpio = NULL; digitalPinToGpio(pin) = NULL;
+    delete pwm; pwm = NULL; digitalPinToPwm(pin) = NULL;
+  }
+
   if (gpio == NULL) {
     gpio = new mbed::DigitalInOut(digitalPinToPinName(pin), PIN_OUTPUT, PullNone, val);
     digitalPinToGpio(pin) = gpio;
