@@ -45,6 +45,7 @@ void arduino::MbedI2C::begin(uint8_t slaveAddr) {
 void arduino::MbedI2C::end() {
 	if (master != NULL) {
 		delete master;
+		master = NULL;
 	}
 #ifdef DEVICE_I2CSLAVE
 	if (slave != NULL) {
@@ -52,6 +53,7 @@ void arduino::MbedI2C::end() {
 		slave_th->free_stack();
 		delete slave_th;
 		delete slave;
+		slave = NULL;
 	}
 #endif
 }
