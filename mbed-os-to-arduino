@@ -324,6 +324,7 @@ if [ $# -eq 0 ] ; then
 	echo " -b specify remote mbed-os branch to checkout"
 	echo " -r specify local mbed-os directory to link"
 	echo " -p specify local mbed core directory (defaults to PWD)"
+	echo " -g restores debug information"
 	echo
 	echo "Example:"
 	echo " $(basename $0) -a ARDUINO_NANO33BLE:ARDUINO_NANO33BLE CHALLENGE_PMC_R2DX:ARDUINO_NANO33BLE"
