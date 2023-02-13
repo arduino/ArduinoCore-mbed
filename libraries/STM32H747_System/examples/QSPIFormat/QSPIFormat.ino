@@ -74,11 +74,13 @@ void setup() {
     int err = wifi_data_fs.reformat(&wifi_data);
     if (err) {
       Serial.println("Error formatting WiFi partition");
+      return;
     }
   
     err = ota_data_fs.reformat(&ota_data);
     if (err) {
       Serial.println("Error formatting OTA partition");
+      return;
     }
 
     if(!default_scheme) {
@@ -96,6 +98,7 @@ void setup() {
       err = user_data_fs->reformat(&user_data);
       if (err) {
         Serial.println("Error formatting user partition");
+        return;
       }
     }
     Serial.println("\nQSPI Flash formatted!");
