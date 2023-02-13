@@ -1,0 +1,64 @@
+From c3103e282514054f521dbad2a3956a7eef846fad Mon Sep 17 00:00:00 2001
+From: Alexander Entinger <consulting@lxrobotics.com>
+Date: Fri, 10 Feb 2023 09:41:36 +0100
+Subject: [PATCH] Fix PWM initialisation when using both channel A and channel
+ B of a single PWM unit.
+
+---
+ .../pico-sdk/rp2_common/hardware_pwm/include/hardware/pwm.h | 6 ++++--
+ targets/TARGET_RASPBERRYPI/TARGET_RP2040/pwmout_api.c       | 4 ++--
+ 2 files changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_pwm/include/hardware/pwm.h b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_pwm/include/hardware/pwm.h
+index 634375e764..201be3c7dd 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_pwm/include/hardware/pwm.h
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/hardware_pwm/include/hardware/pwm.h
+@@ -177,6 +177,8 @@ static inline void pwm_config_set_wrap(pwm_config *c, uint16_t wrap) {
+     c->top = wrap;
+ }
+ 
++static inline void pwm_set_chan_level(uint slice_num, uint chan, uint16_t level);
++
+ /** \brief Initialise a PWM with settings from a configuration object
+  *  \ingroup hardware_pwm
+  *
+@@ -188,12 +190,12 @@ static inline void pwm_config_set_wrap(pwm_config *c, uint16_t wrap) {
+  * \param start If true the PWM will be started running once configured. If false you will need to start
+  *  manually using \ref pwm_set_enabled() or \ref pwm_set_mask_enabled()
+  */
+-static inline void pwm_init(uint slice_num, pwm_config *c, bool start) {
++static inline void pwm_init(uint slice_num, uint chan, pwm_config *c, bool start) {
+     check_slice_num_param(slice_num);
+     pwm_hw->slice[slice_num].csr = 0;
+ 
+     pwm_hw->slice[slice_num].ctr = PWM_CH0_CTR_RESET;
+-    pwm_hw->slice[slice_num].cc = PWM_CH0_CC_RESET;
++    pwm_set_chan_level(slice_num, chan, PWM_CH0_CC_A_RESET);
+     pwm_hw->slice[slice_num].top = c->top;
+     pwm_hw->slice[slice_num].div = c->div;
+     pwm_hw->slice[slice_num].csr = c->csr | (bool_to_bit(start) << PWM_CH0_CSR_EN_LSB);
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pwmout_api.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pwmout_api.c
+index e4bc4daa80..46c5b51df1 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pwmout_api.c
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pwmout_api.c
+@@ -66,7 +66,7 @@ void pwmout_init(pwmout_t *obj, PinName pin)
+     obj->cfg = pwm_get_default_config();
+     pwm_config_set_wrap(&(obj->cfg), count_top);
+ 
+-    pwm_init(obj->slice, &(obj->cfg), false);
++    pwm_init(obj->slice, obj->channel, &(obj->cfg), false);
+     gpio_set_function(pin, GPIO_FUNC_PWM);
+ }
+ 
+@@ -142,7 +142,7 @@ void pwmout_period_us(pwmout_t *obj, int period)
+     uint32_t min_period = 1000000 * count_top / clock_get_hz(clk_sys);
+ 
+     pwm_config_set_clkdiv(&(obj->cfg), (float)period / (float)min_period);
+-    pwm_init(obj->slice, &(obj->cfg), false);
++    pwm_init(obj->slice, obj->channel, &(obj->cfg), false);
+ }
+ 
+ int pwmout_read_period_us(pwmout_t *obj)
+-- 
+2.39.1
+
