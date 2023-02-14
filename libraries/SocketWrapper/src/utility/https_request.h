@@ -61,6 +61,7 @@ public:
 
         _socket = new TLSSocket();
         ((TLSSocket*)_socket)->open(network);
+        ((TLSSocket*)_socket)->set_hostname(_parsed_url->host());
         if (ssl_ca_pem)
           ((TLSSocket*)_socket)->set_root_ca_cert(ssl_ca_pem);
         else
