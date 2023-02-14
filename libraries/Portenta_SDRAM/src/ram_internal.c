@@ -37,19 +37,24 @@ static HAL_StatusTypeDef FMC_SDRAM_Clock_Config(void)
 {
   RCC_PeriphCLKInitTypeDef  RCC_PeriphCLKInitStruct;
   
-  /* PLL2_VCO Input = HSE_VALUE/PLL2_M = 5 Mhz */
-  /* PLL2_VCO Output = PLL2_VCO Input * PLL_N = 800 Mhz */
-  /* FMC Kernel Clock = PLL2_VCO Output/PLL_R = 800/4 = 200 Mhz */
   RCC_PeriphCLKInitStruct.PeriphClockSelection = RCC_PERIPHCLK_FMC;
   RCC_PeriphCLKInitStruct.FmcClockSelection = RCC_FMCCLKSOURCE_PLL2;
 #ifdef ARDUINO_GIGA
-  RCC_PeriphCLKInitStruct.PLL2.PLL2RGE = RCC_PLL2VCIRANGE_3;
-  RCC_PeriphCLKInitStruct.PLL2.PLL2M = 2;
-  RCC_PeriphCLKInitStruct.PLL2.PLL2N = 60;
+  /* 16MHz HSE */
+  /* PLL2_VCO Input = HSE_VALUE/PLL2_M = (16/4) = 4 Mhz */
+  /* PLL2_VCO Output = PLL2_VCO Input * PLL_N = 4*100 = 400 Mhz */
+  /* FMC Kernel Clock = PLL2_VCO Output/PLL_R = 400/2 = 200 Mhz */
+  RCC_PeriphCLKInitStruct.PLL2.PLL2RGE = RCC_PLL2VCIRANGE_2;
+  RCC_PeriphCLKInitStruct.PLL2.PLL2M = 4;
+  RCC_PeriphCLKInitStruct.PLL2.PLL2N = 100;
 #else
+  /* 25MHz HSE */
+  /* PLL2_VCO Input = HSE_VALUE/PLL2_M = 25/5 = 5 Mhz */
+  /* PLL2_VCO Output = PLL2_VCO Input * PLL_N = 5*80  = 400 Mhz */
+  /* FMC Kernel Clock = PLL2_VCO Output/PLL_R = 400/2 = 200 Mhz */
   RCC_PeriphCLKInitStruct.PLL2.PLL2RGE = RCC_PLL2VCIRANGE_2;
   RCC_PeriphCLKInitStruct.PLL2.PLL2M = 5;
-  RCC_PeriphCLKInitStruct.PLL2.PLL2N = 95;
+  RCC_PeriphCLKInitStruct.PLL2.PLL2N = 80;
 #endif
   RCC_PeriphCLKInitStruct.PLL2.PLL2FRACN = 0;
   RCC_PeriphCLKInitStruct.PLL2.PLL2P = 2;
@@ -150,7 +155,7 @@ bool sdram_init(void) {
 
     /* SDRAM device configuration */
     hsdram.Instance = FMC_SDRAM_DEVICE;
-    /* Timing configuration for 90 Mhz of SD clock frequency (180Mhz/2) */
+    /* Timing configuration for 100 Mhz of SD clock frequency (200Mhz/2) */
     /* TMRD: 2 Clock cycles */
     SDRAM_Timing.LoadToActiveDelay    = MICROPY_HW_SDRAM_TIMING_TMRD;
     /* TXSR: min=70ns (6x11.90ns) */
@@ -247,7 +252,7 @@ static void sdram_init_seq(SDRAM_HandleTypeDef
        we also need to subtract 20 from the value, so the target
        refresh rate is 703 - 20 = 683.
      */
-    #define REFRESH_COUNT (MICROPY_HW_SDRAM_REFRESH_RATE * 90000 / 8192 - 20)
+    #define REFRESH_COUNT (MICROPY_HW_SDRAM_REFRESH_RATE * MICROPY_HW_SDRAM_FREQUENCY / MICROPY_HW_SDRAM_REFRESH_CYCLES - 20)
     HAL_SDRAM_ProgramRefreshRate(hsdram, REFRESH_COUNT);
 }
 
