@@ -4,6 +4,8 @@
 
 RTC_HandleTypeDef RTCHandle;
 
+void analogReference(uint8_t mode) {}
+
 AnalogPinDescription g_AAnalogPinDescription[] = {
   { PA_0C,        NULL },    // A0    ADC2_INP0
   { PA_1C,        NULL },    // A1    ADC2_INP1
