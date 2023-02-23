@@ -1,7 +1,7 @@
-From e986c7f5704a510b8d01a137b06890cda947d24d Mon Sep 17 00:00:00 2001
+From 33c4c2259d3fc357729895e153448de3862fa8bb Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Fri, 13 May 2022 10:34:03 +0200
-Subject: [PATCH 161/171] RP2040: add placeholder files
+Subject: [PATCH 161/204] RP2040: add placeholder files
 
 ---
  .../TARGET_RP2040/pico-sdk/boards/include/placeholder.h           | 0
@@ -37,5 +37,5 @@ diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_f
 new file mode 100644
 index 0000000000..e69de29bb2
 -- 
-2.36.0
+2.39.1
 

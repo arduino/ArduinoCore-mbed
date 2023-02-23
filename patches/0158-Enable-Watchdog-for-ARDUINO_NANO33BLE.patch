@@ -1,17 +1,17 @@
-From 2230dbfabcbdb1d6fc861a2475937cf407b184a9 Mon Sep 17 00:00:00 2001
+From 6eb213ea9d765658679966b8729236c86f7d639f Mon Sep 17 00:00:00 2001
 From: Giampaolo Mancini <giampaolo@trampolineup.com>
 Date: Fri, 29 Apr 2022 17:12:22 +0200
-Subject: [PATCH 158/159] Enable Watchdog for ARDUINO_NANO33BLE
+Subject: [PATCH 158/204] Enable Watchdog for ARDUINO_NANO33BLE
 
 ---
  targets/targets.json | 1 +
  1 file changed, 1 insertion(+)
 
 diff --git a/targets/targets.json b/targets/targets.json
-index 677b43ed83..45a6e1f001 100644
+index 33f42a4f9a..3276150b92 100644
 --- a/targets/targets.json
 +++ b/targets/targets.json
-@@ -6937,6 +6937,7 @@
+@@ -7193,6 +7193,7 @@
          "components_remove": [
              "QSPIF"
          ],
@@ -20,5 +20,5 @@ index 677b43ed83..45a6e1f001 100644
              "QSPI",
              "ITM"
 -- 
-2.36.0
+2.39.1
 

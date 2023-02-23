@@ -1,7 +1,7 @@
-From 92234090ae976558fdc7f517a8f836db1110ca42 Mon Sep 17 00:00:00 2001
+From 75563328e3bb5b7010ade25035b6f0c0512e2d5a Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Wed, 19 Jan 2022 14:18:07 +0100
-Subject: [PATCH 123/157] Enable MBEDTLS alternative implementation over SSS
+Subject: [PATCH 123/204] Enable MBEDTLS alternative implementation over SSS
 
 ---
  .../COMPONENT_SE050/sss/inc/fsl_sss_ftr_default.h             | 4 ++--
@@ -30,5 +30,5 @@ index 7ad9a873d2..0113d794bc 100644
  #if (( 0                             \
      + SSS_HAVE_MBEDTLS_ALT_SSS       \
 -- 
-2.36.0
+2.39.1
 

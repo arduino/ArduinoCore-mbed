@@ -1,0 +1,113 @@
+From b5881034882289d9221d628a748dfea73aa6cc7f Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Fri, 17 Feb 2023 16:40:01 +0100
+Subject: [PATCH 201/204] whd: portentah7: fix dcache maintenance
+
+---
+ .../COMPONENT_WHD/port/cyhal_sdio.c           | 55 +++++++++++++------
+ 1 file changed, 39 insertions(+), 16 deletions(-)
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/cyhal_sdio.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/cyhal_sdio.c
+index 34aa5498e1..3ddfd85848 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/cyhal_sdio.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/COMPONENT_WHD/port/cyhal_sdio.c
+@@ -63,6 +63,27 @@
+ #define LINK_MTU        1024
+ #define MAX(a,b)        (a>b)?a:b
+ 
++/* D-cache maintenance for DMA buffers */
++#if defined (__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
++    #define _CYHAL_DCACHE_MAINTENANCE
++    #define _CYHAL_DMA_BUFFER_ALIGN_BYTES      (32u)
++#else
++    #define _CYHAL_DMA_BUFFER_ALIGN_BYTES      (4u)
++#endif /* defined (__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U) */
++
++/* Macro to ALIGN */
++#if defined (__ARMCC_VERSION) /* ARM Compiler */
++    #define ALIGN_HAL_COMMON(buf, x) __align(x) buf
++#elif defined   (__GNUC__)    /* GNU Compiler */
++    #define ALIGN_HAL_COMMON(buf, x)  buf __attribute__ ((aligned (x)))
++#elif defined (__ICCARM__)    /* IAR Compiler */
++    #define ALIGN_HAL_COMMON(buf, x) __ALIGNED(x) buf
++#endif
++
++/* Macro to get variable aligned for cache maintenance purpose */
++#define CYHAL_ALIGN_DMA_BUFFER(arg) ALIGN_HAL_COMMON(arg, _CYHAL_DMA_BUFFER_ALIGN_BYTES)
++
++
+ extern pinconfig_t     PinConfig[];
+ extern  SD_HandleTypeDef hsd;
+ 
+@@ -74,7 +95,7 @@ static uint32_t      dctrl;
+ static whd_driver_t whd_handler;
+ static cyhal_sdio_irq_handler_t sdio_irq_handler;
+ 
+-static uint8_t       temp_dma_buffer[2048] __attribute__((aligned(8)));
++CYHAL_ALIGN_DMA_BUFFER(static uint8_t       temp_dma_buffer[2048]);
+ static uint8_t                     *user_data;
+ static uint32_t                     user_data_size;
+ static uint8_t                     *dma_data_source;
+@@ -150,22 +171,24 @@ static void sdio_prepare_data_transfer(cyhal_transfer_t direction, uint32_t bloc
+     dma_transfer_size = (uint32_t)(((data_size + (uint16_t) block_size - 1) / (uint16_t) block_size) * (uint16_t) block_size);
+ 
+     if (direction == CYHAL_WRITE) {
+-
+-#if !(defined(DUAL_CORE) && defined(CORE_CM4))
+-        SCB_CleanDCache_by_Addr((uint32_t *)dma_data_source, data_size + 32);
+-#endif
+         memcpy(temp_dma_buffer, data, data_size);
+         dma_data_source = temp_dma_buffer;
+     } else {
+         dma_data_source = (uint8_t *)temp_dma_buffer;
+-        //VIKR
+-        //memset(dma_data_source,0x12,data_size);
++    }
+ 
+-#if !(defined(DUAL_CORE) && defined(CORE_CM4))
++#ifdef _CYHAL_DCACHE_MAINTENANCE
++    if (direction == CYHAL_WRITE)
++    {
++        SCB_CleanDCache_by_Addr((uint32_t*)dma_data_source, block_size * dma_transfer_size);
++    }
++    else
++    {
+         /* Cache-Invalidate the output from DMA */
+-        SCB_CleanDCache_by_Addr((uint32_t *)dma_data_source, data_size + 32);
+-#endif
++        SCB_InvalidateDCache_by_Addr((uint32_t*)dma_data_source,
++                                        data_size + __SCB_DCACHE_LINE_SIZE);
+     }
++#endif
+ 
+     SDIO->DTIMER = (uint32_t) 0xFFFFFFFF;
+     SDIO->DLEN   = dma_transfer_size;
+@@ -252,12 +275,6 @@ cy_rslt_t cyhal_sdio_init(cyhal_sdio_t *obj, cyhal_gpio_t cmd, cyhal_gpio_t clk,
+     /* Enable the SDIO Clock */
+     __HAL_RCC_SDMMC1_CLK_ENABLE();
+ 
+-#if !(defined(DUAL_CORE) && defined(CORE_CM4))
+-    /* Disable DCache for STM32H7 family */
+-    SCB_CleanDCache();
+-    SCB_DisableDCache();
+-#endif
+-
+     WPRINT_WHD_DEBUG(("in init: %p\n", sdio_transfer_finished_semaphore));
+ 
+     // Lower  speed configuration
+@@ -437,6 +454,12 @@ restart:
+     }
+ 
+     if (direction == CYHAL_READ) {
++        #ifdef _CYHAL_DCACHE_MAINTENANCE
++        SCB_CleanInvalidateDCache_by_Addr(
++                (uint32_t*)((uint32_t)dma_data_source & ~(__SCB_DCACHE_LINE_SIZE - 1U)),
++                user_data_size + __SCB_DCACHE_LINE_SIZE);
++        #endif /* if defined(_CYHAL_DCACHE_MAINTENANCE) */
++
+         memcpy(user_data, dma_data_source, (size_t) user_data_size);
+     }
+ 
+-- 
+2.39.1
+

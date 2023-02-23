@@ -1,7 +1,7 @@
-From 6959b7db85d808b747949b528289eb9220eae0d5 Mon Sep 17 00:00:00 2001
+From 6f80aa99c5b3e496e42b3e68187d93232412fff5 Mon Sep 17 00:00:00 2001
 From: Giampaolo Mancini <giampaolo@trampolineup.com>
 Date: Fri, 29 Apr 2022 17:13:01 +0200
-Subject: [PATCH 159/159] Enable Watchdog for NICLA
+Subject: [PATCH 159/204] Enable Watchdog for NICLA
 
 ---
  .../TARGET_MCU_NRF52832/config/sdk_config.h          | 12 ++++++++++++
@@ -32,10 +32,10 @@ index b1112d715a..dea0276ddb 100644
   
  // <0=> Default 
 diff --git a/targets/targets.json b/targets/targets.json
-index 45a6e1f001..a42b64a071 100644
+index 3276150b92..e3409dc964 100644
 --- a/targets/targets.json
 +++ b/targets/targets.json
-@@ -6763,6 +6763,7 @@
+@@ -7019,6 +7019,7 @@
          "components_add": [
              "FLASHIAP"
          ],
@@ -44,5 +44,5 @@ index 45a6e1f001..a42b64a071 100644
          "device_name": "nRF52832_xxAA",
          "macros_add": [
 -- 
-2.36.0
+2.39.1
 

@@ -1,7 +1,7 @@
-From afa24e63fb5cb10e60481dc3517bc026ec6e3289 Mon Sep 17 00:00:00 2001
+From 6ef2abea8e05eddc813ddd30abd0724fcc945b4e Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Thu, 10 Dec 2020 19:23:36 +0100
-Subject: [PATCH 090/157] Thales: mbed library porting
+Subject: [PATCH 090/204] Thales: mbed library porting
 
 Wrap changes for Thales inside a library include check
 
@@ -221,7 +221,7 @@ index f2b1d632b9..b4678ff081 100644
  {
      if (_nonip_req && _cp_in_use) {
 diff --git a/connectivity/cellular/source/framework/AT/AT_CellularDevice.cpp b/connectivity/cellular/source/framework/AT/AT_CellularDevice.cpp
-index 83ab47a3c4..f71921e29a 100644
+index e3fd5b551a..3ca0f3fc37 100644
 --- a/connectivity/cellular/source/framework/AT/AT_CellularDevice.cpp
 +++ b/connectivity/cellular/source/framework/AT/AT_CellularDevice.cpp
 @@ -414,7 +414,8 @@ nsapi_error_t AT_CellularDevice::init()
@@ -564,5 +564,5 @@ index 01c5b71c65..22711d2173 100644
  
  } // namespace mbed
 -- 
-2.36.0
+2.39.1
 

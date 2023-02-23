@@ -1,7 +1,7 @@
-From 600aa59949813b2b7ca011009234ad417d340861 Mon Sep 17 00:00:00 2001
+From 3b391f7d3548bd7d5f9f5b8d441d1ae8fcecb726 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Mon, 2 Aug 2021 10:34:57 +0200
-Subject: [PATCH 067/157] RP2040: Add weak aliases for ISR handlers
+Subject: [PATCH 067/204] RP2040: Add weak aliases for ISR handlers
 
 Fixes baremetal build
 ---
@@ -28,5 +28,5 @@ index 3f90b95ee2..97af458711 100644
  .macro decl_isr name
  .weak \name
 -- 
-2.36.0
+2.39.1
 

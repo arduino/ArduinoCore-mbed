@@ -1,7 +1,7 @@
-From 877b8109c62677b86b73dd5cef05c039dff065eb Mon Sep 17 00:00:00 2001
+From 3f266fc95d0604789e6f2eebbb21bfee59d656f2 Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Wed, 2 Feb 2022 10:10:46 +0100
-Subject: [PATCH 126/157] Make i2c and resets pin configurable
+Subject: [PATCH 126/204] Make i2c and resets pin configurable
 
 ---
  .../COMPONENT_SE050/hostlib/hostLib/platform/se05x_i2c.cpp   | 4 ++--
@@ -42,5 +42,5 @@ index 1c6af5a24e..0d7ffcac8c 100644
  void se05x_ic_reset(void)
  {
 -- 
-2.36.0
+2.39.1
 

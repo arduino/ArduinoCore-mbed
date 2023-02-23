@@ -1,7 +1,7 @@
-From abbf7d3e64a63f7c41b23e5ecaf932d3c337e21f Mon Sep 17 00:00:00 2001
+From ce40d81423ddc8351b10f1836d81943f83e36a81 Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Wed, 2 Feb 2022 09:53:57 +0100
-Subject: [PATCH 125/157] Add 1ms delays to let communication work also with
+Subject: [PATCH 125/204] Add 1ms delays to let communication work also with
  debug disabled
 
 ---
@@ -49,5 +49,5 @@ index 4ee1665c42..5f375185d2 100644
          }
      } while (ret != I2C_OK);
 -- 
-2.36.0
+2.39.1
 

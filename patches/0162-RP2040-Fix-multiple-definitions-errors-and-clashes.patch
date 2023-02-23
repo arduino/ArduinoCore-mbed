@@ -1,7 +1,7 @@
-From fdda5455cffab22425dfe63e614ba91d92de3ca8 Mon Sep 17 00:00:00 2001
+From 646866f23470716c7ee5f63273aea291ce3ed037 Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Fri, 13 May 2022 09:59:06 +0200
-Subject: [PATCH 162/171] RP2040: Fix multiple definitions errors and clashes
+Subject: [PATCH 162/204] RP2040: Fix multiple definitions errors and clashes
 
 ---
  targets/TARGET_RASPBERRYPI/TARGET_RP2040/.mbedignore      | 1 +
@@ -87,5 +87,5 @@ index 575e23e08b..50920bcad0 100644
  #endif
  
 -- 
-2.36.0
+2.39.1
 

@@ -1,7 +1,7 @@
-From 3171fa7f53b0f1cf325a69b342d9a611251cab4c Mon Sep 17 00:00:00 2001
+From a4240109ddebcd8508b6d5c29acaaf73a19f5ae5 Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Wed, 20 Apr 2022 12:08:58 +0200
-Subject: [PATCH 163/171] RP2040: Restore previous divider.S to avoid including
+Subject: [PATCH 163/204] RP2040: Restore previous divider.S to avoid including
  hardware_divider folder
 
 ---
@@ -309,5 +309,5 @@ index 234c1a472b..12eae38995 100644
   movs r3,#0
   lsls r4,r5,#16             @ quotient=(q0<<32)+(q1<<16)+q2
 -- 
-2.36.0
+2.39.1
 

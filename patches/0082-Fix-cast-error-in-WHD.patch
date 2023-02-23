@@ -1,7 +1,7 @@
-From f195593a14ef8ef890dfd350dfd689218250c0f4 Mon Sep 17 00:00:00 2001
+From e556ca3c1e60ad54122cb7dbfaf84d908bc226b1 Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Fri, 17 Sep 2021 17:04:41 +0200
-Subject: [PATCH 082/157] Fix cast error in WHD
+Subject: [PATCH 082/204] Fix cast error in WHD
 
 ---
  .../wifi-host-driver/src/bus_protocols/whd_bus_common.c         | 2 +-
@@ -21,5 +21,5 @@ index 4eacf4869a..48c401a0a0 100755
              if ( (result == WHD_SUCCESS) && (tmp != reset_instr) )
              {
 -- 
-2.36.0
+2.39.1
 

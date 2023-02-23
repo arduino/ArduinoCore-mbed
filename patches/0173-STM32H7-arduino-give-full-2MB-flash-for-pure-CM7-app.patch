@@ -1,7 +1,7 @@
-From 7ef7506b2752eb14d9f5c08ea079e809e43c97fc Mon Sep 17 00:00:00 2001
+From a4bb7444ca738c5410e12d3f4e67b5ac595b7ffd Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Tue, 19 Jul 2022 11:18:08 +0200
-Subject: [PATCH] STM32H7: arduino: give full 2MB flash for pure CM7
+Subject: [PATCH 173/204] STM32H7: arduino: give full 2MB flash for pure CM7
  applications
 
 ---
@@ -9,10 +9,10 @@ Subject: [PATCH] STM32H7: arduino: give full 2MB flash for pure CM7
  1 file changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/targets/targets.json b/targets/targets.json
-index fa9880e3ca..c998e1d8f0 100644
+index e3409dc964..045b273f31 100644
 --- a/targets/targets.json
 +++ b/targets/targets.json
-@@ -3362,7 +3362,7 @@
+@@ -3446,7 +3446,7 @@
          ],
          "core": "Cortex-M7FD",
          "mbed_rom_start": "0x08000000",
@@ -21,7 +21,7 @@ index fa9880e3ca..c998e1d8f0 100644
          "mbed_ram_start": "0x24000000",
          "mbed_ram_size": "0x80000",
          "macros_add": [
-@@ -3494,7 +3494,7 @@
+@@ -3578,7 +3578,7 @@
          "inherits": ["PORTENTA_H7"],
          "core": "Cortex-M7FD",
          "mbed_rom_start": "0x08000000",
@@ -30,7 +30,7 @@ index fa9880e3ca..c998e1d8f0 100644
          "mbed_ram_start": "0x24000000",
          "mbed_ram_size" : "0x80000",
          "extra_labels_add": [
-@@ -3540,7 +3540,7 @@
+@@ -3624,7 +3624,7 @@
          "overrides": {
              "system_power_supply": "PWR_LDO_SUPPLY",
              "clock_source": "USE_PLL_HSE_EXTC",
@@ -40,5 +40,5 @@ index fa9880e3ca..c998e1d8f0 100644
              "network-default-interface-type": "WIFI",
              "i2c_timing_value_algo": true,
 -- 
-2.36.0
+2.39.1
 

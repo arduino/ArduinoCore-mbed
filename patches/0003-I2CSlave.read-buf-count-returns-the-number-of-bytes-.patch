@@ -1,7 +1,7 @@
-From 3659582e80ee60cd6f393318f54c51b90ef6703e Mon Sep 17 00:00:00 2001
+From f253ffd9e7717ff049cb678364b4ccf36d9d5245 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Wed, 1 Apr 2020 12:21:59 +0200
-Subject: [PATCH 003/157] I2CSlave.read(buf, count) returns the number of bytes
+Subject: [PATCH 003/204] I2CSlave.read(buf, count) returns the number of bytes
  actually read
 
 ---
@@ -36,5 +36,5 @@ index 4317df9656..e4515820ad 100644
  
  int I2CSlave::read(void)
 -- 
-2.36.0
+2.39.1
 

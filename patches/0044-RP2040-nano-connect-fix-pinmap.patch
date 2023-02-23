@@ -1,7 +1,7 @@
-From ca0a1a1715078f67e7bd385d37b8aea001049f0c Mon Sep 17 00:00:00 2001
+From 9a7f2eed234cf8f3bf13d14ba9545ad15ee02644 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Mon, 15 Mar 2021 15:22:43 +0100
-Subject: [PATCH 044/157] RP2040: nano connect: fix pinmap
+Subject: [PATCH 044/204] RP2040: nano connect: fix pinmap
 
 ---
  .../TARGET_NANO_RP2040_CONNECT/PinNames.h     | 25 ++++++++++++++++---
@@ -52,5 +52,5 @@ index e84e89440c..bad8f487c6 100644
      // Not connected
      NC = (int)0xFFFFFFFF
 -- 
-2.36.0
+2.39.1
 

@@ -1,7 +1,7 @@
-From 0f984f6163c50f322c5ed305723776f5e0a4d1d1 Mon Sep 17 00:00:00 2001
+From 44d77e3fcfa214163aebf738c2db8033294112bf Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Fri, 6 Aug 2021 10:28:50 +0200
-Subject: [PATCH 102/157] Gemalto: properly handle ^SYSSTART URC
+Subject: [PATCH 102/204] Gemalto: properly handle ^SYSSTART URC
 
 ---
  .../CINTERION/GEMALTO_CINTERION_CellularStack.cpp  | 14 +++++++++++++-
@@ -53,5 +53,5 @@ index 22711d2173..b0ae8d23e1 100644
      void urc_sisr();
      void sisr_urc_handler(int sock_id, int urc_code);
 -- 
-2.36.0
+2.39.1
 

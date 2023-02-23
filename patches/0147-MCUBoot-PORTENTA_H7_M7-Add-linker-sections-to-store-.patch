@@ -1,7 +1,7 @@
-From 669637a00509686bfe313bc2cdb3f597314d5510 Mon Sep 17 00:00:00 2001
+From 19af3fd984266b17e77b6c4f2442de7053210eed Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Wed, 4 Aug 2021 09:33:11 +0200
-Subject: [PATCH 147/157] MCUBoot:PORTENTA_H7_M7:Add linker sections to store
+Subject: [PATCH 147/204] MCUBoot:PORTENTA_H7_M7:Add linker sections to store
  boot configuration and gain space
 
 ---
@@ -61,5 +61,5 @@ index 68280f4757..41c72141ed 100644
  
          KEEP(*(.eh_frame*))
 -- 
-2.36.0
+2.39.1
 

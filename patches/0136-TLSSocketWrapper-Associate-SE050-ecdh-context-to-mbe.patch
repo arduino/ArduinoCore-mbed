@@ -1,7 +1,7 @@
-From 83821906a0030586667e13946a23acfbce81b01f Mon Sep 17 00:00:00 2001
+From 922fb1cc11e129ef608ba186d7ae9a112b23d158 Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Mon, 21 Feb 2022 11:34:40 +0100
-Subject: [PATCH 136/157] TLSSocketWrapper: Associate SE050 ecdh context to
+Subject: [PATCH 136/204] TLSSocketWrapper: Associate SE050 ecdh context to
  mbedtls
 
 ---
@@ -26,5 +26,5 @@ index 0826d05346..58f47b54c8 100644
      // callers of mbedtls_ssl_set_bio_ctx and there should be only one ssl context. If these rules don't apply,
      // these defines can't be used.
 -- 
-2.36.0
+2.39.1
 

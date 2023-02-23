@@ -1,8 +1,8 @@
-From c3103e282514054f521dbad2a3956a7eef846fad Mon Sep 17 00:00:00 2001
+From 817a5dd49cdf7362d177579bf8a3c2c098990a7d Mon Sep 17 00:00:00 2001
 From: Alexander Entinger <consulting@lxrobotics.com>
 Date: Fri, 10 Feb 2023 09:41:36 +0100
-Subject: [PATCH] Fix PWM initialisation when using both channel A and channel
- B of a single PWM unit.
+Subject: [PATCH 197/204] Fix PWM initialisation when using both channel A and
+ channel B of a single PWM unit.
 
 ---
  .../pico-sdk/rp2_common/hardware_pwm/include/hardware/pwm.h | 6 ++++--

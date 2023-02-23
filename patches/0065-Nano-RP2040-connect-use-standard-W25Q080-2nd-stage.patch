@@ -1,7 +1,7 @@
-From c63b1f634b2a97cf061c2b09b955114a676447c7 Mon Sep 17 00:00:00 2001
+From e017e1bd82a51bc8eadd099fe1d3fc56f73ebd58 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Fri, 18 Jun 2021 17:58:21 +0200
-Subject: [PATCH 065/157] Nano RP2040 connect: use standard W25Q080 2nd stage
+Subject: [PATCH 065/204] Nano RP2040 connect: use standard W25Q080 2nd stage
 
 Latest boards ship with a different flash chip; QE bit is set during production and should never be set to 0.
 Since the adesto specific code is not working on the new flash, let's fallback to the standard 2nd stage without PROGRAM_STATUS_REG define
@@ -50,5 +50,5 @@ index e9be188191..fc6bea7df6 100644
 +.byte 0xf4, 0x00, 0x00, 0x18, 0x22, 0x20, 0x00, 0xa0, 0x00, 0x01, 0x00, 0x10, 0x08, 0xed, 0x00, 0xe0
 +.byte 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x74, 0xb2, 0x4e, 0x7a
 -- 
-2.36.0
+2.39.1
 

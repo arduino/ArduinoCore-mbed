@@ -1,7 +1,7 @@
-From 22f41f4ac363242be58a892c8926cd8008b7c573 Mon Sep 17 00:00:00 2001
+From 77d1955952707f823666c014a5223389b600718f Mon Sep 17 00:00:00 2001
 From: Giampaolo Mancini <giampaolo@trampolineup.com>
 Date: Mon, 7 Feb 2022 15:13:41 +0100
-Subject: [PATCH 111/157] Fix HostByName SISX request
+Subject: [PATCH 111/204] Fix HostByName SISX request
 
 ---
  .../GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp  | 7 ++++---
@@ -32,5 +32,5 @@ index 1eca8f54e0..33a73bf9a3 100644
                  _at.unlock();
                  return NSAPI_ERROR_DNS_FAILURE;
 -- 
-2.36.0
+2.39.1
 

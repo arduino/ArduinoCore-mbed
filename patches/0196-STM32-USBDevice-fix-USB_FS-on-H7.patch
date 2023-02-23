@@ -1,7 +1,7 @@
-From 6f400289478afa47ca6a0b96daa4e2f2e701f959 Mon Sep 17 00:00:00 2001
+From 2ad3e123d01a9af3c5799d8f01b502f4cc110802 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Thu, 12 Jan 2023 12:07:59 +0100
-Subject: [PATCH 196/199] STM32: USBDevice: fix USB_FS on H7
+Subject: [PATCH 196/204] STM32: USBDevice: fix USB_FS on H7
 
 USB_FS IP, despite the name, shares everything with USBOTG_HS, so the properties (like endpoints number) need to be aligned
 ---
@@ -9,7 +9,7 @@ USB_FS IP, despite the name, shares everything with USBOTG_HS, so the properties
  1 file changed, 11 insertions(+), 19 deletions(-)
 
 diff --git a/targets/TARGET_STM/USBPhy_STM32.cpp b/targets/TARGET_STM/USBPhy_STM32.cpp
-index 40f1044216..9e4c39dc6e 100644
+index 3c86f20883..70be7479da 100644
 --- a/targets/TARGET_STM/USBPhy_STM32.cpp
 +++ b/targets/TARGET_STM/USBPhy_STM32.cpp
 @@ -33,15 +33,19 @@
@@ -43,7 +43,7 @@ index 40f1044216..9e4c39dc6e 100644
      MAX_PACKET_SIZE_NON_ISO,
      MAX_PACKET_SIZE_NON_ISO,
  #endif
-@@ -426,7 +430,7 @@ void USBPhyHw::init(USBPhyEvents *events)
+@@ -435,7 +439,7 @@ void USBPhyHw::init(USBPhyEvents *events)
          total_bytes += fifo_size;
      }
  
@@ -52,7 +52,7 @@ index 40f1044216..9e4c39dc6e 100644
      /* 1.25 kbytes */
      MBED_ASSERT(total_bytes <= 1280);
  #endif
-@@ -536,24 +540,12 @@ const usb_ep_table_t *USBPhyHw::endpoint_table()
+@@ -545,24 +549,12 @@ const usb_ep_table_t *USBPhyHw::endpoint_table()
              {USB_EP_ATTR_ALLOW_CTRL                         | USB_EP_ATTR_DIR_IN_AND_OUT, 0, 0},
              {USB_EP_ATTR_ALLOW_BULK | USB_EP_ATTR_ALLOW_INT | USB_EP_ATTR_DIR_IN_AND_OUT, 0, 0}, // NON ISO
              {USB_EP_ATTR_ALLOW_BULK | USB_EP_ATTR_ALLOW_INT | USB_EP_ATTR_DIR_IN_AND_OUT, 0, 0}, // NON ISO
@@ -81,5 +81,5 @@ index 40f1044216..9e4c39dc6e 100644
      };
      return &table;
 -- 
-2.39.0
+2.39.1
 

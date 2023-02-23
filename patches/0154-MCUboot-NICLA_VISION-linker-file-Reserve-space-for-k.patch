@@ -1,7 +1,7 @@
-From f61549af517c2d7f953ed03be7a01f229be4dc36 Mon Sep 17 00:00:00 2001
+From e2718d9be59a19d1ef32dcc0c430f076994480bf Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Wed, 6 Apr 2022 13:56:50 +0200
-Subject: [PATCH 154/157] MCUboot:NICLA_VISION: linker file:Reserve space for
+Subject: [PATCH 154/204] MCUboot:NICLA_VISION: linker file:Reserve space for
  keys and bootloader id
 
 ---
@@ -40,5 +40,5 @@ index 0a54d17c76..3e84731230 100644
          *ltrans1*.o(.rodata*)
          *ltrans2*.o(.rodata*)
 -- 
-2.36.0
+2.39.1
 

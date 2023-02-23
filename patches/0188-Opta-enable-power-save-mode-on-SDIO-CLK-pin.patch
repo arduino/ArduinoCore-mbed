@@ -1,7 +1,7 @@
-From dc0195d4a7ddd4482373540b5f24ae0f3d2bf44a Mon Sep 17 00:00:00 2001
+From 9c35b625f17ea84d7e65c2287ae554ea68c79229 Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Mon, 8 Nov 2021 12:58:01 +0100
-Subject: [PATCH 188/194] Opta: enable power save mode on SDIO CLK pin
+Subject: [PATCH 188/204] Opta: enable power save mode on SDIO CLK pin
 
 ---
  .../TARGET_OPTA/COMPONENT_WHD/port/cyhal_sdio.c                 | 2 +-
@@ -21,5 +21,5 @@ index 34aa5498e1..2174d7f58f 100644
      sdio_init_structure.HardwareFlowControl = SDMMC_HARDWARE_FLOW_CONTROL_ENABLE;
  
 -- 
-2.38.1
+2.39.1
 

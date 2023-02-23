@@ -1,7 +1,7 @@
-From b2a9bdcffe701c86842ad701ec8c43a7e5930e04 Mon Sep 17 00:00:00 2001
+From 5a2377ec9d5bf106c9bac4b0b7968ef725d593a4 Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Fri, 30 Jul 2021 17:22:36 +0200
-Subject: [PATCH 086/157] RP2040: Add basic RTC support
+Subject: [PATCH 086/204] RP2040: Add basic RTC support
 
 ---
  .../hardware_rtc/include/hardware/rtc.h       |  2 +-
@@ -135,10 +135,10 @@ index 0000000000..999f556355
 +
 +#endif // DEVICE_RTC
 diff --git a/targets/targets.json b/targets/targets.json
-index 89205a0716..7902341c2f 100644
+index fe5bcf4d43..5e957dba70 100644
 --- a/targets/targets.json
 +++ b/targets/targets.json
-@@ -9010,6 +9010,7 @@
+@@ -9457,6 +9457,7 @@
              "SERIAL",
              "SERIAL_FC",
              "SPI",
@@ -147,5 +147,5 @@ index 89205a0716..7902341c2f 100644
              "WATCHDOG",
              "USBDEVICE",
 -- 
-2.36.0
+2.39.1
 

@@ -1,7 +1,7 @@
-From 7d59d1e04f2cc6872d07c30cb6f66457dbd383f2 Mon Sep 17 00:00:00 2001
+From 578b697ad1002da949b102c602bd3a0ed2c2f174 Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Thu, 11 Aug 2022 10:29:34 +0200
-Subject: [PATCH] WHD: force disconnect on roamed due to low RSSI
+Subject: [PATCH 174/204] WHD: force disconnect on roamed due to low RSSI
 
 ---
  .../drivers/emac/COMPONENT_WHD/interface/WhdSTAInterface.cpp | 5 ++++-
@@ -24,5 +24,5 @@ index 6fec15adb0..509a2c0981 100644
          return handler_user_data;
      }
 -- 
-2.37.1
+2.39.1
 

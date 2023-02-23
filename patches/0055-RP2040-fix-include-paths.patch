@@ -1,7 +1,7 @@
-From e4024c767229fa2006d878df098b23c6380f96cc Mon Sep 17 00:00:00 2001
+From 43afccc8589f445c1e5a4f2670cbba83278f569f Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Mon, 3 May 2021 14:32:14 +0200
-Subject: [PATCH 055/157] RP2040: fix include paths
+Subject: [PATCH 055/204] RP2040: fix include paths
 
 ---
  targets/TARGET_RASPBERRYPI/TARGET_RP2040/analogin_api.c | 2 +-
@@ -47,5 +47,5 @@ index 007b79c322..b7abac8917 100644
  #if DEVICE_WATCHDOG
  
 -- 
-2.36.0
+2.39.1
 

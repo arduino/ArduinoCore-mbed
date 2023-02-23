@@ -1,7 +1,7 @@
-From 92907dc0a3dec975e250f753fbc72a2b57639565 Mon Sep 17 00:00:00 2001
+From 1cabe13a9a69a2c821085e29a344655f475cf7a2 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Wed, 28 Sep 2022 17:27:56 +0200
-Subject: [PATCH 178/179] STM32H747: linker: set bootloader_info section for
+Subject: [PATCH 178/204] STM32H747: linker: set bootloader_info section for
  all bootloaders
 
 ---
@@ -22,5 +22,5 @@ index 3e84731230..2914967e38 100644
          *ltrans1*.o(.rodata*)
          *ltrans2*.o(.rodata*)
 -- 
-2.37.3
+2.39.1
 

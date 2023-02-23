@@ -1,7 +1,7 @@
-From 23b27170e02699482e86d7d104a743ed385c7dfa Mon Sep 17 00:00:00 2001
+From 9daeaec8a1dcb3e0d3d9999ad64063478d17f422 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Tue, 18 Jan 2022 16:53:27 +0100
-Subject: [PATCH 156/157] Add Portenta X8 target
+Subject: [PATCH 156/204] Add Portenta X8 target
 
 ---
  .../TARGET_PORTENTA_X8/CMakeLists.txt         |  16 +
@@ -999,10 +999,10 @@ index 0000000000..1cce05b2e2
 +
 +#endif
 diff --git a/targets/targets.json b/targets/targets.json
-index 2afaaf214f..415ef47f7f 100644
+index 9baf7bfa97..80206371e9 100644
 --- a/targets/targets.json
 +++ b/targets/targets.json
-@@ -3565,6 +3565,37 @@
+@@ -3677,6 +3677,37 @@
              "MPU"
          ]
      },
@@ -1040,7 +1040,7 @@ index 2afaaf214f..415ef47f7f 100644
      "MCU_STM32H750xB": {
          "inherits": [
              "MCU_STM32H7"
-@@ -3583,7 +3614,8 @@
+@@ -3695,7 +3726,8 @@
          ],
          "overrides": {
              "system_power_supply": "PWR_LDO_SUPPLY"
@@ -1048,8 +1048,8 @@ index 2afaaf214f..415ef47f7f 100644
 +        },
 +        "device_name": "STM32H747XIHx"
      },
-     "MCU_STM32H7A3xIQ": {
+     "MCU_STM32H753xI": {
          "inherits": [
 -- 
-2.36.0
+2.39.1
 

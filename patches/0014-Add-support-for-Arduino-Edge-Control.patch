@@ -1,7 +1,7 @@
-From d7f2002260d93cbd4424dca524ac0b5ac8855d9e Mon Sep 17 00:00:00 2001
+From fe02240e6f395771a11e37705386e3d6dd82cd58 Mon Sep 17 00:00:00 2001
 From: Giampaolo Mancini <giampaolo@trampolineup.com>
 Date: Wed, 8 Jan 2020 16:42:46 +0100
-Subject: [PATCH 014/157] Add support for Arduino Edge Control
+Subject: [PATCH 014/204] Add support for Arduino Edge Control
 
 ---
  .../TARGET_EDGE_CONTROL/PinNames.h            | 207 ++++++++++++++++++
@@ -269,10 +269,10 @@ index 0000000000..2427e752ea
 +
 +#endif
 diff --git a/targets/targets.json b/targets/targets.json
-index f79bc4f63f..0bc010dbea 100644
+index 8d418bd6b9..c035a6ed52 100644
 --- a/targets/targets.json
 +++ b/targets/targets.json
-@@ -6811,6 +6811,19 @@
+@@ -7067,6 +7067,19 @@
              "CONFIG_GPIO_AS_PINRESET"
          ]
      },
@@ -293,5 +293,5 @@ index f79bc4f63f..0bc010dbea 100644
          "core": "Cortex-M4F",
          "components_add": [
 -- 
-2.36.0
+2.39.1
 

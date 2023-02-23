@@ -1,7 +1,7 @@
-From 05f1b89d856921df730908bf5eb8927e0a60629b Mon Sep 17 00:00:00 2001
+From a97d37232d096b8947b01c1bcec2689da41062ea Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Mon, 14 Nov 2022 17:02:33 +0100
-Subject: [PATCH 192/194] Opta: WHD: add function to mount wlan firmware fs
+Subject: [PATCH 192/204] Opta: WHD: add function to mount wlan firmware fs
  from WiFi library
 
 ---
@@ -46,5 +46,5 @@ index a65aa3c148..77d49d1820 100644
   * Open a file for reading or writing
   *
 -- 
-2.38.1
+2.39.1
 

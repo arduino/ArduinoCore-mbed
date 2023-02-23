@@ -1,7 +1,7 @@
-From 330cc7b36d416064f2d8d456b35b7578da3bec42 Mon Sep 17 00:00:00 2001
+From 25472ac7921e3c0159073edb3efde27391f14c0b Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Tue, 13 Jul 2021 13:16:49 +0200
-Subject: [PATCH 092/157] Make set_cid() protected to call it from GEMALTO
+Subject: [PATCH 092/204] Make set_cid() protected to call it from GEMALTO
  stack
 
 ---
@@ -29,5 +29,5 @@ index 19099c0e08..0eb83531b0 100644
  private:
      ContextOperation _current_op;
 -- 
-2.36.0
+2.39.1
 

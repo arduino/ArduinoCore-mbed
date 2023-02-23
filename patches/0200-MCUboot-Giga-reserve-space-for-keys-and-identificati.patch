@@ -1,0 +1,44 @@
+From 4ae9b1581076af6543d2824abcf8141f31b3482e Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Tue, 15 Nov 2022 12:16:43 +0100
+Subject: [PATCH 200/204] MCUboot: Giga: reserve space for keys and
+ identification string
+
+---
+ .../TOOLCHAIN_GCC_ARM/STM32H747xI_CM7.ld                    | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_STM32H747xI_CM7/TOOLCHAIN_GCC_ARM/STM32H747xI_CM7.ld b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_STM32H747xI_CM7/TOOLCHAIN_GCC_ARM/STM32H747xI_CM7.ld
+index e026a61d4a..61aebc3ce5 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_STM32H747xI_CM7/TOOLCHAIN_GCC_ARM/STM32H747xI_CM7.ld
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_STM32H747xI_CM7/TOOLCHAIN_GCC_ARM/STM32H747xI_CM7.ld
+@@ -46,7 +46,7 @@ MEMORY
+ }
+ 
+ 
+-#if defined(MCUBOOT_BOOTLOADER_BUILD) && ( defined(TARGET_PORTENTA_H7_M7) || defined(TARGET_NICLA_VISION) || defined(TARGET_OPTA))
++#if defined(MCUBOOT_BOOTLOADER_BUILD) && ( defined(TARGET_PORTENTA_H7_M7) || defined(TARGET_NICLA_VISION) || defined(TARGET_OPTA) || defined(TARGET_GIGA))
+ _ConfigStart = 0x0802F000;
+ _IdentificationStart = 0x080002F0;
+ _EncryptKeyStart = 0x08000300;
+@@ -88,7 +88,7 @@ SECTIONS
+     .text :
+     {
+         KEEP(*(.isr_vector))
+-#if defined(MCUBOOT_BOOTLOADER_BUILD) && ( defined(TARGET_PORTENTA_H7_M7) || defined(TARGET_NICLA_VISION) || defined(TARGET_OPTA))
++#if defined(MCUBOOT_BOOTLOADER_BUILD) && ( defined(TARGET_PORTENTA_H7_M7) || defined(TARGET_NICLA_VISION) || defined(TARGET_OPTA) || defined(TARGET_GIGA))
+         . = ABSOLUTE(0x080002F0);
+         KEEP(*(.bootloader_identification))
+         KEEP(*(.signing_key))
+@@ -131,7 +131,7 @@ SECTIONS
+ 
+         *lib*.o(.rodata*)
+ 
+-#if (defined(MCUBOOT_BOOTLOADER_BUILD) || defined(BOOTLOADER_BUILD))  && ( defined(TARGET_NICLA_VISION) || defined(TARGET_OPTA))
++#if (defined(MCUBOOT_BOOTLOADER_BUILD) || defined(BOOTLOADER_BUILD))  && ( defined(TARGET_NICLA_VISION) || defined(TARGET_OPTA) || defined(TARGET_GIGA))
+         . = ABSOLUTE(0x0801F000);
+         KEEP(*(.bootloader_version))
+ #endif
+-- 
+2.39.1
+

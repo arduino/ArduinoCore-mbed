@@ -1,17 +1,17 @@
-From 2b7a490c622e0e78b155ae19119259c45435fc22 Mon Sep 17 00:00:00 2001
+From 01ce92bb04d45102aa279897e28e0a0a4963145e Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Wed, 2 Feb 2022 14:24:59 +0100
-Subject: [PATCH 129/157] NICLA_VISION: Enable component SE050
+Subject: [PATCH 129/204] NICLA_VISION: Enable component SE050
 
 ---
  targets/targets.json | 3 ++-
  1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/targets/targets.json b/targets/targets.json
-index 6702b659f4..5e036861cf 100644
+index 5bfe2292a0..08443a97f9 100644
 --- a/targets/targets.json
 +++ b/targets/targets.json
-@@ -3506,7 +3506,8 @@
+@@ -3618,7 +3618,8 @@
              "QSPIF",
              "WHD",
              "4343W_FS",
@@ -22,5 +22,5 @@ index 6702b659f4..5e036861cf 100644
          "macros_add": [
              "MBEDTLS_FS_IO",
 -- 
-2.36.0
+2.39.1
 

@@ -1,7 +1,7 @@
-From 0e694aa413f85f5cd3356ada49d80d29088d7ea6 Mon Sep 17 00:00:00 2001
+From 93261a0755feaa8e6aea793c28055d34022b147e Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Tue, 12 Jul 2022 15:51:58 +0200
-Subject: [PATCH] RP2040: align gpio_irq_init API with mainline
+Subject: [PATCH 172/204] RP2040: align gpio_irq_init API with mainline
 
 ---
  targets/TARGET_RASPBERRYPI/TARGET_RP2040/gpio_api.c | 6 +++---
@@ -35,5 +35,5 @@ index a10a7d6c89..e53887bc32 100644
      return 0;
  }
 -- 
-2.36.0
+2.39.1
 

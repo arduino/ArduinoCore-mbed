@@ -1,7 +1,7 @@
-From 2bdb291a44fd149d38662f70a574b1a06380fca7 Mon Sep 17 00:00:00 2001
+From a6594adeff91a1a1942b69db209abf2b77794357 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Thu, 11 Mar 2021 11:50:18 +0100
-Subject: [PATCH 011/157] STM32: USB: allow dynamic USB speed configuration
+Subject: [PATCH 011/204] STM32: USB: allow dynamic USB speed configuration
  based on bootloader parameters
 
 ---
@@ -9,7 +9,7 @@ Subject: [PATCH 011/157] STM32: USB: allow dynamic USB speed configuration
  1 file changed, 64 insertions(+), 4 deletions(-)
 
 diff --git a/targets/TARGET_STM/USBPhy_STM32.cpp b/targets/TARGET_STM/USBPhy_STM32.cpp
-index c45150de4b..40f1044216 100644
+index a243961a97..3c86f20883 100644
 --- a/targets/TARGET_STM/USBPhy_STM32.cpp
 +++ b/targets/TARGET_STM/USBPhy_STM32.cpp
 @@ -217,10 +217,29 @@ void USB_reenumerate()
@@ -70,7 +70,7 @@ index c45150de4b..40f1044216 100644
      hpcd.Instance = USB_OTG_HS;
      hpcd.Init.phy_itface = USB_OTG_EMBEDDED_PHY;
      hpcd.Init.Sof_enable = ENABLE;
-@@ -275,7 +304,12 @@ void USBPhyHw::init(USBPhyEvents *events)
+@@ -284,7 +313,12 @@ void USBPhyHw::init(USBPhyEvents *events)
  
      map = PinMap_USB_HS;
  
@@ -84,7 +84,7 @@ index c45150de4b..40f1044216 100644
      hpcd.Instance = USB_OTG_FS;
      hpcd.Init.phy_itface = PCD_PHY_EMBEDDED;
      hpcd.Init.Sof_enable = 1;
-@@ -292,7 +326,12 @@ void USBPhyHw::init(USBPhyEvents *events)
+@@ -301,7 +335,12 @@ void USBPhyHw::init(USBPhyEvents *events)
  
      map = PinMap_USB_FS;
  
@@ -98,7 +98,7 @@ index c45150de4b..40f1044216 100644
      hpcd.Instance = USB;
      hpcd.Init.phy_itface = PCD_PHY_EMBEDDED;
      hpcd.Init.speed = PCD_SPEED_FULL;
-@@ -405,6 +444,13 @@ void USBPhyHw::deinit()
+@@ -414,6 +453,13 @@ void USBPhyHw::deinit()
      HAL_StatusTypeDef ret = HAL_PCD_DeInit(&hpcd);
      MBED_ASSERT(ret == HAL_OK);
  
@@ -112,7 +112,7 @@ index c45150de4b..40f1044216 100644
      NVIC_DisableIRQ(USBHAL_IRQn);
  
      if (events != NULL) {
-@@ -639,6 +685,13 @@ void USBPhyHw::endpoint_abort(usb_ep_t endpoint)
+@@ -648,6 +694,13 @@ void USBPhyHw::endpoint_abort(usb_ep_t endpoint)
  
  void USBPhyHw::process()
  {
@@ -126,7 +126,7 @@ index c45150de4b..40f1044216 100644
      HAL_PCD_IRQHandler(&instance->hpcd);
      // Re-enable interrupt
      NVIC_ClearPendingIRQ(USBHAL_IRQn);
-@@ -647,6 +700,13 @@ void USBPhyHw::process()
+@@ -656,6 +709,13 @@ void USBPhyHw::process()
  
  void USBPhyHw::_usbisr(void)
  {
@@ -141,5 +141,5 @@ index c45150de4b..40f1044216 100644
      instance->events->start_process();
  }
 -- 
-2.36.0
+2.39.1
 

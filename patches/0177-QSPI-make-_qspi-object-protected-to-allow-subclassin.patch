@@ -1,7 +1,8 @@
-From a316902eaa2b438e71a40f0992fc8094058eaa63 Mon Sep 17 00:00:00 2001
+From 77fb09b520e9914d457882ef63e4a795d3e87529 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Fri, 23 Sep 2022 09:51:20 +0200
-Subject: [PATCH] QSPI: make _qspi object protected to allow subclassing
+Subject: [PATCH 177/204] QSPI: make _qspi object protected to allow
+ subclassing
 
 ---
  .../COMPONENT_QSPIF/include/QSPIF/QSPIFBlockDevice.h            | 2 ++
@@ -24,5 +25,5 @@ index 2903ecad32..695a396197 100644
      // Each QSPI Flash device csel can have only 1 QSPIFBlockDevice instance
      // _devices_mutex is used to lock csel list - only one QSPIFBlockDevice instance per csel is allowed
 -- 
-2.37.3
+2.39.1
 

@@ -1,17 +1,17 @@
-From 2e10d655f2b90972531bda55a89d177babcfda8d Mon Sep 17 00:00:00 2001
+From 7e0b9dcc37ea577f80832fe554aa558c795064d3 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Tue, 25 Jan 2022 17:17:58 +0100
-Subject: [PATCH 157/157] PortentaX8: remove MPU support
+Subject: [PATCH 157/204] PortentaX8: remove MPU support
 
 ---
  targets/targets.json | 7 ++++++-
  1 file changed, 6 insertions(+), 1 deletion(-)
 
 diff --git a/targets/targets.json b/targets/targets.json
-index 415ef47f7f..677b43ed83 100644
+index 80206371e9..33f42a4f9a 100644
 --- a/targets/targets.json
 +++ b/targets/targets.json
-@@ -3585,7 +3585,12 @@
+@@ -3697,7 +3697,12 @@
          "macros_add": [
              "MBEDTLS_FS_IO",
              "MBEDTLS_SHA1_C",
@@ -26,5 +26,5 @@ index 415ef47f7f..677b43ed83 100644
          "detect_code": ["0813"],
          "overrides": {
 -- 
-2.36.0
+2.39.1
 

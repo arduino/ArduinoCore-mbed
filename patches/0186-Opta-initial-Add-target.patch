@@ -1,7 +1,7 @@
-From 8a6c325bf08f2ee4d9137f7367f119e30c005019 Mon Sep 17 00:00:00 2001
+From 4d9daca838e075694f48b2890bf855420dbd1a19 Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Thu, 28 Oct 2021 09:46:47 +0200
-Subject: [PATCH 186/194] Opta: initial: Add target
+Subject: [PATCH 186/204] Opta: initial: Add target
 
 ---
  .../TARGET_STM/TARGET_STM32H7/CMakeLists.txt  |     2 +
@@ -92,7 +92,7 @@ Subject: [PATCH 186/194] Opta: initial: Add target
  create mode 100644 targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_OPTA/system_clock_override.c
 
 diff --git a/connectivity/drivers/emac/TARGET_STM/TARGET_STM32H7/CMakeLists.txt b/connectivity/drivers/emac/TARGET_STM/TARGET_STM32H7/CMakeLists.txt
-index 5c9e756148..54d0ed0455 100644
+index bfb91ae154..dea17fcb08 100644
 --- a/connectivity/drivers/emac/TARGET_STM/TARGET_STM32H7/CMakeLists.txt
 +++ b/connectivity/drivers/emac/TARGET_STM/TARGET_STM32H7/CMakeLists.txt
 @@ -5,6 +5,8 @@ if("DISCO_H747I" IN_LIST MBED_TARGET_LABELS)
@@ -35155,10 +35155,10 @@ index 0000000000..19923b626d
 +}
 +#endif
 diff --git a/targets/targets.json b/targets/targets.json
-index 7274f5d03e..2c7ae3d767 100644
+index a11fc88129..ac53c070b2 100644
 --- a/targets/targets.json
 +++ b/targets/targets.json
-@@ -3629,6 +3629,57 @@
+@@ -3713,6 +3713,57 @@
              "i2c_timing_value_algo": true
          }
      },
@@ -35217,5 +35217,5 @@ index 7274f5d03e..2c7ae3d767 100644
          "inherits": [
              "MCU_STM32H7"
 -- 
-2.38.1
+2.39.1
 

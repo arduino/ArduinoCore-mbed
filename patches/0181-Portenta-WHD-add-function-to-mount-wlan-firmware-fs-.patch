@@ -1,7 +1,7 @@
-From cc47c9bdedc7c2841c3200c62dd6aa5658f4587e Mon Sep 17 00:00:00 2001
+From 7a0c5d14cc2c96c03677adb74c8517ea3e6d334d Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Thu, 10 Nov 2022 14:04:15 +0100
-Subject: [PATCH 181/182] Portenta: WHD: add function to mount wlan firmware fs
+Subject: [PATCH 181/204] Portenta: WHD: add function to mount wlan firmware fs
  from WiFi library
 
 ---
@@ -46,5 +46,5 @@ index a65aa3c148..77d49d1820 100644
   * Open a file for reading or writing
   *
 -- 
-2.38.1
+2.39.1
 

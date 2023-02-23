@@ -1,7 +1,7 @@
-From 93e3804de354f1d255b48361a585838cb011197e Mon Sep 17 00:00:00 2001
+From 727e2e12cc425f467c630640e3c1b5a9fc9b1b7f Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Tue, 15 Nov 2022 10:10:29 +0100
-Subject: [PATCH 193/194] stm32h747: linker: set bootloader_version sectionat
+Subject: [PATCH 193/204] stm32h747: linker: set bootloader_version sectionat
  the end of flash
 
 ---
@@ -42,5 +42,5 @@ index fc963145e7..8db1cd9189 100644
  
      .ARM.extab :
 -- 
-2.38.1
+2.39.1
 

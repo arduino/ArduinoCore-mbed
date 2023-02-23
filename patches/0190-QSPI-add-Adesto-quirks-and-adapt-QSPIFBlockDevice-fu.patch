@@ -1,7 +1,7 @@
-From c85131fabe8ea3de63057430955a75784a57dd39 Mon Sep 17 00:00:00 2001
+From 182799684402ec2c783f121e7147843e1056ad99 Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Tue, 29 Mar 2022 16:43:31 +0200
-Subject: [PATCH 190/194] QSPI: add Adesto quirks and adapt QSPIFBlockDevice
+Subject: [PATCH 190/204] QSPI: add Adesto quirks and adapt QSPIFBlockDevice
  functions
 
 ---
@@ -173,5 +173,5 @@ index e523c3449c..9fa6e59aca 100644
                  tr_info("UNSUPPORTED:Parameter header: SCCR Map for SPI Memory Devices");
                  break;
 -- 
-2.38.1
+2.39.1
 

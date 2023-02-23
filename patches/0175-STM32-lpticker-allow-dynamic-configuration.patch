@@ -1,7 +1,7 @@
-From ff38953e8e678c697b52ddbe62bc99fe445a1c74 Mon Sep 17 00:00:00 2001
+From 670d0318a92e657b3ef74036dd83912113f27f61 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Thu, 7 Oct 2021 17:00:27 +0200
-Subject: [PATCH 175/176] STM32: lpticker: allow dynamic configuration
+Subject: [PATCH 175/204] STM32: lpticker: allow dynamic configuration
 
 Step1: allow automatic fallback to LSI if LSE is not functional
 Step2: expose two reconfiguration APIs, so the user can check if LSE is precise enough and eventually revert to LSI
@@ -190,5 +190,5 @@ index d5292566e5..6dc806ccf6 100644
  
      if (HAL_RCCEx_PeriphCLKConfig(&RCC_PeriphCLKInitStruct) != HAL_OK) {
 -- 
-2.37.1
+2.39.1
 

@@ -1,7 +1,7 @@
-From 0943923f6723151a487a0d7eb881ad6309121469 Mon Sep 17 00:00:00 2001
+From 8d731e640a9cf647d8f604775a7299eb078fff12 Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Fri, 13 May 2022 09:53:51 +0200
-Subject: [PATCH 169/171] RP2040: adapt linker script to mbed
+Subject: [PATCH 169/204] RP2040: adapt linker script to mbed
 
 ---
  .../pico-sdk/rp2_common/pico_standard_link/crt0.S  | 14 --------------
@@ -30,5 +30,5 @@ index d22620507e..704a5d9795 100644
 -    .equ HeapSize, PICO_HEAP_SIZE
 -.space HeapSize
 -- 
-2.36.0
+2.39.1
 

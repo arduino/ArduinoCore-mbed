@@ -1,7 +1,7 @@
-From d679e96b0176e20371244583a3d03ecea4d041c7 Mon Sep 17 00:00:00 2001
+From f70719ab23d010515a54d8e86ebf230407f67b3f Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Tue, 5 Apr 2022 16:43:07 +0200
-Subject: [PATCH 152/157] MCUboot:PORTENTA_H7_Move libc rodata after bootloader
+Subject: [PATCH 152/204] MCUboot:PORTENTA_H7_Move libc rodata after bootloader
  data to gain flash space
 
 ---
@@ -30,5 +30,5 @@ index 41c72141ed..0a54d17c76 100644
  
          *(.rodata*)
 -- 
-2.36.0
+2.39.1
 

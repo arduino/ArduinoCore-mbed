@@ -1,7 +1,7 @@
-From e101b91b77feb4a8cb7239bb1b58544264c6d86d Mon Sep 17 00:00:00 2001
+From e32405e7ec786ad701d61d2acd6da7430a19d725 Mon Sep 17 00:00:00 2001
 From: Riccardo Rizzo <r.rizzo@arduino.cc>
 Date: Mon, 28 Jun 2021 15:25:11 +0200
-Subject: [PATCH 073/157] STM32: PWM: implement HRTIM based PWM APIs
+Subject: [PATCH 073/204] STM32: PWM: implement HRTIM based PWM APIs
 
 Signed-off-by: Martino Facchin <m.facchin@arduino.cc>
 ---
@@ -260,5 +260,5 @@ index 8026921c67..1564a1c4d3 100644
      RCC_ClkInitTypeDef RCC_ClkInitStruct;
      uint32_t PclkFreq = 0;
 -- 
-2.36.0
+2.39.1
 

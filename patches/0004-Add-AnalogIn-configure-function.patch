@@ -1,7 +1,7 @@
-From 7abd4be4ee59e6e96f250f9a79c5d70d365a2417 Mon Sep 17 00:00:00 2001
+From 76c93b67d821c29dc00c5c2e1017cb99fcc14c99 Mon Sep 17 00:00:00 2001
 From: Paolo Calao <paolo.calao@gmail.com>
 Date: Wed, 13 May 2020 11:59:46 +0200
-Subject: [PATCH 004/157] Add AnalogIn configure function
+Subject: [PATCH 004/204] Add AnalogIn configure function
 
 This adds a weak method to configure AnalogIn objects.
 Also, a strong implementation of such method for NRF5284 is provided.
@@ -169,5 +169,5 @@ index 41b87722ac..4466f680c7 100644
      uint32_t ch;
  };
 -- 
-2.36.0
+2.39.1
 

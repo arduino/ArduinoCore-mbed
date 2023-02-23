@@ -1,7 +1,7 @@
-From b39498956559ee1c8dba75270e8d07b8090a244d Mon Sep 17 00:00:00 2001
+From a38dc2a6d7e84d01e6148b801fe149280a300a23 Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Wed, 23 Nov 2022 09:38:07 +0100
-Subject: [PATCH 194/194] MCUboot:PORTENTA_H7:Tune rodata to fit flash
+Subject: [PATCH 194/204] MCUboot:PORTENTA_H7:Tune rodata to fit flash
 
 ---
  .../TOOLCHAIN_GCC_ARM/STM32H747xI_CM7.ld           | 14 +++++++++++++-
@@ -48,5 +48,5 @@ index 8db1cd9189..e026a61d4a 100644
  
      .ARM.extab :
 -- 
-2.38.1
+2.39.1
 

@@ -1,7 +1,7 @@
-From fb9e38d41f947ac9844dd877a1b8e613bbea1eec Mon Sep 17 00:00:00 2001
+From cd779cab129aefb8f416025a821009e4d0a06fe1 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Wed, 18 May 2022 15:59:30 +0200
-Subject: [PATCH 171/171] can: stm32: use FDCAN_IT_RX_FIFO0_NEW_MESSAGE for RX
+Subject: [PATCH 171/204] can: stm32: use FDCAN_IT_RX_FIFO0_NEW_MESSAGE for RX
  interrupt
 
 ---
@@ -9,7 +9,7 @@ Subject: [PATCH 171/171] can: stm32: use FDCAN_IT_RX_FIFO0_NEW_MESSAGE for RX
  1 file changed, 13 deletions(-)
 
 diff --git a/targets/TARGET_STM/can_api.c b/targets/TARGET_STM/can_api.c
-index a5715f2b0d..1edf1d9bde 100644
+index c579c19a7e..8e9780c9c3 100644
 --- a/targets/TARGET_STM/can_api.c
 +++ b/targets/TARGET_STM/can_api.c
 @@ -550,21 +550,12 @@ static void can_irq(CANName name, int id)
@@ -47,5 +47,5 @@ index a5715f2b0d..1edf1d9bde 100644
          case IRQ_ERROR:
              interrupts = FDCAN_IT_ERROR_WARNING;
 -- 
-2.36.0
+2.39.1
 

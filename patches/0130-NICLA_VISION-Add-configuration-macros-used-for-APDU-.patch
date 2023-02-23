@@ -1,7 +1,7 @@
-From b1fb8c15671daecb88e22bcb320db93abfef1fe6 Mon Sep 17 00:00:00 2001
+From a8d6db44ffe69a3cb8c322909ec00b9feaf4fc28 Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Wed, 2 Feb 2022 14:26:18 +0100
-Subject: [PATCH 130/157] NICLA_VISION: Add configuration macros used for APDU
+Subject: [PATCH 130/204] NICLA_VISION: Add configuration macros used for APDU
  communication protocol
 
 ---
@@ -9,10 +9,10 @@ Subject: [PATCH 130/157] NICLA_VISION: Add configuration macros used for APDU
  1 file changed, 3 insertions(+), 1 deletion(-)
 
 diff --git a/targets/targets.json b/targets/targets.json
-index 5e036861cf..f2429fba17 100644
+index 08443a97f9..90233a1e33 100644
 --- a/targets/targets.json
 +++ b/targets/targets.json
-@@ -3514,7 +3514,9 @@
+@@ -3626,7 +3626,9 @@
              "MBEDTLS_SHA1_C",
              "CM4_BOOT_BY_APPLICATION",
              "QSPI_NO_SAMPLE_SHIFT",
@@ -24,5 +24,5 @@ index 5e036861cf..f2429fba17 100644
          "device_has_add": [
              "USBDEVICE",
 -- 
-2.36.0
+2.39.1
 

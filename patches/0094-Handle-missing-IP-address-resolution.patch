@@ -1,7 +1,7 @@
-From 2bd81ee3674c87420c5c571b77cf75cff629f540 Mon Sep 17 00:00:00 2001
+From 6a49ec933d4b87d6ce1a81b99d7137f0edeb978f Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Wed, 14 Jul 2021 10:25:40 +0200
-Subject: [PATCH 094/157] Handle missing IP address resolution
+Subject: [PATCH 094/204] Handle missing IP address resolution
 
 ---
  .../GEMALTO_CINTERION_CellularStack.cpp        | 18 +++++++++++++-----
@@ -37,5 +37,5 @@ index 13c1a0b2fa..9eb3e27b39 100644
      }
  
 -- 
-2.36.0
+2.39.1
 

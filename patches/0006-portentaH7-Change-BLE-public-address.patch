@@ -1,7 +1,7 @@
-From 7670c4f59b63a06fea0fc6dcd96af6976a548317 Mon Sep 17 00:00:00 2001
+From 870bd11b57b6497fec6469c7ed59a627fcc96996 Mon Sep 17 00:00:00 2001
 From: Paolo Calao <paolo.calao@gmail.com>
 Date: Thu, 29 Oct 2020 15:40:32 +0100
-Subject: [PATCH 006/157] portentaH7: Change BLE public address
+Subject: [PATCH 006/204] portentaH7: Change BLE public address
 
 ---
  .../ble/FEATURE_BLE/COMPONENT_CYW43XXX/HCIDriver.cpp  | 11 +++++++++++
@@ -37,5 +37,5 @@ index 957e37594b..ff389c9f81 100644
          } else {
          }
 -- 
-2.36.0
+2.39.1
 

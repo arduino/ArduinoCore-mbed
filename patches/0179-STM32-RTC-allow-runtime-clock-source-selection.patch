@@ -1,7 +1,7 @@
-From 98eef4b565d5701b55e58388b14d45f1776e0430 Mon Sep 17 00:00:00 2001
+From 89e07b3d16c661124b6ecb7b1eb7add20d79572c Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Wed, 28 Sep 2022 17:28:59 +0200
-Subject: [PATCH 179/179] STM32: RTC: allow runtime clock source selection
+Subject: [PATCH 179/204] STM32: RTC: allow runtime clock source selection
 
 ---
  targets/TARGET_STM/rtc_api.c | 80 +++++++++++++++++++++---------------
@@ -110,5 +110,5 @@ index 3fb6cc7320..4b0d386e39 100644
  #endif /* MBED_CONF_TARGET_RTC_CLOCK_SOURCE */
  #if defined(DUAL_CORE) && (TARGET_STM32H7)
 -- 
-2.37.3
+2.39.1
 

@@ -1,7 +1,7 @@
-From d9e87b69a5f817da0ce653485acf7cc0cba23df5 Mon Sep 17 00:00:00 2001
+From 753b07f1f4dab602cf2c09357a41bcd2123d7b81 Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Fri, 13 May 2022 09:50:07 +0200
-Subject: [PATCH 167/171] RP2040: Change uart is_writable() logic to handle
+Subject: [PATCH 167/204] RP2040: Change uart is_writable() logic to handle
  FIFO
 
 ---
@@ -30,5 +30,5 @@ index bce0d2f0f8..a274207ee4 100644
  
  /*! \brief Wait for the UART TX fifo to be drained
 -- 
-2.36.0
+2.39.1
 

@@ -1,17 +1,17 @@
-From 5f65d73a8d028e4f1c0d8cc74b686292a9a8ecfb Mon Sep 17 00:00:00 2001
+From 0b1a01ad4adb0cbee9bea76e80ebb08baeff86a6 Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Wed, 6 Apr 2022 13:55:55 +0200
-Subject: [PATCH 153/157] NICLA_VISION:Add device name in target.json
+Subject: [PATCH 153/204] NICLA_VISION:Add device name in target.json
 
 ---
  targets/targets.json | 3 ++-
  1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/targets/targets.json b/targets/targets.json
-index e0e4a8b6d8..2afaaf214f 100644
+index 050ce7e932..9baf7bfa97 100644
 --- a/targets/targets.json
 +++ b/targets/targets.json
-@@ -3544,7 +3544,8 @@
+@@ -3656,7 +3656,8 @@
          ],
          "features": [
              "BLE"
@@ -22,5 +22,5 @@ index e0e4a8b6d8..2afaaf214f 100644
      "PORTENTA_H7_M4": {
          "inherits": ["PORTENTA_H7"],
 -- 
-2.36.0
+2.39.1
 

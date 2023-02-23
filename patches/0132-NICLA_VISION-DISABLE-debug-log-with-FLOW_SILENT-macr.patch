@@ -1,7 +1,7 @@
-From 595d3a1549244e709c75980a4d8f9a8cfcedb529 Mon Sep 17 00:00:00 2001
+From de99bbf08b423fd6dc88bc2735070f8faf988646 Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Wed, 2 Feb 2022 15:04:02 +0100
-Subject: [PATCH 132/157] NICLA_VISION: DISABLE debug log with FLOW_SILENT
+Subject: [PATCH 132/204] NICLA_VISION: DISABLE debug log with FLOW_SILENT
  macro
 
 ---
@@ -9,10 +9,10 @@ Subject: [PATCH 132/157] NICLA_VISION: DISABLE debug log with FLOW_SILENT
  1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/targets/targets.json b/targets/targets.json
-index 43e830d147..e0e4a8b6d8 100644
+index 88efda3f33..050ce7e932 100644
 --- a/targets/targets.json
 +++ b/targets/targets.json
-@@ -3532,7 +3532,8 @@
+@@ -3644,7 +3644,8 @@
              "QSPI_NO_SAMPLE_SHIFT",
              "CYW43XXX_UNBUFFERED_UART",
              "T1oI2C",
@@ -23,5 +23,5 @@ index 43e830d147..e0e4a8b6d8 100644
          "device_has_add": [
              "USBDEVICE",
 -- 
-2.36.0
+2.39.1
 

@@ -1,7 +1,7 @@
-From e63f9f22688e6eccc2dc2586c38559a9205429dd Mon Sep 17 00:00:00 2001
+From c17b33b8cea304e9aa153f0653dcee3ad97fb5e5 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Wed, 11 Aug 2021 17:30:39 +0200
-Subject: [PATCH 105/157] GEMALTO: TX62: tune AT configuration
+Subject: [PATCH 105/204] GEMALTO: TX62: tune AT configuration
 
 ---
  .../cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.cpp   | 10 +++++-----
@@ -39,5 +39,5 @@ index 459bba8eb1..3e3bcd4121 100644
      set_cellular_properties(cellular_properties);
      _module = ModuleTX62;
 -- 
-2.36.0
+2.39.1
 

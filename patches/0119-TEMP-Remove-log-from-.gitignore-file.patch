@@ -1,7 +1,7 @@
-From 86184757e34954fe60e2c81f9d3c08c86566dbbc Mon Sep 17 00:00:00 2001
+From f413796efdcb68961d12c1b922d6676f42e8a079 Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Wed, 19 Jan 2022 10:24:06 +0100
-Subject: [PATCH 119/157] TEMP: Remove log from .gitignore file
+Subject: [PATCH 119/204] TEMP: Remove log from .gitignore file
 
 ---
  .gitignore | 1 -
@@ -20,5 +20,5 @@ index 3e907cf52c..7a68e77ae8 100644
  # Icetea related file
  test_suite.json
 -- 
-2.36.0
+2.39.1
 

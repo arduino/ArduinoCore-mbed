@@ -1,7 +1,7 @@
-From 6df4a3d8af6d4b954bda1635006ea62ec9df0dd7 Mon Sep 17 00:00:00 2001
+From d81aa7300c499a8a8304712b5bab330155d13ba2 Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Thu, 26 Aug 2021 15:42:18 +0200
-Subject: [PATCH 146/157] MCUboot:PORTENTA_H7_M7:Remove HSI,CSI,LSI,HSI48
+Subject: [PATCH 146/204] MCUboot:PORTENTA_H7_M7:Remove HSI,CSI,LSI,HSI48
  support from HAL_RCC_OscConfig
 
 ---
@@ -29,5 +29,5 @@ index b5e93c78b9..eb5485dc7d 100644
    if(((RCC_OscInitStruct->OscillatorType) & RCC_OSCILLATORTYPE_LSE) == RCC_OSCILLATORTYPE_LSE)
    {
 -- 
-2.36.0
+2.39.1
 

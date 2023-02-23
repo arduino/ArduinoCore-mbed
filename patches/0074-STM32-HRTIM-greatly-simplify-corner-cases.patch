@@ -1,7 +1,7 @@
-From 8daa471aa7d0dc170f6f40ea7927495dd8062b79 Mon Sep 17 00:00:00 2001
+From bea4beebeaced6d06643b8c1bf1dff64d690fbdd Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Mon, 28 Jun 2021 17:04:01 +0200
-Subject: [PATCH 074/157] STM32: HRTIM: greatly simplify corner cases
+Subject: [PATCH 074/204] STM32: HRTIM: greatly simplify corner cases
 
 ---
  targets/TARGET_STM/pwmout_api.c | 57 +++++++++++++++------------------
@@ -129,5 +129,5 @@ index 1564a1c4d3..906dc1dcfd 100644
          sConfig_time_base.Period = obj->period;
          sConfig_time_base.PrescalerRatio = obj->prescaler;
 -- 
-2.36.0
+2.39.1
 

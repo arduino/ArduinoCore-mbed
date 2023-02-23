@@ -1,7 +1,7 @@
-From bab7209459afc3510873637c3ed5eeca6b704930 Mon Sep 17 00:00:00 2001
+From 686ec9b801c93557d3c123a24f9373a5f5aa23f5 Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Mon, 15 Mar 2021 17:52:09 +0100
-Subject: [PATCH 049/157] RP2040: Implement reset reasons
+Subject: [PATCH 049/204] RP2040: Implement reset reasons
 
 ---
  .../TARGET_RP2040/reset_reason.c              | 33 +++++++++++++++++++
@@ -49,10 +49,10 @@ index 0000000000..7e511078c5
 +
 +#endif // DEVICE_RESET_REASON
 diff --git a/targets/targets.json b/targets/targets.json
-index c9ddc9708f..ada53ef030 100644
+index 87b25d0c3b..6d8e913119 100644
 --- a/targets/targets.json
 +++ b/targets/targets.json
-@@ -8986,7 +8986,8 @@
+@@ -9433,7 +9433,8 @@
              "SPI",
              "USTICKER",
              "WATCHDOG",
@@ -63,5 +63,5 @@ index c9ddc9708f..ada53ef030 100644
      },
      "NANO_RP2040_CONNECT": {
 -- 
-2.36.0
+2.39.1
 

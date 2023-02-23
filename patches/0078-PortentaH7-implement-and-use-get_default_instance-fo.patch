@@ -1,7 +1,7 @@
-From 4c5f7b4ddf0f60484e402ad8e3c19beace946e79 Mon Sep 17 00:00:00 2001
+From 531ab8f2cf8da34f4ecb84da172cf9eb0e64ddd9 Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Thu, 22 Jul 2021 12:04:53 +0200
-Subject: [PATCH 078/157] PortentaH7: implement and use get_default_instance
+Subject: [PATCH 078/204] PortentaH7: implement and use get_default_instance
  for QSPIBD
 
 ---
@@ -42,5 +42,5 @@ index b6de4ece12..bea07abdef 100644
          if (qspi_bd->init() == BD_ERROR_OK) {
              mbr_bd = new MBRBlockDevice(qspi_bd, WIFI_DEFAULT_PARTITION);
 -- 
-2.36.0
+2.39.1
 

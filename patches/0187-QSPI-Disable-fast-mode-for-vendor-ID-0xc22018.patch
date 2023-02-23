@@ -1,7 +1,7 @@
-From 4d173452ca002468213fb406e2759cac23a0b955 Mon Sep 17 00:00:00 2001
+From 456854bf42eeed7ed899732853298adbd92a9cb7 Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Mon, 18 Oct 2021 16:45:48 +0200
-Subject: [PATCH 187/194] QSPI: Disable fast mode for vendor ID 0xc22018
+Subject: [PATCH 187/204] QSPI: Disable fast mode for vendor ID 0xc22018
 
 ---
  .../blockdevice/COMPONENT_QSPIF/source/QSPIFBlockDevice.cpp | 6 ++++--
@@ -25,5 +25,5 @@ index 898141f780..20af57f257 100644
              _attempt_4_byte_addressing = false;
              break;
 -- 
-2.38.1
+2.39.1
 

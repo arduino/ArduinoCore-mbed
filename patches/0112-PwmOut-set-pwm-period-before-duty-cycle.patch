@@ -1,17 +1,17 @@
-From 64c32e03c7449d9284bc0e1eae41cb1c73788b5e Mon Sep 17 00:00:00 2001
+From 9179831ca7fe22dcf3c095fd07232e495d2beaa9 Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Thu, 3 Feb 2022 14:35:55 +0100
-Subject: [PATCH 112/157] PwmOut: set pwm period before duty cycle
+Subject: [PATCH 112/204] PwmOut: set pwm period before duty cycle
 
 ---
  drivers/source/PwmOut.cpp | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/source/PwmOut.cpp b/drivers/source/PwmOut.cpp
-index ccada968ed..8bbcb23b39 100644
+index cc717f8e99..53e6f84f10 100644
 --- a/drivers/source/PwmOut.cpp
 +++ b/drivers/source/PwmOut.cpp
-@@ -137,8 +137,8 @@ void PwmOut::resume()
+@@ -142,8 +142,8 @@ void PwmOut::resume()
      core_util_critical_section_enter();
      if (!_initialized) {
          PwmOut::init();
@@ -22,5 +22,5 @@ index ccada968ed..8bbcb23b39 100644
      core_util_critical_section_exit();
  }
 -- 
-2.36.0
+2.39.1
 

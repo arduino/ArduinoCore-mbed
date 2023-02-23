@@ -1,7 +1,7 @@
-From fe2e94ce3c2f211caa693c72e950a1b8551ed6f7 Mon Sep 17 00:00:00 2001
+From fd3895618d06daa92615c260a4603e870173b2d2 Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Wed, 27 Oct 2021 15:30:07 +0200
-Subject: [PATCH 118/157] Nicla Vision: fix LPUART at baudrates higher than
+Subject: [PATCH 118/204] Nicla Vision: fix LPUART at baudrates higher than
  9600
 
 ---
@@ -9,10 +9,10 @@ Subject: [PATCH 118/157] Nicla Vision: fix LPUART at baudrates higher than
  1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/targets/targets.json b/targets/targets.json
-index 884f508e46..6702b659f4 100644
+index 3516696296..5bfe2292a0 100644
 --- a/targets/targets.json
 +++ b/targets/targets.json
-@@ -3499,7 +3499,8 @@
+@@ -3611,7 +3611,8 @@
              "lse_available": 0,
              "lpticker_delay_ticks": 0,
              "network-default-interface-type": "WIFI",
@@ -23,5 +23,5 @@ index 884f508e46..6702b659f4 100644
          "components_add": [
              "QSPIF",
 -- 
-2.36.0
+2.39.1
 

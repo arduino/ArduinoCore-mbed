@@ -1,7 +1,7 @@
-From a4a5ef9c18e55fc4c4310ce2efd5bde9ca1215bb Mon Sep 17 00:00:00 2001
+From d28bec851428b2a958f64416fbc50e55b7e9c0d4 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Wed, 22 Sep 2021 15:34:24 +0200
-Subject: [PATCH 083/157] mbed-client-cli: ns_cmdline: make cmd_class_t cmd
+Subject: [PATCH 083/204] mbed-client-cli: ns_cmdline: make cmd_class_t cmd
  private
 
 ---
@@ -22,5 +22,5 @@ index 7e113502b6..1384e278ea 100644
      .cmd_ptr = NULL,
      .mutex_wait_fnc = NULL,
 -- 
-2.36.0
+2.39.1
 

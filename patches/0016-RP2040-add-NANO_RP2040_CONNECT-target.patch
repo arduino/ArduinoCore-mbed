@@ -1,7 +1,7 @@
-From da155e47b873ca2844201f68e8733dd7a2f85bf2 Mon Sep 17 00:00:00 2001
+From d513993457a61cf37cf53aaf02a53c769f132484 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Mon, 3 May 2021 10:56:43 +0200
-Subject: [PATCH 016/157] RP2040: add NANO_RP2040_CONNECT target
+Subject: [PATCH 016/204] RP2040: add NANO_RP2040_CONNECT target
 
 ---
  targets/CMakeLists.txt                        |   1 +
@@ -991,10 +991,10 @@ index 0000000000..f43fa2e32d
 +
 +#endif  // MBED_MBED_RTX_H
 diff --git a/targets/targets.json b/targets/targets.json
-index 0bc010dbea..5bdddb968d 100644
+index c035a6ed52..239260df44 100644
 --- a/targets/targets.json
 +++ b/targets/targets.json
-@@ -8957,6 +8957,35 @@
+@@ -9404,6 +9404,35 @@
          "inherits": ["AMA3B1KK"],
          "components_add": ["lis2dh12", "hm01b0"]
      },
@@ -1031,5 +1031,5 @@ index 0bc010dbea..5bdddb968d 100644
          "version": "1",
          "public": false
 -- 
-2.36.0
+2.39.1
 

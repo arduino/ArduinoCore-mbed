@@ -1,7 +1,7 @@
-From eefa7a72adf578167b6eab9f3ed96220a6599fcc Mon Sep 17 00:00:00 2001
+From 01fab82fb411f87c618054ec4ca820d8893b1e88 Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Fri, 13 May 2022 09:47:37 +0200
-Subject: [PATCH 165/171] RP2040: Change standard interrupt names and linker
+Subject: [PATCH 165/204] RP2040: Change standard interrupt names and linker
  script to be CMSIS compliant
 
 ---
@@ -78,5 +78,5 @@ index f57ddfdefc..d22620507e 100644
      ldr r1, =exit
      blx r1
 -- 
-2.36.0
+2.39.1
 

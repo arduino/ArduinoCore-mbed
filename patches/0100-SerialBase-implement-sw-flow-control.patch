@@ -1,7 +1,7 @@
-From e05bd86be38a29b30b43598c9ca6089e5cd66297 Mon Sep 17 00:00:00 2001
+From d74af6c60c8098de8a7839a2af09f0159f673ca5 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Thu, 5 Aug 2021 15:13:58 +0200
-Subject: [PATCH 100/157] SerialBase: implement sw flow control
+Subject: [PATCH 100/204] SerialBase: implement sw flow control
 
 ---
  drivers/include/drivers/SerialBase.h |  9 ++++++++-
@@ -84,5 +84,5 @@ index 40bf7d0b61..7c21d12e9c 100644
              break;
      }
 -- 
-2.36.0
+2.39.1
 

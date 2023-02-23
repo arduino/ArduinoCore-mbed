@@ -1,7 +1,7 @@
-From f0b1b6c7375568f3256d09287956dc0649b46b20 Mon Sep 17 00:00:00 2001
+From 0747bafcc3578c73a9d2d6a9badbb6ca78c0aa44 Mon Sep 17 00:00:00 2001
 From: Alexander Entinger <cto@lxrobotics.com>
 Date: Tue, 29 Mar 2022 13:01:34 +0200
-Subject: [PATCH 150/157] Fix: Only return true for 'uart_is_writeable' if the
+Subject: [PATCH 150/204] Fix: Only return true for 'uart_is_writeable' if the
  TX FIFO is empty.
 
 This allows the Arduino_Braccio_plusplus library to work again, since it depends on precisely trimmed timeouts to change data direction on the RS485 lines.
@@ -45,5 +45,5 @@ index a6f01a6063..4b2398b397 100644
 \ No newline at end of file
 +#endif
 -- 
-2.36.0
+2.39.1
 

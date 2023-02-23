@@ -1,7 +1,7 @@
-From 0cf54ddf757f09d31b1897c7ec3d0c6288eab024 Mon Sep 17 00:00:00 2001
+From debf97b52779b0d6ae8b5d3d0e6df5fe9196fd23 Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Fri, 13 May 2022 09:46:41 +0200
-Subject: [PATCH 164/171] RP2040: Prepend '_' to clashing functions names
+Subject: [PATCH 164/204] RP2040: Prepend '_' to clashing functions names
 
 ---
  .../pico-sdk/rp2_common/hardware_gpio/gpio.c              | 8 ++++----
@@ -146,5 +146,5 @@ index 880b534315..036b842fc0 100644
      spi_unreset(spi);
  
 -- 
-2.36.0
+2.39.1
 

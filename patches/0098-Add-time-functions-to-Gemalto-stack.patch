@@ -1,7 +1,7 @@
-From 9b076fd634a90f5e3da3b8171656881c8d1b7bc3 Mon Sep 17 00:00:00 2001
+From d24baa365fc9bcf0472c85f0a7b13e356ed5b4b1 Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Tue, 20 Jul 2021 11:48:06 +0200
-Subject: [PATCH 098/157] Add time functions to Gemalto stack
+Subject: [PATCH 098/204] Add time functions to Gemalto stack
 
 ---
  .../cellular/framework/API/CellularDevice.h   |   6 +
@@ -28,7 +28,7 @@ index 236f2d329a..a5fa3b68fd 100644
  public: //Common functions
  
 diff --git a/connectivity/cellular/include/cellular/framework/AT/AT_CellularDevice.h b/connectivity/cellular/include/cellular/framework/AT/AT_CellularDevice.h
-index 20fe6c139e..5ee2d5cf2d 100755
+index 07a5f90dad..4600e9cc77 100755
 --- a/connectivity/cellular/include/cellular/framework/AT/AT_CellularDevice.h
 +++ b/connectivity/cellular/include/cellular/framework/AT/AT_CellularDevice.h
 @@ -98,6 +98,12 @@ public:
@@ -53,7 +53,7 @@ index 20fe6c139e..5ee2d5cf2d 100755
  protected:
      ATHandler _at;
 diff --git a/connectivity/cellular/source/framework/AT/AT_CellularDevice.cpp b/connectivity/cellular/source/framework/AT/AT_CellularDevice.cpp
-index f71921e29a..0b2d37e714 100644
+index 3ca0f3fc37..6b9fb462d3 100644
 --- a/connectivity/cellular/source/framework/AT/AT_CellularDevice.cpp
 +++ b/connectivity/cellular/source/framework/AT/AT_CellularDevice.cpp
 @@ -144,6 +144,11 @@ void AT_CellularDevice::urc_pdn_deact()
@@ -235,5 +235,5 @@ index f8f892fccd..459bba8eb1 100644
      static BufferedSerial serial(MBED_CONF_GEMALTO_CINTERION_TX, MBED_CONF_GEMALTO_CINTERION_RX, MBED_CONF_GEMALTO_CINTERION_BAUDRATE);
  #if defined(MBED_CONF_GEMALTO_CINTERION_RTS) && defined(MBED_CONF_GEMALTO_CINTERION_CTS)
 -- 
-2.36.0
+2.39.1
 

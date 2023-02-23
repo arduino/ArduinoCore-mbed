@@ -1,7 +1,7 @@
-From 8b8098c97702bfdac98f7b20a4c84ba1012b4b61 Mon Sep 17 00:00:00 2001
+From ed87a2d75f36470e370cc0bd6c76df2634711432 Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Tue, 22 Feb 2022 14:16:16 +0100
-Subject: [PATCH 137/157] TLSSocketWrapper: Add function to append a
+Subject: [PATCH 137/204] TLSSocketWrapper: Add function to append a
  certificate to an existing ca chain
 
 ---
@@ -83,5 +83,5 @@ index 58f47b54c8..6665f64cc0 100644
  {
  #if !defined(MBEDTLS_X509_CRT_PARSE_C) || !defined(MBEDTLS_FS_IO)
 -- 
-2.36.0
+2.39.1
 

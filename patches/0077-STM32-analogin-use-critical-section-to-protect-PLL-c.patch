@@ -1,7 +1,7 @@
-From 171db2502ace376ee4b9326694bc927098b7249e Mon Sep 17 00:00:00 2001
+From 6f1f7b1def36a77de936cdc2a49bd25040eed389 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Wed, 11 Aug 2021 12:14:57 +0200
-Subject: [PATCH 077/157] STM32: analogin: use critical section to protect PLL
+Subject: [PATCH 077/204] STM32: analogin: use critical section to protect PLL
  configuration
 
 ---
@@ -9,7 +9,7 @@ Subject: [PATCH 077/157] STM32: analogin: use critical section to protect PLL
  1 file changed, 4 insertions(+)
 
 diff --git a/targets/TARGET_STM/TARGET_STM32H7/analogin_device.c b/targets/TARGET_STM/TARGET_STM32H7/analogin_device.c
-index 3fb41a7997..905e86006e 100644
+index 449b3a3e01..8851773c13 100644
 --- a/targets/TARGET_STM/TARGET_STM32H7/analogin_device.c
 +++ b/targets/TARGET_STM/TARGET_STM32H7/analogin_device.c
 @@ -32,6 +32,8 @@ void analogin_pll_configuration(void)
@@ -31,5 +31,5 @@ index 3fb41a7997..905e86006e 100644
      LL_HSEM_ReleaseLock(HSEM, CFG_HW_RCC_SEMID, HSEM_CR_COREID_CURRENT);
  #endif /* DUAL_CORE */
 -- 
-2.36.0
+2.39.1
 

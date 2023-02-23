@@ -1,7 +1,7 @@
-From 5c6217a65136ee255e5ba67bc86dd0909b25cc78 Mon Sep 17 00:00:00 2001
+From cf206a80c3521bab961bb0a42089d88fc7092933 Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Mon, 4 Apr 2022 10:12:28 +0200
-Subject: [PATCH 151/157] MCUboot:PORTENTA_H7_M7:Remove LittleFS format,
+Subject: [PATCH 151/204] MCUboot:PORTENTA_H7_M7:Remove LittleFS format,
  reformat, rename
 
 ---
@@ -98,5 +98,5 @@ index 752fa99aa5..3b808cf017 100644
  int LittleFileSystem::mkdir(const char *name, mode_t mode)
  {
 -- 
-2.36.0
+2.39.1
 

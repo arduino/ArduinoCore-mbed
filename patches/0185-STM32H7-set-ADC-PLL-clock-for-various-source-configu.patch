@@ -1,7 +1,7 @@
-From eb865b1ff3b226348c8f7df4a9943a4d246e6abd Mon Sep 17 00:00:00 2001
+From 06e36fe08b90d1ea6a80bec04b039f704a68d5d7 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Mon, 5 Dec 2022 17:31:42 +0100
-Subject: [PATCH 185/194] STM32H7: set ADC PLL clock for various source
+Subject: [PATCH 185/204] STM32H7: set ADC PLL clock for various source
  configurations
 
 Replaces c65d254dcac7e2c44ee459871472fc1f7955699f
@@ -44,5 +44,5 @@ index bdf3277e1c..be16b16cda 100644
      PeriphClkInitStruct.PLL2.PLL2RGE = RCC_PLL2VCIRANGE_1;
      PeriphClkInitStruct.PLL2.PLL2VCOSEL = RCC_PLL2VCOWIDE;
 -- 
-2.38.1
+2.39.1
 

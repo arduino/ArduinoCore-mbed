@@ -1,7 +1,7 @@
-From 94a3f41e7ad63ba27576c1fedc8ab5841434b00d Mon Sep 17 00:00:00 2001
+From 9da0254589cc629d7bc602c1ec2280f333c45748 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Tue, 23 Feb 2021 16:52:04 +0100
-Subject: [PATCH 030/157] RP2040: add lp and us timer
+Subject: [PATCH 030/204] RP2040: add lp and us timer
 
 lptimer is deactivated since it's meant to run at 1hz :|
 ---
@@ -232,10 +232,10 @@ index 0000000000..00edf82830
 +{
 +}
 diff --git a/targets/targets.json b/targets/targets.json
-index 54897ff1bd..7859268c9c 100644
+index d0e00a173c..6b16afb1ad 100644
 --- a/targets/targets.json
 +++ b/targets/targets.json
-@@ -8974,12 +8974,14 @@
+@@ -9421,12 +9421,14 @@
          "device_has": [
              "ANALOGIN",
              "I2C",
@@ -251,5 +251,5 @@ index 54897ff1bd..7859268c9c 100644
          ]
      },
 -- 
-2.36.0
+2.39.1
 

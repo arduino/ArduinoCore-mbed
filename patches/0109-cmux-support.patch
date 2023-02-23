@@ -1,7 +1,7 @@
-From 743cabdb2a85f78d98d06c68c37b96664fc2b9a0 Mon Sep 17 00:00:00 2001
+From ee569bd3f2407f7c919a568564f899b921156ca7 Mon Sep 17 00:00:00 2001
 From: Riccardo Rizzo <r.rizzo@arduino.cc>
 Date: Fri, 26 Nov 2021 14:46:40 +0100
-Subject: [PATCH 109/157] cmux support
+Subject: [PATCH 109/204] cmux support
 
 - CMUX.h handle ongoig packet from all serial(virtual, real) and route  to the correct owner, when
   also the cmux enable is ready is supposed that this class should also handle and frammentate the packet to be
@@ -61,7 +61,7 @@ index a5fa3b68fd..0c8d1a2db2 100644
       *
       *  @param fh       file handle used in communication to modem. This can be, for example, UART handle. If null, then the default
 diff --git a/connectivity/cellular/include/cellular/framework/AT/AT_CellularDevice.h b/connectivity/cellular/include/cellular/framework/AT/AT_CellularDevice.h
-index 5ee2d5cf2d..60ae735e79 100755
+index 4600e9cc77..fa011a0968 100755
 --- a/connectivity/cellular/include/cellular/framework/AT/AT_CellularDevice.h
 +++ b/connectivity/cellular/include/cellular/framework/AT/AT_CellularDevice.h
 @@ -84,6 +84,14 @@ public:
@@ -88,7 +88,7 @@ index 5ee2d5cf2d..60ae735e79 100755
  };
  
 diff --git a/connectivity/cellular/source/framework/AT/AT_CellularDevice.cpp b/connectivity/cellular/source/framework/AT/AT_CellularDevice.cpp
-index 0b2d37e714..923fb11fbc 100644
+index 6b9fb462d3..08229ba49b 100644
 --- a/connectivity/cellular/source/framework/AT/AT_CellularDevice.cpp
 +++ b/connectivity/cellular/source/framework/AT/AT_CellularDevice.cpp
 @@ -241,6 +241,37 @@ nsapi_error_t AT_CellularDevice::get_sim_state(SimState &state)
@@ -245,5 +245,5 @@ index 37eee5858a..f89da8c314 100644
      int startGNSS();
      void stopGNSS();
 -- 
-2.36.0
+2.39.1
 

@@ -1,17 +1,17 @@
-From 3497578cddc9b5b048e1a9c35cac17ff3bf9cdd1 Mon Sep 17 00:00:00 2001
+From 730dcf722d74f12ce66911059f312e18f0a255ed Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Mon, 20 Sep 2021 17:30:54 +0200
-Subject: [PATCH 115/157] Nicla Vision: enable I2C_TIMING_VALUE_ALGO
+Subject: [PATCH 115/204] Nicla Vision: enable I2C_TIMING_VALUE_ALGO
 
 ---
  targets/targets.json | 3 ++-
  1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/targets/targets.json b/targets/targets.json
-index 4458fbb207..884f508e46 100644
+index 7b8351db6a..3516696296 100644
 --- a/targets/targets.json
 +++ b/targets/targets.json
-@@ -3498,7 +3498,8 @@
+@@ -3610,7 +3610,8 @@
              "clock_source": "USE_PLL_HSE_EXTC",
              "lse_available": 0,
              "lpticker_delay_ticks": 0,
@@ -22,5 +22,5 @@ index 4458fbb207..884f508e46 100644
          "components_add": [
              "QSPIF",
 -- 
-2.36.0
+2.39.1
 

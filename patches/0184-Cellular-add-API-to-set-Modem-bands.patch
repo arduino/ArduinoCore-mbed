@@ -1,7 +1,7 @@
-From d258aa3cec48ecd5c0e625e6f60368353be833d4 Mon Sep 17 00:00:00 2001
+From 9f249ac3ebd087bca0bf1b941b3c9e19eff1805c Mon Sep 17 00:00:00 2001
 From: Riccardo <r.rizzo@arduino.cc>
 Date: Thu, 3 Nov 2022 12:05:21 +0100
-Subject: [PATCH 184/185] Cellular: add API to set Modem bands
+Subject: [PATCH 184/204] Cellular: add API to set Modem bands
 
 ---
  .../cellular/framework/API/CellularContext.h  | 19 +++++++++++++++++++
@@ -125,5 +125,5 @@ index 620af5ac76..087846e9b5 100644
  }
  
 -- 
-2.38.1
+2.39.1
 

@@ -1,7 +1,7 @@
-From b61ee5dcb0010d99b8260457ac8286bb1078412b Mon Sep 17 00:00:00 2001
+From 33ec14f8249f1bd509dde015e80ecf291b56077a Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Mon, 9 Nov 2020 13:52:28 +0100
-Subject: [PATCH 009/157] TLSSocketWrapper: add test for certificates stored in
+Subject: [PATCH 009/204] TLSSocketWrapper: add test for certificates stored in
  filesystem
 
 ---
@@ -12,13 +12,13 @@ Subject: [PATCH 009/157] TLSSocketWrapper: add test for certificates stored in
  create mode 100644 connectivity/netsocket/tests/TESTS/netsocket/tls/tlssocket_cert_in_filesystem.cpp
 
 diff --git a/connectivity/netsocket/tests/TESTS/netsocket/tls/main.cpp b/connectivity/netsocket/tests/TESTS/netsocket/tls/main.cpp
-index aa256a7128..d9f9cd640c 100644
+index a3dfcb1667..7e1659d865 100644
 --- a/connectivity/netsocket/tests/TESTS/netsocket/tls/main.cpp
 +++ b/connectivity/netsocket/tests/TESTS/netsocket/tls/main.cpp
-@@ -234,6 +234,9 @@ Case cases[] = {
-     Case("TLSSOCKET_SEND_REPEAT", TLSSOCKET_SEND_REPEAT),
-     Case("TLSSOCKET_SEND_TIMEOUT", TLSSOCKET_SEND_TIMEOUT),
-     Case("TLSSOCKET_NO_CERT", TLSSOCKET_NO_CERT),
+@@ -235,6 +235,9 @@ Case cases[] = {
+ //    Case("TLSSOCKET_SEND_REPEAT", TLSSOCKET_SEND_REPEAT),
+ //    Case("TLSSOCKET_SEND_TIMEOUT", TLSSOCKET_SEND_TIMEOUT),
+ //    Case("TLSSOCKET_NO_CERT", TLSSOCKET_NO_CERT),
 +#if defined(MBEDTLS_SSL_CLI_C) && defined(MBEDTLS_FS_IO)
 +    Case("TLSSOCKET_CERT_IN_FILESYSTEM", TLSSOCKET_CERT_IN_FILESYSTEM),
 +#endif
@@ -95,5 +95,5 @@ index 0000000000..cf3dff2e93
 +}
 \ No newline at end of file
 -- 
-2.36.0
+2.39.1
 

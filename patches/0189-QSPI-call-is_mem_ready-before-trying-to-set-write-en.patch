@@ -1,7 +1,7 @@
-From 71fb2ee13a3fb6d566d36cc528b9505a556887c2 Mon Sep 17 00:00:00 2001
+From 3724f4267a7fbf993aaf4cadb3e0249b210af908 Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Tue, 29 Mar 2022 16:19:01 +0200
-Subject: [PATCH 189/194] QSPI: call is_mem_ready before trying to set write
+Subject: [PATCH 189/204] QSPI: call is_mem_ready before trying to set write
  enable bit
 
 ---
@@ -25,5 +25,5 @@ index 20af57f257..197be5e56b 100644
          if (QSPI_STATUS_OK !=  _qspi_send_general_command(QSPIF_INST_WREN, QSPI_NO_ADDRESS_COMMAND, NULL, 0, NULL, 0)) {
              tr_error("Sending WREN command FAILED");
 -- 
-2.38.1
+2.39.1
 

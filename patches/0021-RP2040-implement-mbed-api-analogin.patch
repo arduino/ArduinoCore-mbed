@@ -1,7 +1,7 @@
-From 1a814e88b4c9077aa5458e9639080429691de2e1 Mon Sep 17 00:00:00 2001
+From 0fa87a1cc7f755216ecdd36fd37f6dfe6e06695d Mon Sep 17 00:00:00 2001
 From: Alexander Entinger <cto@lxrobotics.com>
 Date: Mon, 15 Feb 2021 13:52:41 +0100
-Subject: [PATCH 021/157] RP2040: implement mbed api analogin.
+Subject: [PATCH 021/204] RP2040: implement mbed api analogin.
 
 ---
  .../TARGET_RP2040/PeripheralNames.h           |  5 +-
@@ -129,5 +129,5 @@ index 7272492f2f..16dab0daaf 100644
  };
  
 -- 
-2.36.0
+2.39.1
 

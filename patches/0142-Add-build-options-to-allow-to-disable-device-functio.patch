@@ -1,7 +1,7 @@
-From 006f588decaf7e097f6b0cb67460a97b2643cb04 Mon Sep 17 00:00:00 2001
+From d69c66dc52b1600042520fd909963000d5ede81d Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Tue, 24 Aug 2021 17:02:47 +0200
-Subject: [PATCH 142/157] Add build options to allow to disable device
+Subject: [PATCH 142/204] Add build options to allow to disable device
  functionalities i.e DEVICE_ANALOGOUT
 
 ---
@@ -9,7 +9,7 @@ Subject: [PATCH 142/157] Add build options to allow to disable device
  1 file changed, 10 insertions(+)
 
 diff --git a/targets/TARGET_STM/TARGET_STM32H7/objects.h b/targets/TARGET_STM/TARGET_STM32H7/objects.h
-index 6f17147886..8415007dd9 100644
+index aa2bf285ef..02ed6ea8cd 100644
 --- a/targets/TARGET_STM/TARGET_STM32H7/objects.h
 +++ b/targets/TARGET_STM/TARGET_STM32H7/objects.h
 @@ -50,10 +50,13 @@ struct port_s {
@@ -44,7 +44,7 @@ index 6f17147886..8415007dd9 100644
  
  struct serial_s {
      UARTName uart;
-@@ -130,12 +136,14 @@ struct i2c_s {
+@@ -97,12 +103,14 @@ struct serial_s {
  #endif
  };
  
@@ -59,7 +59,7 @@ index 6f17147886..8415007dd9 100644
  
  #if DEVICE_QSPI
  struct qspi_s {
-@@ -177,12 +185,14 @@ struct qspi_s {
+@@ -144,12 +152,14 @@ struct qspi_s {
  #endif /* DUAL_CORE */
  #include "gpio_object.h"
  
@@ -75,5 +75,5 @@ index 6f17147886..8415007dd9 100644
  struct flash_s {
      /*  nothing to be stored for now */
 -- 
-2.36.0
+2.39.1
 

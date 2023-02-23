@@ -1,7 +1,7 @@
-From d15ad9a562ad15948d7e54337f8b57b400e4c70a Mon Sep 17 00:00:00 2001
+From 9bc7f62edc4ab2d494fa9e1cce346f20a854d56d Mon Sep 17 00:00:00 2001
 From: Riccardo Rizzo <r.rizzo@arduino.cc>
 Date: Mon, 28 Jun 2021 15:05:40 +0200
-Subject: [PATCH 072/157] STM32H7: add HRTIM capable pins
+Subject: [PATCH 072/204] STM32H7: add HRTIM capable pins
 
 ---
  targets/TARGET_STM/PeripheralPins.h              |  8 ++++++++
@@ -9,10 +9,10 @@ Subject: [PATCH 072/157] STM32H7: add HRTIM capable pins
  2 files changed, 24 insertions(+)
 
 diff --git a/targets/TARGET_STM/PeripheralPins.h b/targets/TARGET_STM/PeripheralPins.h
-index 56303f8bab..61d4806783 100644
+index d74f6094b6..9ca283c8fb 100644
 --- a/targets/TARGET_STM/PeripheralPins.h
 +++ b/targets/TARGET_STM/PeripheralPins.h
-@@ -81,6 +81,7 @@ extern const PinMap PinMap_I2C_SCL[];
+@@ -86,6 +86,7 @@ extern const PinMap PinMap_I2C_SCL[];
  //*** PWM ***
  #if DEVICE_PWMOUT
  extern const PinMap PinMap_PWM[];
@@ -20,7 +20,7 @@ index 56303f8bab..61d4806783 100644
  #endif
  
  //*** SERIAL ***
-@@ -138,6 +139,13 @@ extern const PinMap PinMap_OSPI_SSEL[];
+@@ -143,6 +144,13 @@ extern const PinMap PinMap_OSPI_SSEL[];
  #define USE_USB_OTG_HS   2
  #define USE_USB_HS_IN_FS 3
  
@@ -62,5 +62,5 @@ index 26cd944066..9e7339bcdb 100644
  //*** SERIAL ***
  
 -- 
-2.36.0
+2.39.1
 

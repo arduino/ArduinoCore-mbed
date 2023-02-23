@@ -1,7 +1,7 @@
-From 63ac31755a473f3761f69298c0b52adf185c50b1 Mon Sep 17 00:00:00 2001
+From 0e81f0e842ceb11f61d99b541dc87e46517a8032 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Tue, 23 Feb 2021 16:47:27 +0100
-Subject: [PATCH 027/157] RP2040: don't initalize contructors during
+Subject: [PATCH 027/204] RP2040: don't initalize contructors during
  runtime_init()
 
 ---
@@ -33,5 +33,5 @@ index bd11d8f80b..22ff5208e6 100644
  
  void __exit(int status) {
 -- 
-2.36.0
+2.39.1
 

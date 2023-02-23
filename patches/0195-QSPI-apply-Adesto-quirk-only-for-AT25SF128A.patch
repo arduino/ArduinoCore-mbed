@@ -1,7 +1,7 @@
-From 17846ae87bbb88df38ef2230566ca18076e7f09f Mon Sep 17 00:00:00 2001
+From 770813ee6cf6aa812a3f32f9969eee0f0365c562 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Mon, 2 Jan 2023 09:40:40 +0100
-Subject: [PATCH] QSPI: apply Adesto quirk only for AT25SF128A
+Subject: [PATCH 195/204] QSPI: apply Adesto quirk only for AT25SF128A
 
 Fixes https://github.com/arduino/ArduinoCore-mbed/issues/600
 ---
@@ -28,5 +28,5 @@ index 05968ba7b1..cd21a7354d 100644
      }
  
 -- 
-2.39.0
+2.39.1
 

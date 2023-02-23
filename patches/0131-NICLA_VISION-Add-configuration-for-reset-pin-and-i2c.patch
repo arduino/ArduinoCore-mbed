@@ -1,17 +1,17 @@
-From 958d8b763ceadd44a82d907e2d09194fb4e2b299 Mon Sep 17 00:00:00 2001
+From 19569825ee77f8d2a7377c5e776c8d166e1430c5 Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Wed, 2 Feb 2022 14:30:07 +0100
-Subject: [PATCH 131/157] NICLA_VISION: Add configuration for reset pin and i2c
+Subject: [PATCH 131/204] NICLA_VISION: Add configuration for reset pin and i2c
 
 ---
  targets/targets.json | 16 ++++++++++++++++
  1 file changed, 16 insertions(+)
 
 diff --git a/targets/targets.json b/targets/targets.json
-index f2429fba17..43e830d147 100644
+index 90233a1e33..88efda3f33 100644
 --- a/targets/targets.json
 +++ b/targets/targets.json
-@@ -3491,6 +3491,22 @@
+@@ -3603,6 +3603,22 @@
              "usb_speed": {
                  "help": "USE_USB_OTG_FS or USE_USB_OTG_HS or USE_USB_HS_IN_FS",
                  "value": "USE_USB_OTG_HS"
@@ -35,5 +35,5 @@ index f2429fba17..43e830d147 100644
          },
          "overrides": {
 -- 
-2.36.0
+2.39.1
 

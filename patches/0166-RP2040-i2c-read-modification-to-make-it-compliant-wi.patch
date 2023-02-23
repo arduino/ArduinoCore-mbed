@@ -1,7 +1,7 @@
-From 6dd64418f0e683c963324e483020fb9469c73a97 Mon Sep 17 00:00:00 2001
+From c776c054be4f31e140cfccf1ddd7b27bcbde7acf Mon Sep 17 00:00:00 2001
 From: giulcioffi <g.cioffi@arduino.cc>
 Date: Fri, 13 May 2022 09:49:28 +0200
-Subject: [PATCH 166/171] RP2040: i2c read() modification to make it compliant
+Subject: [PATCH 166/204] RP2040: i2c read() modification to make it compliant
  with mbed APIs
 
 ---
@@ -59,5 +59,5 @@ index 73b2d0aca5..258bad6a57 100644
  
  /*! \brief Return the DREQ to use for pacing transfers to/from a particular I2C instance
 -- 
-2.36.0
+2.39.1
 

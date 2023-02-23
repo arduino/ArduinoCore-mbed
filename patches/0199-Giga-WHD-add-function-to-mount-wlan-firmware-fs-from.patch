@@ -1,0 +1,50 @@
+From d265d18399f454a1c165bc6a15e73288d6d1ecd9 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Tue, 22 Nov 2022 13:31:48 +0100
+Subject: [PATCH 199/204] Giga: WHD: add function to mount wlan firmware fs
+ from WiFi library
+
+---
+ .../TARGET_GIGA/COMPONENT_WHD/port/wiced_filesystem.cpp  | 5 +++++
+ .../TARGET_GIGA/COMPONENT_WHD/port/wiced_filesystem.h    | 9 +++++++++
+ 2 files changed, 14 insertions(+)
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_GIGA/COMPONENT_WHD/port/wiced_filesystem.cpp b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_GIGA/COMPONENT_WHD/port/wiced_filesystem.cpp
+index 078f8c82b3..5973be673a 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_GIGA/COMPONENT_WHD/port/wiced_filesystem.cpp
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_GIGA/COMPONENT_WHD/port/wiced_filesystem.cpp
+@@ -157,6 +157,11 @@ wiced_result_t wiced_filesystem_init(void)
+     }
+ }
+ 
++wiced_result_t wiced_filesystem_mount_default(void)
++{
++    return wiced_filesystem_mount(mbr_bd, 0, &resource_fs_handle, WIFI_DEFAULT_MOUNT_NAME);
++}
++
+ wiced_result_t wiced_filesystem_mount(BlockDevice *device, wiced_filesystem_handle_type_t fs_type, wiced_filesystem_t *fs_handle_out, const char *mounted_name)
+ {
+     wifi_fs = new FATFileSystem(mounted_name);
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_GIGA/COMPONENT_WHD/port/wiced_filesystem.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_GIGA/COMPONENT_WHD/port/wiced_filesystem.h
+index a65aa3c148..77d49d1820 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_GIGA/COMPONENT_WHD/port/wiced_filesystem.h
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_GIGA/COMPONENT_WHD/port/wiced_filesystem.h
+@@ -81,6 +81,15 @@ typedef int wiced_filesystem_handle_type_t;
+  */
+ wiced_result_t wiced_filesystem_init(void);
+ 
++/**
++ * Mount the physical device using default parameters
++ *
++ * This assumes that the device is ready to read/write immediately.
++ *
++ * @return WICED_SUCCESS on success
++ */
++wiced_result_t wiced_filesystem_mount_default(void);
++
+ /**
+  * Open a file for reading or writing
+  *
+-- 
+2.39.1
+

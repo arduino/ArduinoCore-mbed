@@ -1,7 +1,7 @@
-From 3d7f8d18abca4e6132611fe544bf94b5d3483af3 Mon Sep 17 00:00:00 2001
+From c5ce071e5244e9331a40c81679537e36fae1025f Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Thu, 11 Mar 2021 15:05:20 +0100
-Subject: [PATCH 001/157] PACKAGING: remove gdb exta information to slim
+Subject: [PATCH 001/204] PACKAGING: remove gdb exta information to slim
  library
 
 ---
@@ -22,5 +22,5 @@ index 21ba5c88d5..5995d276e4 100644
          "c": ["-c", "-std=gnu11"],
          "cxx": ["-c", "-std=gnu++14", "-fno-rtti", "-Wvla"],
 -- 
-2.36.0
+2.39.1
 

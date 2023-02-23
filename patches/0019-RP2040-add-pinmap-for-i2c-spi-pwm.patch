@@ -1,7 +1,7 @@
-From d2769007537ff59f08fd97d9c67eee05139bc0f5 Mon Sep 17 00:00:00 2001
+From ba63f1ff4ef571e72ee250445680758ce8f2fe26 Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Fri, 12 Feb 2021 17:03:32 +0100
-Subject: [PATCH 019/157] RP2040: add pinmap for i2c, spi, pwm
+Subject: [PATCH 019/204] RP2040: add pinmap for i2c, spi, pwm
 
 ---
  .../TARGET_RP2040/PeripheralNames.h           |   6 +-
@@ -179,5 +179,5 @@ index abeaed1d82..482f8f499c 100644
  
  //*** ADC ***
 -- 
-2.36.0
+2.39.1
 

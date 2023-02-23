@@ -1,7 +1,7 @@
-From 35749b8feaa2b81799ffd8f04ad1f05d04538d3e Mon Sep 17 00:00:00 2001
+From 955f9f4d1707a09f733094319ffeb50a20b6abde Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Mon, 14 Nov 2022 15:47:50 +0100
-Subject: [PATCH 183/185] NiclaVision: WHD: add function to mount wlan firmware
+Subject: [PATCH 183/204] NiclaVision: WHD: add function to mount wlan firmware
  fs from WiFi library
 
 ---
@@ -46,5 +46,5 @@ index a65aa3c148..77d49d1820 100644
   * Open a file for reading or writing
   *
 -- 
-2.38.1
+2.39.1
 

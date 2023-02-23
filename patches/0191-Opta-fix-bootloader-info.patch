@@ -1,7 +1,7 @@
-From 99be443c28d6e702dc150d24129c721c2e78481a Mon Sep 17 00:00:00 2001
+From b2fe6fc558dd16ac5bace654c69e66e9d5d0004d Mon Sep 17 00:00:00 2001
 From: Martino Facchin <m.facchin@arduino.cc>
 Date: Mon, 14 Nov 2022 16:27:37 +0100
-Subject: [PATCH 191/194] Opta: fix bootloader info
+Subject: [PATCH 191/204] Opta: fix bootloader info
 
 ---
  .../TOOLCHAIN_GCC_ARM/STM32H747xI_CM7.ld                    | 6 +++---
@@ -39,5 +39,5 @@ index 2914967e38..fc963145e7 100644
          *ltrans1*.o(.rodata*)
          *ltrans2*.o(.rodata*)
 -- 
-2.38.1
+2.39.1
 

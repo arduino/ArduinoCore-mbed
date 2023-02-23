@@ -1,7 +1,7 @@
-From e15600c6af3c5d042af46864ebb19032d8a997ad Mon Sep 17 00:00:00 2001
+From 3f564015d9e834659ab420cef445b667f2454695 Mon Sep 17 00:00:00 2001
 From: pennam <m.pennasilico@arduino.cc>
 Date: Tue, 24 Aug 2021 17:04:35 +0200
-Subject: [PATCH 144/157] Add build option to allow FATFS customization: remove
+Subject: [PATCH 144/204] Add build option to allow FATFS customization: remove
  mkfs
 
 ---
@@ -46,7 +46,7 @@ index 581662b2ce..f15e081502 100644
      /** Remove a file from the file system.
       *
 diff --git a/storage/filesystem/fat/source/FATFileSystem.cpp b/storage/filesystem/fat/source/FATFileSystem.cpp
-index 3006a24530..ee0db9bde1 100644
+index 98fa2a5f98..3c32cc6f27 100644
 --- a/storage/filesystem/fat/source/FATFileSystem.cpp
 +++ b/storage/filesystem/fat/source/FATFileSystem.cpp
 @@ -340,7 +340,7 @@ int FATFileSystem::unmount()
@@ -67,5 +67,5 @@ index 3006a24530..ee0db9bde1 100644
  int FATFileSystem::remove(const char *path)
  {
 -- 
-2.36.0
+2.39.1
 
