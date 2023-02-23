@@ -3,7 +3,7 @@
 #elif defined(OPTA_PINS)
 #include "../OPTA/pins_arduino.h"
 #elif defined(NVISION_PINS)
-#include "../NICLA_VSION/pins_arduino.h"
+#include "../NICLA_VISION/pins_arduino.h"
 #elif defined(GIGA_PINS)
 #include "../GIGA/pins_arduino.h"
 #endif

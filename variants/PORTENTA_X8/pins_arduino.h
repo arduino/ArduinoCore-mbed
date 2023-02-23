@@ -12,7 +12,7 @@ extern "C" bool isBetaBoard();
 
 // Booting
 // ----
-void bootM4();
+// void bootM4();
 
 extern PinName digitalPinToPinName(pin_size_t P);
 

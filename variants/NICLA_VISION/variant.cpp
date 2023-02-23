@@ -264,4 +264,12 @@ void _ontouch1200bps_() {
   NVIC_SystemReset();
 }
 
+#include "stm32h7xx_ll_system.h"
+
+void bootM4() {
+  // Classic boot, just set the address and we are ready to go
+  LL_SYSCFG_SetCM4BootAddress0(CM4_BINARY_START >> 16);
+  LL_RCC_ForceCM4Boot();
+}
+
 #endif

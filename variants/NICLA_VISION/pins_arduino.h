@@ -12,7 +12,7 @@ extern "C" bool isBetaBoard();
 
 // Booting
 // ----
-#define bootM4() LL_RCC_ForceCM4Boot() // Provide a memorable alias
+void bootM4();
 
 extern PinName digitalPinToPinName(pin_size_t P);
 

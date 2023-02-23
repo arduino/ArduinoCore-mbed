@@ -5,7 +5,7 @@
 #elif defined(OPTA_PINS)
 #include "../OPTA/variant.cpp"
 #elif defined(NVISION_PINS)
-#include "../NICLA_VSION/variant.cpp"
+#include "../NICLA_VISION/variant.cpp"
 #elif defined(GIGA_PINS)
 #include "../GIGA/variant.cpp"
 #endif
