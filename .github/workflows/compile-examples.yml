@@ -34,7 +34,6 @@ jobs:
       matrix:
         board:
           - fqbn: arduino:mbed:nano33ble
-          - fqbn: arduino:mbed:envie_m4
           - fqbn: arduino:mbed:envie_m7
           - fqbn: arduino:mbed:nanorp2040connect
           - fqbn: arduino:mbed:nicla_sense
@@ -55,7 +54,7 @@ jobs:
               - libraries/USBMSD/examples/Nano33BLE_FlashMassStorage
               - ~/Arduino/libraries/ArduinoBLE
           - board:
-              fqbn: arduino:mbed:envie_m4
+              fqbn: arduino:mbed:envie_m4:target_core=cm4
             additional-libraries: |
               - name: lvgl
             additional-sketch-paths: |
