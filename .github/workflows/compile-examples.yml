@@ -54,7 +54,7 @@ jobs:
               - libraries/USBMSD/examples/Nano33BLE_FlashMassStorage
               - ~/Arduino/libraries/ArduinoBLE
           - board:
-              fqbn: arduino:mbed:envie_m4:target_core=cm4
+              fqbn: arduino:mbed:envie_m7:target_core=cm4
             additional-libraries: |
               - name: lvgl
             additional-sketch-paths: |
