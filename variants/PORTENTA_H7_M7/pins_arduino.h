@@ -164,4 +164,9 @@ void _ontouch1200bps_();
 
 #define USB_MAX_POWER	(500)
 
+#define CAN_HOWMANY       1
+
+#define PIN_CAN0_TX       (PH_13)
+#define PIN_CAN0_RX       (PB_8)
+
 #endif //__PINS_ARDUINO__

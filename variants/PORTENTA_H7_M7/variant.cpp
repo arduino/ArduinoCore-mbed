@@ -78,7 +78,7 @@ PinDescription g_APinDescription[] = {
   { PB_5,         NULL, NULL, NULL },
   { PB_6,         NULL, NULL, NULL },
   { PB_7,         NULL, NULL, NULL },
-  { PB_8,         NULL, NULL, NULL },
+  { PB_8,         NULL, NULL, NULL },    // CAN1 RX
   { PB_9,         NULL, NULL, NULL },
   { PB_10,        NULL, NULL, NULL },
   { PB_11,        NULL, NULL, NULL },
@@ -179,7 +179,7 @@ PinDescription g_APinDescription[] = {
   { PH_10,        NULL, NULL, NULL },
   { PH_11,        NULL, NULL, NULL },
   { PH_12,        NULL, NULL, NULL },
-  { PH_13,        NULL, NULL, NULL },
+  { PH_13,        NULL, NULL, NULL },    // CAN1 TX
   { PH_14,        NULL, NULL, NULL },
   { PH_15,        NULL, NULL, NULL },
   { PI_0,         NULL, NULL, NULL },
