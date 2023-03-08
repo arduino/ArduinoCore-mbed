@@ -100,6 +100,10 @@ bool nicla::enterShipMode()
   uint8_t status_reg = _pmic.getStatus();
   status_reg |= 0x20;
   _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_STATUS, status_reg);
+  if (_pmic.readByte(BQ25120A_ADDRESS, BQ25120A_STATUS) != status_reg) {
+    return false;
+  }
+  return true;
 }
 
 uint8_t nicla::readLDOreg()
