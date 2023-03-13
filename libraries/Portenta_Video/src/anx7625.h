@@ -7,7 +7,6 @@
 extern "C" {
 #include <edid.h>
 }
-//#include <types.h>
 
 #ifndef __ANX7625_H__
 #define __ANX7625_H__
@@ -24,21 +23,21 @@ extern "C" {
 /*********  ANX7625 Register  **********/
 //#define ANXI2CSIM
 #ifdef ANXI2CSIM
-#define TX_P0_ADDR				0x38
-#define TX_P1_ADDR				0x3D
-#define TX_P2_ADDR				0x39
-#define RX_P0_ADDR				0x3F
-#define RX_P1_ADDR				0x42
-#define RX_P2_ADDR				0x2A
-#define TCPC_INTERFACE_ADDR			0x2C
+	#define TX_P0_ADDR				0x38
+	#define TX_P1_ADDR				0x3D
+	#define TX_P2_ADDR				0x39
+	#define RX_P0_ADDR				0x3F
+	#define RX_P1_ADDR				0x42
+	#define RX_P2_ADDR				0x2A
+	#define TCPC_INTERFACE_ADDR		0x2C
 #else
-#define TX_P0_ADDR				0x70
-#define TX_P1_ADDR				0x7A
-#define TX_P2_ADDR				0x72
-#define RX_P0_ADDR				0x7e
-#define RX_P1_ADDR				0x84
-#define RX_P2_ADDR				0x54
-#define TCPC_INTERFACE_ADDR			0x58
+	#define TX_P0_ADDR				0x70
+	#define TX_P1_ADDR				0x7A
+	#define TX_P2_ADDR				0x72
+	#define RX_P0_ADDR				0x7e
+	#define RX_P1_ADDR				0x84
+	#define RX_P2_ADDR				0x54
+	#define TCPC_INTERFACE_ADDR		0x58
 #endif
 
 #define RSVD_00_ADDR				0x00
@@ -50,35 +49,35 @@ extern "C" {
 /* anx7625 clock frequency in Hz */
 #define XTAL_FRQ        (27*1000000)
 
-#define  POST_DIVIDER_MIN	1
-#define  POST_DIVIDER_MAX	16
-#define  PLL_OUT_FREQ_MIN	520000000UL
-#define  PLL_OUT_FREQ_MAX	730000000UL
+#define  POST_DIVIDER_MIN		1
+#define  POST_DIVIDER_MAX		16
+#define  PLL_OUT_FREQ_MIN		520000000UL
+#define  PLL_OUT_FREQ_MAX		730000000UL
 #define  PLL_OUT_FREQ_ABS_MIN	300000000UL
 #define  PLL_OUT_FREQ_ABS_MAX	800000000UL
-#define  MAX_UNSIGNED_24BIT	16777215UL
+#define  MAX_UNSIGNED_24BIT		16777215UL
 
 /***************************************************************/
 /* Register definition of device address 0x58 */
 
-#define PRODUCT_ID_L 0x02
-#define PRODUCT_ID_H 0x03
+#define PRODUCT_ID_L 			0x02
+#define PRODUCT_ID_H 			0x03
 
-#define INTR_ALERT_1  0xCC
-#define INTR_SOFTWARE_INT (1<<3)
-#define INTR_RECEIVED_MSG (1<<5)
+#define INTR_ALERT_1  			0xCC
+#define INTR_SOFTWARE_INT 		(1<<3)
+#define INTR_RECEIVED_MSG 		(1<<5)
 
-#define INTERFACE_CHANGE_INT 0x44
-#define HPD_STATUS_CHANGE 0x80
+#define INTERFACE_CHANGE_INT 	0x44
+#define HPD_STATUS_CHANGE 		0x80
 
 /******** END of I2C Address 0x58 ********/
 
 /***************************************************************/
 /* Register definition of device address 0x70 */
-#define  I2C_ADDR_70_DPTX              0x70
+#define  I2C_ADDR_70_DPTX			0x70
 
-#define SP_TX_LINK_BW_SET_REG 0xA0
-#define SP_TX_LANE_COUNT_SET_REG 0xA1
+#define SP_TX_LINK_BW_SET_REG		0xA0
+#define SP_TX_LANE_COUNT_SET_REG 	0xA1
 
 #define M_VID_0 0xC0
 #define M_VID_1 0xC1
@@ -89,51 +88,51 @@ extern "C" {
 
 /***************************************************************/
 /* Register definition of device address 0x72 */
-#define AUX_RST	0x04
-#define RST_CTRL2 0x07
+#define AUX_RST		0x04
+#define RST_CTRL2 	0x07
 
-#define SP_TX_TOTAL_LINE_STA_L 0x24
-#define SP_TX_TOTAL_LINE_STA_H 0x25
-#define SP_TX_ACT_LINE_STA_L 0x26
-#define SP_TX_ACT_LINE_STA_H 0x27
-#define SP_TX_V_F_PORCH_STA 0x28
-#define SP_TX_V_SYNC_STA 0x29
-#define SP_TX_V_B_PORCH_STA 0x2A
+#define SP_TX_TOTAL_LINE_STA_L 	0x24
+#define SP_TX_TOTAL_LINE_STA_H 	0x25
+#define SP_TX_ACT_LINE_STA_L 	0x26
+#define SP_TX_ACT_LINE_STA_H 	0x27
+#define SP_TX_V_F_PORCH_STA 	0x28
+#define SP_TX_V_SYNC_STA 		0x29
+#define SP_TX_V_B_PORCH_STA 	0x2A
 #define SP_TX_TOTAL_PIXEL_STA_L 0x2B
 #define SP_TX_TOTAL_PIXEL_STA_H 0x2C
-#define SP_TX_ACT_PIXEL_STA_L 0x2D
-#define SP_TX_ACT_PIXEL_STA_H 0x2E
-#define SP_TX_H_F_PORCH_STA_L 0x2F
-#define SP_TX_H_F_PORCH_STA_H 0x30
-#define SP_TX_H_SYNC_STA_L 0x31
-#define SP_TX_H_SYNC_STA_H 0x32
-#define SP_TX_H_B_PORCH_STA_L 0x33
-#define SP_TX_H_B_PORCH_STA_H 0x34
+#define SP_TX_ACT_PIXEL_STA_L 	0x2D
+#define SP_TX_ACT_PIXEL_STA_H 	0x2E
+#define SP_TX_H_F_PORCH_STA_L 	0x2F
+#define SP_TX_H_F_PORCH_STA_H 	0x30
+#define SP_TX_H_SYNC_STA_L 		0x31
+#define SP_TX_H_SYNC_STA_H 		0x32
+#define SP_TX_H_B_PORCH_STA_L 	0x33
+#define SP_TX_H_B_PORCH_STA_H 	0x34
 
-#define SP_TX_VID_CTRL 0x84
-#define SP_TX_BPC_MASK 0xE0
-#define SP_TX_BPC_6    0x00
-#define SP_TX_BPC_8    0x20
-#define SP_TX_BPC_10   0x40
-#define SP_TX_BPC_12   0x60
+#define SP_TX_VID_CTRL 			0x84
+#define SP_TX_BPC_MASK 			0xE0
+#define SP_TX_BPC_6    			0x00
+#define SP_TX_BPC_8    			0x20
+#define SP_TX_BPC_10   			0x40
+#define SP_TX_BPC_12   			0x60
 
-#define VIDEO_BIT_MATRIX_12 0x4c
+#define VIDEO_BIT_MATRIX_12 	0x4c
 
-#define AUDIO_CHANNEL_STATUS_1 0xd0
-#define AUDIO_CHANNEL_STATUS_2 0xd1
-#define AUDIO_CHANNEL_STATUS_3 0xd2
-#define AUDIO_CHANNEL_STATUS_4 0xd3
-#define AUDIO_CHANNEL_STATUS_5 0xd4
-#define AUDIO_CHANNEL_STATUS_6 0xd5
-#define TDM_SLAVE_MODE 0x10
-#define I2S_SLAVE_MODE 0x08
+#define AUDIO_CHANNEL_STATUS_1 	0xd0
+#define AUDIO_CHANNEL_STATUS_2 	0xd1
+#define AUDIO_CHANNEL_STATUS_3 	0xd2
+#define AUDIO_CHANNEL_STATUS_4 	0xd3
+#define AUDIO_CHANNEL_STATUS_5 	0xd4
+#define AUDIO_CHANNEL_STATUS_6 	0xd5
+#define TDM_SLAVE_MODE 			0x10
+#define I2S_SLAVE_MODE 			0x08
 
-#define AUDIO_CONTROL_REGISTER 0xe6
-#define TDM_TIMING_MODE 0x08
+#define AUDIO_CONTROL_REGISTER 	0xe6
+#define TDM_TIMING_MODE 		0x08
 
-#define  I2C_ADDR_72_DPTX              0x72
+#define  I2C_ADDR_72_DPTX       0x72
 
-#define  VIDEO_CONTROL_0  0x08
+#define  VIDEO_CONTROL_0  		0x08
 
 #define  ACTIVE_LINES_L         0x14
 #define  ACTIVE_LINES_H         0x15  /* note: bit[7:6] are reserved */
@@ -158,76 +157,76 @@ extern "C" {
 
 #define  I2C_ADDR_7E_FLASH_CONTROLLER  0x7E
 
-#define  XTAL_FRQ_SEL    0x3F
+#define  XTAL_FRQ_SEL    	0x3F
 /* bit field positions */
-#define  XTAL_FRQ_SEL_POS    5
+#define  XTAL_FRQ_SEL_POS	5
 /* bit field values */
-#define  XTAL_FRQ_19M2   (0 << XTAL_FRQ_SEL_POS)
-#define  XTAL_FRQ_27M    (4 << XTAL_FRQ_SEL_POS)
+#define  XTAL_FRQ_19M2   	(0 << XTAL_FRQ_SEL_POS)
+#define  XTAL_FRQ_27M    	(4 << XTAL_FRQ_SEL_POS)
 
-#define  R_DSC_CTRL_0    0x40
-#define  READ_STATUS_EN  7
-#define  CLK_1MEG_RB     6  /* 1MHz clock reset; 0=reset, 0=reset release */
-#define  DSC_BIST_DONE   1  /* bit[5:1]: 1=DSC MBIST pass */
-#define  DSC_EN          0x01  /* 1=DSC enabled, 0=DSC disabled */
+#define  R_DSC_CTRL_0    	0x40
+#define  READ_STATUS_EN  	7
+#define  CLK_1MEG_RB     	6  /* 1MHz clock reset; 0=reset, 0=reset release */
+#define  DSC_BIST_DONE   	1  /* bit[5:1]: 1=DSC MBIST pass */
+#define  DSC_EN          	0x01  /* 1=DSC enabled, 0=DSC disabled */
 
-#define OCM_FW_VERSION   0x31
-#define OCM_FW_REVERSION 0x32
+#define OCM_FW_VERSION   	0x31
+#define OCM_FW_REVERSION 	0x32
 
-#define AP_AUX_ADDR_7_0   0x11
-#define AP_AUX_ADDR_15_8  0x12
-#define AP_AUX_ADDR_19_16 0x13
+#define AP_AUX_ADDR_7_0   	0x11
+#define AP_AUX_ADDR_15_8  	0x12
+#define AP_AUX_ADDR_19_16 	0x13
 
 /* note: bit[0:3] AUX status, bit 4 op_en, bit 5 address only */
-#define AP_AUX_CTRL_STATUS 0x14
-#define AP_AUX_CTRL_OP_EN 0x10
-#define AP_AUX_CTRL_ADDRONLY 0x20
+#define AP_AUX_CTRL_STATUS 		0x14
+#define AP_AUX_CTRL_OP_EN 		0x10
+#define AP_AUX_CTRL_ADDRONLY 	0x20
 
-#define AP_AUX_BUFF_START 0x15
-#define PIXEL_CLOCK_L 0x25
-#define PIXEL_CLOCK_H 0x26
+#define AP_AUX_BUFF_START 		0x15
+#define PIXEL_CLOCK_L 			0x25
+#define PIXEL_CLOCK_H 			0x26
 
-#define AP_AUX_COMMAND 0x27  /* com+len */
+#define AP_AUX_COMMAND 			0x27  /* com+len */
 /* bit 0&1: 3D video structure */
 /* 0x01: frame packing,  0x02:Line alternative, 0x03:Side-by-side(full) */
-#define AP_AV_STATUS 0x28
-#define AP_VIDEO_CHG (1<<2)
-#define AP_AUDIO_CHG (1<<3)
-#define AP_MIPI_MUTE (1<<4) /* 1:MIPI input mute, 0: ummute */
-#define AP_MIPI_RX_EN (1<<5) /* 1: MIPI RX input in  0: no RX in */
-#define AP_DISABLE_PD (1<<6)
-#define AP_DISABLE_DISPLAY (1<<7)
+#define AP_AV_STATUS 			0x28
+#define AP_VIDEO_CHG 			(1<<2)
+#define AP_AUDIO_CHG 			(1<<3)
+#define AP_MIPI_MUTE 			(1<<4) /* 1:MIPI input mute, 0: ummute */
+#define AP_MIPI_RX_EN 			(1<<5) /* 1: MIPI RX input in  0: no RX in */
+#define AP_DISABLE_PD 			(1<<6)
+#define AP_DISABLE_DISPLAY 		(1<<7)
 
-#define SYSTEM_STSTUS		0x45
-#define VCONN_STATUS		(1<<2)
-#define VBUS_STATUS	        (1<<3)
-#define DATA_ROLE_STATUS	(1<<5)
-#define HPD_STATUS		    (1<<7)
-#define NEW_CC_STATUS		0x46
+#define SYSTEM_STATUS			0x45
+#define VCONN_STATUS			(1<<2)
+#define VBUS_STATUS	        	(1<<3)
+#define DATA_ROLE_STATUS		(1<<5)
+#define HPD_STATUS		    	(1<<7)
+#define NEW_CC_STATUS			0x46
 
 /******** END of I2C Address 0x7e *********/
 
 /***************************************************************/
 /* Register definition of device address 0x84 */
-#define  MIPI_PHY_CONTROL_3            0x03
-#define  MIPI_HS_PWD_CLK               7
-#define  MIPI_HS_RT_CLK                6
-#define  MIPI_PD_CLK                   5
-#define  MIPI_CLK_RT_MANUAL_PD_EN      4
-#define  MIPI_CLK_HS_MANUAL_PD_EN      3
-#define  MIPI_CLK_DET_DET_BYPASS       2
-#define  MIPI_CLK_MISS_CTRL            1
-#define  MIPI_PD_LPTX_CH_MANUAL_PD_EN  0
+#define  MIPI_PHY_CONTROL_3            	0x03
+#define  MIPI_HS_PWD_CLK               	7
+#define  MIPI_HS_RT_CLK                	6
+#define  MIPI_PD_CLK                   	5
+#define  MIPI_CLK_RT_MANUAL_PD_EN      	4
+#define  MIPI_CLK_HS_MANUAL_PD_EN      	3
+#define  MIPI_CLK_DET_DET_BYPASS       	2
+#define  MIPI_CLK_MISS_CTRL            	1
+#define  MIPI_PD_LPTX_CH_MANUAL_PD_EN  	0
 
-#define  MIPI_LANE_CTRL_0		0x05
-#define  MIPI_TIME_HS_PRPR		0x08
+#define  MIPI_LANE_CTRL_0				0x05
+#define  MIPI_TIME_HS_PRPR				0x08
 
 /* After MIPI RX protocol layer received this many video frames, */
 /* protocol layer starts to reconstruct video stream from PHY */
-#define  MIPI_VIDEO_STABLE_CNT           0x0A
+#define  MIPI_VIDEO_STABLE_CNT	0x0A
 
-#define  MIPI_LANE_CTRL_10               0x0F
-#define  MIPI_DIGITAL_ADJ_1   0x1B
+#define  MIPI_LANE_CTRL_10		0x0F
+#define  MIPI_DIGITAL_ADJ_1   	0x1B
 
 #define  MIPI_PLL_M_NUM_23_16   0x1E
 #define  MIPI_PLL_M_NUM_15_8    0x1F
@@ -253,9 +252,9 @@ extern "C" {
 #define  MIPI_PLL_VCO_TUNE_REG   4
 /* bit[5:4]: VCO metal capacitance - */
 /* 00: +20% fast, 01: +10% fast (default), 10: typical, 11: -10% slow */
-#define  MIPI_PLL_VCO_TUNE_REG_VAL   0x30
+#define  MIPI_PLL_VCO_TUNE_REG_VAL	0x30
 
-#define  MIPI_PLL_PLL_LDO_BIT    2
+#define  MIPI_PLL_PLL_LDO_BIT    	2
 /* bit[3:2]: vco_v2i power - */
 /* 00: 1.40V, 01: 1.45V (default), 10: 1.50V, 11: 1.55V */
 #define  MIPI_PLL_RESET_N        0x02
@@ -269,54 +268,54 @@ extern "C" {
 #define  check_sum_err_hs_sync   7
 /* This bit is cleared by 0x84:0x2D[7] */
 
-#define  MIPI_DIGITAL_PLL_8    0x33
-#define  MIPI_POST_DIV_VAL     4
+#define  MIPI_DIGITAL_PLL_8		0x33
+#define  MIPI_POST_DIV_VAL     	4
 /* n means divided by (n+1), n = 0~15 */
-#define  MIPI_EN_LOCK_FRZ      3
-#define  MIPI_FRQ_COUNTER_RST  2
-#define  MIPI_FRQ_SET_REG_8    1
+#define  MIPI_EN_LOCK_FRZ      	3
+#define  MIPI_FRQ_COUNTER_RST  	2
+#define  MIPI_FRQ_SET_REG_8    	1
 /* bit 0 is reserved */
 
-#define  MIPI_DIGITAL_PLL_9    0x34
+#define  MIPI_DIGITAL_PLL_9    			0x34
 
-#define  MIPI_DIGITAL_PLL_16   0x3B
-#define  MIPI_FRQ_FREEZE_NDET          7
-#define  MIPI_FRQ_REG_SET_ENABLE       6
-#define  MIPI_REG_FORCE_SEL_EN         5
-#define  MIPI_REG_SEL_DIV_REG          4
-#define  MIPI_REG_FORCE_PRE_DIV_EN     3
+#define  MIPI_DIGITAL_PLL_16   		   	0x3B
+#define  MIPI_FRQ_FREEZE_NDET          	7
+#define  MIPI_FRQ_REG_SET_ENABLE       	6
+#define  MIPI_REG_FORCE_SEL_EN         	5
+#define  MIPI_REG_SEL_DIV_REG          	4
+#define  MIPI_REG_FORCE_PRE_DIV_EN     	3
 /* bit 2 is reserved */
-#define  MIPI_FREF_D_IND               1
-#define  REF_CLK_27000kHz    1
-#define  REF_CLK_19200kHz    0
-#define  MIPI_REG_PLL_PLL_TEST_ENABLE  0
+#define  MIPI_FREF_D_IND               	1
+#define  REF_CLK_27000kHz    			1
+#define  REF_CLK_19200kHz    			0
+#define  MIPI_REG_PLL_PLL_TEST_ENABLE  	0
 
-#define  MIPI_DIGITAL_PLL_18  0x3D
+#define  MIPI_DIGITAL_PLL_18  	0x3D
 #define  FRQ_COUNT_RB_SEL       7
 #define  REG_FORCE_POST_DIV_EN  6
 #define  MIPI_DPI_SELECT        5
-#define  SELECT_DSI  1
-#define  SELECT_DPI  0
+#define  SELECT_DSI  			1
+#define  SELECT_DPI  			0
 #define  REG_BAUD_DIV_RATIO     0
 
-#define  H_BLANK_L            0x3E
+#define  H_BLANK_L            	0x3E
 /* for DSC only */
-#define  H_BLANK_H            0x3F
+#define  H_BLANK_H            	0x3F
 /* for DSC only; note: bit[7:6] are reserved */
-#define  MIPI_SWAP  0x4A
-#define  MIPI_SWAP_CH0    7
-#define  MIPI_SWAP_CH1    6
-#define  MIPI_SWAP_CH2    5
-#define  MIPI_SWAP_CH3    4
-#define  MIPI_SWAP_CLK    3
+#define  MIPI_SWAP  			0x4A
+#define  MIPI_SWAP_CH0    		7
+#define  MIPI_SWAP_CH1    		6
+#define  MIPI_SWAP_CH2    		5
+#define  MIPI_SWAP_CH3    		4
+#define  MIPI_SWAP_CLK    		3
 /* bit[2:0] are reserved */
 
 /******** END of I2C Address 0x84 *********/
 
 /* DPCD regs */
-#define DPCD_DPCD_REV                  0x00
-#define DPCD_MAX_LINK_RATE             0x01
-#define DPCD_MAX_LANE_COUNT            0x02
+#define DPCD_DPCD_REV			0x00
+#define DPCD_MAX_LINK_RATE		0x01
+#define DPCD_MAX_LANE_COUNT		0x02
 
 /*********  ANX7625 Register End  **********/
 
@@ -351,8 +350,8 @@ enum AudioWdLen {
 
 #define MAX_DPCD_BUFFER_SIZE	16
 
-#define ONE_BLOCK_SIZE      128
-#define FOUR_BLOCK_SIZE     (128*4)
+#define ONE_BLOCK_SIZE      	128
+#define FOUR_BLOCK_SIZE     	(128*4)
 
 struct display_timing {
 	unsigned int pixelclock;
@@ -368,13 +367,12 @@ struct display_timing {
 	unsigned int vpol : 1;
 };
 
-int anx7625_dp_start(uint8_t bus, const struct edid *edid, enum edid_modes mode = EDID_MODE_AUTO);
-int anx7625_dp_get_edid(uint8_t bus, struct edid *out);
-int anx7625_init(uint8_t bus);
-void anx7625_wait_hpd_event(uint8_t bus);
-int anx7625_get_cc_status(uint8_t bus, uint8_t *cc_status);
-int anx7625_read_system_status(uint8_t bus, uint8_t *sys_status);
-bool anx7625_is_power_provider(uint8_t bus);
-
+int 	anx7625_dp_start(uint8_t bus, const struct edid *edid, enum edid_modes mode = EDID_MODE_AUTO);
+int 	anx7625_dp_get_edid(uint8_t bus, struct edid *out);
+int 	anx7625_init(uint8_t bus);
+void 	anx7625_wait_hpd_event(uint8_t bus);
+int 	anx7625_get_cc_status(uint8_t bus, uint8_t *cc_status);
+int 	anx7625_read_system_status(uint8_t bus, uint8_t *sys_status);
+bool 	anx7625_is_power_provider(uint8_t bus);
 
 #endif  /* __ANX7625_H__ */
