@@ -17,6 +17,12 @@
 #include <anx7625.h>
 #include "stm32h7xx_hal.h"
 #include "dsi.h"
+#include "SDRAM.h"
+
+#define BYTES_PER_PIXEL		2
+#define FB_BASE_ADDRESS 	((uint32_t)SDRAM_START_ADDRESS)
+#define FB_ADDRESS_0 		(FB_BASE_ADDRESS)
+#define FB_ADDRESS_1 		(FB_BASE_ADDRESS + (lcd_x_size * lcd_y_size * BYTES_PER_PIXEL))
 
 static DMA2D_HandleTypeDef dma2d;
 static LTDC_HandleTypeDef  ltdc;
@@ -25,8 +31,14 @@ DSI_HandleTypeDef   dsi;
 static uint32_t lcd_x_size = 1280;
 static uint32_t lcd_y_size = 1024;
 
-static void stm32_LayerInit(uint16_t LayerIndex, uint32_t FB_Address)
-{
+static DMA2D_CLUTCfgTypeDef clut;
+static uint32_t __ALIGNED(32) L8_CLUT[256];
+
+extern "C" {
+static uint32_t pend_buffer = 0;
+}
+
+static void stm32_LayerInit(uint16_t LayerIndex, uint32_t FB_Address) {
 	LTDC_LayerCfgTypeDef  Layercfg;
 
 	/* Layer Init */
@@ -49,39 +61,11 @@ static void stm32_LayerInit(uint16_t LayerIndex, uint32_t FB_Address)
 	HAL_LTDC_ConfigLayer(&ltdc, &Layercfg, LayerIndex);
 }
 
-#include "SDRAM.h"
-
-#define BYTES_PER_PIXEL		2
-#define FB_BASE_ADDRESS 	((uint32_t)SDRAM_START_ADDRESS)
-#define FB_ADDRESS_0 		(FB_BASE_ADDRESS)
-#define FB_ADDRESS_1 		(FB_BASE_ADDRESS + (lcd_x_size * lcd_y_size * BYTES_PER_PIXEL))
-
-uint32_t getFramebufferEnd() {
+uint32_t getFramebufferEnd(void) {
 	return (FB_BASE_ADDRESS + 2 * (lcd_x_size * lcd_y_size * BYTES_PER_PIXEL));
 }
 
-extern "C" {
-static uint32_t pend_buffer = 0;
-
-/*
-void HAL_LTDC_LineEventCallback(LTDC_HandleTypeDef *ltdc)
-{
-	LTDC_LAYER(ltdc, 0)->CFBAR = (pend_buffer++ % 2) ? FB_ADDRESS_0 : FB_ADDRESS_1;
-	__HAL_LTDC_RELOAD_CONFIG(ltdc); 
-
-	HAL_LTDC_ProgramLineEvent(ltdc, 0);
-}
-
-void LTDC_IRQHandler(void)
-{
-	HAL_LTDC_IRQHandler(&ltdc);
-}
-*/
-
-}
-
-uint32_t getNextFrameBuffer() {
-
+uint32_t getNextFrameBuffer(void) {
 	int fb = pend_buffer++ % 2;
 
 	__HAL_LTDC_LAYER_ENABLE(&(ltdc), fb);
@@ -91,16 +75,15 @@ uint32_t getNextFrameBuffer() {
 	return fb ? FB_ADDRESS_0 : FB_ADDRESS_1;
 }
 
-uint32_t stm32_getXSize() {
+uint32_t stm32_getXSize(void) {
 	return lcd_x_size;
 }
 
-uint32_t stm32_getYSize() {
+uint32_t stm32_getYSize(void) {
 	return lcd_y_size;
 }
 
 int stm32_dsi_config(uint8_t bus, struct edid *edid, struct display_timing *dt) {
-
 #ifdef ARDUINO_GIGA
 	static const uint32_t DSI_PLLNDIV = 125;
 	static const uint32_t DSI_PLLIDF = DSI_PLL_IN_DIV3;
@@ -126,7 +109,6 @@ int stm32_dsi_config(uint8_t bus, struct edid *edid, struct display_timing *dt) 
 	dt->pixelclock = (LTDC_PLL3N) *LTDC_FREQ_STEP; 	// real pixel clock
 
 	static const uint32_t LANE_BYTE_CLOCK =	62500;
-
 
 	// TODO: switch USB to use HSI48
 
@@ -213,8 +195,8 @@ int stm32_dsi_config(uint8_t bus, struct edid *edid, struct display_timing *dt) 
 
 	hdsivideo_handle.VirtualChannelID     = 0;
 
-	/* Timing parameters for Video modes
-	 Set Timing parameters of DSI depending on its chosen format */
+	/* Timing parameters for Video modes */
+	/* Set Timing parameters of DSI depending on its chosen format */
 	hdsivideo_handle.ColorCoding          = DSI_RGB565;					// may choose DSI_RGB888
 	hdsivideo_handle.LooselyPacked        = DSI_LOOSELY_PACKED_DISABLE;
 	hdsivideo_handle.VSPolarity           = dt->vpol ? DSI_VSYNC_ACTIVE_HIGH : DSI_VSYNC_ACTIVE_LOW;
@@ -265,7 +247,6 @@ int stm32_dsi_config(uint8_t bus, struct edid *edid, struct display_timing *dt) 
 	HAL_DSI_ConfigPhyTimer(&dsi, &dsiPhyInit);
 
 	/*************************End DSI Initialization*******************************/
-
 
 	/************************LTDC Initialization***********************************/
 
@@ -333,8 +314,7 @@ int stm32_dsi_config(uint8_t bus, struct edid *edid, struct display_timing *dt) 
 	//HAL_DSI_Refresh(&dsi);
 }
 
-static void LL_FillBuffer(uint32_t LayerIndex, void *pDst, uint32_t xSize, uint32_t ySize, uint32_t OffLine, uint32_t ColorIndex)
-{
+static void LL_FillBuffer(uint32_t LayerIndex, void *pDst, uint32_t xSize, uint32_t ySize, uint32_t OffLine, uint32_t ColorIndex) {
 	/* Register to memory mode with ARGB8888 as color Mode */
 	dma2d.Init.Mode         = DMA2D_R2M;
 	dma2d.Init.ColorMode    = DMA2D_OUTPUT_RGB565;	//DMA2D_OUTPUT_ARGB8888
@@ -343,12 +323,9 @@ static void LL_FillBuffer(uint32_t LayerIndex, void *pDst, uint32_t xSize, uint3
 	dma2d.Instance = DMA2D;
 
 	/* DMA2D Initialization */
-	if(HAL_DMA2D_Init(&dma2d) == HAL_OK)
-	{
-		if(HAL_DMA2D_ConfigLayer(&dma2d, 1) == HAL_OK)
-		{
-			if (HAL_DMA2D_Start(&dma2d, ColorIndex, (uint32_t)pDst, xSize, ySize) == HAL_OK)
-			{
+	if(HAL_DMA2D_Init(&dma2d) == HAL_OK) {
+		if(HAL_DMA2D_ConfigLayer(&dma2d, 1) == HAL_OK) {
+			if (HAL_DMA2D_Start(&dma2d, ColorIndex, (uint32_t)pDst, xSize, ySize) == HAL_OK) {
 				/* Polling For DMA transfer */
 				HAL_DMA2D_PollForTransfer(&dma2d, 25);
 			}
@@ -356,23 +333,16 @@ static void LL_FillBuffer(uint32_t LayerIndex, void *pDst, uint32_t xSize, uint3
 	}
 }
 
-DMA2D_HandleTypeDef* stm32_get_DMA2D(void)
-{
+DMA2D_HandleTypeDef* stm32_get_DMA2D(void) {
 	return &dma2d;
 }
 
-void stm32_LCD_Clear(uint32_t Color)
-{
+void stm32_LCD_Clear(uint32_t Color) {
 	/* Clear the LCD */
 	LL_FillBuffer(pend_buffer%2, (uint32_t *)(ltdc.LayerCfg[pend_buffer%2].FBStartAdress), lcd_x_size, lcd_y_size, 0, Color);
-	getNextFrameBuffer();
 }
 
-static DMA2D_CLUTCfgTypeDef clut;
-static uint32_t __ALIGNED(32) L8_CLUT[256];
-
-void stm32_configue_CLUT(uint32_t *colors)
-{
+void stm32_configue_CLUT(uint32_t *colors) {
 	memcpy(L8_CLUT, colors, 256 * 4);
 	clut.pCLUT = (uint32_t *)L8_CLUT;
 	clut.CLUTColorMode = DMA2D_CCM_ARGB8888;
@@ -400,13 +370,11 @@ void stm32_configue_CLUT(uint32_t *colors)
 	HAL_DMA2D_PollForTransfer(&dma2d, 100);
 }
 
-void stm32_LCD_FillArea(void *pDst, uint32_t xSize, uint32_t ySize, uint32_t ColorMode)
-{
+void stm32_LCD_FillArea(void *pDst, uint32_t xSize, uint32_t ySize, uint32_t ColorMode) {
 	LL_FillBuffer(pend_buffer%2, pDst, xSize, ySize, lcd_x_size - xSize, ColorMode);
 }
 
-void stm32_LCD_DrawImage(void *pSrc, void *pDst, uint32_t xSize, uint32_t ySize, uint32_t ColorMode)
-{
+void stm32_LCD_DrawImage(void *pSrc, void *pDst, uint32_t xSize, uint32_t ySize, uint32_t ColorMode) {
 	/* Configure the DMA2D Mode, Color Mode and output offset */
 	dma2d.Init.Mode         = DMA2D_M2M_PFC;
 	dma2d.Init.ColorMode    = DMA2D_OUTPUT_RGB565;
@@ -425,12 +393,9 @@ void stm32_LCD_DrawImage(void *pSrc, void *pDst, uint32_t xSize, uint32_t ySize,
 	dma2d.Instance = DMA2D;
 
 	/* DMA2D Initialization */
-	if(HAL_DMA2D_Init(&dma2d) == HAL_OK)
-	{
-		if(HAL_DMA2D_ConfigLayer(&dma2d, 1) == HAL_OK)
-		{
-			if (HAL_DMA2D_Start(&dma2d, (uint32_t)pSrc, (uint32_t)pDst, xSize, ySize) == HAL_OK)
-			{
+	if(HAL_DMA2D_Init(&dma2d) == HAL_OK) {
+		if(HAL_DMA2D_ConfigLayer(&dma2d, 1) == HAL_OK) {
+			if (HAL_DMA2D_Start(&dma2d, (uint32_t)pSrc, (uint32_t)pDst, xSize, ySize) == HAL_OK) {
 				/* Polling For DMA transfer */
 				HAL_DMA2D_PollForTransfer(&dma2d, 25);
 			}
