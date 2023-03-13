@@ -2,9 +2,9 @@
 #include "lv_conf.h"
 #include <lvgl.h>
 #include "mbed.h"
-
 #include "Portenta_Video.h"
 #include "SDRAM.h"
+#include "video_modes.h"
 
 static uint32_t lcd_x_size = 0;
 static uint32_t lcd_y_size = 0;
@@ -12,9 +12,10 @@ static uint32_t lcd_y_size = 0;
 static uint16_t * fb;
 static lv_disp_drv_t disp_drv;
 
+struct edid recognized_edid;
+
 /* Display flushing */
-static void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p)
-{
+static void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p) {
 
 #if defined(__CORTEX_M7)
   SCB_CleanInvalidateDCache();
@@ -96,8 +97,7 @@ static void gpu_blend(lv_disp_drv_t * disp_drv, lv_color_t * dest, const lv_colo
 
 /* If your MCU has hardware accelerator (GPU) then you can use it to fill a memory with a color */
 static void gpu_fill(lv_disp_drv_t * disp_drv, lv_color_t * dest_buf, lv_coord_t dest_width,
-                     const lv_area_t * fill_area, lv_color_t color)
-{
+                     const lv_area_t * fill_area, lv_color_t color) {
 #if defined(__CORTEX_M7)
   SCB_CleanInvalidateDCache();
 #endif
@@ -125,33 +125,41 @@ static void gpu_fill(lv_disp_drv_t * disp_drv, lv_color_t * dest_buf, lv_coord_t
   }
 }
 
-struct edid recognized_edid;
-
 void portenta_init_video() {
-  // put your setup code here, to run once:
   int ret = -1;
 
+  //Initialization of ANX7625
   ret = anx7625_init(0);
   if(ret < 0) {
     printf("Cannot continue, anx7625 init failed.\n");
     while(1);
   }
 
+  //Checking HDMI plug event
   anx7625_wait_hpd_event(0);
+
+  //Read EDID
   anx7625_dp_get_edid(0, &recognized_edid);
+
+  //DSI Configuration
   anx7625_dp_start(0, &recognized_edid, EDID_MODE_720x480_60Hz);
+
+  //Configure SDRAM 
   SDRAM.begin(getFramebufferEnd());
 
+  //Initialization of LVGL library (Embedded Graphic Library)
   lv_init();
 
+  //Retrieving LCD size (X,Y)
   lcd_x_size = stm32_getXSize();
   lcd_y_size = stm32_getYSize();
 
   fb = (uint16_t *)getNextFrameBuffer();
   getNextFrameBuffer();
 
+  //Initialization of display buffer with LVGL
   static lv_color_t buf[LV_HOR_RES_MAX * LV_VER_RES_MAX / 6];
-
+  
   // Compatibility with v7 and v8 APIs
   #if LVGL_VERSION_MAJOR == 8
     static lv_disp_draw_buf_t  disp_buf;
@@ -184,9 +192,6 @@ void portenta_init_video() {
 
   #endif
 }
-
-#include "Portenta_Video.h"
-#include "video_modes.h"
 
 void giga_init_video(bool landscape) {
   // put your setup code here, to run once:
@@ -258,8 +263,6 @@ void giga_init_video(bool landscape) {
 
   #endif
 }
-
-
 
 //Get debug info
 void printInfo()  {
