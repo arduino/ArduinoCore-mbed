@@ -1,8 +1,5 @@
 #include "Portenta_Video.h"
-
 #include "Portenta_lvgl.h"
-#include "anx7625.h"
-#include "dsi.h"
 
 arduino::Portenta_Video::Portenta_Video() { }
 
