@@ -75,6 +75,10 @@ uint32_t getNextFrameBuffer(void) {
 	return fb ? FB_ADDRESS_0 : FB_ADDRESS_1;
 }
 
+uint32_t getCurrentFrameBuffer() {
+	return pend_buffer ? FB_ADDRESS_0 : FB_ADDRESS_1;
+}
+
 uint32_t stm32_getXSize(void) {
 	return lcd_x_size;
 }
@@ -309,7 +313,9 @@ int stm32_dsi_config(uint8_t bus, struct edid *edid, struct display_timing *dt) 
 	//HAL_DSI_PatternGeneratorStart(&dsi, 0, 0);
 	HAL_DSI_PatternGeneratorStop(&dsi);
 	stm32_LCD_Clear(0);
+	getNextFrameBuffer();
 	stm32_LCD_Clear(0);
+	getNextFrameBuffer();
 	
 	//HAL_DSI_Refresh(&dsi);
 }
