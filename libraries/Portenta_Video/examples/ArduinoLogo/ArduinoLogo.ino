@@ -1,4 +1,3 @@
-#include "Portenta_lvgl.h"
 #include "Portenta_Video.h"
 #include "image.h"
 
