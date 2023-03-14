@@ -39,15 +39,27 @@ uint32_t arduino::Portenta_Video::getHeightSize() {
     return _displayHeight;
 }
 
-void arduino::Portenta_Video::drawRectangle(uint32_t rectWidth, uint32_t rectHeight, uint32_t posWidht, uint32_t posHeight, uint32_t color){
+void arduino::Portenta_Video::drawFilledRectangle(uint32_t rectWidth, uint32_t rectHeight, uint32_t posWidht, uint32_t posHeight, uint32_t color){
     uint32_t offsetPos = 0;
 
     offsetPos = (posWidht + (_displayWidth * posHeight)) * sizeof(uint16_t);
     stm32_LCD_FillArea((void *)(_currFrameBufferAddr + offsetPos), rectWidth, rectHeight, color);
 }
 
+void arduino::Portenta_Video::drawRectangle(uint32_t rectWidth, uint32_t rectHeight, uint32_t posWidht, uint32_t posHeight, uint32_t color){
+  int x1 = posWidht;                    // Top-left corner x-coordinate
+  int y1 = posHeight;                   // Top-left corner y-coordinate
+  int x2 = posWidht + rectWidth - 1;    // Bottom-right corner x-coordinate
+  int y2 = posHeight + rectHeight - 1;  // Bottom-right corner y-coordinate
+
+  drawLine(x1, y1, x2, y1, color); // Top
+  drawLine(x1, y2, x2, y2, color);// Bottom
+  drawLine(x1, y1, x1, y2, color); // Left
+  drawLine(x2, y1, x2, y2, color); // Right
+}
+
 void arduino::Portenta_Video::drawPixel(uint32_t posWidht, uint32_t posHeight, uint32_t color) {
-    drawRectangle(1, 1, posWidht, posHeight, color);
+    drawFilledRectangle(1, 1, posWidht, posHeight, color);
 }
 
 void arduino::Portenta_Video::drawLine(int x0, int y0, int x1, int y1, uint32_t color) {

@@ -32,6 +32,7 @@ namespace arduino {
         void drawImage(void *imgBuffer, uint32_t imgWidth, uint32_t imgHeight, uint32_t posWidht, uint32_t posHeight);
         void drawPixel(uint32_t posWidht, uint32_t posHeight, uint32_t color);
         void drawLine(int x0, int y0, int x1, int y1, uint32_t color);
+        void drawFilledRectangle(uint32_t rectWidth, uint32_t rectHeight, uint32_t posWidht, uint32_t posHeight, uint32_t color);
         void drawRectangle(uint32_t rectWidth, uint32_t rectHeight, uint32_t posWidht, uint32_t posHeight, uint32_t color);
         void drawFilledCircle(uint32_t centerX, uint32_t centerY, uint32_t radius, uint32_t color);
         void drawCircle(uint32_t centerX, uint32_t centerY, uint32_t radius, uint32_t color);
