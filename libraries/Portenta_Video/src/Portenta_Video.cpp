@@ -135,3 +135,40 @@ void arduino::Portenta_Video::drawCircle(uint32_t centerX, uint32_t centerY, uin
     x++;
   }
 }
+
+#include "glcdfont.c"
+#define pgm_read_byte(addr) (*(const unsigned char *)(addr))
+
+
+void arduino::Portenta_Video::drawChar(uint32_t x, uint32_t y, unsigned char c, uint32_t color, uint32_t bg, uint8_t size) {
+  //Reference: https://github.com/arduino-libraries/TFT/
+  if((x >= _displayHeight)		|| // Clip right
+     (y >= _displayHeight)		|| // Clip bottom
+     ((x + 6 * size - 1) < 0)	|| // Clip left
+     ((y + 8 * size - 1) < 0))   // Clip top
+    return;
+
+  for (int8_t i=0; i<6; i++ ) {
+    uint8_t line;
+    if (i == 5) 
+      line = 0x0;
+    else 
+      line = pgm_read_byte(font+(c*5)+i);
+    for (int8_t j = 0; j<8; j++) {
+      if (line & 0x1) {
+        if (size == 1) // default size
+          drawPixel(x+i, y+j, color);
+        else {  // big size
+          drawFilledRectangle(x+(i*size), y+(j*size), size, size, color);
+        } 
+      } else if (bg != color) {
+        if (size == 1) // default size
+          drawPixel(x+i, y+j, bg);
+        else {  // big size
+          drawFilledRectangle(x+i*size, y+j*size, size, size, bg);
+        } 	
+      }
+      line >>= 1;
+    }
+  }
+}
