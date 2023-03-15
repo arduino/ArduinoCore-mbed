@@ -9,6 +9,8 @@ int arduino::Portenta_Video::begin() {
     _displayWidth   = stm32_getXSize();
     _displayHeight  = stm32_getYSize();
 
+    clear();
+
     _currFrameBufferAddr = getCurrentFrameBuffer();
 }
 
