@@ -8,12 +8,12 @@ void MCUboot::confirmSketch()
   boot_set_confirmed();
 }
 
-void MCUboot::applyUpdate(int permanent)
+void MCUboot::applyUpdate(bool permanent)
 {
-  boot_set_pending(permanent);
+  boot_set_pending(permanent == true ? 1 : 0);
 }
 
-void MCUboot::bootDebug(int enable)
+void MCUboot::bootDebug(bool enable)
 {
   unsigned int rtc_reg = STM32H747::readBackupRegister(RTCBackup::DR7);
 
