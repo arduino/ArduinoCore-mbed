@@ -39,6 +39,7 @@ namespace arduino {
         void drawCircle(uint32_t centerX, uint32_t centerY, uint32_t radius, uint32_t color);
         void drawFilledCircle(uint32_t centerX, uint32_t centerY, uint32_t radius, uint32_t color);
         void drawChar(uint32_t x, uint32_t y, unsigned char c, uint32_t color, uint32_t bg, uint8_t size);
+        void drawText(uint32_t x, uint32_t y, const char *text, uint32_t color, uint32_t bg, uint8_t size);
     private:
         uint32_t _currFrameBufferAddr;
         uint32_t _displayWidth;

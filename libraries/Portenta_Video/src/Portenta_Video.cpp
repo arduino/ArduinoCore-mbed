@@ -172,3 +172,12 @@ void arduino::Portenta_Video::drawChar(uint32_t x, uint32_t y, unsigned char c, 
     }
   }
 }
+
+void arduino::Portenta_Video::drawText(uint32_t x, uint32_t y, const char *text, uint32_t color, uint32_t bg, uint8_t size) {
+    while (*text) {  // loop until end of string
+        drawChar(x, y, *text, color, bg, size);
+        x += size * 6;  // advance x position by 6 pixels per character
+        ++text;  // move to next character in string
+    }
+}
+
