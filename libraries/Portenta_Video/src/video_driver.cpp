@@ -4,6 +4,10 @@
 #include "anx7625.h"
 #include "dsi.h"
 
+static uint16_t * fb;
+static uint32_t lcd_x_size = 0;
+static uint32_t lcd_y_size = 0;
+
 struct edid recognized_edid;
 
 void portenta_init_video() {
@@ -28,7 +32,10 @@ void portenta_init_video() {
   //Configure SDRAM 
   SDRAM.begin(getFramebufferEnd());
 
-  getNextFrameBuffer();
+  lcd_x_size = stm32_getXSize();
+  lcd_y_size = stm32_getYSize();
+
+  fb = (uint16_t *)getNextFrameBuffer();
   getNextFrameBuffer();
 }
 
@@ -56,6 +63,52 @@ void giga_init_video(bool landscape) {
 
   stm32_dsi_config(0, &_edid, &dt);
 
+  lcd_x_size = stm32_getXSize();
+  lcd_y_size = stm32_getYSize();
+
+  fb = (uint16_t *)getNextFrameBuffer();
   getNextFrameBuffer();
-  getNextFrameBuffer();
+}
+
+void my_disp_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p) {
+
+#if defined(__CORTEX_M7)
+  SCB_CleanInvalidateDCache();
+  SCB_InvalidateICache();
+#endif
+
+  DMA2D_HandleTypeDef * dma2d = stm32_get_DMA2D();
+
+  lv_color_t * pDst = (lv_color_t*)fb;
+  pDst += area->y1 * lcd_x_size + area->x1;
+
+  uint32_t w = lv_area_get_width(area);
+  uint32_t h = lv_area_get_height(area);
+  /*##-1- Configure the DMA2D Mode, Color Mode and output offset #############*/
+  dma2d->Init.Mode         = DMA2D_M2M;
+  dma2d->Init.ColorMode    = DMA2D_OUTPUT_RGB565;
+  dma2d->Init.OutputOffset = lcd_x_size - w;
+  dma2d->Init.AlphaInverted = DMA2D_REGULAR_ALPHA;  /* No Output Alpha Inversion*/
+  dma2d->Init.RedBlueSwap   = DMA2D_RB_REGULAR;     /* No Output Red & Blue swap */
+
+  /*##-2- DMA2D Callbacks Configuration ######################################*/
+  dma2d->XferCpltCallback  = NULL;
+
+  /*##-3- Foreground Configuration ###########################################*/
+  dma2d->LayerCfg[1].AlphaMode = DMA2D_NO_MODIF_ALPHA;
+  dma2d->LayerCfg[1].InputAlpha = 0xFF;
+  dma2d->LayerCfg[1].InputColorMode = DMA2D_INPUT_RGB565;
+  dma2d->LayerCfg[1].InputOffset = 0;
+  dma2d->LayerCfg[1].RedBlueSwap = DMA2D_RB_REGULAR; /* No ForeGround Red/Blue swap */
+  dma2d->LayerCfg[1].AlphaInverted = DMA2D_REGULAR_ALPHA; /* No ForeGround Alpha inversion */
+
+  /* DMA2D Initialization */
+  if (HAL_DMA2D_Init(dma2d) == HAL_OK) {
+    if (HAL_DMA2D_ConfigLayer(dma2d, 1) == HAL_OK) {
+      HAL_DMA2D_Start(dma2d, (uint32_t)color_p, (uint32_t)pDst, w, h);
+      HAL_DMA2D_PollForTransfer(dma2d, 1000);
+    }
+  }
+
+  lv_disp_flush_ready(disp); /* tell lvgl that flushing is done */
 }
