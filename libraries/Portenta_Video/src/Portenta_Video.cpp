@@ -1,5 +1,5 @@
 #include "Portenta_Video.h"
-#include "Portenta_lvgl.h"
+#include "video_driver.h"
 #include "glcdfont.c"
 
 #define pgm_read_byte(addr) (*(const unsigned char *)(addr))
