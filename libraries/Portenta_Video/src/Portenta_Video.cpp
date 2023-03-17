@@ -1,11 +1,26 @@
 #include "Portenta_Video.h"
 #include "Portenta_lvgl.h"
+#include "glcdfont.c"
 
-arduino::Portenta_Video::Portenta_Video() { }
+#define pgm_read_byte(addr) (*(const unsigned char *)(addr))
+
+arduino::Portenta_Video::Portenta_Video(DisplayShieldModel shield) { 
+  _shield = shield;
+}
 
 int arduino::Portenta_Video::begin() {
-    portenta_init_video();
-    
+  #if defined(ARDUINO_PORTENTA_H7_M7)
+    if (_shield == NONE_SHIELD) {
+      portenta_init_video();
+    } else if (_shield == GIGA_DISPLAY_SHIELD) {
+      //@TODO Init portenta w/o ANX
+    }
+  #elif defined(ARDUINO_GIGA)
+    giga_init_video(); 
+  #else 
+    #error Board not compatible with this library
+  #endif
+
     _displayWidth   = stm32_getXSize();
     _displayHeight  = stm32_getYSize();
 
@@ -137,10 +152,6 @@ void arduino::Portenta_Video::drawCircle(uint32_t centerX, uint32_t centerY, uin
     x++;
   }
 }
-
-#include "glcdfont.c"
-#define pgm_read_byte(addr) (*(const unsigned char *)(addr))
-
 
 void arduino::Portenta_Video::drawChar(uint32_t x, uint32_t y, unsigned char c, uint32_t color, uint32_t bg, uint8_t size) {
   //Reference: https://github.com/arduino-libraries/TFT/
