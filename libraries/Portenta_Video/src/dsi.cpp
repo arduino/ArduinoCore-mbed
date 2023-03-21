@@ -381,6 +381,11 @@ void stm32_LCD_FillArea(void *pDst, uint32_t xSize, uint32_t ySize, uint32_t Col
 }
 
 void stm32_LCD_DrawImage(void *pSrc, void *pDst, uint32_t xSize, uint32_t ySize, uint32_t ColorMode) {
+#if defined(__CORTEX_M7) 
+	SCB_CleanInvalidateDCache();
+	SCB_InvalidateICache();
+#endif
+	
 	/* Configure the DMA2D Mode, Color Mode and output offset */
 	dma2d.Init.Mode         = DMA2D_M2M_PFC;
 	dma2d.Init.ColorMode    = DMA2D_OUTPUT_RGB565;

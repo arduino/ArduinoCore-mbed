@@ -1,5 +1,6 @@
 #include "Portenta_Video.h"
 #include "video_driver.h"
+#include "display.h"
 #include "glcdfont.c"
 
 #define pgm_read_byte(addr) (*(const unsigned char *)(addr))
@@ -17,6 +18,7 @@ int arduino::Portenta_Video::begin() {
     }
   #elif defined(ARDUINO_GIGA)
     giga_init_video(); 
+    LCD_ST7701_Init();
   #else 
     #error Board not compatible with this library
   #endif
