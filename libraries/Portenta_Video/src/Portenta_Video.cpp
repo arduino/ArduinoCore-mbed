@@ -3,6 +3,12 @@
 #include "display.h"
 #include "glcdfont.c"
 
+#if __has_include ("lvgl.h")
+#include "lvgl.h"
+
+void lvgl_displayFlush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p);
+#endif
+
 #define pgm_read_byte(addr) (*(const unsigned char *)(addr))
 
 arduino::Portenta_Video::Portenta_Video(DisplayShieldModel shield) { 
@@ -27,6 +33,28 @@ int arduino::Portenta_Video::begin() {
     _displayHeight  = stm32_getYSize();
 
     clear();
+    
+  #if __has_include("lvgl.h")
+    update();
+
+    /* Initiliaze LVGL library */
+    lv_init();
+
+    /* Create a draw buffer */
+    static lv_disp_draw_buf_t draw_buf;
+    static lv_color_t * buf1;                                           
+    buf1 = (lv_color_t*)malloc((_displayWidth * _displayHeight / 10) * sizeof(lv_color_t)); /* Declare a buffer for 1/10 screen size */
+    lv_disp_draw_buf_init(&draw_buf, buf1, NULL, _displayWidth * _displayHeight / 10);      /* Initialize the display buffer. */
+
+    /* Initialize display features for LVGL library */
+    static lv_disp_drv_t disp_drv;          /* Descriptor of a display driver */
+    lv_disp_drv_init(&disp_drv);            /* Basic initialization */
+    disp_drv.flush_cb = lvgl_displayFlush;  /* Set your driver function */
+    disp_drv.draw_buf = &draw_buf;          /* Assign the buffer to the display */
+    disp_drv.hor_res = _displayWidth;       /* Set the horizontal resolution of the display */
+    disp_drv.ver_res = _displayHeight;      /* Set the vertical resolution of the display */
+    lv_disp_drv_register(&disp_drv);        /* Finally register the driver */
+  #endif
 
     _currFrameBufferAddr = getCurrentFrameBuffer();
 }
@@ -196,3 +224,13 @@ void arduino::Portenta_Video::drawText(uint32_t x, uint32_t y, const char *text,
     }
 }
 
+#if __has_include("lvgl.h")
+void lvgl_displayFlush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p) {
+    uint32_t width      = lv_area_get_width(area);
+    uint32_t height     = lv_area_get_height(area);
+    uint32_t offsetPos  = (area->x1 + (disp->hor_res * area->y1)) * sizeof(uint16_t);
+
+    stm32_LCD_DrawImage((void *) color_p, (void *)(getCurrentFrameBuffer() + offsetPos), width, height, DMA2D_INPUT_RGB565);
+    lv_disp_flush_ready(disp);         /* Indicate you are ready with the flushing*/
+}
+#endif
