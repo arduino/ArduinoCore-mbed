@@ -6,10 +6,6 @@
 #if __has_include ("lvgl.h")
 #include "lvgl.h"
 
-#if LVGL_VERSION_MAJOR < 7
-  #error This library is only compatible with LVGL version above 7.x
-#endif
-
 void lvgl_displayFlush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p);
 #endif
 
@@ -44,39 +40,22 @@ int arduino::Portenta_Video::begin() {
     /* Initiliaze LVGL library */
     lv_init();
 
-    #if LVGL_VERSION_MAJOR == 8
-      /* Create a draw buffer */
-      static lv_disp_draw_buf_t draw_buf;
-      static lv_color_t * buf1;                                           
-      buf1 = (lv_color_t*)malloc((_displayWidth * _displayHeight / 10) * sizeof(lv_color_t)); /* Declare a buffer for 1/10 screen size */
-      lv_disp_draw_buf_init(&draw_buf, buf1, NULL, _displayWidth * _displayHeight / 10);      /* Initialize the display buffer. */
+    /* Create a draw buffer */
+    static lv_disp_draw_buf_t draw_buf;
+    static lv_color_t * buf1;                                           
+    buf1 = (lv_color_t*)malloc((_displayWidth * _displayHeight / 10) * sizeof(lv_color_t)); /* Declare a buffer for 1/10 screen size */
+    lv_disp_draw_buf_init(&draw_buf, buf1, NULL, _displayWidth * _displayHeight / 10);      /* Initialize the display buffer. */
 
-      /* Initialize display features for LVGL library */
-      static lv_disp_drv_t disp_drv;          /* Descriptor of a display driver */
-      lv_disp_drv_init(&disp_drv);            /* Basic initialization */
-      disp_drv.flush_cb = lvgl_displayFlush;  /* Set your driver function */
-      disp_drv.draw_buf = &draw_buf;          /* Assign the buffer to the display */
-      disp_drv.hor_res = _displayWidth;       /* Set the horizontal resolution of the display */
-      disp_drv.ver_res = _displayHeight;      /* Set the vertical resolution of the display */
-      disp_drv.rotated = LV_DISP_ROT_270;
-      disp_drv.sw_rotate = 1;
-      lv_disp_drv_register(&disp_drv);        /* Finally register the driver */
-    #elif LVGL_VERSION_MAJOR == 7
-      /* Create a draw buffer */
-      static lv_disp_buf_t disp_buf;
-      static lv_color_t buf[LV_HOR_RES_MAX * LV_VER_RES_MAX / 10];                     /* Declare a buffer for 1/10 screen size */
-      lv_disp_buf_init(&disp_buf, buf, NULL, LV_HOR_RES_MAX * LV_VER_RES_MAX / 10);    /* Initialize the display buffer */
-
-      /* Initialize display features for LVGL library */
-      lv_disp_drv_t disp_drv;                 /* Descriptor of a display driver */
-      lv_disp_drv_init(&disp_drv);            /* Basic initialization */
-      disp_drv.flush_cb = lvgl_displayFlush;  /* Set your driver function */
-      disp_drv.buffer = &disp_buf;            /* Assign the buffer to the display */
-      disp_drv.hor_res = _displayWidth;       /* Set the horizontal resolution of the display */
-      disp_drv.ver_res = _displayHeight;      /* Set the vertical resolution of the display */
-      lv_disp_drv_register(&disp_drv);        /* Finally register the driver */
-    #endif
-
+    /* Initialize display features for LVGL library */
+    static lv_disp_drv_t disp_drv;          /* Descriptor of a display driver */
+    lv_disp_drv_init(&disp_drv);            /* Basic initialization */
+    disp_drv.flush_cb = lvgl_displayFlush;  /* Set your driver function */
+    disp_drv.draw_buf = &draw_buf;          /* Assign the buffer to the display */
+    disp_drv.hor_res = _displayWidth;       /* Set the horizontal resolution of the display */
+    disp_drv.ver_res = _displayHeight;      /* Set the vertical resolution of the display */
+    disp_drv.rotated = LV_DISP_ROT_270;
+    disp_drv.sw_rotate = 1;
+    lv_disp_drv_register(&disp_drv);        /* Finally register the driver */
   #endif
 
     _currFrameBufferAddr = getCurrentFrameBuffer();
