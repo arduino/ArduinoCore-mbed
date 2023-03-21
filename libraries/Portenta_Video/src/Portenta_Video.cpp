@@ -58,6 +58,8 @@ int arduino::Portenta_Video::begin() {
       disp_drv.draw_buf = &draw_buf;          /* Assign the buffer to the display */
       disp_drv.hor_res = _displayWidth;       /* Set the horizontal resolution of the display */
       disp_drv.ver_res = _displayHeight;      /* Set the vertical resolution of the display */
+      disp_drv.rotated = LV_DISP_ROT_270;
+      disp_drv.sw_rotate = 1;
       lv_disp_drv_register(&disp_drv);        /* Finally register the driver */
     #elif LVGL_VERSION_MAJOR == 7
       /* Create a draw buffer */

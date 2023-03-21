@@ -2,6 +2,6 @@
 #define VIDEO_DRIVER_H
 
 void portenta_init_video();
-void giga_init_video(bool landscape = true);
+void giga_init_video();
 
 #endif // VIDEO_DRIVER_H

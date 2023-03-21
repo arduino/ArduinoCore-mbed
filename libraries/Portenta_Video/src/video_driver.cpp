@@ -29,7 +29,7 @@ void portenta_init_video() {
   SDRAM.begin(getFramebufferEnd());
 }
 
-void giga_init_video(bool landscape) {
+void giga_init_video() {
   // put your setup code here, to run once:
   int ret = -1;
 
