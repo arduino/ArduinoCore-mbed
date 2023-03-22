@@ -29,7 +29,7 @@ namespace arduino {
     public:
         Portenta_Video(DisplayShieldModel shield = NONE_SHIELD);
 
-        int         begin();
+        int         begin(bool landscape = true);
         void        fillScreen(uint32_t color);
         void        clear();
         void        update();
@@ -50,6 +50,7 @@ namespace arduino {
         uint32_t            _currFrameBufferAddr;
         uint32_t            _displayWidth;
         uint32_t            _displayHeight;
+        bool                _landscapeMode;
     };  
 
 }

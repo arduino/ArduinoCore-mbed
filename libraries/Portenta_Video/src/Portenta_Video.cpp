@@ -15,7 +15,7 @@ arduino::Portenta_Video::Portenta_Video(DisplayShieldModel shield) {
   _shield = shield;
 }
 
-int arduino::Portenta_Video::begin() {
+int arduino::Portenta_Video::begin(bool landscape) {
   #if defined(ARDUINO_PORTENTA_H7_M7)
     if (_shield == NONE_SHIELD) {
       portenta_init_video();
@@ -31,6 +31,7 @@ int arduino::Portenta_Video::begin() {
 
     _displayWidth   = stm32_getXSize();
     _displayHeight  = stm32_getYSize();
+    _landscapeMode  = landscape;
 
     clear();
     
@@ -53,7 +54,7 @@ int arduino::Portenta_Video::begin() {
     disp_drv.draw_buf = &draw_buf;          /* Assign the buffer to the display */
     disp_drv.hor_res = _displayWidth;       /* Set the horizontal resolution of the display */
     disp_drv.ver_res = _displayHeight;      /* Set the vertical resolution of the display */
-    disp_drv.rotated = LV_DISP_ROT_270;
+    disp_drv.rotated = (landscape) ? LV_DISP_ROT_270 : LV_DISP_ROT_NONE;
     disp_drv.sw_rotate = 1;
     lv_disp_drv_register(&disp_drv);        /* Finally register the driver */
   #endif
@@ -75,24 +76,50 @@ void arduino::Portenta_Video::update() {
 
 void arduino::Portenta_Video::drawImage(uint32_t x, uint32_t y, void *img, uint32_t width, uint32_t height) {
     uint32_t offsetPos = 0;
+    uint32_t x_rot, y_rot, h_rot, w_rot;
 
-    offsetPos = (x + (_displayWidth * y)) * sizeof(uint16_t);
-    stm32_LCD_DrawImage(img, (void *)(_currFrameBufferAddr + offsetPos), width, height, DMA2D_INPUT_RGB565);
+    if (_landscapeMode) {
+      x_rot = ((_displayWidth-1) - y) - height;
+      y_rot = x;
+      h_rot = width;
+      w_rot = height;
+    } else {
+      x_rot = x;
+      y_rot = y;
+      h_rot = height;
+      w_rot = width;
+    }
+
+    offsetPos = (x_rot + (_displayWidth * y_rot)) * sizeof(uint16_t);
+    stm32_LCD_DrawImage(img, (void *)(_currFrameBufferAddr + offsetPos), w_rot, h_rot, DMA2D_INPUT_RGB565);
 }
 
 uint32_t arduino::Portenta_Video::getWidth() {
-    return _displayWidth;
+    return ((_landscapeMode) ? _displayHeight : _displayWidth);
 }
 
 uint32_t arduino::Portenta_Video::getHeight() {
-    return _displayHeight;
+    return ((_landscapeMode) ? _displayWidth : _displayHeight);
 }
 
 void arduino::Portenta_Video::drawFilledRectangle(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t color) {
     uint32_t offsetPos = 0;
+    uint32_t x_rot, y_rot, h_rot, w_rot;
 
-    offsetPos = (x + (_displayWidth * y)) * sizeof(uint16_t);
-    stm32_LCD_FillArea((void *)(_currFrameBufferAddr + offsetPos), width, height, color);
+    if (_landscapeMode) {
+      x_rot = ((_displayWidth-1) - y) - height;
+      y_rot = x;
+      h_rot = width;
+      w_rot = height;
+    } else {
+      x_rot = x;
+      y_rot = y;
+      h_rot = height;
+      w_rot = width;
+    }
+
+    offsetPos = (x_rot + (_displayWidth * y_rot)) * sizeof(uint16_t);
+    stm32_LCD_FillArea((void *)(_currFrameBufferAddr + offsetPos), w_rot, h_rot, color);
 }
 
 void arduino::Portenta_Video::drawRectangle(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t color) {
