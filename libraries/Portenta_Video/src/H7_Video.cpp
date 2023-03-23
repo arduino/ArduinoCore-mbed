@@ -17,6 +17,14 @@ H7_Video::~H7_Video() {
 }
 
 int H7_Video::begin() {
+    int ret = 0;
+
+    ret = begin(true);
+
+    return ret;
+}
+
+int H7_Video::begin(bool landscape) {
   if (!ArduinoGraphics::begin()) {
     return 0;
   }
@@ -35,6 +43,8 @@ int H7_Video::begin() {
   #else 
     #error Board not compatible with this library
   #endif
+
+  _landscape = landscape;
 
   stm32_LCD_Clear(0); 
 
@@ -57,7 +67,7 @@ int H7_Video::begin() {
     disp_drv.draw_buf = &draw_buf;          /* Assign the buffer to the display */
     disp_drv.hor_res = width();       /* Set the horizontal resolution of the display */
     disp_drv.ver_res = height();      /* Set the vertical resolution of the display */
-    disp_drv.rotated = LV_DISP_ROT_NONE;
+    disp_drv.rotated = (_landscape) ? LV_DISP_ROT_270 : LV_DISP_ROT_NONE;
     disp_drv.sw_rotate = 1;
     lv_disp_drv_register(&disp_drv);        /* Finally register the driver */
   #endif

@@ -19,6 +19,7 @@ public:
   virtual ~H7_Video();
 
   int begin();
+  int begin(bool landscape);
   void end();
   
   virtual void beginDraw();
@@ -27,7 +28,8 @@ public:
   virtual void set(int x, int y, uint8_t r, uint8_t g, uint8_t b);
 private:
     DisplayShieldModel  _shield;
-    uint32_t _currFrameBufferAddr;
+    bool                _landscape;
+    uint32_t            _currFrameBufferAddr;
 };
 
 #endif /* _H7_VIDEO_H */
