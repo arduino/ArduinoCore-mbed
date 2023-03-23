@@ -8,9 +8,14 @@
 #define H7_VIDEO_MAX_WIDTH          1280 
 #define H7_VIDEO_MAX_HEIGHT         1024 
 
+enum DisplayShieldModel {
+    NONE_SHIELD = 0,
+    GIGA_DISPLAY_SHIELD = 1
+};
+
 class H7_Video : public ArduinoGraphics {
 public:
-  H7_Video(int width = H7_VIDEO_MAX_WIDTH, int heigth = H7_VIDEO_MAX_HEIGHT);
+  H7_Video(int width = H7_VIDEO_MAX_WIDTH, int heigth = H7_VIDEO_MAX_HEIGHT, DisplayShieldModel shield = NONE_SHIELD);
   virtual ~H7_Video();
 
   int begin();
@@ -21,6 +26,7 @@ public:
 
   virtual void set(int x, int y, uint8_t r, uint8_t g, uint8_t b);
 private:
+    DisplayShieldModel  _shield;
     uint32_t _currFrameBufferAddr;
 };
 
