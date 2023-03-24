@@ -1,10 +1,10 @@
-#include "Portenta_Video.h" 
+#include "H7_Video.h" 
 #include "lvgl.h"
 
-Portenta_Video Display;
+H7_Video Display(480,800);
 
 void setup() {
-  Display.begin();
+  Display.begin(false);
 
   /* Change the active screen's background color */
   lv_obj_set_style_bg_color(lv_scr_act(), lv_color_hex(0x03989e), LV_PART_MAIN);
