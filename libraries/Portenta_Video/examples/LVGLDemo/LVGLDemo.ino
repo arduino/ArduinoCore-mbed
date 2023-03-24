@@ -3,6 +3,8 @@
 
 H7_Video Display(480,800);
 
+//@TODO: Complete demo with 4 main features + touch management
+
 void setup() {
   Display.begin(false);
 
