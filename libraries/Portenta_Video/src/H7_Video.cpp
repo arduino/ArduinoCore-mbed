@@ -84,7 +84,7 @@ void H7_Video::end() {
 void H7_Video::beginDraw() {
   ArduinoGraphics::beginDraw();
 
-  clear();
+  stm32_LCD_Clear(0); 
 }
 
 void H7_Video::endDraw() {
@@ -93,9 +93,31 @@ void H7_Video::endDraw() {
   _currFrameBufferAddr = getNextFrameBuffer();
 }
 
+void H7_Video::background(uint8_t r, uint8_t g, uint8_t b) {
+  ArduinoGraphics::background(r,g,b);
+  _bgR = r;
+  _bgG = g;
+  _bgB = b;
+}
+
+void H7_Video::clear(){
+  uint32_t bg =  (uint32_t)((uint32_t)(_bgR << 16) | (uint32_t)(_bgG << 8) | (uint32_t)(_bgB << 0));
+  stm32_LCD_Clear(bg);
+}
+
 void H7_Video::set(int x, int y, uint8_t r, uint8_t g, uint8_t b) {
+    uint32_t x_rot, y_rot;
+
+    if (_landscape) {
+      x_rot = ((width()-1) - y);
+      y_rot = x;
+    } else {
+      x_rot = x;
+      y_rot = y;
+    }
+
     uint32_t color =  (uint32_t)((uint32_t)(r << 16) | (uint32_t)(g << 8) | (uint32_t)(b << 0));
-    stm32_LCD_FillArea((void *)(_currFrameBufferAddr + ((x + (width() * y)) * sizeof(uint16_t))), 1, 1, color);
+    stm32_LCD_FillArea((void *)(_currFrameBufferAddr + ((x_rot + (width() * y_rot)) * sizeof(uint16_t))), 1, 1, color);
 }
 
 #if __has_include("lvgl.h")
