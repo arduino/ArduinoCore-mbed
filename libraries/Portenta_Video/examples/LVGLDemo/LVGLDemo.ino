@@ -6,7 +6,7 @@ H7_Video Display(480,800);
 //@TODO: Complete demo with 4 main features + touch management
 
 void setup() {
-  Display.begin(false);
+  Display.begin();
 
   /* Change the active screen's background color */
   lv_obj_set_style_bg_color(lv_scr_act(), lv_color_hex(0x03989e), LV_PART_MAIN);
