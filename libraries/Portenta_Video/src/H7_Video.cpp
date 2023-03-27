@@ -93,15 +93,8 @@ void H7_Video::endDraw() {
   _currFrameBufferAddr = getNextFrameBuffer();
 }
 
-void H7_Video::background(uint8_t r, uint8_t g, uint8_t b) {
-  ArduinoGraphics::background(r,g,b);
-  _bgR = r;
-  _bgG = g;
-  _bgB = b;
-}
-
 void H7_Video::clear(){
-  uint32_t bg =  (uint32_t)((uint32_t)(_bgR << 16) | (uint32_t)(_bgG << 8) | (uint32_t)(_bgB << 0));
+  uint32_t bg = ArduinoGraphics::background();
   stm32_LCD_Clear(bg);
 }
 

@@ -22,7 +22,6 @@ public:
   int begin(bool landscape);
   void end();
 
-  void background(uint8_t r, uint8_t g, uint8_t b);
   void clear();
   
   virtual void beginDraw();
@@ -33,7 +32,6 @@ private:
     DisplayShieldModel  _shield;
     bool                _landscape;
     uint32_t            _currFrameBufferAddr;
-    uint8_t             _bgR, _bgG, _bgB;
 };
 
 #endif /* _H7_VIDEO_H */
