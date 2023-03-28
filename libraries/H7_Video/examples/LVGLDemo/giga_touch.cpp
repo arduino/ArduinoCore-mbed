@@ -24,13 +24,13 @@ bool touchpad_pressed;
 
 void handleTouch(int8_t contacts, GTPoint *points) {
   touchpad_pressed = true;
-  printf("Contacts: %d\n", contacts);
+  //printf("Contacts: %d\n", contacts);
   for (uint8_t i = 0; i < contacts; i++) {
     if (i == 0) {
       touchpad_x = points[i].x;
       touchpad_y = points[i].y;
     }
-    printf("C%d: #%d %d,%d s:%d\n", i, points[i].trackId, points[i].x, points[i].y, points[i].area);
+    //printf("C%d: #%d %d,%d s:%d\n", i, points[i].trackId, points[i].x, points[i].y, points[i].area);
     yield();
   }
 }
@@ -57,8 +57,6 @@ void touchStart() {
 }
 
 void giga_touch_setup() {
-  Serial.println("\nGoodix GT911x touch driver");
-
   Wire.setClock(400000);
   Wire.begin();
   delay(300);
@@ -67,7 +65,15 @@ void giga_touch_setup() {
   touchStart();
 }
 
-void giga_touch_loop() {
+void giga_touch_handler() {
   touch.loop();
   delay(1);
+}
+
+uint16_t giga_get_touch_x() {
+  return touchpad_x;
+}
+
+uint16_t giga_get_touch_y() {
+  return touchpad_y;
 }
