@@ -1,11 +1,15 @@
 #include "H7_Video.h" 
 #include "lvgl.h"
+#include "giga_touch.h"
 
 H7_Video Display(480,800);
 
 //@TODO: Complete demo with 4 main features + touch management
 
 void setup() {
+  Serial.begin(115200);
+  giga_touch_setup();
+
   Display.begin();
 
   /* Change the active screen's background color */
@@ -19,6 +23,9 @@ void setup() {
 }
 
 void loop() { 
+  /* Touch handler */
+  giga_touch_loop();
+  
   /* Feed LVGL engine */
   lv_timer_handler();
 }
