@@ -17,6 +17,7 @@
 #include "Arduino.h"
 #include "NDP.h"
 
+#undef abs
 #include "AudioTools.h"
 #include "AudioCodecs/CodecG722.h"
 
