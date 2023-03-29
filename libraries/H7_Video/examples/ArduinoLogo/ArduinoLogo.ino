@@ -17,7 +17,7 @@
 INCBIN(test, "/home/user/Downloads/test.bin");
 */
 
-H7_Video Display(480, 800);
+H7_Video Display(480, 800, GIGA_DISPLAY_SHIELD);
 
 void setup() {
   Display.begin();

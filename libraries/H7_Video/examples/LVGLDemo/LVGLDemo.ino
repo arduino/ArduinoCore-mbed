@@ -2,7 +2,7 @@
 #include "lvgl.h"
 #include "giga_touch.h"
 
-H7_Video Display(480,800);
+H7_Video Display(480, 800, GIGA_DISPLAY_SHIELD);
 
 //@TODO: Complete demo with 4 main features
 

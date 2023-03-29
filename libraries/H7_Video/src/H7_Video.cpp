@@ -35,7 +35,8 @@ int H7_Video::begin(bool landscape) {
     if (_shield == NONE_SHIELD) {
         portenta_init_video();
     } else if (_shield == GIGA_DISPLAY_SHIELD) {
-        //@TODO Init portenta w/o ANX
+        giga_init_video(); 
+        LCD_ST7701_Init();
     }
   #elif defined(ARDUINO_GIGA)
     giga_init_video(); 

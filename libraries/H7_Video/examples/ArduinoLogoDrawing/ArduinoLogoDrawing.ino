@@ -8,7 +8,7 @@
 #include "ArduinoGraphics.h"
 #include "H7_Video.h" // H7_Video depends on ArduinoGraphics
 
-H7_Video Display(480, 800);
+H7_Video Display(480, 800, GIGA_DISPLAY_SHIELD);
 
 void setup() {
   Display.begin();

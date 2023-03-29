@@ -13,7 +13,6 @@ REDIRECT_STDOUT_TO(Serial);
 #endif
 
 #ifdef ARDUINO_PORTENTA_H7_M7
-#define Wire Wire2
 #define INT_PIN PinNameToIndex(PD_4)
 #define RST_PIN PinNameToIndex(PD_5)
 #endif
@@ -36,7 +35,7 @@ void handleTouch(int8_t contacts, GTPoint *points) {
 }
 
 void touchStart() {
-  if (touch.begin(INT_PIN, RST_PIN, 0xDD) != true) {
+  if (touch.begin(Wire, INT_PIN, RST_PIN, 0xDD) != true) {
     Serial.println("! Module reset failed");
   } else {
     Serial.println("Module reset OK");
