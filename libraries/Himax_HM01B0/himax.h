@@ -40,7 +40,7 @@ class HM01B0: public ImageSensor {
         bool getMono() { return true; };
         uint32_t getClockFrequency() { return 6000000; };
         int setFrameRate(int32_t framerate);
-        int setResolution(int32_t resolution);
+        int setResolution(int32_t resolution, int32_t zoom_resolution, uint32_t zoom_x, uint32_t zoom_y);
         int setPixelFormat(int32_t pixformat);
         int setTestPattern(bool enable, bool walking) override;
         int enableMotionDetection(md_callback_t callback=NULL);
@@ -50,6 +50,8 @@ class HM01B0: public ImageSensor {
         int motionDetected();
         int pollMotionDetection();
         int clearMotionDetection();
+        int setVerticalFlip(bool flip_mode);
+        int setHorizontalMirror(bool mirror_mode);
 
         uint8_t printRegs();
         void debug(Stream &stream);

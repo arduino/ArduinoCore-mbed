@@ -210,9 +210,12 @@ class ImageSensor {
          * @brief Set the resolution of the image sensor.
          * @note This has no effect on cameras that do not support variable resolutions.
          * @param resolution The desired resolution, as defined in the resolution enum
+         * @param zoom_resolution The desired zoom window size.
+         * @param zoom_x The desired x position of the zoom window.
+         * @param zoom_y The desired y position of the zoom window.
          * @return int 0 on success, non-zero on failure
          */
-        virtual int setResolution(int32_t resolution) = 0;
+        virtual int setResolution(int32_t resolution, int32_t zoom_resolution, uint32_t zoom_x, uint32_t zoom_y) = 0;
 
         /**
          * @brief Set the pixel (color) format of the image sensor.
@@ -277,11 +280,15 @@ class ImageSensor {
          */
         virtual int motionDetected() = 0;
 
+        virtual int setVerticalFlip(bool flip_mode) = 0;
+        virtual int setHorizontalMirror(bool flip_mode) = 0; 
+
+
         /**
          * @brief Output debug information to a stream.
          * You can use this function to output debug information to the serial port by passing Serial as the stream.
          * @param stream Stream to output the debug information
-         */
+         */       
         virtual void debug(Stream &stream) = 0;
 
         /**
@@ -370,6 +377,7 @@ class Camera {
     private:
         int32_t pixformat;       /// Pixel format
         int32_t resolution;      /// Camera resolution
+        int32_t original_resolution;    /// The resolution originally set through setResolution()
         int32_t framerate;       /// Frame rate
         ImageSensor *sensor;     /// Pointer to the camera sensor
         int reset();             /// Reset the camera
@@ -377,6 +385,8 @@ class Camera {
         Stream *_debug;          /// Pointer to the debug stream
         arduino::MbedI2C *_i2c;  /// Pointer to the I2C interface
         FrameBuffer *_framebuffer; /// Pointer to the frame buffer
+        int setResolutionWithZoom(int32_t resolution, int32_t zoom_resolution, int32_t zoom_x, int32_t zoom_y);
+
 
     public:
         /**
@@ -521,6 +531,12 @@ class Camera {
          * @return int 0 if no motion is detected, non-zero if motion is detected
          */
         int motionDetected();
+        int zoomTo(int32_t zoom_resolution, uint32_t zoom_x, uint32_t zoom_y);
+        int zoomToCenter(int32_t zoom_resolution);
+        int setVerticalFlip(bool flip_mode);
+        int setHorizontalMirror(bool mirror_mode);
+        uint32_t getResolutionWidth();
+        uint32_t getResolutionHeight();
 
         /**
          * @brief Output debug information to a stream.

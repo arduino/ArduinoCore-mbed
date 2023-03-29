@@ -586,9 +586,24 @@ int HM0360::reset()
     return (max_timeout > 0) ? 0 : -1;
 }
 
-int HM0360::setResolution(int32_t resolution)
+int HM0360::setVerticalFlip(bool flip_mode)
+{
+  return -1;
+}
+
+int HM0360::setHorizontalMirror(bool mirror_mode)
+{
+  return -1;
+}
+
+int HM0360::setResolution(int32_t resolution, int32_t zoom_resolution, uint32_t zoom_x, uint32_t zoom_y)
 {
     int ret = 0;
+
+    if (resolution != zoom_resolution)
+    {
+        return -1;
+    }
 
     switch (resolution) {
         case CAMERA_R160x120:
