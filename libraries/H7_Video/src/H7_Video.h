@@ -28,6 +28,8 @@ public:
   virtual void endDraw();
 
   virtual void set(int x, int y, uint8_t r, uint8_t g, uint8_t b);
+
+  void attachLVGLTouchCb(void (*touch_cb)(void*,void*));
 private:
     DisplayShieldModel  _shield;
     bool                _landscape;

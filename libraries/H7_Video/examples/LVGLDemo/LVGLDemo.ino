@@ -27,13 +27,8 @@ void setup() {
   giga_touch_setup();
 
   Display.begin();
-
-  static lv_indev_drv_t indev_drv;                            /* Descriptor of a input device driver */
-  lv_indev_drv_init(&indev_drv);                              /* Basic initialization */
-  indev_drv.type = LV_INDEV_TYPE_POINTER;                     /* Touch pad is a pointer-like device */
-  indev_drv.read_cb = my_touchpad_read;                       /* Set your driver function */
-  lv_indev_t * my_indev = lv_indev_drv_register(&indev_drv);  /* Register the driver in LVGL and save the created input device object */
-
+  Display.attachLVGLTouchCb((void (*)(void*,void*))(my_touchpad_read));
+  
   /* Change the active screen's background color */
   lv_obj_set_style_bg_color(lv_scr_act(), lv_color_hex(0x03989e), LV_PART_MAIN);
 
