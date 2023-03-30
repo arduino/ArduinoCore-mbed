@@ -124,19 +124,21 @@ static TIM_HandleTypeDef  htim  = {0};
 static DMA_HandleTypeDef  hdma  = {0};
 static DCMI_HandleTypeDef hdcmi = {0};
 
+/// Table to store the amount of bytes per pixel for each pixel format
 const uint32_t pixtab[CAMERA_PMAX] = {
-    1,
-    1,
-    2,
+    1, // CAMERA_GRAYSCALE
+    1, // CAMERA_BAYER
+    2, // CAMERA_RGB565
 };
 
+/// Table to store the resolution width and height for each resolution
 const uint32_t restab[CAMERA_RMAX][2] = {
-    {160,   120 },
-    {320,   240 },
+    {160,   120 }, // QQVGA
+    {320,   240 }, // QVGA
     {320,   320 },
-    {640,   480 },
-    {800,   600 },
-    {1600,  1200},
+    {640,   480 }, // VGA
+    {800,   600 }, // SVGA
+    {1600,  1200}, // UXGA
 };
 
 extern "C" {
