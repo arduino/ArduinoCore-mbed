@@ -21,7 +21,7 @@
  * @brief Header file for the Arduino Camera library.
  *
  * This library allows capturing pixels from supported cameras on Arduino products.
- * Supported cameras: OV7670, Himax HM0360, and GC2145.
+ * Supported cameras: OV7670, HM0360, HM01B0, and GC2145.
  * The pixels are returned in a frame buffer from which frames can be retrieved continuously.
  */
 
@@ -153,28 +153,158 @@ class FrameBuffer {
 typedef void (*md_callback_t)();
 
 
+/**
+ * @class ImageSensor
+ * @brief Abstract base class for image sensor drivers.
+ */
 class ImageSensor {
     public:
         virtual ~ImageSensor() { }
+
+        /**
+         * @brief Initialize the image sensor.
+         * This prepares the sensor for capturing frames by setting the registers to their default values.
+         * @return int 0 on success, non-zero on failure
+         */
         virtual int init() = 0;
+
+        /**
+         * @brief Reset the image sensor.
+         * The effect differs between the camera models. 
+         * It has no effect on the GC2145. On the OV7670, it resets all configuration registers to the default values. 
+         * On HM0360 and HM01B0 the registers are reset to the defaults. The camera also enters Standby Mode, where there is no video output and the power consumption is lowered.
+         * @return int 0 on success, non-zero on failure
+         */
         virtual int reset() = 0;
+
+        /**
+         * @brief Get the I2C address of the image sensor.
+         * @return int The sensor ID
+         */
         virtual int getID() = 0;
+
+        /**
+         * @brief Check if the image sensor is monochrome aka grayscale.
+         *
+         * @return true If the sensor is monochrome
+         * @return false Otherwise
+         */
         virtual bool getMono() = 0;
+
+        /**
+         * @brief Get the clock frequency of the image sensor.
+         *
+         * @return uint32_t The clock frequency in Hz
+         */
         virtual uint32_t getClockFrequency() = 0;
+
+        /**
+         * @brief Set the frame rate of the image sensor.
+         * @note This has no effect on cameras that do not support variable frame rates.
+         * @param framerate The desired frame rate in frames per second
+         * @return int 0 on success, non-zero on failure
+         */
         virtual int setFrameRate(int32_t framerate) = 0;
+
+        /**
+         * @brief Set the resolution of the image sensor.
+         * @note This has no effect on cameras that do not support variable resolutions.
+         * @param resolution The desired resolution, as defined in the resolution enum
+         * @return int 0 on success, non-zero on failure
+         */
         virtual int setResolution(int32_t resolution) = 0;
+
+        /**
+         * @brief Set the pixel (color) format of the image sensor.
+         * @note This has no effect on cameras that do not support variable pixel formats.
+         * e.g. the Himax HM01B0 only supports grayscale.
+         * @param pixelformat The desired pixel format, as defined in the pixel format enum
+         * @return int 0 on success, non-zero on failure
+         */
         virtual int setPixelFormat(int32_t pixelformat) = 0;
+
+        /**
+         * @brief Enable motion detection with the specified callback.
+         * 
+         * @note This has no effect on cameras that do not support motion detection. 
+         * Currently only the Himax HM01B0 and HM0360 support motion detection.
+         * @note This has no effect on cameras that do not support motion detection.
+         * @param callback Function to be called when motion is detected
+         * @return int 0 on success, non-zero on failure
+         */
         virtual int enableMotionDetection(md_callback_t callback) = 0;
+
+        /**
+         * @brief Disable motion detection.
+         * 
+         * @note This has no effect on cameras that do not support motion detection. 
+         * Currently only the Himax HM01B0 and HM0360 support motion detection.
+         * @return int 0 on success, non-zero on failure
+         */
         virtual int disableMotionDetection() = 0;
+
+        /**
+         * @brief Set the motion detection window.
+         * 
+         * @note This has no effect on cameras that do not support motion detection. 
+         * Currently only the Himax HM01B0 and HM0360 support motion detection.
+         * @param x The x-coordinate of the window origin
+         * @param y The y-coordinate of the window origin
+         * @param w The width of the window
+         * @param h The height of the window
+         * @return int 0 on success, non-zero on failure
+         */
         virtual int setMotionDetectionWindow(uint32_t x, uint32_t y, uint32_t w, uint32_t h) = 0;
+
+        /**
+         * @brief Set the motion detection threshold.
+         * 
+         * @note This has no effect on cameras that do not support motion detection. 
+         * Currently only the Himax HM01B0 and HM0360 support motion detection.
+         * On the Himax HM01B0, the recommended threshold range is 3 - 240 (0x03 to 0xF0).
+         * @param threshold The motion detection threshold
+         * @return int 0 on success, non-zero on failure
+         */
         virtual int setMotionDetectionThreshold(uint32_t threshold) = 0;
+
+        /**
+         * @brief Check if motion was detected and clear the motion detection flag.
+         * 
+         * @note This has no effect on cameras that do not support motion detection. 
+         * Currently only the Himax HM01B0 and HM0360 support motion detection.
+         * @note This function must be called after the motion detection callback was executed to clear the motion detection flag.
+         * @return int 0 if no motion is detected, non-zero if motion is detected
+         */
         virtual int motionDetected() = 0;
+
+        /**
+         * @brief Output debug information to a stream.
+         * You can use this function to output debug information to the serial port by passing Serial as the stream.
+         * @param stream Stream to output the debug information
+         */
         virtual void debug(Stream &stream) = 0;
 
+        /**
+         * @brief Set the sensor in standby mode.
+         * @note This has no effect on cameras that do not support standby mode.
+         * @note None of the currently supported camera drivers implement this function.
+         * The HM01B0 and HM0360 cameras can be set in standby mode by calling reset() instead.
+         * @param enable true to enable standby mode, false to disable
+         * @return int 0 on success, non-zero on failure (or not implemented)
+         */
         virtual int setStandby(bool enable) {
             return -1;
         }
 
+        /**
+         * @brief Set the test pattern mode for the sensor.
+         *
+         * @note This has no effect on cameras that do not support test pattern mode.
+         * @param enable true to enable test pattern, false to disable
+         * @param walking true for walking test pattern, false for other test pattern (if supported)
+         * The walking test pattern alternates between black and white pixels which is useful for detecting stuck-at faults
+         * @return int 0 on success, non-zero on failure (or not implemented)
+         */
         virtual int setTestPattern(bool enable, bool walking) {
             return -1;
         }
@@ -285,6 +415,7 @@ class Camera {
         /**
          * @brief Set the test pattern mode for the sensor.
          *
+         * @note This has no effect on cameras that do not support test pattern mode.
          * @param enable true to enable test pattern, false to disable
          * @param walking true for walking test pattern, false for other test pattern (if supported)
          * The walking test pattern alternates between black and white pixels which is useful for detecting stuck-at faults
@@ -310,7 +441,9 @@ class Camera {
 
         /**
          * @brief Enable motion detection with the specified callback.
-         * @note This has no effect on cameras that do not support motion detection.
+         * 
+         * @note This has no effect on cameras that do not support motion detection. 
+         * Currently only the Himax HM01B0 and HM0360 support motion detection.
          * @param callback Function to be called when motion is detected
          * @return int 0 on success, non-zero on failure
          */
@@ -318,7 +451,9 @@ class Camera {
 
         /**
          * @brief Disable motion detection.
-         *
+         * 
+         * @note This has no effect on cameras that do not support motion detection. 
+         * Currently only the Himax HM01B0 and HM0360 support motion detection.
          * @return int 0 on success, non-zero on failure
          */
         int disableMotionDetection();
@@ -326,6 +461,8 @@ class Camera {
         /**
          * @brief Set the motion detection window.
          *
+         * @note This has no effect on cameras that do not support motion detection. 
+         * Currently only the Himax HM01B0 and HM0360 support motion detection.
          * @param x The x-coordinate of the window origin
          * @param y The y-coordinate of the window origin
          * @param w The width of the window
@@ -336,6 +473,9 @@ class Camera {
 
         /**
          * @brief Set the motion detection threshold.
+         * 
+         * @note This has no effect on cameras that do not support motion detection. 
+         * Currently only the Himax HM01B0 and HM0360 support motion detection.
          * On the Himax HM01B0, the recommended threshold range is 3 - 240 (0x03 to 0xF0).
          * @param threshold The motion detection threshold
          * @return int 0 on success, non-zero on failure
@@ -344,6 +484,9 @@ class Camera {
 
         /**
          * @brief Check if motion was detected and clear the motion detection flag.
+         * 
+         * @note This has no effect on cameras that do not support motion detection. 
+         * Currently only the Himax HM01B0 and HM0360 support motion detection.
          * @note This function must be called after the motion detection callback was executed to clear the motion detection flag.
          * @return int 0 if no motion is detected, non-zero if motion is detected
          */
