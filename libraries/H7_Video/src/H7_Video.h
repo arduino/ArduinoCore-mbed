@@ -31,7 +31,6 @@ public:
 private:
     DisplayShieldModel  _shield;
     bool                _landscape;
-    uint32_t            _currFrameBufferAddr;
 };
 
 #endif /* _H7_VIDEO_H */

@@ -17,7 +17,7 @@
 #include <drivers/DigitalOut.h>
 #include <drivers/DigitalInOut.h>
 #include <dsi.h>
-#include <string.h>
+//#include <string.h>
 #include <drivers/I2C.h>
 
 #ifdef TARGET_PORTENTA_H7
