@@ -2,8 +2,6 @@
 #define _H7_VIDEO_H
 
 #include <ArduinoGraphics.h>
-#include "anx7625.h"
-#include "dsi.h"
 
 #define H7_VIDEO_MAX_WIDTH          1280 
 #define H7_VIDEO_MAX_HEIGHT         1024 

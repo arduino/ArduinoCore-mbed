@@ -1,4 +1,5 @@
 #include "H7_Video.h"
+#include "dsi.h"
 #include "video_driver.h"
 #include "display.h"
 
