@@ -310,8 +310,23 @@ class ImageSensor {
         }
 };
 
-template <typename T> class ScanResults {
+
+/**
+ * @class ScanResults
+ * @brief A template class used to store the results from an I2C scan.
+ *
+ * @param T Data type for the device address (e.g. uint8_t)
+ */
+template <typename T>
+class ScanResults {
 public:
+    /**
+     * @brief Equality operator to check if a given device address is found in the ScanResults.
+     *
+     * @param toBeFound The device address to be checked
+     * @return true If the device address is found in the ScanResults
+     * @return false Otherwise
+     */
     bool operator==(T toBeFound) {
         for (int i = 0; i < howMany; i++) {
             if (toBeFound == data[i]) {
@@ -320,15 +335,30 @@ public:
         }
         return false;
     }
+
+    /**
+     * @brief Inequality operator to check if a given device address is not found in the ScanResults.
+     *
+     * @param toBeFound The device address to be checked
+     * @return true If the device address is not found in the ScanResults
+     * @return false Otherwise
+     */
     bool operator!=(T toBeFound) {
         return !(*this == toBeFound);
     }
+
+    /**
+     * @brief Add a device address to the ScanResults.
+     *
+     * @param obj The device address to be added
+     */
     void push(T obj) {
         data[howMany++] = obj;
     }
+
 private:
-    T data[20];
-    int howMany = 0;
+    T data[20];     /// Array to store the device addresses (max 20).
+    int howMany = 0; /// Number of device addresses in the ScanResults
 };
 
 
