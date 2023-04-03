@@ -1,7 +1,7 @@
 #include "H7_Video.h"
 
 #include "dsi.h"
-#include "display.h"
+#include "st7701.h"
 #include "SDRAM.h"
 #include "video_modes.h"
 #include "anx7625.h"
@@ -80,7 +80,7 @@ int H7_Video::begin(bool landscape) {
         SDRAM.begin();
 
         //Init LCD Controller
-        LCD_ST7701_Init();
+        st7701_init();
     }
   #elif defined(ARDUINO_GIGA)
     #define EDID_MODE_SELECTED  EDID_MODE_480x800_60Hz
@@ -105,7 +105,7 @@ int H7_Video::begin(bool landscape) {
     SDRAM.begin();
 
     //Init LCD Controller
-    LCD_ST7701_Init();
+    st7701_init();
   #else 
     #error Board not compatible with this library
   #endif
