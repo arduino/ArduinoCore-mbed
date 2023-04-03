@@ -14,3 +14,5 @@ struct envie_edid_mode {
 	unsigned int hpol : 1;
 	unsigned int vpol : 1;
 };
+
+extern struct envie_edid_mode envie_known_modes[];

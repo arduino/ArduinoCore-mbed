@@ -1,7 +1,10 @@
 #include "H7_Video.h"
+
 #include "dsi.h"
-#include "video_driver.h"
 #include "display.h"
+#include "SDRAM.h"
+#include "video_modes.h"
+#include "anx7625.h"
 
 #if __has_include ("lvgl.h")
 #include "lvgl.h"
@@ -34,13 +37,74 @@ int H7_Video::begin(bool landscape) {
   
   #if defined(ARDUINO_PORTENTA_H7_M7)
     if (_shield == NONE_SHIELD) {
-        portenta_init_video();
+        struct edid recognized_edid;
+        int err_code = 0;
+
+        //Initialization of ANX7625
+        err_code = anx7625_init(0);
+        if(err_code < 0) {
+          return err_code;
+        }
+
+        //Checking HDMI plug event
+        anx7625_wait_hpd_event(0);
+
+        //Read EDID
+        anx7625_dp_get_edid(0, &recognized_edid);
+
+        //DSI Configuration
+        anx7625_dp_start(0, &recognized_edid, EDID_MODE_720x480_60Hz);
+
+        //Configure SDRAM 
+        SDRAM.begin(getFramebufferEnd());
     } else if (_shield == GIGA_DISPLAY_SHIELD) {
-        giga_init_video(); 
+        #define EDID_MODE_SELECTED  EDID_MODE_480x800_60Hz
+        struct edid _edid;
+        struct display_timing dt;
+
+        //DSI Configuration
+        dt.pixelclock   = envie_known_modes[EDID_MODE_SELECTED].pixel_clock;
+        dt.hactive      = envie_known_modes[EDID_MODE_SELECTED].hactive;
+        dt.hsync_len    = envie_known_modes[EDID_MODE_SELECTED].hsync_len;
+        dt.hback_porch  = envie_known_modes[EDID_MODE_SELECTED].hback_porch;
+        dt.hfront_porch = envie_known_modes[EDID_MODE_SELECTED].hfront_porch;
+        dt.vactive      = envie_known_modes[EDID_MODE_SELECTED].vactive;
+        dt.vsync_len    = envie_known_modes[EDID_MODE_SELECTED].vsync_len;
+        dt.vback_porch  = envie_known_modes[EDID_MODE_SELECTED].vback_porch;
+        dt.vfront_porch = envie_known_modes[EDID_MODE_SELECTED].vfront_porch;
+        dt.hpol         = envie_known_modes[EDID_MODE_SELECTED].hpol;
+        dt.vpol         = envie_known_modes[EDID_MODE_SELECTED].vpol;
+        stm32_dsi_config(0, &_edid, &dt);
+
+        //Configure SDRAM 
+        SDRAM.begin();
+
+        //Init LCD Controller
         LCD_ST7701_Init();
     }
   #elif defined(ARDUINO_GIGA)
-    giga_init_video(); 
+    #define EDID_MODE_SELECTED  EDID_MODE_480x800_60Hz
+    struct edid _edid;
+    struct display_timing dt;
+
+    //DSI Configuration
+    dt.pixelclock   = envie_known_modes[EDID_MODE_SELECTED].pixel_clock;
+    dt.hactive      = envie_known_modes[EDID_MODE_SELECTED].hactive;
+    dt.hsync_len    = envie_known_modes[EDID_MODE_SELECTED].hsync_len;
+    dt.hback_porch  = envie_known_modes[EDID_MODE_SELECTED].hback_porch;
+    dt.hfront_porch = envie_known_modes[EDID_MODE_SELECTED].hfront_porch;
+    dt.vactive      = envie_known_modes[EDID_MODE_SELECTED].vactive;
+    dt.vsync_len    = envie_known_modes[EDID_MODE_SELECTED].vsync_len;
+    dt.vback_porch  = envie_known_modes[EDID_MODE_SELECTED].vback_porch;
+    dt.vfront_porch = envie_known_modes[EDID_MODE_SELECTED].vfront_porch;
+    dt.hpol         = envie_known_modes[EDID_MODE_SELECTED].hpol;
+    dt.vpol         = envie_known_modes[EDID_MODE_SELECTED].vpol;
+    stm32_dsi_config(0, &_edid, &dt);
+
+    //Configure SDRAM 
+    SDRAM.begin();
+
+    //Init LCD Controller
     LCD_ST7701_Init();
   #else 
     #error Board not compatible with this library
