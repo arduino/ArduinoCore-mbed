@@ -35,8 +35,6 @@
 #define FLASH_LOAD_STA 0x05
 #define FLASH_LOAD_STA_CHK	(1 << 7)
 
-extern struct envie_edid_mode envie_known_modes[];
-
 static mbed::DigitalOut video_on(PK_2, 0);
 static mbed::DigitalOut video_rst(PJ_3, 0);
 static mbed::DigitalInOut otg_on(PJ_6, PIN_INPUT, PullUp, 0);
@@ -841,7 +839,7 @@ int anx7625_dp_start(uint8_t bus, const struct edid *edid, enum edid_modes mode)
 		dt.vpol 		= envie_known_modes[mode].vpol;
 	}
 
-	stm32_dsi_config(bus, (struct edid *)edid, &dt);
+	dsi_init(bus, (struct edid *)edid, &dt);
 
 	ret = anx7625_dsi_config(bus, &dt);
 	if (ret < 0)

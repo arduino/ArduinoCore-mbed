@@ -37,50 +37,50 @@ int H7_Video::begin(bool landscape) {
   
   #if defined(ARDUINO_PORTENTA_H7_M7)
     if (_shield == NONE_SHIELD) {
-        struct edid recognized_edid;
-        int err_code = 0;
+      struct edid recognized_edid;
+      int err_code = 0;
 
-        //Initialization of ANX7625
-        err_code = anx7625_init(0);
-        if(err_code < 0) {
-          return err_code;
-        }
+      //Initialization of ANX7625
+      err_code = anx7625_init(0);
+      if(err_code < 0) {
+        return err_code;
+      }
 
-        //Checking HDMI plug event
-        anx7625_wait_hpd_event(0);
+      //Checking HDMI plug event
+      anx7625_wait_hpd_event(0);
 
-        //Read EDID
-        anx7625_dp_get_edid(0, &recognized_edid);
+      //Read EDID
+      anx7625_dp_get_edid(0, &recognized_edid);
 
-        //DSI Configuration
-        anx7625_dp_start(0, &recognized_edid, EDID_MODE_720x480_60Hz);
+      //DSI Configuration
+      anx7625_dp_start(0, &recognized_edid, EDID_MODE_720x480_60Hz);
 
-        //Configure SDRAM 
-        SDRAM.begin(getFramebufferEnd());
+      //Configure SDRAM 
+      SDRAM.begin(dsi_getFramebufferEnd());
     } else if (_shield == GIGA_DISPLAY_SHIELD) {
-        #define EDID_MODE_SELECTED  EDID_MODE_480x800_60Hz
-        struct edid _edid;
-        struct display_timing dt;
+      #define EDID_MODE_SELECTED  EDID_MODE_480x800_60Hz
+      struct edid _edid;
+      struct display_timing dt;
 
-        //DSI Configuration
-        dt.pixelclock   = envie_known_modes[EDID_MODE_SELECTED].pixel_clock;
-        dt.hactive      = envie_known_modes[EDID_MODE_SELECTED].hactive;
-        dt.hsync_len    = envie_known_modes[EDID_MODE_SELECTED].hsync_len;
-        dt.hback_porch  = envie_known_modes[EDID_MODE_SELECTED].hback_porch;
-        dt.hfront_porch = envie_known_modes[EDID_MODE_SELECTED].hfront_porch;
-        dt.vactive      = envie_known_modes[EDID_MODE_SELECTED].vactive;
-        dt.vsync_len    = envie_known_modes[EDID_MODE_SELECTED].vsync_len;
-        dt.vback_porch  = envie_known_modes[EDID_MODE_SELECTED].vback_porch;
-        dt.vfront_porch = envie_known_modes[EDID_MODE_SELECTED].vfront_porch;
-        dt.hpol         = envie_known_modes[EDID_MODE_SELECTED].hpol;
-        dt.vpol         = envie_known_modes[EDID_MODE_SELECTED].vpol;
-        stm32_dsi_config(0, &_edid, &dt);
+      //DSI Configuration
+      dt.pixelclock   = envie_known_modes[EDID_MODE_SELECTED].pixel_clock;
+      dt.hactive      = envie_known_modes[EDID_MODE_SELECTED].hactive;
+      dt.hsync_len    = envie_known_modes[EDID_MODE_SELECTED].hsync_len;
+      dt.hback_porch  = envie_known_modes[EDID_MODE_SELECTED].hback_porch;
+      dt.hfront_porch = envie_known_modes[EDID_MODE_SELECTED].hfront_porch;
+      dt.vactive      = envie_known_modes[EDID_MODE_SELECTED].vactive;
+      dt.vsync_len    = envie_known_modes[EDID_MODE_SELECTED].vsync_len;
+      dt.vback_porch  = envie_known_modes[EDID_MODE_SELECTED].vback_porch;
+      dt.vfront_porch = envie_known_modes[EDID_MODE_SELECTED].vfront_porch;
+      dt.hpol         = envie_known_modes[EDID_MODE_SELECTED].hpol;
+      dt.vpol         = envie_known_modes[EDID_MODE_SELECTED].vpol;
+      dsi_init(0, &_edid, &dt);
 
-        //Configure SDRAM 
-        SDRAM.begin();
+      //Configure SDRAM 
+      SDRAM.begin();
 
-        //Init LCD Controller
-        st7701_init();
+      //Init LCD Controller
+      st7701_init();
     }
   #elif defined(ARDUINO_GIGA)
     #define EDID_MODE_SELECTED  EDID_MODE_480x800_60Hz
@@ -99,7 +99,7 @@ int H7_Video::begin(bool landscape) {
     dt.vfront_porch = envie_known_modes[EDID_MODE_SELECTED].vfront_porch;
     dt.hpol         = envie_known_modes[EDID_MODE_SELECTED].hpol;
     dt.vpol         = envie_known_modes[EDID_MODE_SELECTED].vpol;
-    stm32_dsi_config(0, &_edid, &dt);
+    dsi_init(0, &_edid, &dt);
 
     //Configure SDRAM 
     SDRAM.begin();
@@ -112,10 +112,10 @@ int H7_Video::begin(bool landscape) {
 
   _landscape = landscape;
 
-  stm32_LCD_Clear(0); 
+  dsi_lcdClear(0); 
 
   #if __has_include("lvgl.h")
-    getNextFrameBuffer();
+    dsi_getNextFrameBuffer();
 
     /* Initiliaze LVGL library */
     lv_init();
@@ -149,21 +149,21 @@ void H7_Video::beginDraw() {
   ArduinoGraphics::beginDraw();
 
   #if __has_include("lvgl.h")
-    getNextFrameBuffer();
+    dsi_getNextFrameBuffer();
   #endif
 
-  stm32_LCD_Clear(0); 
+  dsi_lcdClear(0); 
 }
 
 void H7_Video::endDraw() {
   ArduinoGraphics::endDraw();
 
-  getNextFrameBuffer();
+  dsi_getNextFrameBuffer();
 }
 
 void H7_Video::clear(){
   uint32_t bg = ArduinoGraphics::background();
-  stm32_LCD_Clear(bg);
+  dsi_lcdClear(bg);
 }
 
 void H7_Video::set(int x, int y, uint8_t r, uint8_t g, uint8_t b) {
@@ -178,7 +178,7 @@ void H7_Video::set(int x, int y, uint8_t r, uint8_t g, uint8_t b) {
     }
 
     uint32_t color =  (uint32_t)((uint32_t)(r << 16) | (uint32_t)(g << 8) | (uint32_t)(b << 0));
-    stm32_LCD_FillArea((void *)(getCurrentFrameBuffer() + ((x_rot + (width() * y_rot)) * sizeof(uint16_t))), 1, 1, color);
+    dsi_lcdFillArea((void *)(dsi_getCurrentFrameBuffer() + ((x_rot + (width() * y_rot)) * sizeof(uint16_t))), 1, 1, color);
 }
 
 #if __has_include("lvgl.h")
@@ -187,7 +187,7 @@ void lvgl_displayFlushing(lv_disp_drv_t * disp, const lv_area_t * area, lv_color
     uint32_t height     = lv_area_get_height(area);
     uint32_t offsetPos  = (area->x1 + (disp->hor_res * area->y1)) * sizeof(uint16_t);
 
-    stm32_LCD_DrawImage((void *) color_p, (void *)(getCurrentFrameBuffer() + offsetPos), width, height, DMA2D_INPUT_RGB565);
+    dsi_lcdDrawImage((void *) color_p, (void *)(dsi_getCurrentFrameBuffer() + offsetPos), width, height, DMA2D_INPUT_RGB565);
     lv_disp_flush_ready(disp);         /* Indicate you are ready with the flushing*/
 }
 
