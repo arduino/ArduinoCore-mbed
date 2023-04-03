@@ -15,7 +15,6 @@
 
 #include <Arduino.h>
 #include <anx7625.h>
-//#include "stm32h7xx_hal.h"
 #include "dsi.h"
 #include "SDRAM.h"
 

@@ -1,6 +1,6 @@
-#ifndef ST7701_H
-#define ST7701_H
+#ifndef _ST7701_H
+#define _ST7701_H
 
 void st7701_init();
 
-#endif // ST7701_H
+#endif // _ST7701_H

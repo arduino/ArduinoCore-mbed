@@ -1,5 +1,7 @@
-#ifndef _DSI_H_
-#define _DSI_H_
+#ifndef _DSI_H
+#define _DSI_H
+
+extern DSI_HandleTypeDef dsi;
 
 int                     stm32_dsi_config(uint8_t bus, struct edid *edid, struct display_timing *dt);
 void                    stm32_LCD_Clear(uint32_t color);
@@ -13,4 +15,4 @@ uint32_t                stm32_getYSize(void);
 uint32_t                getFramebufferEnd(void );
 DMA2D_HandleTypeDef*    stm32_get_DMA2D(void);
 
-#endif /* _DSI_H_ */
+#endif /* _DSI_H */
