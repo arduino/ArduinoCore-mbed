@@ -1,3 +1,5 @@
+#include "edid.h"
+
 struct envie_edid_mode {
 	const char *name;
 	unsigned int pixel_clock;

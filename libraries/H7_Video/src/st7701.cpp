@@ -1,6 +1,7 @@
 #include "Arduino.h"
 #include "st7701.h"
 #include "dsi.h"
+#include "video_modes.h"
 
 /* Command2 BKx selection command */
 #define DSI_CMD2BKX_SEL           0xFF
@@ -52,15 +53,32 @@ static void DCS_Short_Write_NP(uint8_t data0);
 static void Generic_Short_Write_1P(uint8_t data0, uint8_t data1);
 static void DCS_Short_Read_NP(uint8_t data0, int length, uint8_t* p_data);
 
-void st7701_init(void) {
+void st7701_init(enum edid_modes mode) {
+  struct edid _edid;
+  struct display_timing dt;
+
+  //DSI Configuration
+  dt.pixelclock   = envie_known_modes[mode].pixel_clock;
+  dt.hactive      = envie_known_modes[mode].hactive;
+  dt.hsync_len    = envie_known_modes[mode].hsync_len;
+  dt.hback_porch  = envie_known_modes[mode].hback_porch;
+  dt.hfront_porch = envie_known_modes[mode].hfront_porch;
+  dt.vactive      = envie_known_modes[mode].vactive;
+  dt.vsync_len    = envie_known_modes[mode].vsync_len;
+  dt.vback_porch  = envie_known_modes[mode].vback_porch;
+  dt.vfront_porch = envie_known_modes[mode].vfront_porch;
+  dt.hpol         = envie_known_modes[mode].hpol;
+  dt.vpol         = envie_known_modes[mode].vpol;
+  dsi_init(0, &_edid, &dt);
+
   DCS_Short_Write_NP(MIPI_DCS_SOFT_RESET);
   Delay(200);
 
   //ST7701S+IVO5.0
   DCS_Short_Write_NP(MIPI_DCS_EXIT_SLEEP_MODE);
 
-  //------------------------------------------Bank0 Setting--------------------------------------------------//
-  //------------------------------------Display Control setting----------------------------------------------//
+  //------------------------------------------Bank0 Setting------------------------------------------------//
+  //------------------------------------Display Control setting--------------------------------------------//
   Delay(800);
 
   const uint8_t Display_Control_0[] = {0xFF,0x77,0x01,0x00,0x00,0x10};  
@@ -75,7 +93,7 @@ void st7701_init(void) {
   Generic_Long_Write((uint8_t*)Display_Control_3, sizeof(Display_Control_3));
   Generic_Long_Write((uint8_t*)Display_Control_4, sizeof(Display_Control_4));
 
-  //-------------------------------------Gamma Cluster Setting-------------------------------------------//
+  //-------------------------------------Gamma Cluster Setting---------------------------------------------//
   const uint8_t _B0[] = {0xB0, 0x40, 0xc9, 0x91, 0x0d,
                         0x12, 0x07, 0x02, 0x09, 0x09, 
                         0x1f, 0x04, 0x50, 0x0f, 0xe4, 
@@ -99,9 +117,9 @@ void st7701_init(void) {
   Generic_Long_Write ((uint8_t*)_FF1, sizeof(_FF1));
   
   Generic_Short_Write_1P (DSI_CMD2_BK1_VRHS,0x65);
-  //-------------------------------------------Vcom Setting---------------------------------------------------//
+  //-------------------------------------------Vcom Setting------------------------------------------------//
   Generic_Short_Write_1P (DSI_CMD2_BK1_VCOM,0x34);
-  //-----------------------------------------End Vcom Setting-----------------------------------------------//
+  //-----------------------------------------End Vcom Setting----------------------------------------------//
   Generic_Short_Write_1P (DSI_CMD2_BK1_VGHSS,0x87);
   Generic_Short_Write_1P (DSI_CMD2_BK1_TESTCMD,0x80);
 
@@ -113,18 +131,18 @@ void st7701_init(void) {
   Generic_Short_Write_1P (DSI_CMD2_BK1_SPD1,0x78);
   Generic_Short_Write_1P (DSI_CMD2_BK1_SPD2,0x78);
   Generic_Short_Write_1P (DSI_CMD2_BK1_MIPISET1,0x88);
-  //---------------------------------End Power Control Registers Initial -------------------------------//
+  //---------------------------------End Power Control Registers Initial ----------------------------------//
   Delay(100);
-  //---------------------------------------------GIP Setting----------------------------------------------------//
+  //---------------------------------------------GIP Setting-----------------------------------------------//
   const uint8_t _E0[] = {0xE0,0x00,0x00,0x02};
   Generic_Long_Write((uint8_t*)_E0, sizeof(_E0));
-  //----------------------------------GIP----------------------------------------------------
+  //----------------------------------GIP------------------------------------------------------------------//
   const uint8_t _E1[] = {0xE1,0x08,0x00,0x0A,0x00,0x07,0x00,0x09,0x00,0x00,0x33,0x33};
   const uint8_t _E2[] = {0xE2,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
   Generic_Long_Write((uint8_t*)_E1, sizeof(_E1));
   Generic_Long_Write((uint8_t*)_E2, sizeof(_E2));
 
-  //--------------------------------------------------------------------------------------
+  //-------------------------------------------------------------------------------------------------------//
   const uint8_t _E3[] = {0xE3,0x00,0x00,0x33,0x33};
   const uint8_t _E4[] = {0xE4,0x44,0x44};
   Generic_Long_Write((uint8_t*)_E3, sizeof(_E3));
@@ -150,8 +168,8 @@ void st7701_init(void) {
   Generic_Long_Write((uint8_t*)_ED, sizeof(_ED));
 
   //--------------------------------------------End GIP Setting-----------------------------------------------//
-  //------------------------------ Power Control Registers Initial End-----------------------------------//
-  //------------------------------------------Bank1 Setting----------------------------------------------------//
+  //------------------------------ Power Control Registers Initial End----------------------------------------//
+  //------------------------------------------Bank1 Setting---------------------------------------------------//
   const uint8_t _FF2[] = {DSI_CMD2BKX_SEL,0x77,0x01,0x00,0x00,DSI_CMD2BKX_SEL_NONE};
   Generic_Long_Write ((uint8_t*)_FF2, sizeof(_FF2));
 

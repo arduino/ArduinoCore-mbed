@@ -1,4 +1,3 @@
-#include "edid.h"
 #include "video_modes.h"
 
 struct envie_edid_mode envie_known_modes[NUM_KNOWN_MODES] = {

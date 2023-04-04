@@ -58,54 +58,18 @@ int H7_Video::begin(bool landscape) {
       //Configure SDRAM 
       SDRAM.begin(dsi_getFramebufferEnd());
     } else if (_shield == GIGA_DISPLAY_SHIELD) {
-      #define EDID_MODE_SELECTED  EDID_MODE_480x800_60Hz
-      struct edid _edid;
-      struct display_timing dt;
-
-      //DSI Configuration
-      dt.pixelclock   = envie_known_modes[EDID_MODE_SELECTED].pixel_clock;
-      dt.hactive      = envie_known_modes[EDID_MODE_SELECTED].hactive;
-      dt.hsync_len    = envie_known_modes[EDID_MODE_SELECTED].hsync_len;
-      dt.hback_porch  = envie_known_modes[EDID_MODE_SELECTED].hback_porch;
-      dt.hfront_porch = envie_known_modes[EDID_MODE_SELECTED].hfront_porch;
-      dt.vactive      = envie_known_modes[EDID_MODE_SELECTED].vactive;
-      dt.vsync_len    = envie_known_modes[EDID_MODE_SELECTED].vsync_len;
-      dt.vback_porch  = envie_known_modes[EDID_MODE_SELECTED].vback_porch;
-      dt.vfront_porch = envie_known_modes[EDID_MODE_SELECTED].vfront_porch;
-      dt.hpol         = envie_known_modes[EDID_MODE_SELECTED].hpol;
-      dt.vpol         = envie_known_modes[EDID_MODE_SELECTED].vpol;
-      dsi_init(0, &_edid, &dt);
+      //Init LCD Controller
+      st7701_init(EDID_MODE_480x800_60Hz);
 
       //Configure SDRAM 
       SDRAM.begin();
-
-      //Init LCD Controller
-      st7701_init();
     }
   #elif defined(ARDUINO_GIGA)
-    #define EDID_MODE_SELECTED  EDID_MODE_480x800_60Hz
-    struct edid _edid;
-    struct display_timing dt;
-
-    //DSI Configuration
-    dt.pixelclock   = envie_known_modes[EDID_MODE_SELECTED].pixel_clock;
-    dt.hactive      = envie_known_modes[EDID_MODE_SELECTED].hactive;
-    dt.hsync_len    = envie_known_modes[EDID_MODE_SELECTED].hsync_len;
-    dt.hback_porch  = envie_known_modes[EDID_MODE_SELECTED].hback_porch;
-    dt.hfront_porch = envie_known_modes[EDID_MODE_SELECTED].hfront_porch;
-    dt.vactive      = envie_known_modes[EDID_MODE_SELECTED].vactive;
-    dt.vsync_len    = envie_known_modes[EDID_MODE_SELECTED].vsync_len;
-    dt.vback_porch  = envie_known_modes[EDID_MODE_SELECTED].vback_porch;
-    dt.vfront_porch = envie_known_modes[EDID_MODE_SELECTED].vfront_porch;
-    dt.hpol         = envie_known_modes[EDID_MODE_SELECTED].hpol;
-    dt.vpol         = envie_known_modes[EDID_MODE_SELECTED].vpol;
-    dsi_init(0, &_edid, &dt);
+    //Init LCD Controller
+    st7701_init(EDID_MODE_480x800_60Hz);
 
     //Configure SDRAM 
     SDRAM.begin();
-
-    //Init LCD Controller
-    st7701_init();
   #else 
     #error Board not compatible with this library
   #endif
