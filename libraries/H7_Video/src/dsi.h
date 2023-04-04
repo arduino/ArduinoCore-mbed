@@ -3,6 +3,20 @@
 
 extern DSI_HandleTypeDef dsi;
 
+struct display_timing {
+	unsigned int pixelclock;
+	unsigned int hactive;
+	unsigned int hfront_porch;
+	unsigned int hback_porch;
+	unsigned int hsync_len;
+	unsigned int vactive;
+	unsigned int vfront_porch;
+	unsigned int vback_porch;
+	unsigned int vsync_len;
+	unsigned int hpol : 1;
+	unsigned int vpol : 1;
+};
+
 int                     dsi_init(uint8_t bus, struct edid *edid, struct display_timing *dt);
 
 void                    dsi_lcdClear(uint32_t color);

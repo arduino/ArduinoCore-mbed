@@ -16,12 +16,11 @@
 #include <Arduino.h>
 #include <drivers/DigitalOut.h>
 #include <drivers/DigitalInOut.h>
-#include <dsi.h>
-//#include <string.h>
 #include <drivers/I2C.h>
 
 #ifdef TARGET_PORTENTA_H7
 
+#include "dsi.h"
 #include "anx7625.h"
 #include "video_modes.h"
 

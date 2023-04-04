@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <anx7625.h>
+
 #include "dsi.h"
 #include "SDRAM.h"
 
