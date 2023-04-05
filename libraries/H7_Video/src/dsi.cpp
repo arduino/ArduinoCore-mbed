@@ -1,18 +1,29 @@
+/**
+  ******************************************************************************
+  * @file    dsi.cpp
+  * @author  
+  * @version 
+  * @date    
+  * @brief   
+  ******************************************************************************
+  */
+
+/* Includes ------------------------------------------------------------------*/
 #include <Arduino.h>
 
 #include "dsi.h"
 #include "SDRAM.h"
 
-#define LCD_MAX_X_SIZE 1280
-#define LCD_MAX_Y_SIZE 1024
+/* Private define ------------------------------------------------------------*/
+#define LCD_MAX_X_SIZE 		1280
+#define LCD_MAX_Y_SIZE 		1024
 
 #define BYTES_PER_PIXEL		2
 #define FB_BASE_ADDRESS 	((uint32_t)SDRAM_START_ADDRESS)
 #define FB_ADDRESS_0 		(FB_BASE_ADDRESS)
 #define FB_ADDRESS_1 		(FB_BASE_ADDRESS + (LCD_MAX_X_SIZE * LCD_MAX_Y_SIZE * BYTES_PER_PIXEL))
 
-DSI_HandleTypeDef   dsi;
-
+/* Private variables ---------------------------------------------------------*/
 static DMA2D_HandleTypeDef dma2d;
 static LTDC_HandleTypeDef  ltdc;
 
@@ -24,9 +35,14 @@ static uint32_t __ALIGNED(32) L8_CLUT[256];
 
 static uint32_t pend_buffer = 0;
 
+/* Exported variables --------------------------------------------------------*/
+DSI_HandleTypeDef   dsi;
+
+/* Private function prototypes -----------------------------------------------*/
 static void dsi_fillBuffer(uint32_t LayerIndex, void *pDst, uint32_t xSize, uint32_t ySize, uint32_t OffLine, uint32_t ColorIndex);
 static void dsi_layerInit(uint16_t LayerIndex, uint32_t FB_Address);
 
+/* Functions -----------------------------------------------------------------*/
 int dsi_init(uint8_t bus, struct edid *edid, struct display_timing *dt) {
 #ifdef ARDUINO_GIGA
 	static const uint32_t DSI_PLLNDIV = 125;
@@ -358,3 +374,5 @@ void dsi_fillBuffer(uint32_t LayerIndex, void *pDst, uint32_t xSize, uint32_t yS
 		}
 	}
 }
+
+/**** END OF FILE ****/

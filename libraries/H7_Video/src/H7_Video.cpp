@@ -1,3 +1,14 @@
+/**
+  ******************************************************************************
+  * @file    H7_Video.cpp
+  * @author  
+  * @version 
+  * @date    
+  * @brief
+  ******************************************************************************
+  */
+
+ /* Includes ------------------------------------------------------------------*/
 #include "H7_Video.h"
 
 #include "dsi.h"
@@ -8,10 +19,14 @@
 
 #if __has_include ("lvgl.h")
 #include "lvgl.h"
+#endif
 
+/* Private function prototypes -----------------------------------------------*/
+#if __has_include ("lvgl.h")
 void lvgl_displayFlushing(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p);
 #endif
 
+/* Functions -----------------------------------------------------------------*/
 H7_Video::H7_Video(int width, int heigth, DisplayShieldModel shield) :
   ArduinoGraphics(width, heigth) {
     _shield = shield;
@@ -163,3 +178,5 @@ void H7_Video::attachLVGLTouchCb(void (*touch_cb)(void*,void*)) {
   lv_indev_t * my_indev = lv_indev_drv_register(&indev_drv);                      /* Register the driver in LVGL and save the created input device object */
 }
 #endif
+
+/**** END OF FILE ****/

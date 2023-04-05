@@ -1,5 +1,17 @@
+/**
+  ******************************************************************************
+  * @file    video_modes.c
+  * @author  
+  * @version 
+  * @date    
+  * @brief  
+  ******************************************************************************
+  */
+
+/* Includes ------------------------------------------------------------------*/
 #include "video_modes.h"
 
+/* Exported variables --------------------------------------------------------*/
 struct envie_edid_mode envie_known_modes[NUM_KNOWN_MODES] = {
 	[EDID_MODE_640x480_60Hz] = {
 		.name = "640x480@75Hz", .pixel_clock = 29400, .refresh = 60,
@@ -38,3 +50,5 @@ struct envie_edid_mode envie_known_modes[NUM_KNOWN_MODES] = {
 		.vactive = 720, .vback_porch = 30, .vfront_porch = 5, .vsync_len = 20,
 	},
 };
+
+/**** END OF FILE ****/

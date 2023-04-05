@@ -1,8 +1,20 @@
+/**
+  ******************************************************************************
+  * @file    st7701.cpp
+  * @author  
+  * @version 
+  * @date    
+  * @brief   
+  ******************************************************************************
+  */
+
+/* Includes ------------------------------------------------------------------*/
 #include "Arduino.h"
 #include "st7701.h"
 #include "dsi.h"
 #include "video_modes.h"
 
+/* Private define ------------------------------------------------------------*/
 /* Command2 BKx selection command */
 #define DSI_CMD2BKX_SEL           0xFF
 #define DSI_CMD2BK1_SEL           0x11
@@ -31,6 +43,13 @@
 #define MIPI_DCS_SOFT_RESET       0x01
 #define MIPI_DCS_EXIT_SLEEP_MODE  0x11
 
+#define hdsi_eval                 dsi
+
+#define LCD_ST7701_ID             0x00  // VC (Virtual channel, for using muliple displays)
+
+#define Delay(x)                  delay(x)
+
+/* Private macro -------------------------------------------------------------*/
 #define SSD_MODE(a,b)
 #define Set_POWER(a,b,c,d)
 #define Set_STANDBY()
@@ -38,20 +57,18 @@
 #define Set_RESET(a,b)
 #define SSD_LANE(a,b)
 
-#define hdsi_eval   dsi
-
-#define LCD_ST7701_ID 0x00  // VC (Virtual channel, for using muliple displays)
-
-#define Delay(x)  delay(x)
-
+/* Private variables ---------------------------------------------------------*/
 const uint16_t _E5[17] = {0xE5,0x0E,0x2D,0xA0,0xa0,0x10,0x2D,0xA0,0xA0,0x0A,0x2D,0xA0,0xA0,0x0C,0x2D,0xA0,0xA0};
 const uint16_t _E8[17] = {0xE8,0x0D,0x2D,0xA0,0xA0,0x0F,0x2D,0xA0,0xA0,0x09,0x2D,0xA0,0xA0,0x0B,0x2D,0xA0,0xA0};
 const uint16_t _ED[17] = {0xED,0xAB,0x89,0x76,0x54,0x01,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x10,0x45,0x67,0x98,0xBA};
 
+/* Private function prototypes -----------------------------------------------*/
 static void Generic_Long_Write(uint8_t* pdata, int length);
 static void DCS_Short_Write_NP(uint8_t data0);
 static void Generic_Short_Write_1P(uint8_t data0, uint8_t data1);
 static void DCS_Short_Read_NP(uint8_t data0, int length, uint8_t* p_data);
+
+/* Functions -----------------------------------------------------------------*/
 
 void st7701_init(enum edid_modes mode) {
   struct edid _edid;
@@ -242,3 +259,5 @@ void Generic_Long_Write(uint8_t* pdata, int length) {
 void DCS_Short_Read_NP(uint8_t data0, int length, uint8_t* p_data) {
   HAL_DSI_Read(&hdsi_eval, LCD_ST7701_ID, p_data, length, DSI_DCS_SHORT_PKT_READ, data0, NULL);
 }
+
+/**** END OF FILE ****/

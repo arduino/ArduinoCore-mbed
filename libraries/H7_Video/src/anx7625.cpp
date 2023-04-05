@@ -1,18 +1,25 @@
-/*
- * This file is part of the coreboot project.
- *
- * Copyright 2019 Analogix Semiconductor.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- */
+/**
+  ******************************************************************************
+  * @file    anx7625.cpp
+  * @author  
+  * @version 
+  * @date    
+  * @brief 	This file is part of the coreboot project.
+  * 		Copyright 2019 Analogix Semiconductor.
+  *
+  * 		This program is free software; you can redistribute it and/or modify
+  * 		it under the terms of the GNU General Public License as published by
+  * 		the Free Software Foundation; version 2 of the License.
+  *
+  * 		This program is distributed in the hope that it will be useful,
+  * 		but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * 		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * 		GNU General Public License for more details.
+  *
+  ******************************************************************************
+  */
 
+/* Includes ------------------------------------------------------------------*/
 #include <Arduino.h>
 #include <drivers/DigitalOut.h>
 #include <drivers/DigitalInOut.h>
@@ -24,6 +31,7 @@
 #include "anx7625.h"
 #include "video_modes.h"
 
+/* Private define ------------------------------------------------------------*/
 #if 0
 	#define ANXERROR(format, ...) \
 			printk(BIOS_ERR, "ERROR: %s: " format, __func__, ##__VA_ARGS__)
@@ -376,6 +384,7 @@ enum AudioWdLen {
 #define ONE_BLOCK_SIZE      	128
 #define FOUR_BLOCK_SIZE     	(ONE_BLOCK_SIZE*4)
 
+/* Private function prototypes -----------------------------------------------*/
 static mbed::DigitalOut video_on(PK_2, 0);
 static mbed::DigitalOut video_rst(PJ_3, 0);
 static mbed::DigitalInOut otg_on(PJ_6, PIN_INPUT, PullUp, 0);
@@ -411,6 +420,8 @@ static int anx7625_power_on_init(uint8_t bus);
 static void anx7625_start_dp_work(uint8_t bus);
 static int anx7625_hpd_change_detect(uint8_t bus);
 static void anx7625_parse_edid(const struct edid *edid, struct display_timing *dt);
+
+/* Functions -----------------------------------------------------------------*/
 
 int anx7625_dp_start(uint8_t bus, const struct edid *edid, enum edid_modes mode) {
 	int ret;
@@ -1384,3 +1395,5 @@ void anx7625_parse_edid(const struct edid *edid, struct display_timing *dt) {
 }
 
 #endif // defined(ARDUINO_PORTENTA_H7_M7)
+
+/**** END OF FILE ****/

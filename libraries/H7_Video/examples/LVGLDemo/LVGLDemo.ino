@@ -3,6 +3,7 @@
 #include "giga_touch.h"
 
 H7_Video Display(480, 800, GIGA_DISPLAY_SHIELD);
+//H7_Video Display(720, 480);
 
 //@TODO: Complete demo with 4 main features
 

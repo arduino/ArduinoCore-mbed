@@ -1,5 +1,20 @@
+/**
+  ******************************************************************************
+  * @file    video_modes.h
+  * @author  
+  * @version 
+  * @date    
+  * @brief  
+  ******************************************************************************
+  */
+
+#ifndef _VIDEO_MODES_H 
+#define _VIDEO_MODES_H
+
+/* Includes ------------------------------------------------------------------*/
 #include "edid.h"
 
+/* Exported struct -----------------------------------------------------------*/
 struct envie_edid_mode {
 	const char *name;
 	unsigned int pixel_clock;
@@ -17,4 +32,7 @@ struct envie_edid_mode {
 	unsigned int vpol : 1;
 };
 
+/* Exported variables --------------------------------------------------------*/
 extern struct envie_edid_mode envie_known_modes[];
+
+#endif /* _VIDEO_MODES_H */ 
