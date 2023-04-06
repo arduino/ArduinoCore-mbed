@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    H7_Video.h
+  * @file    Arduino_H7_Video.h
   * @author  
   * @version 
   * @date    
@@ -8,8 +8,8 @@
   ******************************************************************************
   */
 
-#ifndef _H7_VIDEO_H
-#define _H7_VIDEO_H
+#ifndef _ARDUINO_H7_VIDEO_H
+#define _ARDUINO_H7_VIDEO_H
 
 /* Includes ------------------------------------------------------------------*/
 #include <ArduinoGraphics.h>
@@ -25,10 +25,10 @@ enum DisplayShieldModel {
 };
 
 /* Class ----------------------------------------------------------------------*/
-class H7_Video : public ArduinoGraphics {
+class Arduino_H7_Video : public ArduinoGraphics {
 public:
-  H7_Video(int width = H7_VIDEO_MAX_WIDTH, int heigth = H7_VIDEO_MAX_HEIGHT, DisplayShieldModel shield = NONE_SHIELD);
-  virtual ~H7_Video();
+  Arduino_H7_Video(int width = H7_VIDEO_MAX_WIDTH, int heigth = H7_VIDEO_MAX_HEIGHT, DisplayShieldModel shield = NONE_SHIELD);
+  virtual ~Arduino_H7_Video();
 
   int begin();
   int begin(bool landscape);
@@ -47,4 +47,4 @@ private:
     bool                _landscape;
 };
 
-#endif /* _H7_VIDEO_H */
+#endif /* _ARDUINO_H7_VIDEO_H */

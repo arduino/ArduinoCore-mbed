@@ -5,8 +5,7 @@
   by Leonardo Cavagnis
 */
 
-#include "ArduinoGraphics.h"
-#include "H7_Video.h" // H7_Video depends on ArduinoGraphics
+#include "Arduino_H7_Video.h"
 
 #include "img_arduinologo.h"
 // Alternatively, any raw RGB565 image can be included on demand using this macro
@@ -17,8 +16,8 @@
 INCBIN(test, "/home/user/Downloads/test.bin");
 */
 
-H7_Video Display(480, 800, GIGA_DISPLAY_SHIELD);
-//H7_Video Display(720, 480);
+Arduino_H7_Video Display(480, 800, GIGA_DISPLAY_SHIELD);
+//Arduino_H7_Video Display(720, 480);
 
 void setup() {
   Display.begin();

@@ -5,11 +5,10 @@
   by Leonardo Cavagnis
 */
 
-#include "ArduinoGraphics.h"
-#include "H7_Video.h" // H7_Video depends on ArduinoGraphics
+#include "Arduino_H7_Video.h"
 
-H7_Video Display(480, 800, GIGA_DISPLAY_SHIELD);
-//H7_Video Display(720, 480);
+Arduino_H7_Video Display(480, 800, GIGA_DISPLAY_SHIELD);
+//Arduino_H7_Video Display(720, 480);
 
 void setup() {
   Display.begin();

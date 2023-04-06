@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    H7_Video.cpp
+  * @file    Arduino_H7_Video.cpp
   * @author  
   * @version 
   * @date    
@@ -9,7 +9,7 @@
   */
 
  /* Includes ------------------------------------------------------------------*/
-#include "H7_Video.h"
+#include "Arduino_H7_Video.h"
 
 #include "dsi.h"
 #include "st7701.h"
@@ -27,15 +27,15 @@ void lvgl_displayFlushing(lv_disp_drv_t * disp, const lv_area_t * area, lv_color
 #endif
 
 /* Functions -----------------------------------------------------------------*/
-H7_Video::H7_Video(int width, int heigth, DisplayShieldModel shield) :
+Arduino_H7_Video::Arduino_H7_Video(int width, int heigth, DisplayShieldModel shield) :
   ArduinoGraphics(width, heigth) {
     _shield = shield;
 }
 
-H7_Video::~H7_Video() {
+Arduino_H7_Video::~Arduino_H7_Video() {
 }
 
-int H7_Video::begin() {
+int Arduino_H7_Video::begin() {
     int ret = 0;
 
     ret = begin(true);
@@ -43,7 +43,7 @@ int H7_Video::begin() {
     return ret;
 }
 
-int H7_Video::begin(bool landscape) {
+int Arduino_H7_Video::begin(bool landscape) {
   if (!ArduinoGraphics::begin()) {
     return 0;
   }
@@ -120,11 +120,11 @@ int H7_Video::begin(bool landscape) {
   return 1;
 }
 
-void H7_Video::end() {
+void Arduino_H7_Video::end() {
   ArduinoGraphics::end();
 }
 
-void H7_Video::beginDraw() {
+void Arduino_H7_Video::beginDraw() {
   ArduinoGraphics::beginDraw();
 
   #if __has_include("lvgl.h")
@@ -134,18 +134,18 @@ void H7_Video::beginDraw() {
   dsi_lcdClear(0); 
 }
 
-void H7_Video::endDraw() {
+void Arduino_H7_Video::endDraw() {
   ArduinoGraphics::endDraw();
 
   dsi_getNextFrameBuffer();
 }
 
-void H7_Video::clear(){
+void Arduino_H7_Video::clear(){
   uint32_t bg = ArduinoGraphics::background();
   dsi_lcdClear(bg);
 }
 
-void H7_Video::set(int x, int y, uint8_t r, uint8_t g, uint8_t b) {
+void Arduino_H7_Video::set(int x, int y, uint8_t r, uint8_t g, uint8_t b) {
     uint32_t x_rot, y_rot;
 
     if (_landscape) {
@@ -170,7 +170,7 @@ void lvgl_displayFlushing(lv_disp_drv_t * disp, const lv_area_t * area, lv_color
     lv_disp_flush_ready(disp);         /* Indicate you are ready with the flushing*/
 }
 
-void H7_Video::attachLVGLTouchCb(void (*touch_cb)(void*,void*)) {
+void Arduino_H7_Video::attachLVGLTouchCb(void (*touch_cb)(void*,void*)) {
   static lv_indev_drv_t indev_drv;                                                /* Descriptor of a input device driver */
   lv_indev_drv_init(&indev_drv);                                                  /* Basic initialization */
   indev_drv.type = LV_INDEV_TYPE_POINTER;                                         /* Touch pad is a pointer-like device */

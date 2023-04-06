@@ -1,9 +1,18 @@
-#include "H7_Video.h" 
+
+/*
+  LVGLDemo
+
+  created DD MMM YYYY
+  by Leonardo Cavagnis
+*/
+
+#include "Arduino_H7_Video.h"
+
 #include "lvgl.h"
 #include "giga_touch.h"
 
-H7_Video Display(480, 800, GIGA_DISPLAY_SHIELD);
-//H7_Video Display(720, 480);
+Arduino_H7_Video Display(480, 800, GIGA_DISPLAY_SHIELD);
+//Arduino_H7_Video Display(720, 480);
 
 //@TODO: Complete demo with 4 main features
 
