@@ -5,7 +5,7 @@
 The Arduino camera library is a C++ library designed to capture pixels from cameras on supported Arduino products. It is currently compatible with three camera models: 
 
 - OmniVision OV7670 (On the [Arduino Giga R1](https://docs.arduino.cc/hardware/giga-r1-wifi))
-- Himax HM0360 (On the [Arduino Portenta Vision Shield](https://docs.arduino.cc/hardware/portenta-vision-shield))
+- Himax HM01B0 & HM0360 (On the [Arduino Portenta Vision Shield](https://docs.arduino.cc/hardware/portenta-vision-shield))
 - Galaxy Core GC2145 (On the [Arduino Nicla Vision](https://docs.arduino.cc/hardware/nicla-vision))
 
 This library captures pixels and stores them in a frame buffer. The frames can then be retrieved continuously for processing.
