@@ -3,7 +3,7 @@
 
 #define BQ25120A_ADDRESS           0x6A
 
-// Regsiter Map
+// Register Map
 // https://www.ti.com/lit/ds/symlink/bq25120a.pdf?ts=1610608851953&ref_url=https%253A%252F%252Fwww.startpage.com%252F
 #define BQ25120A_STATUS             0x00
 #define BQ25120A_FAULTS             0x01
