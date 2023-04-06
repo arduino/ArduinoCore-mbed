@@ -31,7 +31,6 @@ public:
   virtual ~Arduino_H7_Video();
 
   int begin();
-  int begin(bool landscape);
   void end();
 
   void clear();

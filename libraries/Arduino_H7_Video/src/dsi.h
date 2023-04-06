@@ -39,5 +39,7 @@ void		dsi_configueCLUT(uint32_t* clut);
 uint32_t	dsi_getNextFrameBuffer(void);
 uint32_t	dsi_getCurrentFrameBuffer(void);
 uint32_t	dsi_getFramebufferEnd(void);
+uint32_t 	dsi_getDisplayXSize(void);
+uint32_t 	dsi_getDisplayYSize(void);
 
 #endif /* _DSI_H */

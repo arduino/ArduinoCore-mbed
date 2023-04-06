@@ -333,6 +333,14 @@ uint32_t dsi_getCurrentFrameBuffer() {
 	return pend_buffer ? FB_ADDRESS_0 : FB_ADDRESS_1;
 }
 
+uint32_t dsi_getDisplayXSize(){
+	return lcd_x_size;
+}
+
+uint32_t dsi_getDisplayYSize(){
+	return lcd_y_size;
+}
+
 void dsi_layerInit(uint16_t LayerIndex, uint32_t FB_Address) {
 	LTDC_LayerCfgTypeDef  Layercfg;
 

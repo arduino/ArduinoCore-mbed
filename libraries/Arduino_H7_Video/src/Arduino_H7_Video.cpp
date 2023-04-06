@@ -30,20 +30,13 @@ void lvgl_displayFlushing(lv_disp_drv_t * disp, const lv_area_t * area, lv_color
 Arduino_H7_Video::Arduino_H7_Video(int width, int heigth, DisplayShieldModel shield) :
   ArduinoGraphics(width, heigth) {
     _shield = shield;
+    _landscape = (width >= heigth) ? true : false;
 }
 
 Arduino_H7_Video::~Arduino_H7_Video() {
 }
 
 int Arduino_H7_Video::begin() {
-    int ret = 0;
-
-    ret = begin(true);
-
-    return ret;
-}
-
-int Arduino_H7_Video::begin(bool landscape) {
   if (!ArduinoGraphics::begin()) {
     return 0;
   }
@@ -89,8 +82,6 @@ int Arduino_H7_Video::begin(bool landscape) {
     #error Board not compatible with this library
   #endif
 
-  _landscape = landscape;
-
   dsi_lcdClear(0); 
 
   #if __has_include("lvgl.h")
@@ -106,13 +97,19 @@ int Arduino_H7_Video::begin(bool landscape) {
     lv_disp_draw_buf_init(&draw_buf, buf1, NULL, width() * height() / 10);      /* Initialize the display buffer. */
 
     /* Initialize display features for LVGL library */
-    static lv_disp_drv_t disp_drv;          /* Descriptor of a display driver */
-    lv_disp_drv_init(&disp_drv);            /* Basic initialization */
-    disp_drv.flush_cb = lvgl_displayFlushing;  /* Set your driver function */
-    disp_drv.draw_buf = &draw_buf;          /* Assign the buffer to the display */
-    disp_drv.hor_res = width();       /* Set the horizontal resolution of the display */
-    disp_drv.ver_res = height();      /* Set the vertical resolution of the display */
-    disp_drv.rotated = (_landscape) ? LV_DISP_ROT_270 : LV_DISP_ROT_NONE;
+    static lv_disp_drv_t disp_drv;              /* Descriptor of a display driver */
+    lv_disp_drv_init(&disp_drv);                /* Basic initialization */
+    disp_drv.flush_cb = lvgl_displayFlushing;   /* Set your driver function */
+    disp_drv.draw_buf = &draw_buf;              /* Assign the buffer to the display */
+    if(_landscape) {
+      disp_drv.hor_res = height();        /* Set the horizontal resolution of the display */
+      disp_drv.ver_res = width();         /* Set the vertical resolution of the display */
+      disp_drv.rotated  = LV_DISP_ROT_270;
+    } else {
+      disp_drv.hor_res = width();         /* Set the horizontal resolution of the display */
+      disp_drv.ver_res = height();        /* Set the vertical resolution of the display */
+      disp_drv.rotated  = LV_DISP_ROT_NONE;
+    }
     disp_drv.sw_rotate = 1;
     lv_disp_drv_register(&disp_drv);        /* Finally register the driver */
   #endif
@@ -142,29 +139,48 @@ void Arduino_H7_Video::endDraw() {
 
 void Arduino_H7_Video::clear(){
   uint32_t bg = ArduinoGraphics::background();
-  dsi_lcdClear(bg);
+  uint32_t x_size, y_size;
+
+  if(_landscape) {
+    x_size = (height() <= dsi_getDisplayXSize())? height() : dsi_getDisplayXSize();
+    y_size = (width() <= dsi_getDisplayYSize())? width() : dsi_getDisplayYSize();
+  } else {
+    x_size = (width() <= dsi_getDisplayXSize())? width() : dsi_getDisplayXSize();
+    y_size = (height() <= dsi_getDisplayYSize())? height() : dsi_getDisplayYSize();
+  }
+
+  dsi_lcdFillArea((void *)(dsi_getCurrentFrameBuffer()), x_size, y_size, bg);
 }
 
 void Arduino_H7_Video::set(int x, int y, uint8_t r, uint8_t g, uint8_t b) {
     uint32_t x_rot, y_rot;
 
     if (_landscape) {
-      x_rot = ((width()-1) - y);
+      x_rot = ((height()-1) - y);
       y_rot = x;
+
+      if (x_rot >= height() || y_rot >= width()) 
+        return;
     } else {
       x_rot = x;
       y_rot = y;
+
+      if (x_rot >= width() || y_rot >= height()) 
+        return;
     }
 
+    if (x_rot >= dsi_getDisplayXSize() || y_rot >= dsi_getDisplayYSize()) 
+      return;
+
     uint32_t color =  (uint32_t)((uint32_t)(r << 16) | (uint32_t)(g << 8) | (uint32_t)(b << 0));
-    dsi_lcdFillArea((void *)(dsi_getCurrentFrameBuffer() + ((x_rot + (width() * y_rot)) * sizeof(uint16_t))), 1, 1, color);
+    dsi_lcdFillArea((void *)(dsi_getCurrentFrameBuffer() + ((x_rot + (dsi_getDisplayXSize() * y_rot)) * sizeof(uint16_t))), 1, 1, color);
 }
 
 #if __has_include("lvgl.h")
 void lvgl_displayFlushing(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p) {
     uint32_t width      = lv_area_get_width(area);
     uint32_t height     = lv_area_get_height(area);
-    uint32_t offsetPos  = (area->x1 + (disp->hor_res * area->y1)) * sizeof(uint16_t);
+    uint32_t offsetPos  = (area->x1 + (dsi_getDisplayXSize() * area->y1)) * sizeof(uint16_t);
 
     dsi_lcdDrawImage((void *) color_p, (void *)(dsi_getCurrentFrameBuffer() + offsetPos), width, height, DMA2D_INPUT_RGB565);
     lv_disp_flush_ready(disp);         /* Indicate you are ready with the flushing*/
