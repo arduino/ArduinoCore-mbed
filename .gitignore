@@ -2,3 +2,4 @@ cores/arduino/api/
 cores/arduino/api*
 **/.vscode/
 **/.development
+.DS_Store
