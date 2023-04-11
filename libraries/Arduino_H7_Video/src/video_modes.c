@@ -39,17 +39,20 @@ struct envie_edid_mode envie_known_modes[NUM_KNOWN_MODES] = {
 		.hactive = 1024, .hback_porch = 80, .hfront_porch = 24, .hsync_len = 68, .hpol = 0,
 		.vactive = 768, .vback_porch = 29, .vfront_porch = 3, .vsync_len = 6, .vpol = 0,
 	},
+	//NOTE: Not supported by STM32H747: Pixel Clock > 58MHz (LTDC + DMA2D + SDRAM 16-bit, source: AN4861rev4-Table12)
 	[EDID_MODE_1280x768_60Hz] = {
 		.name = "1280x768@60Hz", .pixel_clock = 68300, .refresh = 60,
 		.hactive = 1280, .hback_porch = 120, .hfront_porch = 32, .hsync_len = 20, 
 		.vactive = 768, .vback_porch = 10, .vfront_porch = 45, .vsync_len = 12,
 	},
+	//NOTE: Not supported by STM32H747: Pixel Clock > 58MHz (LTDC + DMA2D + SDRAM 16-bit, source: AN4861rev4-Table12)
 	[EDID_MODE_1280x720_60Hz] = {
 		.name = "1280x720@60Hz", .pixel_clock = 74300, .refresh = 60,
 		.hactive = 1280, .hback_porch = 370, .hfront_porch = 110, .hsync_len = 40,
 		.vactive = 720, .vback_porch = 30, .vfront_porch = 5, .vsync_len = 20,
 	},
-	[EDID_MODE_1920x1080_60Hz] = {
+	//NOTE: Not supported by STM32H747: Pixel Clock > 58MHz (LTDC + DMA2D + SDRAM 16-bit, source: AN4861rev4-Table12)
+	[EDID_MODE_1920x1080_60Hz] = { 
 		.name = "1920x1080@60Hz", .pixel_clock = 148500, .refresh = 60,
 		.hactive = 1920, .hback_porch = 280, .hfront_porch = 88, .hsync_len = 44,
 		.vactive = 1080, .vback_porch = 45, .vfront_porch = 4, .vsync_len = 4,
@@ -91,8 +94,11 @@ enum edid_modes video_modes_get_edid(uint32_t h_check, uint32_t v_check) {
 		}
 	}
 
-	if (sel_mode == -1) {
-		sel_mode = EDID_MODE_1920x1080_60Hz;
+	if (sel_mode == -1 						|| 
+		sel_mode == EDID_MODE_1280x768_60Hz ||
+		sel_mode == EDID_MODE_1280x720_60Hz || 
+		sel_mode == EDID_MODE_1920x1080_60Hz) {
+		sel_mode = EDID_MODE_1024x768_60Hz;
 	}
 
 	return sel_mode;
