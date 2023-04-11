@@ -35,4 +35,7 @@ struct envie_edid_mode {
 /* Exported variables --------------------------------------------------------*/
 extern struct envie_edid_mode envie_known_modes[];
 
+/* Exported functions --------------------------------------------------------*/
+enum edid_modes video_modes_get_edid(uint32_t h_check, uint32_t v_check);
+
 #endif /* _VIDEO_MODES_H */ 

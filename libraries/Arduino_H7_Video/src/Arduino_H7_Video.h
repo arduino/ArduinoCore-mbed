@@ -43,7 +43,8 @@ public:
   void attachLVGLTouchCb(void (*touch_cb)(void*,void*));
 private:
     DisplayShieldModel  _shield;
-    bool                _landscape;
+    bool                _rotated;
+    int                 _edidMode;
 };
 
 #endif /* _ARDUINO_H7_VIDEO_H */

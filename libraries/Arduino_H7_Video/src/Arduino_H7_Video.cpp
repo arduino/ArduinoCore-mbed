@@ -14,7 +14,9 @@
 #include "dsi.h"
 #include "st7701.h"
 #include "SDRAM.h"
+extern "C" {
 #include "video_modes.h"
+}
 #include "anx7625.h"
 
 #if __has_include ("lvgl.h")
@@ -30,7 +32,29 @@ void lvgl_displayFlushing(lv_disp_drv_t * disp, const lv_area_t * area, lv_color
 Arduino_H7_Video::Arduino_H7_Video(int width, int heigth, DisplayShieldModel shield) :
   ArduinoGraphics(width, heigth) {
     _shield = shield;
-    _landscape = (width >= heigth) ? true : false;
+
+  #if defined(ARDUINO_PORTENTA_H7_M7)
+    if (_shield == NONE_SHIELD) {
+      _edidMode = video_modes_get_edid(width, heigth);
+    } else if (_shield == GIGA_DISPLAY_SHIELD) {
+      _edidMode = EDID_MODE_480x800_60Hz;
+    }
+  #elif defined(ARDUINO_GIGA)
+    _edidMode = EDID_MODE_480x800_60Hz;
+  #endif
+
+  switch(_edidMode) {
+    case EDID_MODE_640x480_60Hz ... EDID_MODE_800x600_59Hz: 
+    case EDID_MODE_1024x768_60Hz ... EDID_MODE_1920x1080_60Hz:
+      _rotated = (width < heigth) ? true : false;
+      break;
+    case EDID_MODE_480x800_60Hz:
+      _rotated = (width >= heigth) ? true : false;
+      break;
+    default:
+      _rotated = false;
+      break;
+  }
 }
 
 Arduino_H7_Video::~Arduino_H7_Video() {
@@ -61,20 +85,20 @@ int Arduino_H7_Video::begin() {
       anx7625_dp_get_edid(0, &recognized_edid);
 
       //DSI Configuration
-      anx7625_dp_start(0, &recognized_edid, EDID_MODE_720x480_60Hz);
+      anx7625_dp_start(0, &recognized_edid, (enum edid_modes) _edidMode);
 
       //Configure SDRAM 
       SDRAM.begin(dsi_getFramebufferEnd());
     } else if (_shield == GIGA_DISPLAY_SHIELD) {
       //Init LCD Controller
-      st7701_init(EDID_MODE_480x800_60Hz);
+      st7701_init((enum edid_modes) _edidMode);
 
       //Configure SDRAM 
       SDRAM.begin();
     }
   #elif defined(ARDUINO_GIGA)
     //Init LCD Controller
-    st7701_init(EDID_MODE_480x800_60Hz);
+    st7701_init((enum edid_modes) _edidMode);
 
     //Configure SDRAM 
     SDRAM.begin();
@@ -101,7 +125,7 @@ int Arduino_H7_Video::begin() {
     lv_disp_drv_init(&disp_drv);                /* Basic initialization */
     disp_drv.flush_cb = lvgl_displayFlushing;   /* Set your driver function */
     disp_drv.draw_buf = &draw_buf;              /* Assign the buffer to the display */
-    if(_landscape) {
+    if(_rotated) {
       disp_drv.hor_res = height();        /* Set the horizontal resolution of the display */
       disp_drv.ver_res = width();         /* Set the vertical resolution of the display */
       disp_drv.rotated  = LV_DISP_ROT_270;
@@ -141,7 +165,7 @@ void Arduino_H7_Video::clear(){
   uint32_t bg = ArduinoGraphics::background();
   uint32_t x_size, y_size;
 
-  if(_landscape) {
+  if(_rotated) {
     x_size = (height() <= dsi_getDisplayXSize())? height() : dsi_getDisplayXSize();
     y_size = (width() <= dsi_getDisplayYSize())? width() : dsi_getDisplayYSize();
   } else {
@@ -155,7 +179,7 @@ void Arduino_H7_Video::clear(){
 void Arduino_H7_Video::set(int x, int y, uint8_t r, uint8_t g, uint8_t b) {
     uint32_t x_rot, y_rot;
 
-    if (_landscape) {
+    if (_rotated) {
       x_rot = ((height()-1) - y);
       y_rot = x;
 

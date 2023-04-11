@@ -49,6 +49,53 @@ struct envie_edid_mode envie_known_modes[NUM_KNOWN_MODES] = {
 		.hactive = 1280, .hback_porch = 370, .hfront_porch = 110, .hsync_len = 40,
 		.vactive = 720, .vback_porch = 30, .vfront_porch = 5, .vsync_len = 20,
 	},
+	[EDID_MODE_1920x1080_60Hz] = {
+		.name = "1920x1080@60Hz", .pixel_clock = 148500, .refresh = 60,
+		.hactive = 1920, .hback_porch = 280, .hfront_porch = 88, .hsync_len = 44,
+		.vactive = 1080, .vback_porch = 45, .vfront_porch = 4, .vsync_len = 4,
+	},
 };
+
+/* Functions -----------------------------------------------------------------*/
+
+enum edid_modes video_modes_get_edid(uint32_t h_check, uint32_t v_check) {
+	int sum = 0;
+	int sel_mode = -1;
+	int sel_sum = 0;
+
+	for (int i = 0; i<NUM_KNOWN_MODES; i++) {
+		if (h_check <= envie_known_modes[i].hactive && v_check <= envie_known_modes[i].vactive) {
+			sum = ((int)envie_known_modes[i].hactive - h_check) + 
+					((int)envie_known_modes[i].vactive - v_check);
+		} else {
+			sum = -1;
+		}
+
+		if (sum >= 0 && ((sel_mode == -1) || (sum < sel_sum))) {
+			sel_mode = i;
+			sel_sum = sum;
+		}
+	}
+
+	for (int i = 0; i<NUM_KNOWN_MODES; i++) {
+		if (h_check <= envie_known_modes[i].vactive && v_check <= envie_known_modes[i].hactive) {
+			sum = ((int)envie_known_modes[i].vactive - h_check) + 
+					((int)envie_known_modes[i].hactive - v_check);
+		} else {
+			sum = -1;
+		}
+
+		if (sum >= 0 && ((sel_mode == -1) || (sum < sel_sum))) {
+			sel_mode = i;
+			sel_sum = sum;
+		}
+	}
+
+	if (sel_mode == -1) {
+		sel_mode = EDID_MODE_1920x1080_60Hz;
+	}
+
+	return sel_mode;
+}
 
 /**** END OF FILE ****/
