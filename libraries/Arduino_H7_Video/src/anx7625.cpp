@@ -32,7 +32,9 @@
 #include "video_modes.h"
 
 /* Private define ------------------------------------------------------------*/
-#if 0
+#define ANX_LOGENABLED 0
+
+#if ANX_LOGENABLED
 	#define ANXERROR(format, ...) \
 			printk(BIOS_ERR, "ERROR: %s: " format, __func__, ##__VA_ARGS__)
 	#define ANXINFO(format, ...) \
