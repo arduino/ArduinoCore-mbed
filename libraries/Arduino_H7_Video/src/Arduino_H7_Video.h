@@ -18,6 +18,9 @@
 #define H7_VIDEO_MAX_WIDTH          1280 
 #define H7_VIDEO_MAX_HEIGHT         1024 
 
+#define H7V_OK                      1
+#define H7V_ERR_INSUFFMEM           2
+
 /* Exported enumeration ------------------------------------------------------*/
 enum DisplayShieldModel {
     NONE_SHIELD = 0,

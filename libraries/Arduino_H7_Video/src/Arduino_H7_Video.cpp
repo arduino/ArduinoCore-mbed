@@ -118,6 +118,9 @@ int Arduino_H7_Video::begin() {
     static lv_disp_draw_buf_t draw_buf;
     static lv_color_t * buf1;                                           
     buf1 = (lv_color_t*)malloc((width() * height() / 10) * sizeof(lv_color_t)); /* Declare a buffer for 1/10 screen size */
+    if (buf1 == NULL) {
+      return H7V_ERR_INSUFFMEM;
+    }
     lv_disp_draw_buf_init(&draw_buf, buf1, NULL, width() * height() / 10);      /* Initialize the display buffer. */
 
     /* Initialize display features for LVGL library */
@@ -138,7 +141,7 @@ int Arduino_H7_Video::begin() {
     lv_disp_drv_register(&disp_drv);        /* Finally register the driver */
   #endif
 
-  return 1;
+  return H7V_OK;
 }
 
 void Arduino_H7_Video::end() {
