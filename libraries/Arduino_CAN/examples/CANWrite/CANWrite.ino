@@ -40,7 +40,7 @@ void loop()
   /* Transmit the CAN message, capture and display an
    * error core in case of failure.
    */
-  if (int const rc = CAN.write(msg); rc < 0)
+  if (int const rc = CAN.write(msg); rc <= 0)
   {
     Serial.print  ("CAN.write(...) failed with error code ");
     Serial.println(rc);
