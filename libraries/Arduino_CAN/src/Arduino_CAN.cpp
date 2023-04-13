@@ -63,12 +63,16 @@ size_t Arduino_CAN::available()
   mbed::CANMessage can_msg;
   bool const msg_read = _can.read(can_msg) > 0;
 
-  CanMsg const msg(
-    can_msg.id,
-    can_msg.len,
-    can_msg.data);
+  if (msg_read)
+  {
+    CanMsg const msg(
+      can_msg.id,
+      can_msg.len,
+      can_msg.data);
 
-  _rx_msg_buf.enqueue(msg);
+    _rx_msg_buf.enqueue(msg);
+  }
+
   return _rx_msg_buf.available();
 }
 
