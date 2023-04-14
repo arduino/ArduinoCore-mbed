@@ -787,7 +787,12 @@ int GC2145::setHorizontalMirror(bool mirror_enable)
     return ((0 == retVal) ? 0 : -1);
 }
 
-int GC2145::setResolution(int32_t resolution, int32_t zoom_resolution, uint32_t zoom_x, uint32_t zoom_y)
+int GC2145::setResolution(int32_t resolution)
+{
+    setResolutionWithZoom(resolution, resolution, 0, 0);
+}
+
+int GC2145::setResolutionWithZoom(int32_t resolution, int32_t zoom_resolution, uint32_t zoom_x, uint32_t zoom_y)
 {
     int ret = 0;
 

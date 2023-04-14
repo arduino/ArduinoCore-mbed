@@ -39,7 +39,8 @@ class GC2145: public ImageSensor {
         bool getMono() { return false; };
         uint32_t getClockFrequency() { return 12000000; };
         int setFrameRate(int32_t framerate);
-        int setResolution(int32_t resolution, int32_t zoom_resolution, uint32_t zoom_x, uint32_t zoom_y);
+        int setResolutionWithZoom(int32_t resolution, int32_t zoom_resolution, uint32_t zoom_x, uint32_t zoom_y);
+        int setResolution(int32_t resolution);
         int setPixelFormat(int32_t pixformat);
         int enableMotionDetection(md_callback_t callback) { return 0; };
         int disableMotionDetection() { return 0; };
@@ -50,5 +51,5 @@ class GC2145: public ImageSensor {
         int setHorizontalMirror(bool mirror_enable);
         void debug(Stream &stream);
 };
- 
+
 #endif /* __GC2145_H */

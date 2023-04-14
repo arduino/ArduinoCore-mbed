@@ -596,7 +596,12 @@ int HM0360::setHorizontalMirror(bool mirror_enable)
   return -1;
 }
 
-int HM0360::setResolution(int32_t resolution, int32_t zoom_resolution, uint32_t zoom_x, uint32_t zoom_y)
+int HM0360::setResolution(int32_t resolution)
+{
+    setResolutionWithZoom(resolution, resolution, 0, 0);
+}
+
+int HM0360::setResolutionWithZoom(int32_t resolution, int32_t zoom_resolution, uint32_t zoom_x, uint32_t zoom_y)
 {
     int ret = 0;
 

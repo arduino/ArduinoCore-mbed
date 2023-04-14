@@ -547,7 +547,7 @@ int Camera::setResolutionWithZoom(int32_t resolution, int32_t zoom_resolution, i
     }
     HAL_DCMI_ConfigCROP(&hdcmi, 0, 0, bpl - 1, restab[final_resolution][1] - 1);
 
-    if (this->sensor->setResolution(resolution, zoom_resolution, zoom_x, zoom_y) == 0) {
+    if (this->sensor->setResolutionWithZoom(resolution, zoom_resolution, zoom_x, zoom_y) == 0) {
         this->resolution = final_resolution;
         return 0;
     }

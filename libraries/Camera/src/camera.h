@@ -215,7 +215,9 @@ class ImageSensor {
          * @param zoom_y The desired y position of the zoom window.
          * @return int 0 on success, non-zero on failure
          */
-        virtual int setResolution(int32_t resolution, int32_t zoom_resolution, uint32_t zoom_x, uint32_t zoom_y) = 0;
+        virtual int setResolutionWithZoom(int32_t resolution, int32_t zoom_resolution, uint32_t zoom_x, uint32_t zoom_y) = 0;
+
+        virtual int setResolution(int32_t resolution) = 0;
 
         /**
          * @brief Set the pixel (color) format of the image sensor.
@@ -531,7 +533,7 @@ class Camera {
         int zoomTo(int32_t zoom_resolution, uint32_t zoom_x, uint32_t zoom_y);
         int zoomToCenter(int32_t zoom_resolution);
         int setVerticalFlip(bool flip_enable);
-        int setHorizontalMirror(bool mirror_enable;
+        int setHorizontalMirror(bool mirror_enable);
         uint32_t getResolutionWidth();
         uint32_t getResolutionHeight();
 
