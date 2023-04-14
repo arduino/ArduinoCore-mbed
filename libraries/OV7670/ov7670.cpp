@@ -697,12 +697,12 @@ int OV7670::setFrameRate(int32_t framerate)
     return 0;
 }
 
-int OV7670::setVerticalFlip(bool flip_mode)
+int OV7670::setVerticalFlip(bool flip_enable)
 {
   return -1;
 }
 
-int OV7670::setHorizontalMirror(bool mirror_mode)
+int OV7670::setHorizontalMirror(bool mirror_enable)
 {
   return -1;
 }

@@ -600,14 +600,14 @@ int Camera::zoomToCenter(int32_t zoom_resolution)
     return setResolutionWithZoom(this->original_resolution, zoom_resolution, zoom_x, zoom_y);
 }
 
-int Camera::setVerticalFlip(bool flip_mode)
+int Camera::setVerticalFlip(bool flip_enable)
 {
-    return (this->sensor->setVerticalFlip(flip_mode));
+    return (this->sensor->setVerticalFlip(flip_enable));
 }
 
-int Camera::setHorizontalMirror(bool mirror_mode)
+int Camera::setHorizontalMirror(bool mirror_enable)
 {
-    return (this->sensor->setHorizontalMirror(mirror_mode));
+    return (this->sensor->setHorizontalMirror(mirror_enable));
 }
 
 uint32_t Camera::getResolutionWidth()

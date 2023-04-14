@@ -50,8 +50,8 @@ class HM01B0: public ImageSensor {
         int motionDetected();
         int pollMotionDetection();
         int clearMotionDetection();
-        int setVerticalFlip(bool flip_mode);
-        int setHorizontalMirror(bool mirror_mode);
+        int setVerticalFlip(bool flip_enable);
+        int setHorizontalMirror(bool mirror_enable);
 
         uint8_t printRegs();
         void debug(Stream &stream);

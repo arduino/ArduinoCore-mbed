@@ -586,12 +586,12 @@ int HM0360::reset()
     return (max_timeout > 0) ? 0 : -1;
 }
 
-int HM0360::setVerticalFlip(bool flip_mode)
+int HM0360::setVerticalFlip(bool flip_enable)
 {
   return -1;
 }
 
-int HM0360::setHorizontalMirror(bool mirror_mode)
+int HM0360::setHorizontalMirror(bool mirror_enable)
 {
   return -1;
 }

@@ -279,16 +279,13 @@ class ImageSensor {
          * @return int 0 if no motion is detected, non-zero if motion is detected
          */
         virtual int motionDetected() = 0;
-
-        virtual int setVerticalFlip(bool flip_mode) = 0;
-        virtual int setHorizontalMirror(bool flip_mode) = 0; 
-
-
+        virtual int setVerticalFlip(bool flip_enable) = 0;
+        virtual int setHorizontalMirror(bool flip_enable) = 0;        
         /**
          * @brief Output debug information to a stream.
          * You can use this function to output debug information to the serial port by passing Serial as the stream.
          * @param stream Stream to output the debug information
-         */       
+         */ 
         virtual void debug(Stream &stream) = 0;
 
         /**
@@ -533,8 +530,8 @@ class Camera {
         int motionDetected();
         int zoomTo(int32_t zoom_resolution, uint32_t zoom_x, uint32_t zoom_y);
         int zoomToCenter(int32_t zoom_resolution);
-        int setVerticalFlip(bool flip_mode);
-        int setHorizontalMirror(bool mirror_mode);
+        int setVerticalFlip(bool flip_enable);
+        int setHorizontalMirror(bool mirror_enable;
         uint32_t getResolutionWidth();
         uint32_t getResolutionHeight();
 

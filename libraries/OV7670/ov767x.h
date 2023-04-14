@@ -52,8 +52,8 @@ class OV7670: public ImageSensor {
         int setMotionDetectionWindow(uint32_t x, uint32_t y, uint32_t w, uint32_t h) { return 0; };
         int setMotionDetectionThreshold(uint32_t threshold) { return 0; };
         int motionDetected() { return 0; };
-        int setVerticalFlip(bool flip_mode);
-        int setHorizontalMirror(bool mirror_mode);
+        int setVerticalFlip(bool flip_enable);
+        int setHorizontalMirror(bool mirror_enable);
         void debug(Stream &stream);
 };
 

@@ -763,26 +763,26 @@ int GC2145::setFrameRate(int32_t framerate)
     return 0;
 }
 
-int GC2145::setVerticalFlip(bool flip_mode)
+int GC2145::setVerticalFlip(bool flip_enable)
 {
     // The GC2145 doesn't return this value when reading the Analog mode 1 register
     // so we have to save it for setHorizontalMirror()
-    vertical_flip_state = flip_mode;
+    vertical_flip_state = flip_enable;
     // Using the Analog mode 1 register (0x17)
     uint8_t old_value = regRead(GC2145_I2C_ADDR, 0x17);
-    int retVal = regWrite(GC2145_I2C_ADDR, 0x17, (old_value & 0b11111100) | (flip_mode << 1) | horizontal_mirror_state);
+    int retVal = regWrite(GC2145_I2C_ADDR, 0x17, (old_value & 0b11111100) | (flip_enable << 1) | horizontal_mirror_state);
     // Notice that the error codes from regWrite() are positive ones passed on from Wire, not -1
     return ((0 == retVal) ? 0 : -1);
 }
 
-int GC2145::setHorizontalMirror(bool mirror_mode)
+int GC2145::setHorizontalMirror(bool mirror_enable)
 {
     // The GC2145 doesn't return this value when reading the Analog mode 1 register
     // so we have to save it for setVerticalFlip()
-    horizontal_mirror_state = mirror_mode;
+    horizontal_mirror_state = mirror_enable;
     // Using the Analog mode 1 register (0x17)
     uint8_t old_value = regRead(GC2145_I2C_ADDR, 0x17);
-    int retVal = regWrite(GC2145_I2C_ADDR, 0x17, (old_value & 0b11111100) | mirror_mode | (vertical_flip_state << 1));
+    int retVal = regWrite(GC2145_I2C_ADDR, 0x17, (old_value & 0b11111100) | mirror_enable | (vertical_flip_state << 1));
     // Notice that the error codes from regWrite() are positive ones passed on from Wire, not -1
     return ((0 == retVal) ? 0 : -1);
 }
