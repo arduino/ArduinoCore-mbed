@@ -19,10 +19,11 @@ INCBIN(test, "/home/user/Downloads/test.bin");
 Arduino_H7_Video Display(800, 480, GIGA_DISPLAY_SHIELD);
 //Arduino_H7_Video Display(720, 480);
 
+Image img_arduinologo(ENCODING_RGB16, (uint8_t *) texture_raw, 300, 300);
+
 void setup() {
   Display.begin();
 
-  Image img_arduinologo(ENCODING_RGB16, (uint8_t *) texture_raw, 300, 300);
   Display.beginDraw();
   Display.image(img_arduinologo, (Display.width() - img_arduinologo.width())/2, (Display.height() - img_arduinologo.height())/2);
   Display.endDraw();
