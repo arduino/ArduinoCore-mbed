@@ -1,14 +1,14 @@
 /*
   ArduinoLogoDrawing
 
-  created DD MMM YYYY
+  created 17 Apr 2023
   by Leonardo Cavagnis
 */
 
 #include "Arduino_H7_Video.h"
 
-Arduino_H7_Video Display(800, 480, GIGA_DISPLAY_SHIELD);
-//Arduino_H7_Video Display(720, 480);
+Arduino_H7_Video Display(800, 480, GigaDisplayShield);
+//Arduino_H7_Video Display(1024, 768, USBCVideo);
 
 void setup() {
   Display.begin();

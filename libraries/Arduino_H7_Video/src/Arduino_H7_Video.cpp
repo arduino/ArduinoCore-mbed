@@ -12,12 +12,10 @@
 #include "Arduino_H7_Video.h"
 
 #include "dsi.h"
-#include "st7701.h"
 #include "SDRAM.h"
 extern "C" {
 #include "video_modes.h"
 }
-#include "anx7625.h"
 
 #if __has_include ("lvgl.h")
 #include "lvgl.h"
@@ -29,19 +27,10 @@ void lvgl_displayFlushing(lv_disp_drv_t * disp, const lv_area_t * area, lv_color
 #endif
 
 /* Functions -----------------------------------------------------------------*/
-Arduino_H7_Video::Arduino_H7_Video(int width, int heigth, DisplayShieldModel shield) :
+Arduino_H7_Video::Arduino_H7_Video(int width, int heigth, H7DisplayShield &shield) :
   ArduinoGraphics(width, heigth) {
-    _shield = shield;
-
-  #if defined(ARDUINO_PORTENTA_H7_M7)
-    if (_shield == NONE_SHIELD) {
-      _edidMode = video_modes_get_edid(width, heigth);
-    } else if (_shield == GIGA_DISPLAY_SHIELD) {
-      _edidMode = EDID_MODE_480x800_60Hz;
-    }
-  #elif defined(ARDUINO_GIGA)
-    _edidMode = EDID_MODE_480x800_60Hz;
-  #endif
+  _shield   = &shield;
+  _edidMode = _shield->getEdidMode(width, heigth);
 
   switch(_edidMode) {
     case EDID_MODE_640x480_60Hz ... EDID_MODE_800x600_59Hz: 
@@ -66,45 +55,12 @@ int Arduino_H7_Video::begin() {
   }
 
   textFont(Font_5x7);
+
+  /* Video controller/bridge init */
+  _shield->init(_edidMode);
   
-  #if defined(ARDUINO_PORTENTA_H7_M7)
-    if (_shield == NONE_SHIELD) {
-      struct edid recognized_edid;
-      int err_code = 0;
-
-      //Initialization of ANX7625
-      err_code = anx7625_init(0);
-      if(err_code < 0) {
-        return err_code;
-      }
-
-      //Checking HDMI plug event
-      anx7625_wait_hpd_event(0);
-
-      //Read EDID
-      anx7625_dp_get_edid(0, &recognized_edid);
-
-      //DSI Configuration
-      anx7625_dp_start(0, &recognized_edid, (enum edid_modes) _edidMode);
-
-      //Configure SDRAM 
-      SDRAM.begin(dsi_getFramebufferEnd());
-    } else if (_shield == GIGA_DISPLAY_SHIELD) {
-      //Init LCD Controller
-      st7701_init((enum edid_modes) _edidMode);
-
-      //Configure SDRAM 
-      SDRAM.begin();
-    }
-  #elif defined(ARDUINO_GIGA)
-    //Init LCD Controller
-    st7701_init((enum edid_modes) _edidMode);
-
-    //Configure SDRAM 
-    SDRAM.begin();
-  #else 
-    #error Board not compatible with this library
-  #endif
+  /* Configure SDRAM */
+  SDRAM.begin();
 
   dsi_lcdClear(0); 
 

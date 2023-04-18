@@ -13,24 +13,22 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <ArduinoGraphics.h>
+#include "H7DisplayShield.h"
 
 /* Exported defines ----------------------------------------------------------*/
-#define H7_VIDEO_MAX_WIDTH          1280 
-#define H7_VIDEO_MAX_HEIGHT         1024 
-
 #define H7V_OK                      1
 #define H7V_ERR_INSUFFMEM           2
 
 /* Exported enumeration ------------------------------------------------------*/
-enum DisplayShieldModel {
-    NONE_SHIELD = 0,
-    GIGA_DISPLAY_SHIELD = 1
-};
 
 /* Class ----------------------------------------------------------------------*/
 class Arduino_H7_Video : public ArduinoGraphics {
 public:
-  Arduino_H7_Video(int width = H7_VIDEO_MAX_WIDTH, int heigth = H7_VIDEO_MAX_HEIGHT, DisplayShieldModel shield = NONE_SHIELD);
+#if defined(ARDUINO_PORTENTA_H7_M7)
+  Arduino_H7_Video(int width = 1024, int heigth = 768, H7DisplayShield &shield = USBCVideo);
+#elif defined(ARDUINO_GIGA)
+  Arduino_H7_Video(int width = 800, int heigth = 480, H7DisplayShield &shield = GigaDisplayShield);
+#endif
   virtual ~Arduino_H7_Video();
 
   int begin();
@@ -45,7 +43,7 @@ public:
 
   void attachLVGLTouchCb(void (*touch_cb)(void*,void*));
 private:
-    DisplayShieldModel  _shield;
+    H7DisplayShield*    _shield;
     bool                _rotated;
     int                 _edidMode;
 };

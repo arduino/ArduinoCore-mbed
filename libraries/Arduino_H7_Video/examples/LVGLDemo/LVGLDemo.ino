@@ -2,7 +2,7 @@
 /*
   LVGLDemo
 
-  created DD MMM YYYY
+  created 17 Apr 2023
   by Leonardo Cavagnis
 */
 
@@ -11,10 +11,8 @@
 #include "lvgl.h"
 #include "giga_touch.h"
 
-Arduino_H7_Video Display(800, 480, GIGA_DISPLAY_SHIELD);
-//Arduino_H7_Video Display(720, 480);
-
-//@TODO: Complete demo with 4 main features
+Arduino_H7_Video Display(800, 480, GigaDisplayShield);
+//Arduino_H7_Video Display(1024, 768, USBCVideo);
 
 void my_touchpad_read(lv_indev_drv_t * indev, lv_indev_data_t * data) {
   data->state = (touchpad_pressed) ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
