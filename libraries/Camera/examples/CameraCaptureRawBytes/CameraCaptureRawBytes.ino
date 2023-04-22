@@ -67,8 +67,11 @@ void loop() {
   // Time out after 2 seconds and send new data
   bool timeoutDetected = millis() - lastUpdate > 2000;
   
-  // Wait for sync byte.
-  if(!timeoutDetected && Serial.read() != 1) return;  
+  // Wait for sync byte and timeout
+  if ((!timeoutDetected) || (Serial.read() != 1))
+  {
+    return;
+  }
 
   lastUpdate = millis();
   
