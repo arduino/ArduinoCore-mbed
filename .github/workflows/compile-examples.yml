@@ -141,6 +141,7 @@ jobs:
               - name: ArduinoBLE
               - name: arduino-audio-tools
                 source-url: https://github.com/pschatzmann/arduino-audio-tools.git
+                version: v0.9.4
               - name: arduino-libg722
                 source-url: https://github.com/pschatzmann/arduino-libg722.git
 
