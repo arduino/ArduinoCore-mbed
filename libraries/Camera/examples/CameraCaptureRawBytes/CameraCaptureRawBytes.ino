@@ -64,11 +64,16 @@ void loop() {
     while(!Serial);
   }
 
-  // Time out after 2 seconds and send new data
+  // Time out after 2 seconds, which sets the (constant) frame rate
   bool timeoutDetected = millis() - lastUpdate > 2000;
   
-  // Wait for sync byte.
-  if(!timeoutDetected && Serial.read() != 1) return;  
+  // Wait for sync byte and timeout
+  // Notice that this order must be kept, or the sync bytes will be
+  // consumed prematurely
+  if ((!timeoutDetected) || (Serial.read() != 1))
+  {
+    return;
+  }
 
   lastUpdate = millis();
   
