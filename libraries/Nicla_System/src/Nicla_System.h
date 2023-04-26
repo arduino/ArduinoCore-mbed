@@ -72,7 +72,7 @@ public:
    * and store it in a latched register. If true, the latched (stored) value is returned.
    * If false, a new reading is taken from the PMIC. The default is false, so a new reading is taken.
    * @return int8_t The percentage of the regulated voltage in the range of 60% to 100%.
-   * A value of -1 indicates that the battery percentage could not be determined.
+   * A value of < 0 indicates that the battery percentage could not be determined.
    */
   static int8_t getBatteryPercentage(bool useLatchedValue = false);
 

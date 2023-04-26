@@ -10,7 +10,7 @@
 #define BQ25120A_TS_CONTROL         0x02
 #define BQ25120A_FAST_CHG           0x03
 #define BQ25120A_TERMINATION_CURR   0x04
-#define BQ25120A_BATTERY_CTRL       0x05
+#define BQ25120A_BATTERY_CTRL       0x05 // Battery Voltage Control Register
 #define BQ25120A_SYS_VOUT_CTRL      0x06
 #define BQ25120A_LDO_CTRL           0x07
 #define BQ25120A_PUSH_BUTT_CTRL     0x08
