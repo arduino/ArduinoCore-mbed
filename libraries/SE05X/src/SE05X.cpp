@@ -335,6 +335,13 @@ int SE05XClass::beginSHA256()
         return 0;
     }
 
+    status = sss_digest_init(&_digest_ctx);
+
+    if (status != kStatus_SSS_Success) {
+        SE05X_PRINT_ERROR("sss_digest_init Failed!!!");
+        return 0;
+    }
+
     return 1;
 }
 
