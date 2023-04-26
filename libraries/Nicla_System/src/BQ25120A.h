@@ -4,7 +4,7 @@
 #define BQ25120A_ADDRESS           0x6A
 
 // Register Map
-// https://www.ti.com/lit/ds/symlink/bq25120a.pdf?ts=1610608851953&ref_url=https%253A%252F%252Fwww.startpage.com%252F
+// https://www.ti.com/lit/ds/symlink/bq25120a.pdf
 #define BQ25120A_STATUS             0x00
 #define BQ25120A_FAULTS             0x01
 #define BQ25120A_TS_CONTROL         0x02
