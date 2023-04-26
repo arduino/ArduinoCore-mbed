@@ -56,17 +56,13 @@ int Arduino_H7_Video::begin() {
 
   textFont(Font_5x7);
 
-  /* Video controller/bridge init */
-  _shield->init(_edidMode);
-  
   /* Configure SDRAM */
   SDRAM.begin();
 
-  dsi_lcdClear(0); 
+  /* Video controller/bridge init */
+  _shield->init(_edidMode);
 
   #if __has_include("lvgl.h")
-    dsi_getNextFrameBuffer();
-
     /* Initiliaze LVGL library */
     lv_init();
 
@@ -107,17 +103,13 @@ void Arduino_H7_Video::end() {
 void Arduino_H7_Video::beginDraw() {
   ArduinoGraphics::beginDraw();
 
-  #if __has_include("lvgl.h")
-    dsi_getNextFrameBuffer();
-  #endif
-
   dsi_lcdClear(0); 
 }
 
 void Arduino_H7_Video::endDraw() {
   ArduinoGraphics::endDraw();
 
-  dsi_getNextFrameBuffer();
+  dsi_drawCurrentFrameBuffer();
 }
 
 void Arduino_H7_Video::clear(){
@@ -165,7 +157,7 @@ void lvgl_displayFlushing(lv_disp_drv_t * disp, const lv_area_t * area, lv_color
     uint32_t height     = lv_area_get_height(area);
     uint32_t offsetPos  = (area->x1 + (dsi_getDisplayXSize() * area->y1)) * sizeof(uint16_t);
 
-    dsi_lcdDrawImage((void *) color_p, (void *)(dsi_getCurrentFrameBuffer() + offsetPos), width, height, DMA2D_INPUT_RGB565);
+    dsi_lcdDrawImage((void *) color_p, (void *)(dsi_getActiveFrameBuffer() + offsetPos), width, height, DMA2D_INPUT_RGB565);
     lv_disp_flush_ready(disp);         /* Indicate you are ready with the flushing*/
 }
 

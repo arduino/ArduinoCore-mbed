@@ -247,9 +247,9 @@ int dsi_init(uint8_t bus, struct edid *edid, struct display_timing *dt) {
 	HAL_DSI_PatternGeneratorStop(&dsi);
 	
 	dsi_lcdClear(0);
-	dsi_getNextFrameBuffer();
+	dsi_drawCurrentFrameBuffer();
 	dsi_lcdClear(0);
-	dsi_getNextFrameBuffer();
+	dsi_drawCurrentFrameBuffer();
 }
 
 void dsi_lcdClear(uint32_t Color) {
@@ -319,18 +319,20 @@ uint32_t dsi_getFramebufferEnd(void) {
 	return (FB_BASE_ADDRESS + 2 * (lcd_x_size * lcd_y_size * BYTES_PER_PIXEL));
 }
 
-uint32_t dsi_getNextFrameBuffer(void) {
+void dsi_drawCurrentFrameBuffer(void) {
 	int fb = pend_buffer++ % 2;
-
+	
 	__HAL_LTDC_LAYER_ENABLE(&(ltdc), fb);
-  	__HAL_LTDC_LAYER_DISABLE(&(ltdc), !fb);
-  	__HAL_LTDC_VERTICAL_BLANKING_RELOAD_CONFIG(&(ltdc));
-
-	return fb ? FB_ADDRESS_0 : FB_ADDRESS_1;
+	__HAL_LTDC_LAYER_DISABLE(&(ltdc), !fb);
+	__HAL_LTDC_VERTICAL_BLANKING_RELOAD_CONFIG(&(ltdc));
 }
 
 uint32_t dsi_getCurrentFrameBuffer() {
-	return pend_buffer ? FB_ADDRESS_0 : FB_ADDRESS_1;
+	return (ltdc.LayerCfg[pend_buffer%2].FBStartAdress);
+}
+
+uint32_t dsi_getActiveFrameBuffer() {
+	return (ltdc.LayerCfg[(pend_buffer+1)%2].FBStartAdress);
 }
 
 uint32_t dsi_getDisplayXSize(){
