@@ -6,8 +6,8 @@ class MCUboot
 
 public:
   static void confirmSketch(void);
-  static void applyUpdate(int permanent);
-  static void bootDebug(int enable);
+  static void applyUpdate(bool permanent);
+  static void bootDebug(bool enable);
 
 };
 
