@@ -14,6 +14,7 @@ BQ25120A nicla::_pmic;
 rtos::Mutex nicla::i2c_mutex;
 bool nicla::started = false;
 uint8_t nicla::_chg_reg = 0;
+bool nicla::_ntcEnabled = true;
 
 void nicla::pingI2CThd() {
   while(1) {
@@ -107,12 +108,6 @@ uint8_t nicla::readLDOreg()
   return _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_LDO_CTRL);
 }
 
-/** 
- * @brief Defines if the connected battery has a negative temperature coefficient (NTC) thermistor.
- * NTCs are used to prevent the batteries from being charged at temperatures that are too high or too low.
- */
-bool nicla::ntc_disabled;
-
 bool nicla::enableCharge(uint8_t mA, bool disable_ntc)
 {
   if (mA < 5) {
@@ -128,8 +123,8 @@ bool nicla::enableCharge(uint8_t mA, bool disable_ntc)
   _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_ILIM_UVLO_CTRL, 0x3F);
 
   // Disable TS and interrupt on charge
-  ntc_disabled = disable_ntc;
-  if (ntc_disabled) {
+  _ntcEnabled = !disable_ntc;
+  if (!_ntcEnabled) {
     _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_TS_CONTROL, 1 << 3);
   }
 
@@ -148,6 +143,10 @@ uint16_t nicla::getFault() {
   uint16_t tmp = _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_FAULTS) << 8;
   tmp |= (_pmic.readByte(BQ25120A_ADDRESS, BQ25120A_TS_CONTROL) & 0x60);
   return tmp;
+}
+
+void nicla::setBatteryNTCEnabled(bool enabled){
+  _ntcEnabled = enabled;
 }
 
 float nicla::getRegulatedBatteryVoltage(){
@@ -291,7 +290,7 @@ uint8_t nicla::getBatteryStatus() {
     res = BATTERY_EMPTY;
   }
 
-  if (!ntc_disabled) {
+  if (_ntcEnabled) {
     // Extract bits 5 and 6 (TS_FAULT0 and TS_FAULT1)
     uint8_t temperatureSenseFault = _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_TS_CONTROL) >> 5 & 0b11;
 
@@ -321,6 +320,7 @@ uint8_t nicla::getBatteryStatus() {
 }
 
 uint8_t nicla::getBatteryTemperature() {
+  if(!_ntcEnabled) return BATTERY_TEMPERATURE_NORMAL;
   return getBatteryStatus() & BATTERY_TEMPERATURE_MASK;
 }
 

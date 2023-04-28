@@ -48,6 +48,15 @@ public:
   static bool enableCharge(uint8_t mA = 20, bool disable_ntc = true);
 
   /**
+   * @brief Enables or disables the negative temperature coefficient (NTC) thermistor.
+   * NTCs are used to prevent the batteries from being charged at temperatures that are too high or too low.
+   * Set to disabled for standard LiPo batteries without NTC.
+   * If your battery has only a plus and minus wire, it does not have an NTC.
+   * The default is enabled.
+   */
+  static void setBatteryNTCEnabled(bool enabled);
+
+  /**
    * @brief Get the Regulated Battery Voltage in Volts.
    * 
    * @return float The regulated battery voltage in Volts. The default regulated voltage is 4.2V.
@@ -93,6 +102,8 @@ public:
    * When the battery is warm, the charging current is reduced by 140 mV.
    * When the battery is unter an extreme temperature (hot or cold), the charging is suspended.
    * @note If the battery doesn't have a negative temperature coefficient (NTC) thermistor, the temperature is always "Normal".
+   * This is not determined automatically and needs to be set using the setBatteryNTCEnabled() function.
+   * @see setBatteryNTCEnabled()
    * @return uint8_t The battery temperature represented by one of the following constants:
    * BATTERY_TEMPERATURE_NORMAL, BATTERY_TEMPERATURE_EXTREME, BATTERY_TEMPERTURE_COOL, BATTERY_TEMPERTURE_WARM
    */
@@ -111,7 +122,6 @@ public:
 
   static uint16_t getFault();
 
-  static bool ntc_disabled;
 
   static RGBled leds;
   static BQ25120A _pmic;
@@ -123,6 +133,8 @@ public:
   static bool started;
 
 private:
+  /// Defines if the connected battery has a negative temperature coefficient (NTC) thermistor.
+  static bool _ntcEnabled;
   static void pingI2CThd();
   static void checkChgReg();
   static rtos::Mutex i2c_mutex;

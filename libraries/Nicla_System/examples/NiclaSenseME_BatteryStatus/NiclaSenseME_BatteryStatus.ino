@@ -163,7 +163,7 @@ void setup()
   nicla::begin(); // initialise library
   nicla::leds.begin(); // Start I2C connection
 
-  nicla::ntc_disabled = false; // Set to true for standard LiPo batteries without NTC
+  nicla::setBatteryNTCEnabled(true); // Set to false if your battery doesn't have an NTC thermistor.
   setupBLE();
 
   nicla::leds.setColor(green);
