@@ -19,19 +19,19 @@ uint8_t BQ25120A::getStatus()
 void BQ25120A::writeByte(uint8_t address, uint8_t subAddress, uint8_t data)
 {
   setHighImpedanceModeEnabled(false);
-  nicla::i2c_mutex.lock();
+  nicla::_i2c_mutex.lock();
   Wire1.beginTransmission(address);
   Wire1.write(subAddress);
   Wire1.write(data);
   Wire1.endTransmission();
-  nicla::i2c_mutex.unlock();
+  nicla::_i2c_mutex.unlock();
   setHighImpedanceModeEnabled(true);
 }
 
 uint8_t BQ25120A::readByte(uint8_t address, uint8_t subAddress)
 {
   setHighImpedanceModeEnabled(false);
-  nicla::i2c_mutex.lock();
+  nicla::_i2c_mutex.lock();
   Wire1.beginTransmission(address);
   Wire1.write(subAddress);
   Wire1.endTransmission(false);
@@ -40,7 +40,7 @@ uint8_t BQ25120A::readByte(uint8_t address, uint8_t subAddress)
   uint32_t start_time = millis();
   while(!Wire1.available() && (millis() - start_time) < timeout) {}
   uint8_t ret = Wire1.read();
-  nicla::i2c_mutex.unlock();
+  nicla::_i2c_mutex.unlock();
   setHighImpedanceModeEnabled(true);
   return ret;
 }

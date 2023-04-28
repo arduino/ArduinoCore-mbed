@@ -31,7 +31,7 @@
 class nicla {
 
 public:
-  static bool begin(bool mounted_on_mkr = false);
+  static bool begin(bool mountedOnMkr = false);
   static bool enable3V3LDO();
   static bool enable1V8LDO();
   static bool disableLDO();
@@ -45,7 +45,7 @@ public:
    */
   static bool enterShipMode();
   static uint8_t readLDOreg();
-  static bool enableCharge(uint8_t mA = 20, bool disable_ntc = true);
+  static bool enableCharge(uint8_t mA = 20, bool disableNtc = true);
 
   /**
    * @brief Enables or disables the negative temperature coefficient (NTC) thermistor.
@@ -119,26 +119,44 @@ public:
    */
   static uint8_t getBatteryStatus();
 
-
-  static uint16_t getFault();
+  /**
+   * @brief Returns potential battery faults. The first 8 bits (bit 0-7) are the fault register. 
+   * The last 2 bits are the TS_CONTROL register. They are used to retrieve temperature related faults.
+   * 
+   * @return uint16_t 
+   */
+  static uint16_t getBatteryFaults();
 
 
   static RGBled leds;
   static BQ25120A _pmic;
+  
+  /// Flag to check if the begin function has been called. This is used to automatically call the begin function if necessary.
+  static bool started;
 
   friend class RGBled;
   friend class BQ25120A;
   friend class Arduino_BHY2;
 
-  static bool started;
 
 private:
   /// Defines if the connected battery has a negative temperature coefficient (NTC) thermistor.
   static bool _ntcEnabled;
-  static void pingI2CThd();
-  static void checkChgReg();
-  static rtos::Mutex i2c_mutex;
-  static uint8_t _chg_reg;
+
+  /**
+   * @brief Pings the I2C interface by querying the PMIC's fast charge register every 10 seconds.
+   * This is invoked by a thread and is meant to kick the watchdog timer to prevent the PMIC from entering a low power state.
+   * The I2C interface reset timer for the host is 50 seconds.
+   */
+  static void pingI2C();
+  
+  /**
+   * @brief Synchronizes the fast charge settings with the PMIC.
+   * This ensures that the fast charge settings as specified via enableCharge() are applied again the register got wiped.
+   */
+  static void synchronizeFastChargeSettings();
+  static uint8_t _fastChargeRegisterData;
+  static rtos::Mutex _i2c_mutex;
 };
 
 #endif

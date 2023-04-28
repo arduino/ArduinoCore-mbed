@@ -150,17 +150,17 @@ void RGBled::ledBlink(RGBColors color, uint32_t duration)
 
 void RGBled::writeByte(uint8_t address, uint8_t subAddress, uint8_t data)
 {
-  nicla::i2c_mutex.lock();
+  nicla::_i2c_mutex.lock();
   Wire1.beginTransmission(address);
   Wire1.write(subAddress);
   Wire1.write(data);
   Wire1.endTransmission();
-  nicla::i2c_mutex.unlock();
+  nicla::_i2c_mutex.unlock();
 }
 
 uint8_t RGBled::readByte(uint8_t address, uint8_t subAddress)
 {
-  nicla::i2c_mutex.lock();
+  nicla::_i2c_mutex.lock();
   //char response = 0xFF;
   Wire1.beginTransmission(address);
   Wire1.write(subAddress);
@@ -170,6 +170,6 @@ uint8_t RGBled::readByte(uint8_t address, uint8_t subAddress)
   uint32_t start_time = millis();
   while(!Wire1.available() && (millis() - start_time) < timeout) {}
   uint8_t ret = Wire1.read();
-  nicla::i2c_mutex.unlock();
+  nicla::_i2c_mutex.unlock();
   return ret;
 }

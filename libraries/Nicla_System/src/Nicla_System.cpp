@@ -11,32 +11,32 @@
 
 RGBled nicla::leds;
 BQ25120A nicla::_pmic;
-rtos::Mutex nicla::i2c_mutex;
+rtos::Mutex nicla::_i2c_mutex;
 bool nicla::started = false;
-uint8_t nicla::_chg_reg = 0;
+uint8_t nicla::_fastChargeRegisterData = 0;
 bool nicla::_ntcEnabled = true;
 
-void nicla::pingI2CThd() {
+void nicla::pingI2C() {
   while(1) {
     // already protected by a mutex on Wire operations
-    checkChgReg();
+    synchronizeFastChargeSettings();
     delay(10000);
   }
 }
 
-bool nicla::begin(bool mounted_on_mkr)
+bool nicla::begin(bool mountedOnMkr)
 {
-  if (mounted_on_mkr) {
+  if (mountedOnMkr) {
     // GPIO3 is on MKR RESET pin, so we must configure it HIGH or it will, well, reset the board :)
     pinMode(p25, OUTPUT);
     pinMode(P0_10, OUTPUT);
     digitalWrite(P0_10, HIGH);
   }
   Wire1.begin();
-  _chg_reg = _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_FAST_CHG);
+  _fastChargeRegisterData = _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_FAST_CHG);
 #ifndef NO_NEED_FOR_WATCHDOG_THREAD
   static rtos::Thread th(osPriorityHigh, 768, nullptr, "ping_thread");
-  th.start(&nicla::pingI2CThd);
+  th.start(&nicla::pingI2C);
 #endif
   started = true;
 
@@ -108,22 +108,23 @@ uint8_t nicla::readLDOreg()
   return _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_LDO_CTRL);
 }
 
-bool nicla::enableCharge(uint8_t mA, bool disable_ntc)
+bool nicla::enableCharge(uint8_t mA, bool disableNtc)
 {
+
   if (mA < 5) {
-    _chg_reg = 0x3;
+    _fastChargeRegisterData = 0x3;
   } else if (mA < 35) {
-    _chg_reg = ((mA-5) << 2);
+    _fastChargeRegisterData = ((mA-5) << 2);
   } else {
-    _chg_reg = (((mA-40)/10) << 2) | 0x80;
+    _fastChargeRegisterData = (((mA-40)/10) << 2) | 0x80;
   }
-  _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_FAST_CHG, _chg_reg);
+  _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_FAST_CHG, _fastChargeRegisterData);
 
   // For very depleted batteries, set ULVO at the very minimum (2.2V) to re-enable charging
   _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_ILIM_UVLO_CTRL, 0x3F);
 
   // Disable TS and interrupt on charge
-  _ntcEnabled = !disable_ntc;
+  _ntcEnabled = !disableNtc;
   if (!_ntcEnabled) {
     _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_TS_CONTROL, 1 << 3);
   }
@@ -131,15 +132,10 @@ bool nicla::enableCharge(uint8_t mA, bool disable_ntc)
   // also set max battery voltage to 4.2V (VBREG)
   // _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_BATTERY_CTRL, (4.2f - 3.6f)*100);
 
-  return _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_FAST_CHG) == _chg_reg;
+  return _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_FAST_CHG) == _fastChargeRegisterData;
 }
 
-/**
- * @brief Returns potential battery faults. The first 8 bits (bit 0-7) are the fault register, the last 2 bits are the TS_CONTROL register.
- * 
- * @return uint16_t 
- */
-uint16_t nicla::getFault() {
+uint16_t nicla::getBatteryFaults() {
   uint16_t tmp = _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_FAULTS) << 8;
   tmp |= (_pmic.readByte(BQ25120A_ADDRESS, BQ25120A_TS_CONTROL) & 0x60);
   return tmp;
@@ -324,10 +320,10 @@ uint8_t nicla::getBatteryTemperature() {
   return getBatteryStatus() & BATTERY_TEMPERATURE_MASK;
 }
 
-void nicla::checkChgReg()
+void nicla::synchronizeFastChargeSettings()
 {
-  if (_chg_reg != _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_FAST_CHG)) {
-    _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_FAST_CHG, _chg_reg);
+  if (_fastChargeRegisterData != _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_FAST_CHG)) {
+    _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_FAST_CHG, _fastChargeRegisterData);
   }
 }
 
