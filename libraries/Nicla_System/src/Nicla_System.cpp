@@ -137,7 +137,7 @@ bool nicla::enableCharge(uint8_t mA, bool disableNtc)
 
 uint8_t nicla::getBatteryFaults() {
   // Skips the mask bits (4 LSBs)
-  return (_pmic.readByte(BQ25120A_ADDRESS, BQ25120A_FAULTS) >> 4) & 0b1111;
+  return (_pmic.getFaultsRegister() >> 4) & 0b1111;
 }
 
 void nicla::setBatteryNTCEnabled(bool enabled){
@@ -222,7 +222,7 @@ int8_t nicla::getBatteryPercentage(bool useLatchedValue) {
   Example: 0 11 111 00 -> 90% + 8% = 98 - 100% of VBATREG
   */
   constexpr uint8_t BAT_UVLO_FAULT = 0b00100000; // Battery Under-Voltage Lock-Out fault
-  uint8_t faults = _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_FAULTS);
+  uint8_t faults = _pmic.getFaultsRegister();
   if(faults & BAT_UVLO_FAULT) return -1; // Battery is not connected or voltage is too low
 
   // Write 1 to VBMON_READ to trigger a new reading

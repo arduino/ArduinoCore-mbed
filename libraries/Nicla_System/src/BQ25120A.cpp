@@ -15,6 +15,11 @@ uint8_t BQ25120A::getStatusRegister()
   return readByte(BQ25120A_ADDRESS, BQ25120A_STATUS);
 }
 
+uint8_t BQ25120A::getFaultsRegister()
+{
+  return readByte(BQ25120A_ADDRESS, BQ25120A_FAULTS);
+}
+
 void BQ25120A::writeByte(uint8_t address, uint8_t subAddress, uint8_t data)
 {
   setHighImpedanceModeEnabled(false);
