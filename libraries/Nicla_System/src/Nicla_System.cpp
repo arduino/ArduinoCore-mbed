@@ -65,7 +65,7 @@ bool nicla::enable3V3LDO()
 {
   uint8_t ldo_reg = 0xE4;
   _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_LDO_CTRL, ldo_reg);
-  if (_pmic.readByte(BQ25120A_ADDRESS, BQ25120A_LDO_CTRL) != ldo_reg) {
+  if (_pmic.getLDOControlRegister() != ldo_reg) {
     return false;
   }
   return true;
@@ -75,7 +75,7 @@ bool nicla::enable1V8LDO()
 {
   uint8_t ldo_reg = 0xA8;
   _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_LDO_CTRL, ldo_reg);
-  if (_pmic.readByte(BQ25120A_ADDRESS, BQ25120A_LDO_CTRL) != ldo_reg) {
+  if (_pmic.getLDOControlRegister() != ldo_reg) {
     return false;
   }
   return true;
@@ -83,13 +83,10 @@ bool nicla::enable1V8LDO()
 
 bool nicla::disableLDO()
 {
-  uint8_t ldo_reg = _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_LDO_CTRL);
+  uint8_t ldo_reg = _pmic.getLDOControlRegister();
   ldo_reg &= 0x7F;
   _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_LDO_CTRL, ldo_reg);
-  if (_pmic.readByte(BQ25120A_ADDRESS, BQ25120A_LDO_CTRL) != ldo_reg) {
-    return false;
-  }
-  return true;
+  return _pmic.getLDOControlRegister() == ldo_reg;
 }
 
 bool nicla::enterShipMode()
@@ -101,11 +98,6 @@ bool nicla::enterShipMode()
   uint8_t status_reg = _pmic.getStatusRegister();
   status_reg |= 0x20;
   _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_STATUS, status_reg);
-}
-
-uint8_t nicla::readLDOreg()
-{
-  return _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_LDO_CTRL);
 }
 
 bool nicla::enableCharge(uint8_t mA, bool disableNtc)

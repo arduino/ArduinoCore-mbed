@@ -51,7 +51,6 @@ public:
    * @return true if the ship mode is entered successfully.
    */
   static bool enterShipMode();
-  static uint8_t readLDOreg();
   static bool enableCharge(uint8_t mA = 20, bool disableNtc = true);
 
   /**

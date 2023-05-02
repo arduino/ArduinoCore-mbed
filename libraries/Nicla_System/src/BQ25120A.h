@@ -42,6 +42,14 @@ class BQ25120A
   uint8_t getFaultsRegister();
 
   /**
+   * @brief Gets the data from the SYS VOUT Control Register.
+   * @see Section 9.6.7 of the datasheet.
+   * 
+   * @return uint8_t The data from the SYS VOUT Control Register.
+   */
+  uint8_t getLDOControlRegister();
+
+  /**
    * @brief Gets the data from the fast charge control register.
    * @see Section 9.6.4 of the datasheet.
    * 
