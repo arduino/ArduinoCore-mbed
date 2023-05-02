@@ -120,12 +120,17 @@ public:
   static uint8_t getBatteryStatus();
 
   /**
-   * @brief Returns potential battery faults. The first 8 bits (bit 0-7) are the fault register. 
-   * The last 2 bits are the TS_CONTROL register. They are used to retrieve temperature related faults.
+   * @brief Returns potential battery faults retrieved from the fault register.
    * 
-   * @return uint16_t 
+   * - Bit 3: 1 - VIN overvoltage fault. VIN_OV continues to show fault after an I2C read as long as OV exists
+   * - Bit 2: 1 - VIN undervoltage fault. VIN_UV is set when the input falls below VSLP. VIN_UV fault shows only one time. Once read, VIN_UV clears until the the UVLO event occurs.
+   * - Bit 1: 1 – BAT_UVLO fault. BAT_UVLO continues to show fault after an I2C read as long as BAT_UVLO conditions exist.
+   * - Bit 0: 1 – BAT_OCP fault. BAT_OCP is cleared after I2C read.
+   * 
+   * @note Some of the registers are not persistent. See chapter 9.6.2 and 9.6.3 of the datasheet.
+   * @return uint8_t The battery faults encoded in a 16bit integer.
    */
-  static uint16_t getBatteryFaults();
+  static uint8_t getBatteryFaults();
 
 
   static RGBled leds;

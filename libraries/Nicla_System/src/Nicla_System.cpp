@@ -135,10 +135,9 @@ bool nicla::enableCharge(uint8_t mA, bool disableNtc)
   return _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_FAST_CHG) == _fastChargeRegisterData;
 }
 
-uint16_t nicla::getBatteryFaults() {
-  uint16_t tmp = _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_FAULTS) << 8;
-  tmp |= (_pmic.readByte(BQ25120A_ADDRESS, BQ25120A_TS_CONTROL) & 0x60);
-  return tmp;
+uint8_t nicla::getBatteryFaults() {
+  // Skips the mask bits (4 LSBs)
+  return (_pmic.readByte(BQ25120A_ADDRESS, BQ25120A_FAULTS) >> 4) & 0b1111;
 }
 
 void nicla::setBatteryNTCEnabled(bool enabled){
