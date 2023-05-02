@@ -42,6 +42,14 @@ class BQ25120A
   uint8_t getFaultsRegister();
 
   /**
+   * @brief Gets the data from the fast charge control register.
+   * @see Section 9.6.4 of the datasheet.
+   * 
+   * @return uint8_t The data from the fast charge control register.
+   */
+  uint8_t getFastChargeControlRegister();
+
+  /**
    * @brief Writes a byte to the BQ25120A over I2C.
    * @param address The I2C address of the BQ25120A.
    * @param subAddress The memory location of the register to write to.

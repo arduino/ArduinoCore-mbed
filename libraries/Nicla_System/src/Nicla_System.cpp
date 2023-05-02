@@ -33,7 +33,7 @@ bool nicla::begin(bool mountedOnMkr)
     digitalWrite(P0_10, HIGH);
   }
   Wire1.begin();
-  _fastChargeRegisterData = _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_FAST_CHG);
+  _fastChargeRegisterData = _pmic.getFastChargeControlRegister();
 #ifndef NO_NEED_FOR_WATCHDOG_THREAD
   static rtos::Thread th(osPriorityHigh, 768, nullptr, "ping_thread");
   th.start(&nicla::pingI2C);
@@ -132,7 +132,7 @@ bool nicla::enableCharge(uint8_t mA, bool disableNtc)
   // also set max battery voltage to 4.2V (VBREG)
   // _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_BATTERY_CTRL, (4.2f - 3.6f)*100);
 
-  return _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_FAST_CHG) == _fastChargeRegisterData;
+  return _pmic.getFastChargeControlRegister() == _fastChargeRegisterData;
 }
 
 uint8_t nicla::getBatteryFaults() {
@@ -324,7 +324,7 @@ OperatingStatus nicla::getOperatingStatus() {
 
 void nicla::synchronizeFastChargeSettings()
 {
-  if (_fastChargeRegisterData != _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_FAST_CHG)) {
+  if (_fastChargeRegisterData != _pmic.getFastChargeControlRegister()) {
     _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_FAST_CHG, _fastChargeRegisterData);
   }
 }

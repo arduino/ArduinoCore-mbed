@@ -20,6 +20,11 @@ uint8_t BQ25120A::getFaultsRegister()
   return readByte(BQ25120A_ADDRESS, BQ25120A_FAULTS);
 }
 
+uint8_t BQ25120A::getFastChargeControlRegister()
+{
+  return readByte(BQ25120A_ADDRESS, BQ25120A_FAST_CHG);
+}
+
 void BQ25120A::writeByte(uint8_t address, uint8_t subAddress, uint8_t data)
 {
   setHighImpedanceModeEnabled(false);
