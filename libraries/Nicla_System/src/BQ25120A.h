@@ -25,10 +25,37 @@ class BQ25120A
   public:
   BQ25120A() {};
 
+  /**
+   * @brief Gets the data from the status register.
+   * @see Section 9.6.1 of the datasheet.
+   * 
+   * @return uint8_t The data from the status register.
+   */
   uint8_t getStatusRegister();
+  
+  /**
+   * @brief Gets the data from the faults register.
+   * @see Section 9.6.2 of the datasheet.
+   * 
+   * @return uint8_t The data from the faults register.
+   */
   uint8_t getFaultsRegister();
 
+  /**
+   * @brief Writes a byte to the BQ25120A over I2C.
+   * @param address The I2C address of the BQ25120A.
+   * @param subAddress The memory location of the register to write to.
+   * @param data The data to write to the register.
+   */
   void writeByte(uint8_t address, uint8_t subAddress, uint8_t data);
+
+  /**
+   * @brief Reads a byte from the BQ25120A over I2C.
+   * 
+   * @param address The I2C address of the BQ25120A.
+   * @param subAddress The memory location of the register to read from.
+   * @return uint8_t The data read from the register.
+   */
   uint8_t readByte(uint8_t address, uint8_t subAddress);
 
   private:

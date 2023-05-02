@@ -172,7 +172,14 @@ private:
    * This ensures that the fast charge settings as specified via enableCharge() are applied again the register got wiped.
    */
   static void synchronizeFastChargeSettings();
+
+  /** 
+   * A cached version of the fast charge settings for the PMIC.
+   * This is used to reapply the settings if the register got wiped.
+   **/
   static uint8_t _fastChargeRegisterData;
+
+  /// Mutex to prevent concurrent access to the I2C interface.
   static rtos::Mutex _i2c_mutex;
 };
 
