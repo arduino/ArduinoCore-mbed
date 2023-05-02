@@ -181,6 +181,38 @@ float nicla::getRegulatedBatteryVoltage(){
 
 }
 
+void nicla::setRegulatedBatteryVoltage(float voltage){
+  if (voltage < 3.6f){
+    voltage = 3.6f;
+  } else if (voltage > 4.2f) {
+    voltage = 4.2f;
+  }
+
+  // The formula is: VBATREG = 3.6 V + Sum(VBREG[Bit 7:1])
+
+  /*
+  +---------+--------------------+
+  |   Bit   | Regulation Voltage |
+  +---------+--------------------+
+  | 7 (MSB) | 640 mV             |
+  | 6       | 320 mV             |
+  | 5       | 160 mV             |
+  | 4       | 80 mV              |
+  | 3       | 40 mV              |
+  | 2       | 20 mV              |
+  | 1       | 10 mV              |
+  | 0 (LSB) | –                  |
+  +---------+--------------------+
+  */
+
+  // Shift one bit to the left because the LSB is not used.
+  uint16_t additionalMilliVolts = (voltage - 3.6f) * 100;
+  uint8_t value = additionalMilliVolts << 1;
+  // e.g. 4.2V - 3.6V = 0.6V * 100 = 60. 60 << 1 = 120 = 01111000
+
+  _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_BATTERY_CTRL, value);
+}
+
 float nicla::getCurrentBatteryVoltage(){
   return getRegulatedBatteryVoltage() / 100 * getBatteryPercentage();
 }
@@ -284,12 +316,9 @@ BatteryChargeLevel nicla::getBatteryChargeLevel() {
   }
 }
 
-uint8_t nicla::getBatteryTemperature() {
-  if(!_ntcEnabled) return BATTERY_TEMPERATURE_NORMAL;
+BatteryTemperature nicla::getBatteryTemperature() {
+  if(!_ntcEnabled) return BatteryTemperature::Normal;
   
-  // Extract bits 5 and 6 (TS_FAULT0 and TS_FAULT1)
-  uint8_t temperatureSenseFault = _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_TS_CONTROL) >> 5 & 0b11;
-
   /*
   +------+-------------------------------------------------------------+
   | Bits |                         Description                         |
@@ -300,18 +329,9 @@ uint8_t nicla::getBatteryTemperature() {
   |   11 | TWARM < TS temp < THOT (Charging voltage reduced by 140 mV) |
   +------+-------------------------------------------------------------+
   */
-
-  if(temperatureSenseFault == 0){
-    return BATTERY_TEMPERATURE_NORMAL;
-  } else if (temperatureSenseFault == 1) {
-    return BATTERY_TEMPERATURE_EXTREME;
-  } else if (temperatureSenseFault == 2) {
-    return BATTERY_TEMPERTURE_COOL;
-  } else if (temperatureSenseFault == 3) {
-    return BATTERY_TEMPERTURE_WARM;
-  }    
-
-  return BATTERY_TEMPERATURE_NORMAL;
+  // Extract bits 5 and 6 (TS_FAULT0 and TS_FAULT1)
+  uint8_t temperatureSenseFault = _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_TS_CONTROL) >> 5 & 0b11;
+  return static_cast<BatteryTemperature>(temperatureSenseFault);
 }
 
 

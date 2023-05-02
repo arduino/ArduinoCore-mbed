@@ -71,6 +71,13 @@ public:
   static float getRegulatedBatteryVoltage();
 
   /**
+   * @brief Set the Regulated Battery Voltage.
+   * 
+   * @param voltage The voltage in the range of 3.6V to 4.65V.
+   */
+  static void setRegulatedBatteryVoltage(float voltage);
+
+  /**
    * @brief Get the Current Battery Voltage in Volts. This value is calculated by multiplying
    * the regulated voltage by the battery percentage.
    * 
