@@ -265,58 +265,53 @@ int8_t nicla::getBatteryPercentage(bool useLatchedValue) {
 }
 
 uint8_t nicla::getBatteryChargeLevel() {
-  return getBatteryStatus() & BATTERY_CHARGE_MASK;
-}
-
-uint8_t nicla::getBatteryStatus() {
   auto percent = getBatteryPercentage();
-  int res = BATTERY_UNKNOWN;
 
   if (percent >= 98) {
-    res = BATTERY_FULL;
+    return BATTERY_FULL;
   } else if (percent >= 94){
-    res = BATTERY_ALMOST_FULL;
+    return BATTERY_ALMOST_FULL;
   } else if (percent >= 90){
-    res = BATTERY_HALF;
+    return BATTERY_HALF;
   } else if (percent >= 86){
-    res = BATTERY_ALMOST_EMPTY;
+    return BATTERY_ALMOST_EMPTY;
   } else if(percent < 86 && percent > 0)  {
     // < 84% is considered empty
-    res = BATTERY_EMPTY;
+    return BATTERY_EMPTY;
+  } else {
+    // Battery status could not be read
+    return BATTERY_UNKNOWN;
   }
-
-  if (_ntcEnabled) {
-    // Extract bits 5 and 6 (TS_FAULT0 and TS_FAULT1)
-    uint8_t temperatureSenseFault = _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_TS_CONTROL) >> 5 & 0b11;
-
-    /*
-    +------+-------------------------------------------------------------+
-    | Bits |                         Description                         |
-    +------+-------------------------------------------------------------+
-    |   00 | Normal, No TS fault                                         |
-    |   01 | TS temp < TCOLD or TS temp > THOT (Charging suspended)      |
-    |   10 | TCOOL > TS temp > TCOLD (Charging current reduced by half)  |
-    |   11 | TWARM < TS temp < THOT (Charging voltage reduced by 140 mV) |
-    +------+-------------------------------------------------------------+
-    */
-
-    if(temperatureSenseFault == 0){
-      res |= BATTERY_TEMPERATURE_NORMAL;
-    } else if (temperatureSenseFault == 1) {
-      res |= BATTERY_TEMPERATURE_EXTREME;
-    } else if (temperatureSenseFault == 2) {
-      res |= BATTERY_TEMPERTURE_COOL;
-    } else if (temperatureSenseFault == 3) {
-      res |= BATTERY_TEMPERTURE_WARM;
-    }
-  }
-
-  return res;
 }
 
 uint8_t nicla::getBatteryTemperature() {
   if(!_ntcEnabled) return BATTERY_TEMPERATURE_NORMAL;
-  return getBatteryStatus() & BATTERY_TEMPERATURE_MASK;
+  
+  // Extract bits 5 and 6 (TS_FAULT0 and TS_FAULT1)
+  uint8_t temperatureSenseFault = _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_TS_CONTROL) >> 5 & 0b11;
+
+  /*
+  +------+-------------------------------------------------------------+
+  | Bits |                         Description                         |
+  +------+-------------------------------------------------------------+
+  |   00 | Normal, No TS fault                                         |
+  |   01 | TS temp < TCOLD or TS temp > THOT (Charging suspended)      |
+  |   10 | TCOOL > TS temp > TCOLD (Charging current reduced by half)  |
+  |   11 | TWARM < TS temp < THOT (Charging voltage reduced by 140 mV) |
+  +------+-------------------------------------------------------------+
+  */
+
+  if(temperatureSenseFault == 0){
+    return BATTERY_TEMPERATURE_NORMAL;
+  } else if (temperatureSenseFault == 1) {
+    return BATTERY_TEMPERATURE_EXTREME;
+  } else if (temperatureSenseFault == 2) {
+    return BATTERY_TEMPERTURE_COOL;
+  } else if (temperatureSenseFault == 3) {
+    return BATTERY_TEMPERTURE_WARM;
+  }    
+
+  return BATTERY_TEMPERATURE_NORMAL;
 }
 
 

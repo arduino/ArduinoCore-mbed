@@ -26,6 +26,15 @@ enum class OperatingStatus {
 #define BATTERY_EMPTY           1 // Bit pattern: 001
 #define BATTERY_UNKNOWN         0 // Bit pattern: 000
 
+enum class BatteryChargeLevel {
+  Unknown = 0b000,
+  Empty = 0b001,
+  AlmostEmpty = 0b010,
+  HalfFull = 0b011,
+  AlmostFull = 0b100,
+  Full = 0b101
+};
+
 // 2 bits are used to indicate the battery temperature
 #define BATTERY_TEMPERATURE_MASK    0b00011000
 #define BATTERY_TEMPERATURE_NORMAL  (0 << 4)
@@ -113,16 +122,6 @@ public:
    * BATTERY_TEMPERATURE_NORMAL, BATTERY_TEMPERATURE_EXTREME, BATTERY_TEMPERTURE_COOL, BATTERY_TEMPERTURE_WARM
    */
   static uint8_t getBatteryTemperature();
-
-  /**
-   * @brief Get the Battery Status (charge level and temperature).
-   * The first 3 bits indicate the battery charge level. They can be retrieved using the BATTERY_CHARGE_MASK. 
-   * The 4th and 5th bit indicate the battery temperature. They can be retrieved using the BATTERY_TEMPERATURE_MASK.
-   * @see getBatteryChargeLevel()
-   * @see getBatteryTemperature()
-   * @return uint8_t The battery status containing the charge level and temperature. 
-   */
-  static uint8_t getBatteryStatus();
 
   /**
    * @brief Returns potential battery faults retrieved from the fault register.
