@@ -45,15 +45,15 @@ bool updateBatteryLevel(bool enforceNewReading = false) {
   return false;
 }
 
-String getBatteryTemperatureDescription(int status) {
+String getBatteryTemperatureDescription(BatteryTemperature status) {
   switch (status) {
-    case BATTERY_TEMPERATURE_NORMAL:
+    case BatteryTemperature::Normal:
       return "Normal";
-    case BATTERY_TEMPERATURE_EXTREME:
+    case BatteryTemperature::Extreme:
       return "Extreme";
-    case BATTERY_TEMPERTURE_COOL:
+    case BatteryTemperature::Cool:
       return "Cool";
-    case BATTERY_TEMPERTURE_WARM:
+    case BatteryTemperature::Warm:
       return "Warm";
     default:
       return "Unknown";

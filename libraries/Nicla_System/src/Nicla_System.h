@@ -28,11 +28,12 @@ enum class BatteryChargeLevel {
 };
 
 // 2 bits are used to indicate the battery temperature
-#define BATTERY_TEMPERATURE_MASK    0b00011000
-#define BATTERY_TEMPERATURE_NORMAL  (0 << 4)
-#define BATTERY_TEMPERATURE_EXTREME (1 << 4)
-#define BATTERY_TEMPERTURE_COOL     (2 << 4)
-#define BATTERY_TEMPERTURE_WARM     (3 << 4)
+enum class BatteryTemperature {
+  Normal = 0b00,
+  Extreme = 0b01,
+  Cool = 0b10,
+  Warm = 0b11
+};
 
 class nicla {
 
@@ -111,10 +112,10 @@ public:
    * @note If the battery doesn't have a negative temperature coefficient (NTC) thermistor, the temperature is always "Normal".
    * This is not determined automatically and needs to be set using the setBatteryNTCEnabled() function.
    * @see setBatteryNTCEnabled()
-   * @return uint8_t The battery temperature represented by one of the following constants:
-   * BATTERY_TEMPERATURE_NORMAL, BATTERY_TEMPERATURE_EXTREME, BATTERY_TEMPERTURE_COOL, BATTERY_TEMPERTURE_WARM
+   * @return BatteryTemperature The battery temperature represented by one of the following constants:
+   * BatteryTemperature::Normal, BatteryTemperature::Extreme, BatteryTemperature::Cool, BatteryTemperature::Warm
    */
-  static uint8_t getBatteryTemperature();
+  static BatteryTemperature getBatteryTemperature();
 
   /**
    * @brief Returns potential battery faults retrieved from the fault register.
