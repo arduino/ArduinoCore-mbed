@@ -18,14 +18,6 @@ enum class OperatingStatus {
 };
 
 // 3 bits are used to indicate the battery charge level
-#define BATTERY_CHARGE_MASK     0b00000111
-#define BATTERY_FULL            5 // Bit pattern: 101
-#define BATTERY_ALMOST_FULL     4 // Bit pattern: 100
-#define BATTERY_HALF            3 // Bit pattern: 011
-#define BATTERY_ALMOST_EMPTY    2 // Bit pattern: 010
-#define BATTERY_EMPTY           1 // Bit pattern: 001
-#define BATTERY_UNKNOWN         0 // Bit pattern: 000
-
 enum class BatteryChargeLevel {
   Unknown = 0b000,
   Empty = 0b001,
@@ -104,10 +96,11 @@ public:
    * @brief Get the Battery Charge level encoded as a number (0-5). The following values are possible:
    * "Unknown", "Empty", "Almost Empty", "Half Full", "Almost Full", "Full"
    * 
-   * @return uint8_t The battery charge level represented by one of the following constants:
-   * BATTERY_UNKNOWN, BATTERY_FULL, BATTERY_ALMOST_FULL, BATTERY_HALF, BATTERY_ALMOST_EMPTY, BATTERY_EMPTY
+   * @return BatteryChargeLevel The battery charge level represented by one of the following values:
+   * BatteryChargeLevel::Unknown, BatteryChargeLevel::Empty, BatteryChargeLevel::AlmostEmpty, 
+   * BatteryChargeLevel::HalfFull, BatteryChargeLevel::AlmostFull, BatteryChargeLevel::Full
    */
-  static uint8_t getBatteryChargeLevel();
+  static BatteryChargeLevel getBatteryChargeLevel();
 
   /**
    * @brief Get the Battery Temperature. The following values are possible:

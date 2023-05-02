@@ -264,23 +264,23 @@ int8_t nicla::getBatteryPercentage(bool useLatchedValue) {
  return percentageTens + percentageOnes;
 }
 
-uint8_t nicla::getBatteryChargeLevel() {
+BatteryChargeLevel nicla::getBatteryChargeLevel() {
   auto percent = getBatteryPercentage();
 
   if (percent >= 98) {
-    return BATTERY_FULL;
+    return BatteryChargeLevel::Full;
   } else if (percent >= 94){
-    return BATTERY_ALMOST_FULL;
+    return BatteryChargeLevel::AlmostFull;
   } else if (percent >= 90){
-    return BATTERY_HALF;
+    return BatteryChargeLevel::HalfFull;
   } else if (percent >= 86){
-    return BATTERY_ALMOST_EMPTY;
+    return BatteryChargeLevel::AlmostEmpty;
   } else if(percent < 86 && percent > 0)  {
     // < 84% is considered empty
-    return BATTERY_EMPTY;
+    return BatteryChargeLevel::Empty;
   } else {
     // Battery status could not be read
-    return BATTERY_UNKNOWN;
+    return BatteryChargeLevel::Unknown;
   }
 }
 

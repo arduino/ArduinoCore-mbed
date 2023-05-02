@@ -33,7 +33,7 @@ bool updateBatteryLevel(bool enforceNewReading = false) {
     if (batteryPercentage != percentage) {
       batteryPercentage = percentage;
       batteryVoltage = nicla::getCurrentBatteryVoltage();
-      batteryChargeLevel = nicla::getBatteryChargeLevel();
+      batteryChargeLevel = static_cast<int8_t>(nicla::getBatteryChargeLevel());
 
       Serial.print("New battery level: ");
       Serial.println(batteryPercentage);
@@ -60,17 +60,17 @@ String getBatteryTemperatureDescription(int status) {
   }
 }
 
-String getBatteryChargeLevelDescription(int status) {
+String getBatteryChargeLevelDescription(BatteryChargeLevel status) {
   switch (status) {
-    case BATTERY_EMPTY:
+    case BatteryChargeLevel::Empty:
       return "Empty";
-    case BATTERY_ALMOST_EMPTY:
+    case BatteryChargeLevel::AlmostEmpty:
       return "Almost Empty";
-    case BATTERY_HALF:
+    case BatteryChargeLevel::HalfFull:
       return "Half Full";
-    case BATTERY_ALMOST_FULL:
+    case BatteryChargeLevel::AlmostFull:
       return "Almost Full";
-    case BATTERY_FULL:
+    case BatteryChargeLevel::Full:
       return "Full";
     default:
       return "Unknown";
