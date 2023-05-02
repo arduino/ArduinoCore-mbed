@@ -10,6 +10,13 @@
 
 #define USE_FASTCHG_TO_KICK_WATCHDOG 1
 
+enum class OperatingStatus {
+  Ready = 0b00,
+  Charging = 0b01,
+  ChargingComplete = 0b10,
+  Error = 0b11
+};
+
 // 3 bits are used to indicate the battery charge level
 #define BATTERY_CHARGE_MASK     0b00000111
 #define BATTERY_FULL            5 // Bit pattern: 101
@@ -25,8 +32,6 @@
 #define BATTERY_TEMPERATURE_EXTREME (1 << 4)
 #define BATTERY_TEMPERTURE_COOL     (2 << 4)
 #define BATTERY_TEMPERTURE_WARM     (3 << 4)
-
-#define BATTERY_CHARGING        (1 << 7)
 
 class nicla {
 
@@ -132,6 +137,13 @@ public:
    */
   static uint8_t getBatteryFaults();
 
+
+  /**
+   * @brief Get the current operating status of the PMIC.
+   * 
+   * @return OperatingStatus One of the following: Ready, Charging, ChargingComplete, Error.
+   */
+  static OperatingStatus getOperatingStatus();
 
   static RGBled leds;
   static BQ25120A _pmic;

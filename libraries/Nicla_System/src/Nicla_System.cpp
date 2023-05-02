@@ -319,6 +319,14 @@ uint8_t nicla::getBatteryTemperature() {
   return getBatteryStatus() & BATTERY_TEMPERATURE_MASK;
 }
 
+
+OperatingStatus nicla::getOperatingStatus() {
+  // Extract bits 6 and 7
+  uint8_t status = _pmic.getStatus() >> 6 & 0b11;
+  return static_cast<OperatingStatus>(status);
+}
+
+
 void nicla::synchronizeFastChargeSettings()
 {
   if (_fastChargeRegisterData != _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_FAST_CHG)) {

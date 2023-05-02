@@ -167,6 +167,8 @@ void setup()
   setupBLE();
 
   nicla::leds.setColor(green);
+
+  nicla::enableCharge();
 }
 
 void loop()
@@ -216,6 +218,11 @@ void loop()
 
     auto chargeLevel = nicla::getBatteryChargeLevel();
     Serial.println("Battery is " + getBatteryChargeLevelDescription(chargeLevel));
+
+    bool isCharging = nicla::getOperatingStatus() == OperatingStatus::Charging;
+    Serial.print("Battery is charging: ");
+    Serial.println(isCharging ? "Yes" : "No");
+    
     Serial.println("----------------------");
   }
 }
