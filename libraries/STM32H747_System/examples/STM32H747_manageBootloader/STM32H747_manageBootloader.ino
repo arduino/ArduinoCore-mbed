@@ -9,9 +9,13 @@
 #include "portenta_lite_bootloader.h"
 #include "portenta_lite_connected_bootloader.h"
 #define GET_OTP_BOARD_INFO
+typedef PortentaBoardInfo BoardInfo;
 #elif defined(ARDUINO_NICLA_VISION)
 #include "nicla_vision_bootloader.h"
 #elif defined(ARDUINO_OPTA)
+#define GET_OTP_BOARD_INFO
+#include "opta_info.h"
+typedef OptaBoardInfo BoardInfo;
 #include "opta_bootloader.h"
 #endif
 
@@ -54,11 +58,13 @@ void setup() {
   Serial.println("Has Crypto chip: " + String(bootloader_data[9] == 1 ? "Yes" : "No"));
 
 #ifdef GET_OTP_BOARD_INFO
-  auto info = *((PortentaBoardInfo*)boardInfo());
+  auto info = *((BoardInfo*)boardInfo());
   if (info.magic == 0xB5) {
     Serial.println("Secure info version: " + String(info.version));
     Serial.println("Secure board revision: " + String(info.revision >> 8) + "." + String(info.revision & 0xFF));
+#if defined(ARDUINO_PORTENTA_H7_M7)
     Serial.println("Secure carrier identification: " + String(info.carrier >> 8) + "." + String(info.revision & 0xFF));
+#endif
     Serial.println("Secure vid: 0x" + String(info.vid, HEX));
     Serial.println("Secure pid: 0x" + String(info.pid, HEX));
     Serial.println("Secure mac: " + String(info.mac_address[0], HEX) + ":" + String(info.mac_address[1], HEX) + ":" +
