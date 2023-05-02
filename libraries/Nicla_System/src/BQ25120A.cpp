@@ -10,10 +10,9 @@
 // When VIN > VUVLO this enables charging.
 static mbed::DigitalOut cd(p25, 0);
 
-uint8_t BQ25120A::getStatus()
+uint8_t BQ25120A::getStatusRegister()
 {
-  uint8_t c = readByte(BQ25120A_ADDRESS, BQ25120A_STATUS); // Read PRODUCT_ID register for BQ25120A
-  return c;
+  return readByte(BQ25120A_ADDRESS, BQ25120A_STATUS);
 }
 
 void BQ25120A::writeByte(uint8_t address, uint8_t subAddress, uint8_t data)

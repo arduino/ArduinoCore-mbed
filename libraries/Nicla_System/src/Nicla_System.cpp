@@ -98,7 +98,7 @@ bool nicla::enterShipMode()
   //    | B7 | B6 |      B5     | B4 | B3 | B2 | B1 | B0 |
   //    | RO | RO | EN_SHIPMODE | RO | RO | RO | RO | RO |
 
-  uint8_t status_reg = _pmic.getStatus();
+  uint8_t status_reg = _pmic.getStatusRegister();
   status_reg |= 0x20;
   _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_STATUS, status_reg);
 }
@@ -322,7 +322,7 @@ uint8_t nicla::getBatteryTemperature() {
 
 OperatingStatus nicla::getOperatingStatus() {
   // Extract bits 6 and 7
-  uint8_t status = _pmic.getStatus() >> 6 & 0b11;
+  uint8_t status = _pmic.getStatusRegister() >> 6 & 0b11;
   return static_cast<OperatingStatus>(status);
 }
 
