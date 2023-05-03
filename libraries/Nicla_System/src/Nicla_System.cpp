@@ -206,7 +206,11 @@ void nicla::setRegulatedBatteryVoltage(float voltage){
 }
 
 float nicla::getCurrentBatteryVoltage(){
-  return getRegulatedBatteryVoltage() / 100 * getBatteryPercentage();
+  auto percentage = getBatteryPercentage();
+  if (percentage < 0) {
+    return 0;
+  }
+  return getRegulatedBatteryVoltage() / 100 * percentage;
 }
 
 int8_t nicla::getBatteryPercentage(bool useLatchedValue) {
