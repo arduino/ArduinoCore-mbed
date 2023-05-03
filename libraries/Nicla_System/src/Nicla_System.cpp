@@ -102,17 +102,42 @@ bool nicla::enterShipMode()
 
 bool nicla::enableCharge(uint8_t mA, bool disableNtc)
 {
+  /*
+  The ICHRG is calculated using the following equation: 
+  - If ICHRG_RANGE (Bit 7) is 0, then ICHRG = 5 mA + ICHRGCODE x 1 mA. 
+  - If ICHRG_RANGE (Bit 7) is 1, then ICHRG = 40 mA + ICHRGCODE x 10 mA. 
+  - If a value greater than 35 mA (ICHRG_RANGE = 0) or 300 mA (ICHRG_RANGE = 1) is written, 
+    the setting goes to 35 mA or 300 mA respectively, except if the ICHRG bits are all 1 (that is, 11111), 
+    then the externally programmed value is used. See section 9.6.4 in the datasheet.
+  */
+
+  if (mA > 300) {
+    mA = 300;
+  }
 
   if (mA < 5) {
-    _fastChargeRegisterData = 0x3;
-  } else if (mA < 35) {
-    _fastChargeRegisterData = ((mA-5) << 2);
+    mA = 5;
+  }
+
+  if(mA > 35 && mA < 40) {
+    mA = 35;
+  }
+
+  if (mA <= 35) {
+    // Values 5 mA to 35 mA
+    _fastChargeRegisterData = ((mA-5) << 2); // e.g. 20mA - 5mA = 15mA << 2 -> 0b00111100
   } else {
+    // Values 40 mA to 300 mA
+    // e.g. (200mA - 40mA) / 10 = 16mA << 2 -> 0b01000000 | 0x80 -> 0b11000000
     _fastChargeRegisterData = (((mA-40)/10) << 2) | 0x80;
   }
+
   _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_FAST_CHG, _fastChargeRegisterData);
 
-  // For very depleted batteries, set ULVO at the very minimum (2.2V) to re-enable charging
+  // For very depleted batteries, set BULVO to the very minimum to re-enable charging.
+  // 2.2V or 2.0V are the minimum values for BULVO. The latter is not mentioned in the datasheet
+  // but it looks like a typo since 2.2V is mentioned twice. See: Table 22 in the datasheet.
+  // Also sets the input current limit to 350mA.
   _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_ILIM_UVLO_CTRL, 0x3F);
 
   _ntcEnabled = !disableNtc;
@@ -121,9 +146,6 @@ bool nicla::enableCharge(uint8_t mA, bool disableNtc)
     // INT only shows faults and does not show charge status)
     _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_TS_CONTROL, 0);
   }
-
-  // also set max battery voltage to 4.2V (VBREG)
-  // _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_BATTERY_CTRL, (4.2f - 3.6f)*100);
 
   return _pmic.getFastChargeControlRegister() == _fastChargeRegisterData;
 }

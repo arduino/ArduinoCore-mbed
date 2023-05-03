@@ -51,6 +51,14 @@ public:
    * @return true if the ship mode is entered successfully.
    */
   static bool enterShipMode();
+
+  /**
+   * @brief Enables fast charging of the battery. 
+   * 
+   * @param mA The desired milliampere (mA) charging current. The default is 20mA.
+   * @param disableNtc Whether to disable Temperature Sense and interrupt on charge. The default is true.
+   * @return true If the fast charging is enabled successfully. False, otherwise.   
+   */
   static bool enableCharge(uint8_t mA = 20, bool disableNtc = true);
 
   /**
