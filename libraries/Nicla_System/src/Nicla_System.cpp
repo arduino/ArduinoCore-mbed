@@ -150,6 +150,10 @@ bool nicla::enableCharging(uint16_t mA, bool disableNtc)
   return _pmic.getFastChargeControlRegister() == _fastChargeRegisterData;
 }
 
+bool nicla::runsOnBattery() {
+  return _pmic.runsOnBattery(BQ25120A_ADDRESS);
+}
+
 uint8_t nicla::getBatteryFaults() {
   // Skips the mask bits (4 LSBs)
   return (_pmic.getFaultsRegister() >> 4) & 0b1111;

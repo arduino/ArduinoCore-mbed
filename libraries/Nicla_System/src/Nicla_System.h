@@ -62,6 +62,13 @@ public:
   static bool enableCharging(uint16_t mA = 20, bool disableNtc = true);
 
   /**
+   * @brief Determines if the board is charged from the battery.
+   * 
+   * @return true If the board is powered from the battery. False, when powered from USB / VIN.
+   */
+  static bool runsOnBattery();
+
+  /**
    * @brief Enables or disables the negative temperature coefficient (NTC) thermistor.
    * NTCs are used to prevent the batteries from being charged at temperatures that are too high or too low.
    * Set to disabled for standard LiPo batteries without NTC.

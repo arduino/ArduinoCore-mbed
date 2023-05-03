@@ -222,6 +222,11 @@ void loop()
     bool isCharging = nicla::getOperatingStatus() == OperatingStatus::Charging;
     Serial.print("Battery is charging: ");
     Serial.println(isCharging ? "Yes" : "No");
+
+    bool runsOnBattery = nicla::runsOnBattery();
+    Serial.print("Runs on battery: ");
+    Serial.println(runsOnBattery ? "Yes" : "No");
+
     
     Serial.println("----------------------");
   }
