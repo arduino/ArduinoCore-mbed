@@ -97,7 +97,7 @@ public:
    * @return int8_t The percentage of the regulated voltage in the range of 60% to 100%.
    * A value of < 0 indicates that the battery percentage could not be determined.
    */
-  static int8_t getBatteryPercentage(bool useLatchedValue = false);
+  static int8_t getBatteryVoltagePercentage(bool useLatchedValue = false);
 
   /**
    * @brief Get the Battery Charge level encoded as a number (0-5). The following values are possible:

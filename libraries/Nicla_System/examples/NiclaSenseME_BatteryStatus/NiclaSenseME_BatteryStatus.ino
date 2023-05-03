@@ -24,7 +24,7 @@ bool updateBatteryLevel(bool enforceNewReading = false) {
   if (intervalFired || isFirstReading || enforceNewReading) {
     Serial.println("Checking the battery level...");
     updateTimestamp = millis();
-    auto percentage = nicla::getBatteryPercentage();
+    auto percentage = nicla::getBatteryVoltagePercentage();
 
     if (percentage < 0) {      
       return false; // Percentage couldn't be determined.
@@ -209,7 +209,7 @@ void loop()
     Serial.println(voltage);
 
     Serial.print("Battery Percent: ");
-    auto percent = nicla::getBatteryPercentage();
+    auto percent = nicla::getBatteryVoltagePercentage();
     Serial.println(percent);
 
     Serial.print("Battery Temperature: ");

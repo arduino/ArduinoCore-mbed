@@ -206,14 +206,14 @@ void nicla::setRegulatedBatteryVoltage(float voltage){
 }
 
 float nicla::getCurrentBatteryVoltage(){
-  auto percentage = getBatteryPercentage();
+  auto percentage = getBatteryVoltagePercentage();
   if (percentage < 0) {
     return 0;
   }
   return getRegulatedBatteryVoltage() / 100 * percentage;
 }
 
-int8_t nicla::getBatteryPercentage(bool useLatchedValue) {
+int8_t nicla::getBatteryVoltagePercentage(bool useLatchedValue) {
   /*
   * 9.3.4 Voltage Based Battery Monitor (Page 20)
   * The device implements a simple voltage battery monitor which can be used to determine the depth of discharge.
@@ -293,7 +293,7 @@ int8_t nicla::getBatteryPercentage(bool useLatchedValue) {
 }
 
 BatteryChargeLevel nicla::getBatteryChargeLevel() {
-  auto percent = getBatteryPercentage();
+  auto percent = getBatteryVoltagePercentage();
 
   if (percent >= 98) {
     return BatteryChargeLevel::Full;
