@@ -100,7 +100,7 @@ bool nicla::enterShipMode()
   _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_STATUS, status_reg);
 }
 
-bool nicla::enableCharge(uint8_t mA, bool disableNtc)
+bool nicla::enableCharging(uint16_t mA, bool disableNtc)
 {
   /*
   The ICHRG is calculated using the following equation: 

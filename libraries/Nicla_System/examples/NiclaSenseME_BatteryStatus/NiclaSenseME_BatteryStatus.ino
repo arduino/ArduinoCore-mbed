@@ -168,7 +168,7 @@ void setup()
 
   nicla::leds.setColor(green);
 
-  nicla::enableCharge();
+  nicla::enableCharging();
 }
 
 void loop()

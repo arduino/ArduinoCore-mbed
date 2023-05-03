@@ -55,11 +55,11 @@ public:
   /**
    * @brief Enables fast charging of the battery. 
    * 
-   * @param mA The desired milliampere (mA) charging current. The default is 20mA.
+   * @param mA The desired milliampere (mA) charging current. Range: 5mA - 35mA and 40mA - 300mA. The default is 20mA.
    * @param disableNtc Whether to disable Temperature Sense and interrupt on charge. The default is true.
    * @return true If the fast charging is enabled successfully. False, otherwise.   
    */
-  static bool enableCharge(uint8_t mA = 20, bool disableNtc = true);
+  static bool enableCharging(uint16_t mA = 20, bool disableNtc = true);
 
   /**
    * @brief Enables or disables the negative temperature coefficient (NTC) thermistor.
