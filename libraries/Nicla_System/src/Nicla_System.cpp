@@ -115,10 +115,11 @@ bool nicla::enableCharge(uint8_t mA, bool disableNtc)
   // For very depleted batteries, set ULVO at the very minimum (2.2V) to re-enable charging
   _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_ILIM_UVLO_CTRL, 0x3F);
 
-  // Disable TS and interrupt on charge
   _ntcEnabled = !disableNtc;
   if (!_ntcEnabled) {
-    _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_TS_CONTROL, 1 << 3);
+    // Disable Temperature Sense (B7 = 0) and interrupt on charge status change (B3 = 0).
+    // INT only shows faults and does not show charge status)
+    _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_TS_CONTROL, 0);
   }
 
   // also set max battery voltage to 4.2V (VBREG)
