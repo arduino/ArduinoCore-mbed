@@ -159,17 +159,13 @@ float nicla::getRegulatedBatteryVoltage(){
 
   // Read the Battery Voltage Control Register that holds the regulated battery voltage
   uint8_t data = _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_BATTERY_CTRL);
-  int milliVolts = 360; // 3.6V is the minimum voltage
+  int milliVolts = 3600; // 3.6V is the minimum voltage
+  
+  // Shift the data to the right by 1 bit to remove the LSB that is not used.
+  uint8_t shiftedData = (data >> 1) & 0b01111111;
+  milliVolts += shiftedData * 10;
 
-  // Loop through bits 1-7. LSB is bit 0 and it's not used
-  for (int i = 1; i <= 7; ++i) {
-      if (data & (1 << i)) {
-          int addition = 1 << (i - 1); // 2^(i-1): 10, 20, 40, 80, 160, 320, 640 mV
-          milliVolts += addition;
-      }
-  }
-
-  return milliVolts / 100.0f;
+  return milliVolts / 1000.0f;
 
 }
 
@@ -197,9 +193,9 @@ void nicla::setRegulatedBatteryVoltage(float voltage){
   +---------+--------------------+
   */
 
+  uint16_t voltageAddition = (voltage - 3.6f) * 100;
   // Shift one bit to the left because the LSB is not used.
-  uint16_t additionalMilliVolts = (voltage - 3.6f) * 100;
-  uint8_t value = additionalMilliVolts << 1;
+  uint8_t value = voltageAddition << 1;
   // e.g. 4.2V - 3.6V = 0.6V * 100 = 60. 60 << 1 = 120 = 01111000
 
   _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_BATTERY_CTRL, value);
