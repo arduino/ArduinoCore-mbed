@@ -57,6 +57,14 @@ class BQ25120A
    */
   uint8_t getFastChargeControlRegister();
 
+
+  /**
+   * @brief Determines if the board is charged from the battery.
+   * 
+   * @return true If the board is powered from the battery. False, when powered from USB / VIN.
+   */
+  bool runsOnBattery(uint8_t address);
+
   /**
    * @brief Writes a byte to the BQ25120A over I2C.
    * @param address The I2C address of the BQ25120A.
@@ -89,6 +97,15 @@ class BQ25120A
    * @param enabled Defines if the high impedance mode should be enabled or disabled.
    */
   void setHighImpedanceModeEnabled(bool enabled);
+
+  /**
+   * @brief Reads a byte from the BQ25120A over I2C without locking the bus through the mutex.
+   * 
+   * @param address The I2C address of the BQ25120A.
+   * @param subAddress The memory location of the register to read from.
+   * @return uint8_t The data read from the register.
+   */
+  uint8_t readByteUnprotected(uint8_t address, uint8_t subAddress);
 };
 
 #endif
