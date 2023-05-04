@@ -284,13 +284,23 @@ int8_t nicla::getBatteryVoltagePercentage(bool useLatchedValue) {
   uint8_t faults = _pmic.getFaultsRegister();
   if(faults & BAT_UVLO_FAULT) return -1; // Battery is not connected or voltage is too low
 
-  // Write 1 to VBMON_READ to trigger a new reading
-  // TODO: Disable charging while reading battery percentage. SEE chapter 9.3.4
   
   if(!useLatchedValue){
+    // Disable charging while reading battery percentage. SEE chapter 9.3.4    
+    bool chargingEnabled = (_fastChargeRegisterData & 0b10) == 0; // Bit 1 is 0 if charging is enabled.
+    
+    if(chargingEnabled) {
+      disableCharging();
+    }
     // Write 1 to VBMON_READ to trigger a new reading
     _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_BATT_MON, 1);
     delay(3); // According to datasheet, 2ms is enough, but we add 1ms for safety
+    
+    if(chargingEnabled) {
+      // Re-enable charging by setting bit 1 to 0
+      _fastChargeRegisterData &= 0b11111101;
+      _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_FAST_CHG, _fastChargeRegisterData);
+    }
   }
   uint8_t data = _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_BATT_MON);
 
