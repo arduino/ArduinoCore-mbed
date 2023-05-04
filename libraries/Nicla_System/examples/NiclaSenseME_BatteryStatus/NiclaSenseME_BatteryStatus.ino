@@ -230,11 +230,11 @@ void setup()
   nicla::leds.begin(); // Start I2C connection
 
   nicla::setBatteryNTCEnabled(true); // Set to false if your battery doesn't have an NTC thermistor.
-  setupBLE();
+  nicla::enableCharging();
 
   nicla::leds.setColor(green);
 
-  nicla::enableCharging();
+  setupBLE();
 }
 
 void loop()
