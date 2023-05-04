@@ -57,3 +57,14 @@ button:hover {
     width: 0;
     height: 26px;
 }
+
+#battery-status {    
+    display: flex;
+    flex-direction: row;
+    margin: 20px 0;
+    justify-content: center;
+}
+
+#battery-status > div {
+    display: none;
+}

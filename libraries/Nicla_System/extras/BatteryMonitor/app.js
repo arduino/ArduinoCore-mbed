@@ -1,6 +1,8 @@
 const connectButton = document.getElementById('connect');
 const batteryLevelElement = document.getElementById('battery-level');
 const batteryLabel = document.getElementById('battery-label');
+const chargingIconElement = document.getElementById('charging-icon');
+const externalPowerIconElement = document.getElementById('external-powered-icon');
 
 const serviceUuid = '19b10000-0000-537e-4f6c-d104768a1214';
 let pollIntervalID;
@@ -41,6 +43,27 @@ let data = {
             const colors = ["#ffffff", "#ff2d2d", "#fc9228", "#ffea00", "#adfd5c", "#00c600"];
             return colors[value];
         }
+    },
+    "runsOnBattery": {
+        "name": "Runs on Battery",
+        "value": false,
+        "unit": "",
+        "characteristic": null,
+        "characteristicUUID": "19b10000-1004-537e-4f6c-d104768a1214",
+        "extractData": function(dataView) {
+            return dataView.getUint8(0) == 1;
+        }
+    },
+
+    "isCharging": {
+        "name": "Is Charging",
+        "value": false,
+        "unit": "",
+        "characteristic": null,
+        "characteristicUUID": "19b10000-1005-537e-4f6c-d104768a1214",
+        "extractData": function(dataView) {
+            return dataView.getUint8(0) == 1;
+        }
     }
 };
 
@@ -54,6 +77,8 @@ function onDisconnected(event) {
     // Reset the battery level display
     batteryLevelElement.style.width = "0px";
     batteryLabel.textContent = "";
+    chargingIconElement.style.display = "none";
+    externalPowerIconElement.style.display = "none";
 }
 
 async function connectToPeripheralDevice(usePolling = false, pollInterval = 5000){
@@ -93,7 +118,7 @@ async function connectToPeripheralDevice(usePolling = false, pollInterval = 5000
 
 connectButton.addEventListener('click', async () => {
    try {
-       await connectToPeripheralDevice(true);
+       await connectToPeripheralDevice();
        connectButton.disabled = true;
        connectButton.style.opacity = 0.5;
     } catch (error) {
@@ -106,7 +131,7 @@ connectButton.addEventListener('click', async () => {
     }
 });
 
-function displayBatteryLevel() {
+function displayBatteryData() {
     const batteryPercentage = data.batteryPercentage.value;
     const batteryVoltage = data.batteryVoltage.value;
     const regulatedVoltage = (batteryVoltage / batteryPercentage * 100).toFixed(2);
@@ -116,6 +141,9 @@ function displayBatteryLevel() {
     batteryLevelElement.style.width = `${batteryPercentageMapped * 0.56}px`; // Scale the battery level to the width of the battery div
     batteryLevelElement.style.backgroundColor = data.batteryChargeLevel.getColor(data.batteryChargeLevel.value);
     batteryLabel.textContent = `${batteryVoltage.toFixed(2)}V (${batteryPercentage}% of ${regulatedVoltage}V)`;
+
+    chargingIconElement.style.display = data.isCharging.value ? "block" : "none";
+    externalPowerIconElement.style.display = data.runsOnBattery.value ? "none" : "block";
 }
 
 async function readCharacteristicsData() {
@@ -127,7 +155,7 @@ async function readCharacteristicsData() {
             console.log(item.name + ": " + item.value + item.unit);
         })
     );
-    displayBatteryLevel();
+    displayBatteryData();
 }
 
 function handleCharacteristicChange(event) {
@@ -136,6 +164,6 @@ function handleCharacteristicChange(event) {
     let dataView = event.target.value;
     dataItem.value = dataItem.extractData(dataView);
 
-    console.log(dataItem.name + " changed: " + dataItem.value + dataItem.unit);
-    displayBatteryLevel();
+    console.log(`'${dataItem.name}' changed: ${dataItem.value}${dataItem.unit}`);
+    displayBatteryData();
 }

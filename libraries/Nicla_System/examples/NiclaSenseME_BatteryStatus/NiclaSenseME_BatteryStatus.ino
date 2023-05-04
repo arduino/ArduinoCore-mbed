@@ -2,10 +2,12 @@
 #include <ArduinoBLE.h>
 
 constexpr auto printInterval { 4000ul };
-constexpr auto batteryMeasureInterval { 5000ul };
+constexpr auto batteryUpdateInterval { 4000ul };
 int8_t batteryChargeLevel = -1;
 int8_t batteryPercentage = -1;
 float batteryVoltage = -1.0f;
+int8_t runsOnBattery = -1; // Using an int to be able to represent an unknown state.
+int8_t batteryIsCharging = -1; // Using an int to be able to represent an unknown state.
 
 
 #define DEVICE_NAME "NiclaSenseME"
@@ -15,10 +17,39 @@ BLEService service(DEVICE_UUID("0000"));
 BLEIntCharacteristic batteryPercentageCharacteristic(DEVICE_UUID("1001"), BLERead | BLENotify);
 BLEFloatCharacteristic batteryVoltageCharacteristic(DEVICE_UUID("1002"), BLERead | BLENotify);
 BLEIntCharacteristic batteryChargeLevelCharacteristic(DEVICE_UUID("1003"), BLERead | BLENotify);
+BLEBooleanCharacteristic runsOnBatteryCharacteristic(DEVICE_UUID("1004"), BLERead | BLENotify);
+BLEBooleanCharacteristic isChargingCharacteristic(DEVICE_UUID("1005"), BLERead | BLENotify);
 
-bool updateBatteryLevel(bool enforceNewReading = false) {
+bool updateBatteryStatus(){
   static auto updateTimestamp = millis();
-  bool intervalFired = millis() - updateTimestamp >= batteryMeasureInterval;
+  bool intervalFired = millis() - updateTimestamp >= batteryUpdateInterval;
+  bool isFirstReading = runsOnBattery == -1 || batteryIsCharging == -1;
+
+  if (intervalFired || isFirstReading) {
+    Serial.println("Checking the battery status...");
+    updateTimestamp = millis();
+    int8_t isCharging = nicla::getOperatingStatus() == OperatingStatus::Charging;
+    int8_t batteryPowered = nicla::runsOnBattery();
+    bool valueUpdated = false;
+
+    if (batteryIsCharging != isCharging) {
+      batteryIsCharging = isCharging;
+      valueUpdated = true;
+    }
+
+    if (runsOnBattery != batteryPowered) {
+      runsOnBattery = batteryPowered;
+      valueUpdated = true;
+    }
+
+    return valueUpdated;
+  }
+
+  return false;
+}
+
+  static auto updateTimestamp = millis();
+  bool intervalFired = millis() - updateTimestamp >= batteryUpdateInterval;
   bool isFirstReading = batteryPercentage == -1 || batteryVoltage == -1.0f;
 
   if (intervalFired || isFirstReading || enforceNewReading) {
@@ -112,6 +143,22 @@ void onBatteryChargeLevelCharacteristicRead(BLEDevice central, BLECharacteristic
   batteryChargeLevelCharacteristic.writeValue(batteryChargeLevel);
 }
 
+void onRunsOnBatteryCharacteristicRead(BLEDevice central, BLECharacteristic characteristic) {
+  Serial.println("Checking if device runs on battery...");
+  updateBatteryStatus();
+  Serial.print("Runs on battery: ");
+  Serial.println(runsOnBattery == 1 ? "Yes" : "No");
+  runsOnBatteryCharacteristic.writeValue(runsOnBattery == 1);
+}
+
+void onIsChargingCharacteristicRead(BLEDevice central, BLECharacteristic characteristic) {
+  Serial.println("Checking if battery is charging...");
+  updateBatteryStatus();
+  Serial.print("Battery is charging: ");
+  Serial.println(batteryIsCharging == 1 ? "Yes" : "No");
+  isChargingCharacteristic.writeValue(batteryIsCharging == 1);
+}
+
 void onCharacteristicSubscribed(BLEDevice central, BLECharacteristic characteristic) {
   Serial.println("Device subscribed to characteristic: " + String(characteristic.uuid()));
 }
@@ -150,6 +197,16 @@ void setupBLE() {
   batteryChargeLevelCharacteristic.setEventHandler(BLESubscribed, onCharacteristicSubscribed);
   batteryChargeLevelCharacteristic.writeValue(batteryChargeLevel);
 
+  service.addCharacteristic(runsOnBatteryCharacteristic);
+  runsOnBatteryCharacteristic.setEventHandler(BLERead, onRunsOnBatteryCharacteristicRead);
+  runsOnBatteryCharacteristic.setEventHandler(BLESubscribed, onCharacteristicSubscribed);
+  runsOnBatteryCharacteristic.writeValue(runsOnBattery == 1);
+
+  service.addCharacteristic(isChargingCharacteristic);
+  isChargingCharacteristic.setEventHandler(BLERead, onIsChargingCharacteristicRead);
+  isChargingCharacteristic.setEventHandler(BLESubscribed, onCharacteristicSubscribed);
+  isChargingCharacteristic.writeValue(batteryIsCharging == 1);
+
   BLE.addService(service);
   BLE.advertise();
 }
@@ -177,6 +234,7 @@ void loop()
 
   if (BLE.connected()) {
     bool newBatteryLevelAvailable = updateBatteryLevel();
+    bool newBatteryStatusAvailable = updateBatteryStatus();
 
     if (batteryPercentageCharacteristic.subscribed() && newBatteryLevelAvailable) {
       Serial.print("Battery Percentage: ");
@@ -195,7 +253,19 @@ void loop()
       Serial.println(batteryChargeLevel);
       batteryChargeLevelCharacteristic.writeValue(batteryChargeLevel);
     }
-    
+
+    if(runsOnBatteryCharacteristic.subscribed() && newBatteryStatusAvailable) {
+      Serial.print("Runs on battery: ");
+      Serial.println(runsOnBattery == 1 ? "Yes" : "No");
+      runsOnBatteryCharacteristic.writeValue(runsOnBattery == 1);
+    }
+
+    if(isChargingCharacteristic.subscribed() && newBatteryStatusAvailable) {
+      Serial.print("Battery is charging: ");
+      Serial.println(batteryIsCharging == 1 ? "Yes" : "No");
+      isChargingCharacteristic.writeValue(batteryIsCharging == 1);
+    }
+
     return;
   }
 
