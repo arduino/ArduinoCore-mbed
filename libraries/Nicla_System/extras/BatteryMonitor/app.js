@@ -1,3 +1,4 @@
+/// UI elements
 const connectButton = document.getElementById('connect');
 const batteryLevelElement = document.getElementById('battery-level');
 const batteryLabel = document.getElementById('battery-label');
@@ -8,6 +9,7 @@ const serviceUuid = '19b10000-0000-537e-4f6c-d104768a1214';
 let pollIntervalID;
 let peripheralDevice;
 
+/// Data structure to hold the characteristics and their values plus data conversion functions.
 let data = {
     "batteryPercentage": {
         "name": "Battery Percentage",
@@ -81,6 +83,12 @@ function onDisconnected(event) {
     externalPowerIconElement.style.display = "none";
 }
 
+/**
+ * Connects to the Arduino board and starts reading the characteristics.
+ * @param {Boolean} usePolling The default is to use notifications, but polling can be used instead.
+ * In that case a poll interval can be defined.
+ * @param {Number} pollInterval The interval in milliseconds to poll the characteristics from the device.
+ */
 async function connectToPeripheralDevice(usePolling = false, pollInterval = 5000){
     if (peripheralDevice && peripheralDevice.gatt.connected) {
         console.log("Already connected");
@@ -131,6 +139,12 @@ connectButton.addEventListener('click', async () => {
     }
 });
 
+/**
+ * Renders the data from the device in the UI.
+ * It displays the battery level as a visual bar color coded from red to green.
+ * It also displays the battery voltage and the percentage of the regulated voltage.
+ * It also displays the charging and external power status.
+ */
 function displayBatteryData() {
     const batteryPercentage = data.batteryPercentage.value;
     const batteryVoltage = data.batteryVoltage.value;
@@ -146,6 +160,10 @@ function displayBatteryData() {
     externalPowerIconElement.style.display = data.runsOnBattery.value ? "none" : "block";
 }
 
+/**
+ * Used together with polling to read the characteristics from the device.
+ * After reading the data it is displayed in the UI by calling displayBatteryData().
+ */
 async function readCharacteristicsData() {
     await Promise.all(
         Object.keys(data).map(async (key) => {
@@ -158,6 +176,11 @@ async function readCharacteristicsData() {
     displayBatteryData();
 }
 
+/**
+ * Callback function that is called when a characteristic value changes.
+ * Updates the data object with the new value and displays it in the UI by calling displayBatteryData().
+ * @param {*} event The event that contains the characteristic that changed.
+ */
 function handleCharacteristicChange(event) {
     // Find the characteristic that changed in the data object by matching the UUID
     let dataItem = Object.values(data).find(item => item.characteristicUUID === event.target.uuid);    
