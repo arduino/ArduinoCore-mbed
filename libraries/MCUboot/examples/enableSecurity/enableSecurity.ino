@@ -1,3 +1,24 @@
+/*
+  This example enables secuity features of the MCUboot bootloader writing encryption
+  and signing key into the microcontroller flash memory.
+
+  Once the keys are loaded you need to build and upload the future sketches enabling
+  the Security Settings -> "Signing + Encryption" in the tools menu of the IDE. This
+  will create an encrypted and signed binary conforming to the MCUboot image format
+  using imgtool. See https://docs.mcuboot.com/design.html#image-format for more details
+  about image format.
+
+  Writing the keys will also enable MCUboot image swap using a scratch area. This will
+  increase the sketch update time after the upload, but also adds the possibility to
+  revert to the previous image version if the update is not confirmed.
+  See ConfirmSketch example for more details about setting the confirmed flag.
+
+  Circuit:
+  - Arduino Portenta H7 board
+
+  This example code is in the public domain.
+*/
+
 #include "FlashIAP.h"
 #include "QSPIFBlockDevice.h"
 #include "MBRBlockDevice.h"
