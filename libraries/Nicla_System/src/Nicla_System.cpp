@@ -150,6 +150,14 @@ bool nicla::enableCharging(uint16_t mA, bool disableNtc)
   return _pmic.getFastChargeControlRegister() == _fastChargeRegisterData;
 }
 
+bool nicla::disableCharging()
+{
+  // Set Bit 1 to 1 to disable charging.
+  _fastChargeRegisterData |= 0b10;
+  _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_FAST_CHG, _fastChargeRegisterData);
+  return _pmic.getFastChargeControlRegister() == _fastChargeRegisterData;
+}
+
 bool nicla::runsOnBattery() {
   return _pmic.runsOnBattery(BQ25120A_ADDRESS);
 }

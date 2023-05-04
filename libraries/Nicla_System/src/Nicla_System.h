@@ -83,6 +83,13 @@ public:
   static bool enableCharging(uint16_t mA = 20, bool disableNtc = true);
 
   /**
+   * @brief Disables charging of the battery. It can be resumed by calling enableCharging().
+   * 
+   * @return true If the charging is disabled successfully. False, otherwise.
+   */
+  static bool disableCharging();
+
+  /**
    * @brief Determines if the board is charged from the battery.
    * 
    * @return true If the board is powered from the battery. False, when powered from USB / VIN.
