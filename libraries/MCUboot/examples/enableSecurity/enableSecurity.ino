@@ -38,7 +38,7 @@ void setup() {
   String currentBootloaderIdentifier = String(bootloader_identification, 15);
 
   if((currentBootloaderVersion > 24) && (currentBootloaderIdentifier.equals("MCUboot Arduino"))) {
-    Serial.println("\nThe sketch comes with a set of default keys to evaluate signing and encryption process");
+    Serial.println("The sketch comes with a set of default keys to evaluate signing and encryption process");
     Serial.println("If you load the keys, you will need to upload the future sketches with Security Settings -> Signing + Encryption.");
     Serial.println("If you select Security Settings -> None, the sketches will not be executed.");
     Serial.println("Do you want to load the keys? Y/[n]");
@@ -145,9 +145,8 @@ void applyUpdate() {
   setupMCUBootOTAData();
   flash.program(&enc_priv_key, ENCRYPT_KEY_ADDR, ENCRYPT_KEY_SIZE);
   flash.program(&ecdsa_pub_key, SIGNING_KEY_ADDR, SIGNING_KEY_SIZE);
-  Serial.println("Flashed 100%");
   flash.deinit();
-  Serial.println("\nBootloader update complete. It's now safe to reboot or disconnect your board.");
+  Serial.println("\nSecurity features enabled. It's now safe to reboot or disconnect your board.");
 }
 
 void loop() {
