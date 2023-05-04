@@ -48,6 +48,8 @@ void setup() {
       Serial.println("Do you want to proceed loading the default keys? Y/[n]");
       writeKeys = waitResponse();
     } 
+  } else {
+    Serial.println("Security features not available for this bootloader version. Please update it using STM32H747_manageBootloader sketch");
   }
   
   if (writeKeys) {
