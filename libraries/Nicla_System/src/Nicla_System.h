@@ -215,6 +215,9 @@ private:
    */
   static void synchronizeFastChargeSettings();
 
+  [[deprecated("Use synchronizeFastChargeSettings() instead.")]]
+  static void checkChgReg();
+
   /** 
    * A cached version of the fast charge settings for the PMIC.
    * This is used to reapply the settings if the register got wiped.

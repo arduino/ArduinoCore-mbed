@@ -386,6 +386,11 @@ void nicla::synchronizeFastChargeSettings()
   }
 }
 
+void nicla::checkChgReg(){
+  synchronizeFastChargeSettings();
+}
+
+
 I2CLed  LEDR(red);
 I2CLed  LEDG(green);
 I2CLed  LEDB(blue);
