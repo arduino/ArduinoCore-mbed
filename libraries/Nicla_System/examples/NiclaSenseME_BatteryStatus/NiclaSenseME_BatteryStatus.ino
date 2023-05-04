@@ -48,11 +48,12 @@ bool updateBatteryStatus(){
   return false;
 }
 
+bool updateBatteryLevel() {
   static auto updateTimestamp = millis();
   bool intervalFired = millis() - updateTimestamp >= batteryUpdateInterval;
   bool isFirstReading = batteryPercentage == -1 || batteryVoltage == -1.0f;
 
-  if (intervalFired || isFirstReading || enforceNewReading) {
+  if (intervalFired || isFirstReading) {
     Serial.println("Checking the battery level...");
     updateTimestamp = millis();
     auto percentage = nicla::getBatteryVoltagePercentage();
@@ -61,14 +62,22 @@ bool updateBatteryStatus(){
       return false; // Percentage couldn't be determined.
     }
 
+    // Only if the percentage has changed, we update the values as they depend on it.
     if (batteryPercentage != percentage) {
+      int8_t currentChargeLevel = static_cast<int8_t>(nicla::getBatteryChargeLevel());
+      if(currentChargeLevel == 0){
+        return false; // Unknown battery charge level.
+      }
+
+      auto currentVoltage = nicla::getCurrentBatteryVoltage();
+      if(currentVoltage == 0){
+        return false; // Unknown battery voltage.
+      }
+
       batteryPercentage = percentage;
-      batteryVoltage = nicla::getCurrentBatteryVoltage();
-      batteryChargeLevel = static_cast<int8_t>(nicla::getBatteryChargeLevel());
-
-      Serial.print("New battery level: ");
-      Serial.println(batteryPercentage);
-
+      batteryChargeLevel = currentChargeLevel;
+      batteryVoltage = currentVoltage;
+      
       return true;
     }
   }
