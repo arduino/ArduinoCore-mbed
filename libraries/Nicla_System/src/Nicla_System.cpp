@@ -84,7 +84,7 @@ bool nicla::enable1V8LDO()
 bool nicla::disableLDO()
 {
   uint8_t ldo_reg = _pmic.getLDOControlRegister();
-  ldo_reg &= 0x7F;
+  ldo_reg &= 0x7F; // Zeroes the EN_LS_LDO bit to turn it off
   _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_LDO_CTRL, ldo_reg);
   return _pmic.getLDOControlRegister() == ldo_reg;
 }

@@ -39,8 +39,29 @@ class nicla {
 
 public:
   static bool begin(bool mountedOnMkr = false);
+
+  /**
+   * @brief Enables the 3.3V LDO voltage regulator.
+   * 
+   * @return true if the LDO is enabled successfully. 
+   * This is done by verifying that the register was written correctly.
+   */
   static bool enable3V3LDO();
+
+  /**
+   * @brief Enables the 1.8V LDO voltage regulator.
+   * 
+   * @return true if the LDO is enabled successfully. 
+   * This is done by verifying that the register was written correctly.
+   */
   static bool enable1V8LDO();
+
+  /**
+   * @brief Disables the LDO voltage regulator.
+   * 
+   * @return true if the LDO is disabled successfully. 
+   * This is done by verifying that the register was written correctly.
+   */
   static bool disableLDO();
 
   /**
