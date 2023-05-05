@@ -83,6 +83,6 @@ void BQ25120A::setHighImpedanceModeEnabled(bool enabled) {
     cd = 0;
   } else {
     cd = 1;
-    delayMicroseconds(64); // Give some time to the BQ25120A to wake up
+    delayMicroseconds(128); // Give some time to the BQ25120A to wake up
   }
 }
