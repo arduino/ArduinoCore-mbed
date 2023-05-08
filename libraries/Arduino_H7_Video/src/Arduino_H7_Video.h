@@ -16,7 +16,7 @@
 #include "H7DisplayShield.h"
 
 /* Exported defines ----------------------------------------------------------*/
-#define H7V_OK                      1
+#define H7V_ERR_UNKNOWN             1
 #define H7V_ERR_INSUFFMEM           2
 
 /* Exported enumeration ------------------------------------------------------*/

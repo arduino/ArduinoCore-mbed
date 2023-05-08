@@ -51,7 +51,7 @@ Arduino_H7_Video::~Arduino_H7_Video() {
 
 int Arduino_H7_Video::begin() {
   if (!ArduinoGraphics::begin()) {
-    return 0;
+    return H7V_ERR_UNKNOWN;
   }
 
   textFont(Font_5x7);
@@ -93,7 +93,7 @@ int Arduino_H7_Video::begin() {
     lv_disp_drv_register(&disp_drv);        /* Finally register the driver */
   #endif
 
-  return H7V_OK;
+  return 0;
 }
 
 void Arduino_H7_Video::end() {

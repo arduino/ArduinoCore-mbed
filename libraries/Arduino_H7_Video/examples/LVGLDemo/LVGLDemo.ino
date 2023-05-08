@@ -7,36 +7,29 @@
 */
 
 #include "Arduino_H7_Video.h"
+#include "Arduino_GigaDisplayTouch.h"
 
 #include "lvgl.h"
-#include "giga_touch.h"
 
-Arduino_H7_Video Display(800, 480, GigaDisplayShield);
-//Arduino_H7_Video Display(1024, 768, USBCVideo);
+Arduino_H7_Video          Display(800, 480, GigaDisplayShield); /* Arduino_H7_Video Display(1024, 768, USBCVideo); */
+Arduino_GigaDisplayTouch  Touch;
 
-void my_touchpad_read(lv_indev_drv_t * indev, lv_indev_data_t * data) {
-  data->state = (touchpad_pressed) ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
-  if(data->state == LV_INDEV_STATE_PR) {
-    data->point.x = giga_get_touch_x();
-    data->point.y = giga_get_touch_y();
-    touchpad_pressed = false;
-
+void gigaTouchHandler(uint8_t contacts, GDTpoint_t* points) {
+  if (contacts > 0) {
     Serial.print("Touch detected: ");
-    Serial.print(data->point.x);
+    Serial.print(points[0].x);
     Serial.print(",");
-    Serial.println(data->point.y);
+    Serial.println(points[0].y);
   }
-  
-  return;
 }
 
 void setup() {
   Serial.begin(115200);
-  giga_touch_setup();
 
   Display.begin();
-  Display.attachLVGLTouchCb((void (*)(void*,void*))(my_touchpad_read));
-  
+  Touch.begin();
+  Touch.attach(gigaTouchHandler);
+
   /* Change the active screen's background color */
   lv_obj_set_style_bg_color(lv_scr_act(), lv_color_hex(0x03989e), LV_PART_MAIN);
 
@@ -48,9 +41,6 @@ void setup() {
 }
 
 void loop() { 
-  /* Touch handler */
-  giga_touch_handler();
-  
   /* Feed LVGL engine */
   lv_timer_handler();
 }
