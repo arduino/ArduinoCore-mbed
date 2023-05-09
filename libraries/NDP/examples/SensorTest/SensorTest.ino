@@ -59,7 +59,7 @@ void setup() {
 
   do {
     if (retry_sensor_init) {
-      Serial.print("Init attempt ");
+      Serial.print("Reinit attempt ");
       Serial.println(retry_sensor_init);
     }
     // 1st read will place the sensor in SPI mode, 2nd read is real read
@@ -74,7 +74,7 @@ void setup() {
     // soft reset
     s = NDP.sensorBMI270Write(0x7e, 0xb6);
     CHECK_STATUS(s);
-    delay(200);
+    delay(20);
 
     // back to SPI mode after software reset
     s = NDP.sensorBMI270Read(0x0, 1, sensor_data);
