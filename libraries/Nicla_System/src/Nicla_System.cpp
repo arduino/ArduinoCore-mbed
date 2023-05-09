@@ -292,8 +292,9 @@ int8_t nicla::getBatteryVoltagePercentage(bool useLatchedValue) {
     if(chargingEnabled) {
       disableCharging();
     }
-    // Write 1 to VBMON_READ to trigger a new reading
-    _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_BATT_MON, 1);
+    // Write 1 to bit 7 VBMON_READ to trigger a new reading
+    _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_BATT_MON, 0b10000000);
+    
     delay(3); // According to datasheet, 2ms is enough, but we add 1ms for safety
     
     if(chargingEnabled) {
