@@ -81,10 +81,11 @@ public:
    * A safe default charging current value that works for most common LiPo batteries is 0.5C, which means charging at a rate equal to half of the battery's capacity.
    * For example, a 200mAh battery could be charged at 100mA (0.1A).
    * This charging rate is generally safe for most LiPo batteries and provides a good balance between charging speed and battery longevity.
-   * @param disableNtc Whether to disable Temperature Sense and interrupt on charge. The default is true.
+   * @note Make sure to call setBatteryNTCEnabled(false) if your battery does not have an NTC thermistor.
+   * Otherwise the charging will be disabled due to the NTC thermistor not being connected.
    * @return true If the fast charging is enabled successfully. False, otherwise.   
    */
-  static bool enableCharging(uint16_t mA = 20, bool disableNtc = true);
+  static bool enableCharging(uint16_t mA = 20);
 
   /**
    * @brief Disables charging of the battery. It can be resumed by calling enableCharging().
@@ -101,11 +102,12 @@ public:
   static bool runsOnBattery();
 
   /**
-   * @brief Enables or disables the negative temperature coefficient (NTC) thermistor.
+   * @brief Enables or disables the negative temperature coefficient (NTC) thermistor. It is enabled by default.
    * NTCs are used to prevent the batteries from being charged at temperatures that are too high or too low.
    * Set to disabled for standard LiPo batteries without NTC.
    * If your battery has only a plus and minus wire, it does not have an NTC.
-   * The default is enabled.
+   * @note Disabling the NTC will also disable the on-charge-state-change interrupt.
+   * @param enabled Whether to enabled the NTC.
    */
   static void setBatteryNTCEnabled(bool enabled);
 
@@ -186,7 +188,8 @@ public:
 
   /**
    * @brief Get the current operating status of the PMIC.
-   * 
+   * @note If it doesn't report 'Charging' even though you enabled charging with enableCharging(),
+   * you may need to disable the NTC thermistor with setBatteryNTCEnabled(false) in case your battery doesn't have one.
    * @return OperatingStatus One of the following: Ready, Charging, ChargingComplete, Error.
    */
   static OperatingStatus getOperatingStatus();

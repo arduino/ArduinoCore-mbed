@@ -100,7 +100,7 @@ bool nicla::enterShipMode()
   _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_STATUS, status_reg);
 }
 
-bool nicla::enableCharging(uint16_t mA, bool disableNtc)
+bool nicla::enableCharging(uint16_t mA)
 {
   /*
   The ICHRG is calculated using the following equation: 
@@ -140,13 +140,6 @@ bool nicla::enableCharging(uint16_t mA, bool disableNtc)
   // Also sets the input current limit to 350mA.
   _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_ILIM_UVLO_CTRL, 0x3F);
 
-  _ntcEnabled = !disableNtc;
-  if (!_ntcEnabled) {
-    // Disable Temperature Sense (B7 = 0) and interrupt on charge status change (B3 = 0).
-    // INT only shows faults and does not show charge status)
-    _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_TS_CONTROL, 0);
-  }
-
   return _pmic.getFastChargeControlRegister() == _fastChargeRegisterData;
 }
 
@@ -168,7 +161,23 @@ uint8_t nicla::getBatteryFaults() {
 }
 
 void nicla::setBatteryNTCEnabled(bool enabled){
-  _ntcEnabled = enabled;
+  if (_ntcEnabled != enabled) {
+    _ntcEnabled = enabled;
+
+    // Read the current TS_CONTROL register value
+    uint8_t tsControlRegister = _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_TS_CONTROL);
+
+    if (_ntcEnabled) {
+      // Set bit 7 and bit 3 to 1 to enable temperature sense and interrupt on charge status change.
+      tsControlRegister |= 0b10001000;
+    } else {
+      // Set bit 7 and bit 3 to 0 to disable temperature sense and interrupt on charge status change.
+      // INT only shows faults and does not show charge status.
+      tsControlRegister &= 0b01110111;
+    }
+
+    _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_TS_CONTROL, tsControlRegister);
+  }
 }
 
 float nicla::getRegulatedBatteryVoltage(){
