@@ -74,9 +74,13 @@ public:
   static bool enterShipMode();
 
   /**
-   * @brief Enables fast charging of the battery. 
+   * @brief Enables fast charging of the battery. By default charging is already enabled when the board is powered.
+   * The default charging current without enabling fast charging is 10mA. Charging can be disabled by calling disableCharging().
    * 
-   * @param mA The desired milliampere (mA) charging current. Range: 5mA - 35mA and 40mA - 300mA. The default is 20mA.
+   * @param mA The desired milliampere (mA) charging current. Range: 5mA - 35mA and 40mA - 300mA. The default value is 20mA.
+   * A safe default charging current value that works for most common LiPo batteries is 0.5C, which means charging at a rate equal to half of the battery's capacity.
+   * For example, a 200mAh battery could be charged at 100mA (0.1A).
+   * This charging rate is generally safe for most LiPo batteries and provides a good balance between charging speed and battery longevity.
    * @param disableNtc Whether to disable Temperature Sense and interrupt on charge. The default is true.
    * @return true If the fast charging is enabled successfully. False, otherwise.   
    */
