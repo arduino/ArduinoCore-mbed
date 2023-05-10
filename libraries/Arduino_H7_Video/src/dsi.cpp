@@ -35,6 +35,8 @@ static uint32_t __ALIGNED(32) L8_CLUT[256];
 
 static uint32_t pend_buffer = 0;
 
+volatile uint32_t reloadLTDC_status = 0;
+
 /* Exported variables --------------------------------------------------------*/
 DSI_HandleTypeDef   dsi;
 
@@ -321,10 +323,19 @@ uint32_t dsi_getFramebufferEnd(void) {
 
 void dsi_drawCurrentFrameBuffer(void) {
 	int fb = pend_buffer++ % 2;
-	
+
+	/* Enable current LTDC layer */
 	__HAL_LTDC_LAYER_ENABLE(&(ltdc), fb);
+	/* Disable active LTDC layer */
 	__HAL_LTDC_LAYER_DISABLE(&(ltdc), !fb);
-	__HAL_LTDC_VERTICAL_BLANKING_RELOAD_CONFIG(&(ltdc));
+
+	/* LTDC reload request within next vertical blanking */
+	reloadLTDC_status = 0;
+	HAL_LTDC_Reload(&ltdc, LTDC_SRCR_VBR);
+	
+	while(reloadLTDC_status == 0) {
+		/* Wait till reload takes effect */
+	}
 }
 
 uint32_t dsi_getCurrentFrameBuffer() {
@@ -383,6 +394,16 @@ void dsi_fillBuffer(uint32_t LayerIndex, void *pDst, uint32_t xSize, uint32_t yS
 			}
 		}
 	}
+}
+
+/* Handler for LTDC global interrupt request */
+extern "C" void LTDC_IRQHandler(void) {
+	HAL_LTDC_IRQHandler(&ltdc);
+}
+
+/* Reload LTDC event callback */
+void HAL_LTDC_ReloadEventCallback(LTDC_HandleTypeDef *hltdc) {
+  reloadLTDC_status = 1;
 }
 
 /**** END OF FILE ****/
