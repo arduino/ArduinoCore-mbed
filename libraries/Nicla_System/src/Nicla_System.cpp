@@ -32,7 +32,6 @@ bool nicla::begin(bool mountedOnMkr)
 {
   if (mountedOnMkr) {
     // GPIO3 is on MKR RESET pin, so we must configure it HIGH or it will, well, reset the board :)
-    pinMode(p25, OUTPUT);
     pinMode(P0_10, OUTPUT);
     digitalWrite(P0_10, HIGH);
   }
