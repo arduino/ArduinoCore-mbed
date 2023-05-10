@@ -8,6 +8,8 @@
 #include <mbed.h>
 #include <I2C.h>
 
+// Deprecated. Whether or not to use a write operation by default
+// can now be controlled with the default paramter of pingI2C().
 #define USE_FASTCHG_TO_KICK_WATCHDOG 1
 
 enum class OperatingStatus {
@@ -38,6 +40,15 @@ enum class BatteryTemperature {
 class nicla {
 
 public:
+
+  /**
+   * @brief Initializes the Nicla Sense ME board.
+   * 
+   * @param mountedOnMkr Defines whether the board is mounted as a shield on a MKR board or not.
+   * This is used to drive the pin high that connects to the reset pin 
+   * of the MKR board to prevent it from resetting.
+   * @return true if the board is initialized successfully.    
+   */
   static bool begin(bool mountedOnMkr = false);
 
   /**
@@ -81,9 +92,10 @@ public:
    * A safe default charging current value that works for most common LiPo batteries is 0.5C, which means charging at a rate equal to half of the battery's capacity.
    * For example, a 200mAh battery could be charged at 100mA (0.1A).
    * This charging rate is generally safe for most LiPo batteries and provides a good balance between charging speed and battery longevity.
-   * @note Make sure to call setBatteryNTCEnabled(false) if your battery does not have an NTC thermistor.
-   * Otherwise the charging will be disabled due to the NTC thermistor not being connected.
+   * @note If your battery doesn't have an NTC thermistor, the charging speed will be limited to ~35mA.
+   * @note There is a saftey timer that will stop the charging after 9 hours.
    * @return true If the fast charging is enabled successfully. False, otherwise.   
+   * @see disableCharging()
    */
   static bool enableCharging(uint16_t mA = 20);
 
@@ -159,13 +171,13 @@ public:
   static BatteryChargeLevel getBatteryChargeLevel();
 
   /**
-   * @brief Get the Battery Temperature. The following values are possible:
-   * "Normal", "Extreme", "Cool", "Warm".
+   * @brief Get the Battery Temperature using the negative temperature coefficient (NTC) thermistor. 
+   * The following values are possible: "Normal", "Extreme", "Cool", "Warm".
    * When the battery is cool, the charging current is reduced by half.
    * When the battery is warm, the charging current is reduced by 140 mV.
    * When the battery is unter an extreme temperature (hot or cold), the charging is suspended.
-   * @note If the battery doesn't have a negative temperature coefficient (NTC) thermistor, the temperature is always "Normal".
-   * This is not determined automatically and needs to be set using the setBatteryNTCEnabled() function.
+   * @note If the battery isn't configured to have a NTC, the temperature is reported as "Normal".
+   * The presence of the NTC is not determined automatically and needs to be set using the setBatteryNTCEnabled() function.
    * @see setBatteryNTCEnabled()
    * @return BatteryTemperature The battery temperature represented by one of the following constants:
    * BatteryTemperature::Normal, BatteryTemperature::Extreme, BatteryTemperature::Cool, BatteryTemperature::Warm
@@ -188,12 +200,12 @@ public:
 
   /**
    * @brief Get the current operating status of the PMIC.
-   * @note If it doesn't report 'Charging' even though you enabled charging with enableCharging(),
-   * you may need to disable the NTC thermistor with setBatteryNTCEnabled(false) in case your battery doesn't have one.
+   * @note If it doesn't report 'Charging' even though you enabled charging with enableCharging(), the battery might be full.
    * @return OperatingStatus One of the following: Ready, Charging, ChargingComplete, Error.
    */
   static OperatingStatus getOperatingStatus();
 
+  /// Provides access to the IS31FL3194 LED driver that drives the RGB LED.
   static RGBled leds;
   static BQ25120A _pmic;
   

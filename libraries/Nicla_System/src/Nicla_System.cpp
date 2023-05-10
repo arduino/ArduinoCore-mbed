@@ -14,6 +14,8 @@ BQ25120A nicla::_pmic;
 rtos::Mutex nicla::_i2c_mutex;
 bool nicla::started = false;
 uint8_t nicla::_fastChargeRegisterData = 0;
+
+/// Enabled is the default value also represented in the TS Control Register (Bit 7 = 1).
 bool nicla::_ntcEnabled = true;
 
 void nicla::pingI2C() {
