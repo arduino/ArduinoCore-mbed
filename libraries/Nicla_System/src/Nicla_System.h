@@ -225,21 +225,17 @@ private:
    * @brief Pings the I2C interface by querying the PMIC's fast charge register every 10 seconds.
    * This is invoked by a thread and is meant to kick the watchdog timer to prevent the PMIC from entering a low power state.
    * The I2C interface reset timer for the host is 50 seconds.
+   * @param useWriteOperation If true, a write operation to a register is performed to reset the watchdog timer. 
+   * If false, a read operation is performed. The default is false.
    */
-  static void pingI2C();
+  static void pingI2C(bool useWriteOperation = false);
   
-  /**
-   * @brief Synchronizes the fast charge settings with the PMIC.
-   * This ensures that the fast charge settings as specified via enableCharge() are applied again the register got wiped.
-   */
-  static void synchronizeFastChargeSettings();
-
-  [[deprecated("Use synchronizeFastChargeSettings() instead.")]]
+  [[deprecated("Use pingI2C() instead.")]]
   static void checkChgReg();
 
   /** 
    * A cached version of the fast charge settings for the PMIC.
-   * This is used to reapply the settings if the register got wiped.
+   * This is used to avoid unnecessary I2C communication.
    **/
   static uint8_t _fastChargeRegisterData;
 

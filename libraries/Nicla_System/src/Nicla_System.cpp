@@ -18,11 +18,13 @@ uint8_t nicla::_fastChargeRegisterData = 0;
 /// Enabled is the default value also represented in the TS Control Register (Bit 7 = 1).
 bool nicla::_ntcEnabled = true;
 
-void nicla::pingI2C() {
-  while(1) {
-    // already protected by a mutex on Wire operations
-    synchronizeFastChargeSettings();
-    delay(10000);
+void nicla::pingI2C(bool useWriteOperation) {
+  // PMIC commands already protected by a mutex on Wire operations.
+  if(useWriteOperation){
+    // Write the current charging settings to the register to reset the watchdog timer.
+    _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_FAST_CHG, _fastChargeRegisterData);
+  } else {
+    _pmic.getStatusRegister();
   }
 }
 
@@ -36,9 +38,16 @@ bool nicla::begin(bool mountedOnMkr)
   }
   Wire1.begin();
   _fastChargeRegisterData = _pmic.getFastChargeControlRegister();
+
 #ifndef NO_NEED_FOR_WATCHDOG_THREAD
+  // If not using the BHY2 library, we need to start a thread to ping the PMIC every 10 seconds.
   static rtos::Thread th(osPriorityHigh, 768, nullptr, "ping_thread");
-  th.start(&nicla::pingI2C);
+  th.start([]() {
+    while(1) {
+      pingI2C();
+      delay(10000);
+    }
+  });
 #endif
   started = true;
 
@@ -390,16 +399,8 @@ OperatingStatus nicla::getOperatingStatus() {
   return static_cast<OperatingStatus>(status);
 }
 
-
-void nicla::synchronizeFastChargeSettings()
-{
-  if (_fastChargeRegisterData != _pmic.getFastChargeControlRegister()) {
-    _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_FAST_CHG, _fastChargeRegisterData);
-  }
-}
-
 void nicla::checkChgReg(){
-  synchronizeFastChargeSettings();
+  pingI2C();
 }
 
 
