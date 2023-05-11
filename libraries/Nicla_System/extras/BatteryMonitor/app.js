@@ -1,3 +1,18 @@
+/**
+ * This is a simple example of a web app that connects to an Arduino board
+ * and reads the battery level and other battery related characteristics.
+ * 
+ * It uses the Web Bluetooth API to connect to the Arduino board.
+ * 
+ * Instructions:
+ * 1. Upload the NiclaSenseME_BatteryStatus sketch to the Arduino board.
+ * 2. Open the index.html file in a browser that supports the Web Bluetooth API (Chrome, Edge, Opera).
+ * 3. Click on the Connect button to connect to the Arduino board.
+ * 
+ * Initial author: Sebastian Romero @sebromero
+ */
+
+
 /// UI elements
 const connectButton = document.getElementById('connect');
 const batteryLevelElement = document.getElementById('battery-level');

@@ -1,3 +1,24 @@
+/*
+ * This example shows how to use the Nicla Sense ME library to read the battery status and send it over BLE.
+ * 
+ * When not connected over BLE, the battery status is printed over the serial port every 4 seconds.
+ * When connected over BLE, the battery status is checked every 4 seconds and sent over BLE if a value has changed.
+ * That is, when using the notification mechanism in the BatteryMonitor web app, which is the default.
+ * The BatteryMonitor web app can also be configured to poll the battery status every X seconds.
+ * 
+ * The LED colors are used to indicate the BLE connection status:
+ * - Green: Board is ready but no BLE connection has been established yet.
+ * - Blue: Board is connected over BLE to a device that wants to read the battery status.
+ * - Red: A device that was previously connected over BLE has disconnected.
+ * 
+ * Instructions:
+ * 1. Upload this sketch to your Nicla Sense ME board.
+ * 2. Open the BatteryMonitor web app (index.html) in a browser that supports Web Bluetooth (Chrome, Edge, Opera, etc.).
+ * 3. Connect to your Nicla Sense ME board by clicking the "Connect" button.
+ * 
+ * Initial author: Sebastian Romero @sebromero
+ */
+
 #include "Nicla_System.h"
 #include <ArduinoBLE.h>
 
@@ -242,8 +263,10 @@ void setup()
 
 void loop()
 {
-  //BLE.poll(); // Implicit when calling BLE.connected(). Uncomment when only using BLERead
+  //BLE.poll(); // Implicit when calling BLE.connected(). Uncomment when only using BLERead (polling mechanism)
 
+  // Check if a BLE device is connected and handle battery updates 
+  // via the notification mechanism.
   if (BLE.connected()) {
     bool newBatteryLevelAvailable = updateBatteryLevel();
     bool newBatteryStatusAvailable = updateBatteryStatus();
