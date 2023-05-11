@@ -37,6 +37,14 @@ enum class BatteryTemperature {
   Warm = 0b11
 };
 
+enum class ChargingSafetyTimerOption {
+  ThirtyMinutes = 0b00,
+  ThreeHours = 0b01,
+  NineHours = 0b10,
+  Disabled = 0b11
+};
+
+
 class nicla {
 
 public:
@@ -93,11 +101,22 @@ public:
    * For example, a 200mAh battery could be charged at 100mA (0.1A).
    * This charging rate is generally safe for most LiPo batteries and provides a good balance between charging speed and battery longevity.
    * @note If your battery doesn't have an NTC thermistor, the charging speed will be limited to ~16mA.
-   * @note There is a saftey timer that will stop the charging after 9 hours.
+   * @note There is a saftey timer that will stop the charging after 9 hours by default. 
+   * This can be configured by calling configureChargingSafetyTimer().
    * @return true If the fast charging is enabled successfully. False, otherwise.   
    * @see disableCharging()
    */
   static bool enableCharging(uint16_t mA = 20);
+
+  /**
+   * @brief Configures the charging safety timer after which the charging is stopped.
+   * This is useful to prevent overcharging the battery. The timer can have one of the following options:
+   * 30 minutes, 3 hours, 9 hours or disabled.
+   * 
+   * @param option One of the following options: ThirtyMinutes, ThreeHours, NineHours or Disabled.
+   * @return true if the charging safety timer is configured successfully, false otherwise.
+   */
+  static bool configureChargingSafetyTimer(ChargingSafetyTimerOption option);
 
   /**
    * @brief Disables charging of the battery. It can be resumed by calling enableCharging().

@@ -150,14 +150,22 @@ bool nicla::enableCharging(uint16_t mA)
   // Also sets the input current limit to 350mA.
   _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_ILIM_UVLO_CTRL, 0x3F);
 
-  // Set safety timer to 9 hours (Bit 1+2 0b10) to give the battery enough of time to charge.
-  // Set it to 0b11 to disable safety timers. See: Table 24 in the datasheet.
-  uint8_t dpmTimerRegisterData = _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_VIN_DPM);  
-  dpmTimerRegisterData |= 0b00000100; // Set Bit 2 to 1
-  dpmTimerRegisterData &= 0b11111101; // Set Bit 1 to 0  
+  configureChargingSafetyTimer(ChargingSafetyTimerOption::NineHours);
+  
+  return _pmic.getFastChargeControlRegister() == _fastChargeRegisterData;
+}
+
+bool nicla::configureChargingSafetyTimer(ChargingSafetyTimerOption option){
+  // See: Table 24 in the datasheet.
+  // The two bits need to be shifted to skip the unused LSB.
+  uint8_t timerValue = static_cast<uint8_t>(option) << 1;
+  uint8_t dpmTimerRegisterData = _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_VIN_DPM);
+
+  dpmTimerRegisterData &= 0b11111001; // Clear bits 1 and 2
+  dpmTimerRegisterData |= timerValue; // Update bits 1 and 2
   _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_VIN_DPM, dpmTimerRegisterData);
 
-  return _pmic.getFastChargeControlRegister() == _fastChargeRegisterData;
+  return _pmic.readByte(BQ25120A_ADDRESS, BQ25120A_VIN_DPM) == dpmTimerRegisterData;
 }
 
 bool nicla::disableCharging()
