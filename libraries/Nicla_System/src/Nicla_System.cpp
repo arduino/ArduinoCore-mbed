@@ -150,8 +150,6 @@ bool nicla::enableCharging(uint16_t mA)
   // Also sets the input current limit to 350mA.
   _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_ILIM_UVLO_CTRL, 0x3F);
 
-  configureChargingSafetyTimer(ChargingSafetyTimerOption::NineHours);
-  
   return _pmic.getFastChargeControlRegister() == _fastChargeRegisterData;
 }
 

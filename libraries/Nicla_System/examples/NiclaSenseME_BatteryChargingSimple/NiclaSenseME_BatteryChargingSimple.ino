@@ -27,12 +27,23 @@ void setup(){
   nicla::leds.begin(); // Start I2C connection to LED driver
   nicla::setBatteryNTCEnabled(true); // Set to false if your battery doesn't have a NTC.
   
+  /*
+  Set the maximum charging time to 9 hours. This helps to prevent overcharging.
+  Set this to a lower value (e.g. 3h) if your battery will be done with charging sooner.
+  To get an estimation of the charging time, you can use the following formula:
+  Charging time (in hours) = (Battery capacity in mAh) / (0.8 * Charging current in mA)
+  This formula takes into account that the charging process is approximately 80% efficient (hence the 0.8 factor). 
+  This is just a rough estimate, and actual charging time may vary depending on factors like the charger, battery quality, and charging conditions.
+  */
+  nicla::configureChargingSafetyTimer(ChargingSafetyTimerOption::NineHours);
+  
   /* 
   A safe default charging current value that works for most common LiPo batteries is 0.5C, 
   which means charging at a rate equal to half of the battery's capacity.
   For example, a 200mAh battery could be charged at 100mA (0.1A). 
   */
   nicla::enableCharging(100);
+
   nicla::leds.setColor(blue);
 }
 
