@@ -92,7 +92,7 @@ public:
    * A safe default charging current value that works for most common LiPo batteries is 0.5C, which means charging at a rate equal to half of the battery's capacity.
    * For example, a 200mAh battery could be charged at 100mA (0.1A).
    * This charging rate is generally safe for most LiPo batteries and provides a good balance between charging speed and battery longevity.
-   * @note If your battery doesn't have an NTC thermistor, the charging speed will be limited to ~35mA.
+   * @note If your battery doesn't have an NTC thermistor, the charging speed will be limited to ~16mA.
    * @note There is a saftey timer that will stop the charging after 9 hours.
    * @return true If the fast charging is enabled successfully. False, otherwise.   
    * @see disableCharging()
