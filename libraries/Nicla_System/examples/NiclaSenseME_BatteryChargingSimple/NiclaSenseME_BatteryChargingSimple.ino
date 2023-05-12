@@ -1,14 +1,14 @@
 /*
  * This example shows how to use the Nicla Sense ME library to charge a battery.
  * 
- * The LED colors will change depending on the battery's operating status:
+ * The LED color will change depending on the battery's operating status:
  * - Blue: Ready
  * - Yellow: Charging
  * - Green: Charging complete
  * - Red: Error
  * 
  * Instructions:
- * 1. Connect a battery to the board.
+ * 1. Connect a single cell (3.7V nominal) LiPo/Li-Ion battery to the board via battery connector (J4) or the pin header (J3).
  * 2. Configure the charge current in the setup() function.
  * 3. Upload this sketch to your Nicla Sense ME board.
  * 
