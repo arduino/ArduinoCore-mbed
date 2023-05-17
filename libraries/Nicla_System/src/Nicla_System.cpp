@@ -108,6 +108,10 @@ bool nicla::enterShipMode()
   uint8_t status_reg = _pmic.getStatusRegister();
   status_reg |= 0x20;
   _pmic.writeByte(BQ25120A_ADDRESS, BQ25120A_STATUS, status_reg);
+  if (_pmic.readByte(BQ25120A_ADDRESS, BQ25120A_STATUS) != status_reg) {
+    return false;
+  }
+  return true;
 }
 
 bool nicla::enableCharging(uint16_t mA)
