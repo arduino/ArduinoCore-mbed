@@ -12,7 +12,7 @@
 #include "lvgl.h"
 
 Arduino_H7_Video          Display(800, 480, GigaDisplayShield); /* Arduino_H7_Video Display(1024, 768, USBCVideo); */
-Arduino_GigaDisplayTouch  Touch;
+Arduino_GigaDisplayTouch  TouchDetector;
 
 void gigaTouchHandler(uint8_t contacts, GDTpoint_t* points) {
   if (contacts > 0) {
@@ -27,8 +27,8 @@ void setup() {
   Serial.begin(115200);
 
   Display.begin();
-  Touch.begin();
-  Touch.attach(gigaTouchHandler);
+  TouchDetector.begin();
+  TouchDetector.onDetect(gigaTouchHandler);
 
   /* Change the active screen's background color */
   lv_obj_set_style_bg_color(lv_scr_act(), lv_color_hex(0x03989e), LV_PART_MAIN);
