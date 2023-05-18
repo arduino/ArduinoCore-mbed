@@ -29,7 +29,7 @@ public:
 #elif defined(ARDUINO_GIGA)
   Arduino_H7_Video(int width = 800, int heigth = 480, H7DisplayShield &shield = GigaDisplayShield);
 #endif
-  virtual ~Arduino_H7_Video();
+  ~Arduino_H7_Video();
 
   int begin();
   void end();
@@ -40,8 +40,6 @@ public:
   virtual void endDraw();
 
   virtual void set(int x, int y, uint8_t r, uint8_t g, uint8_t b);
-
-  void attachLVGLTouchCb(void (*touch_cb)(void*,void*));
 private:
     H7DisplayShield*    _shield;
     bool                _rotated;

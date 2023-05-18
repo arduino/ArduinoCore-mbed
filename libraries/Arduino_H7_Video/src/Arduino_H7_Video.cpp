@@ -160,14 +160,6 @@ void lvgl_displayFlushing(lv_disp_drv_t * disp, const lv_area_t * area, lv_color
     dsi_lcdDrawImage((void *) color_p, (void *)(dsi_getActiveFrameBuffer() + offsetPos), width, height, DMA2D_INPUT_RGB565);
     lv_disp_flush_ready(disp);         /* Indicate you are ready with the flushing*/
 }
-
-void Arduino_H7_Video::attachLVGLTouchCb(void (*touch_cb)(void*,void*)) {
-  static lv_indev_drv_t indev_drv;                                                /* Descriptor of a input device driver */
-  lv_indev_drv_init(&indev_drv);                                                  /* Basic initialization */
-  indev_drv.type = LV_INDEV_TYPE_POINTER;                                         /* Touch pad is a pointer-like device */
-  indev_drv.read_cb = (void(*)(lv_indev_drv_t *, lv_indev_data_t *))(touch_cb);   /* Set your driver function */
-  lv_indev_t * my_indev = lv_indev_drv_register(&indev_drv);                      /* Register the driver in LVGL and save the created input device object */
-}
 #endif
 
 /**** END OF FILE ****/
