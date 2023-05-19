@@ -6,6 +6,7 @@
 */
 
 #include "Arduino_H7_Video.h"
+#include "ArduinoGraphics.h"
 
 #include "img_arduinologo.h"
 // Alternatively, any raw RGB565 image can be included on demand using this macro

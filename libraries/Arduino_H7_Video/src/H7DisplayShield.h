@@ -1,3 +1,6 @@
+#pragma once
+#include "Arduino.h"
+
 class H7DisplayShield {
     public:
         virtual int init(int edidmode) = 0;

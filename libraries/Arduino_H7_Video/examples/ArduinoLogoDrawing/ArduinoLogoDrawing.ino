@@ -6,6 +6,7 @@
 */
 
 #include "Arduino_H7_Video.h"
+#include "ArduinoGraphics.h"
 
 Arduino_H7_Video Display(800, 480, GigaDisplayShield);
 //Arduino_H7_Video Display(1024, 768, USBCVideo);

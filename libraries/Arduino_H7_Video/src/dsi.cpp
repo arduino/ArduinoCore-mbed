@@ -244,7 +244,7 @@ int dsi_init(uint8_t bus, struct edid *edid, struct display_timing *dt) {
 	HAL_DSI_Refresh(&dsi);
 
 	dsi_layerInit(0, FB_ADDRESS_0);
-	dsi_layerInit(1, FB_ADDRESS_1);
+	dsi_layerInit(1, FB_ADDRESS_0 + (lcd_x_size * lcd_y_size * BYTES_PER_PIXEL));
 
 	HAL_DSI_PatternGeneratorStop(&dsi);
 	
@@ -319,6 +319,16 @@ void dsi_configueCLUT(uint32_t *colors) {
 
 uint32_t dsi_getFramebufferEnd(void) {
 	return (FB_BASE_ADDRESS + 2 * (lcd_x_size * lcd_y_size * BYTES_PER_PIXEL));
+}
+
+uint32_t dsi_getNextFrameBuffer() {
+	int fb = pend_buffer++ % 2;
+
+	__HAL_LTDC_LAYER_ENABLE(&(ltdc), fb);
+  	__HAL_LTDC_LAYER_DISABLE(&(ltdc), !fb);
+  	__HAL_LTDC_VERTICAL_BLANKING_RELOAD_CONFIG(&(ltdc));
+
+	return fb ? ltdc.LayerCfg[0].FBStartAdress : ltdc.LayerCfg[1].FBStartAdress;
 }
 
 void dsi_drawCurrentFrameBuffer(void) {
@@ -402,7 +412,7 @@ extern "C" void LTDC_IRQHandler(void) {
 }
 
 /* Reload LTDC event callback */
-void HAL_LTDC_ReloadEventCallback(LTDC_HandleTypeDef *hltdc) {
+extern "C" void HAL_LTDC_ReloadEventCallback(LTDC_HandleTypeDef *hltdc) {
   reloadLTDC_status = 1;
 }
 
