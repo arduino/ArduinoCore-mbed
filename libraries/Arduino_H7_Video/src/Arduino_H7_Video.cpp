@@ -98,7 +98,7 @@ int Arduino_H7_Video::begin() {
   #endif
 
   /* Configure SDRAM */
-  SDRAM.begin(dsi_getFramebufferEnd());
+  SDRAM.begin(dsi_getFramebufferEnd()); //FIXME: SDRAM init after video controller init can cause display glitch at start-up
 
   return 0;
 }

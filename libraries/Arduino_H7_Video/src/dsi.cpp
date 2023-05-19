@@ -321,16 +321,6 @@ uint32_t dsi_getFramebufferEnd(void) {
 	return (FB_BASE_ADDRESS + 2 * (lcd_x_size * lcd_y_size * BYTES_PER_PIXEL));
 }
 
-uint32_t dsi_getNextFrameBuffer() {
-	int fb = pend_buffer++ % 2;
-
-	__HAL_LTDC_LAYER_ENABLE(&(ltdc), fb);
-  	__HAL_LTDC_LAYER_DISABLE(&(ltdc), !fb);
-  	__HAL_LTDC_VERTICAL_BLANKING_RELOAD_CONFIG(&(ltdc));
-
-	return fb ? ltdc.LayerCfg[0].FBStartAdress : ltdc.LayerCfg[1].FBStartAdress;
-}
-
 void dsi_drawCurrentFrameBuffer(void) {
 	int fb = pend_buffer++ % 2;
 

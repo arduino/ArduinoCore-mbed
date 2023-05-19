@@ -2,7 +2,8 @@
 
 #include "Arduino.h"
 #include "mbed.h"
-#include "Portenta_Video.h"
+#include "Arduino_H7_Video.h"
+#include "dsi.h"
 
 #define sleep _sleep
 
@@ -89,8 +90,6 @@ static void addKeyToQueue(int pressed, unsigned char keyCode)
   s_KeyQueueWriteIndex %= KEYQUEUE_SIZE;
 }
 
-struct edid recognized_edid;
-
 uint32_t LCD_X_Size = 0, LCD_Y_Size = 0;
 DMA2D_HandleTypeDef    DMA2D_Handle;
 
@@ -162,30 +161,13 @@ static void DMA2D_Init(uint16_t xsize, uint16_t ysize)
   HAL_DMA2D_PollForTransfer(&DMA2D_Handle, 100);
 }
 
+Arduino_H7_Video display(640, 480, USBCVideo);
+
+uint32_t fbs[2];
+
 void DG_Init()
 {
-  int ret = -1;
-
-  ret = anx7625_init(0);
-  if(ret < 0) {
-    printf("Cannot continue, anx7625 init failed.\n");
-    while(1);
-  }
-
-  anx7625_wait_hpd_event(0);
-  anx7625_dp_get_edid(0, &recognized_edid);
-  //edid_set_framebuffer_bits_per_pixel(&recognized_edid, 16, 0);
-  //set_display_mode(&recognized_edid, EDID_MODE_720x480_60Hz);
-  //anx7625_dp_start(0, &recognized_edid, EDID_MODE_1280x720_60Hz);
-  anx7625_dp_start(0, &recognized_edid, EDID_MODE_640x480_60Hz);
-
-  LCD_X_Size = stm32_getXSize();
-  LCD_Y_Size = stm32_getYSize();
-
-  SDRAM.begin(getFramebufferEnd());
-
-  stm32_LCD_Clear(0);
-  stm32_LCD_Clear(0);
+  display.begin();
 }
 
 void DG_OnPaletteReload() {
@@ -224,8 +206,8 @@ static void DMA2D_CopyBuffer(uint32_t *pSrc, uint32_t *pDst)
   uint32_t xPos, yPos, destination;
 
   /*##-1- calculate the destination transfer address  ############*/
-  xPos = (stm32_getXSize() - DOOMGENERIC_RESX) / 2;
-  yPos = (stm32_getYSize() - DOOMGENERIC_RESY) / 2;
+  xPos = (display.width() - DOOMGENERIC_RESX) / 2;
+  yPos = (display.height() - DOOMGENERIC_RESY) / 2;
 
   destination = (uint32_t)pDst; // + ((yPos * stm32_getXSize()) + xPos) * 4;
 
@@ -239,7 +221,7 @@ static void DMA2D_CopyBuffer(uint32_t *pSrc, uint32_t *pDst)
 
 void DG_DrawFrame()
 {
-  uint32_t fb = getNextFrameBuffer();
+  uint32_t fb = dsi_getCurrentFrameBuffer();
 #ifdef CORE_CM7
   //SCB_CleanInvalidateDCache();
   //SCB_InvalidateICache();
@@ -247,6 +229,7 @@ void DG_DrawFrame()
 #endif
 
   DMA2D_CopyBuffer((uint32_t *)DG_ScreenBuffer, (uint32_t *)fb);
+  dsi_drawCurrentFrameBuffer();
   //handleKeyInput();
 }
 
