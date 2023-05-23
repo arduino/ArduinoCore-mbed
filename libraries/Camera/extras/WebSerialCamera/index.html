@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Serial Bitmap Reader</title>
+  <style>
+    #main-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div id="main-container">
+    <canvas id="bitmapCanvas"></canvas>
+    <div id="controls">
+      <button id="connect">Connect</button>
+      <button id="disconnect">Disconnect</button>
+      <button id="refresh">Refresh</button>
+      <button id="start">Start</button>
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
