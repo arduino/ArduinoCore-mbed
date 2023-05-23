@@ -102,6 +102,7 @@ async function readBytes(port, numBytes, timeout = null){
         if(value){
           for (const byte of value) {
             bytesRead[bytesReadIdx++] = byte;
+            if (bytesReadIdx >= numBytes) break;
           }
           // count += value.byteLength;
           // console.log(`Read ${value.byteLength} (Total: ${count}) out of ${numBytes} bytes.}`);
