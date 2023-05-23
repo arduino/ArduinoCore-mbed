@@ -6,8 +6,10 @@
   Camera cam(galaxyCore);
   #define IMAGE_MODE CAMERA_RGB565
 #elif defined(ARDUINO_PORTENTA_H7_M7)
-  #include "hm0360.h"
-  HM0360 himax;
+  //#include "hm0360.h"
+  //HM0360 himax;
+  #include "himax.h";
+  HM01B0 himax;
   Camera cam(himax);
   #define IMAGE_MODE CAMERA_GRAYSCALE
 #elif defined(ARDUINO_GIGA)
@@ -33,6 +35,8 @@ If resolution higher than 320x240 is required, please use external RAM via
   // and adding in setup()
   SDRAM.begin();
 */
+#define CHUNK_SIZE 512  // Size of chunks in bytes
+#define RESOLUTION CAMERA_R320x240
 FrameBuffer fb;
 
 unsigned long lastUpdate = 0;
@@ -40,7 +44,8 @@ unsigned long lastUpdate = 0;
 
 void blinkLED(uint32_t count = 0xFFFFFFFF)
 {
-  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(LED_BUILTIN, OUTPUT);  
+  
   while (count--) {
     digitalWrite(LED_BUILTIN, LOW);  // turn the LED on (HIGH is the voltage level)
     delay(50);                       // wait for a second
@@ -49,38 +54,71 @@ void blinkLED(uint32_t count = 0xFFFFFFFF)
   }
 }
 
+void clearSerialBuffer(){
+  while(Serial.available()){
+    Serial.read();
+  }
+  Serial.end();
+  Serial.begin(9600);
+}
+
 void setup() {
   // Init the cam QVGA, 30FPS
-  if (!cam.begin(CAMERA_R320x240, IMAGE_MODE, 30)) {
+  if (!cam.begin(RESOLUTION, IMAGE_MODE, 30)) {
     blinkLED();
   }
 
   blinkLED(5);
+  
+  pinMode(LEDB, OUTPUT);
+  digitalWrite(LEDB, HIGH);
+}
+
+void sendFrame(){
+  // Grab frame and write to serial
+  if (cam.grabFrame(fb, 3000) == 0) {    
+    byte* buffer = fb.getBuffer();
+    size_t bufferSize = cam.frameSize();
+    digitalWrite(LEDB, LOW);
+    
+    // Split buffer into chunks
+    for(size_t i = 0; i < bufferSize; i += CHUNK_SIZE) {
+      size_t chunkSize = min(bufferSize - i, CHUNK_SIZE);
+      Serial.write(buffer + i, chunkSize);
+      Serial.flush();
+      delay(1);  // Optional: Add a small delay to allow the receiver to process the chunk
+    }    
+    
+    digitalWrite(LEDB, HIGH);
+  } else {
+    blinkLED(20);
+  }
+}
+
+void sendCameraConfig(){
+  Serial.write(RESOLUTION);
+  Serial.write(IMAGE_MODE);
+  Serial.flush();
+  delay(1);
 }
 
 void loop() {
   if(!Serial) {    
-    Serial.begin(921600);
-    while(!Serial);
+    Serial.begin(115200, SERIAL_8E2);
+    while(!Serial);    
   }
 
-  // Time out after 2 seconds, which sets the (constant) frame rate
-  bool timeoutDetected = millis() - lastUpdate > 2000;
-  
-  // Wait for sync byte and timeout
-  // Notice that this order must be kept, or the sync bytes will be
-  // consumed prematurely
-  if ((!timeoutDetected) || (Serial.read() != 1))
-  {
-    return;
-  }
+  if(!Serial.available()) return;
 
-  lastUpdate = millis();
-  
-  // Grab frame and write to serial
-  if (cam.grabFrame(fb, 3000) == 0) {
-    Serial.write(fb.getBuffer(), cam.frameSize());
-  } else {
-    blinkLED(20);
+  byte request = Serial.read();
+
+  switch(request){
+    case 1:
+      sendFrame();
+      break; 
+    case 2:
+      sendCameraConfig();
+      break;
   }
+  
 }
