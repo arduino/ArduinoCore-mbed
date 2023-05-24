@@ -12,6 +12,7 @@ class SerialConnectionHandler {
         this.timeout = timeout;
         this.currentPort = null;
         this.currentReader = null;
+        this.registerEvents();
     }
 
     async requestSerialPort() {
@@ -27,7 +28,7 @@ class SerialConnectionHandler {
         }
     }
 
-    isConnected(){
+    isConnected() {
         return this.currentPort?.readable != null;
     }
 
@@ -44,6 +45,7 @@ class SerialConnectionHandler {
                 flowControl: this.flowControl
             });
             console.log('✅ Connected to serial port.');
+            if(this.onConnect) this.onConnect();
             return true;
         } catch (error) {
             return false;
@@ -58,6 +60,7 @@ class SerialConnectionHandler {
             await this.currentReader?.cancel();
             await port.close();
             console.log('🔌 Disconnected from serial port.');
+            if(this.onDisconnect) this.onDisconnect();
         } catch (error) {
             console.error('💣 Error occurred while disconnecting: ' + error.message);
         };
@@ -106,7 +109,7 @@ class SerialConnectionHandler {
                     if (timeout) {
                         timeoutID = setTimeout(() => {
                             console.log('⌛️ Timeout occurred while reading.');
-                            if (this.currentPort.readable) reader?.cancel();
+                            if (this.currentPort?.readable) reader?.cancel();
                         }, timeout);
                     }
 
@@ -129,8 +132,7 @@ class SerialConnectionHandler {
                 }
 
             } catch (error) {
-                console.log('💣 Error occurred while reading: ');
-                console.log(error);
+                console.log('💣 Error occurred while reading: ' + error.message);
             } finally {
                 keepReading = false;
                 // console.log('🔓 Releasing reader lock...');
@@ -141,17 +143,17 @@ class SerialConnectionHandler {
         return bytesRead;
     }
 
-    async requestFrame(){
-        if(!this.currentPort?.writable) {
-          console.log('🚫 Port is not writable. Ignoring request...');
-          return;
+    async requestFrame() {
+        if (!this.currentPort?.writable) {
+            console.log('🚫 Port is not writable. Ignoring request...');
+            return;
         }
         // console.log('Writing 1 to the serial port...');
         // Write a 1 to the serial port
         const writer = this.currentPort.writable.getWriter();
         await writer.write(new Uint8Array([1]));
         await writer.close();
-      }
+    }
 
     async getFrame(totalBytes) {
         if (!this.currentPort) return;
@@ -160,5 +162,19 @@ class SerialConnectionHandler {
         // console.log(`Trying to read ${totalBytes} bytes...`);
         // Read the given amount of bytes
         return await this.readBytes(totalBytes, this.timeout);
+    }
+
+    registerEvents() {
+        navigator.serial.addEventListener("connect", (e) => {
+            // Connect to `e.target` or add it to a list of available ports.
+            console.log('🔌 Serial port became available. VID: 0x' + e.target.getInfo().usbVendorId.toString(16));
+            this.autoConnect();
+        });
+
+        navigator.serial.addEventListener("disconnect", (e) => {
+            console.log('❌ Serial port lost. VID: 0x' + e.target.getInfo().usbVendorId.toString(16));
+            this.currentPort = null;
+            if(this.onDisconnect) this.onDisconnect();
+        });
     }
 }

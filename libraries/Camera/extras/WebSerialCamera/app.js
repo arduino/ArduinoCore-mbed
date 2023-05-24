@@ -1,7 +1,6 @@
 const connectButton = document.getElementById('connect');
 const refreshButton = document.getElementById('refresh');
 const startButton = document.getElementById('start');
-const disconnectButton = document.getElementById('disconnect');
 const saveImageButton = document.getElementById('save-image');
 const canvas = document.getElementById('bitmapCanvas');
 const ctx = canvas.getContext('2d');
@@ -40,6 +39,15 @@ const stopBits = 2; // Adjust this value based on your device's stop bits
 const imageDataProcessor = new ImageDataProcessor(ctx, mode, imageWidth, imageHeight);
 const connectionHandler = new SerialConnectionHandler(baudRate, dataBits, stopBits, "even", "hardware", bufferSize);
 
+connectionHandler.onConnect = () => {
+  connectButton.textContent = 'Disconnect';
+  renderStream();
+};
+
+connectionHandler.onDisconnect = () => {
+  connectButton.textContent = 'Connect';
+};
+
 function renderBitmap(bytes, width, height) {
   canvas.width = width;
   canvas.height = height;
@@ -65,12 +73,13 @@ async function renderFrame(){
 
 startButton.addEventListener('click', renderStream);
 connectButton.addEventListener('click', async () => { 
-  await connectionHandler.requestSerialPort();
-  if(await connectionHandler.connectSerial()){
-    renderStream();
+  if(connectionHandler.isConnected()){
+    connectionHandler.disconnectSerial();
+  } else {
+    await connectionHandler.requestSerialPort();
+    await connectionHandler.connectSerial();
   }
 });
-disconnectButton.addEventListener('click', () => connectionHandler.disconnectSerial());
 refreshButton.addEventListener('click', () => {
   renderFrame();
 });
@@ -83,31 +92,11 @@ saveImageButton.addEventListener('click', () => {
   link.remove();
 });
 
-navigator.serial.addEventListener("connect", (e) => {
-  // Connect to `e.target` or add it to a list of available ports.
-  console.log('🔌 Serial port became available. VID: 0x' + e.target.getInfo().usbVendorId.toString(16));
-  connectionHandler.autoConnect().then((connected) => {
-    if(connected){
-      renderStream();
-    };
-  });
-});
-
-navigator.serial.addEventListener("disconnect", (e) => {
-  // Remove `e.target` from the list of available ports.
-  console.log('❌ Serial port lost. VID: 0x' + e.target.getInfo().usbVendorId.toString(16));
-  currentPort = null;  
-});
-
 // On page load event, try to connect to the serial port
 window.addEventListener('load', async () => {
   console.log('🚀 Page loaded. Trying to connect to serial port...');
   setTimeout(() => {
-    connectionHandler.autoConnect().then((connected) => {
-      if (connected) {
-        renderStream();
-      };
-    });
+    connectionHandler.autoConnect();
   }, 1000);
 });
 
