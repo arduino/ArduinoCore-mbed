@@ -2,6 +2,7 @@ const connectButton = document.getElementById('connect');
 const refreshButton = document.getElementById('refresh');
 const startButton = document.getElementById('start');
 const disconnectButton = document.getElementById('disconnect');
+const saveImageButton = document.getElementById('save-image');
 const canvas = document.getElementById('bitmapCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -209,6 +210,14 @@ connectButton.addEventListener('click', async () => {
 disconnectButton.addEventListener('click', () => disconnectSerial(currentPort));
 refreshButton.addEventListener('click', () => {
   renderFrame(currentPort);
+});
+
+saveImageButton.addEventListener('click', () => {
+  const link = document.createElement('a');
+  link.download = 'image.png';
+  link.href = canvas.toDataURL();
+  link.click();
+  link.remove();
 });
 
 navigator.serial.addEventListener("connect", (e) => {
