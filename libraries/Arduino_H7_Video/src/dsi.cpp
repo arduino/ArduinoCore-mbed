@@ -335,6 +335,7 @@ void dsi_drawCurrentFrameBuffer(void) {
 	
 	while(reloadLTDC_status == 0) {
 		/* Wait till reload takes effect */
+		delay(1);
 	}
 }
 
