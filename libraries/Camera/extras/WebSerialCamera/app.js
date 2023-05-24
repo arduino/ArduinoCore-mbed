@@ -6,8 +6,11 @@ const saveImageButton = document.getElementById('save-image');
 const canvas = document.getElementById('bitmapCanvas');
 const ctx = canvas.getContext('2d');
 
-const UserActionAbortError = 8;
-const ArduinoUSBVendorId = 0x2341;
+// TODO check for signals 
+// TODO implement transformer
+// TODO get image format from device
+// SEE: https://developer.chrome.com/articles/serial/#transforming-streams
+// SEE: https://developer.chrome.com/articles/serial/#signals
 
 config = {
   "RGB565": {    
@@ -34,114 +37,8 @@ const baudRate = 115200; // Adjust this value based on your device's baud rate
 const dataBits = 8; // Adjust this value based on your device's data bits
 const stopBits = 2; // Adjust this value based on your device's stop bits
 
-let currentPort, currentReader;
 const imageDataProcessor = new ImageDataProcessor(ctx, mode, imageWidth, imageHeight);
-
-async function requestSerialPort(){
-  try {
-    // Request a serial port
-    const port = await navigator.serial.requestPort({ filters: [{ usbVendorId: ArduinoUSBVendorId }] });
-    currentPort = port;
-    return port;
-  } catch (error) {
-    if(error.code != UserActionAbortError){
-      console.log(error);
-    }
-    return null;
-  }  
-}
-
-async function autoConnect(){
-  if(currentPort){
-    console.log('🔌 Already connected to a serial port.');
-    return false;
-  }
-
-  // Get all serial ports the user has previously granted the website access to.
-  const ports = await navigator.serial.getPorts();
-
-  for (const port of ports) {    
-    console.log('👀 Serial port found with VID: 0x' + port.getInfo().usbVendorId.toString(16));
-    if(port.getInfo().usbVendorId === ArduinoUSBVendorId){
-      currentPort = port;
-      return await connectSerial(currentPort);
-    }
-  }
-  return false;
-}
-
-async function connectSerial(port, baudRate = 115200, dataBits = 8, stopBits = 2, bufferSize = 4096) {
-  try {
-    // If the port is already open, close it
-    if (port.readable) await port.close();
-    await port.open({ baudRate: baudRate, parity: "even", dataBits: dataBits, stopBits: stopBits, bufferSize: bufferSize });
-    console.log('✅ Connected to serial port.');
-    return true;
-  } catch (error) {
-    return false;
-  }
-}
-
-async function readBytes(port, numBytes, timeout = null){
-  if(port.readable.locked){
-    console.log('🔒 Stream is already locked. Ignoring request...');
-    return null;
-  }
-
-  const bytesRead = new Uint8Array(numBytes);
-  let bytesReadIdx = 0;
-  let keepReading = true;  
-
-  // As long as the errors are non-fatal, a new ReadableStream is created automatically and hence port.readable is non-null. 
-  // If a fatal error occurs, such as the serial device being removed, then port.readable becomes null.
-
-  while (port.readable && keepReading) {
-    const reader = port.readable.getReader();
-    currentReader = reader;
-    let timeoutID = null;
-    // let count = 0;
-
-    try {      
-      while (bytesReadIdx < numBytes) {
-        if(timeout){
-          timeoutID = setTimeout(() => {
-            console.log('⌛️ Timeout occurred while reading.');
-            if(port.readable) reader?.cancel();
-          }, timeout);
-        }
-
-        const { value, done } = await reader.read();
-        if(timeoutID) clearTimeout(timeoutID);
-
-        if(value){
-          for (const byte of value) {
-            bytesRead[bytesReadIdx++] = byte;
-            if (bytesReadIdx >= numBytes) break;
-          }
-          // count += value.byteLength;
-          // console.log(`Read ${value.byteLength} (Total: ${count}) out of ${numBytes} bytes.}`);
-        }
-
-        if (done) {
-          // |reader| has been canceled.
-          console.log('🚫 Reader has been canceled');
-          break;
-        }
-      }
-      
-    } catch (error) {
-      // Handle |error|...
-      console.log('💣 Error occurred while reading: ');
-      console.log(error);
-    } finally {
-      keepReading = false;
-      // console.log('🔓 Releasing reader lock...');
-      reader?.releaseLock();
-      currentReader = null;
-    }
-  }  
-  return bytesRead;
-}
+const connectionHandler = new SerialConnectionHandler(baudRate, dataBits, stopBits, "even", "hardware", bufferSize);
 
 function renderBitmap(bytes, width, height) {
   canvas.width = width;
@@ -151,65 +48,31 @@ function renderBitmap(bytes, width, height) {
   ctx.putImageData(imageData, 0, 0);
 }
 
-async function requestFrame(port){
-  if(!port?.writable) {
-    console.log('🚫 Port is not writable. Ignoring request...');
-    return;
-  }
-  // console.log('Writing 1 to the serial port...');
-  // Write a 1 to the serial port
-  const writer = port.writable.getWriter();
-  await writer.write(new Uint8Array([1]));
-  await writer.close();
-}
-
 async function renderStream(){
-  while(true && currentPort){
-    await renderFrame(currentPort);
+  while(connectionHandler.isConnected()){
+    await renderFrame();
   }
 }
 
-async function renderFrame(port){
-  if(!port) return;
-  const bytes = await getFrame(port);
-  if(!bytes) return false; // Nothing to render
+async function renderFrame(){
+  if(!connectionHandler.isConnected()) return;
+  const bytes = await connectionHandler.getFrame(totalBytes);
+  if(!bytes || bytes.length == 0) return false; // Nothing to render
   // console.log(`Reading done ✅. Rendering image...`);
-  // Render the bytes as a grayscale bitmap
   renderBitmap(bytes, imageWidth, imageHeight);
   return true;
 }
 
-async function getFrame(port) {
-  if(!port) return;
-
-  await requestFrame(port);
-  // console.log(`Trying to read ${totalBytes} bytes...`);
-  // Read the given amount of bytes
-  return await readBytes(port, totalBytes, 2000);
-}
-
-async function disconnectSerial(port) {
-  if(!port) return;
-  try {
-    currentPort = null;    
-    await currentReader?.cancel();
-    await port.close();
-    console.log('🔌 Disconnected from serial port.');
-  } catch (error) {
-    console.error('💣 Error occurred while disconnecting: ' + error.message);
-  };
-}
-
 startButton.addEventListener('click', renderStream);
 connectButton.addEventListener('click', async () => { 
-  currentPort = await requestSerialPort();
-  if(await connectSerial(currentPort, baudRate, dataBits, stopBits, bufferSize, flowControl)){
+  await connectionHandler.requestSerialPort();
+  if(await connectionHandler.connectSerial()){
     renderStream();
   }
 });
-disconnectButton.addEventListener('click', () => disconnectSerial(currentPort));
+disconnectButton.addEventListener('click', () => connectionHandler.disconnectSerial());
 refreshButton.addEventListener('click', () => {
-  renderFrame(currentPort);
+  renderFrame();
 });
 
 saveImageButton.addEventListener('click', () => {
@@ -223,7 +86,7 @@ saveImageButton.addEventListener('click', () => {
 navigator.serial.addEventListener("connect", (e) => {
   // Connect to `e.target` or add it to a list of available ports.
   console.log('🔌 Serial port became available. VID: 0x' + e.target.getInfo().usbVendorId.toString(16));
-  autoConnect().then((connected) => {
+  connectionHandler.autoConnect().then((connected) => {
     if(connected){
       renderStream();
     };
@@ -240,7 +103,7 @@ navigator.serial.addEventListener("disconnect", (e) => {
 window.addEventListener('load', async () => {
   console.log('🚀 Page loaded. Trying to connect to serial port...');
   setTimeout(() => {
-    autoConnect().then((connected) => {
+    connectionHandler.autoConnect().then((connected) => {
       if (connected) {
         renderStream();
       };
