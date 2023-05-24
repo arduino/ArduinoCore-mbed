@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/License-LGPLv3-blue.svg)]()
 
-The Arduino H7 Video library is a C++ library designed to handle the video output of Arduino boards based on the STM32H7 microcontroller with DSI (Display Serial Interface) video interface. DSI stands for Display Serial Interface, which is a serial interface used to connect a display to the microcontroller.
+The Arduino H7 Video library is a C++ library designed to handle the video output of Arduino boards based on the STM32H7 microcontroller with DSI video interface. DSI stands for Display Serial Interface, which is a serial interface used to connect a display to the microcontroller.
 
 This library is based on the graphics primitives of the [ArduinoGraphics](https://github.com/arduino-libraries/ArduinoGraphics) library and currently supports the Arduino Portenta H7 and Arduino Giga R1 WiFi boards. The library offers two modes of operation for the Portenta H7 board: you can connect the display to the video output via a USB Type-C connection or use the Giga Display Shield. For the Giga R1 board, only the Giga Display Shield is supported.
 

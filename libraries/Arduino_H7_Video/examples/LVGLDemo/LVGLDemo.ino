@@ -14,15 +14,6 @@
 Arduino_H7_Video          Display(800, 480, GigaDisplayShield); /* Arduino_H7_Video Display(1024, 768, USBCVideo); */
 Arduino_GigaDisplayTouch  TouchDetector;
 
-void gigaTouchHandler(uint8_t contacts, GDTpoint_t* points) {
-  if (contacts > 0) {
-    Serial.print("Touch detected: ");
-    Serial.print(points[0].x);
-    Serial.print(",");
-    Serial.println(points[0].y);
-  }
-}
-
 /* Button click event callback */
 static void btn_event_cb(lv_event_t * e) {
   static uint32_t cnt = 1;
@@ -42,7 +33,6 @@ void setup() {
 
   Display.begin();
   TouchDetector.begin();
-  TouchDetector.onDetect(gigaTouchHandler);
 
   /* Create a container with grid 2x2 */
   static lv_coord_t col_dsc[] = {370, 370, LV_GRID_TEMPLATE_LAST};
