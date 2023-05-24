@@ -1,6 +1,9 @@
 const ArduinoUSBVendorId = 0x2341;
 const UserActionAbortError = 8;
 
+/**
+ * Handles the connection between the browser and the Arduino board via Web Serial.
+ */
 class SerialConnectionHandler {
     constructor(baudRate = 115200, dataBits = 8, stopBits = 1, parity = "none", flowControl = "none", bufferSize = 4096, timeout = 2000) {
         this.baudRate = baudRate;
@@ -15,6 +18,10 @@ class SerialConnectionHandler {
         this.registerEvents();
     }
 
+    /**
+     * Prompts the user to select a serial port.
+     * @returns {Promise<SerialPort>} The serial port that the user has selected.
+     */
     async requestSerialPort() {
         try {
             const port = await navigator.serial.requestPort({ filters: [{ usbVendorId: ArduinoUSBVendorId }] });
@@ -28,10 +35,20 @@ class SerialConnectionHandler {
         }
     }
 
+    /**
+     * Checks if the browser is connected to a serial port.
+     * @returns {boolean} True if the browser is connected, false otherwise.
+     */
     isConnected() {
         return this.currentPort?.readable != null;
     }
 
+    /**
+     * Opens a connection to the given serial port by using the settings specified in the constructor. 
+     * If the port is already open, it will be closed first.
+     * This method will call the `onConnect` callback before it returns.
+     * @returns {boolean} True if the connection was successfully opened, false otherwise.
+     */
     async connectSerial() {
         try {
             // If the port is already open, close it
@@ -52,6 +69,12 @@ class SerialConnectionHandler {
         }
     }
 
+    /**
+     * Disconnects from the current serial port. 
+     * If a reading operation is in progress, it will be canceled.
+     * This function will call the `onDisconnect` callback before it returns.
+     * @returns {Promise<void>} A promise that resolves when the port has been closed.
+     */
     async disconnectSerial() {
         if (!this.currentPort) return;
         try {
@@ -66,6 +89,11 @@ class SerialConnectionHandler {
         };
     }
 
+    /**
+     * Tries to establish a connection to the first available serial port that has the Arduino USB vendor ID.
+     * This only works if the user has previously granted the website access to that serial port.
+     * @returns {Promise<boolean>} True if the connection was successfully opened, false otherwise.
+     */
     async autoConnect() {
         if (this.currentPort) {
             console.log('🔌 Already connected to a serial port.');
@@ -85,6 +113,12 @@ class SerialConnectionHandler {
         return false;
     }
 
+    /**
+     * Reads the specified number of bytes from the serial port.
+     * @param {number} numBytes The number of bytes to read.
+     * @param {number} timeout The timeout in milliseconds. 
+     * If the timeout is reached, the reader will be canceled and the read lock will be released.
+     */
     async readBytes(numBytes, timeout = null) {
         if (this.currentPort.readable.locked) {
             console.log('🔒 Stream is already locked. Ignoring request...');
@@ -143,6 +177,10 @@ class SerialConnectionHandler {
         return bytesRead;
     }
 
+    /**
+     * Reqests an image frame from the Arduino board by writing a 1 to the serial port.
+     * @returns {Promise<void>} A promise that resolves when the frame has been requested and the write stream has been closed.
+     */
     async requestFrame() {
         if (!this.currentPort?.writable) {
             console.log('🚫 Port is not writable. Ignoring request...');
@@ -155,6 +193,11 @@ class SerialConnectionHandler {
         await writer.close();
     }
 
+    /**
+     * Requests a frame from the Arduino board and reads the specified number of bytes from the serial port afterwards.
+     * Times out after the timeout in milliseconds specified in the constructor.
+     * @param {number} totalBytes The number of bytes to read.
+     */
     async getFrame(totalBytes) {
         if (!this.currentPort) return;
 
@@ -164,6 +207,13 @@ class SerialConnectionHandler {
         return await this.readBytes(totalBytes, this.timeout);
     }
 
+    /**
+     * Registers event listeners for the `connect` and `disconnect` events of the serial port.
+     * The `connect` event is fired when a serial port becomes available not when it is opened.
+     * When the `connect` event is fired, `autoConnect()` is called.
+     * The `disconnect` event is fired when a serial port is lost.
+     * When the `disconnect` event is fired, the `onDisconnect` callback is called.
+     **/
     registerEvents() {
         navigator.serial.addEventListener("connect", (e) => {
             // Connect to `e.target` or add it to a list of available ports.
