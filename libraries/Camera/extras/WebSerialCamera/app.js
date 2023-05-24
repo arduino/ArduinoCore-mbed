@@ -25,9 +25,8 @@ let config = {
 
 const imageWidth = 320; // Adjust this value based on your bitmap width
 const imageHeight = 240; // Adjust this value based on your bitmap height
-const bytesPerPixel = 2; // Adjust this value based on your bitmap format
-// const mode = 'RGB565'; // Adjust this value based on your bitmap format
-const mode = 'GRAYSCALE'; // Adjust this value based on your bitmap format
+const mode = 'RGB565'; // Adjust this value based on your bitmap format
+// const mode = 'GRAYSCALE'; // Adjust this value based on your bitmap format
 const totalBytes = imageWidth * imageHeight * config[mode].bytesPerPixel;
 
 // Set the buffer size to the total bytes. This allows to read the entire bitmap in one go.
@@ -167,22 +166,21 @@ function renderBitmap(bytes, width, height) {
   canvas.height = height;
   const bytesPerPixel = config[mode].bytesPerPixel;
   const BYTES_PER_ROW = width * bytesPerPixel;
-  const BYTES_PER_COL = height * bytesPerPixel;
 
   const imageData = ctx.createImageData(canvas.width, canvas.height);
-  const data = imageData.data;
+  const dataContainer = imageData.data;
 
-  for (let row = 0; row < BYTES_PER_ROW; row++) {
-    for (let col = 0; col < BYTES_PER_COL; col++) {
-      const dataIndex = (row * BYTES_PER_ROW) + (col * bytesPerPixel);      
-      const pixelValue = getPixelValue(bytes, dataIndex, bytesPerPixel);
+  for (let row = 0; row < height; row++) {
+    for (let col = 0; col < width; col++) {
+      const sourceDataIndex = (row * BYTES_PER_ROW) + (col * bytesPerPixel);
+      const pixelValue = getPixelValue(bytes, sourceDataIndex, bytesPerPixel);
       const [r, g, b] = config[mode].convert(pixelValue);
 
-      const idx = ((row * width) + col) * 4;
-      data[idx] = r; // Red channel
-      data[idx + 1] = g; // Green channel
-      data[idx + 2] = b; // Blue channel
-      data[idx + 3] = 255; // Alpha channel (opacity)
+      const pixelIndex = ((row * width) + col) * 4;
+      dataContainer[pixelIndex] = r; // Red channel
+      dataContainer[pixelIndex + 1] = g; // Green channel
+      dataContainer[pixelIndex + 2] = b; // Blue channel
+      dataContainer[pixelIndex + 3] = 255; // Alpha channel (opacity)
     }
   }
   ctx.clearRect(0, 0, canvas.width, canvas.height);
