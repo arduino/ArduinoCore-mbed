@@ -8,14 +8,31 @@ const ctx = canvas.getContext('2d');
 const UserActionAbortError = 8;
 const ArduinoUSBVendorId = 0x2341;
 
+let config = {
+  "RGB565": {
+    "convert": convertRGB565ToRGB888,
+    "bytesPerPixel": 2
+  },
+  "GRAYSCALE": {
+    "convert": convertGrayScaleToRGB888,
+    "bytesPerPixel": 1
+  },
+  "RGB888": {
+    "convert": convertToRGB888,
+    "bytesPerPixel": 3
+  }
+};
+
 const imageWidth = 320; // Adjust this value based on your bitmap width
 const imageHeight = 240; // Adjust this value based on your bitmap height
-const bytesPerPixel = 1; // Adjust this value based on your bitmap format
+const bytesPerPixel = 2; // Adjust this value based on your bitmap format
 // const mode = 'RGB565'; // Adjust this value based on your bitmap format
-const totalBytes = imageWidth * imageHeight * bytesPerPixel;
+const mode = 'GRAYSCALE'; // Adjust this value based on your bitmap format
+const totalBytes = imageWidth * imageHeight * config[mode].bytesPerPixel;
 
 // Set the buffer size to the total bytes. This allows to read the entire bitmap in one go.
 const bufferSize = Math.min(totalBytes, 16 * 1024 * 1024); // Max buffer size is 16MB
+const flowControl = 'hardware';
 const baudRate = 115200; // Adjust this value based on your device's baud rate
 const dataBits = 8; // Adjust this value based on your device's data bits
 const stopBits = 2; // Adjust this value based on your device's stop bits
@@ -85,7 +102,7 @@ async function readBytes(port, numBytes, timeout = null){
     const reader = port.readable.getReader();
     currentReader = reader;
     let timeoutID = null;
-    let count = 0;
+    // let count = 0;
 
     try {      
       while (bytesReadIdx < numBytes) {
@@ -129,9 +146,26 @@ async function readBytes(port, numBytes, timeout = null){
   return bytesRead;
 }
 
+// Get the pixel value using big endian
+// Big-endian: the most significant byte comes first
+function getPixelValue(data, index, bytesPerPixel){
+  if(bytesPerPixel == 1){
+    return data[index];
+  } else if(bytesPerPixel == 2){
+    return (data[index] << 8) | data[index + 1];
+  } else if(bytesPerPixel == 3){
+    return (data[index] << 16) | (data[index + 1] << 8) | data[index + 2];
+  } else if(bytesPerPixel == 4){
+    return (data[index] << 24) | (data[index + 1] << 16) | (data[index + 2] << 8) | data[index + 3];
+  }
+
+  return 0;
+}
+
 function renderBitmap(bytes, width, height) {
   canvas.width = width;
   canvas.height = height;
+  const bytesPerPixel = config[mode].bytesPerPixel;
   const BYTES_PER_ROW = width * bytesPerPixel;
   const BYTES_PER_COL = height * bytesPerPixel;
 
@@ -140,13 +174,14 @@ function renderBitmap(bytes, width, height) {
 
   for (let row = 0; row < BYTES_PER_ROW; row++) {
     for (let col = 0; col < BYTES_PER_COL; col++) {
-      const byte = bytes[row * BYTES_PER_COL + col];
-      const grayscaleValue = byte;
+      const dataIndex = (row * BYTES_PER_ROW) + (col * bytesPerPixel);      
+      const pixelValue = getPixelValue(bytes, dataIndex, bytesPerPixel);
+      const [r, g, b] = config[mode].convert(pixelValue);
 
-      const idx = (row * BYTES_PER_COL + col) * 4;
-      data[idx] = grayscaleValue; // Red channel
-      data[idx + 1] = grayscaleValue; // Green channel
-      data[idx + 2] = grayscaleValue; // Blue channel
+      const idx = ((row * width) + col) * 4;
+      data[idx] = r; // Red channel
+      data[idx + 1] = g; // Green channel
+      data[idx + 2] = b; // Blue channel
       data[idx + 3] = 255; // Alpha channel (opacity)
     }
   }
@@ -205,7 +240,7 @@ async function disconnectSerial(port) {
 startButton.addEventListener('click', renderStream);
 connectButton.addEventListener('click', async () => { 
   currentPort = await requestSerialPort();
-  if(await connectSerial(currentPort, baudRate, dataBits, stopBits, bufferSize)){
+  if(await connectSerial(currentPort, baudRate, dataBits, stopBits, bufferSize, flowControl)){
     renderStream();
   }
 });

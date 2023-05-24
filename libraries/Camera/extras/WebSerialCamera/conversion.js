@@ -9,3 +9,11 @@ function convertRGB565ToRGB888(pixelValue) {
     b <<= 3;
     return [r, g, b];
 }
+
+function convertGrayScaleToRGB888(pixelValue) {
+    return [pixelValue, pixelValue, pixelValue];
+}
+
+function convertToRGB888(pixelValue){
+   return [pixelValue[0], pixelValue[1], pixelValue[2]];
+}
