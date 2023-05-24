@@ -41,7 +41,6 @@ FrameBuffer fb;
 
 unsigned long lastUpdate = 0;
 
-
 void blinkLED(uint32_t count = 0xFFFFFFFF)
 {
   pinMode(LED_BUILTIN, OUTPUT);  
@@ -52,14 +51,6 @@ void blinkLED(uint32_t count = 0xFFFFFFFF)
     digitalWrite(LED_BUILTIN, HIGH); // turn the LED off by making the voltage LOW
     delay(50);                       // wait for a second
   }
-}
-
-void clearSerialBuffer(){
-  while(Serial.available()){
-    Serial.read();
-  }
-  Serial.end();
-  Serial.begin(9600);
 }
 
 void setup() {
