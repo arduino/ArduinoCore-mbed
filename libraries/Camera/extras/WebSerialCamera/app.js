@@ -8,17 +8,14 @@ const ctx = canvas.getContext('2d');
 const UserActionAbortError = 8;
 const ArduinoUSBVendorId = 0x2341;
 
-let config = {
-  "RGB565": {
-    "convert": convertRGB565ToRGB888,
+config = {
+  "RGB565": {    
     "bytesPerPixel": 2
   },
-  "GRAYSCALE": {
-    "convert": convertGrayScaleToRGB888,
+  "GRAYSCALE": {    
     "bytesPerPixel": 1
   },
-  "RGB888": {
-    "convert": convertToRGB888,
+  "RGB888": {    
     "bytesPerPixel": 3
   }
 };
@@ -37,6 +34,7 @@ const dataBits = 8; // Adjust this value based on your device's data bits
 const stopBits = 2; // Adjust this value based on your device's stop bits
 
 let currentPort, currentReader;
+const imageDataProcessor = new ImageDataProcessor(ctx, mode, imageWidth, imageHeight);
 
 async function requestSerialPort(){
   try {
@@ -82,7 +80,6 @@ async function connectSerial(port, baudRate = 115200, dataBits = 8, stopBits = 2
     return false;
   }
 }
-
 
 async function readBytes(port, numBytes, timeout = null){
   if(port.readable.locked){
@@ -145,44 +142,10 @@ async function readBytes(port, numBytes, timeout = null){
   return bytesRead;
 }
 
-// Get the pixel value using big endian
-// Big-endian: the most significant byte comes first
-function getPixelValue(data, index, bytesPerPixel){
-  if(bytesPerPixel == 1){
-    return data[index];
-  } else if(bytesPerPixel == 2){
-    return (data[index] << 8) | data[index + 1];
-  } else if(bytesPerPixel == 3){
-    return (data[index] << 16) | (data[index + 1] << 8) | data[index + 2];
-  } else if(bytesPerPixel == 4){
-    return (data[index] << 24) | (data[index + 1] << 16) | (data[index + 2] << 8) | data[index + 3];
-  }
-
-  return 0;
-}
-
 function renderBitmap(bytes, width, height) {
   canvas.width = width;
   canvas.height = height;
-  const bytesPerPixel = config[mode].bytesPerPixel;
-  const BYTES_PER_ROW = width * bytesPerPixel;
-
-  const imageData = ctx.createImageData(canvas.width, canvas.height);
-  const dataContainer = imageData.data;
-
-  for (let row = 0; row < height; row++) {
-    for (let col = 0; col < width; col++) {
-      const sourceDataIndex = (row * BYTES_PER_ROW) + (col * bytesPerPixel);
-      const pixelValue = getPixelValue(bytes, sourceDataIndex, bytesPerPixel);
-      const [r, g, b] = config[mode].convert(pixelValue);
-
-      const pixelIndex = ((row * width) + col) * 4;
-      dataContainer[pixelIndex] = r; // Red channel
-      dataContainer[pixelIndex + 1] = g; // Green channel
-      dataContainer[pixelIndex + 2] = b; // Blue channel
-      dataContainer[pixelIndex + 3] = 255; // Alpha channel (opacity)
-    }
-  }
+  const imageData = imageDataProcessor.getImageDataBytes(bytes, width, height);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.putImageData(imageData, 0, 0);
 }
@@ -198,6 +161,7 @@ async function requestFrame(port){
   await writer.write(new Uint8Array([1]));
   await writer.close();
 }
+
 async function renderStream(){
   while(true && currentPort){
     await renderFrame(currentPort);
