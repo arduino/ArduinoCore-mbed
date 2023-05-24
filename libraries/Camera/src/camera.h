@@ -530,11 +530,87 @@ class Camera {
          * @return int 0 if no motion is detected, non-zero if motion is detected
          */
         int motionDetected();
+
+        /**
+         * @brief Zoom to a specific region of the image by setting the zoom window size and its position.
+         * The camera resolution must be set to a higher resolution than the zoom resolution for this to work.
+         * The zooming is done by cropping a higher resolution image to the zoom window.
+         * @note This function is currently only supported by the GC2145 sensor on the Arduino Nicla Vision.
+         * @param zoom_resolution The resolution of the zoom window. 
+         * The resolution must be one of the following:
+         * - CAMERA_R160x120
+         * - CAMERA_R320x240
+         * - CAMERA_R320x320
+         * - CAMERA_R640x480
+         * - CAMERA_R800x600
+         * If the desired resolution doesn't fit in the built-in memory, 
+         * the framebuffer should be allocated on external RAM.
+         * @param zoom_x The x position of the zoom window. 
+         * The value must be lower or equal to the width of the image minus the width of the zoom window.
+         * @param zoom_y The y position of the zoom window. 
+         * The value must be lower or equal to the height of the image minus the height of the zoom window.
+         * @return 0 on success, -1 on failure.
+         */
         int zoomTo(int32_t zoom_resolution, uint32_t zoom_x, uint32_t zoom_y);
+
+        /**
+         * @brief Zoom to the center of the image by setting the zoom window size.
+         * 
+         * @param zoom_resolution The resolution of the zoom window. 
+         * The resolution must be one of the following:
+         * - CAMERA_R160x120
+         * - CAMERA_R320x240
+         * - CAMERA_R320x320
+         * - CAMERA_R640x480
+         * - CAMERA_R800x600
+         * If the desired resolution doesn't fit in the built-in memory, 
+         * the framebuffer should be allocated on external RAM.
+         * @return 0 on success, -1 on failure.
+         */
         int zoomToCenter(int32_t zoom_resolution);
+
+        /**
+         * @brief Flips the camera image vertically.
+         * 
+         * @param flip_enable Set to true to enable vertical flip, false to disable.
+         * @return 0 on success, -1 on failure.
+         */
         int setVerticalFlip(bool flip_enable);
+
+        /**
+         * @brief Mirrors the camera image horizontally.
+         * 
+         * @param mirror_enable Set to true to enable horizontal mirror, false to disable.
+         * @return 0 on success, -1 on failure.
+         */
         int setHorizontalMirror(bool mirror_enable);
+
+        /**
+         * @brief Get the width of the current camera resolution.
+         * This can for example be used to calculate the zoom window position and size.
+         * In the following example, the camera is zoomed to the top right side of the image:
+         * @code
+         * // Calculate the zoom window position
+         * uint32_t max_zoom_x = camera.getResolutionWidth() - 320;
+         * // Zoom to the calculated position and size
+         * camera.zoomTo(CAMERA_R320x240, max_zoom_x, 0);
+         * @endcode
+         * @return uint32_t The width of the camera resolution.
+         */
         uint32_t getResolutionWidth();
+
+        /**
+         * @brief Get the height of the current camera resolution.
+         * This can for example be used to calculate the zoom window position and size.
+         * In the following example, the camera is zoomed to the bottom left side of the image:
+         * @code
+         * // Calculate the zoom window position
+         * uint32_t max_zoom_y = camera.getResolutionHeight() - 240;
+         * // Zoom to the calculated position and size
+         * camera.zoomTo(CAMERA_R320x240, 0, max_zoom_y);
+         * @endcode
+         * @return uint32_t The height of the camera resolution.
+         */
         uint32_t getResolutionHeight();
 
         /**
