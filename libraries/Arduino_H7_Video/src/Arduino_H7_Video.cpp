@@ -125,6 +125,10 @@ int Arduino_H7_Video::height() {
   return _height;
 }
 
+bool Arduino_H7_Video::isRotated() {
+  return _rotated;
+}
+
 void Arduino_H7_Video::end() {
 #ifdef HAS_ARDUINOGRAPHICS
   ArduinoGraphics::end();

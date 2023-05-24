@@ -16,11 +16,11 @@ The main class for managing the video controller and the display.
 | `public void` [`end`](#public-void-end) | De-initialize the video controller and display. |
 | `public int` [`width`](#public-int-width) | Get the width of the display. |
 | `public int` [`height`](#public-int-height) | Get the height of the display. |
+| `public bool` [`isRotated`](#public-bool-isrotated) | Check if the display is rotated. |
 | `public void` [`clear`](#public-void-clear) | Clear the display. |
 | `public void` [`beginDraw`](#public-void-begindraw) | Begin drawing operations on the display. |
 | `public void` [`endDraw`](#public-void-enddraw) | End drawing operations on the display. |
 | `public void` [`set`](#public-void-setint-x-int-y-uint8_t-r-uint8_t-g-uint8_t-b) | Set the color of the pixel at the specified coordinates. |
-
 
 > *Note: For all drawing functions, refer to the documentation of the [`ArduinoGraphics`](https://reference.arduino.cc/reference/en/libraries/arduinographics/) library.*
 
@@ -69,6 +69,15 @@ Get the height of the display.
 
 #### Returns
 `int`: The height of the display.
+
+---
+
+### `public bool` [`isRotated`](#)`()`
+
+Check if the display is rotated.
+
+#### Returns
+`bool`: True if the display is rotated, false otherwise.
 
 ---
 

@@ -97,6 +97,13 @@ public:
    */
   int height();
 
+  /**
+   * @brief Check if the display is rotated.
+   * 
+   * @return bool True if the display is rotated, false otherwise.
+   */
+  bool isRotated();
+
 #ifdef HAS_ARDUINOGRAPHICS
   /**
    * @brief Clear the display.
