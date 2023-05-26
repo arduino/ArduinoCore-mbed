@@ -57,20 +57,23 @@ jobs:
               fqbn: arduino:mbed:envie_m7:target_core=cm4
             additional-libraries: |
               - name: lvgl
+                version: 8.3.5
+              - name: ArduinoGraphics
             additional-sketch-paths: |
               - libraries/doom
               - libraries/KernelDebug
               - libraries/Portenta_SDCARD
               - libraries/Portenta_SDRAM
-              - libraries/Portenta_Video
+              - libraries/Arduino_H7_Video
               - libraries/RPC
           - board:
               fqbn: arduino:mbed:envie_m7
             additional-libraries: |
               - name: lvgl
-                version: 7.11.0
+                version: 8.3.5
               - name: MicroNMEA
               - name: ArduinoBLE
+              - name: ArduinoGraphics
             additional-sketch-paths: |
               - libraries/PDM
               - libraries/doom
@@ -82,7 +85,7 @@ jobs:
               - libraries/Portenta_SDCARD
               - libraries/Portenta_SDRAM
               - libraries/STM32H747_System
-              - libraries/Portenta_Video
+              - libraries/Arduino_H7_Video
               - libraries/RPC
               - libraries/ThreadDebug
               - libraries/USBHID
