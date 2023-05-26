@@ -210,6 +210,18 @@ class ImageSensor {
          * @brief Set the resolution of the image sensor.
          * @note This has no effect on cameras that do not support variable resolutions.
          * @param resolution The desired resolution, as defined in the resolution enum
+         * @param zoom_resolution The desired zoom window size.
+         * @param zoom_x The desired x position of the zoom window.
+         * @param zoom_y The desired y position of the zoom window.
+         * @return int 0 on success, non-zero on failure
+         */
+        virtual int setResolutionWithZoom(int32_t resolution, int32_t zoom_resolution, uint32_t zoom_x, uint32_t zoom_y) = 0;
+
+        /**
+         * @brief Set the resolution of the image sensor.
+         * 
+         * @note This has no effect on cameras that do not support variable resolutions.
+         * @param resolution The desired resolution, as defined in the resolution enum
          * @return int 0 on success, non-zero on failure
          */
         virtual int setResolution(int32_t resolution) = 0;
@@ -276,12 +288,13 @@ class ImageSensor {
          * @return int 0 if no motion is detected, non-zero if motion is detected
          */
         virtual int motionDetected() = 0;
-
+        virtual int setVerticalFlip(bool flip_enable) = 0;
+        virtual int setHorizontalMirror(bool flip_enable) = 0;        
         /**
          * @brief Output debug information to a stream.
          * You can use this function to output debug information to the serial port by passing Serial as the stream.
          * @param stream Stream to output the debug information
-         */
+         */ 
         virtual void debug(Stream &stream) = 0;
 
         /**
@@ -370,6 +383,7 @@ class Camera {
     private:
         int32_t pixformat;       /// Pixel format
         int32_t resolution;      /// Camera resolution
+        int32_t original_resolution;    /// The resolution originally set through setResolution()
         int32_t framerate;       /// Frame rate
         ImageSensor *sensor;     /// Pointer to the camera sensor
         int reset();             /// Reset the camera
@@ -377,6 +391,8 @@ class Camera {
         Stream *_debug;          /// Pointer to the debug stream
         arduino::MbedI2C *_i2c;  /// Pointer to the I2C interface
         FrameBuffer *_framebuffer; /// Pointer to the frame buffer
+        int setResolutionWithZoom(int32_t resolution, int32_t zoom_resolution, int32_t zoom_x, int32_t zoom_y);
+
 
     public:
         /**
@@ -521,6 +537,88 @@ class Camera {
          * @return int 0 if no motion is detected, non-zero if motion is detected
          */
         int motionDetected();
+
+        /**
+         * @brief Zoom to a specific region of the image by setting the zoom window size and its position.
+         * The camera resolution must be set to a higher resolution than the zoom resolution for this to work.
+         * The zooming is done by cropping a higher resolution image to the zoom window.
+         * @note This function is currently only supported by the GC2145 sensor on the Arduino Nicla Vision.
+         * @param zoom_resolution The resolution of the zoom window. 
+         * The resolution must be one of the following:
+         * - CAMERA_R160x120
+         * - CAMERA_R320x240
+         * - CAMERA_R320x320
+         * - CAMERA_R640x480
+         * - CAMERA_R800x600
+         * If the desired resolution doesn't fit in the built-in memory, 
+         * the framebuffer should be allocated on external RAM.
+         * @param zoom_x The x position of the zoom window. 
+         * The value must be lower or equal to the width of the image minus the width of the zoom window.
+         * @param zoom_y The y position of the zoom window. 
+         * The value must be lower or equal to the height of the image minus the height of the zoom window.
+         * @return 0 on success, -1 on failure.
+         */
+        int zoomTo(int32_t zoom_resolution, uint32_t zoom_x, uint32_t zoom_y);
+
+        /**
+         * @brief Zoom to the center of the image by setting the zoom window size.
+         * 
+         * @param zoom_resolution The resolution of the zoom window. 
+         * The resolution must be one of the following:
+         * - CAMERA_R160x120
+         * - CAMERA_R320x240
+         * - CAMERA_R320x320
+         * - CAMERA_R640x480
+         * - CAMERA_R800x600
+         * If the desired resolution doesn't fit in the built-in memory, 
+         * the framebuffer should be allocated on external RAM.
+         * @return 0 on success, -1 on failure.
+         */
+        int zoomToCenter(int32_t zoom_resolution);
+
+        /**
+         * @brief Flips the camera image vertically.
+         * 
+         * @param flip_enable Set to true to enable vertical flip, false to disable.
+         * @return 0 on success, -1 on failure.
+         */
+        int setVerticalFlip(bool flip_enable);
+
+        /**
+         * @brief Mirrors the camera image horizontally.
+         * 
+         * @param mirror_enable Set to true to enable horizontal mirror, false to disable.
+         * @return 0 on success, -1 on failure.
+         */
+        int setHorizontalMirror(bool mirror_enable);
+
+        /**
+         * @brief Get the width of the current camera resolution.
+         * This can for example be used to calculate the zoom window position and size.
+         * In the following example, the camera is zoomed to the top right side of the image:
+         * @code
+         * // Calculate the zoom window position
+         * uint32_t max_zoom_x = camera.getResolutionWidth() - 320;
+         * // Zoom to the calculated position and size
+         * camera.zoomTo(CAMERA_R320x240, max_zoom_x, 0);
+         * @endcode
+         * @return uint32_t The width of the camera resolution.
+         */
+        uint32_t getResolutionWidth();
+
+        /**
+         * @brief Get the height of the current camera resolution.
+         * This can for example be used to calculate the zoom window position and size.
+         * In the following example, the camera is zoomed to the bottom left side of the image:
+         * @code
+         * // Calculate the zoom window position
+         * uint32_t max_zoom_y = camera.getResolutionHeight() - 240;
+         * // Zoom to the calculated position and size
+         * camera.zoomTo(CAMERA_R320x240, 0, max_zoom_y);
+         * @endcode
+         * @return uint32_t The height of the camera resolution.
+         */
+        uint32_t getResolutionHeight();
 
         /**
          * @brief Output debug information to a stream.

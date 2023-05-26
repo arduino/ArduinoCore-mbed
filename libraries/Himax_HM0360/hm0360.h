@@ -40,6 +40,7 @@ class HM0360: public ImageSensor {
         bool getMono() { return true; };
         uint32_t getClockFrequency() { return 24000000; };
         int setFrameRate(int32_t framerate);
+        int setResolutionWithZoom(int32_t resolution, int32_t zoom_resolution, uint32_t zoom_x, uint32_t zoom_y);
         int setResolution(int32_t resolution);
         int setPixelFormat(int32_t pixformat);
         int setTestPattern(bool enable, bool walking) override;
@@ -50,6 +51,8 @@ class HM0360: public ImageSensor {
         int motionDetected();
         int pollMotionDetection();
         int clearMotionDetection();
+        int setVerticalFlip(bool flip_enable);
+        int setHorizontalMirror(bool mirror_enable);
 
         uint8_t printRegs();
         void debug(Stream &stream);
