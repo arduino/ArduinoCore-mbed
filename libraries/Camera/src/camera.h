@@ -217,6 +217,13 @@ class ImageSensor {
          */
         virtual int setResolutionWithZoom(int32_t resolution, int32_t zoom_resolution, uint32_t zoom_x, uint32_t zoom_y) = 0;
 
+        /**
+         * @brief Set the resolution of the image sensor.
+         * 
+         * @note This has no effect on cameras that do not support variable resolutions.
+         * @param resolution The desired resolution, as defined in the resolution enum
+         * @return int 0 on success, non-zero on failure
+         */
         virtual int setResolution(int32_t resolution) = 0;
 
         /**
