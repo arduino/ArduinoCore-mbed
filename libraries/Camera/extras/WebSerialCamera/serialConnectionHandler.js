@@ -166,7 +166,7 @@ class SerialConnectionHandler {
                 }
 
             } catch (error) {
-                console.log('💣 Error occurred while reading: ' + error.message);
+                console.error('💣 Error occurred while reading: ' + error.message);
             } finally {
                 keepReading = false;
                 // console.log('🔓 Releasing reader lock...');
