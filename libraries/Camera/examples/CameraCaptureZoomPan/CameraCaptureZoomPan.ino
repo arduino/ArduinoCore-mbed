@@ -2,7 +2,7 @@
  * This example shows how to use the Nicla Vision to capture images from the camera
  * with a zoom window and send them over the serial port.
  * The zoom window will move from left to right and top to bottom 
- * in the predefined steps of pixels (ZOOM_X_STEPS and ZOOM_Y_STEPS).
+ * in the predefined steps of pixels (ZOOM_X_STEP and ZOOM_Y_STEP).
  * 
  * Whenever the board sends a frame over the serial port, the blue LED will blink.
  * 
@@ -32,8 +32,8 @@ Camera cam(galaxyCore);
 
 constexpr uint16_t ZOOM_WINDOW_WIDTH = 320;
 constexpr uint16_t ZOOM_WINDOW_HEIGHT = 240;
-constexpr uint16_t ZOOM_X_STEPS = 100;
-constexpr uint16_t ZOOM_Y_STEPS = 100;
+constexpr uint16_t ZOOM_X_STEP = 100;
+constexpr uint16_t ZOOM_Y_STEP = 100;
 
 FrameBuffer frameBuffer;
 uint32_t currentZoomX = 0;
@@ -111,11 +111,11 @@ void loop() {
 
   if(request == 1){
     sendFrame();
-    currentZoomX += ZOOM_X_STEPS;
+    currentZoomX += ZOOM_X_STEP;
 
     if(currentZoomX > maxZoomX){
       currentZoomX = 0;
-      currentZoomY += ZOOM_Y_STEPS;
+      currentZoomY += ZOOM_Y_STEP;
       if(currentZoomY > maxZoomY){
         currentZoomY = 0;
       }
