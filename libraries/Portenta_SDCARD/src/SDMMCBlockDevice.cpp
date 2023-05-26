@@ -115,6 +115,7 @@ int SDMMCBlockDevice::deinit()
     _sd_state = BSP_SD_DeInit ();
     if(_sd_state != MSD_OK) {
         debug_if (SD_DBG, "SD card deinitialization failed\n");
+        unlock();
         return SD_BLOCK_DEVICE_ERROR;
     }
     _is_initialized = false;

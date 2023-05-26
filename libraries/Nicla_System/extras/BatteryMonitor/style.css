@@ -1,0 +1,70 @@
+:root {
+    --main-control-color: #008184;
+    --main-control-color-hover: #005c5f;
+    --main-flexbox-gap: 16px;
+    --secondary-text-color: #87898b;
+}
+
+body {
+    font-family: 'Open Sans', sans-serif;
+    text-align: center;
+}
+
+.container {
+    display: inline-block;
+    margin-top: 20px;
+}
+
+button {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    justify-content: center;
+    background-color: var(--main-control-color);
+    color: #fff;
+    cursor: pointer;
+    letter-spacing: 1.28px;
+    line-height: normal;
+    outline: none;
+    padding: 8px 18px;
+    text-align: center;
+    text-decoration: none;
+    border: 2px solid transparent;
+    border-radius: 32px;
+    text-transform: uppercase;
+    box-sizing: border-box;
+}
+
+button:hover {
+    background-color: var(--main-control-color-hover);
+}
+
+.battery {
+    width: 60px;
+    height: 30px;
+    border: 2px solid #999;
+    border-radius: 5px;
+    position: relative;
+    margin: 20px auto;
+}
+
+.battery-level {
+    position: absolute;
+    bottom: 2px;
+    left: 2px;
+    background-color: green;
+    border-radius: 2px;
+    width: 0;
+    height: 26px;
+}
+
+#battery-status {    
+    display: flex;
+    flex-direction: row;
+    margin: 20px 0;
+    justify-content: center;
+}
+
+#battery-status > div {
+    display: none;
+}

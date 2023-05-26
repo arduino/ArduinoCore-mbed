@@ -45,6 +45,7 @@ class OV7670: public ImageSensor {
         bool getMono() { return false; };
         uint32_t getClockFrequency() { return 12000000; };
         int setFrameRate(int32_t framerate);
+        int setResolutionWithZoom(int32_t resolution, int32_t zoom_resolution, uint32_t zoom_x, uint32_t zoom_y);
         int setResolution(int32_t resolution);
         int setPixelFormat(int32_t pixformat);
         int enableMotionDetection(md_callback_t callback) { return 0; };
@@ -52,6 +53,8 @@ class OV7670: public ImageSensor {
         int setMotionDetectionWindow(uint32_t x, uint32_t y, uint32_t w, uint32_t h) { return 0; };
         int setMotionDetectionThreshold(uint32_t threshold) { return 0; };
         int motionDetected() { return 0; };
+        int setVerticalFlip(bool flip_enable);
+        int setHorizontalMirror(bool mirror_enable);
         void debug(Stream &stream);
 };
 

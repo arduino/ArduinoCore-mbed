@@ -61,7 +61,7 @@ void analogWrite(pin_size_t pin, int val)
     return;
   }
 #ifdef DAC
-  for (int i=0; i<NUM_ANALOG_OUTPUTS; i++) {
+  for (unsigned int i=0; i<NUM_ANALOG_OUTPUTS; i++) {
     if (digitalPinToPinName(pin) == g_AAnalogOutPinDescription[i].name) {
       analogWriteDAC(digitalPinToPinName(pin), val, i);
       return;

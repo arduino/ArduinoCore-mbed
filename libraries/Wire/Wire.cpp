@@ -153,7 +153,7 @@ void arduino::MbedI2C::receiveThd() {
 					slave->write((const char *) txBuffer, usedTxBuffer);
 					usedTxBuffer = 0;
 				}
-				slave->stop();
+				//slave->stop();
 				break;
 			case mbed::I2CSlave::WriteGeneral:
 			case mbed::I2CSlave::WriteAddressed:

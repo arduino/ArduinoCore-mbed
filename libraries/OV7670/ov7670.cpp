@@ -697,11 +697,31 @@ int OV7670::setFrameRate(int32_t framerate)
     return 0;
 }
 
+int OV7670::setVerticalFlip(bool flip_enable)
+{
+  return -1;
+}
+
+int OV7670::setHorizontalMirror(bool mirror_enable)
+{
+  return -1;
+}
+
 int OV7670::setResolution(int32_t resolution)
+{
+    setResolutionWithZoom(resolution, resolution, 0, 0);
+}
+
+int OV7670::setResolutionWithZoom(int32_t resolution, int32_t zoom_resolution, uint32_t zoom_x, uint32_t zoom_y)
 {
     int ret = 0;
 
     const uint8_t (*regs)[2];
+
+    if (resolution != zoom_resolution)
+    {
+        return -1;
+    }
 
     switch (resolution) {
         case CAMERA_R640x480:

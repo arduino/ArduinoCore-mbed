@@ -18,6 +18,7 @@
 #include "NDP.h"
 
 #undef abs
+#define USE_INT24_FROM_INT
 #include "AudioTools.h"
 #include "AudioCodecs/CodecG722.h"
 

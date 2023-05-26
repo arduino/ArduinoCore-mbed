@@ -1,0 +1,32 @@
+#######################################
+# Syntax Coloring Map for CAN
+#######################################
+
+#######################################
+# Class (KEYWORD1)
+#######################################
+
+CAN	KEYWORD1
+CAN1	KEYWORD1
+CanMsg	KEYWORD1
+CanBitRate	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+begin	KEYWORD2
+end	KEYWORD2
+write	KEYWORD2
+available	KEYWORD2
+read	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+BR_100k	LITERAL1
+BR_125k	LITERAL1
+BR_250k	LITERAL1
+BR_500k	LITERAL1
+BR_1000k	LITERAL1

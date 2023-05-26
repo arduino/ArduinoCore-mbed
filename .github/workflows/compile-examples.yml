@@ -79,7 +79,9 @@ jobs:
               - libraries/doom
               - libraries/KernelDebug
               - libraries/MCUboot
-              - libraries/Camera/examples
+              - libraries/Camera/examples/CameraCaptureRawBytes
+              - libraries/Camera/examples/CameraMotionDetect
+              - libraries/Portenta_lvgl/examples/Portenta_lvgl
               - libraries/Portenta_SDCARD
               - libraries/Portenta_SDRAM
               - libraries/STM32H747_System
@@ -117,6 +119,7 @@ jobs:
             additional-sketch-paths: |
               - libraries/PDM
               - libraries/Camera/examples/CameraCaptureRawBytes
+              - libraries/Camera/examples/CameraCaptureZoomPan
               - libraries/SE05X
               - libraries/STM32H747_System
               - libraries/ThreadDebug
