@@ -60,7 +60,7 @@ void setup() {
 
 void loop() {
   if(!Serial) {    
-    Serial.begin(921600);
+    Serial.begin(115200);
     while(!Serial);
   }
 
