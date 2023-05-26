@@ -341,9 +341,29 @@ int HM01B0::reset()
     return (max_timeout > 0) ? 0 : -1;
 }
 
+int HM01B0::setVerticalFlip(bool flip_enable)
+{
+  return -1;
+}
+
+int HM01B0::setHorizontalMirror(bool mirror_enable)
+{
+  return -1;
+}
+
 int HM01B0::setResolution(int32_t resolution)
 {
+    setResolutionWithZoom(resolution, resolution, 0, 0);
+}
+
+int HM01B0::setResolutionWithZoom(int32_t resolution, int32_t zoom_resolution, uint32_t zoom_x, uint32_t zoom_y)
+{
   int ret = 0;
+
+  if (resolution != zoom_resolution)
+  {
+    return -1;
+  }
 
   switch (resolution) {
     case CAMERA_R160x120:
