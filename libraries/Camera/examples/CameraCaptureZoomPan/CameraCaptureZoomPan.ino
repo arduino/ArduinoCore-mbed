@@ -1,3 +1,20 @@
+/*
+ * This example shows how to use the Nicla Vision to capture images from the camera
+ * with a zoom window and send them over the serial port.
+ * The zoom window will move from left to right and top to bottom 
+ * in the predefined steps of pixels (ZOOM_X_STEPS and ZOOM_Y_STEPS).
+ * 
+ * Whenever the board sends a frame over the serial port, the blue LED will blink.
+ * 
+ * Instructions:
+ * 1. Upload this sketch to Nicla Vision.
+ * 2. Open the CameraRawBytesVisualizer.pde Processing sketch and change `useGrayScale` to `false`.
+ * 3. Adjust the serial port in the Processing sketch to match the one used by Nicla Vision.
+ * 4. Run the Processing sketch.
+ * 
+ * Initial author: Sebastian Romero @sebromero
+ */
+
 #include "camera.h"
 
 #ifndef ARDUINO_NICLA_VISION
@@ -10,7 +27,7 @@ Camera cam(galaxyCore);
 #define IMAGE_MODE CAMERA_RGB565
 
 #define CHUNK_SIZE 512  // Size of chunks in bytes
-#define RESOLUTION CAMERA_R1600x1200
+#define RESOLUTION CAMERA_R1600x1200 // Zoom in from the highest supported resolution
 #define ZOOM_WINDOW_RESOLUTION CAMERA_R320x240
 
 constexpr uint16_t ZOOM_WINDOW_WIDTH = 320;
