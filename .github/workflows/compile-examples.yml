@@ -81,7 +81,6 @@ jobs:
               - libraries/MCUboot
               - libraries/Camera/examples/CameraCaptureRawBytes
               - libraries/Camera/examples/CameraMotionDetect
-              - libraries/Portenta_lvgl/examples/Portenta_lvgl
               - libraries/Portenta_SDCARD
               - libraries/Portenta_SDRAM
               - libraries/STM32H747_System
