@@ -59,6 +59,7 @@ jobs:
               - name: lvgl
                 version: 8.3.5
               - name: ArduinoGraphics
+              - name: Arduino_GigaDisplayTouch
             additional-sketch-paths: |
               - libraries/doom
               - libraries/KernelDebug
@@ -74,6 +75,7 @@ jobs:
               - name: MicroNMEA
               - name: ArduinoBLE
               - name: ArduinoGraphics
+              - name: Arduino_GigaDisplayTouch
             additional-sketch-paths: |
               - libraries/PDM
               - libraries/doom
