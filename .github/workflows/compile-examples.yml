@@ -39,8 +39,8 @@ jobs:
           - fqbn: arduino:mbed:nicla_sense
           - fqbn: arduino:mbed:nicla_vision
           - fqbn: arduino:mbed:opta
-          - fqbn: arduino:mbed:nicla_voice
           - fqpn: arduino:mbed:giga
+          - fqbn: arduino:mbed:nicla_voice
 
         # compile only the examples compatible with each board
         include:
@@ -138,19 +138,6 @@ jobs:
               - libraries/USBHID
               - libraries/USBMSD/examples/AccessFlashAsUSBDisk
               - libraries/WiFi
-          - board:
-              fqbn: arduino:mbed:nicla_voice
-            additional-sketch-paths: |
-              - libraries/Nicla_System
-              - libraries/NDP
-            additional-libraries: |
-              - name: Arduino_BHY2
-              - name: ArduinoBLE
-              - name: arduino-audio-tools
-                source-url: https://github.com/pschatzmann/arduino-audio-tools.git
-                version: v0.9.6
-              - name: arduino-libg722
-                source-url: https://github.com/pschatzmann/arduino-libg722.git
             - board:
               fqbn: arduino:mbed:giga
             additional-libraries: |
@@ -179,6 +166,19 @@ jobs:
               - libraries/WiFi
               - libraries/GSM
               - ~/Arduino/libraries/ArduinoBLE
+          - board:
+              fqbn: arduino:mbed:nicla_voice
+            additional-sketch-paths: |
+              - libraries/Nicla_System
+              - libraries/NDP
+            additional-libraries: |
+              - name: Arduino_BHY2
+              - name: ArduinoBLE
+              - name: arduino-audio-tools
+                source-url: https://github.com/pschatzmann/arduino-audio-tools.git
+                version: v0.9.6
+              - name: arduino-libg722
+                source-url: https://github.com/pschatzmann/arduino-libg722.git
               
     steps:
       - name: Checkout repository
