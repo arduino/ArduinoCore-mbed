@@ -56,17 +56,10 @@ jobs:
               - ~/Arduino/libraries/ArduinoBLE
           - board:
               fqbn: arduino:mbed:envie_m7:target_core=cm4
-            additional-libraries: |
-              - name: lvgl
-                version: 8.3.5
-              - name: ArduinoGraphics
-              - name: Arduino_GigaDisplayTouch
             additional-sketch-paths: |
-              - libraries/doom
               - libraries/KernelDebug
               - libraries/Portenta_SDCARD
               - libraries/Portenta_SDRAM
-              - libraries/Arduino_H7_Video
               - libraries/RPC
           - board:
               fqbn: arduino:mbed:envie_m7
