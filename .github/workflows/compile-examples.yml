@@ -142,7 +142,6 @@ jobs:
               - name: Arduino_GigaDisplayTouch
             additional-sketch-paths: |
               - libraries/PDM
-              - libraries/KernelDebug
               - libraries/MCUboot
               - libraries/Camera/examples/CameraCaptureRawBytes
               - libraries/Camera/examples/CameraMotionDetect
