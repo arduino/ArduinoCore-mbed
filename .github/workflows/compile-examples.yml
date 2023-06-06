@@ -138,7 +138,7 @@ jobs:
               - libraries/USBHID
               - libraries/USBMSD/examples/AccessFlashAsUSBDisk
               - libraries/WiFi
-            - board:
+          - board:
               fqbn: arduino:mbed:giga
             additional-libraries: |
               - name: lvgl
