@@ -148,7 +148,6 @@ jobs:
               - libraries/Camera/examples/CameraMotionDetect
               - libraries/Portenta_SDCARD
               - libraries/Portenta_SDRAM
-              - libraries/STM32H747_System
               - libraries/Arduino_H7_Video
               - libraries/RPC
               - libraries/ThreadDebug
