@@ -39,7 +39,7 @@ jobs:
           - fqbn: arduino:mbed:nicla_sense
           - fqbn: arduino:mbed:nicla_vision
           - fqbn: arduino:mbed:opta
-          - fqpn: arduino:mbed:giga
+          - fqbn: arduino:mbed:giga
           - fqbn: arduino:mbed:nicla_voice
 
         # compile only the examples compatible with each board
