@@ -151,20 +151,34 @@ jobs:
                 version: v0.9.6
               - name: arduino-libg722
                 source-url: https://github.com/pschatzmann/arduino-libg722.git
-          - board:
+            - board:
               fqbn: arduino:mbed:giga
             additional-libraries: |
               - name: lvgl
                 version: 8.3.5
+              - name: MicroNMEA
+              - name: ArduinoBLE
               - name: ArduinoGraphics
               - name: Arduino_GigaDisplayTouch
             additional-sketch-paths: |
+              - libraries/PDM
               - libraries/doom
               - libraries/KernelDebug
+              - libraries/MCUboot
+              - libraries/Camera/examples/CameraCaptureRawBytes
+              - libraries/Camera/examples/CameraMotionDetect
               - libraries/Portenta_SDCARD
               - libraries/Portenta_SDRAM
+              - libraries/STM32H747_System
               - libraries/Arduino_H7_Video
               - libraries/RPC
+              - libraries/ThreadDebug
+              - libraries/USBHID
+              - libraries/USBHOST
+              - libraries/USBMSD/examples/AccessFlashAsUSBDisk
+              - libraries/WiFi
+              - libraries/GSM
+              - ~/Arduino/libraries/ArduinoBLE
               
     steps:
       - name: Checkout repository
