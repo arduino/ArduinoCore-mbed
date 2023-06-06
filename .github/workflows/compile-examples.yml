@@ -40,6 +40,7 @@ jobs:
           - fqbn: arduino:mbed:nicla_vision
           - fqbn: arduino:mbed:opta
           - fqbn: arduino:mbed:nicla_voice
+          - fqpn: arduino:mbed:giga
 
         # compile only the examples compatible with each board
         include:
@@ -150,7 +151,21 @@ jobs:
                 version: v0.9.6
               - name: arduino-libg722
                 source-url: https://github.com/pschatzmann/arduino-libg722.git
-
+          - board:
+              fqbn: arduino:mbed:giga
+            additional-libraries: |
+              - name: lvgl
+                version: 8.3.5
+              - name: ArduinoGraphics
+              - name: Arduino_GigaDisplayTouch
+            additional-sketch-paths: |
+              - libraries/doom
+              - libraries/KernelDebug
+              - libraries/Portenta_SDCARD
+              - libraries/Portenta_SDRAM
+              - libraries/Arduino_H7_Video
+              - libraries/RPC
+              
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
