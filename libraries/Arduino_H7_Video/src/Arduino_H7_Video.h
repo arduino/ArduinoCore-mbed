@@ -64,6 +64,8 @@ public:
   Arduino_H7_Video(int width = 1024, int height = 768, H7DisplayShield &shield = USBCVideo);
 #elif defined(ARDUINO_GIGA)
   Arduino_H7_Video(int width = 800, int height = 480, H7DisplayShield &shield = GigaDisplayShield);
+#else
+  Arduino_H7_Video(int width, int height, H7DisplayShield &shield);
 #endif
 
   /**
