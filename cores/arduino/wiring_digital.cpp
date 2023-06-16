@@ -51,6 +51,9 @@ void pinMode(PinName pin, PinMode mode)
 
 void pinMode(pin_size_t pin, PinMode mode)
 {
+  if (pin >= PINS_COUNT) {
+    return;
+  }
   mbed::DigitalInOut* gpio = digitalPinToGpio(pin);
   if (gpio != NULL) {
     delete gpio;
