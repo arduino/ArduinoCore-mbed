@@ -763,7 +763,36 @@ int GC2145::setFrameRate(int32_t framerate)
     return 0;
 }
 
+int GC2145::setVerticalFlip(bool flip_enable)
+{
+    // The GC2145 doesn't return this value when reading the Analog mode 1 register
+    // so we have to save it for setHorizontalMirror()
+    vertical_flip_state = flip_enable;
+    // Using the Analog mode 1 register (0x17)
+    uint8_t old_value = regRead(GC2145_I2C_ADDR, 0x17);
+    int retVal = regWrite(GC2145_I2C_ADDR, 0x17, (old_value & 0b11111100) | (flip_enable << 1) | horizontal_mirror_state);
+    // Notice that the error codes from regWrite() are positive ones passed on from Wire, not -1
+    return ((0 == retVal) ? 0 : -1);
+}
+
+int GC2145::setHorizontalMirror(bool mirror_enable)
+{
+    // The GC2145 doesn't return this value when reading the Analog mode 1 register
+    // so we have to save it for setVerticalFlip()
+    horizontal_mirror_state = mirror_enable;
+    // Using the Analog mode 1 register (0x17)
+    uint8_t old_value = regRead(GC2145_I2C_ADDR, 0x17);
+    int retVal = regWrite(GC2145_I2C_ADDR, 0x17, (old_value & 0b11111100) | mirror_enable | (vertical_flip_state << 1));
+    // Notice that the error codes from regWrite() are positive ones passed on from Wire, not -1
+    return ((0 == retVal) ? 0 : -1);
+}
+
 int GC2145::setResolution(int32_t resolution)
+{
+    setResolutionWithZoom(resolution, resolution, 0, 0);
+}
+
+int GC2145::setResolutionWithZoom(int32_t resolution, int32_t zoom_resolution, uint32_t zoom_x, uint32_t zoom_y)
 {
     int ret = 0;
 
@@ -809,6 +838,44 @@ int GC2145::setResolution(int32_t resolution)
     // Set readout window first.
     ret |= setWindow(0x09, win_x, win_y, win_w + 16, win_h + 8);
 
+    // Zoom mode active
+    if (resolution != zoom_resolution)
+    {
+        // Can't zoom into a larger window than the original
+        if (zoom_resolution > resolution)
+        {
+            return -1;
+        }
+        
+        // The zoom resolution constant is outside of the allowed range
+        if ((zoom_resolution < 0) || (zoom_resolution >= CAMERA_RMAX))
+        {
+            return -1;
+        }
+
+        uint32_t zoom_w = restab[zoom_resolution][0];
+        uint32_t zoom_h = restab[zoom_resolution][1];
+
+        // Check if the zoom window goes outside the frame on the x axis
+        // Notice that this form prevents uint32_t wraparound, so don't change it
+        if (zoom_x >= (w - zoom_w))
+        {
+            return -1;
+        }
+        // Check of the zoom window goes outside the frame on the y axis
+        // Notice that this form prevents uint32_t wraparound, so don't change it
+        if (zoom_y >= (h - zoom_h))
+        {
+            return -1;
+        }
+
+        // Set the cropping window parameters to the zoom window parameters
+        x = zoom_x;
+        y = zoom_y;
+        w = zoom_w;
+        h = zoom_h;
+    }
+
     // Set cropping window next.
     ret |= setWindow(0x91, x, y, w, h);
 
@@ -820,7 +887,6 @@ int GC2145::setResolution(int32_t resolution)
     ret |= regWrite(GC2145_I2C_ADDR, 0x9A, 0x0E);
 
     return ret;
-
 }
 
 int GC2145::setPixelFormat(int32_t pixformat)

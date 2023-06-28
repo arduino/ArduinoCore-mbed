@@ -39,7 +39,7 @@
 #define SYNTIANT_NDP120_SPI_OP 0
 #define SYNTIANT_NDP120_MCU_OP 1
 
-#define MSPI_CLK_DIV 2
+#define MSPI_CLK_DIV 6
 #define MSSB_OE_USED 7
 
 static int _cspi_read(struct syntiant_ndp120_tiny_device_s *ndp, int ssb, int num_bytes, uint8_t *data, int end_packet);

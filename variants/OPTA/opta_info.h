@@ -17,4 +17,5 @@ typedef struct __attribute__((packed)) {
     uint16_t pid;
     uint8_t mac_address[6];
     uint8_t mac_address_2[6];
+    uint8_t plc_license[16];
 } OptaBoardInfo;

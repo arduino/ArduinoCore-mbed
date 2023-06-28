@@ -20,7 +20,7 @@ final int cameraHeight = 240;
 boolean useGrayScale = true;
 
 // Must match the baud rate in the Arduino sketch
-final int baudRate = 921600;
+final int baudRate = 115200;
 
 final int cameraBytesPerPixel = useGrayScale ? 1 : 2;
 final int cameraPixelCount = cameraWidth * cameraHeight;
