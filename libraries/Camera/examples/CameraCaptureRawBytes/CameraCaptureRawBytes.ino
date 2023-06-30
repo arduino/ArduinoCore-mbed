@@ -6,10 +6,11 @@
   Camera cam(galaxyCore);
   #define IMAGE_MODE CAMERA_RGB565
 #elif defined(ARDUINO_PORTENTA_H7_M7)
-  //#include "hm0360.h"
-  //HM0360 himax;
-  #include "himax.h";
-  HM01B0 himax;
+  // uncomment the correct camera in use
+  #include "hm0360.h"
+  HM0360 himax;
+  // #include "himax.h";
+  // HM01B0 himax;
   Camera cam(himax);
   #define IMAGE_MODE CAMERA_GRAYSCALE
 #elif defined(ARDUINO_GIGA)
@@ -87,8 +88,8 @@ void sendFrame(){
 }
 
 void sendCameraConfig(){
-  Serial.write(RESOLUTION);
   Serial.write(IMAGE_MODE);
+  Serial.write(RESOLUTION);
   Serial.flush();
   delay(1);
 }
