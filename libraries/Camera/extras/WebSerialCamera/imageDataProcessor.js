@@ -1,29 +1,54 @@
 class ImageDataProcessor {
+    pixelFormatInfo = {
+      "RGB565": {
+        "convert": this.convertRGB565ToRGB888,
+        "bytesPerPixel": 2
+      },
+      "GRAYSCALE": {
+        "convert": this.convertGrayScaleToRGB888,
+        "bytesPerPixel": 1
+      },
+      "RGB888": {
+        "convert": this.convertToRGB888,
+        "bytesPerPixel": 3
+      },
+      "BAYER": {
+        "convert": null, // TODO
+        "bytesPerPixel": 1
+      }
+    };
 
-    constructor(context, mode) {
-        this.canvas = context.canvas;
-        this.context = context;
-        this.mode = mode;
-        this.config = {
-            "RGB565": {
-              "convert": this.convertRGB565ToRGB888,
-              "bytesPerPixel": 2
-            },
-            "GRAYSCALE": {
-              "convert": this.convertGrayScaleToRGB888,
-              "bytesPerPixel": 1
-            },
-            "RGB888": {
-              "convert": this.convertToRGB888,
-              "bytesPerPixel": 3
-            }
-          };
-        this.setMode(mode);
+    constructor(context, mode = null, width = null, height = null) {
+      this.context = context;
+      this.canvas = context.canvas;
+      
+      if(mode) this.setMode(mode);
+      if(width && height) this.setResolution(width, height);
     }
   
     setMode(mode) {
         this.mode = mode;
-        this.bytesPerPixel = this.config[mode].bytesPerPixel;
+        this.bytesPerPixel = this.pixelFormatInfo[mode].bytesPerPixel;
+    }
+
+    setResolution(width, height) {
+        this.width = width;
+        this.height = height;
+    }
+
+    getTotalBytes() {
+        return this.width * this.height * this.bytesPerPixel;
+    }
+
+    isConfigured() {
+        return this.mode && this.width && this.height;
+    }
+
+    reset() {
+        this.mode = null;
+        this.bytesPerPixel = null;
+        this.width = null;
+        this.height = null;
     }
   
     convertRGB565ToRGB888(pixelValue) {
@@ -62,19 +87,19 @@ class ImageDataProcessor {
         return 0;
     }
   
-    getImageDataBytes(bytes, width, height) {
-        const BYTES_PER_ROW = width * this.bytesPerPixel;
+    getImageData(bytes) {
+        const BYTES_PER_ROW = this.width * this.bytesPerPixel;
       
-        const imageData = this.context.createImageData(width, height);
+        const imageData = this.context.createImageData(this.width, this.height);
         const dataContainer = imageData.data;
       
-        for (let row = 0; row < height; row++) {
-          for (let col = 0; col < width; col++) {
+        for (let row = 0; row < this.height; row++) {
+          for (let col = 0; col < this.width; col++) {
             const sourceDataIndex = (row * BYTES_PER_ROW) + (col * this.bytesPerPixel);
             const pixelValue = this.getPixelValue(bytes, sourceDataIndex, this.bytesPerPixel);
-            const [r, g, b] = this.config[mode].convert(pixelValue);
+            const [r, g, b] = this.pixelFormatInfo[this.mode].convert(pixelValue);
       
-            const pixelIndex = ((row * width) + col) * 4;
+            const pixelIndex = ((row * this.width) + col) * 4; // 4 channels: R, G, B, A
             dataContainer[pixelIndex] = r; // Red channel
             dataContainer[pixelIndex + 1] = g; // Green channel
             dataContainer[pixelIndex + 2] = b; // Blue channel

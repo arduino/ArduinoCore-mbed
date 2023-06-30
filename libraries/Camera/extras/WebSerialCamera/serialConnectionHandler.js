@@ -177,20 +177,36 @@ class SerialConnectionHandler {
         return bytesRead;
     }
 
+    async sendData(byteArray) {
+        if (!this.currentPort?.writable) {
+            console.log('🚫 Port is not writable. Ignoring request...');
+            return;
+        }
+        const writer = this.currentPort.writable.getWriter();
+        await writer.write(new Uint8Array(byteArray));
+        await writer.close();
+    }
+
     /**
      * Reqests an image frame from the Arduino board by writing a 1 to the serial port.
      * @returns {Promise<void>} A promise that resolves when the frame has been requested and the write stream has been closed.
      */
     async requestFrame() {
-        if (!this.currentPort?.writable) {
-            console.log('🚫 Port is not writable. Ignoring request...');
-            return;
-        }
         // console.log('Writing 1 to the serial port...');
         // Write a 1 to the serial port
-        const writer = this.currentPort.writable.getWriter();
-        await writer.write(new Uint8Array([1]));
-        await writer.close();
+        return this.sendData([1]);
+    }
+
+    async requestConfig() {
+        return this.sendData([2]);
+    }
+
+    async getConfig() {
+        if (!this.currentPort) return;
+
+        await this.requestConfig();
+        // console.log(`Trying to read 2 bytes...`);
+        return await this.readBytes(2, this.timeout);
     }
 
     /**
@@ -201,7 +217,7 @@ class SerialConnectionHandler {
     async getFrame(totalBytes) {
         if (!this.currentPort) return;
 
-        await this.requestFrame(this.currentPort);
+        await this.requestFrame();
         // console.log(`Trying to read ${totalBytes} bytes...`);
         // Read the given amount of bytes
         return await this.readBytes(totalBytes, this.timeout);
