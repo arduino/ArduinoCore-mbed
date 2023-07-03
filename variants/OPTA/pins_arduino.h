@@ -85,10 +85,10 @@ static const uint8_t A7  = PIN_A7;
 #define D12 (12u)
 #define D13 (13u)
 #define D14 (14u)
-#define D15 #error Pin cannot be used as digital pin.
-#define D16 #error Pin cannot be used as digital pin.
-#define D17 #error Pin cannot be used as digital pin.
-#define D18 #error Pin cannot be used as digital pin.
+#define D15 (15u)
+#define D16 (16u)
+#define D17 (17u)
+#define D18 (18u)
 #define D19 (19u)
 #define D20 (20u)
 #define D21 (21u)
