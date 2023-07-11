@@ -1,0 +1,40 @@
+From f6d6cdfcefc77d0bf333cf60812a1d0b7282a5f5 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Tue, 11 Jul 2023 15:21:40 +0200
+Subject: [PATCH] giga: fix QSPI initialization
+
+---
+ .../TARGET_GIGA/system_clock_override.c         | 17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_GIGA/system_clock_override.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_GIGA/system_clock_override.c
+index 21aa4979b9..71678d1187 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_GIGA/system_clock_override.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_GIGA/system_clock_override.c
+@@ -76,6 +76,23 @@ void SetSysClock(void)
+             }
+         }
+     }
++
++    // Set seemingly unrelated pins that prevent QSPI from working
++    GPIO_InitTypeDef GPIO_InitStruct;
++    GPIO_InitStruct.Mode       = GPIO_MODE_ANALOG;
++    GPIO_InitStruct.Speed      = GPIO_SPEED_FREQ_LOW;
++    GPIO_InitStruct.Pull       = GPIO_NOPULL;
++    GPIO_InitStruct.Alternate  = 0;
++
++    GPIO_InitStruct.Pin        =  GPIO_PIN_13;
++    __HAL_RCC_GPIOD_CLK_ENABLE();
++    HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
++    __HAL_RCC_GPIOD_CLK_DISABLE();
++
++    GPIO_InitStruct.Pin        =  GPIO_PIN_7;
++    __HAL_RCC_GPIOF_CLK_ENABLE();
++    HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
++    __HAL_RCC_GPIOF_CLK_DISABLE();
+ }
+ 
+ #if ( ((CLOCK_SOURCE) & USE_PLL_HSE_XTAL) || ((CLOCK_SOURCE) & USE_PLL_HSE_EXTC) )
+-- 
+2.41.0
+
