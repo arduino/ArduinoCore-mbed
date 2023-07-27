@@ -150,6 +150,7 @@
 #define MBED_CONF_LORA_NWKSKEY                                            {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00} // set by library:lora
 #define MBED_CONF_LORA_OVER_THE_AIR_ACTIVATION                            1                                                                                                // set by library:lora
 #define MBED_CONF_LORA_PHY                                                EU868                                                                                            // set by library:lora
+#define MBED_CONF_LORA_PHY_AS923_SUB_REGION                               AS1                                                                                              // set by library:lora
 #define MBED_CONF_LORA_PUBLIC_NETWORK                                     1                                                                                                // set by library:lora
 #define MBED_CONF_LORA_TX_MAX_SIZE                                        64                                                                                               // set by library:lora
 #define MBED_CONF_LORA_UPLINK_PREAMBLE_LENGTH                             8                                                                                                // set by library:lora
