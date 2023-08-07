@@ -48,12 +48,14 @@ void Arduino_CAN::end()
 
 int Arduino_CAN::write(CanMsg const & msg)
 {
+  bool const is_standard_id = msg.isStandardId();
+
   mbed::CANMessage const can_msg(
-    msg.id,
+    is_standard_id ? msg.getStandardId()  : msg.getExtendedId(),
     msg.data,
     msg.data_length,
     CANData,
-    CANStandard);
+    is_standard_id ? CANStandard : CANExtended);
 
   return _can.write(can_msg);
 }
@@ -65,8 +67,10 @@ size_t Arduino_CAN::available()
 
   if (msg_read)
   {
+    bool const is_standard_id = (can_msg.format == CANStandard);
+
     CanMsg const msg(
-      can_msg.id,
+      is_standard_id ? CanStandardId(can_msg.id) : CanExtendedId(can_msg.id),
       can_msg.len,
       can_msg.data);
 
