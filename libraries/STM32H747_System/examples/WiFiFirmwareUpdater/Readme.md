@@ -13,7 +13,7 @@ xxd -i cacert.pem -n cacert_pem | sed 's/^unsigned/const unsigned/g' > certifica
 > [!NOTE]
 > Pre-requisites: `xxd`, GNU Tools (Use g-tools on MacOS: e.g., `gtail`, `ghead`)
 ```
-cat certificates.h | tail -n +2 | head -n -2 | head -c -7 | xxd -r -p > cacert.pem
+cat certificates.h | tail -n +2 | head -n -2 | xxd -r -p > cacert.pem
 ```
 ## Listing certifcates in `certificates.h`
 
@@ -21,7 +21,7 @@ cat certificates.h | tail -n +2 | head -n -2 | head -c -7 | xxd -r -p > cacert.p
 > Pre-requisites: `openssl`
 
 ```
-cat certificates.h | tail -n +2 | head -n -2 | head -c -7 | xxd -r -p > cacert.pem
+cat certificates.h | tail -n +2 | head -n -2 | xxd -r -p > cacert.pem
 openssl crl2pkcs7 -nocrl -certfile cacert.pem | openssl pkcs7 -print_certs | grep '^subject'
 ```
 
@@ -31,5 +31,5 @@ openssl crl2pkcs7 -nocrl -certfile cacert.pem | openssl pkcs7 -print_certs | gre
 > The PEM file for the root CA to add, e.g., `new_root.pem` 
 
 ```
-cat certificates.h | tail -n +2 | head -n -2 | head -c -7 | xxd -r -p | cat - new_root.pem | xxd -n cacert_pem -i | sed 's/^unsigned/const unsigned/g' > certificates.h
+cat certificates.h | tail -n +2 | head -n -2 | xxd -r -p | cat - new_root.pem | xxd -n cacert_pem -i | sed 's/^unsigned/const unsigned/g' > certificates.h
 ```
