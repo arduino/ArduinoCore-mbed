@@ -130,12 +130,17 @@ static const uint8_t SCK  = PIN_SPI_SCK;
 #define PIN_WIRE_SDA        (11u)
 #define PIN_WIRE_SCL        (12u)
 
-#define SERIAL_HOWMANY		2
+#define SERIAL_HOWMANY		3
 #define SERIAL1_TX			(digitalPinToPinName(PIN_SERIAL_TX))
 #define SERIAL1_RX			(digitalPinToPinName(PIN_SERIAL_RX))
 
 #define SERIAL2_TX			PB_10
 #define SERIAL2_RX			PB_11
+
+#define SERIAL3_TX			PB_9
+#define SERIAL3_RX			PH_14
+#define SERIAL3_RTS			PA_15
+#define SERIAL3_CTS			PB_15
 
 #define SERIAL_CDC			1
 #define HAS_UNIQUE_ISERIAL_DESCRIPTOR
@@ -183,11 +188,6 @@ void _ontouch1200bps_();
 #define RS485_DEFAULT_TX_PIN        SERIAL2_TX
 #define RS485_DEFAULT_DE_PIN        PB_14
 #define RS485_DEFAULT_RE_PIN        PB_13
-
-#define SerialLoRa		Serial3
-#define LORA_BOOT0      (PG_7)
-#define LORA_RESET      (PC_7)
-#define LORA_IRQ_DUMB   (PJ_11)
 
 #define CRYPTO_WIRE		Wire1
 
