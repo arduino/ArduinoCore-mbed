@@ -140,11 +140,13 @@ jobs:
               - name: ArduinoBLE
               - name: ArduinoGraphics
               - name: Arduino_GigaDisplayTouch
+              - name: arducam_dvp
             additional-sketch-paths: |
               - libraries/PDM
               - libraries/MCUboot
               - libraries/Camera/examples/CameraCaptureRawBytes
               - libraries/Camera/examples/CameraMotionDetect
+              - libraries/Camera/examples/GigaCameraDisplay
               - libraries/Portenta_SDCARD
               - libraries/Portenta_SDRAM
               - libraries/Arduino_H7_Video
