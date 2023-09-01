@@ -581,6 +581,9 @@ opta.menu.split.100_0=2MB M7
 opta.menu.split.75_25=1.5MB M7 + 0.5MB M4
 opta.menu.split.50_50=1MB M7 + 1MB M4
 
+opta.menu.security.none=None
+opta.menu.security.sien=Signature + Encryption
+
 opta.menu.target_core.cm7.build.variant=OPTA
 opta.menu.target_core.cm7.build.mcu=cortex-m7
 opta.menu.target_core.cm7.build.fpu=-mfpu=fpv5-d16
@@ -593,15 +596,23 @@ opta.menu.target_core.cm4.build.fpu=-mfpu=fpv4-sp-d16
 opta.menu.target_core.cm4.build.architecture=cortex-m4
 opta.menu.target_core.cm4.compiler.mbed.arch.define=-DOPTA_PINS
 
+opta.build.float-abi=-mfloat-abi=softfp
+opta.build.extra_flags=
 opta.menu.split.50_50.build.extra_ldflags=-DCM4_BINARY_START=0x08100000 -DCM4_BINARY_END=0x08200000
 opta.menu.split.75_25.build.extra_ldflags=-DCM4_BINARY_START=0x08180000 -DCM4_BINARY_END=0x08200000
 opta.menu.split.100_0.build.extra_ldflags=-DCM4_BINARY_START=0x60000000 -DCM4_BINARY_END=0x60040000 -DCM4_RAM_END=0x60080000
-opta.build.board={build.variant}
 
-opta.build.extra_flags=
-opta.build.float-abi=-mfloat-abi=softfp
+opta.build.board={build.variant}
 opta.build.ldscript=linker_script.ld
 opta.compiler.mbed.arch.define=
+opta.build.slot_size=0x1E0000
+opta.build.header_size=0x20000
+opta.build.alignment=32
+opta.build.version=1.2.3+4
+opta.menu.security.sien.recipe.hooks.objcopy.postobjcopy.1.pattern="{tools.imgtool.path}/{tools.imgtool.cmd}" {tools.imgtool.flags}
+opta.menu.security.sien.build.keys.keychain={runtime.platform.path}/libraries/MCUboot/default_keys
+opta.menu.security.sien.build.keys.sign_key=ecdsa-p256-signing-priv-key.pem
+opta.menu.security.sien.build.keys.encrypt_key=ecdsa-p256-encrypt-pub-key.pem
 opta.compiler.mbed.defines={build.variant.path}/defines.txt
 opta.compiler.mbed.ldflags={build.variant.path}/ldflags.txt
 opta.compiler.mbed.cflags={build.variant.path}/cflags.txt
@@ -656,7 +667,12 @@ opta.upload.native_usb=true
 opta.upload.maximum_size=1966080
 opta.upload.maximum_data_size=523624
 
-opta.menu.target_core.cm7.upload.address=0x08040000
+opta.menu.security.none.upload.interface=0
+opta.menu.security.sien.upload.interface=2
+
+opta.menu.security.none.upload.address_m7=0x08040000
+opta.menu.security.sien.upload.address_m7=0xA0000000
+opta.menu.target_core.cm7.upload.address={upload.address_m7}
 
 opta.menu.target_core.cm7.menu.split.50_50.upload.maximum_size=786432
 opta.menu.target_core.cm7.menu.split.75_25.upload.maximum_size=1441792
