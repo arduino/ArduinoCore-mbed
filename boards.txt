@@ -653,7 +653,7 @@ opta.upload.interface=0
 opta.upload.use_1200bps_touch=true
 opta.upload.wait_for_upload_port=true
 opta.upload.native_usb=true
-opta.upload.maximum_size=786432
+opta.upload.maximum_size=1966080
 opta.upload.maximum_data_size=523624
 
 opta.menu.target_core.cm7.upload.address=0x08040000
