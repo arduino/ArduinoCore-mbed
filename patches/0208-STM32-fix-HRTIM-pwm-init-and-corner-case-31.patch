@@ -1,0 +1,113 @@
+From 3636262ae786ae623451985dd40c7a54c40b9ab1 Mon Sep 17 00:00:00 2001
+From: Leonardo Cavagnis <45899760+leonardocavagnis@users.noreply.github.com>
+Date: Fri, 29 Sep 2023 10:06:55 +0200
+Subject: [PATCH] STM32: fix HRTIM pwm init and corner case (#31)
+
+* STM32: fix HRTIM pwm corner cases (0-100%) in read function
+
+* STM32: fix HRTIM pwm init with default values
+
+* STM32: add helper fun to manage pwmout obj period
+---
+ targets/TARGET_STM/pwmout_api.c | 59 +++++++++++++++++++++------------
+ 1 file changed, 38 insertions(+), 21 deletions(-)
+
+diff --git a/targets/TARGET_STM/pwmout_api.c b/targets/TARGET_STM/pwmout_api.c
+index e20ac918a3..71a4839728 100644
+--- a/targets/TARGET_STM/pwmout_api.c
++++ b/targets/TARGET_STM/pwmout_api.c
+@@ -53,6 +53,8 @@ static hrtim_t hrtim_timer;
+ static HRTIM_HandleTypeDef HrtimHandle;
+ static HRTIM_CompareCfgTypeDef sConfig_compare;
+ static HRTIM_TimeBaseCfgTypeDef sConfig_time_base;
++
++static void _pwmout_obj_period_us(pwmout_t *obj, int us);
+ #endif
+ 
+ /* Convert STM32 Cube HAL channel to LL channel */
+@@ -142,9 +144,9 @@ static void _pwmout_init_direct(pwmout_t *obj, const PinMap *pinmap)
+         pin_function(pinmap->pin, pinmap->function);
+         pin_mode(pinmap->pin, PullNone);
+ 
+-        obj->period = 0;
+-        obj->pulse = 0;
+-        obj->prescaler = 0;
++        // Initialize obj with default values (period 550Hz, duty 0%)
++        _pwmout_obj_period_us(obj, 18000);
++        obj->pulse = (uint32_t)((float)obj->period * 1.0 + 0.5);
+ 
+         // Initialize the HRTIM structure
+         HrtimHandle.Instance = HRTIM1;
+@@ -444,6 +446,15 @@ float pwmout_read(pwmout_t *obj)
+     if (obj->period > 0) {
+         value = (float)(obj->pulse) / (float)(obj->period);
+     }
++
++    if (obj->pwm == PWM_I) {
++        if (value <= (float)0.0) {
++            value = 1.0;
++        } else if (value >= (float)1.0) {
++            value = 0.0;
++        }
++    }
++
+     return ((value > (float)1.0) ? (float)(1.0) : (value));
+ }
+ 
+@@ -464,24 +475,7 @@ void pwmout_period_us(pwmout_t *obj, int us)
+     if (obj->pwm == PWM_I) {
+         float dc = pwmout_read(obj);
+ 
+-        uint32_t frequency;
+-        uint32_t clocksource = __HAL_RCC_GET_HRTIM1_SOURCE();
+-        switch (clocksource) {
+-            case RCC_HRTIM1CLK_TIMCLK:
+-                frequency = HAL_RCC_GetHCLKFreq();
+-                break;
+-            case RCC_HRTIM1CLK_CPUCLK:
+-                frequency = HAL_RCC_GetSysClockFreq();
+-                break;
+-        }
+-
+-        /* conversion from us to clock tick */
+-        obj->period = us * (frequency / 1000000) / 4;
+-        obj->prescaler = HRTIM_PRESCALERRATIO_DIV4;
+-
+-        if (obj->period > 0xFFDFU) {
+-            obj->period = 0xFFDFU;
+-        }
++        _pwmout_obj_period_us(obj, us);
+ 
+         sConfig_time_base.Mode = HRTIM_MODE_CONTINUOUS;
+         sConfig_time_base.Period = obj->period;
+@@ -602,4 +596,27 @@ const PinMap *pwmout_pinmap()
+     return PinMap_PWM;
+ }
+ 
++#if defined(HRTIM1)
++void _pwmout_obj_period_us(pwmout_t *obj, int us) {
++    uint32_t frequency;
++    uint32_t clocksource = __HAL_RCC_GET_HRTIM1_SOURCE();
++    switch (clocksource) {
++        case RCC_HRTIM1CLK_TIMCLK:
++            frequency = HAL_RCC_GetHCLKFreq();
++            break;
++        case RCC_HRTIM1CLK_CPUCLK:
++            frequency = HAL_RCC_GetSysClockFreq();
++            break;
++    }
++
++    /* conversion from us to clock tick */
++    obj->period = us * (frequency / 1000000) / 4;
++    obj->prescaler = HRTIM_PRESCALERRATIO_DIV4;
++
++    if (obj->period > 0xFFDFU) {
++        obj->period = 0xFFDFU;
++    }
++}
++#endif
++
+ #endif
+-- 
+2.42.0
+
