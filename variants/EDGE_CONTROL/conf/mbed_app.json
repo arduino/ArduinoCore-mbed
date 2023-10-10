@@ -14,6 +14,10 @@
 			"platform.default-serial-baud-rate": 115200,
 			"platform.callback-nontrivial": true,
 			"rtos.main-thread-stack-size": 32768,
+			"cellular.debug-at": true,
+			"cellular.offload-dns-queries": true,
+			"cellular.at-handler-buffer-size": 1024,
+			"mbed-trace.enable": true,
 			"target.mbed_app_start": "0x10000"
 		},
 		"EDGE_CONTROL": {
