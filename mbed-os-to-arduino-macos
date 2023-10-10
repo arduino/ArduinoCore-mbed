@@ -16,7 +16,7 @@
 # - gnu-utils (Installation: brew install gnu-utils)
 # - gnu-sed (Installation: brew install gnu-sed)
 # - coreutils (Installation: brew install coreutils)
-# - ArduinoCore-mbed requirements (pip3 install -r requirements.txt)
+# - ArduinoCore-mbed requirements (Installation: pip install -r requirements.txt)
 #
 # Troubleshooting for hidapi installation issues:
 # If during the installation of ArduinoCore-mbed requirements 'hidapi' installation fails, 
