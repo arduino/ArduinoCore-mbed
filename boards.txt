@@ -47,6 +47,11 @@ edge_control.bootloader.config=-f target/nrf52.cfg
 edge_control.bootloader.programmer=-f interface/cmsis-dap.cfg
 edge_control.bootloader.file=EDGE_CONTROL/bootloader.hex
 
+edge_control.debug.server.openocd.scripts.0=interface/{programmer.protocol}.cfg
+edge_control.debug.server.openocd.scripts.1={programmer.transport_script}
+edge_control.debug.server.openocd.scripts.2=target/nrf52.cfg
+edge_control.debug.svd_file={runtime.platform.path}/svd/nrf52840.svd
+
 ##############################################################
 
 menu.split=Flash split
@@ -159,6 +164,12 @@ envie_m7.bootloader.config=-f target/stm32h7x_dual_bank.cfg
 envie_m7.bootloader.programmer=-f interface/stlink.cfg
 envie_m7.bootloader.extra_action.preflash=stm32h7x option_write 0 0x01c 0xb86aaf0
 envie_m7.bootloader.file=PORTENTA_H7/portentah7_bootloader_mbed_hs_v2.elf
+
+envie_m7.debug.server.openocd.scripts.0=interface/{programmer.protocol}.cfg
+envie_m7.debug.server.openocd.scripts.1={programmer.transport_script}
+envie_m7.debug.server.openocd.scripts.2=target/stm32h7x_dual_bank.cfg
+envie_m7.menu.target_core.cm7.debug.svd_file={runtime.platform.path}/svd/STM32H747_CM7.svd
+envie_m7.menu.target_core.cm4.debug.svd_file={runtime.platform.path}/svd/STM32H747_CM4.svd
 
 envie_m7_thread_debug.name=Arduino Portenta H7 (ThreadDebug)
 envie_m7_thread_debug.vid.0=0x2341
@@ -277,6 +288,11 @@ nano33ble.bootloader.config=-f target/nrf52.cfg
 nano33ble.bootloader.programmer=-f interface/cmsis-dap.cfg
 nano33ble.bootloader.file=nano33ble/bootloader.hex
 
+nano33ble.debug.server.openocd.scripts.0=interface/{programmer.protocol}.cfg
+nano33ble.debug.server.openocd.scripts.1={programmer.transport_script}
+nano33ble.debug.server.openocd.scripts.2=target/nrf52.cfg
+nano33ble.debug.svd_file={runtime.platform.path}/svd/nrf52840.svd
+
 ##############################################################
 
 nanorp2040connect.name=Arduino Nano RP2040 Connect
@@ -333,6 +349,11 @@ nanorp2040connect.bootloader.tool.default=openocd
 nanorp2040connect.bootloader.config=-f target/rp2040.cfg
 nanorp2040connect.bootloader.programmer=-f interface/cmsis-dap.cfg
 
+nanorp2040connect.debug.server.openocd.scripts.0=interface/{programmer.protocol}.cfg
+nanorp2040connect.debug.server.openocd.scripts.1={programmer.transport_script}
+nanorp2040connect.debug.server.openocd.scripts.2=target/rp2040-core0.cfg
+nanorp2040connect.debug.svd_file={runtime.platform.path}/svd/rp2040.svd
+
 ##############################################################
 
 pico.name=Raspberry Pi Pico
@@ -376,6 +397,11 @@ pico.bootloader.tool=openocd
 pico.bootloader.tool.default=openocd
 pico.bootloader.config=-f target/rp2040.cfg
 pico.bootloader.programmer=-f interface/cmsis-dap.cfg
+
+pico.debug.server.openocd.scripts.0=interface/{programmer.protocol}.cfg
+pico.debug.server.openocd.scripts.1={programmer.transport_script}
+pico.debug.server.openocd.scripts.2=target/rp2040-core0.cfg
+pico.debug.svd_file={runtime.platform.path}/svd/rp2040.svd
 
 ##############################################################
 
@@ -424,6 +450,11 @@ nicla_sense.bootloader.config=-f target/nrf52.cfg
 nicla_sense.bootloader.programmer=-f interface/cmsis-dap.cfg
 nicla_sense.bootloader.file=NICLA/bootloader.hex
 
+nicla_sense.debug.server.openocd.scripts.0=interface/{programmer.protocol}.cfg
+nicla_sense.debug.server.openocd.scripts.1={programmer.transport_script}
+nicla_sense.debug.server.openocd.scripts.2=target/nrf52.cfg
+nicla_sense.debug.svd_file={runtime.platform.path}/svd/nrf52833.svd
+
 ##############################################################
 
 nicla_voice.name=Arduino Nicla Voice
@@ -471,6 +502,11 @@ nicla_voice.bootloader.extra_action.preflash=echo INFO:removed_mass-erase
 nicla_voice.bootloader.config=-f target/nrf52.cfg
 nicla_voice.bootloader.programmer=-f interface/cmsis-dap.cfg
 nicla_voice.bootloader.file=NICLA_VOICE/bootloader_application.hex
+
+nicla_voice.debug.server.openocd.scripts.0=interface/{programmer.protocol}.cfg
+nicla_voice.debug.server.openocd.scripts.1={programmer.transport_script}
+nicla_voice.debug.server.openocd.scripts.2=target/nrf52.cfg
+nicla_voice.debug.svd_file={runtime.platform.path}/svd/nrf52833.svd
 
 ##############################################################
 
@@ -566,6 +602,12 @@ nicla_vision.bootloader.config=-f target/stm32h7x_dual_bank.cfg
 nicla_vision.bootloader.programmer=-f interface/stlink.cfg
 nicla_vision.bootloader.extra_action.preflash=stm32h7x option_write 0 0x01c 0xb86aaf0
 nicla_vision.bootloader.file=NICLA_VISION/bootloader.elf
+
+nicla_vision.debug.server.openocd.scripts.0=interface/{programmer.protocol}.cfg
+nicla_vision.debug.server.openocd.scripts.1={programmer.transport_script}
+nicla_vision.debug.server.openocd.scripts.2=target/stm32h7x_dual_bank.cfg
+nicla_vision.menu.target_core.cm7.debug.svd_file={runtime.platform.path}/svd/STM32H747_CM7.svd
+nicla_vision.menu.target_core.cm4.debug.svd_file={runtime.platform.path}/svd/STM32H747_CM4.svd
 
 ##############################################################
 
@@ -696,6 +738,12 @@ opta.bootloader.programmer=-f interface/stlink.cfg
 opta.bootloader.extra_action.preflash=stm32h7x option_write 0 0x01c 0xb86aaf0
 opta.bootloader.file=OPTA/bootloader.elf
 
+opta.debug.server.openocd.scripts.0=interface/{programmer.protocol}.cfg
+opta.debug.server.openocd.scripts.1={programmer.transport_script}
+opta.debug.server.openocd.scripts.2=target/stm32h7x_dual_bank.cfg
+opta.menu.target_core.cm7.debug.svd_file={runtime.platform.path}/svd/STM32H747_CM7.svd
+opta.menu.target_core.cm4.debug.svd_file={runtime.platform.path}/svd/STM32H747_CM4.svd
+
 ##############################################################
 
 giga.name=Arduino Giga R1
@@ -791,3 +839,9 @@ giga.bootloader.config=-f target/stm32h7x_dual_bank.cfg
 giga.bootloader.programmer=-f interface/stlink.cfg
 giga.bootloader.extra_action.preflash=stm32h7x option_write 0 0x01c 0xb86aaf0
 giga.bootloader.file=GIGA/bootloader.elf
+
+giga.debug.server.openocd.scripts.0=interface/{programmer.protocol}.cfg
+giga.debug.server.openocd.scripts.1={programmer.transport_script}
+giga.debug.server.openocd.scripts.2=target/stm32h7x_dual_bank.cfg
+giga.menu.target_core.cm7.debug.svd_file={runtime.platform.path}/svd/STM32H747_CM7.svd
+giga.menu.target_core.cm4.debug.svd_file={runtime.platform.path}/svd/STM32H747_CM4.svd

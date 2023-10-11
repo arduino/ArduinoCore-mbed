@@ -204,12 +204,25 @@ tools.adb.upload.params.quiet=
 tools.adb.upload.pattern="{path}/{cmd}" push "{build.path}/{build.project_name}.elf" "/tmp/arduino/m4-user-sketch.elf"
 
 #
-# GDB (Debugger)
+# Debugger
 #
-# EXPERIMENTAL feature: debug.pattern
-#  - this is alpha and may be subject to change without notice
 
 tools.gdb.path={runtime.tools.arm-none-eabi-gcc-7-2017q4.path}/bin/
 tools.gdb.cmd=arm-none-eabi-gdb
 tools.gdb.cmd.windows=arm-none-eabi-gdb.exe
-tools.gdb.debug.pattern="{path}/{cmd}" --interpreter=mi2 -ex "set pagination off" --baud 115200 -ex "set target-charset ASCII" -ex "target remote {debug.port}" {build.path}/{build.project_name}.elf
+
+debug.executable={build.path}/{build.project_name}.elf
+debug.toolchain=gcc
+debug.toolchain.path={runtime.tools.arm-none-eabi-gcc-7-2017q4.path}/bin/
+debug.toolchain.prefix=arm-none-eabi-
+debug.server=openocd
+debug.server.openocd.path={runtime.tools.openocd-0.11.0-arduino2.path}/bin/openocd
+debug.server.openocd.scripts_dir={runtime.tools.openocd-0.11.0-arduino2.path}/share/openocd/scripts/
+
+debug.cortex-debug.custom.postAttachCommands.0=set remote hardware-watchpoint-limit 2
+debug.cortex-debug.custom.postAttachCommands.1=monitor reset halt
+debug.cortex-debug.custom.postAttachCommands.2=monitor gdb_sync
+debug.cortex-debug.custom.postAttachCommands.3=c
+debug.cortex-debug.custom.overrideRestartCommands.0=monitor reset halt
+debug.cortex-debug.custom.overrideRestartCommands.1=monitor gdb_sync
+debug.cortex-debug.custom.overrideRestartCommands.2=c
