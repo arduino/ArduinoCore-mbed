@@ -1,0 +1,29 @@
+{
+  "target_overrides": {
+    "*": {
+      "target.printf_lib": "std",
+      "platform.stdio-buffered-serial": false,
+      "target.usb_speed": "USE_USB_OTG_FS",
+      "platform.stdio-baud-rate": 115200,
+      "platform.default-serial-baud-rate": 115200,
+      "platform.callback-nontrivial": true,
+      "platform.all-stats-enabled": true,
+      "rtos.main-thread-stack-size": 32768,
+      "cordio.max-connections": 5,
+      "target.lse_available": 0,
+      "target.device_has_remove": [
+        "USBDEVICE",
+        "EMAC"
+      ],
+      "target.macros_add": [
+        "BT_UART_NO_3M_SUPPORT",
+        "NO_VTOR_RELOCATE",
+        "METAL_INTERNAL",
+        "VIRTIO_SLAVE_ONLY",
+        "NO_ATOMIC_64_SUPPORT",
+        "METAL_MAX_DEVICE_REGIONS=2",
+        "RPMSG_BUFFER_SIZE=2048"
+      ]
+    }
+  }
+}
