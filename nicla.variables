@@ -1,5 +1,5 @@
 export FLAVOUR="nicla"
-export VARIANTS=("NICLA NICLA_VISION PORTENTA_H7_M4")
+export VARIANTS=("NICLA NICLA_VISION GENERIC_STM32H747_M4")
 export FQBNS=("nicla_sense nicla_voice nicla_vision")
 export LIBRARIES=("SPI Wire Scheduler Nicla_System WiFi ea_malloc openamp_arduino STM32H747_System ThreadDebug GC2145 Himax_HM01B0 PDM KernelDebug RPC USBHID Camera rpclib USBHOST mbed-memory-status USBMSD SocketWrapper MRI SE05X MLC NDP syntiant_ilib")
 export BOOTLOADERS=("NICLA NICLA_VISION NICLA_VOICE")

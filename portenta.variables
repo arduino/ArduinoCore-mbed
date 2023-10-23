@@ -1,5 +1,5 @@
 export FLAVOUR="portenta"
-export VARIANTS=("PORTENTA_H7_M7 PORTENTA_H7_M4 PORTENTA_X8")
+export VARIANTS=("PORTENTA_H7_M7 GENERIC_STM32H747_M4 PORTENTA_X8")
 export FQBNS=("envie_m7 portenta_x8")
 export LIBRARIES=("doom Ethernet MRI Portenta_SDRAM SPI WiFi ea_malloc openamp_arduino STM32H747_System ThreadDebug Himax_HM01B0 Himax_HM0360 PDM Arduino_H7_Video USBAudio KernelDebug Portenta_Audio RPC USBHID Wire Portenta_lvgl Camera rpclib USBHOST mbed-memory-status Portenta_SDCARD Scheduler USBMSD USBMIDI SocketWrapper GSM GPS MCUboot Arduino_CAN")
 export BOOTLOADERS=("PORTENTA_H7")
