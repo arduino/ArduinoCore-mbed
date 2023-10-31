@@ -11,6 +11,10 @@ uint8_t* arduino::MbedSocketClass::macAddress(uint8_t* mac) {
   return mac;
 }
 
+String arduino::MbedSocketClass::macAddress() {
+  return String(getNetwork()->get_mac_address());
+}
+
 int arduino::MbedSocketClass::hostByName(const char* aHostname, IPAddress& aResult) {
   SocketAddress socketAddress = SocketAddress();
   nsapi_error_t returnCode = getNetwork()->gethostbyname(aHostname, &socketAddress);
