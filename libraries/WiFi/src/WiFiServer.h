@@ -34,6 +34,7 @@ public:
   WiFiServer(uint16_t port)
     : MbedServer(port) {}
   WiFiClient available(uint8_t* status = nullptr);
+  WiFiClient accept();
 };
 
 }
