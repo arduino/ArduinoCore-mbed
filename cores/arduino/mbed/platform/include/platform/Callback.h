@@ -17,6 +17,11 @@
 #ifndef MBED_CALLBACK_H
 #define MBED_CALLBACK_H
 
+// This prevents the GCC compiler from applying optimizations that assume the code follows strict aliasing rules.
+// In order to prevent bugs arising from undefined behavior that is tricky to find in the Callback implementation,
+// or simply from compiler bugs in GCC.
+#pragma GCC optimize("-fno-strict-aliasing")
+
 #include <cstring>
 #include <mstd_cstddef>
 #include <stdint.h>
