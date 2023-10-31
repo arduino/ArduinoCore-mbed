@@ -41,13 +41,15 @@ public:
   MbedServer(uint16_t port)
     : _port(port){};
 
-  virtual ~MbedServer() {
+  virtual ~MbedServer() { end(); }
+  void begin();
+  void end() {
     if (sock) {
       delete sock;
       sock = nullptr;
     }
-  }
-  void begin();
+  };
+  void stop() { end(); };
   virtual size_t write(uint8_t);
   virtual size_t write(const uint8_t *buf, size_t size);
   uint8_t status();
