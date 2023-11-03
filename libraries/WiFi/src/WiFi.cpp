@@ -253,6 +253,7 @@ bool firmware_available = false;
 #include "resources.h"
 
 void wiced_filesystem_mount_error(void) {
+  while (!Serial) {}
   Serial.println("Failed to mount the filesystem containing the WiFi firmware.");
   Serial.println("Usually that means that the WiFi firmware has not been installed yet"
                  " or was overwritten with another firmware.");
@@ -261,6 +262,7 @@ void wiced_filesystem_mount_error(void) {
 }
 
 void wiced_filesystem_firmware_error(void) {
+  while (!Serial) {}
   Serial.println("Please run the \"WiFiFirmwareUpdater\" sketch once to install the WiFi firmware.");
   whd_print_logbuffer();
   while (1) {}
@@ -283,7 +285,7 @@ wiced_result_t whd_firmware_check_hook(const char* mounted_name, int mount_err) 
           return WICED_SUCCESS;
         }
       }
-      Serial.println("File not found");
+      if (Serial) { Serial.println("File not found\n"); }
       closedir(dir);
     }
     wiced_filesystem_firmware_error();
