@@ -238,6 +238,15 @@ void arduino::WiFiClass::MACAddress(uint8_t *mac_address)
 
 #define WIFI_FIRMWARE_PATH "/wlan/4343WA1.BIN"
 
+#if defined(CORE_CM4)
+#include "QSPIFBlockDevice.h"
+mbed::BlockDevice *mbed::BlockDevice::get_default_instance()
+{
+    static QSPIFBlockDevice default_bd(PD_11, PD_12, PE_2, PF_6,  PF_10, PG_6, QSPIF_POLARITY_MODE_1, 40000000);
+    return &default_bd;
+}
+#endif
+
 bool firmware_available = false;
 
 #include "wiced_filesystem.h"
