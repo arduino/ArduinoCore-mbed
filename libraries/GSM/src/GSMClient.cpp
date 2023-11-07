@@ -1,5 +1,5 @@
 /*
-  GSMSSLClient.h
+  GSMClient.cpp
   Copyright (c) 2023 Arduino SA.  All right reserved.
 
   This library is free software; you can redistribute it and/or
@@ -17,26 +17,8 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef GSMSSLCLIENT_H
-#define GSMSSLCLIENT_H
+#include "GSMClient.h"
 
-#include "GSM.h"
-#include "MbedSSLClient.h"
-
-extern const char CA_CERTIFICATES[];
-
-namespace arduino {
-
-class GSMSSLClient : public arduino::MbedSSLClient {
-public:
-  GSMSSLClient();
-
-private:
-  NetworkInterface *getNetwork() {
-    return GSM.getNetwork();
-  }
-};
+arduino::GSMClient::GSMClient(): MbedClient(100) {
 
 }
-
-#endif /* GSMSSLCLIENT_H */
