@@ -116,6 +116,7 @@ private:
 extern GSMClass GSM;
 
 #include "GSMClient.h"
+#include "GSMSSLClient.h"
 #include "GSMUdp.h"
 
 #endif
