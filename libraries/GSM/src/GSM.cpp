@@ -130,6 +130,15 @@ bool arduino::GSMClass::setTime(unsigned long const epoch, int const timezone)
   return _device->set_time(epoch, timezone);
 }
 
+bool arduino::GSMClass::isConnected()
+{
+  if (_context) {
+    return _context->is_connected();
+  } else {
+    return false;
+  }
+}
+
 static PlatformMutex trace_mutex;
 
 static void trace_wait()
