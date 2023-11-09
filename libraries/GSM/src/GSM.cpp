@@ -27,7 +27,6 @@
 
 #define MAXRETRY 3
 
-bool _cmuxEnable = false;
 arduino::CMUXClass * arduino::CMUXClass::get_default_instance()
 {
   static mbed::UnbufferedSerial serial(MBED_CONF_GEMALTO_CINTERION_TX, MBED_CONF_GEMALTO_CINTERION_RX, 115200);
