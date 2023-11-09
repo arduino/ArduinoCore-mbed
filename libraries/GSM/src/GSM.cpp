@@ -21,13 +21,14 @@
 
 #include "mbed.h"
 #include "CellularLog.h"
+#include "CellularDevice.h"
 #include "CellularContext.h"
 #include "CellularInterface.h"
 #include "GEMALTO_CINTERION_CellularStack.h"
 
 #define MAXRETRY 3
 
-arduino::CMUXClass * arduino::CMUXClass::get_default_instance()
+arduino::CMUXClass *arduino::CMUXClass::get_default_instance()
 {
   static mbed::UnbufferedSerial serial(MBED_CONF_GEMALTO_CINTERION_TX, MBED_CONF_GEMALTO_CINTERION_RX, 115200);
   serial.set_flow_control(mbed::SerialBase::RTSCTS_SW, MBED_CONF_GEMALTO_CINTERION_CTS, NC);
@@ -37,11 +38,11 @@ arduino::CMUXClass * arduino::CMUXClass::get_default_instance()
 
 mbed::CellularDevice *mbed::CellularDevice::get_default_instance()
 {
-    static auto cmux = arduino::CMUXClass::get_default_instance();
-    static mbed::GEMALTO_CINTERION device(cmux->get_serial(0));
-    nextSerialPort++;
-    device.enableCMUXChannel = mbed::callback(cmux, &arduino::CMUXClass::enableCMUXChannel);
-    return &device;
+  static auto cmux = arduino::CMUXClass::get_default_instance();
+  static mbed::GEMALTO_CINTERION device(cmux->get_serial(0));
+  nextSerialPort++;
+  device.enableCMUXChannel = mbed::callback(cmux, &arduino::CMUXClass::enableCMUXChannel);
+  return &device;
 }
 
 int arduino::GSMClass::begin(const char* pin, const char* apn, const char* username, const char* password, RadioAccessTechnologyType rat, uint32_t band, bool restart) {
@@ -117,11 +118,11 @@ int arduino::GSMClass::begin(const char* pin, const char* apn, const char* usern
   return connect_status == NSAPI_ERROR_OK ? 1 : 0;
 }
 
-void arduino::GSMClass::enableCmux(){
+void arduino::GSMClass::enableCmux() {
   _cmuxGSMenable = true;
 }
 
-bool arduino::GSMClass::isCmuxEnable(){
+bool arduino::GSMClass::isCmuxEnable() {
   return _cmuxGSMenable;
 }
 
