@@ -157,53 +157,7 @@ bool arduino::GSMClass::isConnected()
   }
 }
 
-static PlatformMutex trace_mutex;
 
-static void trace_wait()
-{
-    trace_mutex.lock();
-}
-
-static void trace_release()
-{
-    trace_mutex.unlock();
-}
-
-static char* trace_time(size_t ss)
-{
-    static char time_st[50];
-    auto ms = std::chrono::time_point_cast<std::chrono::milliseconds>(rtos::Kernel::Clock::now()).time_since_epoch().count();
-    //snprintf(time_st, 49, "[%08llums]", ms);
-    snprintf(time_st, 1, "\n");
-    return time_st;
-}
-
-static Stream* trace_stream = nullptr;
-static void arduino_print(const char* c) {
-  if (trace_stream) {
-    trace_stream->println(c);
-  }
-}
-
-void arduino::GSMClass::debug(Stream& stream) {
-
-#if MBED_CONF_MBED_TRACE_ENABLE
-
-  mbed_trace_init();
-
-  trace_stream = &stream;
-  mbed_trace_print_function_set(arduino_print);
-  mbed_trace_prefix_function_set( &trace_time );
-
-  mbed_trace_mutex_wait_function_set(trace_wait);
-  mbed_trace_mutex_release_function_set(trace_release);
-
-  mbed_cellular_trace::mutex_wait_function_set(trace_wait);
-  mbed_cellular_trace::mutex_release_function_set(trace_release);
-
-#endif
-
-}
 
 NetworkInterface* arduino::GSMClass::getNetwork() {
   return _context;

@@ -90,7 +90,8 @@ public:
   bool setTime(unsigned long const epoch, int const timezone = 0);
   void enableCmux();
   bool isCmuxEnable();
-  void debug(Stream& stream);
+  void trace(Stream& stream);
+  void setTraceLevel(int trace_level, bool timestamp = false);
   int ping(const char* hostname, uint8_t ttl = 128);
   int ping(const String& hostname, uint8_t ttl = 128);
   int ping(IPAddress host, uint8_t ttl = 128);
