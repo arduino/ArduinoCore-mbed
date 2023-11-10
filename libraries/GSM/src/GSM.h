@@ -33,12 +33,28 @@
 #include "CMUXClass.h"
 #include "PTYSerial.h"
 
-#define MBED_CONF_GEMALTO_CINTERION_TX    PA_0
-#define MBED_CONF_GEMALTO_CINTERION_RX    PI_9
-#define MBED_CONF_GEMALTO_CINTERION_RTS   PI_10
-#define MBED_CONF_GEMALTO_CINTERION_CTS   PI_13
-#define MBED_CONF_GEMALTO_CINTERION_RST   PJ_10
-#define MBED_CONF_GEMALTO_CINTERION_ON    PJ_7
+#if defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_PORTENTA_H7_M4)
+  #define MBED_CONF_GEMALTO_CINTERION_TX    PA_0
+  #define MBED_CONF_GEMALTO_CINTERION_RX    PI_9
+  #define MBED_CONF_GEMALTO_CINTERION_RTS   PI_10
+  #define MBED_CONF_GEMALTO_CINTERION_CTS   PI_13
+  #define MBED_CONF_GEMALTO_CINTERION_RST   PJ_10
+  #define MBED_CONF_GEMALTO_CINTERION_ON    PJ_7
+#elif defined (ARDUINO_EDGE_CONTROL)
+  /* IMPORTANT: turn on the module's 5V on demand by calling
+     pinMode(ON_MKR2, OUTPUT);
+     digitalWrite(ON_MKR2, HIGH);
+  */
+  #define MBED_CONF_GEMALTO_CINTERION_TX    p24
+  #define MBED_CONF_GEMALTO_CINTERION_RX    p25
+  #define MBED_CONF_GEMALTO_CINTERION_RTS   NC
+  #define MBED_CONF_GEMALTO_CINTERION_CTS   NC
+  #define MBED_CONF_GEMALTO_CINTERION_RST   p31
+  #define MBED_CONF_GEMALTO_CINTERION_ON    p2
+#else
+  #error Gemalto Cinterion cellular connectivity not supported
+#endif
+
 #define MBED_CONF_APP_SOCK_TYPE           1
 
 #if defined __has_include
