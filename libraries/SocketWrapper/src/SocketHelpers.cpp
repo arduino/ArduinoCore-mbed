@@ -50,6 +50,13 @@ arduino::IPAddress arduino::MbedSocketClass::dnsServerIP() {
   return ipAddressFromSocketAddress(ip);
 }
 
+arduino::IPAddress arduino::MbedSocketClass::dnsIP(int n) {
+  SocketAddress ip;
+  NetworkInterface* interface = getNetwork();
+  interface->get_dns_server(n, &ip, nullptr);
+  return ipAddressFromSocketAddress(ip);
+}
+
 void arduino::MbedSocketClass::config(arduino::IPAddress local_ip) {
   nsapi_addr_t convertedIP = { NSAPI_IPv4, { local_ip[0], local_ip[1], local_ip[2], local_ip[3] } };
   _ip = SocketAddress(convertedIP);
