@@ -48,14 +48,14 @@ mbed::CellularDevice *mbed::CellularDevice::get_default_instance()
 int arduino::GSMClass::begin(const char* pin, const char* apn, const char* username, const char* password, RadioAccessTechnologyType rat, uint32_t band, bool restart) {
 
   if(restart || isCmuxEnable()) {
-    pinMode(PJ_10, OUTPUT);
-    digitalWrite(PJ_10, HIGH);
+    pinMode(MBED_CONF_GEMALTO_CINTERION_RST, OUTPUT);
+    digitalWrite(MBED_CONF_GEMALTO_CINTERION_RST, HIGH);
     delay(800);
-    digitalWrite(PJ_10, LOW);
-    pinMode(PJ_7, OUTPUT);
-    digitalWrite(PJ_7, LOW);
+    digitalWrite(MBED_CONF_GEMALTO_CINTERION_RST, LOW);
+    pinMode(MBED_CONF_GEMALTO_CINTERION_ON, OUTPUT);
+    digitalWrite(MBED_CONF_GEMALTO_CINTERION_ON, LOW);
     delay(1);
-    digitalWrite(PJ_7, HIGH);
+    digitalWrite(MBED_CONF_GEMALTO_CINTERION_ON, HIGH);
     delay(1);
     // this timer is to make sure that at boottime and when the CMUX is used,
     //  ^SYSTART is received in time to avoid stranger behaviour
@@ -69,7 +69,7 @@ int arduino::GSMClass::begin(const char* pin, const char* apn, const char* usern
     printf("Invalid context\n");
     return 0;
   }
-  pinMode(PJ_7, INPUT_PULLDOWN);
+  pinMode(MBED_CONF_GEMALTO_CINTERION_ON, INPUT_PULLDOWN);
 
   static mbed::DigitalOut rts(MBED_CONF_GEMALTO_CINTERION_RTS, 0);
 
