@@ -13,7 +13,7 @@
 			"platform.stdio-baud-rate": 115200,
 			"platform.default-serial-baud-rate": 115200,
 			"platform.callback-nontrivial": true,
-			"rtos.main-thread-stack-size": 32768,
+			"rtos.main-thread-stack-size": 4096,
 			"cellular.debug-at": true,
 			"cellular.offload-dns-queries": true,
 			"cellular.at-handler-buffer-size": 1024,
