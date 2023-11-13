@@ -26,6 +26,14 @@
 #include <mstd_type_traits>
 #include <mstd_functional>
 
+#pragma GCC push_options
+// This prevents the GCC compiler from applying optimizations that assume the code follows strict aliasing rules.
+// In order to prevent bugs arising from undefined behavior that is tricky to find in the Callback implementation,
+// or simply from compiler bugs in GCC.
+#pragma GCC optimize("-fno-strict-aliasing")
+// This prevents the GCC compiler from generating incorrect inline code for the Callback constructor.
+#pragma GCC optimize("-fno-inline")
+
 // Controlling switches from config:
 // MBED_CONF_PLATFORM_CALLBACK_NONTRIVIAL - support storing non-trivial function objects
 // MBED_CONF_PLATFORM_CALLBACK_COMPARABLE - support memcmp comparing stored objects (requires zero padding)
@@ -35,7 +43,6 @@
 #undef MBED_CONF_PLATFORM_CALLBACK_NONTRIVIAL
 #define MBED_CONF_PLATFORM_CALLBACK_NONTRIVIAL 1
 #endif
-
 
 namespace mbed {
 /** \addtogroup platform-public-api */
@@ -834,5 +841,7 @@ Callback(R(*func)(const volatile T *, ArgTs...), const volatile U *arg) -> Callb
 /**@}*/
 
 } // namespace mbed
+
+#pragma GCC pop_options
 
 #endif
