@@ -68,7 +68,9 @@ void HAL_DFSDM_FilterRegConvHalfCpltCallback(DFSDM_Filter_HandleTypeDef *hdfsdm_
     {
         xfer_status |= DMA_XFER_HALF;
         // Invalidate Data Cache to get the updated content of the SRAM
+        #ifdef CORE_CM7
         SCB_InvalidateDCache_by_Addr((uint32_t*)&RecBuff[0],sizeof(RecBuff)/2);
+        #endif
     }
     PDMIrqHandler(true);
 }
@@ -86,7 +88,9 @@ void HAL_DFSDM_FilterRegConvCpltCallback(DFSDM_Filter_HandleTypeDef *hdfsdm_filt
     {
         xfer_status |= DMA_XFER_FULL;
         // Invalidate Data Cache to get the updated content of the SRAM
+        #ifdef CORE_CM7
         SCB_InvalidateDCache_by_Addr((uint32_t*)&RecBuff[PDM_BUFFER_SIZE/2],sizeof(RecBuff)/2);
+        #endif
     }
     PDMIrqHandler(false);
 }

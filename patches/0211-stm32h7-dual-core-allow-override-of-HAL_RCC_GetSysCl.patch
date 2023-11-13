@@ -1,0 +1,27 @@
+From f0fb6a21e7eb398c0b7279bce7859ae77debcc64 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Thu, 26 Oct 2023 16:39:04 +0200
+Subject: [PATCH 211/213] stm32h7 dual core: allow override of
+ HAL_RCC_GetSysClockFreq
+
+It's the only needed entry point to get the right timings for all peripherals
+---
+ .../STM32Cube_FW/STM32H7xx_HAL_Driver/stm32h7xx_hal_rcc.c       | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/STM32Cube_FW/STM32H7xx_HAL_Driver/stm32h7xx_hal_rcc.c b/targets/TARGET_STM/TARGET_STM32H7/STM32Cube_FW/STM32H7xx_HAL_Driver/stm32h7xx_hal_rcc.c
+index eb5485dc7d..f03be381a4 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/STM32Cube_FW/STM32H7xx_HAL_Driver/stm32h7xx_hal_rcc.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/STM32Cube_FW/STM32H7xx_HAL_Driver/stm32h7xx_hal_rcc.c
+@@ -1354,7 +1354,7 @@ void HAL_RCC_DisableCSS(void)
+   *
+   * @retval SYSCLK frequency
+   */
+-uint32_t HAL_RCC_GetSysClockFreq(void)
++__attribute__((weak)) uint32_t HAL_RCC_GetSysClockFreq(void)
+ {
+   uint32_t pllp, pllsource, pllm, pllfracen, hsivalue;
+   float_t fracn1, pllvco;
+-- 
+2.42.0
+

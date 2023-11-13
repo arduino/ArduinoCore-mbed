@@ -169,14 +169,16 @@ int OPENAMP_check_for_message(void)
 
 unsigned long millis();
 
-void OPENAMP_Wait_EndPointready(struct rpmsg_endpoint *rp_ept, size_t deadline)
+int OPENAMP_Wait_EndPointready(struct rpmsg_endpoint *rp_ept, size_t deadline)
 {
   while(!is_rpmsg_ept_ready(rp_ept) && (millis() < deadline)) {
     MAILBOX_Poll(rvdev.vdev);
   }
   if (millis() >= deadline) {
     printf("OPENAMP_Wait_EndPointready %X timed out\n\r", (unsigned int)rp_ept);
+    return -1;
   }
+  return 0;
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

@@ -162,16 +162,6 @@ extern "C" {
   }
 }
 
-#include "drivers/I2C.h"
-
-void fixup3V1Rail() {
-  mbed::I2C i2c(PB_7, PB_6);
-  char data[2];
-  data[0]=0x42;
-  data[1]=(1);
-  i2c.write(8 << 1, data, sizeof(data));
-}
-
 void initVariant() {
   RTCHandle.Instance = RTC;
   // Turn off LED from bootloader

@@ -74,7 +74,7 @@ envie_m7.menu.target_core.cm7.build.fpu=-mfpu=fpv5-d16
 envie_m7.menu.target_core.cm7.build.architecture=cortex-m7
 envie_m7.menu.target_core.cm7.compiler.mbed.arch.define=
 
-envie_m7.menu.target_core.cm4.build.variant=PORTENTA_H7_M4
+envie_m7.menu.target_core.cm4.build.variant=GENERIC_STM32H747_M4
 envie_m7.menu.target_core.cm4.build.mcu=cortex-m4
 envie_m7.menu.target_core.cm4.build.fpu=-mfpu=fpv4-sp-d16
 envie_m7.menu.target_core.cm4.build.architecture=cortex-m4
@@ -99,7 +99,7 @@ envie_m7.compiler.mbed.defines={build.variant.path}/defines.txt
 envie_m7.compiler.mbed.ldflags={build.variant.path}/ldflags.txt
 envie_m7.compiler.mbed.cflags={build.variant.path}/cflags.txt
 envie_m7.compiler.mbed.cxxflags={build.variant.path}/cxxflags.txt
-envie_m7.compiler.mbed.includes={build.variant.path}/includes.txt
+envie_m7.compiler.mbed.includes={build.variant.path}/../PORTENTA_H7_M7/includes.txt
 envie_m7.compiler.mbed.extra_ldflags=-lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
 envie_m7.compiler.mbed="{build.variant.path}/libs/libmbed.a"
 envie_m7.vid.0=0x2341
@@ -492,7 +492,7 @@ nicla_vision.menu.target_core.cm7.build.fpu=-mfpu=fpv5-d16
 nicla_vision.menu.target_core.cm7.build.architecture=cortex-m7
 nicla_vision.menu.target_core.cm7.compiler.mbed.arch.define=
 
-nicla_vision.menu.target_core.cm4.build.variant=PORTENTA_H7_M4
+nicla_vision.menu.target_core.cm4.build.variant=GENERIC_STM32H747_M4
 nicla_vision.menu.target_core.cm4.build.mcu=cortex-m4
 nicla_vision.menu.target_core.cm4.build.fpu=-mfpu=fpv4-sp-d16
 nicla_vision.menu.target_core.cm4.build.architecture=cortex-m4
@@ -510,7 +510,7 @@ nicla_vision.compiler.mbed.defines={build.variant.path}/defines.txt
 nicla_vision.compiler.mbed.ldflags={build.variant.path}/ldflags.txt
 nicla_vision.compiler.mbed.cflags={build.variant.path}/cflags.txt
 nicla_vision.compiler.mbed.cxxflags={build.variant.path}/cxxflags.txt
-nicla_vision.compiler.mbed.includes={build.variant.path}/includes.txt
+nicla_vision.compiler.mbed.includes={build.variant.path}/../NICLA_VISION/includes.txt
 nicla_vision.compiler.mbed.extra_ldflags=-lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
 nicla_vision.compiler.mbed="{build.variant.path}/libs/libmbed.a"
 nicla_vision.vid.0=0x2341
@@ -590,7 +590,7 @@ opta.menu.target_core.cm7.build.fpu=-mfpu=fpv5-d16
 opta.menu.target_core.cm7.build.architecture=cortex-m7
 opta.menu.target_core.cm7.compiler.mbed.arch.define=
 
-opta.menu.target_core.cm4.build.variant=PORTENTA_H7_M4
+opta.menu.target_core.cm4.build.variant=GENERIC_STM32H747_M4
 opta.menu.target_core.cm4.build.mcu=cortex-m4
 opta.menu.target_core.cm4.build.fpu=-mfpu=fpv4-sp-d16
 opta.menu.target_core.cm4.build.architecture=cortex-m4
@@ -617,7 +617,7 @@ opta.compiler.mbed.defines={build.variant.path}/defines.txt
 opta.compiler.mbed.ldflags={build.variant.path}/ldflags.txt
 opta.compiler.mbed.cflags={build.variant.path}/cflags.txt
 opta.compiler.mbed.cxxflags={build.variant.path}/cxxflags.txt
-opta.compiler.mbed.includes={build.variant.path}/includes.txt
+opta.compiler.mbed.includes={build.variant.path}/../OPTA/includes.txt
 opta.compiler.mbed.extra_ldflags=-lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
 opta.compiler.mbed="{build.variant.path}/libs/libmbed.a"
 opta.vid.0=0x2341
@@ -716,7 +716,7 @@ giga.menu.target_core.cm7.build.fpu=-mfpu=fpv5-d16
 giga.menu.target_core.cm7.build.architecture=cortex-m7
 giga.menu.target_core.cm7.compiler.mbed.arch.define=
 
-giga.menu.target_core.cm4.build.variant=PORTENTA_H7_M4
+giga.menu.target_core.cm4.build.variant=GENERIC_STM32H747_M4
 giga.menu.target_core.cm4.build.mcu=cortex-m4
 giga.menu.target_core.cm4.build.fpu=-mfpu=fpv4-sp-d16
 giga.menu.target_core.cm4.build.architecture=cortex-m4
@@ -739,7 +739,7 @@ giga.compiler.mbed.defines={build.variant.path}/defines.txt
 giga.compiler.mbed.ldflags={build.variant.path}/ldflags.txt
 giga.compiler.mbed.cflags={build.variant.path}/cflags.txt
 giga.compiler.mbed.cxxflags={build.variant.path}/cxxflags.txt
-giga.compiler.mbed.includes={build.variant.path}/includes.txt
+giga.compiler.mbed.includes={build.variant.path}/../GIGA/includes.txt
 giga.compiler.mbed.extra_ldflags=-lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
 giga.compiler.mbed="{build.variant.path}/libs/libmbed.a"
 giga.vid.0=0x2341

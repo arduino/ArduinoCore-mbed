@@ -70,7 +70,7 @@ enum wl_enc_type {  /* Values map to 802.11 encryption suites... */
         ENC_TYPE_AUTO = 8
 };
 
-#if defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_PORTENTA_H7_M4)
+#if defined(ARDUINO_PORTENTA_H7_M7)
 #include "whd_version.h"
 #define WIFI_FIRMWARE_LATEST_VERSION WHD_VERSION
 #endif

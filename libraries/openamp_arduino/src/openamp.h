@@ -49,7 +49,7 @@ int OPENAMP_create_endpoint(struct rpmsg_endpoint *ept, const char *name,
 int OPENAMP_check_for_message(void);
 
 /* Wait loop on endpoint ready ( message dest address is know)*/
-void OPENAMP_Wait_EndPointready(struct rpmsg_endpoint *rp_ept, size_t deadline);
+int OPENAMP_Wait_EndPointready(struct rpmsg_endpoint *rp_ept, size_t deadline);
 
 #ifdef __cplusplus
 }

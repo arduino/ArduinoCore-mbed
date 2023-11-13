@@ -1,5 +1,5 @@
 export FLAVOUR="giga"
-export VARIANTS=("GIGA PORTENTA_H7_M4")
+export VARIANTS=("GIGA GENERIC_STM32H747_M4")
 export FQBNS=("giga")
 export LIBRARIES=("MRI Portenta_SDRAM SPI WiFi ea_malloc openamp_arduino STM32H747_System ThreadDebug Himax_HM01B0 PDM Arduino_H7_Video USBAudio KernelDebug Portenta_Audio RPC USBHID Wire Portenta_lvgl Camera rpclib OV7670 mbed-memory-status Scheduler USBMSD USBMIDI SocketWrapper MCUboot Arduino_CAN")
 export BOOTLOADERS=("GIGA")

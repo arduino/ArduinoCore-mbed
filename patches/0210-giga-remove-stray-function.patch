@@ -1,0 +1,44 @@
+From cb4587fa30a8f49bf27a16dda20fb21947d385ed Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Thu, 26 Oct 2023 16:38:15 +0200
+Subject: [PATCH 210/213] giga: remove stray function
+
+---
+ .../TARGET_GIGA/giga_power.cpp                | 23 -------------------
+ 1 file changed, 23 deletions(-)
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_GIGA/giga_power.cpp b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_GIGA/giga_power.cpp
+index a47a758e1d..1954ff50cc 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_GIGA/giga_power.cpp
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_GIGA/giga_power.cpp
+@@ -26,27 +26,4 @@
+  ******************************************************************************/
+ void enableEthPowerSupply(void)
+ {
+-    /* Ensure ETH power supply */
+-    mbed::I2C i2c(PB_7, PB_6);
+-
+-    char data[2];
+-
+-    // LDO3 to 1.2V
+-    data[0] = 0x52;
+-    data[1] = 0x9;
+-    i2c.write(8 << 1, data, sizeof(data));
+-    data[0] = 0x53;
+-    data[1] = 0xF;
+-    i2c.write(8 << 1, data, sizeof(data));
+-
+-    // SW2 to 3.3V (SW2_VOLT)
+-    data[0] = 0x3B;
+-    data[1] = 0xF;
+-    i2c.write(8 << 1, data, sizeof(data));
+-
+-    // SW1 to 3.0V (SW1_VOLT)
+-    data[0] = 0x35;
+-    data[1] = 0xF;
+-    i2c.write(8 << 1, data, sizeof(data));
+-
+ }
+-- 
+2.42.0
+

@@ -183,7 +183,7 @@ generate_flags () {
 	for fl in c cxx ld; do
 		jq -r '.flags | .[] | select(. != "-MMD")' ./BUILD/"$BOARDNAME"/GCC_ARM${PROFILE}/.profile-${fl} \
 		> "$ARDUINOVARIANT"/${fl}flags.txt
-		if [[ $ARDUINOVARIANT == *PORTENTA* || $ARDUINOVARIANT == *GIGA* || $ARDUINOVARIANT == *NICLA_VISION* || $ARDUINOVARIANT == *OPTA* ]]; then
+		if [[ $ARDUINOVARIANT == *PORTENTA* || $ARDUINOVARIANT == *GIGA* || $ARDUINOVARIANT == *NICLA_VISION* || $ARDUINOVARIANT == *OPTA* || $ARDUINOVARIANT == *GENERIC*M4 ]]; then
 			echo "Patching '-fno-exceptions' flag for $ARDUINOVARIANT/${fl}flags.txt"
 			sed -i '/-fno-exceptions/d' "$ARDUINOVARIANT"/${fl}flags.txt
 			set +e

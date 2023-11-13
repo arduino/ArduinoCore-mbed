@@ -24,7 +24,7 @@
  * COMPILE TIME CHECKS
  **************************************************************************************/
 
-#if !(defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_PORTENTA_H7_M4) || defined(ARDUINO_GIGA))
+#if !(defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_GIGA))
 # error "CAN only available on Arduino Portenta H7 and Arduino Giga (of all ArduinoCore-mbed enabled boards)."
 #endif
 

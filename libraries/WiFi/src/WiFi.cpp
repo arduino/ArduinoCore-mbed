@@ -238,12 +238,22 @@ void arduino::WiFiClass::MACAddress(uint8_t *mac_address)
 
 #define WIFI_FIRMWARE_PATH "/wlan/4343WA1.BIN"
 
+#if defined(CORE_CM4)
+#include "QSPIFBlockDevice.h"
+mbed::BlockDevice *mbed::BlockDevice::get_default_instance()
+{
+    static QSPIFBlockDevice default_bd(PD_11, PD_12, PE_2, PF_6,  PF_10, PG_6, QSPIF_POLARITY_MODE_1, 40000000);
+    return &default_bd;
+}
+#endif
+
 bool firmware_available = false;
 
 #include "wiced_filesystem.h"
 #include "resources.h"
 
 void wiced_filesystem_mount_error(void) {
+  while (!Serial) {}
   Serial.println("Failed to mount the filesystem containing the WiFi firmware.");
   Serial.println("Usually that means that the WiFi firmware has not been installed yet"
                  " or was overwritten with another firmware.");
@@ -252,6 +262,7 @@ void wiced_filesystem_mount_error(void) {
 }
 
 void wiced_filesystem_firmware_error(void) {
+  while (!Serial) {}
   Serial.println("Please run the \"WiFiFirmwareUpdater\" sketch once to install the WiFi firmware.");
   whd_print_logbuffer();
   while (1) {}
@@ -274,7 +285,7 @@ wiced_result_t whd_firmware_check_hook(const char* mounted_name, int mount_err) 
           return WICED_SUCCESS;
         }
       }
-      Serial.println("File not found");
+      if (Serial) { Serial.println("File not found\n"); }
       closedir(dir);
     }
     wiced_filesystem_firmware_error();
