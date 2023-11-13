@@ -156,7 +156,6 @@ jobs:
               - libraries/USBHOST
               - libraries/USBMSD/examples/AccessFlashAsUSBDisk
               - libraries/WiFi
-              - libraries/GSM
               - ~/Arduino/libraries/ArduinoBLE
           - board:
               fqbn: arduino:mbed:nicla_voice
