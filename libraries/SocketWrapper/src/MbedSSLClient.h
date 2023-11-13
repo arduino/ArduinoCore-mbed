@@ -23,7 +23,6 @@
 #include "MbedClient.h"
 #include <FATFileSystem.h>
 #include <MBRBlockDevice.h>
-#include <QSPIFBlockDevice.h>
 
 extern const char CA_CERTIFICATES[];
 
@@ -58,7 +57,7 @@ private:
   int setRootCA() {
     mbed::BlockDevice* root = mbed::BlockDevice::get_default_instance();
     int err = root->init();
-    if( err != QSPIF_BD_ERROR_OK) {
+    if( err != 0) {
       return err;
     }
 
