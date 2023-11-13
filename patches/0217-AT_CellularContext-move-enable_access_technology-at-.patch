@@ -1,0 +1,123 @@
+From 822f1b2b855afd1f332dc3c8e490c1f7b08923b5 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Fri, 10 Nov 2023 10:30:12 +0100
+Subject: [PATCH 217/221] AT_CellularContext: move enable_access_technology()
+ at commands into GEMALTO_CINTERION_CellularContext
+
+---
+ .../framework/AT/AT_CellularContext.h         |  4 +--
+ .../framework/AT/AT_CellularContext.cpp       | 25 +----------------
+ .../GEMALTO_CINTERION_CellularContext.cpp     | 28 +++++++++++++++++++
+ .../GEMALTO_CINTERION_CellularContext.h       |  1 +
+ 4 files changed, 32 insertions(+), 26 deletions(-)
+
+diff --git a/connectivity/cellular/include/cellular/framework/AT/AT_CellularContext.h b/connectivity/cellular/include/cellular/framework/AT/AT_CellularContext.h
+index eb3bf5afdd..2f68f1f97b 100644
+--- a/connectivity/cellular/include/cellular/framework/AT/AT_CellularContext.h
++++ b/connectivity/cellular/include/cellular/framework/AT/AT_CellularContext.h
+@@ -135,8 +135,6 @@ private:
+ 
+     PinName _dcd_pin;
+     bool _active_high;
+-    RadioAccessTechnologyType _rat;
+-    FrequencyBand _band;
+ 
+ protected:
+     char _found_apn[MAX_APN_LENGTH];
+@@ -144,6 +142,8 @@ protected:
+     bool _cp_req;
+     bool _is_connected;
+     ATHandler &_at;
++    RadioAccessTechnologyType _rat;
++    FrequencyBand _band;
+ };
+ 
+ } // namespace mbed
+diff --git a/connectivity/cellular/source/framework/AT/AT_CellularContext.cpp b/connectivity/cellular/source/framework/AT/AT_CellularContext.cpp
+index e876e384c9..c05fc386e0 100644
+--- a/connectivity/cellular/source/framework/AT/AT_CellularContext.cpp
++++ b/connectivity/cellular/source/framework/AT/AT_CellularContext.cpp
+@@ -445,30 +445,7 @@ bool AT_CellularContext::set_new_context(int cid)
+ 
+ void AT_CellularContext::enable_access_technology()
+ {
+-    char *buffer = new char [8];
+-    memset(buffer, 0, 8);
+-    sprintf(buffer,"%08X", _band);
+-    switch (_rat)
+-    {
+-    case CATM1:
+-        _at.at_cmd_discard("^SXRAT", "=","%d", _rat);
+-        _at.at_cmd_discard("^SCFG", "=","%s%s", "Radio/Band/CatM",buffer);
+-        _at.at_cmd_discard("^SCFG", "=","%s%d%d", "Radio/Band/CatNB",0,0);
+-        break;
+-
+-    case CATNB:
+-        _at.at_cmd_discard("^SXRAT", "=","%d", _rat);
+-        _at.at_cmd_discard("^SCFG", "=","%s%s", "Radio/Band/CatNB",buffer);
+-        _at.at_cmd_discard("^SCFG", "=","%s%d%d", "Radio/Band/CatM",0,0);
+-        break;
+-
+-    default:
+-        break;
+-    }
+-
+-    _at.at_cmd_discard("^SCFG", "=", "%s%s", "Tcp/withURCs", "on");
+-    free(buffer);
+-
++    enable_access_technology();
+ }
+ 
+ nsapi_error_t AT_CellularContext::do_activate_context()
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.cpp b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.cpp
+index 7ee2c8e53c..bc2b1d514c 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.cpp
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.cpp
+@@ -148,4 +148,32 @@ NetworkStack *GEMALTO_CINTERION_CellularContext::get_stack()
+ }
+ #endif // NSAPI_PPP_AVAILABLE
+ 
++void GEMALTO_CINTERION_CellularContext::enable_access_technology()
++{
++    char *buffer = new char [8];
++    memset(buffer, 0, 8);
++    sprintf(buffer,"%08X", _band);
++    switch (_rat)
++    {
++    case CATM1:
++        _at.at_cmd_discard("^SXRAT", "=","%d", _rat);
++        _at.at_cmd_discard("^SCFG", "=","%s%s", "Radio/Band/CatM",buffer);
++        _at.at_cmd_discard("^SCFG", "=","%s%d%d", "Radio/Band/CatNB",0,0);
++        break;
++
++    case CATNB:
++        _at.at_cmd_discard("^SXRAT", "=","%d", _rat);
++        _at.at_cmd_discard("^SCFG", "=","%s%s", "Radio/Band/CatNB",buffer);
++        _at.at_cmd_discard("^SCFG", "=","%s%d%d", "Radio/Band/CatM",0,0);
++        break;
++
++    default:
++        break;
++    }
++
++    _at.at_cmd_discard("^SCFG", "=", "%s%s", "Tcp/withURCs", "on");
++    free(buffer);
++
++}
++
+ } /* namespace mbed */
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.h b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.h
+index 0645b2b87c..cd9aef0222 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.h
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.h
+@@ -34,6 +34,7 @@ protected:
+     virtual NetworkStack *get_stack();
+ #endif // NSAPI_PPP_AVAILABLE
+     virtual nsapi_error_t do_user_authentication();
++    virtual void enable_access_technology();
+ };
+ 
+ } /* namespace mbed */
+-- 
+2.42.0
+

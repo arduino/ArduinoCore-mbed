@@ -1,0 +1,32 @@
+From 915ad28bd3e9d369128691e8558c4626bc65fb82 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Fri, 10 Nov 2023 10:30:54 +0100
+Subject: [PATCH 218/221] GEMALTO_CINTERION_CellularContext: do not disable all
+ bands
+
+  * Switching rat AT command fails and should not be necessary to disable bands since we do not use a fallback rat
+---
+ .../GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.cpp     | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.cpp b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.cpp
+index bc2b1d514c..bf7522621b 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.cpp
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.cpp
+@@ -158,13 +158,11 @@ void GEMALTO_CINTERION_CellularContext::enable_access_technology()
+     case CATM1:
+         _at.at_cmd_discard("^SXRAT", "=","%d", _rat);
+         _at.at_cmd_discard("^SCFG", "=","%s%s", "Radio/Band/CatM",buffer);
+-        _at.at_cmd_discard("^SCFG", "=","%s%d%d", "Radio/Band/CatNB",0,0);
+         break;
+ 
+     case CATNB:
+         _at.at_cmd_discard("^SXRAT", "=","%d", _rat);
+         _at.at_cmd_discard("^SCFG", "=","%s%s", "Radio/Band/CatNB",buffer);
+-        _at.at_cmd_discard("^SCFG", "=","%s%d%d", "Radio/Band/CatM",0,0);
+         break;
+ 
+     default:
+-- 
+2.42.0
+

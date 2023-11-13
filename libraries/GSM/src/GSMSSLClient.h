@@ -1,6 +1,6 @@
 /*
-  GSMUdp.h
-  Copyright (c) 2021 Arduino SA.  All right reserved.
+  GSMSSLClient.h
+  Copyright (c) 2023 Arduino SA.  All right reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -17,15 +17,21 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef gsmudp_h
-#define gsmudp_h
+#ifndef GSMSSLCLIENT_H
+#define GSMSSLCLIENT_H
 
 #include "GSM.h"
-#include "MbedUdp.h"
+#include "MbedSSLClient.h"
+
+extern const char CA_CERTIFICATES[];
 
 namespace arduino {
 
-class GSMUDP : public MbedUDP {
+class GSMSSLClient : public arduino::MbedSSLClient {
+public:
+  GSMSSLClient();
+
+private:
   NetworkInterface *getNetwork() {
     return GSM.getNetwork();
   }
@@ -33,4 +39,4 @@ class GSMUDP : public MbedUDP {
 
 }
 
-#endif
+#endif /* GSMSSLCLIENT_H */
