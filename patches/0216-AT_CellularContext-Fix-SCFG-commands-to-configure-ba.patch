@@ -1,0 +1,49 @@
+From 8dd642cb19e16ae9169fa52f26f4b1a6abc489d8 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Tue, 7 Nov 2023 14:10:31 +0100
+Subject: [PATCH 216/221] AT_CellularContext: Fix ^SCFG commands to configure
+ bands and URCs
+
+---
+ .../source/framework/AT/AT_CellularContext.cpp    | 15 +++++----------
+ 1 file changed, 5 insertions(+), 10 deletions(-)
+
+diff --git a/connectivity/cellular/source/framework/AT/AT_CellularContext.cpp b/connectivity/cellular/source/framework/AT/AT_CellularContext.cpp
+index 087846e9b5..e876e384c9 100644
+--- a/connectivity/cellular/source/framework/AT/AT_CellularContext.cpp
++++ b/connectivity/cellular/source/framework/AT/AT_CellularContext.cpp
+@@ -452,26 +452,21 @@ void AT_CellularContext::enable_access_technology()
+     {
+     case CATM1:
+         _at.at_cmd_discard("^SXRAT", "=","%d", _rat);
+-        _at.cmd_start_stop("^SCFG", "=","%s%s", "Radio/Band/CatM",buffer);
+-        _at.resp_start("^SCFG");
+-        _at.cmd_start_stop("^SCFG", "=","%s%d%d", "Radio/Band/CatNB",0,0);
+-        _at.resp_start("^SCFG");
++        _at.at_cmd_discard("^SCFG", "=","%s%s", "Radio/Band/CatM",buffer);
++        _at.at_cmd_discard("^SCFG", "=","%s%d%d", "Radio/Band/CatNB",0,0);
+         break;
+ 
+     case CATNB:
+         _at.at_cmd_discard("^SXRAT", "=","%d", _rat);
+-        _at.cmd_start_stop("^SCFG", "=","%s%s", "Radio/Band/CatNB",buffer);
+-        _at.resp_start("^SCFG");
+-        _at.cmd_start_stop("^SCFG", "=","%s%d%d", "Radio/Band/CatM",0,0);
+-        _at.resp_start("^SCFG");
++        _at.at_cmd_discard("^SCFG", "=","%s%s", "Radio/Band/CatNB",buffer);
++        _at.at_cmd_discard("^SCFG", "=","%s%d%d", "Radio/Band/CatM",0,0);
+         break;
+ 
+     default:
+         break;
+     }
+ 
+-    _at.cmd_start_stop("^SCFG", "=", "%s%s", "Tcp/withURCs", "on");
+-    _at.resp_start("^SCFG");
++    _at.at_cmd_discard("^SCFG", "=", "%s%s", "Tcp/withURCs", "on");
+     free(buffer);
+ 
+ }
+-- 
+2.42.0
+

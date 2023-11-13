@@ -1,0 +1,109 @@
+From ae470a5d61a27ec11fea588fa53a1f4f1ddac1cb Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Tue, 7 Nov 2023 10:38:21 +0100
+Subject: [PATCH 215/221] Gemalto Cinterion Cellular: Disable urcs while
+ reading
+
+---
+ .../GEMALTO_CINTERION_CellularStack.cpp       | 23 +++++++++++--------
+ 1 file changed, 14 insertions(+), 9 deletions(-)
+
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+index 33a73bf9a3..fc2e8985d7 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+@@ -524,6 +524,9 @@ sisw_retry:
+     return (_at.get_last_error() == NSAPI_ERROR_OK) ? accept_len : NSAPI_ERROR_DEVICE_ERROR;
+ }
+ 
++#define DISABLE_URCs _at.at_cmd_discard("^SCFG", "=", "%s%s","Tcp/WithURCs","off")
++#define RESTORE_URCs_AND_RETURN(ret) do { _at.at_cmd_discard("^SCFG", "=", "%s%s","Tcp/WithURCs","on"); return ret; } while(0)
++
+ nsapi_size_or_error_t GEMALTO_CINTERION_CellularStack::socket_recvfrom_impl(CellularSocket *socket, SocketAddress *address,
+                                                                             void *buffer, nsapi_size_t size)
+ {
+@@ -531,13 +534,15 @@ nsapi_size_or_error_t GEMALTO_CINTERION_CellularStack::socket_recvfrom_impl(Cell
+     // open on the modem, assert here to catch a programming error
+     MBED_ASSERT(socket->id != -1);
+ 
++    DISABLE_URCs;
++
+     // we must use this flag, otherwise ^SISR URC can come while we are reading response and there is
+     // no way to detect if that is really an URC or response
+     if (!socket->pending_bytes) {
+         _at.process_oob(); // check for ^SISR URC
+         if (!socket->pending_bytes) {
+             tr_debug("Socket %d recv would block", socket->id);
+-            return NSAPI_ERROR_WOULD_BLOCK;
++            RESTORE_URCs_AND_RETURN(NSAPI_ERROR_WOULD_BLOCK);
+         }
+     }
+ 
+@@ -552,7 +557,7 @@ sisr_retry:
+     _at.resp_start("^SISR:");
+     if (!_at.info_resp()) {
+         tr_error("Socket %d not responding", socket->id);
+-        return NSAPI_ERROR_DEVICE_ERROR;
++        RESTORE_URCs_AND_RETURN(NSAPI_ERROR_DEVICE_ERROR);
+     }
+ 
+     int socket_id = _at.read_int();
+@@ -564,24 +569,24 @@ sisr_retry:
+             goto sisr_retry;
+         }
+         tr_error("Socket recvfrom id %d != %d", socket_id, socket->id);
+-        return NSAPI_ERROR_DEVICE_ERROR;
++        RESTORE_URCs_AND_RETURN(NSAPI_ERROR_DEVICE_ERROR);
+     }
+ 
+     nsapi_size_or_error_t len = _at.read_int();
+     if (len == 0) {
+         tr_warn("Socket %d no data", socket->id);
+         _at.resp_stop();
+-        return NSAPI_ERROR_WOULD_BLOCK;
++        RESTORE_URCs_AND_RETURN(NSAPI_ERROR_WOULD_BLOCK);
+     }
+     if (len == -1) {
+         if (GEMALTO_CINTERION::get_module() == GEMALTO_CINTERION::ModuleTX62 && _at.get_last_read_error() == -2) {
+             _at.process_oob();
+             tr_error("Socket %d recvfrom finished!", socket->id);
+             socket->pending_bytes = 0;
+-            return NSAPI_ERROR_OK;
++            RESTORE_URCs_AND_RETURN(NSAPI_ERROR_OK);
+         }
+         tr_error("Socket %d recvfrom failed!", socket->id);
+-        return NSAPI_ERROR_DEVICE_ERROR;
++        RESTORE_URCs_AND_RETURN(NSAPI_ERROR_DEVICE_ERROR);
+     }
+     if (len >= (nsapi_size_or_error_t)size) {
+         len = (nsapi_size_or_error_t)size;
+@@ -606,7 +611,7 @@ sisr_retry:
+                 int len = _at.read_bytes(at_buf + ip_len, 1);
+                 if (len <= 0) {
+                     tr_error("Socket %d recvfrom addr (len %d)", socket->id, ip_len);
+-                    return NSAPI_ERROR_DEVICE_ERROR;
++                    RESTORE_URCs_AND_RETURN(NSAPI_ERROR_DEVICE_ERROR);
+                 }
+                 ip_len += len;
+             } while (ip_len < ip_address_len && at_buf[ip_len - 2] != '\r' && at_buf[ip_len - 1] != '\n');
+@@ -629,7 +634,7 @@ sisr_retry:
+             int ip_len = _at.read_string(ip_address, sizeof(ip_address));
+             if (ip_len <= 0) {
+                 tr_error("Socket %d recvfrom addr (len %d)", socket->id, ip_len);
+-                return NSAPI_ERROR_DEVICE_ERROR;
++                RESTORE_URCs_AND_RETURN(NSAPI_ERROR_DEVICE_ERROR);
+             }
+         }
+ 
+@@ -671,7 +676,7 @@ sisr_retry:
+ 
+     _at.resp_stop();
+ 
+-    return (_at.get_last_error() == NSAPI_ERROR_OK) ? (recv_len ? recv_len : NSAPI_ERROR_WOULD_BLOCK) : NSAPI_ERROR_DEVICE_ERROR;
++    RESTORE_URCs_AND_RETURN((_at.get_last_error() == NSAPI_ERROR_OK) ? (recv_len ? recv_len : NSAPI_ERROR_WOULD_BLOCK) : NSAPI_ERROR_DEVICE_ERROR);
+ }
+ 
+ // setup internet connection profile for sockets
+-- 
+2.42.0
+
