@@ -58,8 +58,11 @@ protected:
 
 private:
   int setRootCA() {
+    int err = 0;
+
+#if defined(MBEDTLS_FS_IO)
     mbed::BlockDevice* root = mbed::BlockDevice::get_default_instance();
-    int err = root->init();
+    err = root->init();
     if( err != 0) {
       return err;
     }
@@ -76,6 +79,7 @@ private:
     if( err != NSAPI_ERROR_OK) {
       return err;
     }
+#endif
 
     if(_ca_cert_custom != NULL) {
       err = ((TLSSocket*)sock)->append_root_ca_cert(_ca_cert_custom);
