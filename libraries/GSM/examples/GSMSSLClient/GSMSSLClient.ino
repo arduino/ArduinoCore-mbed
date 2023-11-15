@@ -1,20 +1,24 @@
 /*
   GSMSSLlient
 
-  This sketch connects to a website (https://ifconfig.me)
+  This sketch connects to a website (https://example.com)
   using the Portenta CAT.M1/NB IoT GNSS Shield and TLS.
  
  */
 
 #include <GSM.h>
-
 #include "arduino_secrets.h" 
+
+#if defined(ARDUINO_EDGE_CONTROL)
+  #include "root_ca.h"
+#endif
+
 char pin[]      = SECRET_PIN;
 char apn[]      = SECRET_APN;
 char username[] = SECRET_USERNAME;
 char pass[]     = SECRET_PASSWORD;
 
-const char  server[] = "ifconfig.me";
+const char  server[] = "example.com";
 const char* ip_address;
 int port = 443;
 GSMSSLClient client;
@@ -25,6 +29,9 @@ void setup() {
   // Power ON MKR2
   pinMode(ON_MKR2, OUTPUT);
   digitalWrite(ON_MKR2, HIGH);
+
+  // Configure root certificate
+  client.appendCustomCACert(root_ca);
 #endif
 
   Serial.begin(115200);
@@ -45,7 +52,7 @@ void setup() {
   if (client.connect(server, port)) {
     Serial.println("connected to server");
     // Make a HTTP request:
-    client.println("GET /ip HTTP/1.1");
+    client.println("GET / HTTP/1.1");
     client.print("Host: ");
     client.println(server);
     client.println("Connection: close");
