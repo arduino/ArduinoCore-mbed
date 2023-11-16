@@ -43,6 +43,13 @@
 #define led2  LEDG
 #define led3  LEDB
 
+// On Edge Control there are no leds so we use GPIO and Serial
+#elif defined(ARDUINO_EDGE_CONTROL)
+
+#define led1  CMD_TRIAC_3
+#define led2  CMD_TRIAC_4
+#define led3  NOT_A_PIN
+
 #else
 
 int led1 = LEDR;
