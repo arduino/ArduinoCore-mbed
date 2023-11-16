@@ -8,8 +8,19 @@ char username[] = SECRET_USERNAME;
 char pass[]     = SECRET_PASSWORD;
 
 void setup() {
+
+#if defined(ARDUINO_EDGE_CONTROL)
+  // Power ON MKR2
+  pinMode(ON_MKR2, OUTPUT);
+  digitalWrite(ON_MKR2, HIGH);
+#endif
+
   Serial.begin(115200);
   while (!Serial) {}
+
+  // To enable AT Trace debug uncomment the following lines
+  //GSM.trace(Serial);
+  //GSM.setTraceLevel(4);
 
   Serial.println("Starting Carrier Network registration");
   if(!GSM.begin(pin, apn, username, pass, CATNB)){

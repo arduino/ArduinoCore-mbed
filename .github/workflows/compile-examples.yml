@@ -41,6 +41,7 @@ jobs:
           - fqbn: arduino:mbed:opta
           - fqbn: arduino:mbed:giga
           - fqbn: arduino:mbed:nicla_voice
+          - fqbn: arduino:mbed:edge_control
 
         # compile only the examples compatible with each board
         include:
@@ -170,6 +171,15 @@ jobs:
                 version: v0.9.6
               - name: arduino-libg722
                 source-url: https://github.com/pschatzmann/arduino-libg722.git
+          - board:
+              fqbn: arduino:mbed:edge_control
+            additional-libraries: |
+              - name: MicroNMEA
+            additional-sketch-paths: |
+              - libraries/GSM
+              - libraries/USBHID
+              - libraries/USBMSD/examples/Nano33BLE_FlashMassStorage
+              - libraries/ThreadDebug
               
     steps:
       - name: Checkout repository
