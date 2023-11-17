@@ -75,6 +75,8 @@ int arduino::GSMClass::begin(const char* pin, const char* apn, const char* usern
 
   _device = _context->get_device();
 
+  _device->modem_debug_on(_at_debug);
+
   _device->set_cmux_status_flag(_cmuxGSMenable);
 
   _context->set_sim_pin(pin);

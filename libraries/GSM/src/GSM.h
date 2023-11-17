@@ -110,7 +110,7 @@ public:
   bool isCmuxEnable();
 #if MBED_CONF_MBED_TRACE_ENABLE
   void trace(Stream& stream);
-  void setTraceLevel(int trace_level, bool timestamp = false);
+  void setTraceLevel(int trace_level, bool timestamp = false, bool at_trace = false);
 #endif
   int ping(const char* hostname, uint8_t ttl = 128);
   int ping(const String& hostname, uint8_t ttl = 128);
@@ -133,6 +133,7 @@ private:
   NetworkInterface* gsm_if = nullptr;
   mbed::CellularContext* _context = nullptr;
   mbed::CellularDevice* _device = nullptr;
+  bool _at_debug = false;
 };
 
 }

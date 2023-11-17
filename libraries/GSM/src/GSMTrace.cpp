@@ -47,7 +47,7 @@ static void trace_println(const char* c) {
 }
 #endif
 
-void arduino::GSMClass::setTraceLevel(int trace_level, bool timestamp) {
+void arduino::GSMClass::setTraceLevel(int trace_level, bool timestamp, bool at_trace) {
 #if MBED_CONF_MBED_TRACE_ENABLE
   switch(trace_level) {
     case 0:  mbed_trace_config_set(TRACE_ACTIVE_LEVEL_NONE);  break;
@@ -59,6 +59,8 @@ void arduino::GSMClass::setTraceLevel(int trace_level, bool timestamp) {
     case 6:  mbed_trace_config_set(TRACE_ACTIVE_LEVEL_ALL);   break;
     default: mbed_trace_config_set(TRACE_ACTIVE_LEVEL_ALL);   break;
   }
+
+  _at_debug = at_trace;
 
   if (timestamp) {
     mbed_trace_prefix_function_set( &trace_time );
