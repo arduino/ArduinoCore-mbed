@@ -1,3 +1,6 @@
+#ifndef PIN_DEFINITIONS_H
+#define PIN_DEFINITIONS_H
+
 #ifdef USE_ARDUINO_PINOUT
 
 #include "drivers/InterruptIn.h"
@@ -36,4 +39,6 @@ PinName digitalPinToPinName(pin_size_t P);
 
 int PinNameToIndex(PinName P);
 
-#endif
+#endif // USE_ARDUINO_PINOUT
+
+#endif // PIN_DEFINITIONS_H
