@@ -19,6 +19,6 @@
 
 #include "GSMClient.h"
 
-arduino::GSMClient::GSMClient(): MbedClient(100) {
+arduino::GSMClient::GSMClient(): AClient(100) {
 
 }

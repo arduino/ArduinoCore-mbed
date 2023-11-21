@@ -21,13 +21,13 @@
 #define ETHERNETSSLCLIENT_H
 
 #include "EthernetClient.h"
-#include "MbedSSLClient.h"
+#include "AClient.h"
 
 extern const char CA_CERTIFICATES[];
 
 namespace arduino {
 
-class EthernetSSLClient : public arduino::MbedSSLClient {
+class EthernetSSLClient : public arduino::ASslClient {
   NetworkInterface *getNetwork() {
     return Ethernet.getNetwork();
   }

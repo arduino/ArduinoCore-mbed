@@ -21,13 +21,13 @@
 #define GSMSSLCLIENT_H
 
 #include "GSM.h"
-#include "MbedSSLClient.h"
+#include "AClient.h"
 
 extern const char CA_CERTIFICATES[];
 
 namespace arduino {
 
-class GSMSSLClient : public arduino::MbedSSLClient {
+class GSMSSLClient : public arduino::ASslClient {
 public:
   GSMSSLClient();
 

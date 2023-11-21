@@ -21,11 +21,11 @@
 #define ethernetclient_h
 
 #include "Ethernet.h"
-#include "MbedClient.h"
+#include "AClient.h"
 
 namespace arduino {
 
-class EthernetClient : public MbedClient {
+class EthernetClient : public AClient {
   NetworkInterface *getNetwork() {
     return Ethernet.getNetwork();
   }

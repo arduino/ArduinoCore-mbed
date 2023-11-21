@@ -35,16 +35,7 @@
 
 namespace arduino {
 
-class MbedClient : public arduino::Client {
-private:
-  // Helper for copy constructor and assignment operator
-  void copyClient(const MbedClient& orig) {
-    auto _sock = orig.sock;
-    auto _m = (MbedClient*)&orig;
-    _m->borrowed_socket = true;
-    _m->stop();
-    this->setSocket(_sock);
-  }
+class MbedClient {
 
 public:
   MbedClient();
@@ -53,31 +44,21 @@ public:
     _timeout = timeout;
   }
 
-  // Copy constructor, to be used when a Client returned by server.available()
-  // needs to "survive" event if it goes out of scope
-  // Sample usage: Client* new_client = new Client(existing_client)
-  MbedClient(const MbedClient& orig) {
-    copyClient(orig);
-  }
-
-  MbedClient& operator=(const MbedClient& orig) {
-    copyClient(orig);
-    return *this;
-  }  
-
   virtual ~MbedClient() {
     stop();
   }
 
+  void setNetwork(NetworkInterface* network) {_network = network;}
+
   uint8_t status();
   int connect(SocketAddress socketAddress);
-  int connect(IPAddress ip, uint16_t port);
-  int connect(const char* host, uint16_t port);
+  virtual int connect(IPAddress ip, uint16_t port);
+  virtual int connect(const char* host, uint16_t port);
   int connectSSL(SocketAddress socketAddress);
   int connectSSL(IPAddress ip, uint16_t port);
   int connectSSL(const char* host, uint16_t port, bool disableSNI = false);
   size_t write(uint8_t);
-  size_t write(const uint8_t* buf, size_t size) override;
+  size_t write(const uint8_t* buf, size_t size);
   int available();
   int read();
   int read(uint8_t* buf, size_t size);
@@ -103,10 +84,10 @@ public:
   friend class MbedSSLClient;
   friend class MbedSocketClass;
 
-  using Print::write;
-
 protected:
-  virtual NetworkInterface* getNetwork() = 0;
+  NetworkInterface* getNetwork() {return _network;}
+
+  NetworkInterface* _network = nullptr;
   Socket* sock = nullptr;
 
   void onBeforeConnect(mbed::Callback<int(void)> cb) {
@@ -114,11 +95,12 @@ protected:
   }
 
 private:
+
+  MbedClient(const MbedClient&) : _timeout(0) {}
+
   RingBufferN<SOCKET_BUFFER_SIZE> rxBuffer;
   bool _status = false;
-  bool borrowed_socket = false;
   bool _own_socket = false;
-  bool closing = false;
   mbed::Callback<int(void)> beforeConnect;
   SocketAddress address;
   rtos::Thread* reader_th = nullptr;

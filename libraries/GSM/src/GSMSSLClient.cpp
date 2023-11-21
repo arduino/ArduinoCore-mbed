@@ -19,6 +19,6 @@
 
 #include "GSMSSLClient.h"
 
-arduino::GSMSSLClient::GSMSSLClient(): MbedSSLClient(100) {
+arduino::GSMSSLClient::GSMSSLClient(): ASslClient(100) {
 
 }
