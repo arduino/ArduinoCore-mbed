@@ -1,0 +1,35 @@
+#######################################
+# Syntax Coloring Map For GSM
+#######################################
+
+#######################################
+# Class (KEYWORD1)
+#######################################
+
+GSM	KEYWORD1
+GSMClient	KEYWORD1
+GSMSSLClient	KEYWORD1
+GSMUDP	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+begin
+disconnect
+end
+getTime
+getLocalTime
+setTime
+enableCmux
+isCmuxEnable
+trace
+setTraceLevel
+ping
+isConnected
+getNetwork
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+

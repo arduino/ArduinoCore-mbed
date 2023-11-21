@@ -1,0 +1,30 @@
+From 973a19b25200a2d11746ea8196a8403f189e13a7 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Fri, 17 Nov 2023 17:29:39 +0100
+Subject: [PATCH 224/226] ATHandler: do not temporarily change debug options to
+ partially trace AT commands
+
+---
+ connectivity/cellular/source/framework/device/ATHandler.cpp | 5 -----
+ 1 file changed, 5 deletions(-)
+
+diff --git a/connectivity/cellular/source/framework/device/ATHandler.cpp b/connectivity/cellular/source/framework/device/ATHandler.cpp
+index f305fd8af5..36d21243f8 100644
+--- a/connectivity/cellular/source/framework/device/ATHandler.cpp
++++ b/connectivity/cellular/source/framework/device/ATHandler.cpp
+@@ -1244,12 +1244,7 @@ void ATHandler::handle_start(const char *cmd, const char *cmd_chr)
+     }
+     _cmd_buffer[len] = '\0';
+ 
+-    const bool temp_state = get_debug();
+-    set_debug(true);
+-
+     cmd_start(_cmd_buffer);
+-
+-    set_debug(temp_state);
+ }
+ 
+ void ATHandler::cmd_start_stop(const char *cmd, const char *cmd_chr, const char *format, ...)
+-- 
+2.42.0
+

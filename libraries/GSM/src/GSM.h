@@ -55,14 +55,33 @@
   #error Gemalto Cinterion cellular connectivity not supported
 #endif
 
-#define MBED_CONF_APP_SOCK_TYPE           1
-
 #if defined __has_include
   #if __has_include ("GPS.h")
   #  define _CMUX_ENABLE 1
   #else
   #   define _CMUX_ENABLE 0
   #endif
+#endif
+
+#if defined __has_include
+  #if __has_include ("Arduino_DebugUtils.h")
+    #include "Arduino_DebugUtils.h"
+    #define GSM_DEBUG_ENABLE 1
+  #else
+    #define DEBUG_ERROR(fmt, ...)
+    #define DEBUG_WARNING(fmt, ...)
+    #define DEBUG_INFO(fmt, ...)
+    #define DEBUG_DEBUG(fmt, ...)
+    #define DEBUG_VERBOSE(fmt, ...)
+    #define GSM_DEBUG_ENABLE 0
+  #endif
+#else
+    #define DEBUG_ERROR(fmt, ...)
+    #define DEBUG_WARNING(fmt, ...)
+    #define DEBUG_INFO(fmt, ...)
+    #define DEBUG_DEBUG(fmt, ...)
+    #define DEBUG_VERBOSE(fmt, ...)
+    #define GSM_DEBUG_ENABLE 0
 #endif
 
 namespace arduino {
@@ -110,7 +129,7 @@ public:
   bool isCmuxEnable();
 #if MBED_CONF_MBED_TRACE_ENABLE
   void trace(Stream& stream);
-  void setTraceLevel(int trace_level, bool timestamp = false);
+  void setTraceLevel(int trace_level, bool timestamp = false, bool at_trace = false);
 #endif
   int ping(const char* hostname, uint8_t ttl = 128);
   int ping(const String& hostname, uint8_t ttl = 128);
@@ -133,6 +152,29 @@ private:
   NetworkInterface* gsm_if = nullptr;
   mbed::CellularContext* _context = nullptr;
   mbed::CellularDevice* _device = nullptr;
+  bool _at_debug = false;
+
+  /* Internal cellular state machine retries. Values are in seconds.
+   * This array also defines the maximum number of retries to 6
+   */
+  const uint16_t _retry_timeout[6] = {1, 2, 4, 8, 16, 32};
+
+#if GSM_DEBUG_ENABLE
+  static constexpr int RSSI_UNKNOWN = 99;
+  static const char * const sim_state_str[];
+  static const char * const reg_type_str[];
+  static const char * const rat_str[];
+  static const char * const state_str[];
+  static const char * const event_str[];
+  static const char * getRATString(const mbed::CellularNetwork::RadioAccessTechnology rat);
+  static const char * getStateString(const mbed::CellularStateMachine::CellularState state);
+  static const char * getEventString(const cellular_event_status event);
+  static const char * getSIMStateString(const mbed::CellularDevice::SimState state);
+  static const char * getRegistrationStateString(const mbed::CellularNetwork::RegistrationStatus state);
+  void onStatusChange(nsapi_event_t ev, intptr_t in);
+#endif
+  void reset();
+  bool isReady(const int timeout = 5000);
 };
 
 }
