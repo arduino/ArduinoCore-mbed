@@ -55,31 +55,25 @@ int arduino::GSMClass::begin(const char* pin, const char* apn, const char* usern
     DEBUG_ERROR("Invalid mbed::CellularContext");
     return 0;
   }
+
   pinMode(MBED_CONF_GEMALTO_CINTERION_ON, INPUT_PULLDOWN);
 
   static mbed::DigitalOut rts(MBED_CONF_GEMALTO_CINTERION_RTS, 0);
 
   _device = _context->get_device();
+  _device->modem_debug_on(_at_debug);
 
   if (!isReady()) {
     DEBUG_ERROR("Cellular device not ready");
     return 0;
   }
 
-  _device->modem_debug_on(_at_debug);
-
   _device->set_cmux_status_flag(_cmuxGSMenable);
-
-  _context->set_sim_pin(pin);
-
   _device->set_retry_timeout_array(_retry_timeout, sizeof(_retry_timeout) / sizeof(_retry_timeout[0]));
 #if GSM_DEBUG_ENABLE
   _device->attach(mbed::callback(this, &GSMClass::onStatusChange));
 #endif
-
   _device->init();
-
-  _context->set_authentication_type((mbed::CellularContext::AuthenticationType)1);
 
   _pin = pin;
   _apn = apn;
@@ -87,9 +81,11 @@ int arduino::GSMClass::begin(const char* pin, const char* apn, const char* usern
   _password = password;
   _rat = rat;
   _band = (FrequencyBand) band;
-  _context->set_credentials(apn, username, password);
 
-  _context->set_access_technology(rat);
+  _context->set_sim_pin(pin);
+  _context->set_authentication_type(mbed::CellularContext::AuthenticationType::PAP);
+  _context->set_credentials(_apn, _username, _password);
+  _context->set_access_technology(_rat);
   _context->set_band(_band);
 
   int connect_status = NSAPI_ERROR_AUTH_FAILURE;
