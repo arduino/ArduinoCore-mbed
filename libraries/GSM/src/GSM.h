@@ -55,8 +55,6 @@
   #error Gemalto Cinterion cellular connectivity not supported
 #endif
 
-#define MBED_CONF_APP_SOCK_TYPE           1
-
 #if defined __has_include
   #if __has_include ("GPS.h")
   #  define _CMUX_ENABLE 1
