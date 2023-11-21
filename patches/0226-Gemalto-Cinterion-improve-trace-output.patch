@@ -1,0 +1,68 @@
+From aa22f048ae886adcc032ba2fefc7e1f90aa2b693 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Tue, 21 Nov 2023 14:50:08 +0100
+Subject: [PATCH 226/226] Gemalto Cinterion: improve trace output
+
+  * Do not flood serial monitor with tr_info prints
+  * Align usage of "\n"
+---
+ .../CINTERION/GEMALTO_CINTERION_CellularContext.cpp       | 2 +-
+ .../GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp | 8 ++++----
+ 2 files changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.cpp b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.cpp
+index 7ee2c8e53c..d4ae578f09 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.cpp
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.cpp
+@@ -122,7 +122,7 @@ nsapi_error_t GEMALTO_CINTERION_CellularContext::do_user_authentication()
+             return NSAPI_ERROR_AUTH_FAILURE;
+         }
+     } else {
+-        tr_info("Empty pwd and username fields: no need for authentication\n");
++        tr_info("Empty pwd and username fields: no need for authentication");
+     }
+ 
+     return NSAPI_ERROR_OK;
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+index fc2e8985d7..ac2a54282a 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+@@ -284,7 +284,7 @@ nsapi_error_t GEMALTO_CINTERION_CellularStack::gethostbyname(const char *host, S
+         _at.resp_stop();
+         if (size > 0) {
+             //Valid string received
+-            tr_info("Read %d bytes. Valid string: %s\n", size, ipAddress);
++            tr_info("Read %d bytes. Valid string: %s", size, ipAddress);
+             // _at.restore_at_timeout();
+             if (!address->set_ip_address(ipAddress)) {
+                 _at.unlock();
+@@ -292,7 +292,7 @@ nsapi_error_t GEMALTO_CINTERION_CellularStack::gethostbyname(const char *host, S
+             }
+         } else {
+             //Null string received
+-            tr_info("Read %d bytes. Null string\n", size);
++            tr_info("Read %d bytes. Null string", size);
+             return NSAPI_ERROR_NO_ADDRESS;
+         }
+     }
+@@ -550,7 +550,7 @@ nsapi_size_or_error_t GEMALTO_CINTERION_CellularStack::socket_recvfrom_impl(Cell
+         size = UDP_PACKET_SIZE;
+     }
+ 
+-    tr_info("requesting %d bytes\n", size);
++    tr_debug("requesting %d bytes\n", size);
+     _at.cmd_start_stop("^SISR", "=", "%d%d", socket->id, size);
+ 
+ sisr_retry:
+@@ -574,7 +574,7 @@ sisr_retry:
+ 
+     nsapi_size_or_error_t len = _at.read_int();
+     if (len == 0) {
+-        tr_warn("Socket %d no data", socket->id);
++        tr_debug("Socket %d no data", socket->id);
+         _at.resp_stop();
+         RESTORE_URCs_AND_RETURN(NSAPI_ERROR_WOULD_BLOCK);
+     }
+-- 
+2.42.0
+
