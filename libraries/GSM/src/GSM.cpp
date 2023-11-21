@@ -26,8 +26,6 @@
 #include "CellularInterface.h"
 #include "GEMALTO_CINTERION_CellularStack.h"
 
-#define MAXRETRY 3
-
 arduino::CMUXClass *arduino::CMUXClass::get_default_instance()
 {
   static mbed::UnbufferedSerial serial(MBED_CONF_GEMALTO_CINTERION_TX, MBED_CONF_GEMALTO_CINTERION_RX, 115200);
@@ -102,24 +100,17 @@ int arduino::GSMClass::begin(const char* pin, const char* apn, const char* usern
   _context->set_band(_band);
 
   int connect_status = NSAPI_ERROR_AUTH_FAILURE;
-  uint8_t retryCount = 0;
-  while(connect_status != NSAPI_ERROR_OK && retryCount < MAXRETRY) {
 
-    connect_status = _context->connect(pin, apn, username, password);
-    retryCount++;
+  DEBUG_INFO("Connecting...");
+  connect_status = _context->connect(pin, apn, username, password);
 
-    if (connect_status == NSAPI_ERROR_AUTH_FAILURE) {
-      DEBUG_ERROR("Authentication Failure. Exiting application.");
-    } else if (connect_status == NSAPI_ERROR_OK || connect_status == NSAPI_ERROR_IS_CONNECTED) {
-      connect_status = NSAPI_ERROR_OK;
-      DEBUG_INFO("Connection Established.");
-    } else if (retryCount > 2) {
-      DEBUG_ERROR("Fatal connection failure: %d", connect_status);
-    } else {
-      DEBUG_WARNING("Couldn't connect, will retry...");
-      continue;
-    }
-
+  if (connect_status == NSAPI_ERROR_AUTH_FAILURE) {
+    DEBUG_ERROR("Authentication Failure. Exiting application.");
+  } else if (connect_status == NSAPI_ERROR_OK || connect_status == NSAPI_ERROR_IS_CONNECTED) {
+    connect_status = NSAPI_ERROR_OK;
+    DEBUG_INFO("Connection Established.");
+  } else {
+    DEBUG_ERROR("Couldn't connect.");
   }
 
   return connect_status == NSAPI_ERROR_OK ? 1 : 0;
