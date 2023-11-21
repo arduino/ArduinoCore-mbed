@@ -66,7 +66,7 @@ int arduino::GSMClass::begin(const char* pin, const char* apn, const char* usern
   _context = mbed::CellularContext::get_default_instance();
 
   if (_context == nullptr) {
-    printf("Invalid context\n");
+    DEBUG_ERROR("Invalid mbed::CellularContext");
     return 0;
   }
   pinMode(MBED_CONF_GEMALTO_CINTERION_ON, INPUT_PULLDOWN);
@@ -80,6 +80,10 @@ int arduino::GSMClass::begin(const char* pin, const char* apn, const char* usern
   _device->set_cmux_status_flag(_cmuxGSMenable);
 
   _context->set_sim_pin(pin);
+
+#if GSM_DEBUG_ENABLE
+  _device->attach(mbed::callback(this, &GSMClass::onStatusChange));
+#endif
 
   _device->init();
 
@@ -104,14 +108,14 @@ int arduino::GSMClass::begin(const char* pin, const char* apn, const char* usern
     retryCount++;
 
     if (connect_status == NSAPI_ERROR_AUTH_FAILURE) {
-      tr_info("Authentication Failure. Exiting application.\n");
+      DEBUG_ERROR("Authentication Failure. Exiting application.");
     } else if (connect_status == NSAPI_ERROR_OK || connect_status == NSAPI_ERROR_IS_CONNECTED) {
       connect_status = NSAPI_ERROR_OK;
-      tr_info("Connection Established.\n");
+      DEBUG_INFO("Connection Established.");
     } else if (retryCount > 2) {
-      tr_info("Fatal connection failure: %d\n", connect_status);
+      DEBUG_ERROR("Fatal connection failure: %d", connect_status);
     } else {
-      tr_info("Couldn't connect, will retry...\n");
+      DEBUG_WARNING("Couldn't connect, will retry...");
       continue;
     }
 

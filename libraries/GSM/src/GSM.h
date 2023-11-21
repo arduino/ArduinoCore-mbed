@@ -63,6 +63,27 @@
   #endif
 #endif
 
+#if defined __has_include
+  #if __has_include ("Arduino_DebugUtils.h")
+    #include "Arduino_DebugUtils.h"
+    #define GSM_DEBUG_ENABLE 1
+  #else
+    #define DEBUG_ERROR(fmt, ...)
+    #define DEBUG_WARNING(fmt, ...)
+    #define DEBUG_INFO(fmt, ...)
+    #define DEBUG_DEBUG(fmt, ...)
+    #define DEBUG_VERBOSE(fmt, ...)
+    #define GSM_DEBUG_ENABLE 0
+  #endif
+#else
+    #define DEBUG_ERROR(fmt, ...)
+    #define DEBUG_WARNING(fmt, ...)
+    #define DEBUG_INFO(fmt, ...)
+    #define DEBUG_DEBUG(fmt, ...)
+    #define DEBUG_VERBOSE(fmt, ...)
+    #define GSM_DEBUG_ENABLE 0
+#endif
+
 namespace arduino {
 
 typedef void* (*voidPrtFuncPtr)(void);
@@ -132,6 +153,21 @@ private:
   mbed::CellularContext* _context = nullptr;
   mbed::CellularDevice* _device = nullptr;
   bool _at_debug = false;
+
+#if GSM_DEBUG_ENABLE
+  static constexpr int RSSI_UNKNOWN = 99;
+  static const char * const sim_state_str[];
+  static const char * const reg_type_str[];
+  static const char * const rat_str[];
+  static const char * const state_str[];
+  static const char * const event_str[];
+  static const char * getRATString(const mbed::CellularNetwork::RadioAccessTechnology rat);
+  static const char * getStateString(const mbed::CellularStateMachine::CellularState state);
+  static const char * getEventString(const cellular_event_status event);
+  static const char * getSIMStateString(const mbed::CellularDevice::SimState state);
+  static const char * getRegistrationStateString(const mbed::CellularNetwork::RegistrationStatus state);
+  void onStatusChange(nsapi_event_t ev, intptr_t in);
+#endif
 };
 
 }
