@@ -173,6 +173,7 @@ private:
   static const char * getRegistrationStateString(const mbed::CellularNetwork::RegistrationStatus state);
   void onStatusChange(nsapi_event_t ev, intptr_t in);
 #endif
+  void reset();
 };
 
 }

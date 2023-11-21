@@ -45,20 +45,8 @@ mbed::CellularDevice *mbed::CellularDevice::get_default_instance()
 
 int arduino::GSMClass::begin(const char* pin, const char* apn, const char* username, const char* password, RadioAccessTechnologyType rat, uint32_t band, bool restart) {
 
-  if(restart || isCmuxEnable()) {
-    pinMode(MBED_CONF_GEMALTO_CINTERION_RST, OUTPUT);
-    digitalWrite(MBED_CONF_GEMALTO_CINTERION_RST, HIGH);
-    delay(800);
-    digitalWrite(MBED_CONF_GEMALTO_CINTERION_RST, LOW);
-    pinMode(MBED_CONF_GEMALTO_CINTERION_ON, OUTPUT);
-    digitalWrite(MBED_CONF_GEMALTO_CINTERION_ON, LOW);
-    delay(1);
-    digitalWrite(MBED_CONF_GEMALTO_CINTERION_ON, HIGH);
-    delay(1);
-    // this timer is to make sure that at boottime and when the CMUX is used,
-    //  ^SYSTART is received in time to avoid stranger behaviour
-    // from HW serial
-    delay(2000);
+  if (restart || isCmuxEnable()) {
+    reset();
   }
 
   _context = mbed::CellularContext::get_default_instance();
@@ -160,6 +148,22 @@ bool arduino::GSMClass::isConnected()
 
 NetworkInterface* arduino::GSMClass::getNetwork() {
   return _context;
+}
+
+void arduino::GSMClass::reset() {
+  pinMode(MBED_CONF_GEMALTO_CINTERION_RST, OUTPUT);
+  digitalWrite(MBED_CONF_GEMALTO_CINTERION_RST, HIGH);
+  delay(800);
+  digitalWrite(MBED_CONF_GEMALTO_CINTERION_RST, LOW);
+  pinMode(MBED_CONF_GEMALTO_CINTERION_ON, OUTPUT);
+  digitalWrite(MBED_CONF_GEMALTO_CINTERION_ON, LOW);
+  delay(1);
+  digitalWrite(MBED_CONF_GEMALTO_CINTERION_ON, HIGH);
+  delay(1);
+  // this timer is to make sure that at boottime and when the CMUX is used,
+  //  ^SYSTART is received in time to avoid stranger behaviour
+  // from HW serial
+  delay(2000);
 }
 
 arduino::GSMClass GSM;
