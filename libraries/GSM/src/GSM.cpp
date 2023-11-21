@@ -61,6 +61,11 @@ int arduino::GSMClass::begin(const char* pin, const char* apn, const char* usern
 
   _device = _context->get_device();
 
+  if (!isReady()) {
+    DEBUG_ERROR("Cellular device not ready");
+    return 0;
+  }
+
   _device->modem_debug_on(_at_debug);
 
   _device->set_cmux_status_flag(_cmuxGSMenable);
@@ -160,10 +165,24 @@ void arduino::GSMClass::reset() {
   delay(1);
   digitalWrite(MBED_CONF_GEMALTO_CINTERION_ON, HIGH);
   delay(1);
-  // this timer is to make sure that at boottime and when the CMUX is used,
-  //  ^SYSTART is received in time to avoid stranger behaviour
-  // from HW serial
-  delay(2000);
+}
+
+bool arduino::GSMClass::isReady(const int timeout) {
+  if (!_device) {
+    DEBUG_ERROR("No device found");
+    return false;
+  }
+
+  const unsigned int start = millis();
+  while (_device->is_ready() != NSAPI_ERROR_OK) {
+
+    if (millis() - start > timeout) {
+      DEBUG_WARNING("Timeout waiting device ready");
+      return false;
+    }
+    delay(100);
+  }
+  return true;
 }
 
 arduino::GSMClass GSM;

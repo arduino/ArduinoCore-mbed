@@ -174,6 +174,7 @@ private:
   void onStatusChange(nsapi_event_t ev, intptr_t in);
 #endif
   void reset();
+  bool isReady(const int timeout = 5000);
 };
 
 }
