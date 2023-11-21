@@ -81,6 +81,7 @@ int arduino::GSMClass::begin(const char* pin, const char* apn, const char* usern
 
   _context->set_sim_pin(pin);
 
+  _device->set_retry_timeout_array(_retry_timeout, sizeof(_retry_timeout) / sizeof(_retry_timeout[0]));
 #if GSM_DEBUG_ENABLE
   _device->attach(mbed::callback(this, &GSMClass::onStatusChange));
 #endif
