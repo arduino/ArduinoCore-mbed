@@ -310,6 +310,6 @@ uint16_t arduino::MbedClient::remotePort() {
   return address.get_port();
 }
 
-void arduino::MbedClient::setTimeout(unsigned long timeout) {
+void arduino::MbedClient::setSocketTimeout(unsigned long timeout) {
   _timeout = timeout;
 }
