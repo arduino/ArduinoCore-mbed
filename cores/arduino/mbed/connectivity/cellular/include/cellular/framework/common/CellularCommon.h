@@ -47,6 +47,26 @@ struct cell_signal_quality_t {
     }
 };
 
+struct cell_timeout_cb_t {
+    int timeout;        /* configured timeout */
+    int state;          /* cellular state */
+    cell_timeout_cb_t()
+    {
+        timeout = -1;
+        state = -1;
+    }
+};
+
+struct cell_retry_cb_t {
+    int retry_count;    /* retry count */
+    int state;          /* cellular state */
+    cell_retry_cb_t()
+    {
+        retry_count = -1;
+        state = -1;
+    }
+};
+
 /**
  * Cellular specific event changes.
  * Connect and disconnect are handled via NSAPI_EVENT_CONNECTION_STATUS_CHANGE
