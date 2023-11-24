@@ -5,9 +5,9 @@ extern "C" {
 
 int SDRAMClass::begin(uint32_t start_address) {
 
-	printf("FMC_SDRAM_DEVICE->SDCMR: %x\n", FMC_SDRAM_DEVICE->SDCMR);
+	//printf("FMC_SDRAM_DEVICE->SDCMR: %x\n", FMC_SDRAM_DEVICE->SDCMR);
 	if (FMC_SDRAM_DEVICE->SDCMR == 0x00000000U) {
-		printf("initializing external ram\n");
+		//printf("initializing external ram\n");
 		bool ret = sdram_init();
 		if (ret == false) {
 			return 0;
@@ -19,7 +19,7 @@ int SDRAMClass::begin(uint32_t start_address) {
 		*/
 
         if (SDRAM_START_ADDRESS != 0xC0000000) {
-		    printf("remap ram to 0x60000000\n");
+		    //printf("remap ram to 0x60000000\n");
             HAL_SetFMCMemorySwappingConfig(FMC_SWAPBMAP_SDRAM_SRAM);
         }
 
@@ -62,7 +62,7 @@ int SDRAMClass::begin(uint32_t start_address) {
 	}
 
 	if (start_address) {
-		printf("malloc_addblock: allocate %d bytes\n", SDRAM_END_ADDRESS - start_address);
+		//printf("malloc_addblock: allocate %d bytes\n", SDRAM_END_ADDRESS - start_address);
 		malloc_addblock((void*)start_address, SDRAM_END_ADDRESS - start_address);
 	}
 

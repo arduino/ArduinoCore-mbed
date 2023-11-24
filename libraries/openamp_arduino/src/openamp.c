@@ -175,7 +175,7 @@ int OPENAMP_Wait_EndPointready(struct rpmsg_endpoint *rp_ept, size_t deadline)
     MAILBOX_Poll(rvdev.vdev);
   }
   if (millis() >= deadline) {
-    printf("OPENAMP_Wait_EndPointready %X timed out\n\r", (unsigned int)rp_ept);
+    //printf("OPENAMP_Wait_EndPointready %X timed out\n\r", (unsigned int)rp_ept);
     return -1;
   }
   return 0;

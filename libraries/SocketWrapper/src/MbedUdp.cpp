@@ -42,7 +42,7 @@ uint8_t arduino::MbedUDP::beginMulticast(IPAddress ip, uint16_t port) {
   SocketAddress socketAddress = SocketHelpers::socketAddressFromIpAddress(ip, port);
 
   if (_socket.join_multicast_group(socketAddress) != NSAPI_ERROR_OK) {
-    printf("Error joining the multicast group\n");
+    //printf("Error joining the multicast group\n");
     return 0;
   }
 

@@ -90,7 +90,7 @@ void* arduino::WiFiClass::handleAPEvents(whd_interface_t ifp, const whd_event_he
     if (osSemaphoreGetCount(whd_driver->ap_info.whd_wifi_sleep_flag) < 1) {
       osStatus_t result = osSemaphoreRelease(whd_driver->ap_info.whd_wifi_sleep_flag);
       if (result != osOK) {
-        printf("Release whd_wifi_sleep_flag ERROR: %d", result);
+        //printf("Release whd_wifi_sleep_flag ERROR: %d", result);
       }
     }
   }
