@@ -10,7 +10,7 @@ AnalogPinDescription g_AAnalogPinDescription[] = {
   { PC_2C,        NULL },    // A2    ADC3_INP0
   { PC_3C,        NULL },    // A3    ADC3_INP1
   { PC_2_ALT0,    NULL },    // A4    ADC1_INP12
-  { PC_3_ALT2,    NULL },    // A5    ADC2_INP13
+  { PC_3_ALT0,    NULL },    // A5    ADC2_INP13
   { PA_4,         NULL },    // A6    ADC1_INP18
   { PA_6,         NULL }     // A7    ADC1_INP7
 };
