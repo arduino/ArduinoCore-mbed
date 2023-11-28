@@ -3,11 +3,34 @@ extern "C" {
 	#include "ram_internal.h"
 }
 
+static void MPU_Config() {
+    MPU_Region_InitTypeDef MPU_InitStruct;
+
+    /* Disable the MPU */
+    HAL_MPU_Disable();
+
+    // Initialize SDRAM Start as shareable
+    MPU_InitStruct.Enable = MPU_REGION_ENABLE;
+    MPU_InitStruct.BaseAddress = SDRAM_START_ADDRESS;
+    MPU_InitStruct.Size = ARM_MPU_REGION_SIZE_8MB;
+    //MPU_InitStruct.SubRegionDisable = 0x00;
+    MPU_InitStruct.Number = MPU_REGION_NUMBER5;
+    MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL0;
+    MPU_InitStruct.AccessPermission = MPU_REGION_FULL_ACCESS;
+    MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_ENABLE;
+    MPU_InitStruct.IsShareable = MPU_ACCESS_SHAREABLE;
+    MPU_InitStruct.IsCacheable = MPU_ACCESS_NOT_CACHEABLE;
+    MPU_InitStruct.IsBufferable = MPU_ACCESS_NOT_BUFFERABLE;
+
+    HAL_MPU_ConfigRegion(&MPU_InitStruct);
+
+    /* Enable the MPU */
+    HAL_MPU_Enable(MPU_PRIVILEGED_DEFAULT);
+}
+
 int SDRAMClass::begin(uint32_t start_address) {
 
-	//printf("FMC_SDRAM_DEVICE->SDCMR: %x\n", FMC_SDRAM_DEVICE->SDCMR);
 	if (FMC_SDRAM_DEVICE->SDCMR == 0x00000000U) {
-		//printf("initializing external ram\n");
 		bool ret = sdram_init();
 		if (ret == false) {
 			return 0;
@@ -18,51 +41,16 @@ int SDRAMClass::begin(uint32_t start_address) {
 			then enable access/caching for the size used
 		*/
 
-        if (SDRAM_START_ADDRESS != 0xC0000000) {
-		    //printf("remap ram to 0x60000000\n");
+        if (SDRAM_START_ADDRESS == 0x60000000) {
             HAL_SetFMCMemorySwappingConfig(FMC_SWAPBMAP_SDRAM_SRAM);
         }
 
-#if 0
-
-		printf("setup mpu\n");
-        #define MPU_SDRAM_EXEC_REGION_NUMBER  MPU_REGION_SDRAM1
-        #define MPU_SDRAM_REGION_TEX          (0x4 << MPU_RASR_TEX_Pos) /* Cached memory */
-        #define MPU_SDRAM_EXEC_REGION_SIZE    (22 << MPU_RASR_SIZE_Pos)  /* 2^(22+1) = 8Mo */
-        #define MPU_SDRAM_ACCESS_PERMSSION    (0x03UL << MPU_RASR_AP_Pos)
-        #define MPU_SDRAM_REGION_CACHABLE     (0x01UL << MPU_RASR_C_Pos)
-        #define MPU_SDRAM_REGION_BUFFERABLE   (0x01UL << MPU_RASR_B_Pos)
-
-        MPU->CTRL &= ~MPU_CTRL_ENABLE_Msk;
-	    /* Configure SDARM region as first region */
-	    MPU->RNR  = MPU_SDRAM_EXEC_REGION_NUMBER;
-	    /* Set MPU SDARM base address (0xD0000000) */
-        MPU->RBAR = SDRAM_START_ADDRESS;
-        /*
-            - Execute region: RASR[size] = 22  -> 2^(22+1) -> size 8MB
-            - Access permission:  Full access: RASR[AP] = 0b011
-            - Cached memory:  RASR[TEX] = 0b0100
-            - Disable the Execute Never option: to allow the code execution on SDRAM: RASR[XN] = 0
-                - Enable the region MPU: RASR[EN] = 1
-        */
-        MPU->RASR = (MPU_SDRAM_EXEC_REGION_SIZE | MPU_SDRAM_ACCESS_PERMSSION | MPU_SDRAM_REGION_TEX | \
-	             MPU_RASR_ENABLE_Msk | MPU_SDRAM_REGION_BUFFERABLE) & ~MPU_RASR_XN_Msk  ;
-
-        /* Enable MPU and leave the predefined regions to default configuration */
-        MPU->CTRL |= MPU_CTRL_PRIVDEFENA_Msk |  MPU_CTRL_ENABLE_Msk;
-#endif
-
-#if 0
-		mpu_config_start();
-		mpu_config_region(MPU_REGION_SDRAM1, SDRAM_START_ADDRESS, MPU_CONFIG_DISABLE(0x00, MPU_REGION_SIZE_512MB));
-		mpu_config_region(MPU_REGION_SDRAM2, SDRAM_START_ADDRESS, MPU_CONFIG_SDRAM(SDRAM_MPU_REGION_SIZE));
-		mpu_config_end();
-#endif
-
+        #ifdef CORE_CM4
+        MPU_Config();
+        #endif
 	}
 
 	if (start_address) {
-		//printf("malloc_addblock: allocate %d bytes\n", SDRAM_END_ADDRESS - start_address);
 		malloc_addblock((void*)start_address, SDRAM_END_ADDRESS - start_address);
 	}
 
@@ -77,7 +65,7 @@ void SDRAMClass::free(void* ptr) {
 	ea_free(ptr);
 }
 
-bool __attribute__((optimize("O0"))) SDRAMClass::test(bool fast) {
+bool __attribute__((optimize("O0"))) SDRAMClass::test(bool fast, Stream& _serial) {
     uint8_t const pattern = 0xaa;
     uint8_t const antipattern = 0x55;
     uint8_t *const mem_base = (uint8_t*)SDRAM_START_ADDRESS;
@@ -86,7 +74,7 @@ bool __attribute__((optimize("O0"))) SDRAMClass::test(bool fast) {
     for (uint8_t i = 1; i; i <<= 1) {
         *mem_base = i;
         if (*mem_base != i) {
-            printf("data bus lines test failed! data (%d)\n", i);
+            _serial.println("data bus lines test failed! data (" + String(i) + ")");
             __asm__ volatile ("BKPT");
         }
     }
@@ -96,7 +84,7 @@ bool __attribute__((optimize("O0"))) SDRAMClass::test(bool fast) {
     for (uint32_t i = 1; i < HW_SDRAM_SIZE; i <<= 1) {
         mem_base[i] = pattern;
         if (mem_base[i] != pattern) {
-            printf("address bus lines test failed! address (%p)\n", &mem_base[i]);
+            _serial.println("address bus lines test failed! address ("+ String((uint32_t)&mem_base[i], HEX) + ")");
             __asm__ volatile ("BKPT");
         }
     }
@@ -105,7 +93,7 @@ bool __attribute__((optimize("O0"))) SDRAMClass::test(bool fast) {
     mem_base[0] = antipattern;
     for (uint32_t i = 1; i < HW_SDRAM_SIZE; i <<= 1) {
         if (mem_base[i] != pattern) {
-            printf("address bus overlap %p\n", &mem_base[i]);
+            _serial.println("address bus overlap! address ("+ String((uint32_t)&mem_base[i], HEX) + ")");
             __asm__ volatile ("BKPT");
         }
     }
@@ -115,7 +103,7 @@ bool __attribute__((optimize("O0"))) SDRAMClass::test(bool fast) {
         for (uint32_t i = 0; i < HW_SDRAM_SIZE; ++i) {
             mem_base[i] = pattern;
             if (mem_base[i] != pattern) {
-                printf("address bus test failed! address (%p)\n", &mem_base[i]);
+                _serial.println("address bus test failed! address ("+ String((uint32_t)&mem_base[i], HEX) + ")");
                 __asm__ volatile ("BKPT");
             }
         }
