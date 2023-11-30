@@ -25,7 +25,7 @@
 #include <drivers/DigitalInOut.h>
 #include <drivers/I2C.h>
 
-#if defined(ARDUINO_PORTENTA_H7_M7)
+#if defined(ARDUINO_PORTENTA_H7_M7) || defined(PORTENTA_H7_PINS)
 
 #include "dsi.h"
 #include "anx7625.h"
@@ -42,9 +42,12 @@
 	#define ANXDEBUG(format, ...) \
 			printk(BIOS_DEBUG, "%s: " format, __func__, ##__VA_ARGS__)
 #else
-	#define ANXERROR(format, ...) 
-	#define ANXINFO(format, ...)
-	#define ANXDEBUG(format, ...)
+	#define ANXERROR(format, ...) \
+		do { static volatile int _i = 5; _i++; } while (0)
+	#define ANXINFO(format, ...) \
+		do { } while (0)
+	#define ANXDEBUG(format, ...) \
+		do { } while (0)
 #endif
 
 #define FLASH_LOAD_STA 0x05
@@ -506,7 +509,7 @@ int anx7625_init(uint8_t bus) {
 		return -1;
 	}
 	ANXINFO("Powering on anx7625 successfull.\n");
-	mdelay(200); // Wait for anx7625 to be stable
+	mdelay(500); // Wait for anx7625 to be stable
 
 	if(anx7625_is_power_provider(0)) {
 		ANXINFO("OTG_ON = 0 -> VBUS ON\n");

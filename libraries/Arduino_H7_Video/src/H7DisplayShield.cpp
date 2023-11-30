@@ -22,6 +22,8 @@ int USBCVideoClass::init(int edidmode) {
     struct edid recognized_edid;
     int err_code = 0;
 
+    memset(&recognized_edid, 0, sizeof(recognized_edid));
+
     //Initialization of ANX7625
     err_code = anx7625_init(0);
     if(err_code < 0) {
