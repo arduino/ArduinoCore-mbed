@@ -91,8 +91,6 @@ public:
 
   void MACAddress(uint8_t *mac_address);
 
-  void setHostname(const char *name);
-
   int disconnect(void);
   void end(void);
 
@@ -123,7 +121,6 @@ private:
   EthernetInterface *eth_if = &net;
   voidPrtFuncPtr _initializerCallback;
   arduino::IPAddress ipAddressFromSocketAddress(SocketAddress socketAddress);
-  SocketAddress socketAddressFromIpAddress(arduino::IPAddress ip, uint16_t port);
 };
 
 }
