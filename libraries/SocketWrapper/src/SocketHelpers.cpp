@@ -125,7 +125,7 @@ void MbedSocketClass::feedWatchdog() {
 
 void MbedSocketClass::body_callback(const char* data, uint32_t data_len) {
   feedWatchdog();
-  fwrite(data, 1, data_len, download_target);
+  fwrite(data, sizeof(data[0]), data_len, download_target);
 }
 
 int MbedSocketClass::download(char* url, const char* target_file, bool const is_https) {
