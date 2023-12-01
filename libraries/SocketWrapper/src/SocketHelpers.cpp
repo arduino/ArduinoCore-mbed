@@ -128,26 +128,41 @@ void MbedSocketClass::body_callback(const char* data, uint32_t data_len) {
   fwrite(data, sizeof(data[0]), data_len, download_target);
 }
 
-int MbedSocketClass::download(char* url, const char* target_file, bool const is_https) {
+int MbedSocketClass::download(const char* url, const char* target_file, bool const is_https) {
   download_target = fopen(target_file, "wb");
+
+  int res = this->download(url, is_https, mbed::callback(this, &MbedSocketClass::body_callback));
+
+  fclose(download_target);
+  download_target = nullptr;
+
+  return res;
+}
+
+int MbedSocketClass::download(const char* url, bool const is_https, mbed::Callback<void(const char*, uint32_t)> cbk) {
+  if(cbk == nullptr) {
+    return 0; // a call back must be set
+  }
 
   HttpRequest* req_http = nullptr;
   HttpsRequest* req_https = nullptr;
   HttpResponse* rsp = nullptr;
+  int res=0;
+  std::vector<string*> header_fields;
 
   if (is_https) {
-    req_https = new HttpsRequest(getNetwork(), nullptr, HTTP_GET, url, mbed::callback(this, &MbedSocketClass::body_callback));
+    req_https = new HttpsRequest(getNetwork(), nullptr, HTTP_GET, url, cbk);
     rsp = req_https->send(NULL, 0);
     if (rsp == NULL) {
-      fclose(download_target);
-      return req_https->get_error();
+      res = req_https->get_error();
+      goto exit;
     }
   } else {
-    req_http = new HttpRequest(getNetwork(), HTTP_GET, url, mbed::callback(this, &MbedSocketClass::body_callback));
+    req_http = new HttpRequest(getNetwork(), HTTP_GET, url, cbk);
     rsp = req_http->send(NULL, 0);
     if (rsp == NULL) {
-      fclose(download_target);
-      return req_http->get_error();
+      res = req_http->get_error();
+      goto exit;
     }
   }
 
@@ -155,7 +170,21 @@ int MbedSocketClass::download(char* url, const char* target_file, bool const is_
     delay(10);
   }
 
-  int const size = ftell(download_target);
-  fclose(download_target);
-  return size;
+  // find the header containing the "Content-Length" value and return that
+  header_fields = rsp->get_headers_fields();
+  for(int i=0; i<header_fields.size(); i++) {
+
+    if(strcmp(header_fields[i]->c_str(), "Content-Length") == 0) {
+      res = std::stoi(*rsp->get_headers_values()[i]);
+      break;
+    }
+  }
+
+exit:
+  if(req_http)  delete req_http;
+  if(req_https) delete req_https;
+  // no need to delete rsp, it is already deleted by deleting the request
+  // this may be harmful since it can allow dangling pointers existence
+
+  return res;
 }
