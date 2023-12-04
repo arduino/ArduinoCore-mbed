@@ -60,6 +60,10 @@ uint32_t arduino::internal::PluggableUSBModule::write_finish(usb_ep_t endpoint) 
     return PluggableUSBD().write_finish(endpoint);
 }
 
+void arduino::internal::PluggableUSBModule::callback_reset()
+{
+}
+
 arduino::PluggableUSBDevice::PluggableUSBDevice(uint16_t vendor_id, uint16_t product_id)
     : USBDevice(get_usb_phy(), vendor_id, product_id, 1 << 8)
 {
