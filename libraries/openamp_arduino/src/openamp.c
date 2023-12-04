@@ -135,7 +135,7 @@ int MX_OPENAMP_Init(int RPMsgRole, rpmsg_ns_bind_cb ns_bind_cb)
   }
 
   rpmsg_virtio_init_shm_pool(&shpool, (void *)VRING_BUFF_ADDRESS,
-                             (size_t)SHM_SIZE);
+                             (size_t)VRING_BUFF_SIZE);
   rpmsg_init_vdev(&rvdev, vdev, ns_bind_cb, shm_io, &shpool);
 
 

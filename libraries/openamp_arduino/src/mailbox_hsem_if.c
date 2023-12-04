@@ -77,14 +77,14 @@ void HAL_HSEM_FreeCallback(uint32_t SemMask)
   UNUSED(SemMask);
   msg_received = RX_NEW_MSG;
 
-  osSignalSet(eventHandlerThreadId, 0x1);
-
 #ifdef CORE_CM7
   HAL_HSEM_ActivateNotification(__HAL_HSEM_SEMID_TO_MASK(HSEM_ID_1));   
 #endif
 #ifdef CORE_CM4
   HAL_HSEM_ActivateNotification(__HAL_HSEM_SEMID_TO_MASK(HSEM_ID_0));   
 #endif
+
+  osSignalSet(eventHandlerThreadId, 0x1);
 }
 
 /**
