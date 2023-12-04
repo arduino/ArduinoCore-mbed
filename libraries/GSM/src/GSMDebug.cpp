@@ -18,6 +18,7 @@
 */
 
 #include <GSM.h>
+#include <GSMDebug.h>
 
 #if GSM_DEBUG_ENABLE
 

@@ -18,6 +18,7 @@
 */
 
 #include "GSM.h"
+#include "GSMDebug.h"
 
 #include "mbed.h"
 #include "CellularLog.h"
