@@ -20,7 +20,7 @@ extern PinName digitalPinToPinName(pin_size_t P);
 // ----
 #define PINS_COUNT           (PINCOUNT_fn())
 #define NUM_DIGITAL_PINS     (103u)
-#define NUM_ANALOG_INPUTS    (14u)
+#define NUM_ANALOG_INPUTS    (10u) // these are analog pins that can also be used as digital
 #define NUM_ANALOG_OUTPUTS   (2u)
 
 // LEDs

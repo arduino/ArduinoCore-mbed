@@ -84,6 +84,7 @@ typedef struct _AnalogPinDescription AnalogPinDescription;
 extern PinDescription g_APinDescription[];
 extern AnalogPinDescription g_AAnalogPinDescription[];
 extern AnalogPinDescription g_AAnalogOutPinDescription[];
+extern AnalogPinDescription g_pureAAnalogPinDescription[];
 
 #ifdef ANALOG_CONFIG
 #include "hal/analogin_api.h"
