@@ -4,13 +4,8 @@
 
 #include "Arduino.h"
 
-#if !defined(CORE_CM4)
 #define SDRAM_END_ADDRESS			(0x60800000)
 #define SDRAM_START_ADDRESS			(0x60000000)
-#else
-#define SDRAM_END_ADDRESS			(0xC0800000)
-#define SDRAM_START_ADDRESS			(0xC0000000)
-#endif
 
 class SDRAMClass {
 public:
@@ -18,7 +13,7 @@ public:
 	int begin(uint32_t start_address = SDRAM_START_ADDRESS);
 	void* malloc(size_t size);
 	void free(void* ptr);
-	bool test(bool fast = false);
+	bool test(bool fast = false, Stream& _serial = Serial);
 private:
 	void mpu_config_start(void) {
 		__disable_irq();

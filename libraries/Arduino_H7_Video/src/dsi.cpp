@@ -51,6 +51,8 @@ int dsi_init(uint8_t bus, struct edid *edid, struct display_timing *dt) {
 	static const uint32_t DSI_PLLIDF = DSI_PLL_IN_DIV3;
 	static const uint32_t DSI_PLLODF = DSI_PLL_OUT_DIV1;
 	static const uint32_t DSI_TXEXCAPECLOCKDIV = 4;
+	#undef HSE_VALUE
+	#define HSE_VALUE 16000000
 #else
 	static const uint32_t DSI_PLLNDIV = 40;
 	static const uint32_t DSI_PLLIDF = DSI_PLL_IN_DIV2;

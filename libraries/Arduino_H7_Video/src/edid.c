@@ -47,9 +47,12 @@
 	#define EDIDDEBUG(format, ...) \
 			printk(BIOS_SPEW, "%s: " format, __func__, ##__VA_ARGS__)
 #else
-	#define EDIDERROR(format, ...) 
-	#define EDIDWARNING(format, ...)
-	#define EDIDDEBUG(format, ...)
+	#define EDIDERROR(format ...) \
+		do { } while (0)
+	#define EDIDWARNING(format ...) \
+		do { } while (0)
+	#define EDIDDEBUG(format ...) \
+		do { } while (0)
 #endif
 
 struct edid_context {
@@ -1034,7 +1037,7 @@ parse_extension(struct edid *out, unsigned char *x, struct edid_context *c)
 }
 
 static const struct {
-	int x, y, refresh;
+	unsigned int x, y, refresh;
 } established_timings[] = {
 	/* 0x23 bit 7 - 0 */
 	{720, 400, 70},
