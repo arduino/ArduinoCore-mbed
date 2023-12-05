@@ -8,7 +8,11 @@ int arduino::EthernetClass::begin(uint8_t *mac, unsigned long timeout, unsigned 
     _initializerCallback();
     if (eth_if == nullptr) return 0;
   }
+  eth_if->set_dhcp(true);
+  _begin(mac, timeout, responseTimeout);
+}
 
+int arduino::EthernetClass::_begin(uint8_t *mac, unsigned long timeout, unsigned long responseTimeout) {
   if (mac != nullptr) {
     eth_if->get_emac().set_hwaddr(mac);
   }
@@ -53,7 +57,7 @@ int arduino::EthernetClass::begin(uint8_t *mac, IPAddress ip, IPAddress dns, IPA
   eth_if->set_network(_ip, _netmask, _gateway);
   eth_if->add_dns_server(_dnsServer1, nullptr);
 
-  auto ret = begin(mac, timeout, responseTimeout);
+  auto ret = _begin(mac, timeout, responseTimeout);
   return ret;
 }
 
