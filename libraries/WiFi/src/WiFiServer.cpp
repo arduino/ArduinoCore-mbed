@@ -1,6 +1,10 @@
 #include "WiFiServer.h"
 
 arduino::WiFiClient arduino::WiFiServer::available(uint8_t* status) {
+  return accept(status);
+}
+
+arduino::WiFiClient arduino::WiFiServer::accept(uint8_t* status) {
   WiFiClient client;
   nsapi_error_t error;
   if (sock == nullptr) {
