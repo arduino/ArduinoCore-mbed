@@ -263,9 +263,15 @@ class SecureQSPIFBlockDevice: public QSPIFBlockDevice {
     }
     virtual int programSecure(void *buffer, mbed::bd_addr_t addr, mbed::bd_size_t size) {
       // like normal program with 42h
+    
+      // avoid warning: no return statement in function returning non-void [-Wreturn-type]
+      return 0;
     }
     virtual int eraseSecure(void *buffer, mbed::bd_addr_t addr, mbed::bd_size_t size) {
       // like normal program with 44h
+    
+      // avoid: warning: no return statement in function returning non-void [-Wreturn-type]
+      return 0;
     }
 };
 #endif
