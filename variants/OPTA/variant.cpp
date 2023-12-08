@@ -253,7 +253,7 @@ class SecureQSPIFBlockDevice: public QSPIFBlockDevice {
 
 #if 1
 // 256byte secure OTP area (on AT25SF128A)
-// TODO: could be imcomplete, to be tested
+// TODO: could be incomplete, to be tested
 class SecureQSPIFBlockDevice: public QSPIFBlockDevice {
   public:
     virtual int readSecure(void *buffer, mbed::bd_addr_t addr, mbed::bd_size_t size) {
