@@ -71,6 +71,7 @@ jobs:
               - name: ArduinoBLE
               - name: ArduinoGraphics
               - name: Arduino_GigaDisplayTouch
+              - name: emWin
             additional-sketch-paths: |
               - libraries/PDM
               - libraries/doom
@@ -142,6 +143,7 @@ jobs:
               - name: ArduinoGraphics
               - name: Arduino_GigaDisplayTouch
               - name: arducam_dvp
+              - name: emWin
             additional-sketch-paths: |
               - libraries/PDM
               - libraries/MCUboot
