@@ -6,31 +6,7 @@
  * Copyright(c) 2011 Google, Inc.
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * * Redistributions of source code must retain the above copyright
- *   notice, this list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright
- *   notice, this list of conditions and the following disclaimer in
- *   the documentation and/or other materials provided with the
- *   distribution.
- * * Neither the name Texas Instruments nor the names of its
- *   contributors may be used to endorse or promote products derived
- *   from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #ifndef REMOTEPROC_VIRTIO_H
@@ -39,48 +15,63 @@
 #include <metal/io.h>
 #include <metal/list.h>
 #include <openamp/virtio.h>
+#include <metal/cache.h>
 
 #if defined __cplusplus
 extern "C" {
 #endif
 
-/* define vdev notification funciton user should implement */
+/* maximum number of vring descriptors for a vdev limited by 16-bit data type */
+#define	RPROC_MAX_VRING_DESC	USHRT_MAX
+
+/* cache invalidation helpers for resource table */
+#ifdef VIRTIO_CACHED_RSC_TABLE
+#warning "VIRTIO_CACHED_RSC_TABLE is deprecated, please use VIRTIO_USE_DCACHE"
+#endif
+#if defined(VIRTIO_CACHED_RSC_TABLE) || defined(VIRTIO_USE_DCACHE)
+#define RSC_TABLE_FLUSH(x, s)		CACHE_FLUSH(x, s)
+#define RSC_TABLE_INVALIDATE(x, s)	CACHE_INVALIDATE(x, s)
+#else
+#define RSC_TABLE_FLUSH(x, s)		do { } while (0)
+#define RSC_TABLE_INVALIDATE(x, s)	do { } while (0)
+#endif /* VIRTIO_CACHED_RSC_TABLE || VIRTIO_USE_DCACHE */
+
+/* define vdev notification function user should implement */
 typedef int (*rpvdev_notify_func)(void *priv, uint32_t id);
 
-/**
- * struct remoteproc_virtio
- * @priv pointer to private data
- * @notifyid notification id
- * @vdev_rsc address of vdev resource
- * @vdev_rsc_io metal I/O region of vdev_info, can be NULL
- * @notify notification function
- * @vdev virtio device
- * @node list node
- */
+/** @brief Virtio structure for remoteproc instance */
 struct remoteproc_virtio {
+	/** Pointer to private data */
 	void *priv;
-	uint32_t notify_id;
+
+	/** Address of vdev resource */
 	void *vdev_rsc;
+
+	/** Metal I/O region of vdev_info, can be NULL */
 	struct metal_io_region *vdev_rsc_io;
+
+	/** Notification function */
 	rpvdev_notify_func notify;
+
+	/** Virtio device */
 	struct virtio_device vdev;
+
+	/** List node */
 	struct metal_list node;
 };
 
 /**
- * rproc_virtio_create_vdev
+ * @brief Create rproc virtio vdev
  *
- * Create rproc virtio vdev
+ * @param role		VIRTIO_DEV_DRIVER or VIRTIO_DEV_DEVICE
+ * @param notifyid	Virtio device notification id
+ * @param rsc		Pointer to the virtio device resource
+ * @param rsc_io	Pointer to the virtio device resource I/O region
+ * @param priv		Pointer to the private data
+ * @param notify	vdev and virtqueue notification function
+ * @param rst_cb	Reset virtio device callback
  *
- * @role: 0 - virtio master, 1 - virtio slave
- * @notifyid: virtio device notification id
- * @rsc: pointer to the virtio device resource
- * @rsc_io: pointer to the virtio device resource I/O region
- * @priv: pointer to the private data
- * @notify: vdev and virtqueue notification function
- * @rst_cb: reset virtio device callback
- *
- * return pointer to the created virtio device for success,
+ * @return pointer to the created virtio device for success,
  * NULL for failure.
  */
 struct virtio_device *
@@ -91,28 +82,24 @@ rproc_virtio_create_vdev(unsigned int role, unsigned int notifyid,
 			 virtio_dev_reset_cb rst_cb);
 
 /**
- * rproc_virtio_remove_vdev
+ * @brief Remove rproc virtio vdev
  *
- * Create rproc virtio vdev
- *
- * @vdev - pointer to the virtio device
+ * @param vdev	Pointer to the virtio device
  */
 void rproc_virtio_remove_vdev(struct virtio_device *vdev);
 
 /**
- * rproc_virtio_create_vring
+ * @brief Initialize rproc virtio vring
  *
- * Create rproc virtio vring
+ * @param vdev		Pointer to the virtio device
+ * @param index		vring index in the virtio device
+ * @param notifyid	remoteproc vring notification id
+ * @param va		vring virtual address
+ * @param io		Pointer to vring I/O region
+ * @param num_descs	Number of descriptors
+ * @param align		vring alignment
  *
- * @vdev: pointer to the virtio device
- * @index: vring index in the virtio device
- * @notifyid: remoteproc vring notification id
- * @va: vring virtual address
- * @io: pointer to vring I/O region
- * @num_desc: number of descriptors
- * @align: vring alignment
- *
- * return 0 for success, negative value for failure.
+ * @return 0 for success, negative value for failure.
  */
 int rproc_virtio_init_vring(struct virtio_device *vdev, unsigned int index,
 			    unsigned int notifyid, void *va,
@@ -120,26 +107,22 @@ int rproc_virtio_init_vring(struct virtio_device *vdev, unsigned int index,
 			    unsigned int num_descs, unsigned int align);
 
 /**
- * rproc_virtio_notified
+ * @brief remoteproc virtio is got notified
  *
- * remoteproc virtio is got notified
+ * @param vdev		Pointer to the virtio device
+ * @param notifyid	Notify id
  *
- * @vdev - pointer to the virtio device
- * @notifyid - notify id
- *
- * return 0 for successful, negative value for failure
+ * @return 0 for successful, negative value for failure
  */
 int rproc_virtio_notified(struct virtio_device *vdev, uint32_t notifyid);
 
 /**
- * rproc_virtio_wait_remote_ready
- *
- * Blocking function, waiting for the remote core is ready to start
+ * @brief Blocking function, waiting for the remote core is ready to start
  * communications.
  *
- * @vdev - pointer to the virtio device
+ * @param vdev	Pointer to the virtio device
  *
- * return true when remote processor is ready.
+ * @return true when remote processor is ready.
  */
 void rproc_virtio_wait_remote_ready(struct virtio_device *vdev);
 

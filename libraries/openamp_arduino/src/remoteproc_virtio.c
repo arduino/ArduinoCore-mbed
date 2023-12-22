@@ -6,53 +6,15 @@
  * Copyright(c) 2011 Google, Inc.
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * * Redistributions of source code must retain the above copyright
- *   notice, this list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright
- *   notice, this list of conditions and the following disclaimer in
- *   the documentation and/or other materials provided with the
- *   distribution.
- * * Neither the name Texas Instruments nor the names of its
- *   contributors may be used to endorse or promote products derived
- *   from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include <openamp/remoteproc.h>
 #include <openamp/remoteproc_virtio.h>
 #include <openamp/virtqueue.h>
+#include <metal/cpu.h>
 #include <metal/utilities.h>
 #include <metal/alloc.h>
-
-static inline struct virtqueue *virtqueue_allocate(unsigned int num_desc_extra)
-{
-	struct virtqueue *vqs;
-	uint32_t vq_size = sizeof(struct virtqueue) +
-		 num_desc_extra * sizeof(struct vq_desc_extra);
-
-	vqs = (struct virtqueue *)metal_allocate_memory(vq_size);
-
-	if (vqs) {
-		memset(vqs, 0x00, vq_size);
-	}
-
-	return vqs;
-}
 
 static void rproc_virtio_virtqueue_notify(struct virtqueue *vq)
 {
@@ -63,7 +25,7 @@ static void rproc_virtio_virtqueue_notify(struct virtqueue *vq)
 
 	vdev = vq->vq_dev;
 	rpvdev = metal_container_of(vdev, struct remoteproc_virtio, vdev);
-	metal_assert(vq_id <= vdev->vrings_num);
+	metal_assert(vq_id < vdev->vrings_num);
 	vring_info = &vdev->vrings_info[vq_id];
 	rpvdev->notify(rpvdev->priv, vring_info->notifyid);
 }
@@ -78,12 +40,13 @@ static unsigned char rproc_virtio_get_status(struct virtio_device *vdev)
 	rpvdev = metal_container_of(vdev, struct remoteproc_virtio, vdev);
 	vdev_rsc = rpvdev->vdev_rsc;
 	io = rpvdev->vdev_rsc_io;
+	RSC_TABLE_INVALIDATE(vdev_rsc, sizeof(struct fw_rsc_vdev));
 	status = metal_io_read8(io,
 				metal_io_virt_to_offset(io, &vdev_rsc->status));
 	return status;
 }
 
-#ifndef VIRTIO_SLAVE_ONLY
+#ifndef VIRTIO_DEVICE_ONLY
 static void rproc_virtio_set_status(struct virtio_device *vdev,
 				    unsigned char status)
 {
@@ -97,11 +60,12 @@ static void rproc_virtio_set_status(struct virtio_device *vdev,
 	metal_io_write8(io,
 			metal_io_virt_to_offset(io, &vdev_rsc->status),
 			status);
-	rpvdev->notify(rpvdev->priv, vdev->index);
+	RSC_TABLE_FLUSH(vdev_rsc, sizeof(struct fw_rsc_vdev));
+	rpvdev->notify(rpvdev->priv, vdev->notifyid);
 }
 #endif
 
-static uint32_t rproc_virtio_get_features(struct virtio_device *vdev)
+static uint32_t rproc_virtio_get_dfeatures(struct virtio_device *vdev)
 {
 	struct remoteproc_virtio *rpvdev;
 	struct fw_rsc_vdev *vdev_rsc;
@@ -111,14 +75,33 @@ static uint32_t rproc_virtio_get_features(struct virtio_device *vdev)
 	rpvdev = metal_container_of(vdev, struct remoteproc_virtio, vdev);
 	vdev_rsc = rpvdev->vdev_rsc;
 	io = rpvdev->vdev_rsc_io;
-	/* TODO: shall we get features based on the role ? */
+	RSC_TABLE_INVALIDATE(vdev_rsc, sizeof(struct fw_rsc_vdev));
 	features = metal_io_read32(io,
 			metal_io_virt_to_offset(io, &vdev_rsc->dfeatures));
 
 	return features;
 }
 
-#ifndef VIRTIO_SLAVE_ONLY
+static uint32_t rproc_virtio_get_features(struct virtio_device *vdev)
+{
+	struct remoteproc_virtio *rpvdev;
+	struct fw_rsc_vdev *vdev_rsc;
+	struct metal_io_region *io;
+	uint32_t gfeatures;
+	uint32_t dfeatures;
+
+	rpvdev = metal_container_of(vdev, struct remoteproc_virtio, vdev);
+	vdev_rsc = rpvdev->vdev_rsc;
+	io = rpvdev->vdev_rsc_io;
+	RSC_TABLE_INVALIDATE(vdev_rsc, sizeof(struct fw_rsc_vdev));
+	gfeatures = metal_io_read32(io,
+			metal_io_virt_to_offset(io, &vdev_rsc->gfeatures));
+	dfeatures = rproc_virtio_get_dfeatures(vdev);
+
+	return dfeatures & gfeatures;
+}
+
+#ifndef VIRTIO_DEVICE_ONLY
 static void rproc_virtio_set_features(struct virtio_device *vdev,
 				      uint32_t features)
 {
@@ -129,64 +112,90 @@ static void rproc_virtio_set_features(struct virtio_device *vdev,
 	rpvdev = metal_container_of(vdev, struct remoteproc_virtio, vdev);
 	vdev_rsc = rpvdev->vdev_rsc;
 	io = rpvdev->vdev_rsc_io;
-	/* TODO: shall we set features based on the role ? */
 	metal_io_write32(io,
-			 metal_io_virt_to_offset(io, &vdev_rsc->dfeatures),
+			 metal_io_virt_to_offset(io, &vdev_rsc->gfeatures),
 			 features);
-	rpvdev->notify(rpvdev->priv, vdev->index);
+	RSC_TABLE_FLUSH(vdev_rsc, sizeof(struct fw_rsc_vdev));
+	rpvdev->notify(rpvdev->priv, vdev->notifyid);
 }
-#endif
 
 static uint32_t rproc_virtio_negotiate_features(struct virtio_device *vdev,
 						uint32_t features)
 {
-	(void)vdev;
-	(void)features;
+	uint32_t dfeatures = rproc_virtio_get_dfeatures(vdev);
+
+	rproc_virtio_set_features(vdev, dfeatures & features);
 
 	return 0;
 }
+#endif
 
 static void rproc_virtio_read_config(struct virtio_device *vdev,
 				     uint32_t offset, void *dst, int length)
 {
-	(void)vdev;
-	(void)offset;
-	(void)dst;
-	(void)length;
+	struct remoteproc_virtio *rpvdev;
+	struct fw_rsc_vdev *vdev_rsc;
+	struct metal_io_region *io;
+	char *config;
+
+	rpvdev = metal_container_of(vdev, struct remoteproc_virtio, vdev);
+	vdev_rsc = rpvdev->vdev_rsc;
+	config = (char *)(&vdev_rsc->vring[vdev->vrings_num]);
+	io = rpvdev->vdev_rsc_io;
+
+	if (offset + length <= vdev_rsc->config_len) {
+		RSC_TABLE_INVALIDATE(config + offset, length);
+		metal_io_block_read(io,
+				metal_io_virt_to_offset(io, config + offset),
+				dst, length);
+	}
 }
 
-#ifndef VIRTIO_SLAVE_ONLY
+#ifndef VIRTIO_DEVICE_ONLY
 static void rproc_virtio_write_config(struct virtio_device *vdev,
 				      uint32_t offset, void *src, int length)
 {
-	(void)vdev;
-	(void)offset;
-	(void)src;
-	(void)length;
+	struct remoteproc_virtio *rpvdev;
+	struct fw_rsc_vdev *vdev_rsc;
+	struct metal_io_region *io;
+	char *config;
+
+	rpvdev = metal_container_of(vdev, struct remoteproc_virtio, vdev);
+	vdev_rsc = rpvdev->vdev_rsc;
+	config = (char *)(&vdev_rsc->vring[vdev->vrings_num]);
+	io = rpvdev->vdev_rsc_io;
+
+	if (offset + length <= vdev_rsc->config_len) {
+		metal_io_block_write(io,
+				metal_io_virt_to_offset(io, config + offset),
+				src, length);
+		RSC_TABLE_FLUSH(config + offset, length);
+		rpvdev->notify(rpvdev->priv, vdev->notifyid);
+	}
 }
 
 static void rproc_virtio_reset_device(struct virtio_device *vdev)
 {
-	if (vdev->role == VIRTIO_DEV_MASTER)
+	if (vdev->role == VIRTIO_DEV_DRIVER)
 		rproc_virtio_set_status(vdev,
 					VIRTIO_CONFIG_STATUS_NEEDS_RESET);
 }
 #endif
 
-const struct virtio_dispatch remoteproc_virtio_dispatch_funcs = {
-	.get_status =  rproc_virtio_get_status,
+static const struct virtio_dispatch remoteproc_virtio_dispatch_funcs = {
+	.get_status = rproc_virtio_get_status,
 	.get_features = rproc_virtio_get_features,
 	.read_config = rproc_virtio_read_config,
 	.notify = rproc_virtio_virtqueue_notify,
-	.negotiate_features = rproc_virtio_negotiate_features,
-#ifndef VIRTIO_SLAVE_ONLY
+#ifndef VIRTIO_DEVICE_ONLY
 	/*
 	 * We suppose here that the vdev is in a shared memory so that can
-	 * be access only by one core: the master. In this case salve core has
+	 * be access only by one core: the host. In this case salve core has
 	 * only read access right.
 	 */
 	.set_status = rproc_virtio_set_status,
 	.set_features = rproc_virtio_set_features,
+	.negotiate_features = rproc_virtio_negotiate_features,
 	.write_config = rproc_virtio_write_config,
 	.reset_device = rproc_virtio_reset_device,
 #endif
@@ -207,9 +216,8 @@ rproc_virtio_create_vdev(unsigned int role, unsigned int notifyid,
 	unsigned int i;
 
 	rpvdev = metal_allocate_memory(sizeof(*rpvdev));
-	if (!rpvdev) {
+	if (!rpvdev)
 		return NULL;
-	}
 	vrings_info = metal_allocate_memory(sizeof(*vrings_info) * num_vrings);
 	if (!vrings_info)
 		goto err0;
@@ -219,21 +227,23 @@ rproc_virtio_create_vdev(unsigned int role, unsigned int notifyid,
 
 	for (i = 0; i < num_vrings; i++) {
 		struct virtqueue *vq;
+#ifndef VIRTIO_DEVICE_ONLY
 		struct fw_rsc_vdev_vring *vring_rsc;
+#endif
 		unsigned int num_extra_desc = 0;
 
+#ifndef VIRTIO_DEVICE_ONLY
 		vring_rsc = &vdev_rsc->vring[i];
-		if (role == VIRTIO_DEV_MASTER) {
+		if (role == VIRTIO_DEV_DRIVER) {
 			num_extra_desc = vring_rsc->num;
 		}
+#endif
 		vq = virtqueue_allocate(num_extra_desc);
 		if (!vq)
 			goto err1;
 		vrings_info[i].vq = vq;
 	}
 
-	/* FIXME commended as seems not nedded, already stored in vdev */
-	//rpvdev->notifyid = notifyid;
 	rpvdev->notify = notify;
 	rpvdev->priv = priv;
 	vdev->vrings_info = vrings_info;
@@ -243,12 +253,19 @@ rproc_virtio_create_vdev(unsigned int role, unsigned int notifyid,
 	rpvdev->vdev_rsc = vdev_rsc;
 	rpvdev->vdev_rsc_io = rsc_io;
 
-	vdev->index = notifyid;
+	vdev->notifyid = notifyid;
 	vdev->role = role;
 	vdev->reset_cb = rst_cb;
 	vdev->vrings_num = num_vrings;
 	vdev->func = &remoteproc_virtio_dispatch_funcs;
-	/* TODO: Shall we set features here ? */
+
+#ifndef VIRTIO_DEVICE_ONLY
+	if (role == VIRTIO_DEV_DRIVER) {
+		uint32_t dfeatures = rproc_virtio_get_dfeatures(vdev);
+		/* Assume the virtio driver support all remote features */
+		rproc_virtio_negotiate_features(vdev, dfeatures);
+	}
+#endif
 
 	return &rpvdev->vdev;
 
@@ -278,7 +295,8 @@ void rproc_virtio_remove_vdev(struct virtio_device *vdev)
 		if (vq)
 			metal_free_memory(vq);
 	}
-	metal_free_memory(vdev->vrings_info);
+	if (vdev->vrings_info)
+		metal_free_memory(vdev->vrings_info);
 	metal_free_memory(rpvdev);
 }
 
@@ -291,7 +309,7 @@ int rproc_virtio_init_vring(struct virtio_device *vdev, unsigned int index,
 	unsigned int num_vrings;
 
 	num_vrings = vdev->vrings_num;
-	if (index >= num_vrings)
+	if ((index >= num_vrings) || (num_descs > RPROC_MAX_VRING_DESC))
 		return -RPROC_EINVAL;
 	vring_info = &vdev->vrings_info[index];
 	vring_info->io = io;
@@ -310,9 +328,9 @@ int rproc_virtio_notified(struct virtio_device *vdev, uint32_t notifyid)
 	struct virtqueue *vq;
 
 	if (!vdev)
-		return -EINVAL;
+		return -RPROC_EINVAL;
 	/* We do nothing for vdev notification in this implementation */
-	if (vdev->index == notifyid)
+	if (vdev->notifyid == notifyid)
 		return 0;
 	num_vrings = vdev->vrings_num;
 	for (i = 0; i < num_vrings; i++) {
@@ -330,17 +348,19 @@ void rproc_virtio_wait_remote_ready(struct virtio_device *vdev)
 {
 	uint8_t status;
 
+#ifndef VIRTIO_DEVICE_ONLY
 	/*
-	 * No status available for slave. As Master has not to wait
-	 * slave action, we can return. Behavior should be updated
-	 * in future if a slave status is added.
+	 * No status available for remote. As virtio driver has not to wait
+	 * remote action, we can return. Behavior should be updated
+	 * in future if a remote status is added.
 	 */
-	if (vdev->role == VIRTIO_DEV_MASTER)
+	if (vdev->role == VIRTIO_DEV_DRIVER)
 		return;
-
+#endif
 	while (1) {
 		status = rproc_virtio_get_status(vdev);
 		if (status & VIRTIO_CONFIG_STATUS_DRIVER_OK)
 			return;
+		metal_cpu_yield();
 	}
 }

@@ -8,10 +8,9 @@
 #ifndef OPEN_AMP_H_
 #define OPEN_AMP_H_
 
-#include "rpmsg.h"
-#include "rpmsg_virtio.h"
-#include "remoteproc.h"
-#include "remoteproc_virtio.h"
-
+#include <openamp/rpmsg.h>
+#include <openamp/rpmsg_virtio.h>
+#include <openamp/remoteproc.h>
+#include <openamp/remoteproc_virtio.h>
 
 #endif				/* OPEN_AMP_H_ */
