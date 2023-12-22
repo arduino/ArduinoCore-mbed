@@ -26,7 +26,7 @@ class client {
       auto buffer = new RPCLIB_MSGPACK::sbuffer;
       RPCLIB_MSGPACK::pack(*buffer, call_obj);
 
-      send_msgpack(buffer);
+      write(buffer);
 
       auto e = osSignalWait(0, timeout);
       delete buffer;
@@ -58,7 +58,7 @@ class client {
       auto buffer = new RPCLIB_MSGPACK::sbuffer;
       RPCLIB_MSGPACK::pack(*buffer, call_obj);
 
-      send_msgpack(buffer);
+      write(buffer);
       delete buffer;
     }
 
@@ -81,7 +81,7 @@ class client {
   private:
     enum class request_type { call = 0, notification = 2 };;
 
-    void send_msgpack(RPCLIB_MSGPACK::sbuffer *buffer);
+    void write(RPCLIB_MSGPACK::sbuffer *buffer);
     void getResult(RPCLIB_MSGPACK::object_handle& res);
 };
 }
