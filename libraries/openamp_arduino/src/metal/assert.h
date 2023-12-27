@@ -12,8 +12,6 @@
 #ifndef __METAL_ASSERT__H__
 #define __METAL_ASSERT__H__
 
-//#include <mbed_assert.h>
-//#include <mbed_error.h>
 #include <metal/system/generic/assert.h>
 
 /**

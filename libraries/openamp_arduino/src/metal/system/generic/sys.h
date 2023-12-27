@@ -25,8 +25,6 @@
 #include <stdarg.h>
 #include <string.h>
 
-#include "./cortexm/sys.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif

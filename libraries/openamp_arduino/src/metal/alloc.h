@@ -12,12 +12,15 @@
 #ifndef __METAL_ALLOC__H__
 #define __METAL_ALLOC__H__
 
+#include <metal/system/generic/alloc.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /** \defgroup Memory Allocation Interfaces
- *  @{ */
+ *  @{
+ */
 
 /**
  * @brief      allocate requested memory size
@@ -26,16 +29,20 @@ extern "C" {
  * @param[in]  size        size in byte of requested memory
  * @return     memory pointer, or 0 if it failed to allocate
  */
-static inline void *metal_allocate_memory(unsigned int size);
+static inline void *metal_allocate_memory(unsigned int size)
+{
+	return __metal_allocate_memory(size);
+}
 
 /**
  * @brief      free the memory previously allocated
  *
  * @param[in]  ptr       pointer to memory
  */
-static inline void metal_free_memory(void *ptr);
-
-#include <metal/system/generic/alloc.h>
+static inline void metal_free_memory(void *ptr)
+{
+	__metal_free_memory(ptr);
+}
 
 /** @} */
 

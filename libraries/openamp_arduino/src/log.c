@@ -10,15 +10,13 @@
 #include <metal/log.h>
 #include <metal/sys.h>
 
-#define DEFAULT_LOGGER_ON
-
 void metal_default_log_handler(enum metal_log_level level,
 			       const char *format, ...)
 {
 #ifdef DEFAULT_LOGGER_ON
 	char msg[1024];
 	va_list args;
-	static const char *level_strs[] = {
+	static const char * const level_strs[] = {
 		"metal: emergency: ",
 		"metal: alert:     ",
 		"metal: critical:  ",
@@ -36,7 +34,7 @@ void metal_default_log_handler(enum metal_log_level level,
 	if (level <= METAL_LOG_EMERGENCY || level > METAL_LOG_DEBUG)
 		level = METAL_LOG_EMERGENCY;
 
-	printf("%s%s", level_strs[level], msg);
+	fprintf(stderr, "%s%s", level_strs[level], msg);
 #else
 	(void)level;
 	(void)format;

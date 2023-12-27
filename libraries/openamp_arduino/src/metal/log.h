@@ -17,7 +17,8 @@ extern "C" {
 #endif
 
 /** \defgroup logging Library Logging Interfaces
- *  @{ */
+ *  @{
+ */
 
 /** Log message priority levels for libmetal. */
 enum metal_log_level {
@@ -62,7 +63,7 @@ extern enum metal_log_level metal_get_log_level(void);
 
 /**
  * @brief	Default libmetal log handler.  This handler prints libmetal log
- *		mesages to stderr.
+ *		messages to stderr.
  * @param[in]	level	log message level.
  * @param[in]	format	log message format string.
  * @return	0 on success, or -errno on failure.
@@ -70,17 +71,39 @@ extern enum metal_log_level metal_get_log_level(void);
 extern void metal_default_log_handler(enum metal_log_level level,
 				      const char *format, ...);
 
+/**
+ * @internal
+ *
+ * @brief	used by the metal_log() macro to update the format string
+ *
+ * If ML_FUNC_LINE is defined this macro generates a unified format
+ * string for metal_log() and its convenience metal_*() macros, i.e. it
+ * adds function-name:line-number prefix to all log messages.
+ *
+ * @param[in]	fmt	format string passed from the metal_log() macro
+ */
+#if defined(ML_FUNC_LINE)
+#define metal_fmt(fmt) "%s:%u " fmt, __func__, __LINE__
+#else	/* ML_FUNC_LINE */
+#define metal_fmt(fmt) fmt
+#endif	/* ML_FUNC_LINE */
 
 /**
- * Emit a log message if the log level permits.
+ * @brief	Emit a log message if the log level permits.
  *
  * @param	level	Log level.
- * @param	...	Format string and arguments.
+ * @param	fmt	Format string.
+ * @param	args... Variable number of arguments.
  */
-#define metal_log(level, ...)						       \
-	((level <= _metal.common.log_level && _metal.common.log_handler) \
-	       ? (void)_metal.common.log_handler(level, __VA_ARGS__)	       \
-	       : (void)0)
+#define metal_log(level, fmt, args...) ({				   \
+	if (_metal.common.log_handler && level <= _metal.common.log_level) \
+		_metal.common.log_handler(level, metal_fmt(fmt), ##args);  \
+})
+
+#define metal_err(fmt, args...) metal_log(METAL_LOG_ERROR, fmt, ##args)
+#define metal_warn(fmt, args...) metal_log(METAL_LOG_WARNING, fmt, ##args)
+#define metal_info(fmt, args...) metal_log(METAL_LOG_INFO, fmt, ##args)
+#define metal_dbg(fmt, args...) metal_log(METAL_LOG_DEBUG, fmt, ##args)
 
 /** @} */
 
