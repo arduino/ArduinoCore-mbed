@@ -3,22 +3,18 @@
 
 void setup() {
   Serial.begin(115200);
+  while (!Serial) {
+  }
   RPC.begin();
 }
 
 void loop() {
-  String data = "";
-  while (RPC.available()) {
-    data += (char)RPC.read();
-  }
-  if (data != "") {
-    Serial.write(data.c_str(), data.length());
-  }
-  data = "";
-  while (Serial.available()) {
-    data += (char)Serial.read();
-  }
-  if (data != "") {
-    RPC.write(data.c_str(), data.length());
+  if (HAL_GetCurrentCPUID() == CM4_CPUID) {
+    RPC.println("Printed from M4 core");
+    delay(1000);
+  } else {
+    while (RPC.available()) {
+      Serial.print((char) RPC.read());
+    }
   }
 }
