@@ -59,6 +59,7 @@ void setup() {
     #ifdef CORE_CM4
     RPC.bind("set_buffer_size", set_buffer_size);    
     #else
+    delay(100);
     auto ret = RPC.call("set_buffer_size", data_buf_size).as<size_t>();
     #endif
         

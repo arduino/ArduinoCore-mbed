@@ -43,7 +43,7 @@ void loop() {
     Serial.print("=> ");
     Serial.write(buf, sizeof(buf));
     Serial.println();
-    RPC.write(&buf[0], sizeof(buf), false, true);
+    RPC.write(&buf[0], sizeof(buf));
     delay(100);
     #endif
 }
