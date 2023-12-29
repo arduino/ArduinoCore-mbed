@@ -1,6 +1,43 @@
 const ArduinoUSBVendorId = 0x2341;
 const UserActionAbortError = 8;
 
+class BytesWaitTransformer {
+    constructor(waitBytes) {
+      this.waitBytes = waitBytes;
+      this.buffer = new Uint8Array(0);
+      this.controller = undefined;
+    }
+  
+    async transform(chunk, controller) {
+      this.controller = controller;
+  
+      // Concatenate incoming chunk with existing buffer
+      this.buffer = new Uint8Array([...this.buffer, ...chunk]);
+  
+      while (this.buffer.length >= this.waitBytes) {
+        // Extract the required number of bytes
+        const bytesToProcess = this.buffer.slice(0, this.waitBytes);
+  
+        // Remove processed bytes from the buffer
+        this.buffer = this.buffer.slice(this.waitBytes);
+  
+        // Notify the controller that bytes have been processed
+        controller.enqueue(bytesToProcess);
+      }
+    }
+  
+    flush(controller) {
+      if (this.buffer.length > 0) {
+        // Handle remaining bytes (if any) when the stream is closed
+        const remainingBytes = this.buffer.slice();
+        console.log("Remaining bytes:", remainingBytes);
+  
+        // Notify the controller that remaining bytes have been processed
+        controller.enqueue(remainingBytes);
+      }
+    }
+  }
+
 /**
  * Handles the connection between the browser and the Arduino board via Web Serial.
  */
@@ -120,61 +157,42 @@ class SerialConnectionHandler {
      * If the timeout is reached, the reader will be canceled and the read lock will be released.
      */
     async readBytes(numBytes, timeout = null) {
-        if (this.currentPort.readable.locked) {
+        if(!this.currentPort) return null;
+        if(this.currentPort.readable.locked) {
             console.log('🔒 Stream is already locked. Ignoring request...');
             return null;
         }
 
-        const bytesRead = new Uint8Array(numBytes);
-        let bytesReadIdx = 0;
-        let keepReading = true;
+        const transformer = new BytesWaitTransformer(numBytes);
+        const transformStream = new TransformStream(transformer);
+        const pipedStream = this.currentPort.readable.pipeThrough(transformStream);
+        const reader = pipedStream.getReader();
+        this.currentReader = reader;
+        let timeoutID = null;
 
-        // As long as the errors are non-fatal, a new ReadableStream is created automatically and hence port.readable is non-null. 
-        // If a fatal error occurs, such as the serial device being removed, then port.readable becomes null.
-
-        while (this.currentPort?.readable && keepReading) {
-            const reader = this.currentPort.readable.getReader();
-            this.currentReader = reader;
-            let timeoutID = null;
-            // let count = 0;
-
-            try {
-                while (bytesReadIdx < numBytes) {
-                    if (timeout) {
-                        timeoutID = setTimeout(() => {
-                            console.log('⌛️ Timeout occurred while reading.');
-                            if (this.currentPort?.readable) reader?.cancel();
-                        }, timeout);
-                    }
-
-                    const { value, done } = await reader.read();
-                    if (timeoutID) clearTimeout(timeoutID);
-
-                    if (value) {
-                        for (const byte of value) {
-                            bytesRead[bytesReadIdx++] = byte;
-                            if (bytesReadIdx >= numBytes) break;
-                        }
-                        // count += value.byteLength;
-                        // console.log(`Read ${value.byteLength} (Total: ${count}) out of ${numBytes} bytes.}`);
-                    }
-
-                    if (done) {
-                        console.log('🚫 Reader has been canceled');
-                        break;
-                    }
-                }
-
-            } catch (error) {
-                console.error('💣 Error occurred while reading: ' + error.message);
-            } finally {
-                keepReading = false;
-                // console.log('🔓 Releasing reader lock...');
-                reader?.releaseLock();
-                this.currentReader = null;
+        try {
+            if (timeout) {
+                timeoutID = setTimeout(() => {
+                    console.log('⌛️ Timeout occurred while reading.');
+                    if (this.currentPort?.readable) reader?.cancel();
+                }, timeout);
             }
+            const { value, done } = await reader.read();
+            if (timeoutID) clearTimeout(timeoutID);
+
+            if (done) {
+                console.log('🚫 Reader has been canceled');
+                return null;
+            }
+            return value;
+        } catch (error) {
+            console.error('💣 Error occurred while reading: ' + error.message);
+        } finally {
+            // console.log('🔓 Releasing reader lock...');
+            await reader?.cancel(); // Discards any enqueued data
+            reader?.releaseLock();
+            this.currentReader = null;
         }
-        return bytesRead;
     }
 
     async sendData(byteArray) {
