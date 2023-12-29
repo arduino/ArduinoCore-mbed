@@ -5,12 +5,9 @@ const saveImageButton = document.getElementById('save-image');
 const canvas = document.getElementById('bitmapCanvas');
 const ctx = canvas.getContext('2d');
 
-// TODO check for signals 
-// TODO implement transformer
-// TODO get image format from device
-// SEE: https://developer.chrome.com/articles/serial/#transforming-streams
-// SEE: https://developer.chrome.com/articles/serial/#signals
-
+// Check the following links for more information on the Web Serial API:
+// https://developer.chrome.com/articles/serial/
+// https://wicg.github.io/serial/
 
 // Set the buffer size to the total bytes. This allows to read the entire bitmap in one go.
 const bufferSize = 2 * 1024 * 1024; // Max buffer size is 16MB
