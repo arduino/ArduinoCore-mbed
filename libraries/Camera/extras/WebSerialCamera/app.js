@@ -13,14 +13,15 @@ const ctx = canvas.getContext('2d');
 
 
 // Set the buffer size to the total bytes. This allows to read the entire bitmap in one go.
-const bufferSize = 1024 * 1024;//Math.min(totalBytes, 16 * 1024 * 1024); // Max buffer size is 16MB
+const bufferSize = 2 * 1024 * 1024; // Max buffer size is 16MB
 const flowControl = 'hardware';
 const baudRate = 115200; // Adjust this value based on your device's baud rate
 const dataBits = 8; // Adjust this value based on your device's data bits
 const stopBits = 2; // Adjust this value based on your device's stop bits
+const parityBit = 'even'; // Adjust this value based on your device's parity bit
 
 const imageDataProcessor = new ImageDataProcessor(ctx);
-const connectionHandler = new SerialConnectionHandler(baudRate, dataBits, stopBits, "even", "hardware", bufferSize);
+const connectionHandler = new SerialConnectionHandler(baudRate, dataBits, stopBits, parityBit, flowControl, bufferSize);
 
 connectionHandler.onConnect = async () => {
   connectButton.textContent = 'Disconnect';
