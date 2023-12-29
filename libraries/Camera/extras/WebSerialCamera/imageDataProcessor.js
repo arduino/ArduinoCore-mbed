@@ -1,3 +1,6 @@
+// This could be turned into a transform stream.
+// See example here: https://github.com/mdn/dom-examples/blob/main/streams/png-transform-stream/png-transform-stream.js
+
 class ImageDataProcessor {
     pixelFormatInfo = {
       "RGB565": {

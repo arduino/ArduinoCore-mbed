@@ -52,6 +52,7 @@ class SerialConnectionHandler {
         this.timeout = timeout;
         this.currentPort = null;
         this.currentReader = null;
+        this.readableStreamClosed = null;
         this.registerEvents();
     }
 
@@ -118,6 +119,7 @@ class SerialConnectionHandler {
             const port = this.currentPort;
             this.currentPort = null;
             await this.currentReader?.cancel();
+            await this.readableStreamClosed.catch(() => { }); // Ignores the error
             await port.close();
             console.log('🔌 Disconnected from serial port.');
             if(this.onDisconnect) this.onDisconnect();
@@ -163,10 +165,12 @@ class SerialConnectionHandler {
             return null;
         }
 
-        const transformer = new BytesWaitTransformer(numBytes);
-        const transformStream = new TransformStream(transformer);
-        const pipedStream = this.currentPort.readable.pipeThrough(transformStream);
-        const reader = pipedStream.getReader();
+        const transformStream = new TransformStream(new BytesWaitTransformer(numBytes));
+        // pipeThrough() cannot be used because we need a promise that resolves when the stream is closed
+        // to be able to close the port. pipeTo() returns such a promise.
+        // SEE: https://stackoverflow.com/questions/71262432/how-can-i-close-a-web-serial-port-that-ive-piped-through-a-transformstream
+        this.readableStreamClosed = this.currentPort.readable.pipeTo(transformStream.writable);
+        const reader = transformStream.readable.getReader();
         this.currentReader = reader;
         let timeoutID = null;
 
@@ -190,6 +194,7 @@ class SerialConnectionHandler {
         } finally {
             // console.log('🔓 Releasing reader lock...');
             await reader?.cancel(); // Discards any enqueued data
+            await this.readableStreamClosed.catch(() => { }); // Ignores the error
             reader?.releaseLock();
             this.currentReader = null;
         }
