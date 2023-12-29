@@ -1,9 +1,21 @@
+/**
+ * @fileoverview This file contains the configuration for the camera.
+ */
+
+/**
+ * The available camera (color) modes.
+ * The Arduino sketch uses the same values to communicate which mode should be used.
+ **/
 const CAMERA_MODES = {
     0: "GRAYSCALE",
     1: "BAYER",
     2: "RGB565"
 };
 
+/**
+ * The available camera resolutions.
+ * The Arduino sketch uses the same values to communicate which resolution should be used.
+ */
 const CAMERA_RESOLUTIONS = {
     0: {
         "name": "QQVGA",
