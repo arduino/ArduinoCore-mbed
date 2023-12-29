@@ -25,8 +25,16 @@ const connectionHandler = new SerialConnectionHandler(baudRate, dataBits, stopBi
 connectionHandler.onConnect = async () => {
   connectButton.textContent = 'Disconnect';
   cameraConfig = await connectionHandler.getConfig();
+  if(!cameraConfig){
+    console.error('🚫 Could not read camera configuration. Aborting...');
+    return;
+  }
   const imageMode = CAMERA_MODES[cameraConfig[0]];
   const imageResolution = CAMERA_RESOLUTIONS[cameraConfig[1]];
+  if(!imageMode || !imageResolution){
+    console.error(`🚫 Invalid camera configuration: ${cameraConfig[0]}, ${cameraConfig[1]}. Aborting...`);
+    return;
+  }
   imageDataProcessor.setMode(imageMode);
   imageDataProcessor.setResolution(imageResolution.width, imageResolution.height);
   renderStream();
