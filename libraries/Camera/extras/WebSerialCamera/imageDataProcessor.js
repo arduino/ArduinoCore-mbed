@@ -1,6 +1,8 @@
-// This could be turned into a transform stream.
-// See example here: https://github.com/mdn/dom-examples/blob/main/streams/png-transform-stream/png-transform-stream.js
-
+/**
+ * Represents an image data processor that converts raw image data to a specified pixel format.
+ * This could be turned into a transform stream and be used in the serial connection handler.
+ * See example here: https://github.com/mdn/dom-examples/blob/main/streams/png-transform-stream/png-transform-stream.js
+ */
 class ImageDataProcessor {
     pixelFormatInfo = {
       "RGB565": {
@@ -16,11 +18,19 @@ class ImageDataProcessor {
         "bytesPerPixel": 3
       },
       "BAYER": {
-        "convert": null, // TODO
+        "convert": () => {throw new Error("BAYER conversion not implemented.")},
         "bytesPerPixel": 1
       }
     };
 
+    /**
+     * Creates a new instance of the imageDataProcessor class.
+     * @param {CanvasRenderingContext2D} context - The 2D rendering context of the canvas.
+     * @param {string|null} mode - The image mode of the image data processor. (Optional)
+     * Possible values: RGB565, GRAYSCALE, RGB888, BAYER
+     * @param {number|null} width - The width of the image data processor. (Optional)
+     * @param {number|null} height - The height of the image data processor. (Optional)
+     */
     constructor(context, mode = null, width = null, height = null) {
       this.context = context;
       this.canvas = context.canvas;
@@ -29,24 +39,50 @@ class ImageDataProcessor {
       if(width && height) this.setResolution(width, height);
     }
   
+    /**
+     * Sets the image mode of the image data processor.
+     * Possible values: RGB565, GRAYSCALE, RGB888, BAYER
+     * 
+     * @param {string} mode - The image mode of the image data processor.
+     */
     setMode(mode) {
         this.mode = mode;
         this.bytesPerPixel = this.pixelFormatInfo[mode].bytesPerPixel;
     }
 
+    /**
+     * Sets the resolution of the target image.
+     * @param {number} width - The width of the resolution.
+     * @param {number} height - The height of the resolution.
+     */
     setResolution(width, height) {
         this.width = width;
         this.height = height;
     }
 
+    /**
+     * Calculates the total number of bytes in the image data 
+     * based on the current image mode and resolution.
+     * 
+     * @returns {number} The total number of bytes.
+     */
     getTotalBytes() {
         return this.width * this.height * this.bytesPerPixel;
     }
 
+    /**
+     * Checks if the image data processor is configured.
+     * This is true if the image mode and resolution are set.
+     * @returns {boolean} True if the image data processor is configured, false otherwise.
+     */
     isConfigured() {
         return this.mode && this.width && this.height;
     }
 
+    /**
+     * Resets the state of the imageDataProcessor.
+     * This resets the image mode, resolution, and bytes per pixel.
+     */
     reset() {
         this.mode = null;
         this.bytesPerPixel = null;
@@ -54,6 +90,11 @@ class ImageDataProcessor {
         this.height = null;
     }
   
+    /**
+     * Converts a pixel value from RGB565 format to RGB888 format.
+     * @param {number} pixelValue - The pixel value in RGB565 format.
+     * @returns {number[]} - The RGB888 pixel value as an array of three values [R, G, B].
+     */
     convertRGB565ToRGB888(pixelValue) {
         // RGB565
         let r = (pixelValue >> (6 + 5)) & 0x1F;
@@ -66,16 +107,32 @@ class ImageDataProcessor {
         return [r, g, b];
     }
     
+    /**
+     * Converts a grayscale pixel value to RGB888 format.
+     * @param {number} pixelValue - The grayscale pixel value.
+     * @returns {number[]} - The RGB888 pixel value as an array of three values [R, G, B].
+     */
     convertGrayScaleToRGB888(pixelValue) {
         return [pixelValue, pixelValue, pixelValue];
     }
     
+    /**
+     * Converts a pixel value to RGB888 format.
+     * @param {number} pixelValue - The pixel value to convert.
+     * @returns {number[]} - The RGB888 pixel value as an array of three values [R, G, B].
+     */
     convertToRGB888(pixelValue){
-       return [pixelValue[0], pixelValue[1], pixelValue[2]];
+       return pixelValue;
     }
-  
-    // Get the pixel value using big endian
-    // Big-endian: the most significant byte comes first
+    
+    /**
+     * Retrieves the pixel value from the source data at the specified index
+     * using big endian: the most significant byte comes first.
+     * 
+     * @param {Uint8Array} sourceData - The source data array.
+     * @param {number} index - The index of the pixel value in the source data array.
+     * @returns {number} The pixel value.
+     */
     getPixelValue(sourceData, index) {        
         if (this.bytesPerPixel == 1) {
             return sourceData[index];
@@ -90,6 +147,12 @@ class ImageDataProcessor {
         return 0;
     }
   
+    /**
+     * Retrieves the image data from the given bytes by converting each pixel value.
+     * 
+     * @param {Uint8Array} bytes - The raw byte array containing the image data.
+     * @returns {ImageData} The image data object.
+     */
     getImageData(bytes) {
         const BYTES_PER_ROW = this.width * this.bytesPerPixel;
       
