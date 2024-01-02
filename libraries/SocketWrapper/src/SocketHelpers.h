@@ -144,6 +144,7 @@ protected:
   SocketAddress _netmask = nullptr;
   SocketAddress _dnsServer1 = nullptr;
   SocketAddress _dnsServer2 = nullptr;
+  bool _useStaticIP = false;
 
   voidFuncPtr _feed_watchdog_func = nullptr;
 
