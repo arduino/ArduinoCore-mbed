@@ -1,5 +1,19 @@
 /**
  * @fileoverview This file contains the main application logic.
+ * 
+ * The application uses the Web Serial API to connect to the serial port.
+ * Check the following links for more information on the Web Serial API:
+ * https://developer.chrome.com/articles/serial/
+ * https://wicg.github.io/serial/
+ * 
+ * The flow of the application is as follows:
+ * 1. The user clicks the "Connect" button or the browser automatically connects 
+ * to the serial port if it has been previously connected.
+ * 2. The application requests the camera configuration (mode and resolution) from the board.
+ * 3. The application starts reading the image data stream from the serial port. 
+ * It waits until the calculated number of bytes have been read and then processes the data.
+ * 4. The processed image data is rendered on the canvas.
+ * 
  * @author Sebastian Romero
  */
 
@@ -10,14 +24,11 @@ const saveImageButton = document.getElementById('save-image');
 const canvas = document.getElementById('bitmapCanvas');
 const ctx = canvas.getContext('2d');
 
-// Check the following links for more information on the Web Serial API:
-// https://developer.chrome.com/articles/serial/
-// https://wicg.github.io/serial/
-
-
-const imageDataProcessor = new ImageDataProcessor();
-let imageDataTransfomer = new ImageDataTransformer();
+const imageDataTransfomer = new ImageDataTransformer(ctx);
 const connectionHandler = new SerialConnectionHandler();
+
+
+// Connection handler event listeners
 
 connectionHandler.onConnect = async () => {
   connectButton.textContent = 'Disconnect';
@@ -32,46 +43,55 @@ connectionHandler.onConnect = async () => {
     console.error(`🚫 Invalid camera configuration: ${cameraConfig[0]}, ${cameraConfig[1]}. Aborting...`);
     return;
   }
-  imageDataProcessor.setMode(imageMode);
-  imageDataProcessor.setResolution(imageResolution.width, imageResolution.height);
   imageDataTransfomer.setImageMode(imageMode);
   imageDataTransfomer.setResolution(imageResolution.width, imageResolution.height);
-  connectionHandler.setTransformer(imageDataTransfomer);
   renderStream();
 };
 
 connectionHandler.onDisconnect = () => {
   connectButton.textContent = 'Connect';
-  imageDataProcessor.reset();
+  imageDataTransfomer.reset();
 };
 
-function renderBitmap(width, height, imageData) {
-  canvas.width = width;
-  canvas.height = height;
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.putImageData(imageData, 0, 0);
-}
+
+// Rendering logic
 
 async function renderStream(){
   while(connectionHandler.isConnected()){
-    if(imageDataProcessor.isConfigured()) await renderFrame();
+    if(imageDataTransfomer.isConfigured()) await renderFrame();
   }
 }
 
+/**
+ * Renders the image data for one frame from the board and renders it.
+ * @returns {Promise<boolean>} True if a frame was rendered, false otherwise.
+ */
 async function renderFrame(){
   if(!connectionHandler.isConnected()) return;
-  const bytes = await connectionHandler.getFrame(imageDataProcessor.getTotalBytes());
-  if(!bytes || bytes.length == 0) return false; // Nothing to render
-  // console.log(`Reading done ✅. Rendering image...`);
-  const imageData = ctx.createImageData(320, 240);
-  const data = imageDataProcessor.getImageData(bytes);
-  imageData.data.set(data);
-
-  renderBitmap(imageDataProcessor.width, imageDataProcessor.height, imageData);
+  const imageData = await connectionHandler.getFrame(imageDataTransfomer);
+  if(!imageData) return false; // Nothing to render
+  if(!(imageData instanceof ImageData)) throw new Error('🚫 Image data is not of type ImageData'); 
+  renderBitmap(ctx, imageData);
   return true;
 }
 
+/**
+ * Renders the image data on the canvas.
+ * @param {CanvasRenderingContext2D} context The canvas context to render on.
+ * @param {ImageData} imageData The image data to render.
+ */
+function renderBitmap(context, imageData) {
+  context.canvas.width = imageData.width;
+  context.canvas.height = imageData.height;
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  context.putImageData(imageData, 0, 0);
+}
+
+
+// UI Event listeners
+
 startButton.addEventListener('click', renderStream);
+
 connectButton.addEventListener('click', async () => { 
   if(connectionHandler.isConnected()){
     connectionHandler.disconnectSerial();
@@ -80,8 +100,9 @@ connectButton.addEventListener('click', async () => {
     await connectionHandler.connectSerial();
   }
 });
+
 refreshButton.addEventListener('click', () => {
-  if(imageDataProcessor.isConfigured()) renderFrame();
+  if(imageDataTransfomer.isConfigured()) renderFrame();
 });
 
 saveImageButton.addEventListener('click', () => {
