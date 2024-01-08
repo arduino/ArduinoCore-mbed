@@ -9,16 +9,9 @@ const ctx = canvas.getContext('2d');
 // https://developer.chrome.com/articles/serial/
 // https://wicg.github.io/serial/
 
-// Set the buffer size to the total bytes. This allows to read the entire bitmap in one go.
-const bufferSize = 2 * 1024 * 1024; // Max buffer size is 16MB
-const flowControl = 'hardware';
-const baudRate = 115200; // Adjust this value based on your device's baud rate
-const dataBits = 8; // Adjust this value based on your device's data bits
-const stopBits = 2; // Adjust this value based on your device's stop bits
-const parityBit = 'even'; // Adjust this value based on your device's parity bit
 
 const imageDataProcessor = new ImageDataProcessor(ctx);
-const connectionHandler = new SerialConnectionHandler(baudRate, dataBits, stopBits, parityBit, flowControl, bufferSize);
+const connectionHandler = new SerialConnectionHandler();
 
 connectionHandler.onConnect = async () => {
   connectButton.textContent = 'Disconnect';
@@ -43,9 +36,9 @@ connectionHandler.onDisconnect = () => {
   imageDataProcessor.reset();
 };
 
-function renderBitmap(imageData) {
-  canvas.width = imageDataProcessor.width;
-  canvas.height = imageDataProcessor.height;
+function renderBitmap(width, height, imageData) {
+  canvas.width = width;
+  canvas.height = height;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.putImageData(imageData, 0, 0);
 }
@@ -62,7 +55,7 @@ async function renderFrame(){
   if(!bytes || bytes.length == 0) return false; // Nothing to render
   // console.log(`Reading done ✅. Rendering image...`);
   const imageData = imageDataProcessor.getImageData(bytes);
-  renderBitmap(imageData);
+  renderBitmap(imageDataProcessor.width, imageDataProcessor.height, imageData);
   return true;
 }
 

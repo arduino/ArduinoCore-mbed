@@ -42,11 +42,12 @@ class BytesWaitTransformer {
  * Handles the connection between the browser and the Arduino board via Web Serial.
  */
 class SerialConnectionHandler {
-    constructor(baudRate = 115200, dataBits = 8, stopBits = 1, parity = "none", flowControl = "none", bufferSize = 4096, timeout = 2000) {
+    constructor(baudRate = 115200, dataBits = 8, stopBits = 1, parity = "none", flowControl = "none", bufferSize = 2 * 1024 * 1024, timeout = 2000) {
         this.baudRate = baudRate;
         this.dataBits = dataBits;
         this.stopBits = stopBits;
         this.flowControl = flowControl;
+        // Max buffer size is 16MB
         this.bufferSize = bufferSize;
         this.parity = parity;
         this.timeout = timeout;
