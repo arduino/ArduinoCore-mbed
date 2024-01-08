@@ -1,5 +1,6 @@
 /**
  * @fileoverview This file contains the configuration for the camera.
+ * @author Sebastian Romero
  */
 
 /**

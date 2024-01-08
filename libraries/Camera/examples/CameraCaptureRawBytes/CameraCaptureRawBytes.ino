@@ -96,7 +96,7 @@ void sendCameraConfig(){
 
 void loop() {
   if(!Serial) {    
-    Serial.begin(115200, SERIAL_8E2);
+    Serial.begin(115200);
     while(!Serial);    
   }
 

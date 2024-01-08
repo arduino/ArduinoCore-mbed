@@ -1,3 +1,8 @@
+/**
+ * @fileoverview This file contains the main application logic.
+ * @author Sebastian Romero
+ */
+
 const connectButton = document.getElementById('connect');
 const refreshButton = document.getElementById('refresh');
 const startButton = document.getElementById('start');
@@ -10,7 +15,8 @@ const ctx = canvas.getContext('2d');
 // https://wicg.github.io/serial/
 
 
-const imageDataProcessor = new ImageDataProcessor(ctx);
+const imageDataProcessor = new ImageDataProcessor();
+let imageDataTransfomer = new ImageDataTransformer();
 const connectionHandler = new SerialConnectionHandler();
 
 connectionHandler.onConnect = async () => {
@@ -28,6 +34,9 @@ connectionHandler.onConnect = async () => {
   }
   imageDataProcessor.setMode(imageMode);
   imageDataProcessor.setResolution(imageResolution.width, imageResolution.height);
+  imageDataTransfomer.setImageMode(imageMode);
+  imageDataTransfomer.setResolution(imageResolution.width, imageResolution.height);
+  connectionHandler.setTransformer(imageDataTransfomer);
   renderStream();
 };
 
@@ -54,7 +63,10 @@ async function renderFrame(){
   const bytes = await connectionHandler.getFrame(imageDataProcessor.getTotalBytes());
   if(!bytes || bytes.length == 0) return false; // Nothing to render
   // console.log(`Reading done ✅. Rendering image...`);
-  const imageData = imageDataProcessor.getImageData(bytes);
+  const imageData = ctx.createImageData(320, 240);
+  const data = imageDataProcessor.getImageData(bytes);
+  imageData.data.set(data);
+
   renderBitmap(imageDataProcessor.width, imageDataProcessor.height, imageData);
   return true;
 }

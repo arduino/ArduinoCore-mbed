@@ -1,43 +1,6 @@
 const ArduinoUSBVendorId = 0x2341;
 const UserActionAbortError = 8;
 
-class BytesWaitTransformer {
-    constructor(waitBytes) {
-      this.waitBytes = waitBytes;
-      this.buffer = new Uint8Array(0);
-      this.controller = undefined;
-    }
-  
-    async transform(chunk, controller) {
-      this.controller = controller;
-  
-      // Concatenate incoming chunk with existing buffer
-      this.buffer = new Uint8Array([...this.buffer, ...chunk]);
-  
-      while (this.buffer.length >= this.waitBytes) {
-        // Extract the required number of bytes
-        const bytesToProcess = this.buffer.slice(0, this.waitBytes);
-  
-        // Remove processed bytes from the buffer
-        this.buffer = this.buffer.slice(this.waitBytes);
-  
-        // Notify the controller that bytes have been processed
-        controller.enqueue(bytesToProcess);
-      }
-    }
-  
-    flush(controller) {
-      if (this.buffer.length > 0) {
-        // Handle remaining bytes (if any) when the stream is closed
-        const remainingBytes = this.buffer.slice();
-        console.log("Remaining bytes:", remainingBytes);
-  
-        // Notify the controller that remaining bytes have been processed
-        controller.enqueue(remainingBytes);
-      }
-    }
-  }
-
 /**
  * Handles the connection between the browser and the Arduino board via Web Serial.
  */
@@ -54,6 +17,7 @@ class SerialConnectionHandler {
         this.currentPort = null;
         this.currentReader = null;
         this.readableStreamClosed = null;
+        this.transformer = new BytesWaitTransformer();
         this.registerEvents();
     }
 
@@ -72,6 +36,14 @@ class SerialConnectionHandler {
             }
             return null;
         }
+    }
+
+    /**
+     * Sets the transformer that is used to convert bytes into higher-level data types.
+     * @param {*} transformer 
+     */
+    setTransformer(transformer) {
+        this.transformer = transformer;
     }
 
     /**
@@ -121,6 +93,7 @@ class SerialConnectionHandler {
             this.currentPort = null;
             await this.currentReader?.cancel();
             await this.readableStreamClosed.catch(() => { }); // Ignores the error
+            this.transformer.flush();
             await port.close();
             console.log('🔌 Disconnected from serial port.');
             if(this.onDisconnect) this.onDisconnect();
@@ -165,8 +138,9 @@ class SerialConnectionHandler {
             console.log('🔒 Stream is already locked. Ignoring request...');
             return null;
         }
-
-        const transformStream = new TransformStream(new BytesWaitTransformer(numBytes));
+        
+        this.transformer.setBytesToWait(numBytes);
+        const transformStream = new TransformStream(this.transformer);
         // pipeThrough() cannot be used because we need a promise that resolves when the stream is closed
         // to be able to close the port. pipeTo() returns such a promise.
         // SEE: https://stackoverflow.com/questions/71262432/how-can-i-close-a-web-serial-port-that-ive-piped-through-a-transformstream
@@ -180,6 +154,7 @@ class SerialConnectionHandler {
                 timeoutID = setTimeout(() => {
                     console.log('⌛️ Timeout occurred while reading.');
                     if (this.currentPort?.readable) reader?.cancel();
+                    this.transformer.flush();
                 }, timeout);
             }
             const { value, done } = await reader.read();
