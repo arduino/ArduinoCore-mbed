@@ -1,7 +1,5 @@
 /**
  * Represents an image data processor that converts raw image data to a specified pixel format.
- * This could be turned into a transform stream and be used in the serial connection handler.
- * See example here: https://github.com/mdn/dom-examples/blob/main/streams/png-transform-stream/png-transform-stream.js
  * 
  * @author Sebastian Romero
  */
@@ -27,14 +25,13 @@ class ImageDataProcessor {
 
     /**
      * Creates a new instance of the imageDataProcessor class.
-     * @param {CanvasRenderingContext2D} context - The 2D rendering context of the canvas.
      * @param {string|null} mode - The image mode of the image data processor. (Optional)
      * Possible values: RGB565, GRAYSCALE, RGB888, BAYER
      * @param {number|null} width - The width of the image data processor. (Optional)
      * @param {number|null} height - The height of the image data processor. (Optional)
      */
     constructor(mode = null, width = null, height = null) {
-      if(mode) this.setMode(mode);
+      if(mode) this.setImageMode(mode);
       if(width && height) this.setResolution(width, height);
     }
   
@@ -44,7 +41,7 @@ class ImageDataProcessor {
      * 
      * @param {string} mode - The image mode of the image data processor.
      */
-    setMode(mode) {
+    setImageMode(mode) {
         this.mode = mode;
         this.bytesPerPixel = this.pixelFormatInfo[mode].bytesPerPixel;
     }
@@ -67,15 +64,6 @@ class ImageDataProcessor {
      */
     getTotalBytes() {
         return this.width * this.height * this.bytesPerPixel;
-    }
-
-    /**
-     * Checks if the image data processor is configured.
-     * This is true if the image mode and resolution are set.
-     * @returns {boolean} True if the image data processor is configured, false otherwise.
-     */
-    isConfigured() {
-        return this.mode && this.width && this.height;
     }
 
     /**
@@ -152,7 +140,7 @@ class ImageDataProcessor {
      * @param {Uint8Array} bytes - The raw byte array containing the image data.
      * @returns {Uint8ClampedArray} The image data as a Uint8ClampedArray containing RGBA values.
      */
-    getImageData(bytes) {
+    convertToPixelData(bytes) {
         const BYTES_PER_ROW = this.width * this.bytesPerPixel;
         const dataContainer = new Uint8ClampedArray(this.width * this.height * 4); // 4 channels: R, G, B, A
       

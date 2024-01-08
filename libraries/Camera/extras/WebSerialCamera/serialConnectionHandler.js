@@ -1,23 +1,40 @@
+/**
+ * @fileoverview This file contains the SerialConnectionHandler class.
+ * It handles the connection between the browser and the Arduino board via Web Serial.
+ * @author Sebastian Romero
+ */
+
 const ArduinoUSBVendorId = 0x2341;
 const UserActionAbortError = 8;
 
 /**
  * Handles the connection between the browser and the Arduino board via Web Serial.
+ * Please note that for board with software serial over USB, the baud rate and other serial settings have no effect.
  */
 class SerialConnectionHandler {
+    /**
+     * Represents a serial connection handler.
+     * @constructor
+     * @param {number} [baudRate=115200] - The baud rate of the serial connection.
+     * @param {number} [dataBits=8] - The number of data bits.
+     * @param {number} [stopBits=1] - The number of stop bits.
+     * @param {string} [parity="none"] - The parity setting.
+     * @param {string} [flowControl="none"] - The flow control setting.
+     * @param {number} [bufferSize=2097152] - The size of the buffer in bytes. Max buffer size is 16MB
+     * @param {number} [timeout=2000] - The connection timeout value in milliseconds.
+     */
     constructor(baudRate = 115200, dataBits = 8, stopBits = 1, parity = "none", flowControl = "none", bufferSize = 2 * 1024 * 1024, timeout = 2000) {
         this.baudRate = baudRate;
         this.dataBits = dataBits;
         this.stopBits = stopBits;
         this.flowControl = flowControl;
-        // Max buffer size is 16MB
         this.bufferSize = bufferSize;
         this.parity = parity;
         this.timeout = timeout;
         this.currentPort = null;
         this.currentReader = null;
+        this.currentTransformer = null;
         this.readableStreamClosed = null;
-        this.transformer = new BytesWaitTransformer();
         this.registerEvents();
     }
 
@@ -36,14 +53,6 @@ class SerialConnectionHandler {
             }
             return null;
         }
-    }
-
-    /**
-     * Sets the transformer that is used to convert bytes into higher-level data types.
-     * @param {*} transformer 
-     */
-    setTransformer(transformer) {
-        this.transformer = transformer;
     }
 
     /**
@@ -93,7 +102,7 @@ class SerialConnectionHandler {
             this.currentPort = null;
             await this.currentReader?.cancel();
             await this.readableStreamClosed.catch(() => { }); // Ignores the error
-            this.transformer.flush();
+            this.currentTransformer?.flush();
             await port.close();
             console.log('🔌 Disconnected from serial port.');
             if(this.onDisconnect) this.onDisconnect();
@@ -126,21 +135,31 @@ class SerialConnectionHandler {
         return false;
     }
 
+
+    /**
+     * Reads a specified number of bytes from the serial connection.
+     * @param {number} numBytes - The number of bytes to read.
+     * @returns {Promise<Uint8Array>} - A promise that resolves to a Uint8Array containing the read bytes.
+     */
+    async readBytes(numBytes) {
+        return await this.readData(new BytesWaitTransformer(numBytes));
+    }
+
     /**
      * Reads the specified number of bytes from the serial port.
-     * @param {number} numBytes The number of bytes to read.
-     * @param {number} timeout The timeout in milliseconds. 
+     * @param {Transformer} transformer The transformer that is used to process the bytes.     
      * If the timeout is reached, the reader will be canceled and the read lock will be released.
      */
-    async readBytes(numBytes, timeout = null) {
+    async readData(transformer) {
+        if(!transformer) throw new Error('Transformer is null');
         if(!this.currentPort) return null;
         if(this.currentPort.readable.locked) {
             console.log('🔒 Stream is already locked. Ignoring request...');
             return null;
         }
         
-        this.transformer.setBytesToWait(numBytes);
-        const transformStream = new TransformStream(this.transformer);
+        const transformStream = new TransformStream(transformer);
+        this.currentTransformer = transformer;
         // pipeThrough() cannot be used because we need a promise that resolves when the stream is closed
         // to be able to close the port. pipeTo() returns such a promise.
         // SEE: https://stackoverflow.com/questions/71262432/how-can-i-close-a-web-serial-port-that-ive-piped-through-a-transformstream
@@ -150,12 +169,12 @@ class SerialConnectionHandler {
         let timeoutID = null;
 
         try {
-            if (timeout) {
+            if (this.timeout) {
                 timeoutID = setTimeout(() => {
                     console.log('⌛️ Timeout occurred while reading.');
                     if (this.currentPort?.readable) reader?.cancel();
                     this.transformer.flush();
-                }, timeout);
+                }, this.timeout);
             }
             const { value, done } = await reader.read();
             if (timeoutID) clearTimeout(timeoutID);
@@ -173,9 +192,16 @@ class SerialConnectionHandler {
             await this.readableStreamClosed.catch(() => { }); // Ignores the error
             reader?.releaseLock();
             this.currentReader = null;
+            this.currentTransformer = null;
         }
     }
 
+    /**
+     * Sends the provided byte array data through the current serial port.
+     * 
+     * @param {ArrayBuffer} byteArray - The byte array data to send.
+     * @returns {Promise<void>} - A promise that resolves when the data has been sent.
+     */
     async sendData(byteArray) {
         if (!this.currentPort?.writable) {
             console.log('🚫 Port is not writable. Ignoring request...');
@@ -196,10 +222,19 @@ class SerialConnectionHandler {
         return this.sendData([1]);
     }
 
+    /**
+     * Requests the camera configuration from the board by writing a 2 to the serial port.
+     * @returns {Promise} A promise that resolves with the configuration data.
+     */
     async requestConfig() {
         return this.sendData([2]);
     }
 
+    /**
+     * Requests the camera resolution from the board and reads it back from the serial port.
+     * The configuration simply consists of two bytes: the mode and the resolution.
+     * @returns {Promise<ArrayBuffer>} The raw configuration data as an ArrayBuffer.
+     */
     async getConfig() {
         if (!this.currentPort) return;
 
@@ -211,15 +246,12 @@ class SerialConnectionHandler {
     /**
      * Requests a frame from the Arduino board and reads the specified number of bytes from the serial port afterwards.
      * Times out after the timeout in milliseconds specified in the constructor.
-     * @param {number} totalBytes The number of bytes to read.
+     * @param {Transformer} transformer The transformer that is used to process the bytes.     
      */
-    async getFrame(totalBytes) {
+    async getFrame(transformer) {
         if (!this.currentPort) return;
-
         await this.requestFrame();
-        // console.log(`Trying to read ${totalBytes} bytes...`);
-        // Read the given amount of bytes
-        return await this.readBytes(totalBytes, this.timeout);
+        return await this.readData(transformer, this.timeout);
     }
 
     /**
