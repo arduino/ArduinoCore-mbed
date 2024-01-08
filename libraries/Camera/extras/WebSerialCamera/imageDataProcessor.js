@@ -2,6 +2,8 @@
  * Represents an image data processor that converts raw image data to a specified pixel format.
  * This could be turned into a transform stream and be used in the serial connection handler.
  * See example here: https://github.com/mdn/dom-examples/blob/main/streams/png-transform-stream/png-transform-stream.js
+ * 
+ * @author Sebastian Romero
  */
 class ImageDataProcessor {
     pixelFormatInfo = {
@@ -31,10 +33,7 @@ class ImageDataProcessor {
      * @param {number|null} width - The width of the image data processor. (Optional)
      * @param {number|null} height - The height of the image data processor. (Optional)
      */
-    constructor(context, mode = null, width = null, height = null) {
-      this.context = context;
-      this.canvas = context.canvas;
-      
+    constructor(mode = null, width = null, height = null) {
       if(mode) this.setMode(mode);
       if(width && height) this.setResolution(width, height);
     }
@@ -151,13 +150,11 @@ class ImageDataProcessor {
      * Retrieves the image data from the given bytes by converting each pixel value.
      * 
      * @param {Uint8Array} bytes - The raw byte array containing the image data.
-     * @returns {ImageData} The image data object.
+     * @returns {Uint8ClampedArray} The image data as a Uint8ClampedArray containing RGBA values.
      */
     getImageData(bytes) {
         const BYTES_PER_ROW = this.width * this.bytesPerPixel;
-      
-        const imageData = this.context.createImageData(this.width, this.height);
-        const dataContainer = imageData.data;
+        const dataContainer = new Uint8ClampedArray(this.width * this.height * 4); // 4 channels: R, G, B, A
       
         for (let row = 0; row < this.height; row++) {
           for (let col = 0; col < this.width; col++) {
@@ -172,6 +169,6 @@ class ImageDataProcessor {
             dataContainer[pixelIndex + 3] = 255; // Alpha channel (opacity)
           }
         }
-        return imageData;
+        return dataContainer;
       }
   }
