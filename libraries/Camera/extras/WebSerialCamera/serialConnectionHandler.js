@@ -173,7 +173,7 @@ class SerialConnectionHandler {
                 timeoutID = setTimeout(() => {
                     console.log('⌛️ Timeout occurred while reading.');
                     if (this.currentPort?.readable) reader?.cancel();
-                    this.transformer.flush();
+                    this.currentTransformer.flush();
                 }, this.timeout);
             }
             const { value, done } = await reader.read();
