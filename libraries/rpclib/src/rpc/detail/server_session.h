@@ -3,6 +3,7 @@
 #ifndef SESSION_H_5KG6ZMAB
 #define SESSION_H_5KG6ZMAB
 
+#include "asio.hpp"
 #include <memory>
 #include <vector>
 
@@ -21,7 +22,9 @@ namespace detail {
 
 class server_session : public async_writer {
 public:
-    server_session(server *srv, std::shared_ptr<dispatcher> disp, bool suppress_exceptions);
+    server_session(server *srv, RPCLIB_ASIO::io_service *io,
+                   RPCLIB_ASIO::ip::tcp::socket socket,
+                   std::shared_ptr<dispatcher> disp, bool suppress_exceptions);
     void start();
 
     void close();
@@ -31,6 +34,8 @@ private:
 
 private:
     server* parent_;
+    RPCLIB_ASIO::io_service *io_;
+    RPCLIB_ASIO::strand read_strand_;
     std::shared_ptr<dispatcher> disp_;
     RPCLIB_MSGPACK::unpacker pac_;
     RPCLIB_MSGPACK::sbuffer output_buf_;

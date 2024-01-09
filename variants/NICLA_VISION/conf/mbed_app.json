@@ -14,7 +14,7 @@
       "target.mbed_app_start": "0x8040000",
       "target.macros_add": [
         "METAL_INTERNAL",
-        "VIRTIO_MASTER_ONLY",
+        "VIRTIO_DRIVER_ONLY",
         "NO_ATOMIC_64_SUPPORT",
         "METAL_MAX_DEVICE_REGIONS=2",
         "RPMSG_BUFFER_SIZE=100"

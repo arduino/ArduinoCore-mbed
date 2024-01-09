@@ -9,19 +9,20 @@
 
 #include <openamp/rpmsg.h>
 #include <metal/alloc.h>
-#include <metal/utilities.h>
 
 #include "rpmsg_internal.h"
 
 /**
- * rpmsg_get_address
+ * @internal
+ *
+ * @brief rpmsg_get_address
  *
  * This function provides unique 32 bit address.
  *
- * @param bitmap - bit map for addresses
- * @param size   - size of bitmap
+ * @param bitmap	Bit map for addresses
+ * @param size		Size of bitmap
  *
- * return - a unique address
+ * @return A unique address
  */
 static uint32_t rpmsg_get_address(unsigned long *bitmap, int size)
 {
@@ -30,7 +31,7 @@ static uint32_t rpmsg_get_address(unsigned long *bitmap, int size)
 
 	nextbit = metal_bitmap_next_clear_bit(bitmap, 0, size);
 	if (nextbit < (uint32_t)size) {
-		addr = nextbit;
+		addr = RPMSG_RESERVED_ADDRESSES + nextbit;
 		metal_bitmap_set_bit(bitmap, nextbit);
 	}
 
@@ -38,54 +39,57 @@ static uint32_t rpmsg_get_address(unsigned long *bitmap, int size)
 }
 
 /**
- * rpmsg_release_address
+ * @internal
  *
- * Frees the given address.
+ * @brief Frees the given address.
  *
- * @param bitmap - bit map for addresses
- * @param size   - size of bitmap
- * @param addr   - address to free
+ * @param bitmap	Bit map for addresses
+ * @param size		Size of bitmap
+ * @param addr		Address to free
  */
 static void rpmsg_release_address(unsigned long *bitmap, int size,
 				  int addr)
 {
-	if (addr < size)
+	addr -= RPMSG_RESERVED_ADDRESSES;
+	if (addr >= 0 && addr < size)
 		metal_bitmap_clear_bit(bitmap, addr);
 }
 
 /**
- * rpmsg_is_address_set
+ * @internal
  *
- * Checks whether address is used or free.
+ * @brief Checks whether address is used or free.
  *
- * @param bitmap - bit map for addresses
- * @param size   - size of bitmap
- * @param addr   - address to free
+ * @param bitmap	Bit map for addresses
+ * @param size		Size of bitmap
+ * @param addr		Address to free
  *
- * return - TRUE/FALSE
+ * @return TRUE/FALSE
  */
 static int rpmsg_is_address_set(unsigned long *bitmap, int size, int addr)
 {
-	if (addr < size)
+	addr -= RPMSG_RESERVED_ADDRESSES;
+	if (addr >= 0 && addr < size)
 		return metal_bitmap_is_bit_set(bitmap, addr);
 	else
 		return RPMSG_ERR_PARAM;
 }
 
 /**
- * rpmsg_set_address
+ * @internal
  *
- * Marks the address as consumed.
+ * @brief Marks the address as consumed.
  *
- * @param bitmap - bit map for addresses
- * @param size   - size of bitmap
- * @param addr   - address to free
+ * @param bitmap	Bit map for addresses
+ * @param size		Size of bitmap
+ * @param addr		Address to free
  *
- * return - none
+ * @return 0 on success, otherwise error code
  */
 static int rpmsg_set_address(unsigned long *bitmap, int size, int addr)
 {
-	if (addr < size) {
+	addr -= RPMSG_RESERVED_ADDRESSES;
+	if (addr >= 0 && addr < size) {
 		metal_bitmap_set_bit(bitmap, addr);
 		return RPMSG_SUCCESS;
 	} else {
@@ -93,34 +97,20 @@ static int rpmsg_set_address(unsigned long *bitmap, int size, int addr)
 	}
 }
 
-/**
- * This function sends rpmsg "message" to remote device.
- *
- * @param ept     - pointer to end point
- * @param src     - source address of channel
- * @param dst     - destination address of channel
- * @param data    - data to transmit
- * @param size    - size of data
- * @param wait    - boolean, wait or not for buffer to become
- *                  available
- *
- * @return - size of data sent or negative value for failure.
- *
- */
 int rpmsg_send_offchannel_raw(struct rpmsg_endpoint *ept, uint32_t src,
-			      uint32_t dst, const void *data, int size,
+			      uint32_t dst, const void *data, int len,
 			      int wait)
 {
 	struct rpmsg_device *rdev;
 
-	if (!ept || !ept->rdev || !data || dst == RPMSG_ADDR_ANY)
+	if (!ept || !ept->rdev || !data || dst == RPMSG_ADDR_ANY || len < 0)
 		return RPMSG_ERR_PARAM;
 
 	rdev = ept->rdev;
 
 	if (rdev->ops.send_offchannel_raw)
 		return rdev->ops.send_offchannel_raw(rdev, src, dst, data,
-						      size, wait);
+						     len, wait);
 
 	return RPMSG_ERR_PARAM;
 }
@@ -142,6 +132,80 @@ int rpmsg_send_ns_message(struct rpmsg_endpoint *ept, unsigned long flags)
 		return RPMSG_SUCCESS;
 }
 
+void rpmsg_hold_rx_buffer(struct rpmsg_endpoint *ept, void *rxbuf)
+{
+	struct rpmsg_device *rdev;
+
+	if (!ept || !ept->rdev || !rxbuf)
+		return;
+
+	rdev = ept->rdev;
+
+	if (rdev->ops.hold_rx_buffer)
+		rdev->ops.hold_rx_buffer(rdev, rxbuf);
+}
+
+void rpmsg_release_rx_buffer(struct rpmsg_endpoint *ept, void *rxbuf)
+{
+	struct rpmsg_device *rdev;
+
+	if (!ept || !ept->rdev || !rxbuf)
+		return;
+
+	rdev = ept->rdev;
+
+	if (rdev->ops.release_rx_buffer)
+		rdev->ops.release_rx_buffer(rdev, rxbuf);
+}
+
+int rpmsg_release_tx_buffer(struct rpmsg_endpoint *ept, void *buf)
+{
+	struct rpmsg_device *rdev;
+
+	if (!ept || !ept->rdev || !buf)
+		return RPMSG_ERR_PARAM;
+
+	rdev = ept->rdev;
+
+	if (rdev->ops.release_tx_buffer)
+		return rdev->ops.release_tx_buffer(rdev, buf);
+
+	return RPMSG_ERR_PERM;
+}
+
+void *rpmsg_get_tx_payload_buffer(struct rpmsg_endpoint *ept,
+				  uint32_t *len, int wait)
+{
+	struct rpmsg_device *rdev;
+
+	if (!ept || !ept->rdev || !len)
+		return NULL;
+
+	rdev = ept->rdev;
+
+	if (rdev->ops.get_tx_payload_buffer)
+		return rdev->ops.get_tx_payload_buffer(rdev, len, wait);
+
+	return NULL;
+}
+
+int rpmsg_send_offchannel_nocopy(struct rpmsg_endpoint *ept, uint32_t src,
+				 uint32_t dst, const void *data, int len)
+{
+	struct rpmsg_device *rdev;
+
+	if (!ept || !ept->rdev || !data || dst == RPMSG_ADDR_ANY || len < 0)
+		return RPMSG_ERR_PARAM;
+
+	rdev = ept->rdev;
+
+	if (rdev->ops.send_offchannel_nocopy)
+		return rdev->ops.send_offchannel_nocopy(rdev, src, dst,
+							data, len);
+
+	return RPMSG_ERR_PARAM;
+}
+
 struct rpmsg_endpoint *rpmsg_get_endpoint(struct rpmsg_device *rdev,
 					  const char *name, uint32_t addr,
 					  uint32_t dest_addr)
@@ -156,19 +220,16 @@ struct rpmsg_endpoint *rpmsg_get_endpoint(struct rpmsg_device *rdev,
 		/* try to get by local address only */
 		if (addr != RPMSG_ADDR_ANY && ept->addr == addr)
 			return ept;
-		/* try to find match on local end remote address */
-		if (addr == ept->addr && dest_addr == ept->dest_addr)
-			return ept;
 		/* else use name service and destination address */
 		if (name)
 			name_match = !strncmp(ept->name, name,
 					      sizeof(ept->name));
 		if (!name || !name_match)
 			continue;
-		/* destination address is known, equal to ept remote address*/
+		/* destination address is known, equal to ept remote address */
 		if (dest_addr != RPMSG_ADDR_ANY && ept->dest_addr == dest_addr)
 			return ept;
-		/* ept is registered but not associated to remote ept*/
+		/* ept is registered but not associated to remote ept */
 		if (addr == RPMSG_ADDR_ANY && ept->dest_addr == RPMSG_ADDR_ANY)
 			return ept;
 	}
@@ -177,40 +238,51 @@ struct rpmsg_endpoint *rpmsg_get_endpoint(struct rpmsg_device *rdev,
 
 static void rpmsg_unregister_endpoint(struct rpmsg_endpoint *ept)
 {
-	struct rpmsg_device *rdev;
+	struct rpmsg_device *rdev = ept->rdev;
 
-	if (!ept)
-		return;
-
-	rdev = ept->rdev;
-
+	metal_mutex_acquire(&rdev->lock);
 	if (ept->addr != RPMSG_ADDR_ANY)
 		rpmsg_release_address(rdev->bitmap, RPMSG_ADDR_BMP_SIZE,
 				      ept->addr);
 	metal_list_del(&ept->node);
+	ept->rdev = NULL;
+	metal_mutex_release(&rdev->lock);
 }
 
-int rpmsg_register_endpoint(struct rpmsg_device *rdev,
-			    struct rpmsg_endpoint *ept)
+void rpmsg_register_endpoint(struct rpmsg_device *rdev,
+			     struct rpmsg_endpoint *ept,
+			     const char *name,
+			     uint32_t src, uint32_t dest,
+			     rpmsg_ept_cb cb,
+			     rpmsg_ns_unbind_cb ns_unbind_cb)
 {
+	strncpy(ept->name, name ? name : "", sizeof(ept->name));
+	ept->addr = src;
+	ept->dest_addr = dest;
+	ept->cb = cb;
+	ept->ns_unbind_cb = ns_unbind_cb;
 	ept->rdev = rdev;
-
 	metal_list_add_tail(&rdev->endpoints, &ept->node);
-	return RPMSG_SUCCESS;
 }
 
 int rpmsg_create_ept(struct rpmsg_endpoint *ept, struct rpmsg_device *rdev,
 		     const char *name, uint32_t src, uint32_t dest,
 		     rpmsg_ept_cb cb, rpmsg_ns_unbind_cb unbind_cb)
 {
-	int status;
+	int status = RPMSG_SUCCESS;
 	uint32_t addr = src;
 
-	if (!ept)
+	if (!ept || !rdev || !cb)
 		return RPMSG_ERR_PARAM;
 
 	metal_mutex_acquire(&rdev->lock);
-	if (src != RPMSG_ADDR_ANY) {
+	if (src == RPMSG_ADDR_ANY) {
+		addr = rpmsg_get_address(rdev->bitmap, RPMSG_ADDR_BMP_SIZE);
+		if (addr == RPMSG_ADDR_ANY) {
+			status = RPMSG_ERR_ADDR;
+			goto ret_status;
+		}
+	} else if (src >= RPMSG_RESERVED_ADDRESSES) {
 		status = rpmsg_is_address_set(rdev->bitmap,
 					      RPMSG_ADDR_BMP_SIZE, src);
 		if (!status) {
@@ -218,54 +290,46 @@ int rpmsg_create_ept(struct rpmsg_endpoint *ept, struct rpmsg_device *rdev,
 			rpmsg_set_address(rdev->bitmap, RPMSG_ADDR_BMP_SIZE,
 					  src);
 		} else if (status > 0) {
-			status = RPMSG_SUCCESS;
+			status = RPMSG_ERR_ADDR;
 			goto ret_status;
 		} else {
 			goto ret_status;
 		}
 	} else {
-		addr = rpmsg_get_address(rdev->bitmap, RPMSG_ADDR_BMP_SIZE);
+		/* Skip check the address duplication in 0-1023:
+		 * 1.Trust the author of predefined service
+		 * 2.Simplify the tracking implementation
+		 */
 	}
 
-	rpmsg_init_ept(ept, name, addr, dest, cb, unbind_cb);
+	rpmsg_register_endpoint(rdev, ept, name, addr, dest, cb, unbind_cb);
+	metal_mutex_release(&rdev->lock);
 
-	status = rpmsg_register_endpoint(rdev, ept);
-	if (status < 0)
-		rpmsg_release_address(rdev->bitmap, RPMSG_ADDR_BMP_SIZE, addr);
-
-	if (!status  && ept->dest_addr == RPMSG_ADDR_ANY) {
-		/* Send NS announcement to remote processor */
-		metal_mutex_release(&rdev->lock);
+	/* Send NS announcement to remote processor */
+	if (ept->name[0] && rdev->support_ns &&
+	    ept->dest_addr == RPMSG_ADDR_ANY)
 		status = rpmsg_send_ns_message(ept, RPMSG_NS_CREATE);
-		metal_mutex_acquire(&rdev->lock);
-		if (status)
-			rpmsg_unregister_endpoint(ept);
-	}
+
+	if (status)
+		rpmsg_unregister_endpoint(ept);
+	return status;
 
 ret_status:
 	metal_mutex_release(&rdev->lock);
 	return status;
 }
 
-/**
- * rpmsg_destroy_ept
- *
- * This function deletes rpmsg endpoint and performs cleanup.
- *
- * @param ept - pointer to endpoint to destroy
- *
- */
 void rpmsg_destroy_ept(struct rpmsg_endpoint *ept)
 {
 	struct rpmsg_device *rdev;
 
-	if (!ept)
+	if (!ept || !ept->rdev)
 		return;
 
 	rdev = ept->rdev;
-	if (ept->addr != RPMSG_NS_EPT_ADDR)
+
+	if (ept->name[0] && rdev->support_ns &&
+	    ept->addr >= RPMSG_RESERVED_ADDRESSES)
 		(void)rpmsg_send_ns_message(ept, RPMSG_NS_DESTROY);
-	metal_mutex_acquire(&rdev->lock);
 	rpmsg_unregister_endpoint(ept);
-	metal_mutex_release(&rdev->lock);
 }

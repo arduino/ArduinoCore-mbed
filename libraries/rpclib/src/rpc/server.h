@@ -93,6 +93,24 @@ public:
         disp_->bind(name, func);
     }
 
+    //! \brief Unbinds a functor binded to a name.
+    //!
+    //! This function removes already binded function from RPC Ccallable functions
+    //!
+    //! \param name The name of the functor.
+    void unbind(std::string const &name) {
+        disp_->unbind(name);
+    }
+	
+	//! \brief Returns all binded names
+    //!
+    //! This function returns a list of all names which functors are binded to
+    //!
+    //! \param name The name of the functor.
+    std::vector<std::string> names() const {
+        return disp_->names();
+    }
+	
     //! \brief Sets the exception behavior in handlers. By default,
     //! handlers throwing will crash the server. If suppressing is on,
     //! the server will try to gather textual data and return it to
@@ -104,12 +122,13 @@ public:
     //! \note This should not be called from worker threads.
     void stop();
 
+    //! \brief Returns port
+    //! \note The port
+    unsigned short port() const;
+
     //! \brief Closes all sessions gracefully.
     void close_sessions();
 
-    friend class detail::server_session;
-
-private:
     //! \brief Closes a specific session.
     void close_session(std::shared_ptr<detail::server_session> const& s);
 
