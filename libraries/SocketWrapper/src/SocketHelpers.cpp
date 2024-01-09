@@ -50,14 +50,18 @@ arduino::IPAddress arduino::MbedSocketClass::gatewayIP() {
 arduino::IPAddress arduino::MbedSocketClass::dnsServerIP() {
   SocketAddress ip;
   NetworkInterface* interface = getNetwork();
-  interface->get_dns_server(0, &ip, nullptr);
+  char _if_name[5] {};
+  interface->get_interface_name(_if_name);
+  interface->get_dns_server(0, &ip, _if_name);
   return ipAddressFromSocketAddress(ip);
 }
 
 arduino::IPAddress arduino::MbedSocketClass::dnsIP(int n) {
   SocketAddress ip;
   NetworkInterface* interface = getNetwork();
-  interface->get_dns_server(n, &ip, nullptr);
+  char _if_name[5] {};
+  interface->get_interface_name(_if_name);
+  interface->get_dns_server(n, &ip, _if_name);
   return ipAddressFromSocketAddress(ip);
 }
 
