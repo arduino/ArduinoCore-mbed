@@ -253,7 +253,7 @@ class SecureQSPIFBlockDevice: public QSPIFBlockDevice {
 
 #if 1
 // 256byte secure OTP area (on AT25SF128A)
-// TODO: could be imcomplete, to be tested
+// TODO: could be incomplete, to be tested
 class SecureQSPIFBlockDevice: public QSPIFBlockDevice {
   public:
     virtual int readSecure(void *buffer, mbed::bd_addr_t addr, mbed::bd_size_t size) {
@@ -263,9 +263,15 @@ class SecureQSPIFBlockDevice: public QSPIFBlockDevice {
     }
     virtual int programSecure(void *buffer, mbed::bd_addr_t addr, mbed::bd_size_t size) {
       // like normal program with 42h
+    
+      // avoid warning: no return statement in function returning non-void [-Wreturn-type]
+      return 0;
     }
     virtual int eraseSecure(void *buffer, mbed::bd_addr_t addr, mbed::bd_size_t size) {
       // like normal program with 44h
+    
+      // avoid: warning: no return statement in function returning non-void [-Wreturn-type]
+      return 0;
     }
 };
 #endif
