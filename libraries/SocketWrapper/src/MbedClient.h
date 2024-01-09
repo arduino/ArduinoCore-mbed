@@ -97,7 +97,7 @@ public:
   IPAddress remoteIP();
   uint16_t remotePort();
 
-  void setTimeout(unsigned long timeout);
+  void setSocketTimeout(unsigned long timeout);
 
   friend class MbedServer;
   friend class MbedSSLClient;
