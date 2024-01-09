@@ -184,8 +184,15 @@ const char * arduino::GSMClass::getRegistrationStateString(const mbed::CellularN
   }
 }
 
+#endif
+
 void arduino::GSMClass::onStatusChange(nsapi_event_t ev, intptr_t in) {
 
+  if(ev == CellularStateRetryEvent) {
+    feedWatchdog();
+  }
+
+#if GSM_DEBUG_ENABLE
   const cell_callback_data_t *data = (const cell_callback_data_t *)in;
 
   switch(ev)
@@ -270,6 +277,5 @@ void arduino::GSMClass::onStatusChange(nsapi_event_t ev, intptr_t in) {
     }
     break;
   }
-}
-
 #endif
+}
