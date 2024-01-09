@@ -196,6 +196,15 @@ uint8_t arduino::WiFiClass::encryptionType(uint8_t networkItem) {
   return sec2enum(ap_list[networkItem].get_security());
 }
 
+uint8_t* arduino::WiFiClass::BSSID(uint8_t networkItem, uint8_t* bssid) {
+  memcpy(bssid,  ap_list[networkItem].get_bssid(), 6);
+  return bssid;
+}
+
+uint8_t arduino::WiFiClass::channel(uint8_t networkItem) {
+  return ap_list[networkItem].get_channel();
+}
+
 int32_t arduino::WiFiClass::RSSI() {
   return wifi_if->get_rssi();
 }
