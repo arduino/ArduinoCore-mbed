@@ -1,4 +1,10 @@
 /**
+ * @fileoverview This file contains classes that transform incoming data into higher-level data types.
+ * @author Sebastian Romero
+ */
+
+
+/**
  * A transformer class that waits for a specific number of bytes before processing them.
  */
 class BytesWaitTransformer {
@@ -67,7 +73,6 @@ class BytesWaitTransformer {
         }
     }
 }
-
 
 /**
  * Represents an Image Data Transformer that converts bytes into image data.
@@ -149,7 +154,12 @@ class ImageDataTransformer extends BytesWaitTransformer {
      * @returns {ImageData} The converted ImageData object.
      */
     convertBytes(bytes) {
-        const pixelData = this.imageDataProcessor.convertToPixelData(bytes);
+        let pixelData = this.imageDataProcessor.convertToPixelData(bytes);
+        
+        if(this.filter){
+            this.filter.applyFilter(pixelData, imageDataTransfomer.width, imageDataTransfomer.height);
+        }
+
         const imageData = this.context.createImageData(imageDataTransfomer.width, imageDataTransfomer.height);
         imageData.data.set(pixelData);
         return imageData;

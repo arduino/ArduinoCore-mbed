@@ -25,6 +25,12 @@ const canvas = document.getElementById('bitmapCanvas');
 const ctx = canvas.getContext('2d');
 
 const imageDataTransfomer = new ImageDataTransformer(ctx);
+// 🐣 Uncomment one of the following lines to apply a filter to the image data
+// imageDataTransfomer.filter = new GrayScaleFilter();
+// imageDataTransfomer.filter = new BlackAndWhiteFilter();
+// imageDataTransfomer.filter = new SepiaColorFilter();
+// imageDataTransfomer.filter = new PixelateFilter(8);
+// imageDataTransfomer.filter = new BlurFilter(8);
 const connectionHandler = new SerialConnectionHandler();
 
 
