@@ -1,12 +1,14 @@
 MEMORY
 {
-  FLASH (rx) : ORIGIN = 0x8040000, LENGTH = 0x1c0000
+  FLASH (rx) : ORIGIN = 0x8040000, LENGTH = CM4_BINARY_START - 0x8040000
   DTCMRAM (rwx) : ORIGIN = 0x20000000 + (((166 * 4) + 7) & 0xFFFFFFF8), LENGTH = 128K - (((166 * 4) + 7) & 0xFFFFFFF8)
   RAM (xrw) : ORIGIN = 0x24000000, LENGTH = 0x80000
   RAM_D2 (xrw) : ORIGIN = 0x30000000, LENGTH = 288K
   RAM_D3 (xrw) : ORIGIN = 0x38000000, LENGTH = 64K
   ITCMRAM (xrw) : ORIGIN = 0x00000000, LENGTH = 64K
 }
+__OPENAMP_region_start__  = 0x38000400;
+__OPENAMP_region_end__ = 0x38000400 + LENGTH(RAM_D3) - 1K;
 ENTRY(Reset_Handler)
 SECTIONS
 {
@@ -92,6 +94,20 @@ SECTIONS
         __bss_end__ = .;
         _ebss = .;
     } > RAM
+    .openamp_section (NOLOAD) : {
+ 				. = ABSOLUTE(0x38000000);
+ 				*(.resource_table)
+ 				} >RAM_D3  AT > FLASH
+ 				.pdm_section (NOLOAD) : {
+ 				. = ABSOLUTE(0x3800FC00);
+ 				*(.pdm_buffer)
+ 				} > RAM_D3
+ 					_dtcm_lma = __etext + SIZEOF(.data);
+ 					.dtcm : AT(_dtcm_lma) {
+ 					_sdtcm = .;
+ 					*(.dtcm*)
+ 					_edtcm = .;
+ 					} > DTCMRAM
     .heap (COPY):
     {
         __end__ = .;

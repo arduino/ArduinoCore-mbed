@@ -156,7 +156,17 @@ void initVariant() {
   pinMode(PIN_ENABLE_I2C_PULLUP, OUTPUT);
 
   digitalWrite(PIN_ENABLE_SENSORS_3V3, HIGH);
+  delay(10);
   digitalWrite(PIN_ENABLE_I2C_PULLUP, HIGH);
+
+  // Set high drive pin to properly power the bmi150
+  nrf_gpio_cfg(
+        digitalPinToPinName(PIN_ENABLE_SENSORS_3V3),
+        NRF_GPIO_PIN_DIR_OUTPUT,
+        NRF_GPIO_PIN_INPUT_DISCONNECT,
+        NRF_GPIO_PIN_NOPULL,
+        NRF_GPIO_PIN_H0H1,
+        NRF_GPIO_PIN_NOSENSE);
 
   // Disable UARTE0 which is initially enabled by the bootloader
   nrf_uarte_task_trigger(NRF_UARTE0, NRF_UARTE_TASK_STOPRX); 

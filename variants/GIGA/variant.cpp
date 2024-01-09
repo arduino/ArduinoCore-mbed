@@ -12,12 +12,15 @@ AnalogPinDescription g_AAnalogPinDescription[] = {
   { PC_2,         NULL },    // A5   ADC1_INP12
   { PC_0,         NULL },    // A6   ADC1_INP10
   { PA_0,         NULL },    // A7   ADC1_INP16
+  { PA_4,         NULL },    // A12  DAC1_OUT1
+  { PA_5,         NULL },    // A13  DAC1_OUT2
+};
+
+AnalogPinDescription g_pureAAnalogPinDescription[] = {
   { PC_2C,        NULL },    // A8   ADC3_INP0
   { PC_3C,        NULL },    // A9   ADC3_INP1
   { PA_1C,        NULL },    // A10  ADC2_INP1
   { PA_0C,        NULL },    // A11  ADC2_INP0
-  { PA_4,         NULL },    // A12  DAC1_OUT1
-  { PA_5,         NULL },    // A13  DAC1_OUT2
 };
 
 AnalogPinDescription g_AAnalogOutPinDescription[] = {
@@ -160,16 +163,6 @@ extern "C" {
   unsigned int PINCOUNT_fn() {
     return (sizeof(g_APinDescription) / sizeof(g_APinDescription[0]));
   }
-}
-
-#include "drivers/I2C.h"
-
-void fixup3V1Rail() {
-  mbed::I2C i2c(PB_7, PB_6);
-  char data[2];
-  data[0]=0x42;
-  data[1]=(1);
-  i2c.write(8 << 1, data, sizeof(data));
 }
 
 void initVariant() {

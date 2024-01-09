@@ -1,0 +1,41 @@
+From 0611201dfb21fcc36e0d37e283a7e8bb44664ec8 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Fri, 17 Nov 2023 17:25:50 +0100
+Subject: [PATCH 223/226] CellularDevice: avoid callback data is changed before
+ attached callback is changed
+
+---
+ .../source/framework/device/CellularDevice.cpp         | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/connectivity/cellular/source/framework/device/CellularDevice.cpp b/connectivity/cellular/source/framework/device/CellularDevice.cpp
+index 50d900e14a..1f53b33e61 100644
+--- a/connectivity/cellular/source/framework/device/CellularDevice.cpp
++++ b/connectivity/cellular/source/framework/device/CellularDevice.cpp
+@@ -180,6 +180,11 @@ void CellularDevice::stm_callback(nsapi_event_t ev, intptr_t ptr)
+ 
+ void CellularDevice::cellular_callback(nsapi_event_t ev, intptr_t ptr, CellularContext *ctx)
+ {
++    // forward to callback function if set by attach(...).
++    if (_status_cb) {
++        _status_cb(ev, ptr);
++    }
++
+     if (ev >= NSAPI_EVENT_CELLULAR_STATUS_BASE && ev <= NSAPI_EVENT_CELLULAR_STATUS_END) {
+         cellular_connection_status_t cell_ev = (cellular_connection_status_t)ev;
+         cell_callback_data_t *ptr_data = (cell_callback_data_t *)ptr;
+@@ -220,11 +225,6 @@ void CellularDevice::cellular_callback(nsapi_event_t ev, intptr_t ptr, CellularC
+         }
+         curr = curr->_next;
+     }
+-
+-    // forward to callback function if set by attach(...).
+-    if (_status_cb) {
+-        _status_cb(ev, ptr);
+-    }
+ }
+ 
+ nsapi_error_t CellularDevice::shutdown()
+-- 
+2.42.0
+

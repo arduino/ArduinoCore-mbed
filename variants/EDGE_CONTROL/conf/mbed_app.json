@@ -4,6 +4,7 @@
 		"MBED_STACK_STATS_ENABLED=1",
 		"MBED_MEM_TRACING_ENABLED=1",
 		"NRFX_GPIOTE_CONFIG_NUM_OF_LOW_POWER_EVENTS=8",
+		"MBEDTLS_SHA1_C=1",
 		"NRFX_WDT_ENABLED=1"
 	],
 	"target_overrides": {
@@ -13,7 +14,11 @@
 			"platform.stdio-baud-rate": 115200,
 			"platform.default-serial-baud-rate": 115200,
 			"platform.callback-nontrivial": true,
-			"rtos.main-thread-stack-size": 32768,
+			"rtos.main-thread-stack-size": 4096,
+			"cellular.debug-at": true,
+			"cellular.offload-dns-queries": true,
+			"cellular.at-handler-buffer-size": 1024,
+			"mbed-trace.enable": true,
 			"target.mbed_app_start": "0x10000"
 		},
 		"EDGE_CONTROL": {

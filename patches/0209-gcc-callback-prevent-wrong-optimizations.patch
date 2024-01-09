@@ -1,0 +1,39 @@
+From 28a199761f80a8400da5cac8fbcaf138d29ea596 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Mon, 13 Nov 2023 09:40:06 +0100
+Subject: [PATCH 209/217] gcc: callback: prevent wrong optimizations
+
+Porting of https://github.com/arduino/ArduinoCore-mbed/pull/755
+---
+ platform/include/platform/Callback.h | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/platform/include/platform/Callback.h b/platform/include/platform/Callback.h
+index e76a4f1979..3df0b9117f 100644
+--- a/platform/include/platform/Callback.h
++++ b/platform/include/platform/Callback.h
+@@ -26,6 +26,14 @@
+ #include <mstd_type_traits>
+ #include <mstd_functional>
+ 
++#pragma GCC push_options
++// This prevents the GCC compiler from applying optimizations that assume the code follows strict aliasing rules.
++// In order to prevent bugs arising from undefined behavior that is tricky to find in the Callback implementation,
++// or simply from compiler bugs in GCC.
++#pragma GCC optimize("-fno-strict-aliasing")
++// This prevents the GCC compiler from generating incorrect inline code for the Callback constructor.
++#pragma GCC optimize("-fno-inline")
++
+ // Controlling switches from config:
+ // MBED_CONF_PLATFORM_CALLBACK_NONTRIVIAL - support storing non-trivial function objects
+ // MBED_CONF_PLATFORM_CALLBACK_COMPARABLE - support memcmp comparing stored objects (requires zero padding)
+@@ -835,4 +843,6 @@ Callback(R(*func)(const volatile T *, ArgTs...), const volatile U *arg) -> Callb
+ 
+ } // namespace mbed
+ 
++#pragma GCC pop_options
++
+ #endif
+-- 
+2.42.0
+

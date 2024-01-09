@@ -23,7 +23,6 @@
 #include "MbedClient.h"
 #include <FATFileSystem.h>
 #include <MBRBlockDevice.h>
-#include <QSPIFBlockDevice.h>
 
 extern const char CA_CERTIFICATES[];
 
@@ -33,6 +32,9 @@ class MbedSSLClient : public arduino::MbedClient {
 
 public:
   MbedSSLClient();
+
+  MbedSSLClient(unsigned long  timeout);
+
   virtual ~MbedSSLClient() {
     stop();
   }
@@ -56,9 +58,12 @@ protected:
 
 private:
   int setRootCA() {
+    int err = 0;
+
+#if defined(MBEDTLS_FS_IO)
     mbed::BlockDevice* root = mbed::BlockDevice::get_default_instance();
-    int err = root->init();
-    if( err != QSPIF_BD_ERROR_OK) {
+    err = root->init();
+    if( err != 0) {
       return err;
     }
 
@@ -74,6 +79,7 @@ private:
     if( err != NSAPI_ERROR_OK) {
       return err;
     }
+#endif
 
     if(_ca_cert_custom != NULL) {
       err = ((TLSSocket*)sock)->append_root_ca_cert(_ca_cert_custom);

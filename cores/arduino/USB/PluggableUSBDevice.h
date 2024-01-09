@@ -38,6 +38,8 @@ public:
     PluggableUSBModule(uint8_t numIfs) :
         numInterfaces(numIfs)
     { }
+    virtual ~PluggableUSBModule() 
+    { }
     void lock();
     void unlock();
     void assert_locked();
@@ -49,16 +51,24 @@ public:
     uint32_t write_finish(usb_ep_t endpoint);
 
 protected:
-    virtual const uint8_t *configuration_desc(uint8_t index);
-    virtual void callback_reset() {};
-    virtual void callback_state_change(USBDevice::DeviceState new_state);
-    virtual uint32_t callback_request(const USBDevice::setup_packet_t *setup, USBDevice::RequestResult *result, uint8_t** data);
-    virtual bool callback_request_xfer_done(const USBDevice::setup_packet_t *setup, bool aborted);
-    virtual bool callback_set_configuration(uint8_t configuration);
-    virtual void callback_set_interface(uint16_t interface, uint8_t alternate);
-    virtual void init(EndpointResolver& resolver);
-    virtual const uint8_t *string_iinterface_desc();
+    virtual const uint8_t *configuration_desc(uint8_t index) = 0;
+    virtual void callback_state_change(USBDevice::DeviceState new_state) = 0;
+    virtual uint32_t callback_request(const USBDevice::setup_packet_t *setup, USBDevice::RequestResult *result, uint8_t** data) = 0;
+    virtual bool callback_request_xfer_done(const USBDevice::setup_packet_t *setup, bool aborted) = 0;
+    virtual bool callback_set_configuration(uint8_t configuration) = 0;
+    virtual void callback_set_interface(uint16_t interface, uint8_t alternate) = 0;
+    virtual void init(EndpointResolver& resolver) = 0;
+    virtual const uint8_t *string_iinterface_desc() = 0;
     virtual uint8_t getProductVersion() = 0;
+
+    /**
+     * Non-pure virtual method with a non-inline definition
+     *
+     * @note This satisfies all criteria necessary for the compiler to emit a
+     * vtable, allowing users to safely subclass any of the derived "pluggable"
+     * USB device classes (USBCDC, USBHID, USBMIDI, etc).
+     */
+    virtual void callback_reset();
 
     uint8_t pluggedInterface;
 

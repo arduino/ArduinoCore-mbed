@@ -189,6 +189,8 @@ private:
     bool _command_success;
     bool _is_retry;
     cell_callback_data_t _cb_data;
+    cell_timeout_cb_t _timeout_cb_data;
+    cell_retry_cb_t _retry_cb_data;
     cellular_connection_status_t _current_event;
     int _status;
     PlatformMutex _mutex;

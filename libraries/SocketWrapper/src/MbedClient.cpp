@@ -150,6 +150,11 @@ int arduino::MbedClient::connectSSL(SocketAddress socketAddress) {
     return 0;
   }
 
+  /* For TLS connection timeout needs to be configured before handshake starts
+   * otherwise socket timeout is not adopted. See TLSSocketWrapper::set_timeout(int timeout)
+   */
+  sock->set_timeout(_timeout);
+
 restart_connect:
   nsapi_error_t returnCode = static_cast<TLSSocket *>(sock)->connect(socketAddress);
   int ret = 0;
@@ -294,7 +299,7 @@ void arduino::MbedClient::stop() {
 }
 
 uint8_t arduino::MbedClient::connected() {
-  return _status;
+  return ((_status) || (available() > 0));
 }
 
 IPAddress arduino::MbedClient::remoteIP() {
@@ -305,6 +310,6 @@ uint16_t arduino::MbedClient::remotePort() {
   return address.get_port();
 }
 
-void arduino::MbedClient::setTimeout(unsigned long timeout) {
+void arduino::MbedClient::setSocketTimeout(unsigned long timeout) {
   _timeout = timeout;
 }

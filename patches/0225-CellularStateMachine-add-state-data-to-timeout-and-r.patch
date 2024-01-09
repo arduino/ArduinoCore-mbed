@@ -1,0 +1,97 @@
+From 1e2795ce9a47146d8c87e4ff957ac3784482e075 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Fri, 17 Nov 2023 17:57:49 +0100
+Subject: [PATCH 225/226] CellularStateMachine: add state data to timeout and
+ retry callbacks
+
+---
+ .../framework/common/CellularCommon.h         | 20 +++++++++++++++++++
+ .../framework/device/CellularStateMachine.h   |  2 ++
+ .../framework/device/CellularStateMachine.cpp | 11 +++++++---
+ 3 files changed, 30 insertions(+), 3 deletions(-)
+
+diff --git a/connectivity/cellular/include/cellular/framework/common/CellularCommon.h b/connectivity/cellular/include/cellular/framework/common/CellularCommon.h
+index f0466e88cf..96e25dc991 100644
+--- a/connectivity/cellular/include/cellular/framework/common/CellularCommon.h
++++ b/connectivity/cellular/include/cellular/framework/common/CellularCommon.h
+@@ -47,6 +47,26 @@ struct cell_signal_quality_t {
+     }
+ };
+ 
++struct cell_timeout_cb_t {
++    int timeout;        /* configured timeout */
++    int state;          /* cellular state */
++    cell_timeout_cb_t()
++    {
++        timeout = -1;
++        state = -1;
++    }
++};
++
++struct cell_retry_cb_t {
++    int retry_count;    /* retry count */
++    int state;          /* cellular state */
++    cell_retry_cb_t()
++    {
++        retry_count = -1;
++        state = -1;
++    }
++};
++
+ /**
+  * Cellular specific event changes.
+  * Connect and disconnect are handled via NSAPI_EVENT_CONNECTION_STATUS_CHANGE
+diff --git a/connectivity/cellular/include/cellular/framework/device/CellularStateMachine.h b/connectivity/cellular/include/cellular/framework/device/CellularStateMachine.h
+index 67912e463c..aed9d615ce 100644
+--- a/connectivity/cellular/include/cellular/framework/device/CellularStateMachine.h
++++ b/connectivity/cellular/include/cellular/framework/device/CellularStateMachine.h
+@@ -189,6 +189,8 @@ private:
+     bool _command_success;
+     bool _is_retry;
+     cell_callback_data_t _cb_data;
++    cell_timeout_cb_t _timeout_cb_data;
++    cell_retry_cb_t _retry_cb_data;
+     cellular_connection_status_t _current_event;
+     int _status;
+     PlatformMutex _mutex;
+diff --git a/connectivity/cellular/source/framework/device/CellularStateMachine.cpp b/connectivity/cellular/source/framework/device/CellularStateMachine.cpp
+index 833f1d2239..37416ca72e 100644
+--- a/connectivity/cellular/source/framework/device/CellularStateMachine.cpp
++++ b/connectivity/cellular/source/framework/device/CellularStateMachine.cpp
+@@ -61,7 +61,7 @@ CellularStateMachine::CellularStateMachine(CellularDevice &device, events::Event
+     _start_time(rand() % (MBED_CONF_CELLULAR_RANDOM_MAX_START_DELAY)),
+ #endif // MBED_CONF_CELLULAR_RANDOM_MAX_START_DELAY
+     _event_timeout(-1s), _event_id(-1), _plmn(0), _command_success(false),
+-    _is_retry(false), _cb_data(), _current_event(CellularDeviceReady), _status(0)
++    _is_retry(false), _cb_data(), _timeout_cb_data(), _retry_cb_data(), _current_event(CellularDeviceReady), _status(0)
+ {
+ 
+     // set initial retry values in seconds
+@@ -289,8 +289,10 @@ void CellularStateMachine::retry_state_or_fail()
+     if (_retry_count < _retry_array_length) {
+         tr_debug("%s: retry %d/%d", get_state_string(_state), _retry_count, _retry_array_length);
+         // send info to application/driver about error logic so it can implement proper error logic
++        _retry_cb_data.retry_count = _retry_count;
++        _retry_cb_data.state = _state;
+         _cb_data.status_data = _current_event;
+-        _cb_data.data = &_retry_count;
++        _cb_data.data = &_retry_cb_data;
+         _cb_data.error = NSAPI_ERROR_OK;
+         send_event_cb(CellularStateRetryEvent);
+ 
+@@ -680,8 +682,11 @@ void CellularStateMachine::send_event_cb(cellular_connection_status_t status)
+ 
+ void CellularStateMachine::change_timeout(const std::chrono::duration<int, std::milli> &timeout)
+ {
++    _timeout_cb_data.timeout = timeout.count();
++    _timeout_cb_data.state = _state;
++
+     _cb_data.status_data = _current_event;
+-    _cb_data.data = &timeout;
++    _cb_data.data = &_timeout_cb_data;
+     _cb_data.error = NSAPI_ERROR_OK;
+     // event callback is a preferred method to communicate to CellularDevice,
+     // for example calling CellularDevice::set_timeout would call back to this class
+-- 
+2.42.0
+

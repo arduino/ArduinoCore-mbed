@@ -26,6 +26,10 @@
 namespace arduino {
 
 class GSMClient : public MbedClient {
+public:
+  GSMClient();
+
+private:
   NetworkInterface *getNetwork() {
     return GSM.getNetwork();
   }

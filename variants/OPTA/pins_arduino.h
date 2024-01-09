@@ -85,10 +85,10 @@ static const uint8_t A7  = PIN_A7;
 #define D12 (12u)
 #define D13 (13u)
 #define D14 (14u)
-#define D15 #error Pin cannot be used as digital pin.
-#define D16 #error Pin cannot be used as digital pin.
-#define D17 #error Pin cannot be used as digital pin.
-#define D18 #error Pin cannot be used as digital pin.
+#define D15 (15u)
+#define D16 (16u)
+#define D17 (17u)
+#define D18 (18u)
 #define D19 (19u)
 #define D20 (20u)
 #define D21 (21u)
@@ -130,12 +130,17 @@ static const uint8_t SCK  = PIN_SPI_SCK;
 #define PIN_WIRE_SDA        (11u)
 #define PIN_WIRE_SCL        (12u)
 
-#define SERIAL_HOWMANY		2
+#define SERIAL_HOWMANY		3
 #define SERIAL1_TX			(digitalPinToPinName(PIN_SERIAL_TX))
 #define SERIAL1_RX			(digitalPinToPinName(PIN_SERIAL_RX))
 
 #define SERIAL2_TX			PB_10
 #define SERIAL2_RX			PB_11
+
+#define SERIAL3_TX			PB_9
+#define SERIAL3_RX			PH_14
+#define SERIAL3_RTS			PA_15
+#define SERIAL3_CTS			PB_15
 
 #define SERIAL_CDC			1
 #define HAS_UNIQUE_ISERIAL_DESCRIPTOR
@@ -183,11 +188,6 @@ void _ontouch1200bps_();
 #define RS485_DEFAULT_TX_PIN        SERIAL2_TX
 #define RS485_DEFAULT_DE_PIN        PB_14
 #define RS485_DEFAULT_RE_PIN        PB_13
-
-#define SerialLoRa		Serial3
-#define LORA_BOOT0      (PG_7)
-#define LORA_RESET      (PC_7)
-#define LORA_IRQ_DUMB   (PJ_11)
 
 #define CRYPTO_WIRE		Wire1
 

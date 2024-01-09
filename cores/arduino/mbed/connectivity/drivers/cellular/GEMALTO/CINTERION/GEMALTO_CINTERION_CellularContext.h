@@ -34,6 +34,7 @@ protected:
     virtual NetworkStack *get_stack();
 #endif // NSAPI_PPP_AVAILABLE
     virtual nsapi_error_t do_user_authentication();
+    virtual nsapi_error_t enable_access_technology();
 };
 
 } /* namespace mbed */

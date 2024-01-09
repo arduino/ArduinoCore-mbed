@@ -1,0 +1,53 @@
+From 547edd2014933a15cd0e48fe1f2f5f9b9ce094fd Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Thu, 26 Oct 2023 16:37:54 +0200
+Subject: [PATCH 209/213] portenta_h7: make sure configuration is only executed
+ by M7
+
+---
+ .../TARGET_STM32H747xI/TARGET_PORTENTA_H7/portenta_power.cpp   | 3 ++-
+ .../TARGET_PORTENTA_H7/system_clock_override.c                 | 2 ++
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/portenta_power.cpp b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/portenta_power.cpp
+index 13ba1042de..59e6ac6cca 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/portenta_power.cpp
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/portenta_power.cpp
+@@ -26,6 +26,7 @@
+  ******************************************************************************/
+ void enableEthPowerSupply(void)
+ {
++#ifndef CORE_CM4
+     /* Ensure ETH power supply */
+     mbed::I2C i2c(PB_7, PB_6);
+ 
+@@ -48,5 +49,5 @@ void enableEthPowerSupply(void)
+     data[0] = 0x35;
+     data[1] = 0xF;
+     i2c.write(8 << 1, data, sizeof(data));
+-
++#endif
+ }
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/system_clock_override.c b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/system_clock_override.c
+index ae7821ede0..e47b7d258c 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/system_clock_override.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_PORTENTA_H7/system_clock_override.c
+@@ -129,6 +129,7 @@ uint8_t SetSysClock_PLL_HSE(uint8_t bypass, bool lowspeed)
+         }
+     }
+ 
++#ifndef CORE_CM4
+     /* Enable oscillator pin */
+     __HAL_RCC_GPIOH_CLK_ENABLE();
+     GPIO_InitTypeDef  gpio_osc_init_structure;
+@@ -139,6 +140,7 @@ uint8_t SetSysClock_PLL_HSE(uint8_t bypass, bool lowspeed)
+     HAL_GPIO_Init(GPIOH, &gpio_osc_init_structure);
+     HAL_Delay(10);
+     HAL_GPIO_WritePin(GPIOH, GPIO_PIN_1, 1);
++#endif
+ 
+     /* Supply configuration update enable */
+ #if HSE_VALUE == 27000000
+-- 
+2.42.0
+

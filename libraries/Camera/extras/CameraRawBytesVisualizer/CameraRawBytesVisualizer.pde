@@ -17,10 +17,10 @@ final int cameraWidth = 320;
 final int cameraHeight = 240;
 
 // Must match the image mode in the Arduino sketch
-final boolean useGrayScale = true;
+boolean useGrayScale = true;
 
 // Must match the baud rate in the Arduino sketch
-final int baudRate = 921600;
+final int baudRate = 115200;
 
 final int cameraBytesPerPixel = useGrayScale ? 1 : 2;
 final int cameraPixelCount = cameraWidth * cameraHeight;
@@ -119,4 +119,10 @@ void serialEvent(Serial myPort) {
   // Let the Arduino sketch know we received all pixels
   // and are ready for the next frame
   myPort.write(1);
+}
+
+void keyPressed() {
+  if (key == ' ') {
+    useGrayScale = !useGrayScale; // change boolean value of greyscale when space is pressed
+  }
 }

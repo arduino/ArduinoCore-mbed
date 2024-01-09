@@ -133,8 +133,8 @@ void write_hub_configuration(struct usb251xb* hub) {
     wbuf[0] = USB251XB_I2C_WRITE_SZ;
     memcpy(&wbuf[1], &i2c_wb[offset], USB251XB_I2C_WRITE_SZ);
 
-    printf("writing %d byte block %d to 0x%02X\n",
-            USB251XB_I2C_WRITE_SZ, i, offset);
+    //printf("writing %d byte block %d to 0x%02X\n",
+    //        USB251XB_I2C_WRITE_SZ, i, offset);
 
     Wire.beginTransmission(0x2C);
     Wire.write(offset);

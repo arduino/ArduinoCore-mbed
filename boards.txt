@@ -47,6 +47,11 @@ edge_control.bootloader.config=-f target/nrf52.cfg
 edge_control.bootloader.programmer=-f interface/cmsis-dap.cfg
 edge_control.bootloader.file=EDGE_CONTROL/bootloader.hex
 
+edge_control.debug.server.openocd.scripts.0=interface/{programmer.protocol}.cfg
+edge_control.debug.server.openocd.scripts.1={programmer.transport_script}
+edge_control.debug.server.openocd.scripts.2=target/nrf52.cfg
+edge_control.debug.svd_file={runtime.platform.path}/svd/nrf52840.svd
+
 ##############################################################
 
 menu.split=Flash split
@@ -74,7 +79,7 @@ envie_m7.menu.target_core.cm7.build.fpu=-mfpu=fpv5-d16
 envie_m7.menu.target_core.cm7.build.architecture=cortex-m7
 envie_m7.menu.target_core.cm7.compiler.mbed.arch.define=
 
-envie_m7.menu.target_core.cm4.build.variant=PORTENTA_H7_M4
+envie_m7.menu.target_core.cm4.build.variant=GENERIC_STM32H747_M4
 envie_m7.menu.target_core.cm4.build.mcu=cortex-m4
 envie_m7.menu.target_core.cm4.build.fpu=-mfpu=fpv4-sp-d16
 envie_m7.menu.target_core.cm4.build.architecture=cortex-m4
@@ -99,7 +104,7 @@ envie_m7.compiler.mbed.defines={build.variant.path}/defines.txt
 envie_m7.compiler.mbed.ldflags={build.variant.path}/ldflags.txt
 envie_m7.compiler.mbed.cflags={build.variant.path}/cflags.txt
 envie_m7.compiler.mbed.cxxflags={build.variant.path}/cxxflags.txt
-envie_m7.compiler.mbed.includes={build.variant.path}/includes.txt
+envie_m7.compiler.mbed.includes={build.variant.path}/../PORTENTA_H7_M7/includes.txt
 envie_m7.compiler.mbed.extra_ldflags=-lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
 envie_m7.compiler.mbed="{build.variant.path}/libs/libmbed.a"
 envie_m7.vid.0=0x2341
@@ -159,6 +164,13 @@ envie_m7.bootloader.config=-f target/stm32h7x_dual_bank.cfg
 envie_m7.bootloader.programmer=-f interface/stlink.cfg
 envie_m7.bootloader.extra_action.preflash=stm32h7x option_write 0 0x01c 0xb86aaf0
 envie_m7.bootloader.file=PORTENTA_H7/portentah7_bootloader_mbed_hs_v2.elf
+
+envie_m7.debug.server.openocd.scripts.0=interface/{programmer.protocol}.cfg
+envie_m7.debug.server.openocd.scripts.1={programmer.transport_script}
+envie_m7.debug.server.openocd.scripts.2=target/stm32h7x_dual_bank.cfg
+envie_m7.debug.cortex-debug.custom.request=attach
+envie_m7.menu.target_core.cm7.debug.svd_file={runtime.platform.path}/svd/STM32H747_CM7.svd
+envie_m7.menu.target_core.cm4.debug.svd_file={runtime.platform.path}/svd/STM32H747_CM4.svd
 
 envie_m7_thread_debug.name=Arduino Portenta H7 (ThreadDebug)
 envie_m7_thread_debug.vid.0=0x2341
@@ -277,6 +289,11 @@ nano33ble.bootloader.config=-f target/nrf52.cfg
 nano33ble.bootloader.programmer=-f interface/cmsis-dap.cfg
 nano33ble.bootloader.file=nano33ble/bootloader.hex
 
+nano33ble.debug.server.openocd.scripts.0=interface/{programmer.protocol}.cfg
+nano33ble.debug.server.openocd.scripts.1={programmer.transport_script}
+nano33ble.debug.server.openocd.scripts.2=target/nrf52.cfg
+nano33ble.debug.svd_file={runtime.platform.path}/svd/nrf52840.svd
+
 ##############################################################
 
 nanorp2040connect.name=Arduino Nano RP2040 Connect
@@ -333,6 +350,11 @@ nanorp2040connect.bootloader.tool.default=openocd
 nanorp2040connect.bootloader.config=-f target/rp2040.cfg
 nanorp2040connect.bootloader.programmer=-f interface/cmsis-dap.cfg
 
+nanorp2040connect.debug.server.openocd.scripts.0=interface/{programmer.protocol}.cfg
+nanorp2040connect.debug.server.openocd.scripts.1={programmer.transport_script}
+nanorp2040connect.debug.server.openocd.scripts.2=target/rp2040-core0.cfg
+nanorp2040connect.debug.svd_file={runtime.platform.path}/svd/rp2040.svd
+
 ##############################################################
 
 pico.name=Raspberry Pi Pico
@@ -376,6 +398,11 @@ pico.bootloader.tool=openocd
 pico.bootloader.tool.default=openocd
 pico.bootloader.config=-f target/rp2040.cfg
 pico.bootloader.programmer=-f interface/cmsis-dap.cfg
+
+pico.debug.server.openocd.scripts.0=interface/{programmer.protocol}.cfg
+pico.debug.server.openocd.scripts.1={programmer.transport_script}
+pico.debug.server.openocd.scripts.2=target/rp2040-core0.cfg
+pico.debug.svd_file={runtime.platform.path}/svd/rp2040.svd
 
 ##############################################################
 
@@ -423,6 +450,11 @@ nicla_sense.bootloader.extra_action.preflash=echo INFO:removed_mass-erase
 nicla_sense.bootloader.config=-f target/nrf52.cfg
 nicla_sense.bootloader.programmer=-f interface/cmsis-dap.cfg
 nicla_sense.bootloader.file=NICLA/bootloader.hex
+
+nicla_sense.debug.server.openocd.scripts.0=interface/{programmer.protocol}.cfg
+nicla_sense.debug.server.openocd.scripts.1={programmer.transport_script}
+nicla_sense.debug.server.openocd.scripts.2=target/nrf52.cfg
+nicla_sense.debug.svd_file={runtime.platform.path}/svd/nrf52833.svd
 
 ##############################################################
 
@@ -472,6 +504,11 @@ nicla_voice.bootloader.config=-f target/nrf52.cfg
 nicla_voice.bootloader.programmer=-f interface/cmsis-dap.cfg
 nicla_voice.bootloader.file=NICLA_VOICE/bootloader_application.hex
 
+nicla_voice.debug.server.openocd.scripts.0=interface/{programmer.protocol}.cfg
+nicla_voice.debug.server.openocd.scripts.1={programmer.transport_script}
+nicla_voice.debug.server.openocd.scripts.2=target/nrf52.cfg
+nicla_voice.debug.svd_file={runtime.platform.path}/svd/nrf52833.svd
+
 ##############################################################
 
 nicla_vision.name=Arduino Nicla Vision
@@ -492,7 +529,7 @@ nicla_vision.menu.target_core.cm7.build.fpu=-mfpu=fpv5-d16
 nicla_vision.menu.target_core.cm7.build.architecture=cortex-m7
 nicla_vision.menu.target_core.cm7.compiler.mbed.arch.define=
 
-nicla_vision.menu.target_core.cm4.build.variant=PORTENTA_H7_M4
+nicla_vision.menu.target_core.cm4.build.variant=GENERIC_STM32H747_M4
 nicla_vision.menu.target_core.cm4.build.mcu=cortex-m4
 nicla_vision.menu.target_core.cm4.build.fpu=-mfpu=fpv4-sp-d16
 nicla_vision.menu.target_core.cm4.build.architecture=cortex-m4
@@ -510,7 +547,7 @@ nicla_vision.compiler.mbed.defines={build.variant.path}/defines.txt
 nicla_vision.compiler.mbed.ldflags={build.variant.path}/ldflags.txt
 nicla_vision.compiler.mbed.cflags={build.variant.path}/cflags.txt
 nicla_vision.compiler.mbed.cxxflags={build.variant.path}/cxxflags.txt
-nicla_vision.compiler.mbed.includes={build.variant.path}/includes.txt
+nicla_vision.compiler.mbed.includes={build.variant.path}/../NICLA_VISION/includes.txt
 nicla_vision.compiler.mbed.extra_ldflags=-lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
 nicla_vision.compiler.mbed="{build.variant.path}/libs/libmbed.a"
 nicla_vision.vid.0=0x2341
@@ -567,6 +604,13 @@ nicla_vision.bootloader.programmer=-f interface/stlink.cfg
 nicla_vision.bootloader.extra_action.preflash=stm32h7x option_write 0 0x01c 0xb86aaf0
 nicla_vision.bootloader.file=NICLA_VISION/bootloader.elf
 
+nicla_vision.debug.server.openocd.scripts.0=interface/{programmer.protocol}.cfg
+nicla_vision.debug.server.openocd.scripts.1={programmer.transport_script}
+nicla_vision.debug.server.openocd.scripts.2=target/stm32h7x_dual_bank.cfg
+nicla_vision.debug.cortex-debug.custom.request=attach
+nicla_vision.menu.target_core.cm7.debug.svd_file={runtime.platform.path}/svd/STM32H747_CM7.svd
+nicla_vision.menu.target_core.cm4.debug.svd_file={runtime.platform.path}/svd/STM32H747_CM4.svd
+
 ##############################################################
 
 opta.name=Opta
@@ -581,32 +625,43 @@ opta.menu.split.100_0=2MB M7
 opta.menu.split.75_25=1.5MB M7 + 0.5MB M4
 opta.menu.split.50_50=1MB M7 + 1MB M4
 
+opta.menu.security.none=None
+opta.menu.security.sien=Signature + Encryption
+
 opta.menu.target_core.cm7.build.variant=OPTA
 opta.menu.target_core.cm7.build.mcu=cortex-m7
 opta.menu.target_core.cm7.build.fpu=-mfpu=fpv5-d16
 opta.menu.target_core.cm7.build.architecture=cortex-m7
 opta.menu.target_core.cm7.compiler.mbed.arch.define=
 
-opta.menu.target_core.cm4.build.variant=PORTENTA_H7_M4
+opta.menu.target_core.cm4.build.variant=GENERIC_STM32H747_M4
 opta.menu.target_core.cm4.build.mcu=cortex-m4
 opta.menu.target_core.cm4.build.fpu=-mfpu=fpv4-sp-d16
 opta.menu.target_core.cm4.build.architecture=cortex-m4
 opta.menu.target_core.cm4.compiler.mbed.arch.define=-DOPTA_PINS
 
+opta.build.float-abi=-mfloat-abi=softfp
+opta.build.extra_flags=
 opta.menu.split.50_50.build.extra_ldflags=-DCM4_BINARY_START=0x08100000 -DCM4_BINARY_END=0x08200000
 opta.menu.split.75_25.build.extra_ldflags=-DCM4_BINARY_START=0x08180000 -DCM4_BINARY_END=0x08200000
 opta.menu.split.100_0.build.extra_ldflags=-DCM4_BINARY_START=0x60000000 -DCM4_BINARY_END=0x60040000 -DCM4_RAM_END=0x60080000
-opta.build.board={build.variant}
 
-opta.build.extra_flags=
-opta.build.float-abi=-mfloat-abi=softfp
+opta.build.board={build.variant}
 opta.build.ldscript=linker_script.ld
 opta.compiler.mbed.arch.define=
+opta.build.slot_size=0x1E0000
+opta.build.header_size=0x20000
+opta.build.alignment=32
+opta.build.version=1.2.3+4
+opta.menu.security.sien.recipe.hooks.objcopy.postobjcopy.1.pattern="{tools.imgtool.path}/{tools.imgtool.cmd}" {tools.imgtool.flags}
+opta.menu.security.sien.build.keys.keychain={runtime.platform.path}/libraries/MCUboot/default_keys
+opta.menu.security.sien.build.keys.sign_key=ecdsa-p256-signing-priv-key.pem
+opta.menu.security.sien.build.keys.encrypt_key=ecdsa-p256-encrypt-pub-key.pem
 opta.compiler.mbed.defines={build.variant.path}/defines.txt
 opta.compiler.mbed.ldflags={build.variant.path}/ldflags.txt
 opta.compiler.mbed.cflags={build.variant.path}/cflags.txt
 opta.compiler.mbed.cxxflags={build.variant.path}/cxxflags.txt
-opta.compiler.mbed.includes={build.variant.path}/includes.txt
+opta.compiler.mbed.includes={build.variant.path}/../OPTA/includes.txt
 opta.compiler.mbed.extra_ldflags=-lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
 opta.compiler.mbed="{build.variant.path}/libs/libmbed.a"
 opta.vid.0=0x2341
@@ -653,10 +708,15 @@ opta.upload.interface=0
 opta.upload.use_1200bps_touch=true
 opta.upload.wait_for_upload_port=true
 opta.upload.native_usb=true
-opta.upload.maximum_size=786432
+opta.upload.maximum_size=1966080
 opta.upload.maximum_data_size=523624
 
-opta.menu.target_core.cm7.upload.address=0x08040000
+opta.menu.security.none.upload.interface=0
+opta.menu.security.sien.upload.interface=2
+
+opta.menu.security.none.upload.address_m7=0x08040000
+opta.menu.security.sien.upload.address_m7=0xA0000000
+opta.menu.target_core.cm7.upload.address={upload.address_m7}
 
 opta.menu.target_core.cm7.menu.split.50_50.upload.maximum_size=786432
 opta.menu.target_core.cm7.menu.split.75_25.upload.maximum_size=1441792
@@ -680,6 +740,13 @@ opta.bootloader.programmer=-f interface/stlink.cfg
 opta.bootloader.extra_action.preflash=stm32h7x option_write 0 0x01c 0xb86aaf0
 opta.bootloader.file=OPTA/bootloader.elf
 
+opta.debug.server.openocd.scripts.0=interface/{programmer.protocol}.cfg
+opta.debug.server.openocd.scripts.1={programmer.transport_script}
+opta.debug.server.openocd.scripts.2=target/stm32h7x_dual_bank.cfg
+opta.debug.cortex-debug.custom.request=attach
+opta.menu.target_core.cm7.debug.svd_file={runtime.platform.path}/svd/STM32H747_CM7.svd
+opta.menu.target_core.cm4.debug.svd_file={runtime.platform.path}/svd/STM32H747_CM4.svd
+
 ##############################################################
 
 giga.name=Arduino Giga R1
@@ -700,7 +767,7 @@ giga.menu.target_core.cm7.build.fpu=-mfpu=fpv5-d16
 giga.menu.target_core.cm7.build.architecture=cortex-m7
 giga.menu.target_core.cm7.compiler.mbed.arch.define=
 
-giga.menu.target_core.cm4.build.variant=PORTENTA_H7_M4
+giga.menu.target_core.cm4.build.variant=GENERIC_STM32H747_M4
 giga.menu.target_core.cm4.build.mcu=cortex-m4
 giga.menu.target_core.cm4.build.fpu=-mfpu=fpv4-sp-d16
 giga.menu.target_core.cm4.build.architecture=cortex-m4
@@ -723,7 +790,7 @@ giga.compiler.mbed.defines={build.variant.path}/defines.txt
 giga.compiler.mbed.ldflags={build.variant.path}/ldflags.txt
 giga.compiler.mbed.cflags={build.variant.path}/cflags.txt
 giga.compiler.mbed.cxxflags={build.variant.path}/cxxflags.txt
-giga.compiler.mbed.includes={build.variant.path}/includes.txt
+giga.compiler.mbed.includes={build.variant.path}/../GIGA/includes.txt
 giga.compiler.mbed.extra_ldflags=-lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
 giga.compiler.mbed="{build.variant.path}/libs/libmbed.a"
 giga.vid.0=0x2341
@@ -775,3 +842,10 @@ giga.bootloader.config=-f target/stm32h7x_dual_bank.cfg
 giga.bootloader.programmer=-f interface/stlink.cfg
 giga.bootloader.extra_action.preflash=stm32h7x option_write 0 0x01c 0xb86aaf0
 giga.bootloader.file=GIGA/bootloader.elf
+
+giga.debug.server.openocd.scripts.0=interface/{programmer.protocol}.cfg
+giga.debug.server.openocd.scripts.1={programmer.transport_script}
+giga.debug.server.openocd.scripts.2=target/stm32h7x_dual_bank.cfg
+giga.debug.cortex-debug.custom.request=attach
+giga.menu.target_core.cm7.debug.svd_file={runtime.platform.path}/svd/STM32H747_CM7.svd
+giga.menu.target_core.cm4.debug.svd_file={runtime.platform.path}/svd/STM32H747_CM4.svd

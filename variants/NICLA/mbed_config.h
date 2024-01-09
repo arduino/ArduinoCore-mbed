@@ -31,7 +31,7 @@
 #define BLE_FEATURE_PHY_MANAGEMENT                                              1                                                                                                // set by library:ble
 #define BLE_FEATURE_PRIVACY                                                     0                                                                                                // set by application[*]
 #define BLE_FEATURE_SECURE_CONNECTIONS                                          0                                                                                                // set by application[*]
-#define BLE_FEATURE_SECURITY                                                    0                                                                                                // set by application[*]
+#define BLE_FEATURE_SECURITY                                                    1                                                                                                // set by application[*]
 #define BLE_FEATURE_SIGNING                                                     0                                                                                                // set by application[*]
 #define BLE_FEATURE_WHITELIST                                                   0                                                                                                // set by application[*]
 #define BLE_GAP_HOST_BASED_PRIVATE_ADDRESS_RESOLUTION                           0                                                                                                // set by application[*]
@@ -199,6 +199,7 @@
 #define MBED_CONF_LORA_NWKSKEY                                                  {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00} // set by library:lora
 #define MBED_CONF_LORA_OVER_THE_AIR_ACTIVATION                                  1                                                                                                // set by library:lora
 #define MBED_CONF_LORA_PHY                                                      EU868                                                                                            // set by library:lora
+#define MBED_CONF_LORA_PHY_AS923_SUB_REGION                                     AS1                                                                                              // set by library:lora
 #define MBED_CONF_LORA_PUBLIC_NETWORK                                           1                                                                                                // set by library:lora
 #define MBED_CONF_LORA_TX_MAX_SIZE                                              64                                                                                               // set by library:lora
 #define MBED_CONF_LORA_UPLINK_PREAMBLE_LENGTH                                   8                                                                                                // set by library:lora
@@ -305,7 +306,7 @@
 #define MBED_CONF_RTOS_PRESENT                                                  1                                                                                                // set by library:rtos
 #define MBED_CONF_RTOS_SEMAPHORE_NUM                                            0                                                                                                // set by library:rtos
 #define MBED_CONF_RTOS_THREAD_NUM                                               0                                                                                                // set by library:rtos
-#define MBED_CONF_RTOS_THREAD_STACK_SIZE                                        1024                                                                                             // set by application[*]
+#define MBED_CONF_RTOS_THREAD_STACK_SIZE                                        768                                                                                              // set by application[*]
 #define MBED_CONF_RTOS_THREAD_USER_STACK_SIZE                                   0                                                                                                // set by library:rtos
 #define MBED_CONF_RTOS_TIMER_NUM                                                0                                                                                                // set by library:rtos
 #define MBED_CONF_RTOS_TIMER_THREAD_STACK_SIZE                                  768                                                                                              // set by library:rtos
@@ -385,9 +386,7 @@
 #define LHCI_ENABLE_VS                                                          0                                                                                                // defined by library:cordio-nordic-ll
 #define LL_MAX_PER_SCAN                                                         3                                                                                                // defined by library:cordio-nordic-ll
 #define MBEDTLS_CIPHER_MODE_CTR                                                                                                                                                  // defined by library:SecureStore
-#define MBED_HEAP_STATS_ENABLED                                                 1                                                                                                // defined by application
 #define MBED_MEM_TRACING_ENABLED                                                1                                                                                                // defined by application
-#define MBED_STACK_STATS_ENABLED                                                1                                                                                                // defined by application
 #define NRFX_GPIOTE_CONFIG_NUM_OF_LOW_POWER_EVENTS                              8                                                                                                // defined by application
 #define NRFX_WDT_ENABLED                                                        1                                                                                                // defined by application
 #define NSAPI_PPP_AVAILABLE                                                     (MBED_CONF_PPP_ENABLED || MBED_CONF_LWIP_PPP_ENABLED)                                            // defined by library:ppp

@@ -27,6 +27,15 @@ int arduino::WiFiClass::begin(const char* ssid, const char* passphrase) {
     return _currentNetworkStatus;
   }
 
+  wifi_if->set_dhcp(!_useStaticIP);
+  if (_useStaticIP) {
+    wifi_if->set_network(_ip, _netmask, _gateway);
+    char if_name[5];
+    wifi_if->get_interface_name(if_name);
+    wifi_if->add_dns_server(_dnsServer2, if_name);
+    wifi_if->add_dns_server(_dnsServer1, if_name); // pushes dnsServer2 at index 1
+  }
+
   nsapi_error_t result = wifi_if->connect(ssid, passphrase, ap_list[connected_ap].get_security());
 
   if(result == NSAPI_ERROR_IS_CONNECTED) {
@@ -39,8 +48,7 @@ int arduino::WiFiClass::begin(const char* ssid, const char* passphrase) {
 
 //Config Wifi to set Static IP && Disable DHCP
 void arduino::WiFiClass::config(const char* localip, const char* netmask, const char* gateway){
-  wifi_if->set_network(localip, netmask, gateway);
-  wifi_if->set_dhcp(false);
+  SocketHelpers::config(IPAddress(localip), dnsIP(0), IPAddress(gateway), IPAddress(netmask));
 }
 
 int arduino::WiFiClass::beginAP(const char* ssid, const char* passphrase, uint8_t channel) {
@@ -90,7 +98,7 @@ void* arduino::WiFiClass::handleAPEvents(whd_interface_t ifp, const whd_event_he
     if (osSemaphoreGetCount(whd_driver->ap_info.whd_wifi_sleep_flag) < 1) {
       osStatus_t result = osSemaphoreRelease(whd_driver->ap_info.whd_wifi_sleep_flag);
       if (result != osOK) {
-        printf("Release whd_wifi_sleep_flag ERROR: %d", result);
+        //printf("Release whd_wifi_sleep_flag ERROR: %d", result);
       }
     }
   }
@@ -188,6 +196,15 @@ uint8_t arduino::WiFiClass::encryptionType(uint8_t networkItem) {
   return sec2enum(ap_list[networkItem].get_security());
 }
 
+uint8_t* arduino::WiFiClass::BSSID(uint8_t networkItem, uint8_t* bssid) {
+  memcpy(bssid,  ap_list[networkItem].get_bssid(), 6);
+  return bssid;
+}
+
+uint8_t arduino::WiFiClass::channel(uint8_t networkItem) {
+  return ap_list[networkItem].get_channel();
+}
+
 int32_t arduino::WiFiClass::RSSI() {
   return wifi_if->get_rssi();
 }
@@ -238,12 +255,22 @@ void arduino::WiFiClass::MACAddress(uint8_t *mac_address)
 
 #define WIFI_FIRMWARE_PATH "/wlan/4343WA1.BIN"
 
+#if defined(CORE_CM4)
+#include "QSPIFBlockDevice.h"
+mbed::BlockDevice *mbed::BlockDevice::get_default_instance()
+{
+    static QSPIFBlockDevice default_bd(PD_11, PD_12, PE_2, PF_6,  PF_10, PG_6, QSPIF_POLARITY_MODE_1, 40000000);
+    return &default_bd;
+}
+#endif
+
 bool firmware_available = false;
 
 #include "wiced_filesystem.h"
 #include "resources.h"
 
 void wiced_filesystem_mount_error(void) {
+  while (!Serial) {}
   Serial.println("Failed to mount the filesystem containing the WiFi firmware.");
   Serial.println("Usually that means that the WiFi firmware has not been installed yet"
                  " or was overwritten with another firmware.");
@@ -252,6 +279,7 @@ void wiced_filesystem_mount_error(void) {
 }
 
 void wiced_filesystem_firmware_error(void) {
+  while (!Serial) {}
   Serial.println("Please run the \"WiFiFirmwareUpdater\" sketch once to install the WiFi firmware.");
   whd_print_logbuffer();
   while (1) {}
@@ -274,7 +302,7 @@ wiced_result_t whd_firmware_check_hook(const char* mounted_name, int mount_err) 
           return WICED_SUCCESS;
         }
       }
-      Serial.println("File not found");
+      if (Serial) { Serial.println("File not found\n"); }
       closedir(dir);
     }
     wiced_filesystem_firmware_error();

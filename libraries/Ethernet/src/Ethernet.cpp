@@ -9,6 +9,10 @@ int arduino::EthernetClass::begin(uint8_t *mac, unsigned long timeout, unsigned 
     if (eth_if == nullptr) return 0;
   }
 
+  if (mac != nullptr) {
+    eth_if->get_emac().set_hwaddr(mac);
+  }
+
   unsigned long start = millis();
   eth_if->set_blocking(false);
   eth_if->connect();

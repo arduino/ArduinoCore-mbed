@@ -28,7 +28,7 @@
 #define ALIGN_PTR(p,a)   ((p & (a-1)) ?(((uintptr_t)p + a) & ~(uintptr_t)(a-1)) : p)
 
 // Include all image sensor drivers here.
-#if defined (ARDUINO_PORTENTA_H7_M7) || defined (ARDUINO_PORTENTA_H7_M4)
+#if defined (ARDUINO_PORTENTA_H7_M7)
 
 #define DCMI_TIM                    (TIM1)
 #define DCMI_TIM_PIN                (GPIO_PIN_1)
@@ -80,7 +80,7 @@ arduino::MbedI2C CameraWire(I2C_SDA1, I2C_SCL1);
 
 // DCMI GPIO pins struct
 static const struct { GPIO_TypeDef *port; uint16_t pin; } dcmi_pins[] = {
-    #if defined (ARDUINO_PORTENTA_H7_M7) || defined (ARDUINO_PORTENTA_H7_M4)
+    #if defined (ARDUINO_PORTENTA_H7_M7)
     {GPIOA,     GPIO_PIN_4  },
     {GPIOA,     GPIO_PIN_6  },
     {GPIOI,     GPIO_PIN_4  },
@@ -137,6 +137,7 @@ const uint32_t restab[CAMERA_RMAX][2] = {
     {320,   240 }, // QVGA
     {320,   320 },
     {640,   480 }, // VGA
+    {0,       0 }, // Empty entry because there's a jump in the resolution enum initializers
     {800,   600 }, // SVGA
     {1600,  1200}, // UXGA
 };
@@ -174,7 +175,7 @@ void HAL_DCMI_MspInit(DCMI_HandleTypeDef *hdcmi)
     hgpio.Speed     = GPIO_SPEED_FREQ_VERY_HIGH;
     hgpio.Alternate = GPIO_AF13_DCMI;
 
-    #if defined (ARDUINO_PORTENTA_H7_M7) || defined (ARDUINO_PORTENTA_H7_M4)
+    #if defined (ARDUINO_PORTENTA_H7_M7)
     /* Enable GPIO clocks */
     __HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_GPIOH_CLK_ENABLE();
@@ -504,11 +505,30 @@ int Camera::setFrameRate(int32_t framerate)
     return -1;
 }
 
-int Camera::setResolution(int32_t resolution)
+int Camera::setResolutionWithZoom(int32_t resolution, int32_t zoom_resolution, int32_t zoom_x, int32_t zoom_y)
 {
     if (this->sensor == NULL || resolution >= CAMERA_RMAX
             || pixformat >= CAMERA_PMAX || pixformat == -1) {
         return -1;
+    }
+
+    // resolution = the full resolution to set the camera to
+    // zoom_resolution = the resolution to crop to when zooming (set equal to resolution for no zoom)
+    // final_resolution = the resolution to crop to (depends on zoom or not)
+    int32_t final_resolution;
+    // Check if zooming is asked for
+    if (resolution != zoom_resolution)
+    {
+        // Can't zoom into a larger window than the original
+        if (zoom_resolution > resolution)
+        {
+            return -1;
+        }
+        final_resolution = zoom_resolution;
+    }
+    else
+    {
+        final_resolution = resolution;
     }
 
     /*
@@ -518,20 +538,85 @@ int Camera::setResolution(int32_t resolution)
      * @param  YSize DCMI Line number
      */
     HAL_DCMI_EnableCROP(&hdcmi);
-    uint32_t bpl = restab[resolution][0];
+    uint32_t bpl = restab[final_resolution][0];
     if (pixformat == CAMERA_RGB565 ||
        (pixformat == CAMERA_GRAYSCALE && !this->sensor->getMono())) {
         // If the pixel format is Grayscale and sensor is Not monochrome,
         // the actual pixel format will be YUV (i.e 2 bytes per pixel).
         bpl *= 2;
     }
-    HAL_DCMI_ConfigCROP(&hdcmi, 0, 0, bpl - 1, restab[resolution][1] - 1);
+    HAL_DCMI_ConfigCROP(&hdcmi, 0, 0, bpl - 1, restab[final_resolution][1] - 1);
 
-    if (this->sensor->setResolution(resolution) == 0) {
-        this->resolution = resolution;
+    if (this->sensor->setResolutionWithZoom(resolution, zoom_resolution, zoom_x, zoom_y) == 0) {
+        this->resolution = final_resolution;
         return 0;
     }
     return -1;
+}
+
+int Camera::setResolution(int32_t resolution)
+{
+    // Check for resolutions that would cause out-of-bounds indexing of restab
+    // This check is here because original_resolution will be trusted in all other code
+    if ((resolution < 0) || (resolution >= CAMERA_RMAX))
+    {
+        return -1;
+    }
+    original_resolution = resolution;
+    return setResolutionWithZoom(resolution, resolution, 0, 0);
+}
+
+int Camera::zoomTo(int32_t zoom_resolution, uint32_t zoom_x, uint32_t zoom_y)
+{
+    // Check for zoom resolutions that would cause out-of-bounds indexing of restab
+    if ((zoom_resolution < 0) || (zoom_resolution >= CAMERA_RMAX))
+    {
+        return -1;
+    }
+    // Check if the zoom window goes outside the frame on the x axis
+    // Notice that this form prevents uint32_t wraparound, so don't change it
+    if (zoom_x >= (restab[this->original_resolution][0]) - (restab[zoom_resolution][0]))
+    {
+         return -1;
+    }
+    // Check if the zoom window goes outside the frame on the y axis
+    // Notice that this form prevents uint32_t wraparound, so don't change it
+    if (zoom_y >= (restab[this->original_resolution][1]) - (restab[zoom_resolution][1]))
+    {
+        return -1;
+    }
+    return setResolutionWithZoom(this->original_resolution, zoom_resolution, zoom_x, zoom_y);
+}
+
+int Camera::zoomToCenter(int32_t zoom_resolution)
+{
+    // Check for zoom resolutions that would cause out-of-bounds indexing of restab
+    if ((zoom_resolution < 0) || (zoom_resolution >= CAMERA_RMAX))
+    {
+        return -1;
+    }
+    uint32_t zoom_x = (restab[this->original_resolution][0] - restab[zoom_resolution][0]) / 2;
+    uint32_t zoom_y = (restab[this->original_resolution][1] - restab[zoom_resolution][1]) / 2;
+    return setResolutionWithZoom(this->original_resolution, zoom_resolution, zoom_x, zoom_y);
+}
+
+int Camera::setVerticalFlip(bool flip_enable)
+{
+    return (this->sensor->setVerticalFlip(flip_enable));
+}
+
+int Camera::setHorizontalMirror(bool mirror_enable)
+{
+    return (this->sensor->setHorizontalMirror(mirror_enable));
+}
+
+uint32_t Camera::getResolutionWidth()
+{
+    return (restab[this->original_resolution][0]);
+}
+uint32_t Camera::getResolutionHeight()
+{
+    return (restab[this->original_resolution][1]);
 }
 
 int Camera::setPixelFormat(int32_t pixformat)

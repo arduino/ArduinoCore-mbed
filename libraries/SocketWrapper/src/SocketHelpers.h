@@ -99,13 +99,37 @@ public:
      */
   IPAddress dnsServerIP();
 
-  virtual NetworkInterface* getNetwork() = 0;
+  /*
+     * Get the DNS Server ip address.
+     *
+     * return: DNS Server ip address value
+     */
+  IPAddress dnsIP(int n = 0);
 
-  int download(char* url, const char* target, bool const is_https = false);
+  virtual NetworkInterface* getNetwork() = 0;
+  
+  /*
+     * Download a file from an HTTP endpoint and save it in the provided `target` location on the fs
+     * The parameter cbk can be used to perform actions on the buffer before saving on the fs
+     *
+     * return: on success the size of the downloaded file, on error -status code
+     */
+  int download(
+    const char* url, const char* target, bool const is_https = false);
+  /*
+     * Download a file from an HTTP endpoint and handle the body of the request on a callback
+     * passed as an argument
+     *
+     * return: on success the size of the downloaded file, on error -status code
+     */
+  int download(
+    const char* url, bool const is_https = false,
+    mbed::Callback<void(const char*, uint32_t)> cbk = nullptr);
 
   int hostByName(const char* aHostname, IPAddress& aResult);
 
   uint8_t* macAddress(uint8_t* mac);
+  String macAddress();
 
   void setFeedWatchdogFunc(voidFuncPtr func);
   void feedWatchdog();
@@ -120,6 +144,7 @@ protected:
   SocketAddress _netmask = nullptr;
   SocketAddress _dnsServer1 = nullptr;
   SocketAddress _dnsServer2 = nullptr;
+  bool _useStaticIP = false;
 
   voidFuncPtr _feed_watchdog_func = nullptr;
 

@@ -49,6 +49,10 @@ private:
 public:
   MbedClient();
 
+  MbedClient(unsigned long  timeout) {
+    _timeout = timeout;
+  }
+
   // Copy constructor, to be used when a Client returned by server.available()
   // needs to "survive" event if it goes out of scope
   // Sample usage: Client* new_client = new Client(existing_client)
@@ -93,7 +97,7 @@ public:
   IPAddress remoteIP();
   uint16_t remotePort();
 
-  void setTimeout(unsigned long timeout);
+  void setSocketTimeout(unsigned long timeout);
 
   friend class MbedServer;
   friend class MbedSSLClient;

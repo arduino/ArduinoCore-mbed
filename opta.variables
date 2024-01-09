@@ -1,5 +1,5 @@
 export FLAVOUR="opta"
-export VARIANTS=("OPTA PORTENTA_H7_M4")
+export VARIANTS=("OPTA GENERIC_STM32H747_M4")
 export FQBNS=("opta")
 export LIBRARIES=("Ethernet SPI WiFi openamp_arduino ThreadDebug KernelDebug RPC USBHID Wire rpclib USBHOST mbed-memory-status Scheduler USBMSD SocketWrapper STM32H747_System MRI")
 export BOOTLOADERS=("OPTA")

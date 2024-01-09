@@ -1,7 +1,5 @@
 #include <GSM.h>
 
-REDIRECT_STDOUT_TO(Serial);
-
 #include "arduino_secrets.h" 
 char pin[]      = SECRET_PIN;
 char apn[]      = SECRET_APN;
@@ -14,8 +12,20 @@ int port = 80;
 GSMClient client;
 
 void setup() {
+
+#if defined(ARDUINO_EDGE_CONTROL)
+  // Power ON MKR2
+  pinMode(ON_MKR2, OUTPUT);
+  digitalWrite(ON_MKR2, HIGH);
+#endif
+
   Serial.begin(115200);
   while(!Serial) {}
+
+  // To enable AT Trace debug uncomment the following lines
+  //GSM.trace(Serial);
+  //GSM.setTraceLevel(4);
+
   Serial.println("Starting Carrier Network registration");
   if(!GSM.begin(pin, apn, username, pass, CATNB, BAND_20 | BAND_19)){
     Serial.println("The board was not able to register to the network...");

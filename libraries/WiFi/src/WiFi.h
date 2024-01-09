@@ -197,6 +197,7 @@ public:
   friend class WiFiClient;
   friend class WiFiServer;
   friend class WiFiUDP;
+  friend class WiFiSSLClient;
 
   NetworkInterface* getNetwork();
 
@@ -221,5 +222,6 @@ extern WiFiClass WiFi;
 #include "WiFiClient.h"
 #include "WiFiServer.h"
 #include "WiFiUdp.h"
+#include "WiFiSSLClient.h"
 
 #endif

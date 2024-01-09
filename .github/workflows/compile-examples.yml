@@ -39,7 +39,9 @@ jobs:
           - fqbn: arduino:mbed:nicla_sense
           - fqbn: arduino:mbed:nicla_vision
           - fqbn: arduino:mbed:opta
+          - fqbn: arduino:mbed:giga
           - fqbn: arduino:mbed:nicla_voice
+          - fqbn: arduino:mbed:edge_control
 
         # compile only the examples compatible with each board
         include:
@@ -55,33 +57,32 @@ jobs:
               - ~/Arduino/libraries/ArduinoBLE
           - board:
               fqbn: arduino:mbed:envie_m7:target_core=cm4
-            additional-libraries: |
-              - name: lvgl
             additional-sketch-paths: |
-              - libraries/doom
               - libraries/KernelDebug
               - libraries/Portenta_SDCARD
               - libraries/Portenta_SDRAM
-              - libraries/Portenta_Video
               - libraries/RPC
           - board:
               fqbn: arduino:mbed:envie_m7
             additional-libraries: |
               - name: lvgl
-                version: 7.11.0
+                version: 8.3.5
               - name: MicroNMEA
               - name: ArduinoBLE
+              - name: ArduinoGraphics
+              - name: Arduino_GigaDisplayTouch
+              - name: emWin
             additional-sketch-paths: |
               - libraries/PDM
               - libraries/doom
               - libraries/KernelDebug
               - libraries/MCUboot
-              - libraries/Camera/examples
-              - libraries/Portenta_lvgl/examples/Portenta_lvgl
+              - libraries/Camera/examples/CameraCaptureRawBytes
+              - libraries/Camera/examples/CameraMotionDetect
               - libraries/Portenta_SDCARD
               - libraries/Portenta_SDRAM
               - libraries/STM32H747_System
-              - libraries/Portenta_Video
+              - libraries/Arduino_H7_Video
               - libraries/RPC
               - libraries/ThreadDebug
               - libraries/USBHID
@@ -115,6 +116,7 @@ jobs:
             additional-sketch-paths: |
               - libraries/PDM
               - libraries/Camera/examples/CameraCaptureRawBytes
+              - libraries/Camera/examples/CameraCaptureZoomPan
               - libraries/SE05X
               - libraries/STM32H747_System
               - libraries/ThreadDebug
@@ -132,6 +134,33 @@ jobs:
               - libraries/USBMSD/examples/AccessFlashAsUSBDisk
               - libraries/WiFi
           - board:
+              fqbn: arduino:mbed:giga
+            additional-libraries: |
+              - name: lvgl
+                version: 8.3.5
+              - name: MicroNMEA
+              - name: ArduinoBLE
+              - name: ArduinoGraphics
+              - name: Arduino_GigaDisplayTouch
+              - name: arducam_dvp
+              - name: emWin
+            additional-sketch-paths: |
+              - libraries/PDM
+              - libraries/MCUboot
+              - libraries/Camera/examples/CameraCaptureRawBytes
+              - libraries/Camera/examples/CameraMotionDetect
+              - libraries/Camera/examples/GigaCameraDisplay
+              - libraries/Portenta_SDCARD
+              - libraries/Portenta_SDRAM
+              - libraries/Arduino_H7_Video
+              - libraries/RPC
+              - libraries/ThreadDebug
+              - libraries/USBHID
+              - libraries/USBHOST
+              - libraries/USBMSD/examples/AccessFlashAsUSBDisk
+              - libraries/WiFi
+              - ~/Arduino/libraries/ArduinoBLE
+          - board:
               fqbn: arduino:mbed:nicla_voice
             additional-sketch-paths: |
               - libraries/Nicla_System
@@ -141,10 +170,19 @@ jobs:
               - name: ArduinoBLE
               - name: arduino-audio-tools
                 source-url: https://github.com/pschatzmann/arduino-audio-tools.git
-                version: v0.9.4
+                version: v0.9.6
               - name: arduino-libg722
                 source-url: https://github.com/pschatzmann/arduino-libg722.git
-
+          - board:
+              fqbn: arduino:mbed:edge_control
+            additional-libraries: |
+              - name: MicroNMEA
+            additional-sketch-paths: |
+              - libraries/GSM
+              - libraries/USBHID
+              - libraries/USBMSD/examples/Nano33BLE_FlashMassStorage
+              - libraries/ThreadDebug
+              
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2

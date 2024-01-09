@@ -20,7 +20,7 @@ extern PinName digitalPinToPinName(pin_size_t P);
 // ----
 #define PINS_COUNT           (PINCOUNT_fn())
 #define NUM_DIGITAL_PINS     (103u)
-#define NUM_ANALOG_INPUTS    (14u)
+#define NUM_ANALOG_INPUTS    (10u) // these are analog pins that can also be used as digital
 #define NUM_ANALOG_OUTPUTS   (2u)
 
 // LEDs
@@ -266,7 +266,7 @@ void _ontouch1200bps_();
 #define CAN_HOWMANY       2
 
 #define PIN_CAN0_TX       (PB_13)
-#define PIN_CAN0_RX       (PB_12)
+#define PIN_CAN0_RX       (PB_5)
 
 #define PIN_CAN1_TX       (PH_13)
 #define PIN_CAN1_RX       (PB_8)

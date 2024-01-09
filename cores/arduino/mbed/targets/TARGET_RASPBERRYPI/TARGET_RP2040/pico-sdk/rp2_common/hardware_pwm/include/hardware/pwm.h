@@ -177,6 +177,8 @@ static inline void pwm_config_set_wrap(pwm_config *c, uint16_t wrap) {
     c->top = wrap;
 }
 
+static inline void pwm_set_chan_level(uint slice_num, uint chan, uint16_t level);
+
 /** \brief Initialise a PWM with settings from a configuration object
  *  \ingroup hardware_pwm
  *
@@ -188,12 +190,12 @@ static inline void pwm_config_set_wrap(pwm_config *c, uint16_t wrap) {
  * \param start If true the PWM will be started running once configured. If false you will need to start
  *  manually using \ref pwm_set_enabled() or \ref pwm_set_mask_enabled()
  */
-static inline void pwm_init(uint slice_num, pwm_config *c, bool start) {
+static inline void pwm_init(uint slice_num, uint chan, pwm_config *c, bool start) {
     check_slice_num_param(slice_num);
     pwm_hw->slice[slice_num].csr = 0;
 
     pwm_hw->slice[slice_num].ctr = PWM_CH0_CTR_RESET;
-    pwm_hw->slice[slice_num].cc = PWM_CH0_CC_RESET;
+    pwm_set_chan_level(slice_num, chan, PWM_CH0_CC_A_RESET);
     pwm_hw->slice[slice_num].top = c->top;
     pwm_hw->slice[slice_num].div = c->div;
     pwm_hw->slice[slice_num].csr = c->csr | (bool_to_bit(start) << PWM_CH0_CSR_EN_LSB);
