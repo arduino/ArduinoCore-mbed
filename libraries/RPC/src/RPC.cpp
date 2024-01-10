@@ -52,12 +52,11 @@ int RPCClass::rpmsg_recv_callback(struct rpmsg_endpoint *ept, void *data, size_t
     uint8_t msgpack_type = ((uint8_t *) data)[1];
     switch (msgpack_type) {
         case MSGPACK_TYPE_REQUEST:
+        case MSGPACK_TYPE_NOTIFY:
             RPC.request((uint8_t *) data, len);
             break;
         case MSGPACK_TYPE_RESPONSE:
             RPC.response((uint8_t *) data, len);
-            break;
-        case MSGPACK_TYPE_NOTIFY:
             break;
     }
 
