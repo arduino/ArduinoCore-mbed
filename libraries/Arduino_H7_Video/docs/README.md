@@ -46,6 +46,18 @@ void loop() { }
 - **[ArduinoLogo](../examples/ArduinoLogo):** This example demonstrates how to display an Arduino logo image on the screen.
 - **[ArduinoLogoDrawing](../examples/ArduinoLogoDrawing):** This example demonstrates how to draw an Arduino logo image using graphics primitives (line, circle, rect, etc.).
 - **[LVGLDemo](../examples/LVGLDemo):** This example demonstrates how to create a graphical user interface (GUI) using the LVGL library. It includes the [Arduino_GigaDisplayTouch](https://github.com/arduino-libraries/Arduino_GigaDisplayTouch/) library to handle touch events.
+- **[emWinDemo](../examples/emWinDemo):** This example demonstrates how to create a graphical user interface (GUI) using the SEGGER emWin library. It includes the [emWin-Arduino-Library](https://github.com/SEGGERMicro/emWin-Arduino-Library) library.
+
+## Guides
+
+To learn more about usage of this library, you can check out the following guides:
+- [GIGA Display Shield LVGL Guide](https://docs.arduino.cc/tutorials/giga-display-shield/lvgl-guide).
+- [GIGA Display Shield Image Orientation Guide](https://docs.arduino.cc/tutorials/giga-display-shield/image-orientation)
+- [GIGA Display Shield Image Draw Guide](https://docs.arduino.cc/tutorials/giga-display-shield/basic-draw-and-image)
+
+
+You can also check out the following guide available in the Segger Wiki:
+- using the SEGGER emWin library on the GIGA Display Shield, check out the [SEGGER emWin on Arduino Wiki](https://wiki.segger.com/emWin_on_Arduino).
 
 ## API
 

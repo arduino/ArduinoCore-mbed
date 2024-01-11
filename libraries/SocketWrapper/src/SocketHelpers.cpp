@@ -50,20 +50,25 @@ arduino::IPAddress arduino::MbedSocketClass::gatewayIP() {
 arduino::IPAddress arduino::MbedSocketClass::dnsServerIP() {
   SocketAddress ip;
   NetworkInterface* interface = getNetwork();
-  interface->get_dns_server(0, &ip, nullptr);
+  char _if_name[5] {};
+  interface->get_interface_name(_if_name);
+  interface->get_dns_server(0, &ip, _if_name);
   return ipAddressFromSocketAddress(ip);
 }
 
 arduino::IPAddress arduino::MbedSocketClass::dnsIP(int n) {
   SocketAddress ip;
   NetworkInterface* interface = getNetwork();
-  interface->get_dns_server(n, &ip, nullptr);
+  char _if_name[5] {};
+  interface->get_interface_name(_if_name);
+  interface->get_dns_server(n, &ip, _if_name);
   return ipAddressFromSocketAddress(ip);
 }
 
 void arduino::MbedSocketClass::config(arduino::IPAddress local_ip) {
-  nsapi_addr_t convertedIP = { NSAPI_IPv4, { local_ip[0], local_ip[1], local_ip[2], local_ip[3] } };
-  _ip = SocketAddress(convertedIP);
+  IPAddress dns = local_ip;
+  dns[3] = 1;
+  config(local_ip, dns);
 }
 
 void arduino::MbedSocketClass::config(const char* local_ip) {
@@ -71,20 +76,27 @@ void arduino::MbedSocketClass::config(const char* local_ip) {
 }
 
 void arduino::MbedSocketClass::config(IPAddress local_ip, IPAddress dns_server) {
-  config(local_ip);
-  setDNS(dns_server);
+  IPAddress gw = local_ip;
+  gw[3] = 1;
+  config(local_ip, dns_server, gw);
 }
 
 void arduino::MbedSocketClass::config(IPAddress local_ip, IPAddress dns_server, IPAddress gateway) {
-  config(local_ip, dns_server);
-  nsapi_addr_t convertedGatewayIP = { NSAPI_IPv4, { gateway[0], gateway[1], gateway[2], gateway[3] } };
-  _gateway = SocketAddress(convertedGatewayIP);
+  IPAddress nm(255, 255, 255, 0);
+  config(local_ip, dns_server, gateway, nm);
 }
 
 void arduino::MbedSocketClass::config(IPAddress local_ip, IPAddress dns_server, IPAddress gateway, IPAddress subnet) {
-  config(local_ip, dns_server, gateway);
+  _useStaticIP = (local_ip != INADDR_NONE);
+  if (!_useStaticIP)
+    return;
+  nsapi_addr_t convertedIP = { NSAPI_IPv4, { local_ip[0], local_ip[1], local_ip[2], local_ip[3] } };
+  _ip = SocketAddress(convertedIP);
+  nsapi_addr_t convertedGatewayIP = { NSAPI_IPv4, { gateway[0], gateway[1], gateway[2], gateway[3] } };
+  _gateway = SocketAddress(convertedGatewayIP);
   nsapi_addr_t convertedSubnetMask = { NSAPI_IPv4, { subnet[0], subnet[1], subnet[2], subnet[3] } };
   _netmask = SocketAddress(convertedSubnetMask);
+  setDNS(dns_server);
 }
 
 void arduino::MbedSocketClass::setDNS(IPAddress dns_server1) {

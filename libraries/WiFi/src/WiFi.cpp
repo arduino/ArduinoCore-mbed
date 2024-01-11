@@ -27,6 +27,15 @@ int arduino::WiFiClass::begin(const char* ssid, const char* passphrase) {
     return _currentNetworkStatus;
   }
 
+  wifi_if->set_dhcp(!_useStaticIP);
+  if (_useStaticIP) {
+    wifi_if->set_network(_ip, _netmask, _gateway);
+    char if_name[5];
+    wifi_if->get_interface_name(if_name);
+    wifi_if->add_dns_server(_dnsServer2, if_name);
+    wifi_if->add_dns_server(_dnsServer1, if_name); // pushes dnsServer2 at index 1
+  }
+
   nsapi_error_t result = wifi_if->connect(ssid, passphrase, ap_list[connected_ap].get_security());
 
   if(result == NSAPI_ERROR_IS_CONNECTED) {
@@ -39,8 +48,7 @@ int arduino::WiFiClass::begin(const char* ssid, const char* passphrase) {
 
 //Config Wifi to set Static IP && Disable DHCP
 void arduino::WiFiClass::config(const char* localip, const char* netmask, const char* gateway){
-  wifi_if->set_network(localip, netmask, gateway);
-  wifi_if->set_dhcp(false);
+  SocketHelpers::config(IPAddress(localip), dnsIP(0), IPAddress(gateway), IPAddress(netmask));
 }
 
 int arduino::WiFiClass::beginAP(const char* ssid, const char* passphrase, uint8_t channel) {
@@ -186,6 +194,15 @@ int32_t arduino::WiFiClass::RSSI(uint8_t networkItem) {
 
 uint8_t arduino::WiFiClass::encryptionType(uint8_t networkItem) {
   return sec2enum(ap_list[networkItem].get_security());
+}
+
+uint8_t* arduino::WiFiClass::BSSID(uint8_t networkItem, uint8_t* bssid) {
+  memcpy(bssid,  ap_list[networkItem].get_bssid(), 6);
+  return bssid;
+}
+
+uint8_t arduino::WiFiClass::channel(uint8_t networkItem) {
+  return ap_list[networkItem].get_channel();
 }
 
 int32_t arduino::WiFiClass::RSSI() {

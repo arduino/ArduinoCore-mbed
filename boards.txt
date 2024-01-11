@@ -168,6 +168,7 @@ envie_m7.bootloader.file=PORTENTA_H7/portentah7_bootloader_mbed_hs_v2.elf
 envie_m7.debug.server.openocd.scripts.0=interface/{programmer.protocol}.cfg
 envie_m7.debug.server.openocd.scripts.1={programmer.transport_script}
 envie_m7.debug.server.openocd.scripts.2=target/stm32h7x_dual_bank.cfg
+envie_m7.debug.cortex-debug.custom.request=attach
 envie_m7.menu.target_core.cm7.debug.svd_file={runtime.platform.path}/svd/STM32H747_CM7.svd
 envie_m7.menu.target_core.cm4.debug.svd_file={runtime.platform.path}/svd/STM32H747_CM4.svd
 
@@ -606,6 +607,7 @@ nicla_vision.bootloader.file=NICLA_VISION/bootloader.elf
 nicla_vision.debug.server.openocd.scripts.0=interface/{programmer.protocol}.cfg
 nicla_vision.debug.server.openocd.scripts.1={programmer.transport_script}
 nicla_vision.debug.server.openocd.scripts.2=target/stm32h7x_dual_bank.cfg
+nicla_vision.debug.cortex-debug.custom.request=attach
 nicla_vision.menu.target_core.cm7.debug.svd_file={runtime.platform.path}/svd/STM32H747_CM7.svd
 nicla_vision.menu.target_core.cm4.debug.svd_file={runtime.platform.path}/svd/STM32H747_CM4.svd
 
@@ -741,6 +743,7 @@ opta.bootloader.file=OPTA/bootloader.elf
 opta.debug.server.openocd.scripts.0=interface/{programmer.protocol}.cfg
 opta.debug.server.openocd.scripts.1={programmer.transport_script}
 opta.debug.server.openocd.scripts.2=target/stm32h7x_dual_bank.cfg
+opta.debug.cortex-debug.custom.request=attach
 opta.menu.target_core.cm7.debug.svd_file={runtime.platform.path}/svd/STM32H747_CM7.svd
 opta.menu.target_core.cm4.debug.svd_file={runtime.platform.path}/svd/STM32H747_CM4.svd
 
@@ -843,5 +846,6 @@ giga.bootloader.file=GIGA/bootloader.elf
 giga.debug.server.openocd.scripts.0=interface/{programmer.protocol}.cfg
 giga.debug.server.openocd.scripts.1={programmer.transport_script}
 giga.debug.server.openocd.scripts.2=target/stm32h7x_dual_bank.cfg
+giga.debug.cortex-debug.custom.request=attach
 giga.menu.target_core.cm7.debug.svd_file={runtime.platform.path}/svd/STM32H747_CM7.svd
 giga.menu.target_core.cm4.debug.svd_file={runtime.platform.path}/svd/STM32H747_CM4.svd
