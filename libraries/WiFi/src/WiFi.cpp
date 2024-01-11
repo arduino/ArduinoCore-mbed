@@ -61,6 +61,10 @@ int arduino::WiFiClass::beginAP(const char* ssid, const char* passphrase, uint8_
   //Set ap ssid, password and channel
   softAPInterface->set_network(_ip, _netmask, _gateway);
   nsapi_error_t result = softAPInterface->start(ssid, passphrase, NSAPI_SECURITY_WPA2, channel, true /* dhcp server */, NULL, true /* cohexistance */);
+  if (result != NSAPI_ERROR_OK) {
+    _currentNetworkStatus = WL_AP_FAILED;
+    return _currentNetworkStatus;
+  }
 
   nsapi_error_t registrationResult;
   softAPInterface->unregister_event_handler();
