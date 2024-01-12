@@ -56,7 +56,7 @@ class RPCClass : public Stream, public rpc::detail::dispatcher {
         }
         void flush(void) {};
         size_t write(uint8_t c);
-        size_t write(const uint8_t *buf, size_t len, bool pack = true, bool raw = false);
+        size_t write(const uint8_t *buf, size_t len, bool raw = true);
 
         using Print::write; // pull in write(str) and write(buf, size) from Print
         operator bool() {
@@ -115,6 +115,7 @@ class RPCClass : public Stream, public rpc::detail::dispatcher {
         }
 
         rpc::client* clients[10];
+        RingBufferN<512> rx_buffer;
         mbed::Callback<void(const uint8_t *buf, size_t len)> raw_callback;
 
     private:
@@ -122,7 +123,6 @@ class RPCClass : public Stream, public rpc::detail::dispatcher {
         uint32_t _timeout = osWaitForever;
         bool has_timed_out = false;
         rtos::Thread* eventThread;
-        RingBufferN<512> rx_buffer;
         RPCLIB_MSGPACK::unpacker unpacker;
 
         static void new_service_cb(struct rpmsg_device *rdev, const char *name, uint32_t dest);

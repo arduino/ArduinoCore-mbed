@@ -12,6 +12,9 @@ arduino::RPCClass RPC;
 osThreadId eventHandlerThreadId;
 static rtos::Mutex mutex;
 static struct rpmsg_endpoint endpoints[2];
+#ifdef CORE_CM4
+static bool endpoints_init[2] = { 0 };
+#endif
 
 void RPCClass::new_service_cb(struct rpmsg_device *rdev, const char *name, uint32_t dest) {
     uint8_t buffer[1] = {0};
@@ -31,12 +34,11 @@ void RPCClass::new_service_cb(struct rpmsg_device *rdev, const char *name, uint3
 
 int RPCClass::rpmsg_recv_callback(struct rpmsg_endpoint *ept, void *data, size_t len, uint32_t src, void *priv) {
     #ifdef CORE_CM4
-    static bool ep_init_msg[2] = { 0 };
-    if (!ep_init_msg[ENDPOINT_ID_RPC] && ept == &endpoints[ENDPOINT_ID_RPC]) {
-        ep_init_msg[ENDPOINT_ID_RPC] = true;
+    if (!endpoints_init[ENDPOINT_ID_RPC] && ept == &endpoints[ENDPOINT_ID_RPC]) {
+        endpoints_init[ENDPOINT_ID_RPC] = true;
         return 0;
-    } else if (!ep_init_msg[ENDPOINT_ID_RAW] && ept == &endpoints[ENDPOINT_ID_RAW]) {
-        ep_init_msg[ENDPOINT_ID_RAW] = true;
+    } else if (!endpoints_init[ENDPOINT_ID_RAW] && ept == &endpoints[ENDPOINT_ID_RAW]) {
+        endpoints_init[ENDPOINT_ID_RAW] = true;
         return 0;
     }
     #endif
@@ -44,7 +46,11 @@ int RPCClass::rpmsg_recv_callback(struct rpmsg_endpoint *ept, void *data, size_t
     if (ept == &endpoints[ENDPOINT_ID_RAW]) {
         // data on raw endpoint
         if (RPC.raw_callback) {
-            RPC.raw_callback.call((const uint8_t *) data, len);
+            RPC.raw_callback.call((uint8_t *) data, len);
+        } else {
+            for (size_t i=0; i<len; i++) {
+                RPC.rx_buffer.store_char(((uint8_t *) data)[i]);
+            }
         }
         return 0;
     }
@@ -176,6 +182,16 @@ int RPCClass::begin() {
         return 0;
     }
 
+    // Wait for endpoints to be initialized first by the host before allowing
+    // the remote to use the endpoints.
+    uint32_t millis_start = millis();
+    while (!endpoints_init[ENDPOINT_ID_RPC] || !endpoints_init[ENDPOINT_ID_RAW]) {
+        if ((millis() - millis_start) >= 5000) {
+            return 0;
+        }
+        osDelay(10);
+    }
+
     return 1;
 }
 #endif
@@ -217,51 +233,23 @@ void RPCClass::request(uint8_t *buf, size_t len) {
     RPCLIB_MSGPACK::unpacked result;
     while (unpacker.next(result)) {
         auto msg = result.get();
-        if (msg.via.array.size == 1) {
-            // raw array
-            std::tuple<RPCLIB_MSGPACK::object> arr;
-            msg.convert(arr);
-
-            std::vector<uint8_t> buf;
-            std::get<0>(arr).convert(buf);
-
-            for (size_t i = 0; i < buf.size(); i++) {
-                rx_buffer.store_char(buf[i]);
-            }
-        }
-
-        if (msg.via.array.size > 2) {
-            auto resp = rpc::detail::dispatcher::dispatch(msg, false);
-            auto data = resp.get_data();
-            if (!resp.is_empty()) {
-                OPENAMP_send(&endpoints[ENDPOINT_ID_RPC], data.data(), data.size());
-            }
+        auto resp = rpc::detail::dispatcher::dispatch(msg, false);
+        auto data = resp.get_data();
+        if (!resp.is_empty()) {
+            OPENAMP_send(&endpoints[ENDPOINT_ID_RPC], data.data(), data.size());
         }
     }
 }
 
 size_t RPCClass::write(uint8_t c) {
-    return write(&c, 1, true, false);
+    return write(&c, 1, true);
 }
 
 void rpc::client::write(RPCLIB_MSGPACK::sbuffer *buffer) {
-    RPC.write((const uint8_t *) buffer->data(), buffer->size(), false, false);
+    RPC.write((const uint8_t *) buffer->data(), buffer->size(), false);
 }
 
-size_t RPCClass::write(const uint8_t *buf, size_t len, bool pack, bool raw) {
-    if (pack) {
-        std::vector<uint8_t> tx_buffer;
-        for (size_t i = 0; i < len; i++) {
-            tx_buffer.push_back(buf[i]);
-        }
-        auto call_obj = std::make_tuple(tx_buffer);
-
-        RPCLIB_MSGPACK::sbuffer buffer;
-        RPCLIB_MSGPACK::pack(buffer, call_obj);
-        len = buffer.size();
-        buf = (const uint8_t *) buffer.data();
-    }
-
+size_t RPCClass::write(const uint8_t *buf, size_t len, bool raw) {
     mutex.lock();
     OPENAMP_send(&endpoints[raw ? ENDPOINT_ID_RAW : ENDPOINT_ID_RPC], buf, len);
     mutex.unlock();
