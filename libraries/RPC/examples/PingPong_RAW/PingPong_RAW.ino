@@ -16,7 +16,7 @@ void recv_callback(const uint8_t *buf, size_t len) {
     Serial.println();
     #else
     const uint8_t msg[] = "Pong!";
-    RPC.write(&msg[0], sizeof(msg), false, true);
+    RPC.write(&msg[0], sizeof(msg), true);
     #endif
 }
 
