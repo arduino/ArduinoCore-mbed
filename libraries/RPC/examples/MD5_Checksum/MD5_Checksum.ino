@@ -7,7 +7,7 @@ size_t hash_out_count = 0;
 #ifdef CORE_CM4
 size_t data_buf_size = 0;
 #else
-size_t data_buf_size = 512;
+size_t data_buf_size = 256;
 #endif
 
 typedef std::vector<byte> vec_t;
@@ -59,6 +59,8 @@ void setup() {
     #ifdef CORE_CM4
     RPC.bind("set_buffer_size", set_buffer_size);    
     #else
+    // Introduce a brief delay to allow the M4 sufficient time
+    // to bind remote functions before invoking them.
     delay(100);
     auto ret = RPC.call("set_buffer_size", data_buf_size).as<size_t>();
     #endif
