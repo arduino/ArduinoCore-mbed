@@ -51,14 +51,20 @@ If resolution higher than 320x240 is required, please use external RAM via
   // and adding in setup()
   SDRAM.begin();
 */
-#define CHUNK_SIZE 512  // Size of chunks in bytes
-#define RESOLUTION  CAMERA_R320x240 // CAMERA_R160x120
-constexpr uint8_t START_SEQUENCE[4] = { 0xfa, 0xce, 0xfe, 0xed };
-constexpr uint8_t STOP_SEQUENCE[4] = { 0xda, 0xbb, 0xad, 0x00 };
+constexpr uint16_t CHUNK_SIZE = 512;  // Size of chunks in bytes
+constexpr uint8_t RESOLUTION  = CAMERA_R320x240; // CAMERA_R160x120
+constexpr uint8_t CONFIG_SEND_REQUEST = 2;
+constexpr uint8_t IMAGE_SEND_REQUEST = 1;
+
+uint8_t START_SEQUENCE[4] = { 0xfa, 0xce, 0xfe, 0xed };
+uint8_t STOP_SEQUENCE[4] = { 0xda, 0xbb, 0xad, 0x00 };
 FrameBuffer fb;
 
-unsigned long lastUpdate = 0;
-
+/**
+ * Blinks the LED a specified number of times.
+ * 
+ * @param count The number of times to blink the LED. Default is 0xFFFFFFFF.
+ */
 void blinkLED(uint32_t count = 0xFFFFFFFF) { 
   while (count--) {
     digitalWrite(LED_BUILTIN, LOW);  // turn the LED on (HIGH is the voltage level)
@@ -79,6 +85,21 @@ void setup() {
   blinkLED(5);
 }
 
+/**
+ * Sends a chunk of data over a serial connection.
+ * 
+ * @param buffer The buffer containing the data to be sent.
+ * @param bufferSize The size of the buffer.
+ */
+void sendChunk(uint8_t* buffer, size_t bufferSize){
+  Serial.write(buffer, bufferSize);
+  Serial.flush();
+  delay(1); // Optional: Add a small delay to allow the receiver to process the chunk
+}
+
+/**
+ * Sends a frame of camera image data over a serial connection.
+ */
 void sendFrame(){
   // Grab frame and write to serial
   if (cam.grabFrame(fb, 3000) == 0) {    
@@ -86,20 +107,15 @@ void sendFrame(){
     size_t bufferSize = cam.frameSize();
     digitalWrite(LED_BUILTIN, LOW);
     
-    Serial.write(START_SEQUENCE, sizeof(START_SEQUENCE));
-    Serial.flush();
-    delay(1);
+    sendChunk(START_SEQUENCE, sizeof(START_SEQUENCE));
 
     // Split buffer into chunks
     for(size_t i = 0; i < bufferSize; i += CHUNK_SIZE) {
       size_t chunkSize = min(bufferSize - i, CHUNK_SIZE);
-      Serial.write(buffer + i, chunkSize);
-      Serial.flush();
-      delay(1);  // Optional: Add a small delay to allow the receiver to process the chunk
+      sendChunk(buffer + i, chunkSize);
     }    
-    Serial.write(STOP_SEQUENCE, sizeof(STOP_SEQUENCE));
-    Serial.flush();
-    delay(1);
+    
+    sendChunk(STOP_SEQUENCE, sizeof(STOP_SEQUENCE));
     
     digitalWrite(LED_BUILTIN, HIGH);
   } else {
@@ -107,6 +123,10 @@ void sendFrame(){
   }
 }
 
+/**
+ * Sends the camera configuration over a serial connection.
+ * This is used to configure the web app to display the image correctly.
+ */
 void sendCameraConfig(){
   Serial.write(IMAGE_MODE);
   Serial.write(RESOLUTION);
@@ -125,10 +145,10 @@ void loop() {
   byte request = Serial.read();
 
   switch(request){
-    case 1:
+    case IMAGE_SEND_REQUEST:
       sendFrame();
       break; 
-    case 2:
+    case CONFIG_SEND_REQUEST:
       sendCameraConfig();
       break;
   }
