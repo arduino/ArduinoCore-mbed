@@ -5,6 +5,166 @@
 
 
 /**
+ * Represents a transformer that processes incoming data between start and stop sequences.
+ */
+class StartStopSequenceTransformer {
+    constructor(startSequence = null, stopSequence = null, expectedBytes = null) {
+        this.startSequence = new Uint8Array(startSequence);
+        this.stopSequence = new Uint8Array(stopSequence);
+        this.expectedBytes = expectedBytes;
+        this.buffer = new Uint8Array(0);
+        this.controller = undefined;
+        this.waitingForStart = true;
+    }
+
+    /**
+     * Sets the start sequence for the received data.
+     * This is used to disregard any data before the start sequence.
+     * @param {Array<number>} startSequence - The start sequence as an array of numbers.
+     */
+    setStartSequence(startSequence) {
+        this.startSequence = new Uint8Array(startSequence);
+    }
+
+    /**
+     * Sets the stop sequence for the received data.
+     * This is used to know when the data has finished being sent and should be processed.
+     * @param {Array<number>} stopSequence - The stop sequence as an array of numbers.
+     */
+    setStopSequence(stopSequence) {
+        this.stopSequence = new Uint8Array(stopSequence);
+    }
+
+    /**
+     * Sets the expected number of bytes for the received data.
+     * This is used to check if the number of bytes matches the expected amount
+     * and discard the data if it doesn't.
+     * 
+     * @param {number} expectedBytes - The expected number of bytes.
+     */
+    setExpectedBytes(expectedBytes) {
+        this.expectedBytes = expectedBytes;
+    }
+
+    /**
+     * Transforms the incoming chunk of data and enqueues the processed bytes to the controller
+     * between start and stop sequences.
+     * 
+     * @param {Uint8Array} chunk - The incoming chunk of data.
+     * @param {TransformStreamDefaultController} controller - The controller for enqueuing processed bytes.
+     * @returns {Promise<void>} - A promise that resolves when the transformation is complete.
+     */
+    async transform(chunk, controller) {
+        this.controller = controller;
+
+        // Concatenate incoming chunk with existing buffer
+        this.buffer = new Uint8Array([...this.buffer, ...chunk]);
+
+        let startIndex = 0;
+
+        while (startIndex < this.buffer.length) {
+            if (this.waitingForStart) {
+                // Look for the start sequence
+                startIndex = this.indexOfSequence(this.buffer, this.startSequence, startIndex);
+
+                if (startIndex === -1) {
+                    // No start sequence found, discard the buffer
+                    this.buffer = new Uint8Array(0);
+                    return;
+                }
+
+                // Remove bytes before the start sequence
+                this.buffer = this.buffer.slice(startIndex + this.startSequence.length);
+                startIndex = 0; // Reset startIndex after removing bytes
+                this.waitingForStart = false;
+            }
+
+            // Look for the stop sequence
+            const stopIndex = this.indexOfSequence(this.buffer, this.stopSequence, startIndex);
+
+            if (stopIndex === -1) {
+                // No stop sequence found, wait for more data
+                return;
+            }
+
+            // Extract bytes between start and stop sequences
+            const bytesToProcess = this.buffer.slice(startIndex, stopIndex);
+            this.buffer = this.buffer.slice(stopIndex + this.stopSequence.length);
+
+            // Check if the number of bytes matches the expected amount
+            if (this.expectedBytes !== null && bytesToProcess.length !== this.expectedBytes) {
+                // Drop all bytes in the buffer to avoid broken data
+                throw new Error(`🚫 Expected ${this.expectedBytes} bytes, but got ${bytesToProcess.length} bytes instead.`);
+                this.buffer = new Uint8Array(0);
+                return;
+            }
+
+            // Notify the controller that bytes have been processed
+            controller.enqueue(this.convertBytes(bytesToProcess));
+            this.waitingForStart = true;
+        }
+    }
+
+    /**
+     * Flushes the buffer and processes any remaining bytes when the stream is closed.
+     * 
+     * @param {WritableStreamDefaultController} controller - The controller for the writable stream.
+     */
+    flush(controller) {
+        // Only enqueue the remaining bytes if they meet the expectedBytes criteria
+        if (this.buffer.length === this.expectedBytes || this.expectedBytes === null) {
+            controller?.enqueue(this.buffer);
+        }
+    }
+
+    /**
+     * Finds the index of the given sequence in the buffer.
+     * 
+     * @param {Uint8Array} buffer - The buffer to search.
+     * @param {Uint8Array} sequence - The sequence to find.
+     * @param {number} startIndex - The index to start searching from.
+     * @returns {number} - The index of the sequence in the buffer, or -1 if not found.
+     */
+    indexOfSequence(buffer, sequence, startIndex) {
+        for (let i = startIndex; i <= buffer.length - sequence.length; i++) {
+            if (this.isSubarray(buffer, sequence, i)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Checks if a subarray is present at a given index in the buffer.
+     * 
+     * @param {Uint8Array} buffer - The buffer to check.
+     * @param {Uint8Array} subarray - The subarray to check.
+     * @param {number} index - The index to start checking from.
+     * @returns {boolean} - True if the subarray is present at the given index, false otherwise.
+     */
+    isSubarray(buffer, subarray, index) {
+        for (let i = 0; i < subarray.length; i++) {
+            if (buffer[index + i] !== subarray[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Converts bytes into higher-level data types.
+     * This method is meant to be overridden by subclasses.
+     * @param {Uint8Array} bytes 
+     * @returns 
+     */
+    convertBytes(bytes) {
+        return bytes;
+    }
+    
+}
+
+
+/**
  * A transformer class that waits for a specific number of bytes before processing them.
  */
 class BytesWaitTransformer {
@@ -77,9 +237,9 @@ class BytesWaitTransformer {
 /**
  * Represents an Image Data Transformer that converts bytes into image data.
  * See other example for PNGs here: https://github.com/mdn/dom-examples/blob/main/streams/png-transform-stream/png-transform-stream.js
- * @extends BytesWaitTransformer
+ * @extends StartStopSequenceTransformer
  */
-class ImageDataTransformer extends BytesWaitTransformer {
+class ImageDataTransformer extends StartStopSequenceTransformer {
     /**
      * Creates a new instance of the Transformer class.
      * @param {CanvasRenderingContext2D} context - The canvas rendering context.
@@ -110,7 +270,7 @@ class ImageDataTransformer extends BytesWaitTransformer {
         this.height = height;
         this.imageDataProcessor.setResolution(width, height);
         if(this.isConfigured()){
-            this.setBytesToWait(this.imageDataProcessor.getTotalBytes());
+            this.setExpectedBytes(this.imageDataProcessor.getTotalBytes());
         }
     }
 

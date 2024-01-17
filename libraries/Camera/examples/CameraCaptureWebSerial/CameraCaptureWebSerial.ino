@@ -52,7 +52,9 @@ If resolution higher than 320x240 is required, please use external RAM via
   SDRAM.begin();
 */
 #define CHUNK_SIZE 512  // Size of chunks in bytes
-#define RESOLUTION CAMERA_R320x240
+#define RESOLUTION  CAMERA_R320x240 // CAMERA_R160x120
+constexpr uint8_t START_SEQUENCE[4] = { 0xfa, 0xce, 0xfe, 0xed };
+constexpr uint8_t STOP_SEQUENCE[4] = { 0xda, 0xbb, 0xad, 0x00 };
 FrameBuffer fb;
 
 unsigned long lastUpdate = 0;
@@ -84,6 +86,10 @@ void sendFrame(){
     size_t bufferSize = cam.frameSize();
     digitalWrite(LED_BUILTIN, LOW);
     
+    Serial.write(START_SEQUENCE, sizeof(START_SEQUENCE));
+    Serial.flush();
+    delay(1);
+
     // Split buffer into chunks
     for(size_t i = 0; i < bufferSize; i += CHUNK_SIZE) {
       size_t chunkSize = min(bufferSize - i, CHUNK_SIZE);
@@ -91,6 +97,9 @@ void sendFrame(){
       Serial.flush();
       delay(1);  // Optional: Add a small delay to allow the receiver to process the chunk
     }    
+    Serial.write(STOP_SEQUENCE, sizeof(STOP_SEQUENCE));
+    Serial.flush();
+    delay(1);
     
     digitalWrite(LED_BUILTIN, HIGH);
   } else {

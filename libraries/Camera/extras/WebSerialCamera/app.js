@@ -11,7 +11,7 @@
  * to the serial port if it has been previously connected.
  * 2. The application requests the camera configuration (mode and resolution) from the board.
  * 3. The application starts reading the image data stream from the serial port. 
- * It waits until the calculated number of bytes have been read and then processes the data.
+ * It waits until the expected amount of bytes have been read and then processes the data.
  * 4. The processed image data is rendered on the canvas.
  * 
  * @author Sebastian Romero
@@ -25,6 +25,9 @@ const canvas = document.getElementById('bitmapCanvas');
 const ctx = canvas.getContext('2d');
 
 const imageDataTransfomer = new ImageDataTransformer(ctx);
+imageDataTransfomer.setStartSequence([0xfa, 0xce, 0xfe, 0xed]);
+imageDataTransfomer.setStopSequence([0xda, 0xbb, 0xad, 0x00]);
+
 // 🐣 Uncomment one of the following lines to apply a filter to the image data
 // imageDataTransfomer.filter = new GrayScaleFilter();
 // imageDataTransfomer.filter = new BlackAndWhiteFilter();
