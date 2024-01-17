@@ -20,8 +20,8 @@ class SerialConnectionHandler {
      * @param {number} [stopBits=1] - The number of stop bits.
      * @param {string} [parity="none"] - The parity setting.
      * @param {string} [flowControl="none"] - The flow control setting.
-     * @param {number} [bufferSize=2097152] - The size of the buffer in bytes. Max buffer size is 16MB
-     * @param {number} [timeout=2000] - The connection timeout value in milliseconds.
+     * @param {number} [bufferSize=2097152] - The size of the buffer in bytes. The default value is 2 MB.  Max buffer size is 16MB.
+     * @param {number} [timeout=2000] - The connection timeout value in milliseconds. The default value is 2000 ms.
      */
     constructor(baudRate = 115200, dataBits = 8, stopBits = 1, parity = "none", flowControl = "none", bufferSize = 2 * 1024 * 1024, timeout = 2000) {
         this.baudRate = baudRate;
@@ -36,6 +36,14 @@ class SerialConnectionHandler {
         this.currentTransformer = null;
         this.readableStreamClosed = null;
         this.registerEvents();
+    }
+
+    /**
+     * Sets the connection timeout for the serial connection.
+     * @param {number} timeout - The timeout value in milliseconds.
+     */
+    setConnectionTimeout(timeout) {
+        this.timeout = timeout;
     }
 
     /**
