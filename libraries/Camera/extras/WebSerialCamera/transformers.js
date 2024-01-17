@@ -59,10 +59,12 @@ class StartStopSequenceTransformer {
 
         // Concatenate incoming chunk with existing buffer
         this.buffer = new Uint8Array([...this.buffer, ...chunk]);
-
         let startIndex = 0;
 
-        while (startIndex < this.buffer.length) {
+        // Only process data if at least one start and stop sequence is present in the buffer
+        const minimumRequiredBytes = Math.min(this.startSequence.length, this.stopSequence.length);
+
+        while (this.buffer.length >= minimumRequiredBytes) {
             if (this.waitingForStart) {
                 // Look for the start sequence
                 startIndex = this.indexOfSequence(this.buffer, this.startSequence, startIndex);
@@ -73,7 +75,7 @@ class StartStopSequenceTransformer {
                     return;
                 }
 
-                // Remove bytes before the start sequence
+                // Remove bytes before the start sequence including the start sequence
                 this.buffer = this.buffer.slice(startIndex + this.startSequence.length);
                 startIndex = 0; // Reset startIndex after removing bytes
                 this.waitingForStart = false;
@@ -89,13 +91,14 @@ class StartStopSequenceTransformer {
 
             // Extract bytes between start and stop sequences
             const bytesToProcess = this.buffer.slice(startIndex, stopIndex);
+            // Remove processed bytes from the buffer including the stop sequence.
             this.buffer = this.buffer.slice(stopIndex + this.stopSequence.length);
 
             // Check if the number of bytes matches the expected amount
             if (this.expectedBytes !== null && bytesToProcess.length !== this.expectedBytes) {
-                // Drop all bytes in the buffer to avoid broken data
-                throw new Error(`🚫 Expected ${this.expectedBytes} bytes, but got ${bytesToProcess.length} bytes instead.`);
-                this.buffer = new Uint8Array(0);
+                // Skip processing the bytes, but keep the remaining data in the buffer
+                console.error(`🚫 Expected ${this.expectedBytes} bytes, but got ${bytesToProcess.length} bytes instead. Dropping data.`);
+                this.waitingForStart = true;
                 return;
             }
 
@@ -106,16 +109,15 @@ class StartStopSequenceTransformer {
     }
 
     /**
-     * Flushes the buffer and processes any remaining bytes when the stream is closed.
+     * Flushes the buffer and discards any remaining bytes when the stream is closed.
      * 
      * @param {WritableStreamDefaultController} controller - The controller for the writable stream.
      */
     flush(controller) {
-        // Only enqueue the remaining bytes if they meet the expectedBytes criteria
-        if (this.buffer.length === this.expectedBytes || this.expectedBytes === null) {
-            controller?.enqueue(this.buffer);
-        }
+        // Discard the remaining data in the buffer
+        this.buffer = new Uint8Array(0);
     }
+
 
     /**
      * Finds the index of the given sequence in the buffer.
