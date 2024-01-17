@@ -62,27 +62,30 @@ FrameBuffer fb;
 
 /**
  * Blinks the LED a specified number of times.
- * 
+ * @param ledPin The pin number of the LED.
  * @param count The number of times to blink the LED. Default is 0xFFFFFFFF.
  */
-void blinkLED(uint32_t count = 0xFFFFFFFF) { 
+void blinkLED(int ledPin, uint32_t count = 0xFFFFFFFF) { 
   while (count--) {
-    digitalWrite(LED_BUILTIN, LOW);  // turn the LED on (HIGH is the voltage level)
+    digitalWrite(ledPin, LOW);  // turn the LED on (HIGH is the voltage level)
     delay(50);                       // wait for a second
-    digitalWrite(LED_BUILTIN, HIGH); // turn the LED off by making the voltage LOW
+    digitalWrite(ledPin, HIGH); // turn the LED off by making the voltage LOW
     delay(50);                       // wait for a second
   }
 }
 
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);  
+  pinMode(LEDR, OUTPUT);
+  digitalWrite(LED_BUILTIN, HIGH);
+  digitalWrite(LEDR, HIGH);
 
   // Init the cam QVGA, 30FPS
   if (!cam.begin(RESOLUTION, IMAGE_MODE, 30)) {
-    blinkLED();
+    blinkLED(LEDR);
   }
 
-  blinkLED(5);
+  blinkLED(LED_BUILTIN, 5);
 }
 
 /**
