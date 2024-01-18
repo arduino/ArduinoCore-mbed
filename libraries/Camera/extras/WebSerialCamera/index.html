@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Serial Bitmap Reader</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="main-container">
+    <canvas id="bitmapCanvas"></canvas>
+    <div id="controls">
+      <button id="connect">Connect</button>
+      <button id="save-image">Save Image</button>
+      <button id="refresh">Refresh</button>
+      <button id="start">Start</button>
+    </div>
+  </div>
+  <script src="filters.js"></script>
+  <script src="transformers.js"></script>
+  <script src="imageDataProcessor.js"></script>
+  <script src="serialConnectionHandler.js"></script>
+  <script src="cameraConfig.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
