@@ -699,12 +699,16 @@ int OV7670::setFrameRate(int32_t framerate)
 
 int OV7670::setVerticalFlip(bool flip_enable)
 {
-  return -1;
+    uint8_t currentRegisterValue = regRead(getID(), MVFP);
+    uint8_t newRegisterValue = flip_enable ? currentRegisterValue | MVFP_VFLIP : currentRegisterValue & ~MVFP_VFLIP;
+    return regWrite(getID(), MVFP, newRegisterValue);
 }
 
 int OV7670::setHorizontalMirror(bool mirror_enable)
 {
-  return -1;
+    uint8_t currentRegisterValue = regRead(getID(), MVFP);
+    uint8_t newRegisterValue = mirror_enable ? currentRegisterValue | MVFP_MIRROR : currentRegisterValue & ~MVFP_MIRROR;
+    return regWrite(getID(), MVFP, newRegisterValue);
 }
 
 int OV7670::setResolution(int32_t resolution)
