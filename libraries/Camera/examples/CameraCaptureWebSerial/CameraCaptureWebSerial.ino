@@ -8,7 +8,8 @@
  * Instructions:
  * 1. Make sure the correct camera is selected in the #include section below by uncommenting the correct line.
  * 2. Upload this sketch to your camera-equipped board.
- * 3. Open the web app in a browser (Chrome or Edge) by opening the index.html file in the "extras" folder.
+ * 3. Open the web app in a browser (Chrome or Edge) by opening the index.html file 
+ * in the "WebSerialCamera" folder which is located in the "extras" folder.
  * 
  * Initial author: Sebastian Romero @sebromero
  */
