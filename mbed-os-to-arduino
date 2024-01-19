@@ -200,6 +200,16 @@ generate_flags () {
 				*(.pdm_buffer)\n \
 				} > RAM_D3\n"
 
+				if [[ $ARDUINOVARIANT == *GENERIC*M4 ]]; then
+				echo "Fixing VTOR base in $ARDUINOVARIANT/linker_script.ld"
+				VTOR_SECTION="#if (CM4_BINARY_START == 0x60000000)\n \
+								REGION_ALIAS(\"RAM\", FLASH);\n \
+								#else\n \
+								REGION_ALIAS(\"RAM\", RAM_D2);\n \
+								#endif\n"
+				sed -i "s?REGION_ALIAS.*?${VTOR_SECTION}?g" $ARDUINOVARIANT/linker_script.ld
+				fi
+
 				if [[ $ARDUINOVARIANT == *PORTENTA*M7* || $ARDUINOVARIANT == *GIGA* || $ARDUINOVARIANT == *OPTA* ]]; then
 					OPENAMP_SECTION="${OPENAMP_SECTION} \
 					_dtcm_lma = __etext + SIZEOF(.data);\n \

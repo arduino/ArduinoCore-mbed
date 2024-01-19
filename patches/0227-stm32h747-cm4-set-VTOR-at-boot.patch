@@ -1,0 +1,48 @@
+From 2d834973fc86b787535204b174303a0311e1f36f Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Fri, 19 Jan 2024 11:13:09 +0100
+Subject: [PATCH] stm32h747: cm4: set VTOR at boot
+
+---
+ .../STM32Cube_FW/system_stm32h7xx_dualcore_boot_cm4_cm7.c | 2 +-
+ .../TOOLCHAIN_GCC_ARM/stm32h747xI_CM4.ld                  | 8 +++++++-
+ 2 files changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/STM32Cube_FW/system_stm32h7xx_dualcore_boot_cm4_cm7.c b/targets/TARGET_STM/TARGET_STM32H7/STM32Cube_FW/system_stm32h7xx_dualcore_boot_cm4_cm7.c
+index b4a4cc7826..8e0017de2a 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/STM32Cube_FW/system_stm32h7xx_dualcore_boot_cm4_cm7.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/STM32Cube_FW/system_stm32h7xx_dualcore_boot_cm4_cm7.c
+@@ -232,7 +232,7 @@ __weak void SystemInit (void)
+   /* Configure the Vector Table location add offset address ------------------*/
+ #ifdef VECT_TAB_SRAM
+   SCB->VTOR = D2_AXISRAM_BASE | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal SRAM */
+-#elif !defined(NO_VTOR_RELOCATE)
++#else
+ #include "nvic_addr.h"                   // MBED
+   SCB->VTOR = NVIC_FLASH_VECTOR_ADDRESS; // MBED
+ #endif
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_STM32H747xI_CM4/TOOLCHAIN_GCC_ARM/stm32h747xI_CM4.ld b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_STM32H747xI_CM4/TOOLCHAIN_GCC_ARM/stm32h747xI_CM4.ld
+index ea81a18b11..7d2651dcb4 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_STM32H747xI_CM4/TOOLCHAIN_GCC_ARM/stm32h747xI_CM4.ld
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_STM32H747xI_CM4/TOOLCHAIN_GCC_ARM/stm32h747xI_CM4.ld
+@@ -38,10 +38,16 @@
+ MEMORY
+ {
+     FLASH (rx)   : ORIGIN = MBED_APP_START, LENGTH = MBED_APP_SIZE
+-    RAM (rwx)    : ORIGIN = MBED_RAM_START + VECTORS_SIZE, LENGTH = MBED_RAM_SIZE - VECTORS_SIZE
++    RAM_D2 (rwx)    : ORIGIN = MBED_RAM_START + VECTORS_SIZE, LENGTH = MBED_RAM_SIZE - VECTORS_SIZE
+     RAM_D3 (xrw) : ORIGIN = 0x38000000, LENGTH = 64K
+ }
+ 
++#if (CM4_BINARY_START == 0x60000000)
++REGION_ALIAS("RAM", FLASH);
++#else
++REGION_ALIAS("RAM", RAM_D2);
++#endif
++
+ /* Linker script to place sections and symbol values. Should be used together
+  * with other linker script that defines memory regions FLASH and RAM.
+  * It references following symbols, which must be defined in code:
+-- 
+2.43.0
+
