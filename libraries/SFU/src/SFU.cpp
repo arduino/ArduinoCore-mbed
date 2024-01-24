@@ -21,14 +21,17 @@ int SFU::begin() {
     if (err) {
         err = getFileSystem().reformat(&bd);
     }
+    return err;
 }
 
 int SFU::download(const char* url) {
-	// No download at the moment, allow the user to upload a file via mass storage
+    // No download at the moment, allow the user to upload a file via mass storage
+    return 0;
 }
 
 int SFU::apply() {
-	// No autoreboot
+    // No autoreboot
+    return 0;
 }
 
 #ifdef ADD_USB_MSD

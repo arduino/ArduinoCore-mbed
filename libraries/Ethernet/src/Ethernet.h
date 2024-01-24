@@ -116,6 +116,8 @@ public:
   constexpr static int maintain () { return DHCP_CHECK_NONE; }
 
 private:
+  int _begin(uint8_t *mac, unsigned long timeout, unsigned long responseTimeout);
+
   volatile EthernetLinkStatus _currentNetworkStatus = Unknown;
   EthernetInterface net;
   EthernetInterface *eth_if = &net;
