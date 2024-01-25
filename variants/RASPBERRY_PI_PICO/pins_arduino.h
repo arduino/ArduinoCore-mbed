@@ -40,6 +40,8 @@ static const uint8_t A3  = PIN_A3;
 // Serial
 #define PIN_SERIAL_TX (0ul)
 #define PIN_SERIAL_RX (1ul)
+#define PIN_SERIAL2_TX (8ul)
+#define PIN_SERIAL2_RX (9ul)
 
 // SPI
 #define PIN_SPI_MISO  (16u)
@@ -56,9 +58,11 @@ static const uint8_t SCK  = PIN_SPI_SCK;
 #define PIN_WIRE_SDA        (4u)
 #define PIN_WIRE_SCL        (5u)
 
-#define SERIAL_HOWMANY		1
+#define SERIAL_HOWMANY		2
 #define SERIAL1_TX			(digitalPinToPinName(PIN_SERIAL_TX))
 #define SERIAL1_RX			(digitalPinToPinName(PIN_SERIAL_RX))
+#define SERIAL2_TX			(digitalPinToPinName(PIN_SERIAL2_TX))
+#define SERIAL2_RX			(digitalPinToPinName(PIN_SERIAL2_RX))
 
 #define SERIAL_CDC			1
 #define HAS_UNIQUE_ISERIAL_DESCRIPTOR
