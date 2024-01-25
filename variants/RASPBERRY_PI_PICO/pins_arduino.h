@@ -38,8 +38,8 @@ static const uint8_t A3  = PIN_A3;
 #define ADC_RESOLUTION 12
 
 // Serial
-#define PIN_SERIAL_TX (0ul)
-#define PIN_SERIAL_RX (1ul)
+#define PIN_SERIAL1_TX (0ul)
+#define PIN_SERIAL1_RX (1ul)
 #define PIN_SERIAL2_TX (8ul)
 #define PIN_SERIAL2_RX (9ul)
 
@@ -59,8 +59,8 @@ static const uint8_t SCK  = PIN_SPI_SCK;
 #define PIN_WIRE_SCL        (5u)
 
 #define SERIAL_HOWMANY		2
-#define SERIAL1_TX			(digitalPinToPinName(PIN_SERIAL_TX))
-#define SERIAL1_RX			(digitalPinToPinName(PIN_SERIAL_RX))
+#define SERIAL1_TX			(digitalPinToPinName(PIN_SERIAL1_TX))
+#define SERIAL1_RX			(digitalPinToPinName(PIN_SERIAL1_RX))
 #define SERIAL2_TX			(digitalPinToPinName(PIN_SERIAL2_TX))
 #define SERIAL2_RX			(digitalPinToPinName(PIN_SERIAL2_RX))
 
