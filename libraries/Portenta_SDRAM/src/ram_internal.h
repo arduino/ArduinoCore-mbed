@@ -1,3 +1,6 @@
+#ifndef __RAM_INTERNAL_H
+#define __RAM_INTERNAL_H
+
 bool sdram_init(void);
 
 #define MPU_REGION_SDRAM1	(MPU_REGION_NUMBER4)
@@ -56,3 +59,5 @@ bool sdram_init(void);
                                  | (size)                        << MPU_RASR_SIZE_Pos \
                                  | MPU_REGION_ENABLE             << MPU_RASR_ENABLE_Pos \
                                )
+
+#endif // __RAM_INTERNAL_H
