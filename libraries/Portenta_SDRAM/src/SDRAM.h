@@ -1,3 +1,6 @@
+#ifndef __SDRAM_H
+#define __SDRAM_H
+
 #include "ea_malloc.h"
 
 #ifdef __cplusplus
@@ -36,3 +39,4 @@ private:
 extern SDRAMClass SDRAM;
 
 #endif
+#endif // __SDRAM_H
