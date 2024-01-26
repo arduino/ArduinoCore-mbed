@@ -20,6 +20,10 @@ void arduino::MbedClient::readSocket() {
     int ret = NSAPI_ERROR_WOULD_BLOCK;
     do {
       if (rxBuffer.availableForStore() == 0) {
+        // Notify that the buffer is full and data needs to be processed
+        if (_data_available_cb) {
+            _data_available_cb();
+        }
         yield();
         continue;
       }
@@ -42,6 +46,10 @@ void arduino::MbedClient::readSocket() {
       mutex->unlock();
       _status = true;
     } while (ret == NSAPI_ERROR_WOULD_BLOCK || ret > 0);
+    // Notify about data in RX Buffer
+    if (_data_available_cb) {
+        _data_available_cb();
+    }
   }
 cleanup:
   _status = false;

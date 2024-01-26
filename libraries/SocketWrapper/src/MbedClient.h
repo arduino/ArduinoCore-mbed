@@ -89,6 +89,10 @@ public:
     return sock != nullptr;
   }
 
+  void registerDataAvailableCb(mbed::Callback<void(void)> cb) {
+      _data_available_cb = cb;
+  }
+
   void setSocket(Socket* _sock);
   Socket* getSocket() { return sock; };
 
@@ -114,6 +118,7 @@ protected:
   }
 
 private:
+  mbed::Callback<void(void)> _data_available_cb;
   RingBufferN<SOCKET_BUFFER_SIZE> rxBuffer;
   bool _status = false;
   bool borrowed_socket = false;
