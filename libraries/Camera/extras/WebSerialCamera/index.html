@@ -9,11 +9,22 @@
 <body>
   <div id="main-container">
     <canvas id="bitmapCanvas"></canvas>
-    <div id="controls">
+    <div class="controls">
       <button id="connect">Connect</button>
       <button id="save-image">Save Image</button>
       <button id="refresh">Refresh</button>
       <button id="start">Start</button>
+    </div>
+    <div class="controls">
+      <label for="filter">Filter</label>
+      <select id="filter-selector">
+        <option value="none">None</option>
+        <option value="gray-scale">Grayscale</option>
+        <option value="black-and-white">Black and White</option>
+        <option value="sepia">Sepia</option>
+        <option value="pixelate">Pixelate</option>
+        <option value="blur">Blur</option>
+      </select>
     </div>
   </div>
   <script src="filters.js"></script>

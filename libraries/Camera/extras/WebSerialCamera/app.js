@@ -21,6 +21,7 @@ const connectButton = document.getElementById('connect');
 const refreshButton = document.getElementById('refresh');
 const startButton = document.getElementById('start');
 const saveImageButton = document.getElementById('save-image');
+const filterSelector = document.getElementById('filter-selector');
 const canvas = document.getElementById('bitmapCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -28,12 +29,6 @@ const imageDataTransfomer = new ImageDataTransformer(ctx);
 imageDataTransfomer.setStartSequence([0xfa, 0xce, 0xfe, 0xed]);
 imageDataTransfomer.setStopSequence([0xda, 0xbb, 0xad, 0x00]);
 
-// 🐣 Uncomment one of the following lines to apply a filter to the image data
-// imageDataTransfomer.filter = new GrayScaleFilter();
-// imageDataTransfomer.filter = new BlackAndWhiteFilter();
-// imageDataTransfomer.filter = new SepiaColorFilter();
-// imageDataTransfomer.filter = new PixelateFilter(8);
-// imageDataTransfomer.filter = new BlurFilter(8);
 const connectionHandler = new SerialConnectionHandler();
 
 
@@ -54,12 +49,20 @@ connectionHandler.onConnect = async () => {
   }
   imageDataTransfomer.setImageMode(imageMode);
   imageDataTransfomer.setResolution(imageResolution.width, imageResolution.height);
+
+  // Filters are only available for color images
+  if(imageMode !== 'GRAYSCALE'){
+    filterSelector.disabled = false;
+  }
+
   renderStream();
 };
 
 connectionHandler.onDisconnect = () => {
-  connectButton.textContent = 'Connect';
   imageDataTransfomer.reset();
+  connectButton.textContent = 'Connect';
+  filterSelector.disabled = true;
+  filterSelector.value = 'none';
 };
 
 
@@ -122,9 +125,37 @@ saveImageButton.addEventListener('click', () => {
   link.remove();
 });
 
+filterSelector.addEventListener('change', () => {
+  const filter = filterSelector.value;
+  switch(filter){
+    case 'none':
+      imageDataTransfomer.filter = null;
+      break;
+    case 'gray-scale':
+      imageDataTransfomer.filter = new GrayScaleFilter();
+      break;
+    case 'black-and-white':
+      imageDataTransfomer.filter = new BlackAndWhiteFilter();
+      break;
+    case 'sepia':
+      imageDataTransfomer.filter = new SepiaColorFilter();
+      break;
+    case 'pixelate':
+      imageDataTransfomer.filter = new PixelateFilter(8);
+      break;
+    case 'blur':
+      imageDataTransfomer.filter = new BlurFilter(8);
+      break;
+    default:
+      imageDataTransfomer.filter = null;
+  }
+});
+
 // On page load event, try to connect to the serial port
 window.addEventListener('load', async () => {
+  filterSelector.disabled = true;
   console.log('🚀 Page loaded. Trying to connect to serial port...');
+  
   setTimeout(() => {
     connectionHandler.autoConnect();
   }, 1000);
