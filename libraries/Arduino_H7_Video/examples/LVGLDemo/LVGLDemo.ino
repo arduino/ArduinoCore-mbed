@@ -17,7 +17,7 @@ Arduino_GigaDisplayTouch  TouchDetector;
 /* Button click event callback */
 static void btn_event_cb(lv_event_t * e) {
   static uint32_t cnt = 1;
-  lv_obj_t * btn = lv_event_get_target(e);
+  lv_obj_t * btn = (lv_obj_t *)lv_event_get_target(e);
   lv_obj_t * label = lv_obj_get_child(btn, 0);
   lv_label_set_text_fmt(label, "%"LV_PRIu32, cnt);
   cnt++;
@@ -76,7 +76,7 @@ void setup() {
   lv_style_init(&style_radio);
   lv_style_set_radius(&style_radio, LV_RADIUS_CIRCLE);
   lv_style_init(&style_radio_chk);
-  lv_style_set_bg_img_src(&style_radio_chk, NULL);
+  lv_style_set_bg_image_src(&style_radio_chk, NULL);
   
   cb = lv_checkbox_create(obj);
   lv_checkbox_set_text(cb, "Lemon");

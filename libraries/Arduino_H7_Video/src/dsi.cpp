@@ -323,7 +323,7 @@ uint32_t dsi_getFramebufferEnd(void) {
 	return (FB_BASE_ADDRESS + 2 * (lcd_x_size * lcd_y_size * BYTES_PER_PIXEL));
 }
 
-void dsi_drawCurrentFrameBuffer(void) {
+void dsi_drawCurrentFrameBuffer(bool reload) {
 	int fb = pend_buffer++ % 2;
 
 	/* Enable current LTDC layer */
@@ -331,6 +331,9 @@ void dsi_drawCurrentFrameBuffer(void) {
 	/* Disable active LTDC layer */
 	__HAL_LTDC_LAYER_DISABLE(&(ltdc), !fb);
 
+	if (!reload) {
+		return;
+	}
 	/* LTDC reload request within next vertical blanking */
 	reloadLTDC_status = 0;
 	HAL_LTDC_Reload(&ltdc, LTDC_SRCR_VBR);
