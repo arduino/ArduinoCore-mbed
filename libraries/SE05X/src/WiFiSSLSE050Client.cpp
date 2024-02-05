@@ -19,13 +19,25 @@
 
 #include "WiFiSSLSE050Client.h"
 
-arduino::WiFiSSLSE050Client::WiFiSSLSE050Client() {
-  onBeforeConnect(mbed::callback(this, &WiFiSSLSE050Client::setRootCAClientCertKey));
+arduino::MbedSSLSE050Client::MbedSSLSE050Client() {
+  onBeforeConnect(mbed::callback(this, &MbedSSLSE050Client::setRootCAClientCertKey));
 };
 
-void arduino::WiFiSSLSE050Client::setEccSlot(int KeySlot, const byte cert[], int certLen) {
+void arduino::MbedSSLSE050Client::setEccSlot(int KeySlot, const byte cert[], int certLen) {
 
   _keySlot = KeySlot;
   _client_cert_len = certLen;
   _client_cert = cert;
+}
+
+void  WiFiSSLSE050Client::setEccSlot(int KeySlot, const byte cert[], int certLen) {
+  if (!client) {
+    newMbedClient();
+  }
+  static_cast<MbedSSLSE050Client*>(client.get())->setEccSlot(KeySlot, cert, certLen);
+}
+
+void WiFiSSLSE050Client::newMbedClient() {
+  client.reset(new MbedSSLSE050Client());
+  client->setNetwork(getNetwork());
 }

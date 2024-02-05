@@ -24,7 +24,7 @@ void arduino::MbedClient::readSocket() {
         continue;
       }
       mutex->lock();
-      if (sock == nullptr || (closing && borrowed_socket)) {
+      if (sock == nullptr) {
         goto cleanup;
       }
       ret = sock->recv(data, rxBuffer.availableForStore());
@@ -270,7 +270,7 @@ void arduino::MbedClient::stop() {
   if (mutex != nullptr) {
     mutex->lock();
   }
-  if (sock != nullptr && borrowed_socket == false) {
+  if (sock != nullptr) {
     if (_own_socket) {
       delete sock;
     } else {
@@ -278,7 +278,6 @@ void arduino::MbedClient::stop() {
     }
     sock = nullptr;
   }
-  closing = true;
   if (mutex != nullptr) {
     mutex->unlock();
   }

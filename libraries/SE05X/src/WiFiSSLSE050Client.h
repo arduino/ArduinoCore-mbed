@@ -23,18 +23,17 @@
 
 #include "SE05X.h"
 #include "WiFiSSLClient.h"
+#include "MbedSSLClient.h"
 
 extern const char CA_CERTIFICATES[];
 
 namespace arduino {
 
-class WiFiSSLSE050Client : public arduino::WiFiSSLClient {
+class MbedSSLSE050Client : public arduino::MbedSSLClient {
 
 public:
-  WiFiSSLSE050Client();
-  virtual ~WiFiSSLSE050Client() {
-    stop();
-  }
+  MbedSSLSE050Client();
+
   void setEccSlot(int KeySlot, const byte cert[], int certLen);
 
 private:
@@ -57,12 +56,25 @@ private:
       return 0;
     }
 
-    if( NSAPI_ERROR_OK != ((TLSSocket*)sock)->set_client_cert_key((void*)_client_cert, (size_t)_client_cert_len, &_keyObject, SE05X.getDeviceCtx())) {
+    if( NSAPI_ERROR_OK != ((TLSSocket*)sock)->set_client_cert_key((void*)_client_cert,
+            (size_t)_client_cert_len,
+            &_keyObject,
+            SE05X.getDeviceCtx())) {
       return 0;
     }
 
     return 1;
   }
+};
+
+class WiFiSSLSE050Client : public arduino::WiFiSSLClient {
+
+public:
+
+  void setEccSlot(int KeySlot, const byte cert[], int certLen);
+
+protected:
+  virtual void newMbedClient();
 };
 
 }

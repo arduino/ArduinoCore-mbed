@@ -21,11 +21,11 @@
 #define gsmclient_h
 
 #include "GSM.h"
-#include "MbedClient.h"
+#include "AClient.h"
 
 namespace arduino {
 
-class GSMClient : public MbedClient {
+class GSMClient : public AClient {
 public:
   GSMClient();
 

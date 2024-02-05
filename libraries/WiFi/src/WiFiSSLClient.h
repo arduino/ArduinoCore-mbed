@@ -21,13 +21,14 @@
 #define WIFISSLCLIENT_H
 
 #include "WiFi.h"
-#include "MbedSSLClient.h"
+#include "AClient.h"
 
 extern const char CA_CERTIFICATES[];
 
 namespace arduino {
 
-class WiFiSSLClient : public arduino::MbedSSLClient {
+class WiFiSSLClient : public arduino::ASslClient {
+protected:
   NetworkInterface *getNetwork() {
     return WiFi.getNetwork();
   }

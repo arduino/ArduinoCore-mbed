@@ -21,11 +21,11 @@
 #define wificlient_h
 
 #include "WiFi.h"
-#include "MbedClient.h"
+#include "AClient.h"
 
 namespace arduino {
 
-class WiFiClient : public MbedClient {
+class WiFiClient : public AClient {
   NetworkInterface *getNetwork() {
     return WiFi.getNetwork();
   }
