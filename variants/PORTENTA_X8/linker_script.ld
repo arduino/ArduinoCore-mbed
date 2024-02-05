@@ -1,9 +1,10 @@
 MEMORY
 {
     FLASH (rx) : ORIGIN = CM4_BINARY_START, LENGTH = 0x100000
-    RAM (rwx) : ORIGIN = 0x10000000 + (((166 * 4) + 7) & 0xFFFFFFF8), LENGTH = 0x48000 - (((166 * 4) + 7) & 0xFFFFFFF8)
+    RAM_D2 (rwx) : ORIGIN = 0x10000000 + (((166 * 4) + 7) & 0xFFFFFFF8), LENGTH = 0x48000 - (((166 * 4) + 7) & 0xFFFFFFF8)
     RAM_D3 (xrw) : ORIGIN = 0x38000000, LENGTH = 64K
 }
+REGION_ALIAS("RAM", RAM_D2);
 __OPENAMP_region_start__  = 0x38000400;
 __OPENAMP_region_end__ = 0x38000400 + LENGTH(RAM_D3) - 1K;
 ENTRY(Reset_Handler)
