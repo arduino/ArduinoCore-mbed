@@ -9,7 +9,7 @@ int arduino::EthernetClass::begin(uint8_t *mac, unsigned long timeout, unsigned 
     if (eth_if == nullptr) return 0;
   }
   eth_if->set_dhcp(true);
-  _begin(mac, timeout, responseTimeout);
+  return _begin(mac, timeout, responseTimeout);
 }
 
 int arduino::EthernetClass::_begin(uint8_t *mac, unsigned long timeout, unsigned long responseTimeout) {
