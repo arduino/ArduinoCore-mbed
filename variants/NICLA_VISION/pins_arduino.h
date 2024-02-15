@@ -60,12 +60,12 @@ static const uint8_t A2  = PIN_A2;
 #define D13 (13u)
 #define D14 (14u)
 #define D15 (15u)
-#define D16 (u16)
-#define D17 (u17)
-#define D18 (u18)
-#define D19 (u19)
-#define D20 (u20)
-#define D21 (u21)
+#define D16 (16u)
+#define D17 (17u)
+#define D18 (18u)
+#define D19 (19u)
+#define D20 (20u)
+#define D21 (21u)
 
 // Serial
 #define PIN_SERIAL_RX (2ul)
