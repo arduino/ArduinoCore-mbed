@@ -76,7 +76,11 @@ void setup() {
   lv_style_init(&style_radio);
   lv_style_set_radius(&style_radio, LV_RADIUS_CIRCLE);
   lv_style_init(&style_radio_chk);
+  #if (LVGL_VERSION_MAJOR == 9)
   lv_style_set_bg_image_src(&style_radio_chk, NULL);
+  #else
+  lv_style_set_bg_img_src(&style_radio_chk, NULL);
+  #endif
   
   cb = lv_checkbox_create(obj);
   lv_checkbox_set_text(cb, "Lemon");

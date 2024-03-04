@@ -636,6 +636,7 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_IMG_ARDUI
 #endif
 };
 
+#if (LVGL_VERSION_MAJOR == 9)
 const lv_img_dsc_t img_arduinologo = {
   .header.cf = LV_COLOR_FORMAT_RGB565,
   .header.w = 200,
@@ -643,3 +644,14 @@ const lv_img_dsc_t img_arduinologo = {
   .data_size = 30000 * LV_COLOR_DEPTH / 8,
   .data = img_arduinologo_map,
 };
+#else
+const lv_img_dsc_t img_arduinologo = {
+  .header.cf = LV_IMG_CF_TRUE_COLOR,
+  .header.always_zero = 0,
+  .header.reserved = 0,
+  .header.w = 200,
+  .header.h = 150,
+  .data_size = 30000 * LV_COLOR_SIZE / 8,
+  .data = img_arduinologo_map,
+};
+#endif

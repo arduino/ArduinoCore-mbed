@@ -38,6 +38,7 @@ extern "C" {
 /* Private function prototypes -----------------------------------------------*/
 #if __has_include ("lvgl.h")
 #include "mbed.h"
+#if (LVGL_VERSION_MAJOR == 9)
 void lvgl_displayFlushing(lv_display_t * display, const lv_area_t * area, unsigned char * px_map);
 static void inc_thd() {
     while (1) {
@@ -46,6 +47,9 @@ static void inc_thd() {
     }
 }
 static rtos::Thread lvgl_inc_thd;
+#else
+void lvgl_displayFlushing(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p);
+#endif
 #endif
 
 /* Functions -----------------------------------------------------------------*/
@@ -92,6 +96,8 @@ int Arduino_H7_Video::begin() {
     /* Initiliaze LVGL library */
     lv_init();
 
+
+  #if (LVGL_VERSION_MAJOR == 9)
     /* Create a draw buffer */
     static lv_color_t * buf1 = (lv_color_t*)malloc((width() * height() / 10)); /* Declare a buffer for 1/10 screen size */
     if (buf1 == NULL) {
@@ -114,6 +120,36 @@ int Arduino_H7_Video::begin() {
     lv_display_set_flush_cb(display, lvgl_displayFlushing);
 
     lvgl_inc_thd.start(inc_thd);
+
+  #else //LVGL_VERSION_MAJOR
+
+      /* Create a draw buffer */
+    static lv_disp_draw_buf_t draw_buf;
+    static lv_color_t * buf1;
+    buf1 = (lv_color_t*)malloc((width() * height() / 10) * sizeof(lv_color_t)); /* Declare a buffer for 1/10 screen size */
+    if (buf1 == NULL) {
+      return 2; /* Insuff memory err */
+    }
+    lv_disp_draw_buf_init(&draw_buf, buf1, NULL, width() * height() / 10);      /* Initialize the display buffer. */
+
+    /* Initialize display features for LVGL library */
+    static lv_disp_drv_t disp_drv;              /* Descriptor of a display driver */
+    lv_disp_drv_init(&disp_drv);                /* Basic initialization */
+    disp_drv.flush_cb = lvgl_displayFlushing;   /* Set your driver function */
+    disp_drv.draw_buf = &draw_buf;              /* Assign the buffer to the display */
+    if(_rotated) {
+      disp_drv.hor_res = height();        /* Set the horizontal resolution of the display */
+      disp_drv.ver_res = width();         /* Set the vertical resolution of the display */
+      disp_drv.rotated  = LV_DISP_ROT_270;
+    } else {
+      disp_drv.hor_res = width();         /* Set the horizontal resolution of the display */
+      disp_drv.ver_res = height();        /* Set the vertical resolution of the display */
+      disp_drv.rotated  = LV_DISP_ROT_NONE;
+    }
+    disp_drv.sw_rotate = 1;
+    lv_disp_drv_register(&disp_drv);        /* Finally register the driver */
+
+  #endif
   #endif
 
   /* Configure SDRAM */
@@ -194,6 +230,7 @@ void Arduino_H7_Video::set(int x, int y, uint8_t r, uint8_t g, uint8_t b) {
 #endif
 
 #if __has_include("lvgl.h")
+#if (LVGL_VERSION_MAJOR == 9)
 static uint8_t* rotated_buf = nullptr;
 void lvgl_displayFlushing(lv_display_t * disp, const lv_area_t * area, unsigned char * px_map) {
     uint32_t w     = lv_area_get_width(area);
@@ -228,6 +265,16 @@ void lvgl_displayFlushing(lv_display_t * disp, const lv_area_t * area, unsigned 
     dsi_lcdDrawImage((void *) px_map, (void *)(dsi_getActiveFrameBuffer() + offsetPos), w, h, DMA2D_INPUT_RGB565);
     lv_display_flush_ready(disp);         /* Indicate you are ready with the flushing*/
 }
+#else
+void lvgl_displayFlushing(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p) {
+    uint32_t width      = lv_area_get_width(area);
+    uint32_t height     = lv_area_get_height(area);
+    uint32_t offsetPos  = (area->x1 + (dsi_getDisplayXSize() * area->y1)) * sizeof(uint16_t);
+
+    dsi_lcdDrawImage((void *) color_p, (void *)(dsi_getActiveFrameBuffer() + offsetPos), width, height, DMA2D_INPUT_RGB565);
+    lv_disp_flush_ready(disp);         /* Indicate you are ready with the flushing*/
+}
+#endif
 #endif
 
 /**** END OF FILE ****/
