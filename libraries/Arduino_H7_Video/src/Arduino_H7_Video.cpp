@@ -111,7 +111,7 @@ int Arduino_H7_Video::begin() {
     lv_display_t *display;
     if(_rotated) {
       display = lv_display_create(height(), width());
-      lv_display_set_rotation(display, LV_DISPLAY_ROTATION_90);
+      lv_display_set_rotation(display, LV_DISPLAY_ROTATION_270);
       //display->sw_rotate = 1;
     } else {
       display = lv_display_create(width(), height());
@@ -246,12 +246,12 @@ void lvgl_displayFlushing(lv_display_t * disp, const lv_area_t * area, unsigned 
         lv_draw_sw_rotate(px_map, rotated_buf,
                           w, h, lv_draw_buf_width_to_stride(w, cf),
                           lv_draw_buf_width_to_stride(h, cf),
-                          LV_DISPLAY_ROTATION_270, cf);
-        rotated_area.x1 = area->y1;
-        rotated_area.y2 = lv_display_get_horizontal_resolution(disp) - area->x1 - 1;
+                          LV_DISPLAY_ROTATION_90, cf);
+        rotated_area.x1 = lv_display_get_vertical_resolution(disp) - area->y2 - 1;
+        rotated_area.y1 = area->x1;
         //rotated_area.y2 = dsi_getDisplayYSize() - area->x1 - 1;
         rotated_area.x2 = rotated_area.x1 + h - 1;
-        rotated_area.y1 = rotated_area.y2 - w + 1;
+        rotated_area.y2 = rotated_area.y1 + w + 1;
 
         area_in_use = &rotated_area;
         px_map = rotated_buf;
