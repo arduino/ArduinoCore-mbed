@@ -154,6 +154,7 @@ protected:
 
   static arduino::IPAddress ipAddressFromSocketAddress(SocketAddress socketAddress);
   static SocketAddress socketAddressFromIpAddress(arduino::IPAddress ip, uint16_t port);
+  static nsapi_error_t gethostbyname(NetworkInterface* interface, const char* aHostname, SocketAddress* socketAddress);
 };
 
 using SocketHelpers = MbedSocketClass;

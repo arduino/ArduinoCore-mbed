@@ -17,7 +17,7 @@ String arduino::MbedSocketClass::macAddress() {
 
 int arduino::MbedSocketClass::hostByName(const char* aHostname, IPAddress& aResult) {
   SocketAddress socketAddress = SocketAddress();
-  nsapi_error_t returnCode = getNetwork()->gethostbyname(aHostname, &socketAddress);
+  nsapi_error_t returnCode = gethostbyname(getNetwork(), aHostname, &socketAddress);
   nsapi_addr_t address = socketAddress.get_addr();
   aResult[0] = address.bytes[0];
   aResult[1] = address.bytes[1];
@@ -120,6 +120,11 @@ SocketAddress arduino::MbedSocketClass::socketAddressFromIpAddress(arduino::IPAd
   return SocketAddress(convertedIP, port);
 }
 
+nsapi_error_t arduino::MbedSocketClass::gethostbyname(NetworkInterface* interface, const char* aHostname, SocketAddress* socketAddress) {
+  char ifname[5] {};
+  interface->get_interface_name(ifname);
+  return interface->gethostbyname(aHostname, socketAddress, NSAPI_UNSPEC, ifname);
+}
 
 // Download helper
 
