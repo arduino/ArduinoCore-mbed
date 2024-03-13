@@ -35,4 +35,4 @@ blackmagic.program.protocol=
 blackmagic.program.tool=
 blackmagic.program.tool.default=
 blackmagic.program.extra_params=
-blackmagic.debug.server=blackmagic
+blackmagic.debug.server=bmp
