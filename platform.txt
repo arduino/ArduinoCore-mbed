@@ -22,13 +22,13 @@ compiler.optimization_flags.debug=-Og
 
 compiler.path={build.compiler_path}
 compiler.c.cmd={build.crossprefix}gcc
-compiler.c.flags=-c {compiler.warning_flags} {compiler.optimization_flags} -g3 -nostdlib "@{compiler.mbed.defines}" "@{compiler.mbed.cflags}" {compiler.mbed.arch.define} -MMD -mcpu={build.mcu} {build.float-abi} {build.fpu}
+compiler.c.flags=-c {compiler.warning_flags} -g3 -nostdlib "@{compiler.mbed.defines}" "@{compiler.mbed.cflags}" {compiler.optimization_flags} {compiler.mbed.arch.define} -MMD -mcpu={build.mcu} {build.float-abi} {build.fpu}
 compiler.c.elf.cmd={build.crossprefix}g++
 compiler.c.elf.flags=-Wl,--gc-sections {compiler.warning_flags} -Wl,--as-needed
 compiler.S.cmd={build.crossprefix}g++
 compiler.S.flags=-c -g -x assembler-with-cpp {compiler.optimization_flags} -mcpu={build.mcu} {build.fpu}
 compiler.cpp.cmd={build.crossprefix}g++
-compiler.cpp.flags=-c {compiler.warning_flags} {compiler.optimization_flags} -g3 -nostdlib "@{compiler.mbed.defines}" "@{compiler.mbed.cxxflags}" {compiler.mbed.arch.define} -MMD -mcpu={build.mcu} {build.float-abi} {build.fpu}
+compiler.cpp.flags=-c {compiler.warning_flags} -g3 -nostdlib "@{compiler.mbed.defines}" "@{compiler.mbed.cxxflags}" {compiler.optimization_flags} {compiler.mbed.arch.define} -MMD -mcpu={build.mcu} {build.float-abi} {build.fpu}
 compiler.ar.cmd={build.crossprefix}ar
 compiler.ar.flags=rcs
 compiler.objcopy.cmd=
