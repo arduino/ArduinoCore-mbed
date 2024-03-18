@@ -37,7 +37,19 @@ extern "C" {
 
 /* Private function prototypes -----------------------------------------------*/
 #if __has_include ("lvgl.h")
+#include "mbed.h"
+#if (LVGL_VERSION_MAJOR == 9)
+void lvgl_displayFlushing(lv_display_t * display, const lv_area_t * area, unsigned char * px_map);
+static void inc_thd() {
+    while (1) {
+      lv_tick_inc(16);
+      delay(16);
+    }
+}
+static rtos::Thread lvgl_inc_thd;
+#else
 void lvgl_displayFlushing(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p);
+#endif
 #endif
 
 /* Functions -----------------------------------------------------------------*/
@@ -84,9 +96,36 @@ int Arduino_H7_Video::begin() {
     /* Initiliaze LVGL library */
     lv_init();
 
+
+  #if (LVGL_VERSION_MAJOR == 9)
     /* Create a draw buffer */
+    static lv_color_t * buf1 = (lv_color_t*)malloc((width() * height() / 10)); /* Declare a buffer for 1/10 screen size */
+    if (buf1 == NULL) {
+      return 2; /* Insuff memory err */
+    }
+    static lv_color_t * buf2 = (lv_color_t*)malloc((width() * height() / 10)); /* Declare a buffer for 1/10 screen size */
+    if (buf2 == NULL) {
+      return 2; /* Insuff memory err */
+    }
+
+    lv_display_t *display;
+    if(_rotated) {
+      display = lv_display_create(height(), width());
+      lv_display_set_rotation(display, LV_DISPLAY_ROTATION_270);
+      //display->sw_rotate = 1;
+    } else {
+      display = lv_display_create(width(), height());
+    }
+    lv_display_set_buffers(display, buf1, NULL, width() * height() / 10, LV_DISPLAY_RENDER_MODE_PARTIAL);  /*Initialize the display buffer.*/
+    lv_display_set_flush_cb(display, lvgl_displayFlushing);
+
+    lvgl_inc_thd.start(inc_thd);
+
+  #else //LVGL_VERSION_MAJOR
+
+      /* Create a draw buffer */
     static lv_disp_draw_buf_t draw_buf;
-    static lv_color_t * buf1;                                           
+    static lv_color_t * buf1;
     buf1 = (lv_color_t*)malloc((width() * height() / 10) * sizeof(lv_color_t)); /* Declare a buffer for 1/10 screen size */
     if (buf1 == NULL) {
       return 2; /* Insuff memory err */
@@ -109,6 +148,8 @@ int Arduino_H7_Video::begin() {
     }
     disp_drv.sw_rotate = 1;
     lv_disp_drv_register(&disp_drv);        /* Finally register the driver */
+
+  #endif
   #endif
 
   /* Configure SDRAM */
@@ -189,6 +230,42 @@ void Arduino_H7_Video::set(int x, int y, uint8_t r, uint8_t g, uint8_t b) {
 #endif
 
 #if __has_include("lvgl.h")
+#if (LVGL_VERSION_MAJOR == 9)
+static uint8_t* rotated_buf = nullptr;
+void lvgl_displayFlushing(lv_display_t * disp, const lv_area_t * area, unsigned char * px_map) {
+    uint32_t w     = lv_area_get_width(area);
+    uint32_t h     = lv_area_get_height(area);
+    lv_area_t* area_in_use = (lv_area_t *)area;
+
+    // TODO: find a smart way to tackle sw rotation
+    lv_display_rotation_t rotation = lv_display_get_rotation(disp);
+    lv_area_t rotated_area;
+    if (rotation != LV_DISPLAY_ROTATION_0) {
+        rotated_buf = (uint8_t*)realloc(rotated_buf, w * h * 4);
+        lv_color_format_t cf = lv_display_get_color_format(disp);
+        lv_draw_sw_rotate(px_map, rotated_buf,
+                          w, h, lv_draw_buf_width_to_stride(w, cf),
+                          lv_draw_buf_width_to_stride(h, cf),
+                          LV_DISPLAY_ROTATION_90, cf);
+        rotated_area.x1 = lv_display_get_vertical_resolution(disp) - area->y2 - 1;
+        rotated_area.y1 = area->x1;
+        //rotated_area.y2 = dsi_getDisplayYSize() - area->x1 - 1;
+        rotated_area.x2 = rotated_area.x1 + h - 1;
+        rotated_area.y2 = rotated_area.y1 + w + 1;
+
+        area_in_use = &rotated_area;
+        px_map = rotated_buf;
+        auto temp = w;
+        w = h;
+        h = temp;
+    }
+
+    uint32_t offsetPos  = (area_in_use->x1 + (dsi_getDisplayXSize() * area_in_use->y1)) * sizeof(uint16_t);
+
+    dsi_lcdDrawImage((void *) px_map, (void *)(dsi_getActiveFrameBuffer() + offsetPos), w, h, DMA2D_INPUT_RGB565);
+    lv_display_flush_ready(disp);         /* Indicate you are ready with the flushing*/
+}
+#else
 void lvgl_displayFlushing(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p) {
     uint32_t width      = lv_area_get_width(area);
     uint32_t height     = lv_area_get_height(area);
@@ -197,6 +274,7 @@ void lvgl_displayFlushing(lv_disp_drv_t * disp, const lv_area_t * area, lv_color
     dsi_lcdDrawImage((void *) color_p, (void *)(dsi_getActiveFrameBuffer() + offsetPos), width, height, DMA2D_INPUT_RGB565);
     lv_disp_flush_ready(disp);         /* Indicate you are ready with the flushing*/
 }
+#endif
 #endif
 
 /**** END OF FILE ****/
