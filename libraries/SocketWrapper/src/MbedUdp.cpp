@@ -63,7 +63,7 @@ int arduino::MbedUDP::beginPacket(IPAddress ip, uint16_t port) {
 int arduino::MbedUDP::beginPacket(const char *host, uint16_t port) {
   _host = SocketAddress(host, port);
   txBuffer.clear();
-  getNetwork()->gethostbyname(host, &_host);
+  SocketHelpers::gethostbyname(getNetwork(), host, &_host);
   //If IP is null and port is 0 the initialization failed
   return (_host.get_ip_address() == nullptr && _host.get_port() == 0) ? 0 : 1;
 }
