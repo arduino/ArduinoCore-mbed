@@ -187,13 +187,6 @@ public:
 
   unsigned long getTime();
 
-  void lowPowerMode();
-  void noLowPowerMode();
-
-  int ping(const char* hostname, uint8_t ttl = 128);
-  int ping(const String& hostname, uint8_t ttl = 128);
-  int ping(IPAddress host, uint8_t ttl = 128);
-
   friend class WiFiClient;
   friend class WiFiServer;
   friend class WiFiUDP;
