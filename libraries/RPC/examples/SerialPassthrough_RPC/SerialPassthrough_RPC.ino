@@ -9,7 +9,7 @@ void setup() {
 }
 
 void loop() {
-  if (HAL_GetCurrentCPUID() == CM4_CPUID) {
+  if (RPC.cpu_id() == CM4_CPUID) {
     RPC.println("Printed from M4 core");
     delay(1000);
   } else {

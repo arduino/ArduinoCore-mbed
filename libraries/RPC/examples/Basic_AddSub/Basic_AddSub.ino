@@ -17,7 +17,7 @@ void setup() {
   RPC.begin();
   RPC.bind("add", add);
   RPC.bind("sub", sub);
-  if (HAL_GetCurrentCPUID() == CM7_CPUID) {
+  if (RPC.cpu_id() == CM7_CPUID) {
     // Introduce a brief delay to allow the M4 sufficient time
     // to bind remote functions before invoking them.
     delay(100);
@@ -29,7 +29,7 @@ void loop() {
   static size_t loop_count = 0;
 
   // Blink every 512 iterations
-  if (HAL_GetCurrentCPUID() == CM4_CPUID && (loop_count++ % 512) == 0) {
+  if (RPC.cpu_id() == CM4_CPUID && (loop_count++ % 512) == 0) {
     digitalWrite(LEDG, LOW);
     delay(10);
     digitalWrite(LEDG, HIGH);
@@ -37,12 +37,12 @@ void loop() {
   }
 
   int res = RPC.call("add", 1, 2).as<int>();
-  if (HAL_GetCurrentCPUID() == CM7_CPUID) {
+  if (RPC.cpu_id() == CM7_CPUID) {
     Serial.println("add(1, 2) = " + String(res));
   }
 
   res = RPC.call("sub", res, 1).as<int>();
-  if (HAL_GetCurrentCPUID() == CM7_CPUID) {
+  if (RPC.cpu_id() == CM7_CPUID) {
     Serial.println("sub(3, 1) = " + String(res));
   }
   delay(250);

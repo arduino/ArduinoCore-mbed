@@ -11,7 +11,7 @@ Thread subtractThread;
    Note that the sketch has to be uploaded to both cores.
  **/
 String currentCPU() {
-  if (HAL_GetCurrentCPUID() == CM7_CPUID) {
+  if (RPC.cpu_id() == CM7_CPUID) {
     return "M7";
   } else {
     return "M4";
