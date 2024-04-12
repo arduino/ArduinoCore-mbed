@@ -42,19 +42,26 @@ class RPCClass : public Stream, public rpc::detail::dispatcher {
             for (int i = 0; i< 10; i++) {
                 clients[i] = NULL;
             }
-        };
+        }
         int begin();
-        void end() {};
+        void end() {
+
+        }
         int available(void) {
             return rx_buffer.available();
-        };
+        }
         int peek(void) {
             return rx_buffer.peek();
         }
         int read(void) {
             return rx_buffer.read_char();
         }
-        void flush(void) {};
+        void flush(void) {
+
+        }
+        uint32_t cpu_id() {
+            return HAL_GetCurrentCPUID();
+        }
         size_t write(uint8_t c);
         size_t write(const uint8_t *buf, size_t len, bool raw = true);
 
