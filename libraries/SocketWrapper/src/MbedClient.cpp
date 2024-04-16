@@ -299,6 +299,7 @@ void arduino::MbedClient::stop() {
     mutex = nullptr;
   }
   _status = false;
+  rxBuffer.clear();
 }
 
 uint8_t arduino::MbedClient::connected() {
