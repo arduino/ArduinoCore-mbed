@@ -65,7 +65,7 @@ void arduino::MbedClient::configureSocket(Socket *_s) {
   _s->set_timeout(_timeout);
   _s->set_blocking(false);
   _s->getpeername(&address);
-  
+
   if (event == nullptr) {
     event = new rtos::EventFlags;
   }
