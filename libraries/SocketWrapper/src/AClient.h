@@ -28,7 +28,6 @@ class AClient : public Client {
 public:
 
   AClient() {}
-  AClient(unsigned long  timeout);
 
   virtual int connect(IPAddress ip, uint16_t port);
   virtual int connect(const char *host, uint16_t port);
@@ -71,7 +70,6 @@ class ASslClient : public AClient {
 public:
 
   ASslClient() {}
-  ASslClient(unsigned long  timeout) : AClient(timeout) {}
 
   void disableSNI(bool statusSNI);
 

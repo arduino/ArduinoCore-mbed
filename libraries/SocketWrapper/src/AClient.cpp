@@ -2,10 +2,6 @@
 #include "AClient.h"
 #include "MbedSSLClient.h"
 
-AClient::AClient(unsigned long  timeout) {
-  setSocketTimeout(timeout);
-}
-
 void arduino::AClient::newMbedClient() {
   client.reset(new MbedClient());
   client->setNetwork(getNetwork());
