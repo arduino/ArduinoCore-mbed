@@ -20,7 +20,7 @@
 
 /*
  * This is the container for our free-list.
- * Node the usage of the linked list here: the library uses offsetof
+ * Note the usage of the linked list here: the library uses offsetof
  * and container_of to manage the list and get back to the parent struct.
  */
 typedef struct
@@ -67,7 +67,7 @@ void defrag_free_list(void)
 		{
 			if((((uintptr_t)&lb->block) + lb->size) == (uintptr_t)b)
 			{
-				lb->size += sizeof(*b) + b->size;
+				lb->size += ALLOC_HEADER_SZ + b->size;
 				list_del(&b->node);
 				continue;
 			}
