@@ -27,6 +27,12 @@
 
 #define ALIGN_PTR(p,a)   ((p & (a-1)) ?(((uintptr_t)p + a) & ~(uintptr_t)(a-1)) : p)
 
+#ifdef __SCB_DCACHE_LINE_SIZE
+#define FB_ALIGNMENT    __SCB_DCACHE_LINE_SIZE
+#else
+#define FB_ALIGNMENT    32
+#endif
+
 // Include all image sensor drivers here.
 #if defined (ARDUINO_PORTENTA_H7_M7)
 
@@ -337,15 +343,16 @@ FrameBuffer::FrameBuffer(int32_t x, int32_t y, int32_t bpp) :
     _fb_size(x*y*bpp),
     _isAllocated(true)
 {
-    uint8_t *buffer = (uint8_t *)malloc(x*y*bpp);
-    _fb = (uint8_t *)ALIGN_PTR((uintptr_t)buffer, 32);
+    uint8_t *buffer = (uint8_t *) malloc(x * y * bpp + FB_ALIGNMENT);
+    _fb = (uint8_t *) ALIGN_PTR((uintptr_t) buffer, FB_ALIGNMENT);
 }
 
 FrameBuffer::FrameBuffer(int32_t address) : 
     _fb_size(0),
-    _isAllocated(true)
+    _isAllocated(true),
+    _fb((uint8_t *) address)
 {
-    _fb = (uint8_t *)ALIGN_PTR((uintptr_t)address, 32);
+    // Assume that `address` is aligned, this will be verified later in grabFrame.
 }
 
 FrameBuffer::FrameBuffer() : 
@@ -688,17 +695,17 @@ int Camera::grabFrame(FrameBuffer &fb, uint32_t timeout)
             }
         }
     } else {
-        uint8_t *buffer = (uint8_t *)malloc(framesize+32);
-        uint8_t *alignedBuff = (uint8_t *)ALIGN_PTR((uintptr_t)buffer, 32);
-        fb.setBuffer(alignedBuff);
+        uint8_t *buffer = (uint8_t *) malloc(framesize + FB_ALIGNMENT);
+        uint8_t *aligned_buffer = (uint8_t *) ALIGN_PTR((uintptr_t) buffer, FB_ALIGNMENT);
+        fb.setBuffer(aligned_buffer);
     }
 
     uint8_t *framebuffer = fb.getBuffer();
 
-    // Ensure FB is aligned to 32 bytes cache lines.
-    if ((uint32_t) framebuffer & 0x1F) {
+    // Ensure that the framebuffer is aligned.
+    if ((uint32_t) framebuffer & (FB_ALIGNMENT - 1)) {
         if (_debug) {
-            _debug->println("Framebuffer not aligned to 32 bytes cache lines");
+            _debug->println("The framebuffer memory is not aligned!");
         }
         return -1;
     }
