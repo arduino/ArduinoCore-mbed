@@ -28,9 +28,6 @@ extern const char CA_CERTIFICATES[];
 namespace arduino {
 
 class GSMSSLClient : public arduino::ASslClient {
-public:
-  GSMSSLClient();
-
 private:
   NetworkInterface *getNetwork() {
     return GSM.getNetwork();

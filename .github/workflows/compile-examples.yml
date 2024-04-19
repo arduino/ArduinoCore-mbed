@@ -72,6 +72,7 @@ jobs:
               - name: ArduinoGraphics
               - name: Arduino_GigaDisplayTouch
               - name: emWin
+              - name: Arduino_DebugUtils
             additional-sketch-paths: |
               - libraries/PDM
               - libraries/doom
@@ -177,6 +178,7 @@ jobs:
               fqbn: arduino:mbed:edge_control
             additional-libraries: |
               - name: MicroNMEA
+              - name: Arduino_DebugUtils
             additional-sketch-paths: |
               - libraries/GSM
               - libraries/USBHID

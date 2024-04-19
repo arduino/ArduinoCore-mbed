@@ -1,6 +1,16 @@
-#include <GSM.h>
+/*
+  GSMClient
 
-#include "arduino_secrets.h" 
+  This sketch connects to a website (https://example.com)
+  using the Portenta CAT.M1/NB IoT GNSS Shield.
+
+ */
+
+#include <GSM.h>
+#include <Arduino_DebugUtils.h>
+#include <GSMDebug.h>
+#include "arduino_secrets.h"
+
 char pin[]      = SECRET_PIN;
 char apn[]      = SECRET_APN;
 char username[] = SECRET_USERNAME;
@@ -13,18 +23,21 @@ GSMClient client;
 
 void setup() {
 
+  Serial.begin(9600);
+  while(!Serial) {}
+
 #if defined(ARDUINO_EDGE_CONTROL)
   // Power ON MKR2
   pinMode(ON_MKR2, OUTPUT);
   digitalWrite(ON_MKR2, HIGH);
 #endif
 
-  Serial.begin(115200);
-  while(!Serial) {}
-
   // To enable AT Trace debug uncomment the following lines
   //GSM.trace(Serial);
   //GSM.setTraceLevel(4);
+
+  Debug.setDebugOutputStream(&Serial);
+  Debug.setDebugLevel(4);
 
   Serial.println("Starting Carrier Network registration");
   if(!GSM.begin(pin, apn, username, pass, CATNB, BAND_20 | BAND_19)){

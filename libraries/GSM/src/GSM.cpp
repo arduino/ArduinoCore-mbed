@@ -50,7 +50,9 @@ int arduino::GSMClass::begin(const char* pin, const char* apn, const char* usern
     reset();
   }
 
-  _context = mbed::CellularContext::get_default_instance();
+  if (!_context) {
+    _context = mbed::CellularContext::get_default_instance();
+  }
 
   if (_context == nullptr) {
     DEBUG_ERROR("Invalid mbed::CellularContext");
@@ -117,7 +119,10 @@ void arduino::GSMClass::end() {
 }
 
 int arduino::GSMClass::disconnect() {
-  return _context->disconnect();
+  if (_context) {
+    return _context->disconnect();
+  }
+  return 0;
 }
 
 unsigned long arduino::GSMClass::getTime()
@@ -144,9 +149,12 @@ bool arduino::GSMClass::isConnected()
   }
 }
 
-
-
 NetworkInterface* arduino::GSMClass::getNetwork() {
+  /* Can happen this is called before GSM.begin( .. ) when configuring GSMSSLClient
+   * from sketch calling client.appendCustomCACert( .. ) */
+  if (!_context) {
+    _context = mbed::CellularContext::get_default_instance();
+  }
   return _context;
 }
 

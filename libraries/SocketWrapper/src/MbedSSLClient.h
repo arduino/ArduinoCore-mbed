@@ -33,8 +33,6 @@ class MbedSSLClient : public arduino::MbedClient {
 public:
   MbedSSLClient();
 
-  MbedSSLClient(unsigned long  timeout);
-
   virtual ~MbedSSLClient() {
     stop();
   }

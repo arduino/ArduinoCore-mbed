@@ -26,10 +26,6 @@
 namespace arduino {
 
 class GSMClient : public AClient {
-public:
-  GSMClient();
-
-private:
   NetworkInterface *getNetwork() {
     return GSM.getNetwork();
   }
