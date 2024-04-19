@@ -129,7 +129,7 @@ int arduino::MbedClient::connect(IPAddress ip, uint16_t port) {
 int arduino::MbedClient::connect(const char *host, uint16_t port) {
   SocketAddress socketAddress = SocketAddress();
   socketAddress.set_port(port);
-  getNetwork()->gethostbyname(host, &socketAddress);
+  SocketHelpers::gethostbyname(getNetwork(), host, &socketAddress);
   return connect(socketAddress);
 }
 
@@ -199,7 +199,7 @@ int arduino::MbedClient::connectSSL(const char *host, uint16_t port, bool disabl
 
   SocketAddress socketAddress = SocketAddress();
   socketAddress.set_port(port);
-  getNetwork()->gethostbyname(host, &socketAddress);
+  SocketHelpers::gethostbyname(getNetwork(), host, &socketAddress);
   return connectSSL(socketAddress);
 }
 
