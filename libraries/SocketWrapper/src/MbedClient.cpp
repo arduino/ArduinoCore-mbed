@@ -13,20 +13,24 @@ uint8_t arduino::MbedClient::status() {
   return _status;
 }
 
+
 void arduino::MbedClient::readSocket() {
-  while (1) {
+  uint8_t data[SOCKET_BUFFER_SIZE];
+
+  while (sock != nullptr) {
     event->wait_any(0xFF, 100);
-    uint8_t data[SOCKET_BUFFER_SIZE];
     int ret = NSAPI_ERROR_WOULD_BLOCK;
     do {
+      mutex->lock();
+      if (sock == nullptr) {
+        goto cleanup;
+      }
+      mutex->unlock();
       if (rxBuffer.availableForStore() == 0) {
         yield();
         continue;
       }
       mutex->lock();
-      if (sock == nullptr) {
-        goto cleanup;
-      }
       ret = sock->recv(data, rxBuffer.availableForStore());
       if (ret < 0 && ret != NSAPI_ERROR_WOULD_BLOCK) {
         goto cleanup;
@@ -61,7 +65,7 @@ void arduino::MbedClient::configureSocket(Socket *_s) {
   _s->set_timeout(_timeout);
   _s->set_blocking(false);
   _s->getpeername(&address);
-  
+
   if (event == nullptr) {
     event = new rtos::EventFlags;
   }
@@ -295,6 +299,7 @@ void arduino::MbedClient::stop() {
     mutex = nullptr;
   }
   _status = false;
+  rxBuffer.clear();
 }
 
 uint8_t arduino::MbedClient::connected() {
