@@ -93,6 +93,7 @@ uint8_t arduino::MbedI2C::endTransmission(void) {
 
 size_t arduino::MbedI2C::requestFrom(uint8_t address, size_t len, bool stopBit) {
 	char buf[256];
+	len = min(len, sizeof(buf));
 	int ret = master->read(address << 1, buf, len, !stopBit);
 	if (ret != 0) {
 		return 0;
