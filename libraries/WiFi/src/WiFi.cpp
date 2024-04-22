@@ -3,6 +3,39 @@
 #define SSID_MAX_LENGTH 32
 #define SSID_MAX_COUNT  64
 
+static uint8_t sec2enum(nsapi_security_t sec) {
+  switch (sec) {
+    case NSAPI_SECURITY_NONE:
+      return ENC_TYPE_NONE;
+    case NSAPI_SECURITY_WEP:
+      return ENC_TYPE_WEP;
+    case NSAPI_SECURITY_WPA:
+      return ENC_TYPE_TKIP;
+    case NSAPI_SECURITY_WPA2:
+      return ENC_TYPE_CCMP;
+    case NSAPI_SECURITY_WPA_WPA2:
+      return ENC_TYPE_CCMP;
+    case NSAPI_SECURITY_UNKNOWN:
+    default:
+      return ENC_TYPE_AUTO;
+  }
+}
+
+static nsapi_security_t enum2sec(wl_enc_type sec) {
+  switch (sec) {
+    case ENC_TYPE_NONE:
+      return NSAPI_SECURITY_NONE;
+    case ENC_TYPE_WEP:
+      return NSAPI_SECURITY_WEP;
+    case ENC_TYPE_TKIP:
+      return NSAPI_SECURITY_WPA;
+    case ENC_TYPE_CCMP:
+      return NSAPI_SECURITY_WPA_WPA2;
+    default:
+      return NSAPI_SECURITY_UNKNOWN;
+  }
+}
+
 bool arduino::WiFiClass::isVisible(const char* ssid) {
   for (int i = 0; i < SSID_MAX_COUNT; i++) {
     if (strncmp(ap_list[i].get_ssid(), ssid, SSID_MAX_LENGTH) == 0) {
@@ -13,7 +46,7 @@ bool arduino::WiFiClass::isVisible(const char* ssid) {
   return false;
 }
 
-int arduino::WiFiClass::begin(const char* ssid, const char* passphrase) {
+int arduino::WiFiClass::begin(const char* ssid, const char* passphrase, wl_enc_type security) {
   if (wifi_if == nullptr) {
     return 0;
   }
@@ -21,10 +54,13 @@ int arduino::WiFiClass::begin(const char* ssid, const char* passphrase) {
   wifi_if->attach(&arduino::WiFiClass::statusCallback);
 
   scanNetworks();
-  // use scan result to populate security field
-  if (!isVisible(ssid)) {
-    _currentNetworkStatus = WL_CONNECT_FAILED;
-    return _currentNetworkStatus;
+
+  if (isVisible(ssid)) {
+    // Set the network security mode from the scan result.
+    _security = ap_list[connected_ap].get_security();
+  } else {
+    // For hidden networks, the security mode must be set explicitly.
+    _security = enum2sec(security);
   }
 
   wifi_if->set_dhcp(!_useStaticIP);
@@ -36,7 +72,7 @@ int arduino::WiFiClass::begin(const char* ssid, const char* passphrase) {
     wifi_if->add_dns_server(_dnsServer1, if_name); // pushes dnsServer2 at index 1
   }
 
-  nsapi_error_t result = wifi_if->connect(ssid, passphrase, ap_list[connected_ap].get_security());
+  nsapi_error_t result = wifi_if->connect(ssid, passphrase, _security);
 
   if(result == NSAPI_ERROR_IS_CONNECTED) {
     wifi_if->disconnect();
@@ -44,6 +80,10 @@ int arduino::WiFiClass::begin(const char* ssid, const char* passphrase) {
   _currentNetworkStatus = (result == NSAPI_ERROR_OK && setSSID(ssid)) ? WL_CONNECTED : WL_CONNECT_FAILED;
 
   return _currentNetworkStatus;
+}
+
+int arduino::WiFiClass::begin(const char* ssid) {
+  return begin(ssid, NULL, ENC_TYPE_NONE);
 }
 
 //Config Wifi to set Static IP && Disable DHCP
@@ -161,25 +201,8 @@ int arduino::WiFiClass::setSSID(const char* ssid) {
   return 1;
 }
 
-static uint8_t sec2enum(nsapi_security_t sec) {
-  switch (sec) {
-    case NSAPI_SECURITY_NONE:
-      return ENC_TYPE_NONE;
-    case NSAPI_SECURITY_WEP:
-      return ENC_TYPE_WEP;
-    case NSAPI_SECURITY_WPA:
-      return ENC_TYPE_TKIP;
-    case NSAPI_SECURITY_WPA2:
-      return ENC_TYPE_CCMP;
-    case NSAPI_SECURITY_WPA_WPA2:
-      return ENC_TYPE_CCMP;
-    case NSAPI_SECURITY_UNKNOWN:
-    default:
-      return ENC_TYPE_AUTO;
-  }
-}
-
 int8_t arduino::WiFiClass::scanNetworks() {
+  connected_ap = SSID_MAX_COUNT;
   uint8_t count = SSID_MAX_COUNT;
   if (ap_list != nullptr) {
     free(ap_list);
@@ -189,23 +212,39 @@ int8_t arduino::WiFiClass::scanNetworks() {
 }
 
 char* arduino::WiFiClass::SSID(uint8_t networkItem) {
+  if (networkItem >= SSID_MAX_COUNT) {
+    return NULL;
+  }
   return (char*)ap_list[networkItem].get_ssid();
 }
 
 int32_t arduino::WiFiClass::RSSI(uint8_t networkItem) {
+  if (networkItem >= SSID_MAX_COUNT) {
+    return 0;
+  }
   return ap_list[networkItem].get_rssi();
 }
 
 uint8_t arduino::WiFiClass::encryptionType(uint8_t networkItem) {
+  if (networkItem >= SSID_MAX_COUNT) {
+    return ENC_TYPE_UNKNOWN;
+  }
   return sec2enum(ap_list[networkItem].get_security());
 }
 
 uint8_t* arduino::WiFiClass::BSSID(uint8_t networkItem, uint8_t* bssid) {
-  memcpy(bssid,  ap_list[networkItem].get_bssid(), 6);
+  if (networkItem >= SSID_MAX_COUNT) {
+    memset(bssid, 0, 6);
+  } else {
+    memcpy(bssid, ap_list[networkItem].get_bssid(), 6);
+  }
   return bssid;
 }
 
 uint8_t arduino::WiFiClass::channel(uint8_t networkItem) {
+  if (networkItem >= SSID_MAX_COUNT) {
+    return -1;
+  }
   return ap_list[networkItem].get_channel();
 }
 
@@ -218,13 +257,21 @@ uint8_t arduino::WiFiClass::status() {
 }
 
 uint8_t arduino::WiFiClass::encryptionType() {
-  return sec2enum(ap_list[connected_ap].get_security());
+  if (connected_ap >= SSID_MAX_COUNT) {
+    return sec2enum(_security);
+  } else {
+    return sec2enum(ap_list[connected_ap].get_security());
+  }
 }
 
 uint8_t* arduino::WiFiClass::BSSID(unsigned char* bssid) {
-  const uint8_t* reverse_bssid = ap_list[connected_ap].get_bssid();
-  for (int b = 0; b < 6; b++) {
-    bssid[b] = reverse_bssid[5 - b];
+  if (connected_ap >= SSID_MAX_COUNT) {
+    memset(bssid, 0, 6);
+  } else {
+    const uint8_t* reverse_bssid = ap_list[connected_ap].get_bssid();
+    for (int b = 0; b < 6; b++) {
+      bssid[b] = reverse_bssid[5 - b];
+    }
   }
   return bssid;
 }

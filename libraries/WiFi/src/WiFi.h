@@ -67,16 +67,6 @@ public:
      */
   int begin(const char* ssid);
 
-  /* Start Wifi connection with WEP encryption.
-     * Configure a key into the device. The key type (WEP-40, WEP-104)
-     * is determined by the size of the key (5 bytes for WEP-40, 13 bytes for WEP-104).
-     *
-     * param ssid: Pointer to the SSID string.
-     * param key_idx: The key index to set. Valid values are 0-3.
-     * param key: Key input buffer.
-     */
-  int begin(const char* ssid, uint8_t key_idx, const char* key);
-
   void MACAddress(uint8_t *mac_address);
 
   /* Start Wifi connection with passphrase
@@ -86,7 +76,7 @@ public:
      * param passphrase: Passphrase. Valid characters in a passphrase
      *        must be between ASCII 32-126 (decimal).
      */
-  int begin(const char* ssid, const char* passphrase);
+  int begin(const char* ssid, const char* passphrase, wl_enc_type security = ENC_TYPE_CCMP);
 	
   // Inherit config methods from the parent class
   using MbedSocketClass::config;
@@ -201,6 +191,7 @@ private:
   WiFiInterface* wifi_if = nullptr;
   WiFiAccessPoint* ap_list = nullptr;
   uint8_t connected_ap;
+  nsapi_security_t _security;
   int setSSID(const char* ssid);
   void ensureDefaultAPNetworkConfiguration();
   static void* handleAPEvents(whd_interface_t ifp, const whd_event_header_t* event_header, const uint8_t* event_data, void* handler_user_data);
