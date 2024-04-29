@@ -74,7 +74,8 @@ enum wl_enc_type {  /* Values map to 802.11 Cipher Algorithm Identifier */
         ENC_TYPE_AUTO = 8
 };
 
-#if defined(ARDUINO_PORTENTA_H7_M7)
+#if defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_NICLA_VISION) || \
+    defined(ARDUINO_GIGA) || defined(ARDUINO_OPTA)
 #include "whd_version.h"
 #define WIFI_FIRMWARE_LATEST_VERSION WHD_VERSION
 #endif
