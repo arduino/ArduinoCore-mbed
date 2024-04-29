@@ -22,7 +22,7 @@ body {
     margin-top: 20px;
 }
 
-#controls {
+.controls {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -56,6 +56,21 @@ button {
 
 button:hover {
     background-color: var(--main-control-color-hover);
+}
+
+label {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: bold;
+    color: var(--secondary-text-color);
+}
+
+select {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    padding: 5px 10px;
+    border-radius: 5px;
 }
 
 #refresh {

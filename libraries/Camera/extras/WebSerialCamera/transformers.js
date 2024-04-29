@@ -306,6 +306,7 @@ class ImageDataTransformer extends StartStopSequenceTransformer {
         this.imageMode = null;
         this.width = null;
         this.height = null;
+        this.filter = null;
         this.imageDataProcessor.reset();
     }
 
