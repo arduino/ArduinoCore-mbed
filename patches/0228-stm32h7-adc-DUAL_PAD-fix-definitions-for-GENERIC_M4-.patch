@@ -1,0 +1,40 @@
+From 992ed2cca5ebbce5f817d9fd25b2162ff8e77bbe Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Mon, 29 Apr 2024 10:41:37 +0200
+Subject: [PATCH] stm32h7: adc: DUAL_PAD: fix definitions for GENERIC_M4 target
+
+Completes 2e1da0130 and fixes https://github.com/arduino/ArduinoCore-mbed/issues/867
+---
+ .../TARGET_STM32H747xI/TARGET_GENERIC_STM32H747_M4/PinNames.h   | 2 +-
+ targets/TARGET_STM/tools/STM32_gen_PeripheralPins.py            | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_GENERIC_STM32H747_M4/PinNames.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_GENERIC_STM32H747_M4/PinNames.h
+index 97d48334d7..04a34504a7 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_GENERIC_STM32H747_M4/PinNames.h
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_GENERIC_STM32H747_M4/PinNames.h
+@@ -43,7 +43,7 @@
+ extern "C" {
+ #endif
+ 
+-#define DUAL_PAD 0xF00
++#define DUAL_PAD 0x800
+ 
+ typedef enum {
+     ALT0  = 0x100,
+diff --git a/targets/TARGET_STM/tools/STM32_gen_PeripheralPins.py b/targets/TARGET_STM/tools/STM32_gen_PeripheralPins.py
+index 44a95f9c02..903ce5f7e0 100644
+--- a/targets/TARGET_STM/tools/STM32_gen_PeripheralPins.py
++++ b/targets/TARGET_STM/tools/STM32_gen_PeripheralPins.py
+@@ -491,7 +491,7 @@ extern "C" {
+ 
+     if DUAL_PAD:
+         line_to_write = ("""
+-#define DUAL_PAD 0xF00
++#define DUAL_PAD 0x800
+ """)
+         out_h_file.write(line_to_write)
+ 
+-- 
+2.44.0
+
