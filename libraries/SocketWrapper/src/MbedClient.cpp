@@ -22,15 +22,13 @@ void arduino::MbedClient::readSocket() {
     int ret = NSAPI_ERROR_WOULD_BLOCK;
     do {
       mutex->lock();
-      if (sock == nullptr) {
-        goto cleanup;
-      }
-      mutex->unlock();
-      if (rxBuffer.availableForStore() == 0) {
+      if (sock != nullptr && rxBuffer.availableForStore() == 0) {
+        mutex->unlock();
         yield();
         continue;
+      } else if (sock == nullptr) {
+        goto cleanup;
       }
-      mutex->lock();
       ret = sock->recv(data, rxBuffer.availableForStore());
       if (ret < 0 && ret != NSAPI_ERROR_WOULD_BLOCK) {
         goto cleanup;
