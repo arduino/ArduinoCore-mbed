@@ -85,13 +85,6 @@ public:
 
   int beginAP(const char* ssid, const char* passphrase, uint8_t channel = DEFAULT_AP_CHANNEL);
 
-  /* Set the hostname used for DHCP requests
-     *
-     * param name: hostname to set
-     *
-     */
-  void setHostname(const char* name);
-
   /*
      * Disconnect from the network
      *
