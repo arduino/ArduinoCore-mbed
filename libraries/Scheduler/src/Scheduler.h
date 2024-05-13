@@ -27,12 +27,14 @@ extern "C" {
 	typedef void (*SchedulerParametricTask)(void *);
 }
 
+// This class exists for only backwards compatibility with arduino-libraries/Scheduler. 
+// You are encorraged to use mbed::Thread directly rather than using this.
 class SchedulerClass {
 public:
 	SchedulerClass();
-	void startLoop(SchedulerTask task, uint32_t stackSize = 1024);
-	void start(SchedulerTask task, uint32_t stackSize = 1024);
-	void start(SchedulerParametricTask task, void *data, uint32_t stackSize = 1024);
+	void startLoop(SchedulerTask task, uint32_t stackSize = OS_STACK_SIZE);
+	void start(SchedulerTask task, uint32_t stackSize = OS_STACK_SIZE);
+	void start(SchedulerParametricTask task, void *data, uint32_t stackSize = OS_STACK_SIZE);
 
 	void yield() { ::yield(); };
 private:
