@@ -48,7 +48,7 @@ static void dsi_layerInit(uint16_t LayerIndex, uint32_t FB_Address);
 int dsi_init(uint8_t bus, struct edid *edid, struct display_timing *dt) {
 #ifdef ARDUINO_GIGA
 	static const uint32_t DSI_PLLNDIV = 125;
-	static const uint32_t DSI_PLLIDF = DSI_PLL_IN_DIV3;
+	static const uint32_t DSI_PLLIDF = DSI_PLL_IN_DIV4;
 	static const uint32_t DSI_PLLODF = DSI_PLL_OUT_DIV1;
 	static const uint32_t DSI_TXEXCAPECLOCKDIV = 4;
 	#undef HSE_VALUE
