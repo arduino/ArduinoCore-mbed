@@ -28,7 +28,7 @@ extern "C" {
 }
 
 // This class exists for only backwards compatibility with arduino-libraries/Scheduler. 
-// You are encorraged to use mbed::Thread directly rather than using this.
+// You are encouraged to use mbed::Thread directly rather than using this.
 class SchedulerClass {
 public:
 	SchedulerClass();
