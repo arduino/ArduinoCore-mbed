@@ -1,0 +1,28 @@
+From a448ec473c706fd2b6bd2e99aa31d6c7e3d9debb Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Tue, 4 Jun 2024 14:29:00 +0200
+Subject: [PATCH] NiclaVision: enable red blink on mbed_die()
+
+---
+ .../TARGET_STM32H747xI/TARGET_NICLA_VISION/PinNames.h        | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_NICLA_VISION/PinNames.h b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_NICLA_VISION/PinNames.h
+index 9f14a66d67..42d24cd79d 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_NICLA_VISION/PinNames.h
++++ b/targets/TARGET_STM/TARGET_STM32H7/TARGET_STM32H747xI/TARGET_NICLA_VISION/PinNames.h
+@@ -467,6 +467,11 @@ typedef enum {
+     NC = (int)0xFFFFFFFF
+ } PinName;
+ 
++// Standardized LED and button names
++#define LED1     LED_RED
++#define LED2     LED_GREEN
++#define LED3     LED_BLUE
++
+ #ifdef __cplusplus
+ }
+ #endif
+-- 
+2.45.0
+
