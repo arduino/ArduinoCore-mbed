@@ -12,8 +12,19 @@ SUBSYSTEMS=="usb", ATTRS{idVendor}=="0525", MODE:="0666"
 EOF
 }
 
-if [ "$EUID" -ne 0 ]
-  then echo "Please run as root"
+if [ "$EUID" -ne 0 ]; then
+  if [ -e "${PWD}/post_install.sh" ]; then
+    echo
+    echo "You might need to configure permissions for uploading."
+    echo "To do so, run the following command from the terminal:"
+    echo "sudo \"${PWD}/post_install.sh\""
+    echo
+  else
+    # Script was executed from another path. It is assumed this will only occur when user is executing script directly.
+    # So it is not necessary to provide the command line.
+    echo "Please run as root"
+  fi
+
   exit
 fi
 
