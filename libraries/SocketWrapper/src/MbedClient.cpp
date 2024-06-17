@@ -305,7 +305,7 @@ void arduino::MbedClient::stop() {
 }
 
 uint8_t arduino::MbedClient::connected() {
-  return ((_status) || (available() > 0));
+  return ((status() == true) || (available() > 0));
 }
 
 IPAddress arduino::MbedClient::remoteIP() {
