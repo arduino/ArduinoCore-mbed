@@ -51,6 +51,10 @@ int arduino::EthernetClass::begin(uint8_t *mac, IPAddress ip, IPAddress dns, IPA
 }
 
 int arduino::EthernetClass::begin(uint8_t *mac, IPAddress ip, IPAddress dns, IPAddress gateway, IPAddress subnet, unsigned long timeout, unsigned long responseTimeout) {
+  if(eth_if == nullptr) {
+    return 0;
+  }
+
   config(ip, dns, gateway, subnet);
 
   eth_if->set_dhcp(false);
@@ -68,6 +72,9 @@ void arduino::EthernetClass::end() {
 }
 
 EthernetLinkStatus arduino::EthernetClass::linkStatus() {
+  if(eth_if == nullptr) {
+    return LinkOFF;
+  }
   return (eth_if->get_connection_status() == NSAPI_STATUS_GLOBAL_UP ? LinkON : LinkOFF);
 }
 
@@ -77,7 +84,9 @@ EthernetHardwareStatus arduino::EthernetClass::hardwareStatus() {
 
 
 int arduino::EthernetClass::disconnect() {
-  eth_if->disconnect();
+  if(eth_if != nullptr) {
+    eth_if->disconnect();
+  }
   return 1;
 }
 
