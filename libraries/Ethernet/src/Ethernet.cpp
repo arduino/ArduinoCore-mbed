@@ -5,7 +5,10 @@
 int arduino::EthernetClass::begin(uint8_t *mac, unsigned long timeout, unsigned long responseTimeout) {
   if (eth_if == nullptr) {
     //Q: What is the callback for?
-    _initializerCallback();
+    //A: To call a specific function on your system before any initialization is performed
+    if(_initializerCallback != nullptr) {
+      _initializerCallback();
+    }
     if (eth_if == nullptr) return 0;
   }
   eth_if->set_dhcp(true);

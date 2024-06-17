@@ -121,7 +121,7 @@ private:
   volatile EthernetLinkStatus _currentNetworkStatus = Unknown;
   EthernetInterface net;
   EthernetInterface *eth_if = &net;
-  voidPrtFuncPtr _initializerCallback;
+  voidPrtFuncPtr _initializerCallback = nullptr;
   arduino::IPAddress ipAddressFromSocketAddress(SocketAddress socketAddress);
 };
 
