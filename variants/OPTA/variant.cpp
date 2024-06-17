@@ -207,7 +207,7 @@ PinDescription g_APinDescription[] = {
   { PJ_12,        NULL, NULL, NULL },
   { PJ_13,        NULL, NULL, NULL },
   { PJ_14,        NULL, NULL, NULL },
-  { PJ_15,        NULL, NULL, NULL },
+  { PJ_15,        NULL, NULL, NULL }, // 185 - RESET ETHERNET PHY ON OPTA
   { PK_0,         NULL, NULL, NULL },
   { PK_1,         NULL, NULL, NULL },
   { PK_2,         NULL, NULL, NULL },
@@ -355,6 +355,11 @@ void initVariant() {
   // Disable the FMC bank1 (enabled after reset)
   // See https://github.com/STMicroelectronics/STM32CubeH7/blob/beced99ac090fece04d1e0eb6648b8075e156c6c/Projects/STM32H747I-DISCO/Applications/OpenAMP/OpenAMP_RTOS_PingPong/Common/Src/system_stm32h7xx.c#L215
   FMC_Bank1_R->BTCR[0] = 0x000030D2;
+
+
+  pinMode(ETHERNET_PHY_RESET,OUTPUT);
+  // keep ethernet phy reset...
+  digitalWrite(ETHERNET_PHY_RESET, LOW);
 }
 
 #ifdef SERIAL_CDC
@@ -377,6 +382,7 @@ uint8_t getUniqueSerialNumber(uint8_t* name) {
 }
 
 void _ontouch1200bps_() {
+  digitalWrite(ETHERNET_PHY_RESET, LOW);
   HAL_RTCEx_BKUPWrite(&RTCHandle, RTC_BKP_DR0, 0xDF59);
   NVIC_SystemReset();
 }

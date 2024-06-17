@@ -193,6 +193,8 @@ void _ontouch1200bps_();
 
 #define USB_MAX_POWER	(500)
 
+#define ETHERNET_PHY_RESET   (185)
+
 static GPIO_TypeDef * const GPIO_PORT[] = {
     GPIOA,
     GPIOB,
