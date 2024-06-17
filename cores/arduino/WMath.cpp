@@ -25,8 +25,8 @@ extern "C" {
   #include "stdlib.h"
   #include "hal/trng_api.h"
 }
-
-#if defined(ARDUINO_PORTENTA_H7_M7) || \
+#if defined(ARDUINO_NANO_RP2040_CONNECT) || \
+    defined(ARDUINO_PORTENTA_H7_M7) || \
     defined(ARDUINO_NICLA_VISION) || \
     defined(ARDUINO_OPTA) || \
     defined(ARDUINO_GIGA)
