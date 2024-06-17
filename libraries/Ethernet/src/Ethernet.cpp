@@ -3,11 +3,6 @@
 #define SSID_MAX_LENGTH 32
 
 int arduino::EthernetClass::begin(uint8_t *mac, unsigned long timeout, unsigned long responseTimeout) {
-  if (eth_if == nullptr) {
-    //Q: What is the callback for?
-    _initializerCallback();
-    if (eth_if == nullptr) return 0;
-  }
   eth_if->set_dhcp(true);
   return _begin(mac, timeout, responseTimeout);
 }
