@@ -62,9 +62,6 @@ public:
     : eth_if(_if){};
   EthernetClass(){};
 
-  EthernetClass(voidPrtFuncPtr _cb)
-    : _initializerCallback(_cb){};
-
   int begin(uint8_t *mac = nullptr, unsigned long timeout = 60000, unsigned long responseTimeout = 4000);
   EthernetLinkStatus linkStatus();
   EthernetHardwareStatus hardwareStatus();
@@ -121,7 +118,6 @@ private:
   volatile EthernetLinkStatus _currentNetworkStatus = Unknown;
   EthernetInterface net;
   EthernetInterface *eth_if = &net;
-  voidPrtFuncPtr _initializerCallback;
   arduino::IPAddress ipAddressFromSocketAddress(SocketAddress socketAddress);
 };
 
