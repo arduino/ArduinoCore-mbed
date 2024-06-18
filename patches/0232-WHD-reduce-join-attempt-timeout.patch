@@ -1,0 +1,25 @@
+From e67490e8d2006e85877c6aff28132a9699023295 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Mon, 17 Jun 2024 17:12:51 +0200
+Subject: [PATCH 232/233] WHD: reduce join attempt timeout
+
+---
+ .../wifi/COMPONENT_WHD/wifi-host-driver/src/whd_wifi_api.c      | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/connectivity/drivers/wifi/COMPONENT_WHD/wifi-host-driver/src/whd_wifi_api.c b/connectivity/drivers/wifi/COMPONENT_WHD/wifi-host-driver/src/whd_wifi_api.c
+index 5294104ab4..c248b2ea1f 100755
+--- a/connectivity/drivers/wifi/COMPONENT_WHD/wifi-host-driver/src/whd_wifi_api.c
++++ b/connectivity/drivers/wifi/COMPONENT_WHD/wifi-host-driver/src/whd_wifi_api.c
+@@ -64,7 +64,7 @@
+ #define JOIN_SECURITY_FLAGS_MASK    (JOIN_SECURITY_COMPLETE | JOIN_EAPOL_KEY_M1_TIMEOUT | JOIN_EAPOL_KEY_M3_TIMEOUT | \
+                                      JOIN_EAPOL_KEY_G1_TIMEOUT | JOIN_EAPOL_KEY_FAILURE)
+ 
+-#define DEFAULT_JOIN_ATTEMPT_TIMEOUT     (7000)   /* Overall join attempt timeout in milliseconds. */
++#define DEFAULT_JOIN_ATTEMPT_TIMEOUT     (4000)   /* Overall join attempt timeout in milliseconds. */
+ #define DEFAULT_EAPOL_KEY_PACKET_TIMEOUT (5000)   /* Timeout when waiting for EAPOL key packet M1 or M3 in milliseconds.*/
+                                                   /* Some APs may be slow to provide M1 and 1000 ms is not long enough for edge of cell. */
+ #ifndef DEFAULT_PM2_SLEEP_RET_TIME
+-- 
+2.43.0
+
