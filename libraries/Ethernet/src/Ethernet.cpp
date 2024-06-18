@@ -3,6 +3,9 @@
 #define SSID_MAX_LENGTH 32
 
 int arduino::EthernetClass::begin(uint8_t *mac, unsigned long timeout, unsigned long responseTimeout) {
+  if (eth_if == nullptr) {
+    return 0;
+  }
   eth_if->set_dhcp(true);
   return _begin(mac, timeout, responseTimeout);
 }
@@ -94,4 +97,4 @@ void arduino::EthernetClass::MACAddress(uint8_t *mac_address)
   macAddress(mac_address);
 }
 
-arduino::EthernetClass Ethernet;
+arduino::EthernetClass Ethernet(static_cast<EthernetInterface*>(EthInterface::get_default_instance()));

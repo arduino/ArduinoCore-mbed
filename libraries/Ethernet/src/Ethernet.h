@@ -60,7 +60,6 @@ public:
   // Returns 0 if the DHCP configuration failed, and 1 if it succeeded
   EthernetClass(EthernetInterface *_if)
     : eth_if(_if){};
-  EthernetClass(){};
 
   int begin(uint8_t *mac = nullptr, unsigned long timeout = 60000, unsigned long responseTimeout = 4000);
   EthernetLinkStatus linkStatus();
@@ -116,8 +115,7 @@ private:
   int _begin(uint8_t *mac, unsigned long timeout, unsigned long responseTimeout);
 
   volatile EthernetLinkStatus _currentNetworkStatus = Unknown;
-  EthernetInterface net;
-  EthernetInterface *eth_if = &net;
+  EthernetInterface *eth_if = nullptr;
   arduino::IPAddress ipAddressFromSocketAddress(SocketAddress socketAddress);
 };
 
