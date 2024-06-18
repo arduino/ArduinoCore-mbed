@@ -163,7 +163,7 @@ envie_m7.bootloader.tool.default=openocd
 envie_m7.bootloader.config=-f target/stm32h7x_dual_bank.cfg
 envie_m7.bootloader.programmer=-f interface/stlink.cfg
 envie_m7.bootloader.extra_action.preflash=stm32h7x option_write 0 0x01c 0xb86aaf0
-envie_m7.bootloader.file=PORTENTA_H7/portentah7_bootloader_mbed_hs_v2.elf
+envie_m7.bootloader.file=PORTENTA_H7/portentah7_bootloader_mbed_hs_v2.hex
 
 envie_m7.debug.server.openocd.scripts.0=interface/{programmer.protocol}.cfg
 envie_m7.debug.server.openocd.scripts.1={programmer.transport_script}
@@ -603,7 +603,7 @@ nicla_vision.bootloader.tool.default=openocd
 nicla_vision.bootloader.config=-f target/stm32h7x_dual_bank.cfg
 nicla_vision.bootloader.programmer=-f interface/stlink.cfg
 nicla_vision.bootloader.extra_action.preflash=stm32h7x option_write 0 0x01c 0xb86aaf0
-nicla_vision.bootloader.file=NICLA_VISION/bootloader.elf
+nicla_vision.bootloader.file=NICLA_VISION/bootloader.hex
 
 nicla_vision.debug.server.openocd.scripts.0=interface/{programmer.protocol}.cfg
 nicla_vision.debug.server.openocd.scripts.1={programmer.transport_script}
@@ -740,7 +740,7 @@ opta.bootloader.tool.default=openocd
 opta.bootloader.config=-f target/stm32h7x_dual_bank.cfg
 opta.bootloader.programmer=-f interface/stlink.cfg
 opta.bootloader.extra_action.preflash=stm32h7x option_write 0 0x01c 0xb86aaf0
-opta.bootloader.file=OPTA/bootloader.elf
+opta.bootloader.file=OPTA/bootloader.hex
 
 opta.debug.server.openocd.scripts.0=interface/{programmer.protocol}.cfg
 opta.debug.server.openocd.scripts.1={programmer.transport_script}
@@ -844,7 +844,7 @@ giga.bootloader.tool.default=openocd
 giga.bootloader.config=-f target/stm32h7x_dual_bank.cfg
 giga.bootloader.programmer=-f interface/stlink.cfg
 giga.bootloader.extra_action.preflash=stm32h7x option_write 0 0x01c 0xb86aaf0
-giga.bootloader.file=GIGA/bootloader.elf
+giga.bootloader.file=GIGA/bootloader.hex
 
 giga.debug.server.openocd.scripts.0=interface/{programmer.protocol}.cfg
 giga.debug.server.openocd.scripts.1={programmer.transport_script}
