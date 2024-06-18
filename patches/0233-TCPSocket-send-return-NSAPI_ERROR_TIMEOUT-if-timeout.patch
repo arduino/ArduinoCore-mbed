@@ -1,0 +1,25 @@
+From 783e574f0989f71447a460742d30b202fbc681d2 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Mon, 17 Jun 2024 17:15:25 +0200
+Subject: [PATCH 233/233] TCPSocket::send return NSAPI_ERROR_TIMEOUT if timeout
+ is reached
+
+---
+ connectivity/netsocket/source/TCPSocket.cpp | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/connectivity/netsocket/source/TCPSocket.cpp b/connectivity/netsocket/source/TCPSocket.cpp
+index 368a2a36f1..f9efe6f8d1 100644
+--- a/connectivity/netsocket/source/TCPSocket.cpp
++++ b/connectivity/netsocket/source/TCPSocket.cpp
+@@ -144,6 +144,7 @@ nsapi_size_or_error_t TCPSocket::send(const void *data, nsapi_size_t size)
+ 
+             if (flag & osFlagsError) {
+                 // Timeout break
++                ret = NSAPI_ERROR_TIMEOUT;
+                 break;
+             }
+         } else if (ret < 0) {
+-- 
+2.43.0
+
