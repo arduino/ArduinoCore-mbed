@@ -65,8 +65,6 @@
 
 namespace arduino {
 
-typedef void* (*voidPrtFuncPtr)(void);
-
 class GSMClass : public MbedSocketClass {
 public:
 

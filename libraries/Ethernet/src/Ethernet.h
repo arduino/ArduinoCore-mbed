@@ -50,8 +50,6 @@ enum {  // compatibility with Arduino ::maintain()
     DHCP_CHECK_REBIND_OK    = 4
 };
 
-typedef void *(*voidPrtFuncPtr)(void);
-
 class EthernetClass : public MbedSocketClass {
 
 public:

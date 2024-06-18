@@ -46,8 +46,6 @@ extern "C" {
 
 namespace arduino {
 
-typedef void* (*voidPrtFuncPtr)(void);
-
 class WiFiClass : public MbedSocketClass {
 public:
   static int16_t _state[MAX_SOCK_NUM];
