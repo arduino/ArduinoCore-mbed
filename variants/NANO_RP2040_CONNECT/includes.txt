@@ -325,6 +325,9 @@
 -iwithprefixbefore/mbed/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_platform
 -iwithprefixbefore/mbed/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_platform/include
 -iwithprefixbefore/mbed/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_platform/include/pico
+-iwithprefixbefore/mbed/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_rand
+-iwithprefixbefore/mbed/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_rand/include
+-iwithprefixbefore/mbed/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_rand/include/pico
 -iwithprefixbefore/mbed/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_runtime
 -iwithprefixbefore/mbed/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_runtime/include
 -iwithprefixbefore/mbed/targets/TARGET_RASPBERRYPI/TARGET_RP2040/pico-sdk/rp2_common/pico_runtime/include/pico
