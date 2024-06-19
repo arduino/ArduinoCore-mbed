@@ -229,6 +229,8 @@ int arduino::MbedClient::available() {
 }
 
 int arduino::MbedClient::read() {
+  if (sock == nullptr)
+    return -1;
   mutex->lock();
   if (!available()) {
     mutex->unlock();
@@ -241,6 +243,8 @@ int arduino::MbedClient::read() {
 }
 
 int arduino::MbedClient::read(uint8_t *data, size_t len) {
+  if (sock == nullptr)
+    return 0;
   mutex->lock();
   int avail = available();
 
