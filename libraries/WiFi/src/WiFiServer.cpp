@@ -15,3 +15,7 @@ arduino::WiFiClient arduino::WiFiServer::available(uint8_t* status) {
   }
   return client;
 }
+
+arduino::WiFiClient arduino::WiFiServer::accept() {
+  return available();
+}
