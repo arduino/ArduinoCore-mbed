@@ -1,12 +1,8 @@
 #include "Ethernet.h"
 
-#define SSID_MAX_LENGTH 32
-
 int arduino::EthernetClass::begin(uint8_t *mac, unsigned long timeout, unsigned long responseTimeout) {
   if (eth_if == nullptr) {
-    //Q: What is the callback for?
-    _initializerCallback();
-    if (eth_if == nullptr) return 0;
+    return 0;
   }
   eth_if->set_dhcp(true);
   return _begin(mac, timeout, responseTimeout);
@@ -51,6 +47,10 @@ int arduino::EthernetClass::begin(uint8_t *mac, IPAddress ip, IPAddress dns, IPA
 }
 
 int arduino::EthernetClass::begin(uint8_t *mac, IPAddress ip, IPAddress dns, IPAddress gateway, IPAddress subnet, unsigned long timeout, unsigned long responseTimeout) {
+  if(eth_if == nullptr) {
+    return 0;
+  }
+
   config(ip, dns, gateway, subnet);
 
   eth_if->set_dhcp(false);
@@ -68,6 +68,9 @@ void arduino::EthernetClass::end() {
 }
 
 EthernetLinkStatus arduino::EthernetClass::linkStatus() {
+  if(eth_if == nullptr) {
+    return LinkOFF;
+  }
   return (eth_if->get_connection_status() == NSAPI_STATUS_GLOBAL_UP ? LinkON : LinkOFF);
 }
 
@@ -77,7 +80,9 @@ EthernetHardwareStatus arduino::EthernetClass::hardwareStatus() {
 
 
 int arduino::EthernetClass::disconnect() {
-  eth_if->disconnect();
+  if(eth_if != nullptr) {
+    eth_if->disconnect();
+  }
   return 1;
 }
 
@@ -99,4 +104,4 @@ void arduino::EthernetClass::MACAddress(uint8_t *mac_address)
   macAddress(mac_address);
 }
 
-arduino::EthernetClass Ethernet;
+arduino::EthernetClass Ethernet(static_cast<EthernetInterface*>(EthInterface::get_default_instance()));

@@ -25,8 +25,6 @@
 
 namespace arduino {
 
-typedef void* (*voidPrtFuncPtr)(void);
-
 class GPSClass : public HardwareSerial {
 public:
 

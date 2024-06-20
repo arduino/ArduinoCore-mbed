@@ -50,21 +50,15 @@ enum {  // compatibility with Arduino ::maintain()
     DHCP_CHECK_REBIND_OK    = 4
 };
 
-typedef void *(*voidPrtFuncPtr)(void);
-
 class EthernetClass : public MbedSocketClass {
 
 public:
+  EthernetClass(EthernetInterface *_if)
+    : eth_if(_if){};
+
   // Initialise the Ethernet shield to use the provided MAC address and
   // gain the rest of the configuration through DHCP.
   // Returns 0 if the DHCP configuration failed, and 1 if it succeeded
-  EthernetClass(EthernetInterface *_if)
-    : eth_if(_if){};
-  EthernetClass(){};
-
-  EthernetClass(voidPrtFuncPtr _cb)
-    : _initializerCallback(_cb){};
-
   int begin(uint8_t *mac = nullptr, unsigned long timeout = 60000, unsigned long responseTimeout = 4000);
   EthernetLinkStatus linkStatus();
   EthernetHardwareStatus hardwareStatus();
@@ -119,9 +113,7 @@ private:
   int _begin(uint8_t *mac, unsigned long timeout, unsigned long responseTimeout);
 
   volatile EthernetLinkStatus _currentNetworkStatus = Unknown;
-  EthernetInterface net;
-  EthernetInterface *eth_if = &net;
-  voidPrtFuncPtr _initializerCallback;
+  EthernetInterface *eth_if = nullptr;
   arduino::IPAddress ipAddressFromSocketAddress(SocketAddress socketAddress);
 };
 
