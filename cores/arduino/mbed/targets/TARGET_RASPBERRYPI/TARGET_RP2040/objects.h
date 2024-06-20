@@ -33,6 +33,7 @@ extern "C" {
 #include "pico/assert.h"
 #include "pico/time.h"
 #include "pico/types.h"
+#include "pico/rand.h"
 #include "hardware/pwm.h"
 #include "hardware/adc.h"
 #include "hardware/resets.h"
@@ -121,6 +122,12 @@ struct flash_s {
 	/*  nothing to be stored for now */
 	uint32_t dummy;
 };
+
+#if DEVICE_TRNG
+struct trng_s {
+    uint8_t not_used;
+};
+#endif
 
 typedef struct gpio_s gpio_t;
 typedef struct serial_s serial_t;
