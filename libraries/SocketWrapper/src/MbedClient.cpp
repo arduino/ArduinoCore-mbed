@@ -60,7 +60,6 @@ void arduino::MbedClient::setSocket(Socket *_sock) {
 }
 
 void arduino::MbedClient::configureSocket(Socket *_s) {
-  _s->set_timeout(_timeout);
   _s->set_blocking(false);
   _s->getpeername(&address);
 
