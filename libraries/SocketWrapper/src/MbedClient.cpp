@@ -280,6 +280,7 @@ void arduino::MbedClient::stop() {
     if (_own_socket) {
       delete sock;
     } else {
+      sock->set_timeout(_timeout);
       sock->close();
     }
     sock = nullptr;
