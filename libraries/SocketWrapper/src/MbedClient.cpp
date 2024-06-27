@@ -212,7 +212,6 @@ size_t arduino::MbedClient::write(const uint8_t *buf, size_t size) {
   if (sock == nullptr)
     return 0;
 
-  sock->set_blocking(true);
   sock->set_timeout(_timeout);
   int ret = sock->send(buf, size);
   sock->set_blocking(false);
