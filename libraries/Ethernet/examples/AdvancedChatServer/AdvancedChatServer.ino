@@ -67,7 +67,7 @@ void setup() {
 
 void loop() {
   // check for any new client connecting, and say hello (before any incoming data)
-  EthernetClient newClient = server.available();
+  EthernetClient newClient = server.accept();
   if (newClient) {
     for (byte i=0; i < 8; i++) {
       if (!clients[i]) {

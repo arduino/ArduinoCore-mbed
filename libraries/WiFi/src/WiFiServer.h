@@ -31,9 +31,11 @@ class WiFiServer : public MbedServer {
   }
 
 public:
+  WiFiServer() {}
   WiFiServer(uint16_t port)
     : MbedServer(port) {}
-  WiFiClient available(uint8_t* status = nullptr);
+  WiFiClient accept(uint8_t* status = nullptr);
+  WiFiClient available(uint8_t* status = nullptr) __attribute__((deprecated("Use accept().")));
 };
 
 }
