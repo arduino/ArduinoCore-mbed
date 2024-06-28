@@ -10,7 +10,7 @@ arduino::MbedClient::MbedClient()
 }
 
 uint8_t arduino::MbedClient::status() {
-  return _status;
+  return (_status && (getNetwork()->get_connection_status() < NSAPI_STATUS_DISCONNECTED));
 }
 
 
@@ -300,7 +300,7 @@ void arduino::MbedClient::stop() {
 }
 
 uint8_t arduino::MbedClient::connected() {
-  return ((_status) || (available() > 0));
+  return ((status() == true) || (available() > 0));
 }
 
 IPAddress arduino::MbedClient::remoteIP() {
