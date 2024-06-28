@@ -1,0 +1,29 @@
+From ef10b7085d61c6743e97d6bba153e4956d59ed30 Mon Sep 17 00:00:00 2001
+From: maidnl <d.aimo@arduino.cc>
+Date: Thu, 20 Jun 2024 12:02:04 +0200
+Subject: [PATCH] fix for dhcp not asking for address when host if goes down
+ and up again
+
+---
+ connectivity/lwipstack/source/LWIPInterface.cpp | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/connectivity/lwipstack/source/LWIPInterface.cpp b/connectivity/lwipstack/source/LWIPInterface.cpp
+index a1cfcf31c4..c5c851406f 100644
+--- a/connectivity/lwipstack/source/LWIPInterface.cpp
++++ b/connectivity/lwipstack/source/LWIPInterface.cpp
+@@ -199,6 +199,11 @@ void LWIP::Interface::netif_link_irq(struct netif *netif)
+             netif_set_down(&interface->netif);
+         }
+     } else {
++        if (interface->dhcp_started) {
++            interface->dhcp_started = false;
++            interface->dhcp_has_to_be_set = true;
++            dhcp_stop(netif);
++        }
+         osSemaphoreRelease(interface->unlinked);
+         if (netif_is_up(&interface->netif)) {
+             interface->connected = NSAPI_STATUS_CONNECTING;
+-- 
+2.34.1
+
