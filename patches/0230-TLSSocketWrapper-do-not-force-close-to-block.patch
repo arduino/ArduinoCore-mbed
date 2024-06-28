@@ -1,0 +1,24 @@
+From d0f5c17e3f7a3094c80b6b239c407f1cf7ba6df9 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Thu, 27 Jun 2024 13:36:31 +0200
+Subject: [PATCH] TLSSocketWrapper: do not force close() to block
+
+---
+ connectivity/netsocket/source/TLSSocketWrapper.cpp | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/connectivity/netsocket/source/TLSSocketWrapper.cpp b/connectivity/netsocket/source/TLSSocketWrapper.cpp
+index 1fb9c21769..c020cd9f59 100644
+--- a/connectivity/netsocket/source/TLSSocketWrapper.cpp
++++ b/connectivity/netsocket/source/TLSSocketWrapper.cpp
+@@ -757,7 +757,6 @@ nsapi_error_t TLSSocketWrapper::close()
+ 
+     int ret = 0;
+     if (_handshake_completed) {
+-        _transport->set_blocking(true);
+         ret = mbedtls_ssl_close_notify(&_ssl);
+         if (ret) {
+             print_mbedtls_error("mbedtls_ssl_close_notify", ret);
+-- 
+2.43.0
+
