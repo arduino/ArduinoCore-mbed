@@ -6,7 +6,7 @@
 
 arduino::MbedClient::MbedClient()
   : _status(false),
-    _timeout(0) {
+    _timeout(SOCKET_TIMEOUT) {
 }
 
 uint8_t arduino::MbedClient::status() {
@@ -60,7 +60,6 @@ void arduino::MbedClient::setSocket(Socket *_sock) {
 }
 
 void arduino::MbedClient::configureSocket(Socket *_s) {
-  _s->set_timeout(_timeout);
   _s->set_blocking(false);
   _s->getpeername(&address);
 
@@ -213,14 +212,10 @@ size_t arduino::MbedClient::write(const uint8_t *buf, size_t size) {
   if (sock == nullptr)
     return 0;
 
-  sock->set_blocking(true);
-  sock->set_timeout(SOCKET_TIMEOUT);
-  int ret = NSAPI_ERROR_WOULD_BLOCK;
-  do {
-    ret = sock->send(buf, size);
-  } while ((ret != size && ret == NSAPI_ERROR_WOULD_BLOCK) && connected());
-  configureSocket(sock);
-  return size;
+  sock->set_timeout(_timeout);
+  int ret = sock->send(buf, size);
+  sock->set_blocking(false);
+  return ret >= 0 ? ret : 0;
 }
 
 int arduino::MbedClient::available() {
