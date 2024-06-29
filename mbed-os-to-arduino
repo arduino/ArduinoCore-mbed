@@ -53,6 +53,8 @@ mbed_revision () {
 				rm -rf mbed-os
 				ln -s "$LOCAL_REPO" mbed-os
 			fi
+        else
+			ln -s "$LOCAL_REPO" mbed-os
 		fi
 	fi
 	echo " done."
