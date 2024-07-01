@@ -53,6 +53,7 @@ public:
 
   using Print::write;
 
+  void setConnectionTimeout(unsigned long timeout);
   void setSocketTimeout(unsigned long timeout);
 
 protected:

@@ -18,6 +18,11 @@ void arduino::AClient::setSocket(Socket *sock) {
   client->setSocket(sock);
 }
 
+void arduino::AClient::setConnectionTimeout(unsigned long timeout) {
+  setSocketTimeout(timeout);
+}
+
+
 void arduino::AClient::setSocketTimeout(unsigned long timeout) {
   if (!client) {
     newMbedClient();

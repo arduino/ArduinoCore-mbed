@@ -100,7 +100,7 @@ int arduino::MbedClient::connect(SocketAddress socketAddress) {
   if (static_cast<TCPSocket *>(sock)->open(getNetwork()) != NSAPI_ERROR_OK) {
     return 0;
   }
-
+  sock->set_timeout(_timeout);
   nsapi_error_t returnCode = static_cast<TCPSocket *>(sock)->connect(socketAddress);
   int ret = 0;
 
