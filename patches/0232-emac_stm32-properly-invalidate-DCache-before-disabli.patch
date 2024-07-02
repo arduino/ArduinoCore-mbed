@@ -1,0 +1,40 @@
+From 717b63ce10981d1c3684e465f625e10b0b9efe96 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Tue, 2 Jul 2024 16:30:07 +0200
+Subject: [PATCH] emac_stm32: properly invalidate DCache before disabling it
+
+---
+ .../TARGET_STM/TARGET_STM32H7/TARGET_OPTA/stm32h7_eth_init.c   | 3 +++
+ .../TARGET_STM32H7/TARGET_PORTENTA_H7/stm32h7_eth_init.c       | 1 +
+ 2 files changed, 4 insertions(+)
+
+diff --git a/connectivity/drivers/emac/TARGET_STM/TARGET_STM32H7/TARGET_OPTA/stm32h7_eth_init.c b/connectivity/drivers/emac/TARGET_STM/TARGET_STM32H7/TARGET_OPTA/stm32h7_eth_init.c
+index 0572fae7a2..8b9cc8bcd0 100644
+--- a/connectivity/drivers/emac/TARGET_STM/TARGET_STM32H7/TARGET_OPTA/stm32h7_eth_init.c
++++ b/connectivity/drivers/emac/TARGET_STM/TARGET_STM32H7/TARGET_OPTA/stm32h7_eth_init.c
+@@ -66,7 +66,10 @@ void HAL_ETH_MspInit(ETH_HandleTypeDef *heth)
+ 
+ #if !(defined(DUAL_CORE) && defined(CORE_CM4))
+         /* Disable DCache for STM32H7 family */
++        core_util_critical_section_enter();
++        SCB_CleanInvalidateDCache();
+         SCB_DisableDCache();
++        core_util_critical_section_exit();
+ #endif
+ 
+         /* GPIO Ports Clock Enable */
+diff --git a/connectivity/drivers/emac/TARGET_STM/TARGET_STM32H7/TARGET_PORTENTA_H7/stm32h7_eth_init.c b/connectivity/drivers/emac/TARGET_STM/TARGET_STM32H7/TARGET_PORTENTA_H7/stm32h7_eth_init.c
+index 643fc5acd3..7f5b4206cb 100644
+--- a/connectivity/drivers/emac/TARGET_STM/TARGET_STM32H7/TARGET_PORTENTA_H7/stm32h7_eth_init.c
++++ b/connectivity/drivers/emac/TARGET_STM/TARGET_STM32H7/TARGET_PORTENTA_H7/stm32h7_eth_init.c
+@@ -68,6 +68,7 @@ void HAL_ETH_MspInit(ETH_HandleTypeDef *heth)
+ #if !(defined(DUAL_CORE) && defined(CORE_CM4))
+         /* Disable DCache for STM32H7 family */
+         core_util_critical_section_enter();
++        SCB_CleanInvalidateDCache();
+         SCB_DisableDCache();
+         core_util_critical_section_exit();
+ #endif
+-- 
+2.45.2
+
