@@ -1,0 +1,32 @@
+From 67f98029e080a9ff605b078e383cabeb21da4807 Mon Sep 17 00:00:00 2001
+From: Martino Facchin <m.facchin@arduino.cc>
+Date: Tue, 2 Jul 2024 16:13:42 +0200
+Subject: [PATCH] QSPI: call is_mem_ready before trying to set write enable bit
+ for AT25SF128A
+
+This reverts commit f6d960e023a8d2300f3e850f5d721e87eeb95948.
+---
+ .../blockdevice/COMPONENT_QSPIF/source/QSPIFBlockDevice.cpp | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/storage/blockdevice/COMPONENT_QSPIF/source/QSPIFBlockDevice.cpp b/storage/blockdevice/COMPONENT_QSPIF/source/QSPIFBlockDevice.cpp
+index ee8bab5556..b005aeb0f1 100644
+--- a/storage/blockdevice/COMPONENT_QSPIF/source/QSPIFBlockDevice.cpp
++++ b/storage/blockdevice/COMPONENT_QSPIF/source/QSPIFBlockDevice.cpp
+@@ -1243,7 +1243,13 @@ int QSPIFBlockDevice::_set_write_enable()
+     uint8_t status_value = 0;
+     int status = -1;
+ 
++    if (_AT25SF128A_quirk && (false == _is_mem_ready())) {
++        tr_error("Device not ready, set_write_enable failed");
++        return -1;
++    }
++
+     do {
++
+         if (QSPI_STATUS_OK !=  _qspi_send_general_command(QSPIF_INST_WREN, QSPI_NO_ADDRESS_COMMAND, NULL, 0, NULL, 0)) {
+             tr_error("Sending WREN command FAILED");
+             break;
+-- 
+2.45.2
+
