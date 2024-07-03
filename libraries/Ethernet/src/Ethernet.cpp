@@ -55,11 +55,13 @@ int arduino::EthernetClass::begin(uint8_t *mac, IPAddress ip, IPAddress dns, IPA
 
   eth_if->set_dhcp(false);
   eth_if->set_network(_ip, _netmask, _gateway);
+
+  auto ret = _begin(mac, timeout, responseTimeout);
+
   char if_name[5];
   eth_if->get_interface_name(if_name);
   eth_if->add_dns_server(_dnsServer1, if_name);
 
-  auto ret = _begin(mac, timeout, responseTimeout);
   return ret;
 }
 

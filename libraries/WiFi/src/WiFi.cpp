@@ -66,16 +66,18 @@ int arduino::WiFiClass::begin(const char* ssid, const char* passphrase, wl_enc_t
   wifi_if->set_dhcp(!_useStaticIP);
   if (_useStaticIP) {
     wifi_if->set_network(_ip, _netmask, _gateway);
-    char if_name[5];
-    wifi_if->get_interface_name(if_name);
-    wifi_if->add_dns_server(_dnsServer2, if_name);
-    wifi_if->add_dns_server(_dnsServer1, if_name); // pushes dnsServer2 at index 1
   }
 
   nsapi_error_t result = wifi_if->connect(ssid, passphrase, _security);
 
   if(result == NSAPI_ERROR_IS_CONNECTED) {
     wifi_if->disconnect();
+  } else
+  if (_useStaticIP) {
+    char if_name[5];
+    wifi_if->get_interface_name(if_name);
+    wifi_if->add_dns_server(_dnsServer2, if_name);
+    wifi_if->add_dns_server(_dnsServer1, if_name); // pushes dnsServer2 at index 1
   }
   _currentNetworkStatus = (result == NSAPI_ERROR_OK && setSSID(ssid)) ? WL_CONNECTED : WL_CONNECT_FAILED;
 
