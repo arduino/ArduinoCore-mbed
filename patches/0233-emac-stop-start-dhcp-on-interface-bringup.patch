@@ -1,0 +1,30 @@
+From 5114c7f56a82c37021cdd92f07bc1a2c62e85e64 Mon Sep 17 00:00:00 2001
+From: maidnl <d.aimo@arduino.cc>
+Date: Mon, 8 Jul 2024 12:07:40 +0200
+Subject: [PATCH 233/234] emac: stop/start dhcp on interface bringup
+
+---
+ connectivity/lwipstack/source/LWIPInterface.cpp | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/connectivity/lwipstack/source/LWIPInterface.cpp b/connectivity/lwipstack/source/LWIPInterface.cpp
+index a1cfcf31c4..dfefebcb8b 100644
+--- a/connectivity/lwipstack/source/LWIPInterface.cpp
++++ b/connectivity/lwipstack/source/LWIPInterface.cpp
+@@ -169,8 +169,12 @@ nsapi_error_t LWIP::Interface::set_dhcp()
+ 
+ #if LWIP_DHCP
+     if (dhcp_has_to_be_set) {
++        if(dhcp_started) {
++            dhcp_stop(&netif);
++            dhcp_started = false;
++        }
++
+         err_t err = dhcp_start(&netif);
+-        dhcp_has_to_be_set = false;
+         if (err) {
+             connected = NSAPI_STATUS_DISCONNECTED;
+             if (client_callback) {
+-- 
+2.45.2
+

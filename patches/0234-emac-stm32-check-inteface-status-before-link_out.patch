@@ -1,0 +1,147 @@
+From e0cad5c4277b3c5ee9cb01a9529df9333612bbeb Mon Sep 17 00:00:00 2001
+From: maidnl <d.aimo@arduino.cc>
+Date: Mon, 8 Jul 2024 12:08:48 +0200
+Subject: [PATCH 234/234] emac: stm32: check inteface status before link_out()
+
+This allows handling of HAL_ETH_STATE_ERROR, usually on interface teardown/up with strict timings
+---
+ .../drivers/emac/TARGET_STM/stm32xx_emac.cpp  | 27 +++++++++++++++++++
+ .../drivers/emac/TARGET_STM/stm32xx_emac.h    |  7 +++++
+ .../lwipstack/source/LWIPInterfaceEMAC.cpp    | 15 +++++++++--
+ .../netsocket/include/netsocket/EMAC.h        | 11 ++++++++
+ .../STM32H7xx_HAL_Driver/stm32h7xx_hal_eth.c  |  8 +-----
+ 5 files changed, 59 insertions(+), 9 deletions(-)
+
+diff --git a/connectivity/drivers/emac/TARGET_STM/stm32xx_emac.cpp b/connectivity/drivers/emac/TARGET_STM/stm32xx_emac.cpp
+index 0230a90665..0e7d64ad34 100644
+--- a/connectivity/drivers/emac/TARGET_STM/stm32xx_emac.cpp
++++ b/connectivity/drivers/emac/TARGET_STM/stm32xx_emac.cpp
+@@ -402,6 +402,33 @@ bool STM32_EMAC::low_level_init_successful()
+ }
+ #endif // ETH_IP_VERSION_V2
+ 
++/**
++ * This function get the state of emac interface
++ */
++int STM32_EMAC::get_interface_status() {
++    return HAL_ETH_GetState(&EthHandle);
++}
++
++/**
++ * This function returns true if the status of the interface is in the
++ * correct state for the trasmission
++ */
++bool STM32_EMAC::is_ready_to_tx() {
++    return (HAL_ETH_GetState(&EthHandle) == HAL_ETH_STATE_READY);
++}
++
++/**
++ * This function reset the emac interface in case the status is in error
++ * Apparently there was not anything to recover from an error state
++ */
++void STM32_EMAC::restart() {
++    if(HAL_ETH_STATE_ERROR == HAL_ETH_GetState(&EthHandle)){
++        HAL_ETH_Stop(&EthHandle);
++        HAL_ETH_Start(&EthHandle);
++    }
++}
++
++
+ /**
+  * This function should do the actual transmission of the packet. The packet is
+  * contained in the memory buffer chain that is passed to the function.
+diff --git a/connectivity/drivers/emac/TARGET_STM/stm32xx_emac.h b/connectivity/drivers/emac/TARGET_STM/stm32xx_emac.h
+index cfa6752177..ecc280b2f8 100644
+--- a/connectivity/drivers/emac/TARGET_STM/stm32xx_emac.h
++++ b/connectivity/drivers/emac/TARGET_STM/stm32xx_emac.h
+@@ -148,6 +148,13 @@ public:
+      */
+     virtual void set_memory_manager(EMACMemoryManager &mem_mngr);
+ 
++    /* return the status of the interface as integer */
++    int get_interface_status() override;
++    /* return true if the interface is in the correct state to transmit */
++    bool is_ready_to_tx() override;
++    /* restart only if the interface is in error state */
++    void restart() override;
++
+     // Called from driver functions
+     ETH_HandleTypeDef EthHandle;
+     osThreadId_t thread; /**< Processing thread */
+diff --git a/connectivity/lwipstack/source/LWIPInterfaceEMAC.cpp b/connectivity/lwipstack/source/LWIPInterfaceEMAC.cpp
+index 56fbcc0d90..ed4397879e 100644
+--- a/connectivity/lwipstack/source/LWIPInterfaceEMAC.cpp
++++ b/connectivity/lwipstack/source/LWIPInterfaceEMAC.cpp
+@@ -27,15 +27,26 @@
+ 
+ #if LWIP_ETHERNET
+ 
++
+ err_t LWIP::Interface::emac_low_level_output(struct netif *netif, struct pbuf *p)
+ {
++    bool ret = false;
+     /* Increase reference counter since lwip stores handle to pbuf and frees
+        it after output */
+     pbuf_ref(p);
+ 
+     LWIP::Interface *mbed_if = static_cast<LWIP::Interface *>(netif->state);
+-    bool ret = mbed_if->emac->link_out(p);
+-    return ret ? ERR_OK : ERR_IF;
++
++    if(mbed_if->emac->is_ready_to_tx()) {
++        ret = mbed_if->emac->link_out(p);
++    }
++    else {
++        mbed_if->emac->restart();
++        ret = mbed_if->emac->link_out(p);
++    }
++
++    err_t rv = ret ? ERR_OK : ERR_IF;
++    return rv;
+ }
+ 
+ void LWIP::Interface::emac_input(emac_mem_buf_t *buf)
+diff --git a/connectivity/netsocket/include/netsocket/EMAC.h b/connectivity/netsocket/include/netsocket/EMAC.h
+index 515629b5a6..885bc92c01 100644
+--- a/connectivity/netsocket/include/netsocket/EMAC.h
++++ b/connectivity/netsocket/include/netsocket/EMAC.h
+@@ -176,6 +176,17 @@ public:
+      * @param mem_mngr Pointer to memory manager
+      */
+     virtual void set_memory_manager(EMACMemoryManager &mem_mngr) = 0;
++
++    virtual bool is_ready_to_tx() {
++        return true;
++    }
++
++    virtual void restart() {
++    }
++
++    virtual int get_interface_status() {
++        return -1;
++    }
+ };
+ 
+ 
+diff --git a/targets/TARGET_STM/TARGET_STM32H7/STM32Cube_FW/STM32H7xx_HAL_Driver/stm32h7xx_hal_eth.c b/targets/TARGET_STM/TARGET_STM32H7/STM32Cube_FW/STM32H7xx_HAL_Driver/stm32h7xx_hal_eth.c
+index decff79455..df797092fc 100644
+--- a/targets/TARGET_STM/TARGET_STM32H7/STM32Cube_FW/STM32H7xx_HAL_Driver/stm32h7xx_hal_eth.c
++++ b/targets/TARGET_STM/TARGET_STM32H7/STM32Cube_FW/STM32H7xx_HAL_Driver/stm32h7xx_hal_eth.c
+@@ -2341,13 +2341,7 @@ HAL_StatusTypeDef HAL_ETH_SetWakeUpFilter(ETH_HandleTypeDef *heth, uint32_t *pFi
+   */
+ HAL_ETH_StateTypeDef HAL_ETH_GetState(ETH_HandleTypeDef *heth)
+ {
+-  HAL_ETH_StateTypeDef ret;
+-  HAL_ETH_StateTypeDef gstate = heth->gState;
+-  HAL_ETH_StateTypeDef rxstate =heth->RxState;
+-
+-  ret = gstate;
+-  ret |= rxstate;
+-  return ret;
++  return heth->gState;
+ }
+ 
+ /**
+-- 
+2.45.2
+
