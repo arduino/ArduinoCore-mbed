@@ -57,7 +57,7 @@ public:
     : eth_if(_if){};
 
   // When using DHCP the hostname provided will be used.
-  int setHostname(const char* hostname)
+  int setHostname(const char* hostname);
 
   // Initialise the Ethernet shield to use the provided MAC address and
   // gain the rest of the configuration through DHCP.
