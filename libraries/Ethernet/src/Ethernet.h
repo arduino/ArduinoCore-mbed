@@ -56,10 +56,14 @@ public:
   EthernetClass(EthernetInterface *_if)
     : eth_if(_if){};
 
+  // When using DHCP the hostname provided will be used.
+  int setHostname(const char* hostname)
+
   // Initialise the Ethernet shield to use the provided MAC address and
   // gain the rest of the configuration through DHCP.
   // Returns 0 if the DHCP configuration failed, and 1 if it succeeded
   int begin(uint8_t *mac = nullptr, unsigned long timeout = 60000, unsigned long responseTimeout = 4000);
+  int begin(const char* hostname);
   EthernetLinkStatus linkStatus();
   EthernetHardwareStatus hardwareStatus();
 
