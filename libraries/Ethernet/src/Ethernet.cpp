@@ -24,6 +24,11 @@ int arduino::EthernetClass::_begin(uint8_t *mac, unsigned long timeout, unsigned
   return (linkStatus() == LinkON ? 1 : 0);
 }
 
+int arduino::EthernetClass::setHostname(const char* hostname) {
+  eth_if->set_hostname(hostname);
+  return 1;
+}
+
 int arduino::EthernetClass::begin(uint8_t *mac, IPAddress ip) {
   IPAddress dns = ip;
   dns[3] = 1;
