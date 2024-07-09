@@ -1,0 +1,148 @@
+From f7740c5ec7986dab71901704936a923899041720 Mon Sep 17 00:00:00 2001
+From: Channel59 <caspar@meshnex.nl>
+Date: Tue, 9 Jul 2024 23:54:43 +0200
+Subject: [PATCH 2/2] Add methods for setting hostname -- from: https://github.com/ARMmbed/mbed-os/pull/15506/commits/979a9425499565e434db708317a4fc0dc3792af8
+
+---
+ .../include/netsocket/EMACInterface.h         |  8 ++++++
+ .../include/netsocket/NetworkInterface.h      | 16 ++++++++++++
+ .../netsocket/include/netsocket/nsapi_types.h | 10 +++++++
+ .../netsocket/source/EMACInterface.cpp        | 26 +++++++++++++++++++
+ .../netsocket/source/NetworkInterface.cpp     | 10 +++++++
+ 5 files changed, 70 insertions(+)
+
+diff --git a/connectivity/netsocket/include/netsocket/EMACInterface.h b/connectivity/netsocket/include/netsocket/EMACInterface.h
+index 8cf47cb703..c06aeb850e 100644
+--- a/connectivity/netsocket/include/netsocket/EMACInterface.h
++++ b/connectivity/netsocket/include/netsocket/EMACInterface.h
+@@ -83,6 +83,12 @@ public:
+     /** @copydoc NetworkInterface::disconnect */
+     nsapi_error_t disconnect() override;
+ 
++    /** @copydoc NetworkInterface::get_hostname */
++    const char *get_hostname() override;
++
++    /** @copydoc NetworkInterface::set_hostname */
++    nsapi_error_t set_hostname(const char *hostname) override;
++
+     /** @copydoc NetworkInterface::get_mac_address */
+     const char *get_mac_address() override;
+ 
+@@ -146,6 +152,8 @@ protected:
+     OnboardNetworkStack::Interface *_interface = nullptr;
+     bool _dhcp = true;
+     bool _blocking = true;
++    bool _hostname_set = false;
++    char _hostname[NSAPI_HOSTNAME_SIZE];
+     bool _hw_mac_addr_set = false;
+     char _mac_address[NSAPI_MAC_SIZE];
+     char _ip_address[NSAPI_IPv6_SIZE] {};
+diff --git a/connectivity/netsocket/include/netsocket/NetworkInterface.h b/connectivity/netsocket/include/netsocket/NetworkInterface.h
+index 9071a1e40b..0e2aa64c9d 100644
+--- a/connectivity/netsocket/include/netsocket/NetworkInterface.h
++++ b/connectivity/netsocket/include/netsocket/NetworkInterface.h
+@@ -90,6 +90,22 @@ public:
+      */
+     virtual void set_as_default();
+ 
++    /** Get hostname.
++     *
++     *  @return         Hostname if configured, null otherwise
++     */
++    virtual const char *get_hostname();
++
++    /** Set hostname.
++     *
++     *  @param          hostname Hostname string
++     *  @retval         NSAPI_ERROR_OK on success
++     *  @retval         NSAPI_ERROR_UNSUPPORTED if this feature is not supported
++     *  @retval         NSAPI_ERROR_PARAMETER if hostname is not valid
++     *  @retval         NSAPI_ERROR_BUSY if hostname can't be set
++     */
++    virtual nsapi_error_t set_hostname(const char *hostname);
++
+     /** Get the local MAC address.
+      *
+      *  Provided MAC address is intended for info or debug purposes and
+diff --git a/connectivity/netsocket/include/netsocket/nsapi_types.h b/connectivity/netsocket/include/netsocket/nsapi_types.h
+index 3b496d5087..28dbcc9a38 100644
+--- a/connectivity/netsocket/include/netsocket/nsapi_types.h
++++ b/connectivity/netsocket/include/netsocket/nsapi_types.h
+@@ -196,6 +196,16 @@ typedef enum nsapi_security {
+  */
+ #define NSAPI_IP_BYTES NSAPI_IPv6_BYTES
+ 
++/** Maximum size of hostname
++ *
++ *  According to RFC 1034 [1], Section 3.1 "Name space specifications and
++ *  terminology", 63 is the maximum size of a hostname. +1 for the string
++ *  terminator.
++ *
++ *  [1] https://www.rfc-editor.org/rfc/rfc1034
++ */
++#define NSAPI_HOSTNAME_SIZE 64
++
+ /** Maximum size of MAC address representation
+  */
+ #define NSAPI_MAC_SIZE 18
+diff --git a/connectivity/netsocket/source/EMACInterface.cpp b/connectivity/netsocket/source/EMACInterface.cpp
+index f48bc0a185..26b7e29856 100644
+--- a/connectivity/netsocket/source/EMACInterface.cpp
++++ b/connectivity/netsocket/source/EMACInterface.cpp
+@@ -88,6 +88,32 @@ nsapi_error_t EMACInterface::disconnect()
+     return NSAPI_ERROR_NO_CONNECTION;
+ }
+ 
++const char *EMACInterface::get_hostname()
++{
++    if (_hostname_set) {
++        return _hostname;
++    }
++    return nullptr;
++}
++
++nsapi_error_t EMACInterface::set_hostname(const char *hostname)
++{
++    if (!hostname || strlen(hostname) > NSAPI_HOSTNAME_SIZE-1) {
++        return NSAPI_ERROR_PARAMETER;
++    }
++
++    if (_interface) {
++        // can't set hostname once initialized
++        return NSAPI_ERROR_BUSY;
++    }
++
++    memset(_hostname, 0, NSAPI_HOSTNAME_SIZE);
++    strncpy(_hostname, hostname, NSAPI_HOSTNAME_SIZE-1);
++    _hostname_set = true;
++
++    return NSAPI_ERROR_OK;
++}
++
+ const char *EMACInterface::get_mac_address()
+ {
+     if (_interface && _interface->get_mac_address(_mac_address, sizeof(_mac_address))) {
+diff --git a/connectivity/netsocket/source/NetworkInterface.cpp b/connectivity/netsocket/source/NetworkInterface.cpp
+index 0f237f0e19..649df0f9b3 100644
+--- a/connectivity/netsocket/source/NetworkInterface.cpp
++++ b/connectivity/netsocket/source/NetworkInterface.cpp
+@@ -29,6 +29,16 @@ void NetworkInterface::set_as_default()
+ 
+ }
+ 
++const char *NetworkInterface::get_hostname()
++{
++    return 0;
++}
++
++nsapi_error_t NetworkInterface::set_hostname(const char *hostname)
++{
++    return NSAPI_ERROR_UNSUPPORTED;
++}
++
+ const char *NetworkInterface::get_mac_address()
+ {
+     return 0;
+-- 
+2.34.1
+

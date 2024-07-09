@@ -1,0 +1,36 @@
+From 08da30219b0faf0415a8fd2d6bed803c3fe7dbac Mon Sep 17 00:00:00 2001
+From: Channel59 <caspar@meshnex.nl>
+Date: Tue, 9 Jul 2024 23:48:55 +0200
+Subject: [PATCH 1/2] Request hostname if set -- From: https://github.com/ARMmbed/mbed-os/pull/15506/commits/a96d34923e5b70c2b3db32ce65283f93e9f7f789
+
+---
+ connectivity/lwipstack/source/LWIPInterface.cpp | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/connectivity/lwipstack/source/LWIPInterface.cpp b/connectivity/lwipstack/source/LWIPInterface.cpp
+index dfefebcb8b..b2540732bd 100644
+--- a/connectivity/lwipstack/source/LWIPInterface.cpp
++++ b/connectivity/lwipstack/source/LWIPInterface.cpp
+@@ -437,6 +437,7 @@ LWIP::Interface::Interface() :
+ nsapi_error_t LWIP::add_ethernet_interface(EMAC &emac, bool default_if, OnboardNetworkStack::Interface **interface_out, NetworkInterface *user_network_interface)
+ {
+ #if LWIP_ETHERNET
++    const char *hostname;
+     Interface *interface = new (std::nothrow) Interface();
+     if (!interface) {
+         return NSAPI_ERROR_NO_MEMORY;
+@@ -445,6 +446,11 @@ nsapi_error_t LWIP::add_ethernet_interface(EMAC &emac, bool default_if, OnboardN
+     interface->memory_manager = &memory_manager;
+     interface->ppp_enabled = false;
+ 
++    hostname = user_network_interface->get_hostname();
++    if(hostname) {
++    netif_set_hostname(&interface->netif, hostname);
++    }
++    
+ #if (MBED_MAC_ADDRESS_SUM != MBED_MAC_ADDR_INTERFACE)
+     netif->interface.hwaddr[0] = MBED_MAC_ADDR_0;
+     netif->interface.hwaddr[1] = MBED_MAC_ADDR_1;
+-- 
+2.34.1
+
