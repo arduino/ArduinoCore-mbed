@@ -29,12 +29,6 @@ int arduino::EthernetClass::setHostname(const char* hostname) {
   return 1;
 }
 
-int arduino::EthernetClass::begin(const char* hostname) {
-  eth_if->set_hostname(hostname);
-  auto ret = begin();
-  return ret;
-}
-
 int arduino::EthernetClass::begin(uint8_t *mac, IPAddress ip) {
   IPAddress dns = ip;
   dns[3] = 1;
