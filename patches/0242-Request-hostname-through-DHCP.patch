@@ -1,0 +1,53 @@
+From 091ea74d6956d6684bcd88ed842a73218a7b8bd3 Mon Sep 17 00:00:00 2001
+From: Guilherme Ricioli <guilherme.riciolic@gmail.com>
+Date: Tue, 16 Apr 2024 10:50:48 -0300
+Subject: [PATCH] Request hostname through DHCP
+
+If hostname is provided, request it to local DNS through DHCP.
+---
+ connectivity/lwipstack/source/LWIPInterface.cpp             | 6 ++++++
+ connectivity/netsocket/include/netsocket/NetworkInterface.h | 4 +++-
+ 2 files changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/connectivity/lwipstack/source/LWIPInterface.cpp b/connectivity/lwipstack/source/LWIPInterface.cpp
+index dfefebcb8b..64869a3538 100644
+--- a/connectivity/lwipstack/source/LWIPInterface.cpp
++++ b/connectivity/lwipstack/source/LWIPInterface.cpp
+@@ -437,6 +437,7 @@ LWIP::Interface::Interface() :
+ nsapi_error_t LWIP::add_ethernet_interface(EMAC &emac, bool default_if, OnboardNetworkStack::Interface **interface_out, NetworkInterface *user_network_interface)
+ {
+ #if LWIP_ETHERNET
++    const char *hostname;
+     Interface *interface = new (std::nothrow) Interface();
+     if (!interface) {
+         return NSAPI_ERROR_NO_MEMORY;
+@@ -445,6 +446,11 @@ nsapi_error_t LWIP::add_ethernet_interface(EMAC &emac, bool default_if, OnboardN
+     interface->memory_manager = &memory_manager;
+     interface->ppp_enabled = false;
+ 
++    hostname = user_network_interface->get_hostname();
++    if (hostname) {
++        netif_set_hostname(&interface->netif, hostname);
++    }
++
+ #if (MBED_MAC_ADDRESS_SUM != MBED_MAC_ADDR_INTERFACE)
+     netif->interface.hwaddr[0] = MBED_MAC_ADDR_0;
+     netif->interface.hwaddr[1] = MBED_MAC_ADDR_1;
+diff --git a/connectivity/netsocket/include/netsocket/NetworkInterface.h b/connectivity/netsocket/include/netsocket/NetworkInterface.h
+index 81f6011950..22355767ce 100644
+--- a/connectivity/netsocket/include/netsocket/NetworkInterface.h
++++ b/connectivity/netsocket/include/netsocket/NetworkInterface.h
+@@ -102,7 +102,9 @@ public:
+      *  @retval         NSAPI_ERROR_OK on success
+      *  @retval         NSAPI_ERROR_UNSUPPORTED if this feature is not supported
+      *  @retval         NSAPI_ERROR_PARAMETER if hostname is not valid
+-     *  @retval         NSAPI_ERROR_BUSY if hostname couldn't be set
++     *  @retval         NSAPI_ERROR_BUSY if hostname couldn't be set (e.g. for
++     *                  LwIP stack, hostname can only be set before calling
++     *                  \c EthernetInterface::connect method)
+      */
+     virtual nsapi_error_t set_hostname(const char *hostname);
+ 
+-- 
+2.45.2
+
