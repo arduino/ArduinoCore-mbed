@@ -148,6 +148,13 @@ public:
      */
     virtual void set_memory_manager(EMACMemoryManager &mem_mngr);
 
+    /* return the status of the interface as integer */
+    int get_interface_status() override;
+    /* return true if the interface is in the correct state to transmit */
+    bool is_ready_to_tx() override;
+    /* restart only if the interface is in error state */
+    void restart() override;
+
     // Called from driver functions
     ETH_HandleTypeDef EthHandle;
     osThreadId_t thread; /**< Processing thread */
