@@ -283,17 +283,19 @@ static bool has_otp_info = false;
 
 bool getSecureFlashData() {
     static OptaBoardInfo info;
-    char temp_buf[sizeof(OptaBoardInfo) + 1];
-    int ret = QSPI_STATUS_OK;
-    mbed::QSPI _qspi(QSPI_FLASH1_IO0, QSPI_FLASH1_IO1, QSPI_FLASH1_IO2, QSPI_FLASH1_IO3, QSPI_FLASH1_SCK, QSPI_FLASH1_CSN, QSPIF_POLARITY_MODE_0);
-    auto rxlen = sizeof(temp_buf);
-    ret = _qspi.read(0x48, -1, 1 << 13, temp_buf, &rxlen);
+    uint8_t temp_buf[sizeof(OptaBoardInfo) + 1];
+    int ret = 0;
+    static SecureQSPIFBlockDevice secure_root;
+    secure_root.init();
+    // read secure sector 2 ( address 1 << 13 )
+    ret = secure_root.readSecure(temp_buf, (1 << 13), sizeof(temp_buf));
     memcpy(&info, &temp_buf[1], sizeof(OptaBoardInfo));
     if (info.magic == OTP_QSPI_MAGIC) {
       _boardInfo = (uint8_t*)&info;
       has_otp_info = true;
     }
-    return ret == QSPI_STATUS_OK;
+    secure_root.deinit();
+    return ret == 0;
 }
 
 uint8_t* boardInfo() {
