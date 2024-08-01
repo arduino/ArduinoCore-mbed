@@ -1,3 +1,5 @@
+// Copyright (c) 2024 Arduino SA
+// SPDX-License-Identifier: MPL-2.0
 #include "RPC.h"
 
 #define ENDPOINT_ID_RAW     0
