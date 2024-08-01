@@ -187,18 +187,27 @@ generate_flags () {
 			echo "Patching '-fno-exceptions' flag for $ARDUINOVARIANT/${fl}flags.txt"
 			sed -i '/-fno-exceptions/d' "$ARDUINOVARIANT"/${fl}flags.txt
 			set +e
-			HAS_OPENAMP_SECTION=`grep openamp_section "$ARDUINOVARIANT"/linker_script.ld`
+			HAS_PDM_SECTION=`grep pdm_section "$ARDUINOVARIANT"/linker_script.ld`
 			set -e
-			if [ x"$HAS_OPENAMP_SECTION" == x ]; then
-				echo "Adding OpenAMP section to $ARDUINOVARIANT/linker_script.ld"
-				OPENAMP_SECTION=".openamp_section (NOLOAD) : {\n \
-				. = ABSOLUTE(0x38000000);\n \
-				*(.resource_table)\n \
-				} >RAM_D3  AT > FLASH\n \
-				.pdm_section (NOLOAD) : {\n \
-				. = ABSOLUTE(0x3800FC00);\n \
+			if [ x"$HAS_PDM_SECTION" == x ]; then
+				echo "Adding PDM section to $ARDUINOVARIANT/linker_script.ld"
+				PDM_SECTION=".pdm_section 0x3800FC00 (NOLOAD):  {\n \
 				*(.pdm_buffer)\n \
 				} > RAM_D3\n"
+
+				if [[ $ARDUINOVARIANT == *PORTENTA*M7* || $ARDUINOVARIANT == *GIGA* || $ARDUINOVARIANT == *OPTA* ]]; then
+					PDM_SECTION="${PDM_SECTION} \
+					_dtcm_lma = __etext + SIZEOF(.data);\n \
+					.dtcm : AT(_dtcm_lma) {\n \
+					_sdtcm = .;\n \
+					*(.dtcm*)\n \
+					_edtcm = .;\n \
+					} > DTCMRAM"
+				fi
+
+				sed -i "s?.heap (COPY):?${PDM_SECTION}\n    .heap (COPY):?g" $ARDUINOVARIANT/linker_script.ld
+				OPENAMP_REGIONS="__OPENAMP_region_start__  = 0x38000400;\n__OPENAMP_region_end__ = 0x38000400 + LENGTH(RAM_D3) - 1K;"
+				sed -i "s?ENTRY(Reset_Handler)?${OPENAMP_REGIONS}\nENTRY(Reset_Handler)?g" $ARDUINOVARIANT/linker_script.ld
 
 				if [[ $ARDUINOVARIANT == *GENERIC*M4 ]]; then
 				echo "Fixing VTOR base in $ARDUINOVARIANT/linker_script.ld"
@@ -208,21 +217,10 @@ generate_flags () {
 								REGION_ALIAS(\"RAM\", RAM_D2);\n \
 								#endif\n"
 				sed -i "s?REGION_ALIAS.*?${VTOR_SECTION}?g" $ARDUINOVARIANT/linker_script.ld
+				echo "Fixing shared memory attributes in $ARDUINOVARIANT/linker_script.ld"
+				sed -i "s?.heap (COPY)?.heap (NOLOAD)?g" $ARDUINOVARIANT/linker_script.ld
+				sed -i "s?.stack_dummy (COPY)?.stack_dummy (NOLOAD)?g" $ARDUINOVARIANT/linker_script.ld
 				fi
-
-				if [[ $ARDUINOVARIANT == *PORTENTA*M7* || $ARDUINOVARIANT == *GIGA* || $ARDUINOVARIANT == *OPTA* ]]; then
-					OPENAMP_SECTION="${OPENAMP_SECTION} \
-					_dtcm_lma = __etext + SIZEOF(.data);\n \
-					.dtcm : AT(_dtcm_lma) {\n \
-					_sdtcm = .;\n \
-					*(.dtcm*)\n \
-					_edtcm = .;\n \
-					} > DTCMRAM"
-				fi
-
-				sed -i "s?.heap (COPY):?${OPENAMP_SECTION}\n    .heap (COPY):?g" $ARDUINOVARIANT/linker_script.ld
-				OPENAMP_REGIONS="__OPENAMP_region_start__  = 0x38000400;\n__OPENAMP_region_end__ = 0x38000400 + LENGTH(RAM_D3) - 1K;"
-				sed -i "s?ENTRY(Reset_Handler)?${OPENAMP_REGIONS}\nENTRY(Reset_Handler)?g" $ARDUINOVARIANT/linker_script.ld
 			fi
 			echo "Patching linker scripts"
 			sed -i 's/0x8100000/CM4_BINARY_START/g' "$ARDUINOVARIANT"/linker_script.ld

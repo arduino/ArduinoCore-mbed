@@ -151,6 +151,9 @@ extern int __OPENAMP_region_end__[];
 #define SHM_START_ADDRESS       ((metal_phys_addr_t)__OPENAMP_region_start__)
 #define SHM_SIZE                (size_t)((void *)__OPENAMP_region_end__ - (void *) __OPENAMP_region_start__)
 
+#define SHM_RSC_SIZE            (1024)
+#define SHM_RSC_ADDR            ((void *)__OPENAMP_region_start__ - SHM_RSC_SIZE)
+
 #endif
 
 #define VRING_RX_ADDRESS        SHM_START_ADDRESS

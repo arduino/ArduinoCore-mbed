@@ -1,3 +1,5 @@
+// Copyright (c) 2024 Arduino SA
+// SPDX-License-Identifier: MPL-2.0
 #ifdef __cplusplus
 
 #ifndef __ARDUINO_RPC_IMPLEMENTATION__
