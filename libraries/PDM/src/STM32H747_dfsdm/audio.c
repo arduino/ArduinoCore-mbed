@@ -391,7 +391,10 @@ int py_audio_init(size_t channels, uint32_t frequency)
 
 void py_audio_gain_set(int gain_db)
 {
-  attenuation = 8 - gain_db;
+  attenuation = 8 - (gain_db / 3);
+  if (attenuation < 0) {
+    attenuation = 0;
+  }
 }
 
 void py_audio_deinit()
