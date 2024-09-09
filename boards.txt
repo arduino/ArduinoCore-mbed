@@ -443,6 +443,8 @@ nicla_sense.upload.wait_for_upload_port=true
 nicla_sense.upload.native_usb=true
 nicla_sense.upload.maximum_size=527616
 nicla_sense.upload.maximum_data_size=64288
+nicla_sense.programmer.protocol=cmsis-dap
+nicla_sense.programmer.transport_script={runtime.platform.path}/debugger/select_swd.cfg
 
 nicla_sense.bootloader.tool=openocd
 nicla_sense.bootloader.tool.default=openocd
@@ -496,6 +498,8 @@ nicla_voice.upload.wait_for_upload_port=true
 nicla_voice.upload.native_usb=true
 nicla_voice.upload.maximum_size=527616
 nicla_voice.upload.maximum_data_size=64288
+nicla_voice.programmer.protocol=cmsis-dap
+nicla_voice.programmer.transport_script={runtime.platform.path}/debugger/select_swd.cfg
 
 nicla_voice.bootloader.tool=openocd
 nicla_voice.bootloader.tool.default=openocd
