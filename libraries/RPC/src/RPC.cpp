@@ -1,3 +1,5 @@
+// Copyright (c) 2024 Arduino SA
+// SPDX-License-Identifier: MPL-2.0
 #include "RPC.h"
 
 #define ENDPOINT_ID_RAW     0
@@ -161,6 +163,35 @@ int RPCClass::begin() {
 #endif
 
 #ifdef CORE_CM4
+#if (CM4_BINARY_START >= 0x60000000) && (CM4_BINARY_START < 0xe0000000)
+class M4Init {
+public:
+    M4Init() {
+        // If the Cortex-M4 core is booting from SDRAM, the memory region must be
+        // configured as Strongly Ordered. Note that the Cortex-M4 core does not
+        // seem to implement speculative prefetching, so there is no need to protect
+        // the whole region from speculative prefetching with a second MPU region.
+        HAL_MPU_Disable();
+        MPU_Region_InitTypeDef MPU_InitStruct;
+        MPU_InitStruct.Number = MPU_REGION_NUMBER1;
+        MPU_InitStruct.Enable = MPU_REGION_ENABLE;
+        MPU_InitStruct.BaseAddress = CM4_BINARY_START;
+        MPU_InitStruct.Size = MPU_REGION_SIZE_1MB;
+        MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL0;
+        MPU_InitStruct.AccessPermission = MPU_REGION_FULL_ACCESS;
+        MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_ENABLE;
+        MPU_InitStruct.IsShareable = MPU_ACCESS_NOT_SHAREABLE;
+        MPU_InitStruct.IsCacheable = MPU_ACCESS_NOT_CACHEABLE;
+        MPU_InitStruct.IsBufferable = MPU_ACCESS_NOT_BUFFERABLE;
+        MPU_InitStruct.SubRegionDisable = 0x00;
+        HAL_MPU_ConfigRegion(&MPU_InitStruct);
+        HAL_MPU_Enable(MPU_PRIVILEGED_DEFAULT);
+    }
+};
+
+M4Init __m4init __attribute__ ((init_priority (101)));
+#endif
+
 int RPCClass::begin() {
     eventThread = new rtos::Thread(osPriorityHigh, 16*1024, nullptr, "rpc_evt");
     eventThread->start(&eventHandler);

@@ -1,3 +1,5 @@
+// Copyright (c) 2024 Arduino SA
+// SPDX-License-Identifier: MPL-2.0
 #include "SerialRPC.h"
 #include "RPC.h"
 

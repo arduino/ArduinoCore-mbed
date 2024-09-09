@@ -1,3 +1,5 @@
+// Copyright (c) 2024 Arduino SA
+// SPDX-License-Identifier: MPL-2.0
 #ifndef __SERIAL_RPC__
 #define __SERIAL_RPC__
 
