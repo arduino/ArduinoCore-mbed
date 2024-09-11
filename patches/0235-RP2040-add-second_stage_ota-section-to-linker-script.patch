@@ -1,0 +1,28 @@
+From 9819fef4bdb417e3ff9aee08266264b6ec23e075 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Wed, 11 Sep 2024 12:24:01 +0200
+Subject: [PATCH 235/236] RP2040: add second_stage_ota section to linker script
+
+  - This was previously done inside mbed-os-to-arduino script
+---
+ .../TARGET_RP2040/TOOLCHAIN_GCC_ARM/memmap_default.ld         | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/TOOLCHAIN_GCC_ARM/memmap_default.ld b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/TOOLCHAIN_GCC_ARM/memmap_default.ld
+index ec8bac7e40..8295f3269d 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/TOOLCHAIN_GCC_ARM/memmap_default.ld
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/TOOLCHAIN_GCC_ARM/memmap_default.ld
+@@ -54,6 +54,10 @@ SECTIONS
+         __flash_binary_start = .;
+     } > FLASH
+ 
++    .second_stage_ota : {
++         KEEP (*(.second_stage_ota))
++     } > FLASH
++
+     .boot2 : {
+         __boot2_start__ = .;
+         KEEP (*(.boot2))
+-- 
+2.45.2
+
