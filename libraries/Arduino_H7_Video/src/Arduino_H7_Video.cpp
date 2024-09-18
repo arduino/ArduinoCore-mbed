@@ -243,10 +243,14 @@ void lvgl_displayFlushing(lv_display_t * disp, const lv_area_t * area, unsigned 
     if (rotation != LV_DISPLAY_ROTATION_0) {
         rotated_buf = (uint8_t*)realloc(rotated_buf, w * h * 4);
         lv_color_format_t cf = lv_display_get_color_format(disp);
+        #if (LVGL_VERSION_MINOR < 2) 
+        rotation = LV_DISPLAY_ROTATION_90; // bugfix: force 90 degree rotation for lvgl 9.1 end earlier
+        #endif
         lv_draw_sw_rotate(px_map, rotated_buf,
                           w, h, lv_draw_buf_width_to_stride(w, cf),
                           lv_draw_buf_width_to_stride(h, cf),
-                          LV_DISPLAY_ROTATION_90, cf);
+                          rotation, cf);
+
         rotated_area.x1 = lv_display_get_vertical_resolution(disp) - area->y2 - 1;
         rotated_area.y1 = area->x1;
         //rotated_area.y2 = dsi_getDisplayYSize() - area->x1 - 1;
