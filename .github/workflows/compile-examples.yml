@@ -34,14 +34,25 @@ jobs:
       matrix:
         board:
           - fqbn: arduino:mbed:nano33ble
+            id: nano33ble
           - fqbn: arduino:mbed:envie_m7
+            id: envie_m7
+          - fqbn: arduino:mbed:envie_m7:target_core=cm4
+            id: envie_m7_core_cm4
           - fqbn: arduino:mbed:nanorp2040connect
+            id: nanorp2040connect
           - fqbn: arduino:mbed:nicla_sense
+            id: nicla_sense
           - fqbn: arduino:mbed:nicla_vision
+            id: nicla_vision
           - fqbn: arduino:mbed:opta
+            id: opta
           - fqbn: arduino:mbed:giga
+            id: giga
           - fqbn: arduino:mbed:nicla_voice
+            id: nicla_voice
           - fqbn: arduino:mbed:edge_control
+            id: edge_control
 
         # compile only the examples compatible with each board
         include:
@@ -187,11 +198,11 @@ jobs:
               
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       # The source files are in a subfolder of the ArduinoCore-API repository, so it's not possible to clone it directly to the final destination in the core
       - name: Checkout ArduinoCore-API
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           repository: arduino/ArduinoCore-API
           path: ArduinoCore-API
@@ -226,7 +237,7 @@ jobs:
 
       - name: Save memory usage change report as artifact
         if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           path: ${{ env.SKETCHES_REPORTS_PATH }}
-          name: ${{ env.SKETCHES_REPORTS_PATH }}
+          name: ${{ env.SKETCHES_REPORTS_PATH }}-${{ matrix.board.id }}
