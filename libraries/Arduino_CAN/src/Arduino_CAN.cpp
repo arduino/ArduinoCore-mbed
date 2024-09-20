@@ -57,7 +57,10 @@ int Arduino_CAN::write(CanMsg const & msg)
     CANData,
     is_standard_id ? CANStandard : CANExtended);
 
-  return _can.write(can_msg);
+  int const rc = _can.write(can_msg);
+  if (rc == 0) /* mbed returns 0 in case of failed CAN::write(). */
+    return -1; /* Note: provide named constant in ArduinoCore-API/HardwareCAN.h, i.e. CAN_WRITE_GENERIC_ERROR */
+  return 1;
 }
 
 size_t Arduino_CAN::available()
