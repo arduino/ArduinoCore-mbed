@@ -55,6 +55,12 @@ void setup() {
   Serial.println("Do you want to proceed? Y/[n]");
 
   if (true == waitResponse()) {
+    if (root->init() != BD_ERROR_OK) {
+      Serial.println(F("Error: QSPI init failure."));
+      return;
+    }
+
+    root->erase(0x0, root->get_erase_size());
     MBRBlockDevice::partition(root, 1, 0x0B, 0, 1 * 1024 * 1024);
     MBRBlockDevice::partition(root, 2, 0x0B, 1 * 1024 * 1024,  6 * 1024 * 1024);
     MBRBlockDevice::partition(root, 3, 0x0B, 6 * 1024 * 1024,  7 * 1024 * 1024);
