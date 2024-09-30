@@ -60,6 +60,13 @@ int arduino::WiFiClass::begin(const char* ssid, const char* passphrase, wl_enc_t
     _security = ap_list[connected_ap].get_security();
   } else {
     // For hidden networks, the security mode must be set explicitly.
+    // if ENC_TYPE_UNKNOWN this means that is the default value and so the user
+    // has not set it... no worth trying, it is probably an unknown (not hidden) 
+    // interface
+    if(security == ENC_TYPE_UNKNOWN) {
+      _currentNetworkStatus = WL_CONNECT_FAILED;
+      return _currentNetworkStatus;
+    }
     _security = enum2sec(security);
   }
 
