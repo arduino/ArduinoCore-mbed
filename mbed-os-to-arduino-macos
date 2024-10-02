@@ -253,18 +253,6 @@ generate_flags () {
 			gsed -i 's/LENGTH = 0x200000/LENGTH = CM4_BINARY_END - CM4_BINARY_START/g' "$ARDUINOVARIANT"/linker_script.ld
 			gsed -i 's/LENGTH = 0x1c0000/LENGTH = CM4_BINARY_START - 0x8040000/g' "$ARDUINOVARIANT"/linker_script.ld
 		fi
-		if [[ $ARDUINOVARIANT == *NANO_RP2040* ]]; then
-			set +e
-			HAS_2NDSTAGE_SECTION=`grep second_stage_ota "$ARDUINOVARIANT"/linker_script.ld`
-			set -e
-			if [ x"$HAS_2NDSTAGE_SECTION" == x ]; then
-				echo "Adding second stage bootloader section to Nano RP2040 Connect"
-				SECOND_STAGE_SECTION=".second_stage_ota : {\n \
-        KEEP (*(.second_stage_ota))\n \
-    } > FLASH"
-				gsed -i "s?.flash_begin?${SECOND_STAGE_SECTION}\n    .flash_begin?g" $ARDUINOVARIANT/linker_script.ld
-			fi
-		fi
 	done
 	echo " done."
 }

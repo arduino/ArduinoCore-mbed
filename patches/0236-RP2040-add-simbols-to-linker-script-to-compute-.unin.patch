@@ -1,0 +1,27 @@
+From 35b0d95199cb5b9cda593ce4b4029c4306906ccd Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Wed, 11 Sep 2024 12:27:03 +0200
+Subject: [PATCH 236/236] RP2040: add simbols to linker script to compute
+ .uninitialized_data section size
+
+---
+ .../TARGET_RP2040/TOOLCHAIN_GCC_ARM/memmap_default.ld           | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/TOOLCHAIN_GCC_ARM/memmap_default.ld b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/TOOLCHAIN_GCC_ARM/memmap_default.ld
+index 8295f3269d..b748bab5fa 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/TOOLCHAIN_GCC_ARM/memmap_default.ld
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/TOOLCHAIN_GCC_ARM/memmap_default.ld
+@@ -183,7 +183,9 @@ SECTIONS
+ 
+     .uninitialized_data (COPY): {
+         . = ALIGN(4);
++        __uninitialized_data_start__ = .;
+         *(.uninitialized_data*)
++        __uninitialized_data_end__ = .;
+     } > RAM
+ 
+     /* Start and end symbols must be word-aligned */
+-- 
+2.45.2
+
