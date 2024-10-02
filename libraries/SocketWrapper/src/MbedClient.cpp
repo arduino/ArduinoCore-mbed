@@ -80,14 +80,8 @@ void arduino::MbedClient::configureSocket(Socket *_s) {
 }
 
 int arduino::MbedClient::connect(SocketAddress socketAddress) {
-
-  if (sock && reader_th) {
-    // trying to reuse a connection, let's call stop() to cleanup the state
-    char c;
-    if (sock->recv(&c, 1) < 0) {
-      stop();
-    }
-  }
+  // if a connection is aready ongoing, a disconnection must be enforced before starting another one
+  stop();
 
   if (sock == nullptr) {
     sock = new TCPSocket();
@@ -135,6 +129,9 @@ int arduino::MbedClient::connect(const char *host, uint16_t port) {
 }
 
 int arduino::MbedClient::connectSSL(SocketAddress socketAddress) {
+  // if a connection is aready ongoing, a disconnection must be enforced before starting another one
+  stop();
+
   if (sock == nullptr) {
     sock = new TLSSocket();
     _own_socket = true;
