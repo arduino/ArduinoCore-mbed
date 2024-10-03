@@ -20,6 +20,7 @@
 
 #include "Arduino.h"
 #include "api/HardwareSPI.h"
+#include <Mutex.h>
 
 typedef struct _mbed_spi mbed_spi;
 
@@ -50,6 +51,7 @@ public:
 private:
     SPISettings settings = SPISettings(0, MSBFIRST, SPI_MODE0);
     _mbed_spi* dev = NULL;
+    rtos::Mutex spiLockMutex;
     PinName _miso;
     PinName _mosi;
     PinName _sck;
