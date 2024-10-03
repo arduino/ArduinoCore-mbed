@@ -95,6 +95,11 @@ int arduino::WiFiClass::begin(const char* ssid) {
   return begin(ssid, NULL, ENC_TYPE_NONE);
 }
 
+int arduino::WiFiClass::setHostname(const char* hostname) {
+  wifi_if->set_hostname(hostname);
+  return 1;
+}
+
 //Config Wifi to set Static IP && Disable DHCP
 void arduino::WiFiClass::config(const char* localip, const char* netmask, const char* gateway){
   SocketHelpers::config(IPAddress(localip), dnsIP(0), IPAddress(gateway), IPAddress(netmask));
