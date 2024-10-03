@@ -42,10 +42,21 @@ static const uint8_t A3  = PIN_A3;
 #define PIN_SERIAL_RX (1ul)
 
 // SPI
+#ifndef PIN_SPI_MISO
 #define PIN_SPI_MISO  (16u)
+#endif
+
+#ifndef PIN_SPI_MOSI
 #define PIN_SPI_MOSI  (19u)
+#endif
+
+#ifndef PIN_SPI_SCK
 #define PIN_SPI_SCK   (18u)
+#endif
+
+#ifndef PIN_SPI_SS
 #define PIN_SPI_SS    (17u)
+#endif
 
 static const uint8_t SS   = PIN_SPI_SS;   // SPI Slave SS not used. Set here only for reference.
 static const uint8_t MOSI = PIN_SPI_MOSI;
