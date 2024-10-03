@@ -1,0 +1,31 @@
+From 81a7d47a15e76701b206bce907526b9d9d5888cc Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Wed, 2 Oct 2024 11:31:36 +0200
+Subject: [PATCH] Watchdog: kick only if watchdog is running
+
+---
+ drivers/source/Watchdog.cpp | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/source/Watchdog.cpp b/drivers/source/Watchdog.cpp
+index 3f21b94dfb..daca018148 100644
+--- a/drivers/source/Watchdog.cpp
++++ b/drivers/source/Watchdog.cpp
+@@ -72,9 +72,11 @@ bool Watchdog::stop()
+ 
+ void Watchdog::kick()
+ {
+-    core_util_critical_section_enter();
+-    hal_watchdog_kick();
+-    core_util_critical_section_exit();
++    if (_running) {
++        core_util_critical_section_enter();
++        hal_watchdog_kick();
++        core_util_critical_section_exit();
++    }
+ }
+ 
+ bool Watchdog::is_running() const
+-- 
+2.45.2
+
