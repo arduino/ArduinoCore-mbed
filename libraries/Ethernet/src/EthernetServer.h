@@ -31,9 +31,11 @@ class EthernetServer : public MbedServer {
   }
 
 public:
+  EthernetServer() {}
   EthernetServer(uint16_t port)
     : MbedServer(port) {}
-  EthernetClient available(uint8_t* status = nullptr);
+  EthernetClient accept(uint8_t* status = nullptr);
+  EthernetClient available(uint8_t* status = nullptr) __attribute__((deprecated("Use accept().")));
 };
 
 }

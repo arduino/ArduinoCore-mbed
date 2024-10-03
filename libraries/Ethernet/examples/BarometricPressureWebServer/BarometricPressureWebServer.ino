@@ -141,7 +141,7 @@ void getData() {
 
 void listenForEthernetClients() {
   // listen for incoming clients
-  EthernetClient client = server.available();
+  EthernetClient client = server.accept();
   if (client) {
     Serial.println("Got a client");
     // an http request ends with a blank line

@@ -1,6 +1,10 @@
 #include "EthernetServer.h"
 
 arduino::EthernetClient arduino::EthernetServer::available(uint8_t* status) {
+  return accept(status);
+}
+
+arduino::EthernetClient arduino::EthernetServer::accept(uint8_t* status) {
   EthernetClient client;
   nsapi_error_t error;
 

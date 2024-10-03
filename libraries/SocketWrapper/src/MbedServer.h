@@ -30,7 +30,7 @@ namespace arduino {
 
 class MbedClient;
 
-class MbedServer : public arduino::Server {
+class MbedServer {
 
 protected:
   virtual NetworkInterface *getNetwork() = 0;
@@ -38,23 +38,26 @@ protected:
   uint16_t _port;
 
 public:
+  MbedServer()
+    : _port(80){};
   MbedServer(uint16_t port)
     : _port(port){};
 
   virtual ~MbedServer() {
+    end();
+  }
+  void end() {
     if (sock) {
       delete sock;
       sock = nullptr;
     }
   }
+  void begin(uint16_t port);
   void begin();
-  virtual size_t write(uint8_t);
-  virtual size_t write(const uint8_t *buf, size_t size);
   uint8_t status();
-
-  //virtual MbedClient available(uint8_t* status) = 0;
-
-  using Print::write;
+  explicit operator bool() {
+    return sock != nullptr;
+  }
 
   friend class MbedSocketClass;
   friend class MbedClient;
