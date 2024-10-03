@@ -32,6 +32,12 @@ void arduino::MbedI2C::begin() {
 	master = new mbed::I2C(_sda, _scl);
 }
 
+void arduino::MbedI2C::begin(int sda, int scl) {
+	_sda = digitalPinToPinName(sda);
+	_scl = digitalPinToPinName(scl);
+	master = new mbed::I2C(_sda, _scl);
+}
+
 void arduino::MbedI2C::begin(uint8_t slaveAddr) {
 #ifdef DEVICE_I2CSLAVE
 	end();
