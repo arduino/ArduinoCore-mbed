@@ -1,0 +1,25 @@
+From b6c62d169e750de6e5af3a47bc6c0c2a1fc81c88 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Thu, 3 Oct 2024 18:05:26 +0200
+Subject: [PATCH] WhdSTA allow hostname configuration
+
+---
+ .../drivers/emac/COMPONENT_WHD/interface/WhdSTAInterface.cpp    | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/connectivity/drivers/emac/COMPONENT_WHD/interface/WhdSTAInterface.cpp b/connectivity/drivers/emac/COMPONENT_WHD/interface/WhdSTAInterface.cpp
+index 509a2c0981..ba1fa7900a 100644
+--- a/connectivity/drivers/emac/COMPONENT_WHD/interface/WhdSTAInterface.cpp
++++ b/connectivity/drivers/emac/COMPONENT_WHD/interface/WhdSTAInterface.cpp
+@@ -280,7 +280,7 @@ nsapi_error_t WhdSTAInterface::connect()
+     _iface_shared.if_status_flags |= IF_STATUS_STA_UP;
+     _iface_shared.default_if_cfg = DEFAULT_IF_STA;
+     if (!_interface) {
+-        nsapi_error_t err = _stack.add_ethernet_interface(_emac, true, &_interface);
++        nsapi_error_t err = _stack.add_ethernet_interface(_emac, true, &_interface, this);
+         if (err != NSAPI_ERROR_OK) {
+             _interface = NULL;
+             return err;
+-- 
+2.45.2
+
