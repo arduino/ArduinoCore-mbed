@@ -75,7 +75,10 @@ public:
      *        must be between ASCII 32-126 (decimal).
      */
   int begin(const char* ssid, const char* passphrase, wl_enc_type security = ENC_TYPE_UNKNOWN);
-	
+
+  // When using DHCP the hostname provided will be used.
+  int setHostname(const char* hostname);
+
   // Inherit config methods from the parent class
   using MbedSocketClass::config;
 
