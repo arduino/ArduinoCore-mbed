@@ -150,7 +150,6 @@ private:
   void onStatusChange(nsapi_event_t ev, intptr_t in);
 
   void reset();
-  bool isReady(const int timeout = 5000);
 };
 
 }
