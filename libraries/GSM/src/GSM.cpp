@@ -110,7 +110,7 @@ bool arduino::GSMClass::isCmuxEnable() {
 }
 
 void arduino::GSMClass::end() {
-
+  _device->shutdown();
 }
 
 int arduino::GSMClass::disconnect() {
