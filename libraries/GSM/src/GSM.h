@@ -95,6 +95,9 @@ public:
      */
   int disconnect(void);
 
+  /*
+   * Reset internal state machine in order to be ready to reconnect again.
+   */
   void end(void);
 
   unsigned long getTime();
