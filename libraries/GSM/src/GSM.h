@@ -75,24 +75,24 @@ public:
       }
     }
 
-  /* Start GSM connection.
-     * Configure the credentials into the device.
-     *
-     * param pin: Pointer to the pin string.
-     * param apn: Pointer to the apn string.
-     * param username: Pointer to the username string.
-     * param password: Pointer to the password string.
-     * param rat: Radio Access Technology.
-     * 
-     * return: 0 in case of success, negative number in case of failure
-     */
+  /*
+   * Start GSM connection. Configure the credentials into the device.
+   *
+   * param pin: Pointer to the pin string.
+   * param apn: Pointer to the apn string.
+   * param username: Pointer to the username string.
+   * param password: Pointer to the password string.
+   * param rat: Radio Access Technology.
+   *
+   * return: 0 in case of success, negative number in case of failure
+   */
   int begin(const char* pin, const char* apn, const char* username, const char* password, RadioAccessTechnologyType rat = CATNB, uint32_t band = BAND_20, bool restart = true);
 
   /*
-     * Disconnect from the network
-     *
-     * return: one value of wl_status_t enum
-     */
+   * Disconnect from the network
+   *
+   * return: one value of wl_status_t enum
+   */
   int disconnect(void);
 
   /*
