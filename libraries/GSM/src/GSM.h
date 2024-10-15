@@ -132,9 +132,9 @@ private:
   bool _at_debug = false;
 
   /* Internal cellular state machine retries. Values are in seconds.
-   * This array also defines the maximum number of retries to 6
+   * This array also defines the maximum number of retries to CELLULAR_RETRY_ARRAY_SIZE
    */
-  const uint16_t _retry_timeout[6] = {1, 2, 4, 8, 16, 32};
+  const uint16_t _retry_timeout[CELLULAR_RETRY_ARRAY_SIZE] = {1, 2, 4, 8, 8, 8, 8, 8, 8, 8};
 
   static constexpr int RSSI_UNKNOWN = 99;
   static const char * const sim_state_str[];
