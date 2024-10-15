@@ -68,6 +68,7 @@ int arduino::GSMClass::begin(const char* pin, const char* apn, const char* usern
 
   _device->set_cmux_status_flag(_cmuxGSMenable);
   _device->set_retry_timeout_array(_retry_timeout, sizeof(_retry_timeout) / sizeof(_retry_timeout[0]));
+  _device->set_timeout(_timeout);
   _device->attach(mbed::callback(this, &GSMClass::onStatusChange));
   _device->init();
 
@@ -99,6 +100,10 @@ int arduino::GSMClass::begin(const char* pin, const char* apn, const char* usern
   }
 
   return connect_status == NSAPI_ERROR_OK ? 1 : 0;
+}
+
+void arduino::GSMClass::setTimeout(unsigned long timeout) {
+  _timeout = timeout;
 }
 
 void arduino::GSMClass::enableCmux() {

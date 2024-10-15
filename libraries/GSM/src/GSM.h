@@ -100,8 +100,12 @@ public:
    */
   void end(void);
 
-  unsigned long getTime();
+  /*
+   * Change cellular state timeouts. Needs to be called before GSM.begin()
+   */
+  void setTimeout(unsigned long timeout);
 
+  unsigned long getTime();
   unsigned long getLocalTime();
 
   bool setTime(unsigned long const epoch, int const timezone = 0);
@@ -133,6 +137,7 @@ private:
   mbed::CellularContext* _context = nullptr;
   mbed::CellularDevice* _device = nullptr;
   bool _at_debug = false;
+  unsigned long _timeout = 1000;
 
   /* Internal cellular state machine retries. Values are in seconds.
    * This array also defines the maximum number of retries to CELLULAR_RETRY_ARRAY_SIZE
