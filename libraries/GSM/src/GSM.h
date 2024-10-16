@@ -155,6 +155,7 @@ private:
   void onStatusChange(nsapi_event_t ev, intptr_t in);
 
   void reset();
+  void on();
 };
 
 }

@@ -46,9 +46,25 @@ mbed::CellularDevice *mbed::CellularDevice::get_default_instance()
 
 int arduino::GSMClass::begin(const char* pin, const char* apn, const char* username, const char* password, RadioAccessTechnologyType rat, uint32_t band, bool restart) {
 
+  /* Assume module is powered ON. Uncomment this line is you are using
+   * Edge Control without Arduino_ConnectionHandler
+   * #if defined (ARDUINO_EDGE_CONTROL)
+   *   pinMode(ON_MKR2, OUTPUT);
+   *   digitalWrite(ON_MKR2, HIGH);
+   * #endif
+   */
+
+  /* Ensure module is not under reset */
+  pinMode(MBED_CONF_GEMALTO_CINTERION_RST, OUTPUT);
+  digitalWrite(MBED_CONF_GEMALTO_CINTERION_RST, LOW);
+
+  /* Reset module if needed */
   if (restart || isCmuxEnable()) {
     reset();
   }
+
+  /* Create rising edge on pin ON */
+  on();
 
   if (!_context) {
     _context = mbed::CellularContext::get_default_instance();
@@ -59,9 +75,10 @@ int arduino::GSMClass::begin(const char* pin, const char* apn, const char* usern
     return 0;
   }
 
-  pinMode(MBED_CONF_GEMALTO_CINTERION_ON, INPUT_PULLDOWN);
-
+#if defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_PORTENTA_H7_M4)
+  /* This is needed to wakeup module if hw flow control is enabled */
   static mbed::DigitalOut rts(MBED_CONF_GEMALTO_CINTERION_RTS, 0);
+#endif
 
   _device = _context->get_device();
   _device->modem_debug_on(_at_debug);
@@ -159,18 +176,21 @@ NetworkInterface* arduino::GSMClass::getNetwork() {
 }
 
 void arduino::GSMClass::reset() {
+  /* Reset logic is inverted */
   pinMode(MBED_CONF_GEMALTO_CINTERION_RST, OUTPUT);
   digitalWrite(MBED_CONF_GEMALTO_CINTERION_RST, HIGH);
   delay(800);
   digitalWrite(MBED_CONF_GEMALTO_CINTERION_RST, LOW);
+}
+
+void arduino::GSMClass::on() {
+  /* Module needs a rising edge to power on */
   pinMode(MBED_CONF_GEMALTO_CINTERION_ON, OUTPUT);
   digitalWrite(MBED_CONF_GEMALTO_CINTERION_ON, LOW);
   delay(1);
   digitalWrite(MBED_CONF_GEMALTO_CINTERION_ON, HIGH);
   delay(1);
 }
-
-
 
 
 arduino::GSMClass GSM;
