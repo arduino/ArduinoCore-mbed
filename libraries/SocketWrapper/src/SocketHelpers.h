@@ -28,100 +28,100 @@ public:
   void config(IPAddress local_ip);
 
   /* Change Ip configuration settings disabling the dhcp client
-        *
-        * param local_ip: 	Static ip configuration as string
-        */
+   *
+   * param local_ip: Static ip configuration as string
+   */
   void config(const char* local_ip);
 
   /* Change Ip configuration settings disabling the dhcp client
-        *
-        * param local_ip: 	Static ip configuration
-		* param dns_server:     IP configuration for DNS server 1
-        */
+   *
+   * param local_ip:   Static ip configuration
+	* param dns_server: IP configuration for DNS server 1
+   */
   void config(IPAddress local_ip, IPAddress dns_server);
 
   /* Change Ip configuration settings disabling the dhcp client
-        *
-        * param local_ip: 	Static ip configuration
-		* param dns_server:     IP configuration for DNS server 1
-        * param gateway : 	Static gateway configuration
-        */
+   *
+   * param local_ip:    Static ip configuration
+	* param dns_server:  IP configuration for DNS server 1
+   * param gateway :    Static gateway configuration
+   */
   void config(IPAddress local_ip, IPAddress dns_server, IPAddress gateway);
 
   /* Change Ip configuration settings disabling the dhcp client
-        *
-        * param local_ip: 	Static ip configuration
-		* param dns_server:     IP configuration for DNS server 1
-        * param gateway: 	Static gateway configuration
-        * param subnet:		Static Subnet mask
-        */
+   *
+   * param local_ip:   Static ip configuration
+	* param dns_server: IP configuration for DNS server 1
+   * param gateway:    Static gateway configuration
+   * param subnet:     Static Subnet mask
+   */
   void config(IPAddress local_ip, IPAddress dns_server, IPAddress gateway, IPAddress subnet);
 
   /* Change DNS Ip configuration
-     *
-     * param dns_server1: ip configuration for DNS server 1
-     */
+   *
+   * param dns_server1: ip configuration for DNS server 1
+   */
   void setDNS(IPAddress dns_server1);
 
   /* Change DNS Ip configuration
-     *
-     * param dns_server1: ip configuration for DNS server 1
-     * param dns_server2: ip configuration for DNS server 2
-     *
-     */
+   *
+   * param dns_server1: ip configuration for DNS server 1
+   * param dns_server2: ip configuration for DNS server 2
+   *
+   */
   void setDNS(IPAddress dns_server1, IPAddress dns_server2);
 
   /*
-     * Get the interface IP address.
-     *
-     * return: Ip address value
-     */
+   * Get the interface IP address.
+   *
+   * return: Ip address value
+   */
   IPAddress localIP();
 
   /*
-     * Get the interface subnet mask address.
-     *
-     * return: subnet mask address value
-     */
+   * Get the interface subnet mask address.
+   *
+   * return: subnet mask address value
+   */
   IPAddress subnetMask();
 
   /*
-     * Get the gateway ip address.
-     *
-     * return: gateway ip address value
-     */
+   * Get the gateway ip address.
+   *
+   * return: gateway ip address value
+   */
   IPAddress gatewayIP();
 
   /*
-     * Get the DNS Server ip address.
-     *
-     * return: DNS Server ip address value
-     */
+   * Get the DNS Server ip address.
+   *
+   * return: DNS Server ip address value
+   */
   IPAddress dnsServerIP();
 
   /*
-     * Get the DNS Server ip address.
-     *
-     * return: DNS Server ip address value
-     */
+   * Get the DNS Server ip address.
+   *
+   * return: DNS Server ip address value
+   */
   IPAddress dnsIP(int n = 0);
 
   virtual NetworkInterface* getNetwork() = 0;
-  
+
   /*
-     * Download a file from an HTTP endpoint and save it in the provided `target` location on the fs
-     * The parameter cbk can be used to perform actions on the buffer before saving on the fs
-     *
-     * return: on success the size of the downloaded file, on error -status code
-     */
+   * Download a file from an HTTP endpoint and save it in the provided `target` location on the fs
+   * The parameter cbk can be used to perform actions on the buffer before saving on the fs
+   *
+   * return: on success the size of the downloaded file, on error -status code
+   */
   int download(
     const char* url, const char* target, bool const is_https = false);
   /*
-     * Download a file from an HTTP endpoint and handle the body of the request on a callback
-     * passed as an argument
-     *
-     * return: on success the size of the downloaded file, on error -status code
-     */
+   * Download a file from an HTTP endpoint and handle the body of the request on a callback
+   * passed as an argument
+   *
+   * return: on success the size of the downloaded file, on error -status code
+   */
   int download(
     const char* url, bool const is_https = false,
     mbed::Callback<void(const char*, uint32_t)> cbk = nullptr);
