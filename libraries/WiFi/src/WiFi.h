@@ -168,6 +168,11 @@ public:
 
   unsigned long getTime();
 
+  /*
+   * Configure WiFi join timeout in milliseconds. Default value is 7s.
+   */
+  void setTimeout(unsigned long timeout);
+
   friend class WiFiClient;
   friend class WiFiServer;
   friend class WiFiUDP;
@@ -183,6 +188,7 @@ private:
   WiFiAccessPoint* ap_list = nullptr;
   uint8_t connected_ap;
   nsapi_security_t _security;
+  unsigned long _timeout = 7000;
   int setSSID(const char* ssid);
   void ensureDefaultAPNetworkConfiguration();
   static void* handleAPEvents(whd_interface_t ifp, const whd_event_header_t* event_header, const uint8_t* event_data, void* handler_user_data);
