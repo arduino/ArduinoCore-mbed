@@ -11,7 +11,11 @@ uint8_t* arduino::MbedSocketClass::macAddress(uint8_t* mac) {
 }
 
 String arduino::MbedSocketClass::macAddress() {
-  return String(getNetwork()->get_mac_address());
+  const char* mac_str = getNetwork()->get_mac_address();
+  if (!mac_str) {
+    return String("ff:ff:ff:ff:ff:ff");
+  }
+  return String(mac_str);
 }
 
 int arduino::MbedSocketClass::hostByName(const char* aHostname, IPAddress& aResult) {
