@@ -210,7 +210,10 @@ size_t arduino::MbedClient::write(const uint8_t *buf, size_t size) {
     return 0;
 
   sock->set_timeout(_timeout);
-  int ret = sock->send(buf, size);
+  int ret = NSAPI_ERROR_WOULD_BLOCK;
+  do {
+    ret = sock->send(buf, size);
+  } while ((ret != size && ret == NSAPI_ERROR_WOULD_BLOCK) && connected());
   sock->set_blocking(false);
   return ret >= 0 ? ret : 0;
 }

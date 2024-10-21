@@ -75,30 +75,37 @@ public:
       }
     }
 
-  /* Start GSM connection.
-     * Configure the credentials into the device.
-     *
-     * param pin: Pointer to the pin string.
-     * param apn: Pointer to the apn string.
-     * param username: Pointer to the username string.
-     * param password: Pointer to the password string.
-     * param rat: Radio Access Technology.
-     * 
-     * return: 0 in case of success, negative number in case of failure
-     */
+  /*
+   * Start GSM connection. Configure the credentials into the device.
+   *
+   * param pin: Pointer to the pin string.
+   * param apn: Pointer to the apn string.
+   * param username: Pointer to the username string.
+   * param password: Pointer to the password string.
+   * param rat: Radio Access Technology.
+   *
+   * return: 0 in case of success, negative number in case of failure
+   */
   int begin(const char* pin, const char* apn, const char* username, const char* password, RadioAccessTechnologyType rat = CATNB, uint32_t band = BAND_20, bool restart = true);
 
   /*
-     * Disconnect from the network
-     *
-     * return: one value of wl_status_t enum
-     */
+   * Disconnect from the network
+   *
+   * return: one value of wl_status_t enum
+   */
   int disconnect(void);
 
+  /*
+   * Reset internal state machine in order to be ready to reconnect again.
+   */
   void end(void);
 
-  unsigned long getTime();
+  /*
+   * Change cellular state timeouts. Needs to be called before GSM.begin()
+   */
+  void setTimeout(unsigned long timeout);
 
+  unsigned long getTime();
   unsigned long getLocalTime();
 
   bool setTime(unsigned long const epoch, int const timezone = 0);
@@ -130,11 +137,12 @@ private:
   mbed::CellularContext* _context = nullptr;
   mbed::CellularDevice* _device = nullptr;
   bool _at_debug = false;
+  unsigned long _timeout = 1000;
 
   /* Internal cellular state machine retries. Values are in seconds.
-   * This array also defines the maximum number of retries to 6
+   * This array also defines the maximum number of retries to CELLULAR_RETRY_ARRAY_SIZE
    */
-  const uint16_t _retry_timeout[6] = {1, 2, 4, 8, 16, 32};
+  const uint16_t _retry_timeout[CELLULAR_RETRY_ARRAY_SIZE] = {1, 2, 4, 8, 8, 8, 8, 8, 8, 8};
 
   static constexpr int RSSI_UNKNOWN = 99;
   static const char * const sim_state_str[];
@@ -150,7 +158,7 @@ private:
   void onStatusChange(nsapi_event_t ev, intptr_t in);
 
   void reset();
-  bool isReady(const int timeout = 5000);
+  void on();
 };
 
 }
