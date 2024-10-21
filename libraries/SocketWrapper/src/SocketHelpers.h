@@ -128,7 +128,26 @@ public:
 
   int hostByName(const char* aHostname, IPAddress& aResult);
 
+  /*
+   * Get the interface MAC address.
+   *
+   * Network interface should be ready to get a valid mac address.
+   * Call WiFi.begin("",""); or Ethernet.begin(); before issuing a mac address
+   * request, otherwhise returned value will be ff:ff:ff:ff:ff:ff
+   *
+   * return: pointer to uint8_t array with length WL_MAC_ADDR_LENGTH
+   */
   uint8_t* macAddress(uint8_t* mac);
+
+  /*
+   * Get the interface MAC address String.
+   *
+   * Network interface should be ready to get a valid MAC address.
+   * Call WiFi.begin("",""); or Ethernet.begin(); before issuing a mac address
+   * request, otherwhise returned value will be ff:ff:ff:ff:ff:ff
+   *
+   * return: MAC Address String
+   */
   String macAddress();
 
   void setFeedWatchdogFunc(voidFuncPtr func);
