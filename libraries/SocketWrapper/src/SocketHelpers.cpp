@@ -7,7 +7,6 @@ uint8_t* arduino::MbedSocketClass::macAddress(uint8_t* mac) {
     sscanf(&mac_str[b * 2 + (b)], "%02x", (unsigned int*)&tmp);
     mac[5 - b] = (uint8_t)tmp;
   }
-  //sscanf(mac_str, "%02hhx:%02hhx:%02hhx:%02hhx:%02hhx:%02hhx", &mac[5], &mac[4], &mac[3], &mac[2], &mac[1], &mac[0]);
   return mac;
 }
 
