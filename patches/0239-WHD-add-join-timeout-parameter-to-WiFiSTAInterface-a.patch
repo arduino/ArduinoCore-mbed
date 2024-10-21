@@ -1,0 +1,152 @@
+From efd54c8990ba5b437eb4eb8b786b7e48941b03f1 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Mon, 21 Oct 2024 11:27:36 +0200
+Subject: [PATCH] WHD: add join timeout parameter to WiFiSTAInterface and
+ drivers
+
+---
+ .../emac/COMPONENT_WHD/interface/WhdSTAInterface.cpp     | 7 ++++---
+ .../emac/COMPONENT_WHD/interface/WhdSTAInterface.h       | 6 ++++++
+ .../COMPONENT_WHD/wifi-host-driver/inc/whd_wifi_api.h    | 2 +-
+ .../COMPONENT_WHD/wifi-host-driver/src/whd_wifi_api.c    | 9 ++++++---
+ connectivity/netsocket/include/netsocket/WiFiInterface.h | 7 +++++++
+ 5 files changed, 24 insertions(+), 7 deletions(-)
+
+diff --git a/connectivity/drivers/emac/COMPONENT_WHD/interface/WhdSTAInterface.cpp b/connectivity/drivers/emac/COMPONENT_WHD/interface/WhdSTAInterface.cpp
+index c933203d36..f7631a0583 100644
+--- a/connectivity/drivers/emac/COMPONENT_WHD/interface/WhdSTAInterface.cpp
++++ b/connectivity/drivers/emac/COMPONENT_WHD/interface/WhdSTAInterface.cpp
+@@ -211,7 +211,8 @@ WhdSTAInterface::WhdSTAInterface(WHD_EMAC &emac, OnboardNetworkStack &stack, Olm
+       _security(NSAPI_SECURITY_NONE),
+       _whd_emac(emac),
+       _olm(&olm),
+-      _iface_shared(shared)
++      _iface_shared(shared),
++      _timeout(7000)
+ {
+ }
+ 
+@@ -334,7 +335,7 @@ nsapi_error_t WhdSTAInterface::connect()
+             res = (whd_result_t)whd_wifi_join(_whd_emac.ifp,
+                                               &ssid,
+                                               security,
+-                                              (const uint8_t *)_pass, strlen(_pass));
++                                              (const uint8_t *)_pass, strlen(_pass), _timeout);
+     	}
+     	else
+     	{
+@@ -345,7 +346,7 @@ nsapi_error_t WhdSTAInterface::connect()
+     		res = (whd_result_t)whd_wifi_join(_whd_emac.ifp,
+     		                                   &ssid,
+     		                                   security,
+-    		                                   (const uint8_t *)_pass, key_length);
++    		                                   (const uint8_t *)_pass, key_length, _timeout);
+     	}
+     	if (res == WHD_SUCCESS) {
+                 break;
+diff --git a/connectivity/drivers/emac/COMPONENT_WHD/interface/WhdSTAInterface.h b/connectivity/drivers/emac/COMPONENT_WHD/interface/WhdSTAInterface.h
+index 4dd1098947..bfe933bac7 100644
+--- a/connectivity/drivers/emac/COMPONENT_WHD/interface/WhdSTAInterface.h
++++ b/connectivity/drivers/emac/COMPONENT_WHD/interface/WhdSTAInterface.h
+@@ -119,6 +119,11 @@ public:
+         return 0;
+     }
+ 
++    nsapi_error_t set_timeout(uint32_t timeout)
++    {
++        _timeout = timeout;
++    }
++
+     /** Set blocking status of interface. 
+      *  Nonblocking mode unsupported.
+      *
+@@ -257,6 +262,7 @@ private:
+     nsapi_security_t _security;
+     WHD_EMAC &_whd_emac;
+     OlmInterface *_olm;
++    uint32_t _timeout;
+     whd_interface_shared_info_t &_iface_shared;
+ };
+ 
+diff --git a/connectivity/drivers/wifi/COMPONENT_WHD/wifi-host-driver/inc/whd_wifi_api.h b/connectivity/drivers/wifi/COMPONENT_WHD/wifi-host-driver/inc/whd_wifi_api.h
+index f3b73214cb..291bd23de8 100755
+--- a/connectivity/drivers/wifi/COMPONENT_WHD/wifi-host-driver/inc/whd_wifi_api.h
++++ b/connectivity/drivers/wifi/COMPONENT_WHD/wifi-host-driver/inc/whd_wifi_api.h
+@@ -281,7 +281,7 @@ extern uint32_t whd_wifi_stop_scan(whd_interface_t ifp);
+  *           Error code    if an error occurred
+  */
+ extern uint32_t whd_wifi_join(whd_interface_t ifp, const whd_ssid_t *ssid, whd_security_t auth_type,
+-                              const uint8_t *security_key, uint8_t key_length);
++                              const uint8_t *security_key, uint8_t key_length, uint32_t timeout);
+ 
+ /** Joins a specific Wi-Fi network
+  *
+diff --git a/connectivity/drivers/wifi/COMPONENT_WHD/wifi-host-driver/src/whd_wifi_api.c b/connectivity/drivers/wifi/COMPONENT_WHD/wifi-host-driver/src/whd_wifi_api.c
+index 5294104ab4..8a8f411ef9 100755
+--- a/connectivity/drivers/wifi/COMPONENT_WHD/wifi-host-driver/src/whd_wifi_api.c
++++ b/connectivity/drivers/wifi/COMPONENT_WHD/wifi-host-driver/src/whd_wifi_api.c
+@@ -294,6 +294,8 @@ static const uint16_t mcs_data_rate_lookup_table[32][2][2] =
+     },
+ };
+ 
++static whd_wifi_join_timeout = DEFAULT_JOIN_ATTEMPT_TIMEOUT;
++
+ 
+ /******************************************************
+ *             Static Function prototypes
+@@ -1334,7 +1336,7 @@ static uint32_t whd_wifi_join_wait_for_complete(whd_interface_t ifp, cy_semaphor
+ 
+     while (!done)
+     {
+-        result = cy_rtos_get_semaphore(semaphore, DEFAULT_JOIN_ATTEMPT_TIMEOUT / 10, WHD_FALSE);
++        result = cy_rtos_get_semaphore(semaphore, whd_wifi_join_timeout / 10, WHD_FALSE);
+         whd_assert("Get semaphore failed", (result == CY_RSLT_SUCCESS) || (result == CY_RTOS_TIMEOUT) );
+         REFERENCE_DEBUG_ONLY_VARIABLE(result);
+ 
+@@ -1345,7 +1347,7 @@ static uint32_t whd_wifi_join_wait_for_complete(whd_interface_t ifp, cy_semaphor
+         }
+ 
+         cy_rtos_get_time(&current_time);
+-        done = (whd_bool_t)( (current_time - start_time) >= DEFAULT_JOIN_ATTEMPT_TIMEOUT );
++        done = (whd_bool_t)( (current_time - start_time) >= whd_wifi_join_timeout );
+     }
+ 
+     if (result != WHD_SUCCESS)
+@@ -1574,7 +1576,7 @@ uint32_t whd_wifi_join_specific(whd_interface_t ifp, const whd_scan_result_t *ap
+ }
+ 
+ uint32_t whd_wifi_join(whd_interface_t ifp, const whd_ssid_t *ssid, whd_security_t auth_type,
+-                       const uint8_t *security_key, uint8_t key_length)
++                       const uint8_t *security_key, uint8_t key_length, uint32_t timeout)
+ {
+     cy_semaphore_t join_sema;
+     whd_result_t result;
+@@ -1616,6 +1618,7 @@ uint32_t whd_wifi_join(whd_interface_t ifp, const whd_ssid_t *ssid, whd_security
+         ssid_params->SSID_len = htod32(ssid->length);
+         memcpy(ssid_params->SSID, ssid->value, ssid_params->SSID_len);
+         result = whd_cdc_send_ioctl(ifp, CDC_SET, WLC_SET_SSID, buffer, 0);
++        whd_wifi_join_timeout = timeout;
+ 
+         if (result == WHD_SUCCESS)
+         {
+diff --git a/connectivity/netsocket/include/netsocket/WiFiInterface.h b/connectivity/netsocket/include/netsocket/WiFiInterface.h
+index 4fd7fc6fb8..c13cab4312 100644
+--- a/connectivity/netsocket/include/netsocket/WiFiInterface.h
++++ b/connectivity/netsocket/include/netsocket/WiFiInterface.h
+@@ -59,6 +59,13 @@ public:
+      */
+     virtual nsapi_error_t set_channel(uint8_t channel) = 0;
+ 
++    /** Set the Wi-Fi network join timeout.
++     *
++     *  @param timeout   joint timeout in milliseconds (Default: 7000).
++     *  @return          NSAPI_ERROR_OK on success, or error code on failure.
++     */
++    virtual nsapi_error_t set_timeout(uint32_t timeout) = 0;
++
+     /** Get the current radio signal strength for active connection.
+      *
+      *  @return         Connection strength in dBm (negative value),
+-- 
+2.45.2
+
