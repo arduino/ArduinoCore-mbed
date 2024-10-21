@@ -1,0 +1,25 @@
+From 42b018c12eb413383c6ae4f2432be9f0c2d9dbe9 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Mon, 17 Jun 2024 17:11:58 +0200
+Subject: [PATCH] WHD: reduce the number of join retry
+
+---
+ .../drivers/emac/COMPONENT_WHD/interface/WhdSTAInterface.cpp    | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/connectivity/drivers/emac/COMPONENT_WHD/interface/WhdSTAInterface.cpp b/connectivity/drivers/emac/COMPONENT_WHD/interface/WhdSTAInterface.cpp
+index 509a2c0981..c933203d36 100644
+--- a/connectivity/drivers/emac/COMPONENT_WHD/interface/WhdSTAInterface.cpp
++++ b/connectivity/drivers/emac/COMPONENT_WHD/interface/WhdSTAInterface.cpp
+@@ -260,7 +260,7 @@ nsapi_error_t WhdSTAInterface::connect()
+ {
+     ScopedMutexLock lock(_iface_shared.mutex);
+ 
+-#define MAX_RETRY_COUNT    ( 5 )
++#define MAX_RETRY_COUNT    ( 1 )
+     int i;
+     whd_result_t res;
+ 
+-- 
+2.43.0
+
