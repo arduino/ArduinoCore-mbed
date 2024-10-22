@@ -26,7 +26,6 @@
 #define SE05X_EC_SIGNATURE_HEADER_LENGTH 6
 #define SE05X_EC_SIGNATURE_DER_LENGTH    SE05X_EC_SIGNATURE_HEADER_LENGTH + SE05X_EC_SIGNATURE_RAW_LENGTH
 #define SE05X_SHA256_LENGTH              32
-#define SE05X_SN_LENGTH                  18
 #define SE05X_DER_BUFFER_SIZE            256
 #define SE05X_TEMP_OBJECT                9999
 
@@ -158,17 +157,39 @@ int SE05XClass::readConfiguration(byte data[])
     return 1;
 }
 
+int SE05XClass::serialNumber(byte sn[])
+{
+    return serialNumber(sn, SE05X_SN_LENGTH);
+}
+
+int SE05XClass::serialNumber(byte sn[], size_t length)
+{
+    size_t uidLen = SE05X_SN_LENGTH;
+    byte UID[SE05X_SN_LENGTH];
+
+    if(!sn) {
+        return 0;
+    }
+
+    sss_status_t status = sss_session_prop_get_au8(&_boot_ctx.session, kSSS_SessionProp_UID, UID, &uidLen);
+    if ((status != kStatus_SSS_Success)) {
+        SE05X_PRINT_ERROR("Error in Se05x_API_ReadObject \n");
+        return 0;
+    }
+    memcpy(sn, UID, length < SE05X_SN_LENGTH ? length : SE05X_SN_LENGTH);
+    return 1;
+}
+
 String SE05XClass::serialNumber()
 {
     String result = (char*)NULL;
     byte UID[SE05X_SN_LENGTH];
-    size_t uidLen = 18;
 
-    sss_session_prop_get_au8(&_boot_ctx.session, kSSS_SessionProp_UID, UID, &uidLen);
+    serialNumber(UID, sizeof(UID));
 
-    result.reserve(uidLen*2);
+    result.reserve(SE05X_SN_LENGTH * 2);
 
-    for (int i = 0; i < uidLen; i++) {
+    for (size_t i = 0; i < SE05X_SN_LENGTH; i++) {
         byte b = UID[i];
 
         if (b < 16) {
