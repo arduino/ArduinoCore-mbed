@@ -53,20 +53,20 @@ int arduino::WiFiClass::begin(const char* ssid, const char* passphrase, wl_enc_t
 
   wifi_if->attach(&arduino::WiFiClass::statusCallback);
 
-  scanNetworks();
-
-  if (isVisible(ssid)) {
-    // Set the network security mode from the scan result.
-    _security = ap_list[connected_ap].get_security();
-  } else {
-    // For hidden networks, the security mode must be set explicitly.
-    // if ENC_TYPE_UNKNOWN this means that is the default value and so the user
-    // has not set it... no worth trying, it is probably an unknown (not hidden) 
-    // interface
-    if(security == ENC_TYPE_UNKNOWN) {
+  if(security == ENC_TYPE_UNKNOWN) {
+    scanNetworks();
+    if (isVisible(ssid)) {
+      // Set the network security mode from the scan result.
+      _security = ap_list[connected_ap].get_security();
+    } else {
+      // For hidden networks, the security mode must be set explicitly.
+      // if ENC_TYPE_UNKNOWN this means that is the default value and so the user
+      // has not set it... no worth trying, it is probably an unknown (not hidden)
+      // interface
       _currentNetworkStatus = WL_CONNECT_FAILED;
       return _currentNetworkStatus;
     }
+  } else {
     _security = enum2sec(security);
   }
 
@@ -75,6 +75,7 @@ int arduino::WiFiClass::begin(const char* ssid, const char* passphrase, wl_enc_t
     wifi_if->set_network(_ip, _netmask, _gateway);
   }
 
+  wifi_if->set_timeout(_timeout);
   nsapi_error_t result = wifi_if->connect(ssid, passphrase, _security);
 
   if(result == NSAPI_ERROR_IS_CONNECTED) {
@@ -295,6 +296,10 @@ NetworkInterface* arduino::WiFiClass::getNetwork() {
 
 unsigned long arduino::WiFiClass::getTime() {
   return 0;
+}
+
+void arduino::WiFiClass::setTimeout(unsigned long timeout) {
+  _timeout = timeout;
 }
 
 void arduino::WiFiClass::statusCallback(nsapi_event_t status, intptr_t param)
