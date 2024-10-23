@@ -110,8 +110,6 @@ static void setECSignatureRsValuesInDER(const byte* rawSignature, byte* signatur
 
 int SE05XClass::begin()
 {
-    sss_status_t status;
-
     memset(&_boot_ctx, 0, sizeof(ex_sss_boot_ctx_t));
 
     se05x_ic_power_on();
@@ -612,8 +610,6 @@ int SE05XClass::deleteAllObjects(void)
 
 int SE05XClass::getObjectHandle(int objectId, sss_object_t * object)
 {
-    sss_status_t status;
-
     if(kStatus_SSS_Success != sss_key_object_init(object, &_boot_ctx.ks)) {
         SE05X_PRINT_ERROR("sss_key_object_init Failed");
         return 0;
