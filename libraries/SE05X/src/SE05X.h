@@ -27,10 +27,12 @@
 #include "se05x_APDU.h"
 
 #if defined SE05X_PRINT_ERROR_ENABLE
-#define SE05X_PRINT_ERROR Serial.println
+#define SE05X_PRINT_ERROR(x) Serial.println(x)
 #else
-#define SE05X_PRINT_ERROR
+#define SE05X_PRINT_ERROR(x)
 #endif
+
+#define SE05X_SN_LENGTH 18
 
 class SE05XClass
 {
@@ -41,6 +43,8 @@ public:
     int begin();
     void end();
 
+    int serialNumber(byte sn[]);
+    int serialNumber(byte sn[], size_t length);
     String serialNumber();
 
     long random(long max);
