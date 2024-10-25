@@ -296,6 +296,15 @@ bool getSecureFlashData() {
     return ret == QSPI_STATUS_OK;
 }
 
+class SecureQSPIReader {
+public:
+    SecureQSPIReader() {
+        getSecureFlashData();
+    }
+};
+
+SecureQSPIReader __reader __attribute__ ((init_priority (101)));
+
 uint8_t* boardInfo() {
     return _boardInfo;
 }
