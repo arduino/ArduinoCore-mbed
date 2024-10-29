@@ -281,7 +281,7 @@ extern uint32_t whd_wifi_stop_scan(whd_interface_t ifp);
  *           Error code    if an error occurred
  */
 extern uint32_t whd_wifi_join(whd_interface_t ifp, const whd_ssid_t *ssid, whd_security_t auth_type,
-                              const uint8_t *security_key, uint8_t key_length);
+                              const uint8_t *security_key, uint8_t key_length, uint32_t timeout);
 
 /** Joins a specific Wi-Fi network
  *

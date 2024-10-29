@@ -119,6 +119,11 @@ public:
         return 0;
     }
 
+    nsapi_error_t set_timeout(uint32_t timeout)
+    {
+        _timeout = timeout;
+    }
+
     /** Set blocking status of interface. 
      *  Nonblocking mode unsupported.
      *
@@ -257,6 +262,7 @@ private:
     nsapi_security_t _security;
     WHD_EMAC &_whd_emac;
     OlmInterface *_olm;
+    uint32_t _timeout;
     whd_interface_shared_info_t &_iface_shared;
 };
 

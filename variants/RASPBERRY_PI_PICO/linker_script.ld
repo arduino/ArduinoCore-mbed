@@ -11,6 +11,9 @@ SECTIONS
     .flash_begin : {
         __flash_binary_start = .;
     } > FLASH
+    .second_stage_ota : {
+         KEEP (*(.second_stage_ota))
+     } > FLASH
     .boot2 : {
         __boot2_start__ = .;
         KEEP (*(.boot2))
@@ -101,7 +104,9 @@ SECTIONS
     } > RAM AT> FLASH
     .uninitialized_data (COPY): {
         . = ALIGN(4);
+        __uninitialized_data_start__ = .;
         *(.uninitialized_data*)
+        __uninitialized_data_end__ = .;
     } > RAM
     .scratch_x : {
         __scratch_x_start__ = .;
