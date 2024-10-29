@@ -1,0 +1,69 @@
+From 4369443525c662ddb2ecb15dd9cdba0098e1f01d Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Mon, 28 Oct 2024 09:56:31 +0100
+Subject: [PATCH] TLSSocketWrapper: add read/write event flags
+
+  This allows to properly handle timeouts during read write operations
+---
+ .../netsocket/include/netsocket/TLSSocketWrapper.h        | 4 ++++
+ connectivity/netsocket/source/TLSSocketWrapper.cpp        | 8 ++++----
+ 2 files changed, 8 insertions(+), 4 deletions(-)
+
+diff --git a/connectivity/netsocket/include/netsocket/TLSSocketWrapper.h b/connectivity/netsocket/include/netsocket/TLSSocketWrapper.h
+index 2dc3b4b000..79fe5c564d 100644
+--- a/connectivity/netsocket/include/netsocket/TLSSocketWrapper.h
++++ b/connectivity/netsocket/include/netsocket/TLSSocketWrapper.h
+@@ -379,6 +379,10 @@ private:
+     Socket *_transport;
+     int _timeout = -1;
+ 
++    // Event flags
++    static const int READ_FLAG     = 0x1u;
++    static const int WRITE_FLAG    = 0x2u;
++
+ #ifdef MBEDTLS_X509_CRT_PARSE_C
+     mbedtls_x509_crt *_cacert = nullptr;
+     mbedtls_x509_crt *_clicert = nullptr;
+diff --git a/connectivity/netsocket/source/TLSSocketWrapper.cpp b/connectivity/netsocket/source/TLSSocketWrapper.cpp
+index c020cd9f59..3a66be2e5e 100644
+--- a/connectivity/netsocket/source/TLSSocketWrapper.cpp
++++ b/connectivity/netsocket/source/TLSSocketWrapper.cpp
+@@ -381,7 +381,7 @@ nsapi_error_t TLSSocketWrapper::continue_handshake()
+         ret = mbedtls_ssl_handshake(&_ssl);
+         if (_timeout && (ret == MBEDTLS_ERR_SSL_WANT_READ || ret == MBEDTLS_ERR_SSL_WANT_WRITE)) {
+             uint32_t flag;
+-            flag = _event_flag.wait_any(1, _timeout);
++            flag = _event_flag.wait_any(WRITE_FLAG | READ_FLAG, _timeout);
+             if (flag & osFlagsError) {
+                 break;
+             }
+@@ -461,7 +461,7 @@ nsapi_error_t TLSSocketWrapper::send(const void *data, nsapi_size_t size)
+             break;
+         } else if (ret == MBEDTLS_ERR_SSL_WANT_WRITE || ret == MBEDTLS_ERR_SSL_WANT_READ) {
+             uint32_t flag;
+-            flag = _event_flag.wait_any(1, _timeout);
++            flag = _event_flag.wait_any(WRITE_FLAG, _timeout);
+             if (flag & osFlagsError) {
+                 // Timeout break
+                 break;
+@@ -522,7 +522,7 @@ nsapi_size_or_error_t TLSSocketWrapper::recv(void *data, nsapi_size_t size)
+             break;
+         } else if (ret == MBEDTLS_ERR_SSL_WANT_WRITE || ret == MBEDTLS_ERR_SSL_WANT_READ) {
+             uint32_t flag;
+-            flag = _event_flag.wait_any(1, _timeout);
++            flag = _event_flag.wait_any(READ_FLAG, _timeout);
+             if (flag & osFlagsError) {
+                 // Timeout break
+                 break;
+@@ -855,7 +855,7 @@ nsapi_error_t TLSSocketWrapper::listen(int)
+ 
+ void TLSSocketWrapper::event()
+ {
+-    _event_flag.set(1);
++    _event_flag.set(READ_FLAG | WRITE_FLAG);
+     if (_sigio) {
+         _sigio();
+     }
+-- 
+2.45.2
+
