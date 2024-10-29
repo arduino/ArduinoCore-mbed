@@ -379,6 +379,10 @@ private:
     Socket *_transport;
     int _timeout = -1;
 
+    // Event flags
+    static const int READ_FLAG     = 0x1u;
+    static const int WRITE_FLAG    = 0x2u;
+
 #ifdef MBEDTLS_X509_CRT_PARSE_C
     mbedtls_x509_crt *_cacert = nullptr;
     mbedtls_x509_crt *_clicert = nullptr;

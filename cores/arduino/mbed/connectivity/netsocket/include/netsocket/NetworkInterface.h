@@ -90,6 +90,24 @@ public:
      */
     virtual void set_as_default();
 
+    /** Get hostname.
+     *
+     *  @return         Hostname if configured, null otherwise
+     */
+    virtual const char *get_hostname();
+
+    /** Set hostname.
+     *
+     *  @param          hostname Hostname string
+     *  @retval         NSAPI_ERROR_OK on success
+     *  @retval         NSAPI_ERROR_UNSUPPORTED if this feature is not supported
+     *  @retval         NSAPI_ERROR_PARAMETER if hostname is not valid
+     *  @retval         NSAPI_ERROR_BUSY if hostname couldn't be set (e.g. for
+     *                  LwIP stack, hostname can only be set before calling
+     *                  \c EthernetInterface::connect method)
+     */
+    virtual nsapi_error_t set_hostname(const char *hostname);
+
     /** Get the local MAC address.
      *
      *  Provided MAC address is intended for info or debug purposes and

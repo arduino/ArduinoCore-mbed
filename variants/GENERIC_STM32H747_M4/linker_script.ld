@@ -91,10 +91,9 @@ SECTIONS
         __bss_end__ = .;
         _ebss = .;
     } > RAM
-
     .pdm_section 0x3800FC00 (NOLOAD):  {
-        *(.pdm_buffer)
-    } > RAM_D3
+ 				*(.pdm_buffer)
+ 				} > RAM_D3
 
     .heap (NOLOAD):
     {
@@ -104,7 +103,6 @@ SECTIONS
         . = ORIGIN(RAM) + LENGTH(RAM) - 0x400;
         __HeapLimit = .;
     } > RAM
-
     .stack_dummy (NOLOAD):
     {
         *(.stack*)

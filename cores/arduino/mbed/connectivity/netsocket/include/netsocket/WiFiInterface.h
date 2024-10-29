@@ -59,6 +59,13 @@ public:
      */
     virtual nsapi_error_t set_channel(uint8_t channel) = 0;
 
+    /** Set the Wi-Fi network join timeout.
+     *
+     *  @param timeout   joint timeout in milliseconds (Default: 7000).
+     *  @return          NSAPI_ERROR_OK on success, or error code on failure.
+     */
+    virtual nsapi_error_t set_timeout(uint32_t timeout) = 0;
+
     /** Get the current radio signal strength for active connection.
      *
      *  @return         Connection strength in dBm (negative value),
