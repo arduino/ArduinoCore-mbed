@@ -1,0 +1,25 @@
+From 4b6c6ad0554c88c369fc4e2e5ed543d52117aa3f Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Thu, 31 Oct 2024 12:00:51 +0100
+Subject: [PATCH 245/247] GEMALTO CINTERION: close socket on timeout
+
+---
+ .../GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp       | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+index ac2a54282a..41a01859e7 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+@@ -59,7 +59,7 @@ void GEMALTO_CINTERION_CellularStack::urc_sis()
+         }
+         if (urc_code == 0) {
+             int urc_info_id = _at.read_int();
+-            if (urc_info_id == 48) {
++            if (urc_info_id == 48 || urc_info_id == 20) {
+                 tr_info("Socket closed %d", sock_id);
+                 sock->closed = true;
+                 if (sock->_cb) {
+-- 
+2.45.2
+

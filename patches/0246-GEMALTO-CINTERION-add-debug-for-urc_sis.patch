@@ -1,0 +1,33 @@
+From 84e682a7f4c0c05dded7f12817f78c1cc9a66cfe Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Thu, 31 Oct 2024 12:01:47 +0100
+Subject: [PATCH 246/247] GEMALTO CINTERION: add debug for urc_sis
+
+---
+ .../GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp      | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+index 41a01859e7..9a3f22dc3c 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+@@ -47,6 +47,8 @@ void GEMALTO_CINTERION_CellularStack::urc_sis()
+     int sock_id = _at.read_int();
+     int urc_code = _at.read_int();
+     CellularSocket *sock = find_socket(sock_id);
++
++    tr_info("urc_sis socket id %d urc code %d\n\r", sock_id, urc_code);
+     if (sock) {
+         // Currently only UDP is supported so there is need to handle only some error codes here,
+         // and others are detected on sendto/recvfrom responses.
+@@ -59,6 +61,7 @@ void GEMALTO_CINTERION_CellularStack::urc_sis()
+         }
+         if (urc_code == 0) {
+             int urc_info_id = _at.read_int();
++            tr_info("urcInfoId %d\n\r", urc_info_id);
+             if (urc_info_id == 48 || urc_info_id == 20) {
+                 tr_info("Socket closed %d", sock_id);
+                 sock->closed = true;
+-- 
+2.45.2
+
