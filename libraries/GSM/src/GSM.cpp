@@ -132,7 +132,10 @@ bool arduino::GSMClass::isCmuxEnable() {
 }
 
 void arduino::GSMClass::end() {
-  _device->shutdown();
+  if(_device) {
+    _device->shutdown();
+    _device->get_at_handler()->set_urc_handler("^SYSSTART", nullptr);
+  }
 }
 
 int arduino::GSMClass::disconnect() {
