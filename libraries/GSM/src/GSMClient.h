@@ -29,6 +29,24 @@ class GSMClient : public AClient {
   NetworkInterface *getNetwork() {
     return GSM.getNetwork();
   }
+
+  size_t write(uint8_t b) {
+    int ret = 0;
+    do {
+      ret = client->write(b);
+      delay(0);
+    } while (ret == 0 && status());
+    return ret;
+  }
+
+  size_t write(const uint8_t *buf, size_t size) {
+    int ret = 0;
+    do {
+      ret = client->write(buf, size);
+      delay(0);
+    } while (ret == 0 && status());
+    return ret;
+  }
 };
 
 }
