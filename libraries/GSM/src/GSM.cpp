@@ -139,9 +139,14 @@ void arduino::GSMClass::end() {
 }
 
 int arduino::GSMClass::disconnect() {
-  if (_context) {
+  if (!_context) {
+    return 0;
+  }
+
+  if (_context->is_connected()) {
     return _context->disconnect();
   }
+
   return 0;
 }
 
