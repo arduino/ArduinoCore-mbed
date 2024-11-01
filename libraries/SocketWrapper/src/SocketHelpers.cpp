@@ -15,6 +15,12 @@ String arduino::MbedSocketClass::macAddress() {
   return String(getNetwork()->get_mac_address());
 }
 
+int arduino::MbedSocketClass::setHostname(const char* hostname) {
+  NetworkInterface* interface = getNetwork();
+  interface->set_hostname(hostname);
+  return 1;
+}
+
 int arduino::MbedSocketClass::hostByName(const char* aHostname, IPAddress& aResult) {
   SocketAddress socketAddress = SocketAddress();
   nsapi_error_t returnCode = gethostbyname(getNetwork(), aHostname, &socketAddress);
