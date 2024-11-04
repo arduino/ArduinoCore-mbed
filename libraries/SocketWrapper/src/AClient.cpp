@@ -46,11 +46,11 @@ int arduino::AClient::connectSSL(IPAddress ip, uint16_t port) {
   return client->connectSSL(ip, port);
 }
 
-int arduino::AClient::connectSSL(const char *host, uint16_t port, bool disableSNI) {
+int arduino::AClient::connectSSL(const char *host, uint16_t port) {
   if (!client) {
     newMbedClient();
   }
-  return client->connectSSL(host, port, disableSNI);
+  return client->connectSSL(host, port);
 }
 
 void arduino::AClient::stop() {

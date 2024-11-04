@@ -186,15 +186,7 @@ int arduino::MbedClient::connectSSL(IPAddress ip, uint16_t port) {
   return connectSSL(SocketHelpers::socketAddressFromIpAddress(ip, port));
 }
 
-int arduino::MbedClient::connectSSL(const char *host, uint16_t port, bool disableSNI) {
-  if (!disableSNI) {
-    if (sock == nullptr) {
-      sock = new TLSSocket();
-      _own_socket = true;
-    }
-    static_cast<TLSSocket *>(sock)->set_hostname(host);
-  }
-
+int arduino::MbedClient::connectSSL(const char *host, uint16_t port) {
   SocketAddress socketAddress = SocketAddress();
   socketAddress.set_port(port);
   SocketHelpers::gethostbyname(getNetwork(), host, &socketAddress);
