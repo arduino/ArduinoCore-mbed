@@ -41,7 +41,8 @@ public:
     return connectSSL(ip, port);
   }
   int connect(const char* host, uint16_t port) {
-    return connectSSL(host, port, _disableSNI);
+    _hostname = host;
+    return connectSSL(host, port);
   }
   void disableSNI(bool statusSNI) {
     _disableSNI = statusSNI;
@@ -53,6 +54,7 @@ public:
 
 protected:
   const char* _ca_cert_custom = NULL;
+  const char* _hostname = NULL;
 
 private:
   int setRootCA() {
@@ -78,6 +80,10 @@ private:
       return err;
     }
 #endif
+
+    if(_hostname && !_disableSNI) {
+      ((TLSSocket*)sock)->set_hostname(_hostname);
+    }
 
     if(_ca_cert_custom != NULL) {
       err = ((TLSSocket*)sock)->append_root_ca_cert(_ca_cert_custom);

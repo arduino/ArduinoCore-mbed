@@ -56,7 +56,7 @@ public:
   virtual int connect(const char* host, uint16_t port);
   int connectSSL(SocketAddress socketAddress);
   int connectSSL(IPAddress ip, uint16_t port);
-  int connectSSL(const char* host, uint16_t port, bool disableSNI = false);
+  int connectSSL(const char* host, uint16_t port);
   size_t write(uint8_t);
   size_t write(const uint8_t* buf, size_t size);
   int available();
