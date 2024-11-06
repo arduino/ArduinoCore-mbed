@@ -53,8 +53,9 @@ public:
   }
 
 protected:
-  const char* _ca_cert_custom = NULL;
-  const char* _hostname = NULL;
+  const char* _ca_cert_custom;
+  const char* _hostname;
+  bool _disableSNI;
 
 private:
   int setRootCA() {
@@ -90,8 +91,6 @@ private:
     }
     return err;
   }
-
-  bool _disableSNI;
 };
 
 }
