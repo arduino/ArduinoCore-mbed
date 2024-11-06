@@ -65,7 +65,7 @@ public:
    */
   int begin(const char* ssid);
 
-  void MACAddress(uint8_t *mac_address);
+  void MACAddress(uint8_t *mac_address) __attribute__((deprecated("Use macAddress(uint8_t *mac_address)")));
 
   /* Start Wifi connection with passphrase
    * the most secure supported mode will be automatically selected
