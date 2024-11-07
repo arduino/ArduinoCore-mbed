@@ -3,7 +3,7 @@
 #include "LittleFileSystem.h"
 #include "FATFileSystem.h"
 
-#ifndef CORE_CM7  
+#ifndef CORE_CM7
   #error Format QSPI flash by uploading the sketch to the M7 core instead of the M4 core.
 #endif
 
@@ -47,11 +47,13 @@ void setup() {
   Serial.println("Available partition schemes:");
   Serial.println("\nPartition scheme 1");
   Serial.println("Partition 1: WiFi firmware and certificates 1MB");
-  Serial.println("Partition 2: OTA and user data 13MB");
+  Serial.println("Partition 2: OTA and user data 12MB");
+  Serial.println("Partition 3: Provisioning KVStore 1MB");
   Serial.println("\nPartition scheme 2");
   Serial.println("Partition 1: WiFi firmware and certificates 1MB");
   Serial.println("Partition 2: OTA 5MB");
-  Serial.println("Partition 3: User data 8MB"),
+  Serial.println("Partition 3: User data 7MB"),
+  Serial.println("Partition 4: Provisioning KVStore 1MB");
   Serial.println("\nDo you want to use partition scheme 1? Y/[n]");
   Serial.println("If No, partition scheme 2 will be used.");
   bool default_scheme = waitResponse();
@@ -60,14 +62,22 @@ void setup() {
   Serial.println("Do you want to proceed? Y/[n]");
 
   if (true == waitResponse()) {
+    if (root.init() != QSPIF_BD_ERROR_OK) {
+      Serial.println(F("Error: QSPI init failure."));
+      return;
+    }
+    root.erase(0x0, root.get_erase_size());
+
     mbed::MBRBlockDevice::partition(&root, 1, 0x0B, 0, 1024 * 1024);
     if(default_scheme) {
-      mbed::MBRBlockDevice::partition(&root, 3, 0x0B, 14 * 1024 * 1024, 14 * 1024 * 1024);
-      mbed::MBRBlockDevice::partition(&root, 2, 0x0B, 1024 * 1024, 14 * 1024 * 1024);
+      mbed::MBRBlockDevice::partition(&root, 2, 0x0B, 1024 * 1024, 13 * 1024 * 1024);
+      mbed::MBRBlockDevice::partition(&root, 3, 0x0B, 13 * 1024 * 1024, 13 * 1024 * 1024);
+      mbed::MBRBlockDevice::partition(&root, 4, 0x0B, 13 * 1024 * 1024, 14 * 1024 * 1024);
       // use space from 15.5MB to 16 MB for another fw, memory mapped
     } else {
       mbed::MBRBlockDevice::partition(&root, 2, 0x0B, 1024 * 1024, 6 * 1024 * 1024);
-      mbed::MBRBlockDevice::partition(&root, 3, 0x0B, 6 * 1024 * 1024, 14 * 1024 * 1024);
+      mbed::MBRBlockDevice::partition(&root, 3, 0x0B, 6 * 1024 * 1024, 13 * 1024 * 1024);
+      mbed::MBRBlockDevice::partition(&root, 4, 0x0B, 13* 1024 * 1024, 14 * 1024 * 1024);
       // use space from 15.5MB to 16 MB for another fw, memory mapped
     }
 
@@ -76,7 +86,7 @@ void setup() {
       Serial.println("Error formatting WiFi partition");
       return;
     }
-  
+
     err = ota_data_fs.reformat(&ota_data);
     if (err) {
       Serial.println("Error formatting OTA partition");
