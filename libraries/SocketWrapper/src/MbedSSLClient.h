@@ -48,12 +48,12 @@ public:
     _disableSNI = statusSNI;
   }
 
-  void appendCustomCACert(const char* ca_cert) {
-    _ca_cert_custom = ca_cert;
+  void appendCustomCACert(const char* rootCA) {
+    _rootCA = rootCA;
     _appendCA = true;
   }
   void setCACert(const char* rootCA) {
-    _ca_cert_custom = rootCA;
+    _rootCA = rootCA;
     _appendCA = false;
   }
   void setCertificate(const char* clientCert) {
@@ -64,7 +64,7 @@ public:
   }
 
 protected:
-  const char* _ca_cert_custom;
+  const char* _rootCA;
   const char* _hostname;
   const char* _clientCert;
   const char* _privateKey;
@@ -86,8 +86,8 @@ private:
       }
     }
 
-    if(!_appendCA && _ca_cert_custom) {
-      return ((TLSSocket*)sock)->set_root_ca_cert(_ca_cert_custom);
+    if(!_appendCA && _rootCA) {
+      return ((TLSSocket*)sock)->set_root_ca_cert(_rootCA);
     }
 
 #if defined(MBEDTLS_FS_IO)
@@ -111,8 +111,8 @@ private:
     }
 #endif
 
-    if(_ca_cert_custom != NULL) {
-      err = ((TLSSocket*)sock)->append_root_ca_cert(_ca_cert_custom);
+    if(_rootCA != NULL) {
+      err = ((TLSSocket*)sock)->append_root_ca_cert(_rootCA);
     }
     return err;
   }

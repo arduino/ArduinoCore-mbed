@@ -1,7 +1,7 @@
 #include "MbedSSLClient.h"
 
 arduino::MbedSSLClient::MbedSSLClient()
-  : _ca_cert_custom(nullptr),
+  : _rootCA(nullptr),
     _hostname(nullptr),
     _clientCert(nullptr),
     _privateKey(nullptr),
