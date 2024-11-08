@@ -63,7 +63,7 @@ public:
     _privateKey = privateKey;
   }
 
-protected:
+private:
   const char* _rootCA;
   const char* _hostname;
   const char* _clientCert;
@@ -71,7 +71,7 @@ protected:
   bool _disableSNI;
   bool _appendCA;
 
-private:
+protected:
   int setRootCA() {
     int err = 0;
 
