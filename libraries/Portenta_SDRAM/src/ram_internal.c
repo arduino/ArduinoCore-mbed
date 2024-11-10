@@ -38,28 +38,7 @@ static HAL_StatusTypeDef FMC_SDRAM_Clock_Config(void)
   RCC_PeriphCLKInitTypeDef  RCC_PeriphCLKInitStruct;
   
   RCC_PeriphCLKInitStruct.PeriphClockSelection = RCC_PERIPHCLK_FMC;
-  RCC_PeriphCLKInitStruct.FmcClockSelection = RCC_FMCCLKSOURCE_PLL2;
-#ifdef ARDUINO_GIGA
-  /* 16MHz HSE */
-  /* PLL2_VCO Input = HSE_VALUE/PLL2_M = (16/4) = 4 Mhz */
-  /* PLL2_VCO Output = PLL2_VCO Input * PLL_N = 4*100 = 400 Mhz */
-  /* FMC Kernel Clock = PLL2_VCO Output/PLL_R = 400/2 = 200 Mhz */
-  RCC_PeriphCLKInitStruct.PLL2.PLL2RGE = RCC_PLL2VCIRANGE_2;
-  RCC_PeriphCLKInitStruct.PLL2.PLL2M = 4;
-  RCC_PeriphCLKInitStruct.PLL2.PLL2N = 100;
-#else
-  /* 25MHz HSE */
-  /* PLL2_VCO Input = HSE_VALUE/PLL2_M = 25/5 = 5 Mhz */
-  /* PLL2_VCO Output = PLL2_VCO Input * PLL_N = 5*80  = 400 Mhz */
-  /* FMC Kernel Clock = PLL2_VCO Output/PLL_R = 400/2 = 200 Mhz */
-  RCC_PeriphCLKInitStruct.PLL2.PLL2RGE = RCC_PLL2VCIRANGE_2;
-  RCC_PeriphCLKInitStruct.PLL2.PLL2M = 5;
-  RCC_PeriphCLKInitStruct.PLL2.PLL2N = 80;
-#endif
-  RCC_PeriphCLKInitStruct.PLL2.PLL2FRACN = 0;
-  RCC_PeriphCLKInitStruct.PLL2.PLL2P = 2;
-  RCC_PeriphCLKInitStruct.PLL2.PLL2Q = 2;
-  RCC_PeriphCLKInitStruct.PLL2.PLL2R = 2;
+  RCC_PeriphCLKInitStruct.FmcClockSelection = RCC_FMCCLKSOURCE_HCLK;
   RCC_PeriphCLKInitStruct.PLL2.PLL2VCOSEL = RCC_PLL2VCOWIDE;
   return HAL_RCCEx_PeriphCLKConfig(&RCC_PeriphCLKInitStruct);
 }
