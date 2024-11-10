@@ -39,7 +39,6 @@ static HAL_StatusTypeDef FMC_SDRAM_Clock_Config(void)
   
   RCC_PeriphCLKInitStruct.PeriphClockSelection = RCC_PERIPHCLK_FMC;
   RCC_PeriphCLKInitStruct.FmcClockSelection = RCC_FMCCLKSOURCE_HCLK;
-  RCC_PeriphCLKInitStruct.PLL2.PLL2VCOSEL = RCC_PLL2VCOWIDE;
   return HAL_RCCEx_PeriphCLKConfig(&RCC_PeriphCLKInitStruct);
 }
 
