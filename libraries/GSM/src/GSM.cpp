@@ -140,6 +140,36 @@ void arduino::GSMClass::end() {
   }
 }
 
+int arduino::GSMClass::ping(const char* hostname, int ttl) {
+
+  mbed::GEMALTO_CINTERION_CellularStack* stack = (mbed::GEMALTO_CINTERION_CellularStack*)_context->get_stack();
+  if (!stack) {
+    return 0;
+  }
+  return stack->ping(hostname, ttl);
+}
+
+int arduino::GSMClass::ping(const String &hostname, int ttl)
+{
+  return ping(hostname.c_str(), ttl);
+}
+
+int arduino::GSMClass::ping(IPAddress ip, int ttl)
+{
+  String host;
+  host.reserve(15);
+
+  host += ip[0];
+  host += '.';
+  host += ip[1];
+  host += '.';
+  host += ip[2];
+  host += '.';
+  host += ip[3];
+
+  return ping(host, ttl);
+}
+
 int arduino::GSMClass::disconnect() {
   if (!_context) {
     return 0;

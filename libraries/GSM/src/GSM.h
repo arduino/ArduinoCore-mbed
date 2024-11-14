@@ -115,9 +115,9 @@ public:
   void trace(Stream& stream);
   void setTraceLevel(int trace_level, bool timestamp = false, bool at_trace = false);
 #endif
-  int ping(const char* hostname, uint8_t ttl = 128);
-  int ping(const String& hostname, uint8_t ttl = 128);
-  int ping(IPAddress host, uint8_t ttl = 128);
+  int ping(const char* hostname, int ttl = 5000);
+  int ping(const String& hostname, int ttl = 5000);
+  int ping(IPAddress host, int ttl = 5000);
   bool isConnected();
 
   friend class GSMClient;
