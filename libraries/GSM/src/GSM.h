@@ -86,7 +86,7 @@ public:
    *
    * return: 0 in case of success, negative number in case of failure
    */
-  int begin(const char* pin, const char* apn, const char* username, const char* password, RadioAccessTechnologyType rat = CATNB, uint32_t band = BAND_20, bool restart = true);
+  int begin(const char* pin, const char* apn, const char* username, const char* password, RadioAccessTechnologyType rat = CATNB, uint32_t band = BAND_20, bool restart = false);
 
   /*
    * Disconnect from the network
