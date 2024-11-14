@@ -85,6 +85,7 @@ int arduino::GSMClass::begin(const char* pin, const char* apn, const char* usern
   _device = _context->get_device();
   _device->modem_debug_on(_at_debug);
 
+  DEBUG_INFO("CMUX %s", _cmuxGSMenable ? "enabled" : "disabled");
   _device->set_cmux_status_flag(_cmuxGSMenable);
   _device->set_retry_timeout_array(_retry_timeout, sizeof(_retry_timeout) / sizeof(_retry_timeout[0]));
   _device->set_timeout(_timeout);
