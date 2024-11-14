@@ -59,7 +59,9 @@ int arduino::GSMClass::begin(const char* pin, const char* apn, const char* usern
   digitalWrite(MBED_CONF_GEMALTO_CINTERION_RST, LOW);
 
   /* Reset module if needed */
-  if (restart || isCmuxEnable()) {
+  const bool emergencyReset = restart || isCmuxEnable();
+  DEBUG_INFO("Emergency reset %s", emergencyReset ? "enabled" : "disabled");
+  if (emergencyReset) {
     reset();
   }
 
