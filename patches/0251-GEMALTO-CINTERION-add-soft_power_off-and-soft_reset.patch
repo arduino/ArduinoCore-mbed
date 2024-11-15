@@ -1,0 +1,102 @@
+From 7c789f289225ef631952f0ddb8ac46d2d1de9191 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Thu, 14 Nov 2024 15:57:07 +0100
+Subject: [PATCH 251/256] GEMALTO CINTERION: add soft_power_off() and
+ soft_reset()
+
+---
+ .../include/cellular/framework/API/CellularDevice.h   | 11 +++++++++++
+ .../include/cellular/framework/AT/AT_CellularDevice.h |  2 ++
+ .../source/framework/AT/AT_CellularDevice.cpp         |  5 +++++
+ .../cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.cpp  | 10 ++++++++++
+ .../cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.h    |  2 ++
+ 5 files changed, 30 insertions(+)
+
+diff --git a/connectivity/cellular/include/cellular/framework/API/CellularDevice.h b/connectivity/cellular/include/cellular/framework/API/CellularDevice.h
+index 0c8d1a2db2..69455e1567 100644
+--- a/connectivity/cellular/include/cellular/framework/API/CellularDevice.h
++++ b/connectivity/cellular/include/cellular/framework/API/CellularDevice.h
+@@ -201,6 +201,17 @@ public: //Pure virtual functions
+      */
+     virtual nsapi_error_t soft_power_off() = 0;
+ 
++    /** Resets the modem via AT command
++     *
++     *  @remark CellularStateMachine disconnect or destruct does not reset the modem,
++     *  but you need to do that yourself.
++     *
++     *  @pre You must call shutdown to prepare the modem for reset.
++     *
++     *  @return         NSAPI_ERROR_OK on success
++     */
++    virtual nsapi_error_t soft_reset() = 0;
++
+     /** Open the SIM card by setting the pin code for SIM.
+      *
+      *  @param sim_pin  PIN for the SIM card
+diff --git a/connectivity/cellular/include/cellular/framework/AT/AT_CellularDevice.h b/connectivity/cellular/include/cellular/framework/AT/AT_CellularDevice.h
+index fa011a0968..0006b6c391 100755
+--- a/connectivity/cellular/include/cellular/framework/AT/AT_CellularDevice.h
++++ b/connectivity/cellular/include/cellular/framework/AT/AT_CellularDevice.h
+@@ -80,6 +80,8 @@ public:
+ 
+     virtual nsapi_error_t soft_power_off();
+ 
++    virtual nsapi_error_t soft_reset();
++
+     virtual nsapi_error_t set_pin(const char *sim_pin);
+ 
+     virtual nsapi_error_t get_sim_state(SimState &state);
+diff --git a/connectivity/cellular/source/framework/AT/AT_CellularDevice.cpp b/connectivity/cellular/source/framework/AT/AT_CellularDevice.cpp
+index 3eccc4a5c0..d7dae05aa2 100644
+--- a/connectivity/cellular/source/framework/AT/AT_CellularDevice.cpp
++++ b/connectivity/cellular/source/framework/AT/AT_CellularDevice.cpp
+@@ -187,6 +187,11 @@ nsapi_error_t AT_CellularDevice::soft_power_off()
+     return NSAPI_ERROR_OK;
+ }
+ 
++nsapi_error_t AT_CellularDevice::soft_reset()
++{
++    return NSAPI_ERROR_OK;
++}
++
+ ATHandler *AT_CellularDevice::get_at_handler()
+ {
+     return &_at;
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.cpp b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.cpp
+index c00c1880e4..40e74ab98f 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.cpp
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.cpp
+@@ -98,6 +98,16 @@ nsapi_error_t GEMALTO_CINTERION::shutdown()
+     return NSAPI_ERROR_OK;
+ }
+ 
++nsapi_error_t GEMALTO_CINTERION::soft_power_off()
++{
++    return _at.at_cmd_discard("^SMSO=", "fast");
++}
++
++nsapi_error_t GEMALTO_CINTERION::soft_reset()
++{
++    return _at.at_cmd_discard("+CFUN", "=1,1");
++}
++
+ GEMALTO_CINTERION::Module GEMALTO_CINTERION::get_module()
+ {
+     return _module;
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.h b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.h
+index e77078cb49..edc980209e 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.h
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.h
+@@ -56,6 +56,8 @@ protected: // AT_CellularDevice
+ protected:
+     virtual nsapi_error_t init();
+     virtual nsapi_error_t shutdown();
++    virtual nsapi_error_t soft_power_off();
++    virtual nsapi_error_t soft_reset();
+ 
+ private:
+     static Module _module;
+-- 
+2.45.2
+

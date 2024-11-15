@@ -1,0 +1,53 @@
+From 09a4787109efd233aded2b960fcdfa10587eec9d Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Thu, 14 Nov 2024 15:59:37 +0100
+Subject: [PATCH 253/256] GEMALTO CONTERION: add ping
+
+---
+ .../GEMALTO_CINTERION_CellularStack.cpp         | 17 +++++++++++++++++
+ .../CINTERION/GEMALTO_CINTERION_CellularStack.h |  1 +
+ 2 files changed, 18 insertions(+)
+
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+index f96ae481f0..938cdbfef2 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+@@ -224,6 +224,23 @@ void GEMALTO_CINTERION_CellularStack::PSMDisable() {
+     }
+ }
+ 
++int GEMALTO_CINTERION_CellularStack::ping(const char *host, int ttl)
++{
++    MBED_ASSERT(host);
++
++    _at.lock();
++    _at.set_at_timeout(ttl + 1000);
++    _at.cmd_start_stop("^SISX", "=", "%s%d%s%d%d", "Ping", _cid, host, 1, ttl);
++    _at.resp_start("^SISX: \"Ping\",");
++    _at.skip_param(3); //pingInfoType, conProfileId, ip-address
++    int rTT = _at.read_int(); //roundTripTime
++    _at.resp_stop();
++    _at.clear_error();
++    _at.restore_at_timeout();
++    _at.unlock();
++    return rTT;
++}
++
+ nsapi_error_t GEMALTO_CINTERION_CellularStack::socket_stack_init()
+ {
+     _at.lock();
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.h b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.h
+index f89da8c314..159ea68aa9 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.h
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.h
+@@ -43,6 +43,7 @@ public:
+     void stopGNSS();
+     void PSMEnable();
+     void PSMDisable();
++    int ping(const char *host, int ttl);
+ 
+ protected:
+ 
+-- 
+2.45.2
+
