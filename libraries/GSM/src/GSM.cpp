@@ -144,7 +144,7 @@ int arduino::GSMClass::ping(const char* hostname, int ttl) {
 
   mbed::GEMALTO_CINTERION_CellularStack* stack = (mbed::GEMALTO_CINTERION_CellularStack*)_context->get_stack();
   if (!stack) {
-    return 0;
+    return -1;
   }
   return stack->ping(hostname, ttl);
 }
