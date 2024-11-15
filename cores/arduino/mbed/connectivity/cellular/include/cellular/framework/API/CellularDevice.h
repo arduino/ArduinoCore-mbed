@@ -201,6 +201,17 @@ public: //Pure virtual functions
      */
     virtual nsapi_error_t soft_power_off() = 0;
 
+    /** Resets the modem via AT command
+     *
+     *  @remark CellularStateMachine disconnect or destruct does not reset the modem,
+     *  but you need to do that yourself.
+     *
+     *  @pre You must call shutdown to prepare the modem for reset.
+     *
+     *  @return         NSAPI_ERROR_OK on success
+     */
+    virtual nsapi_error_t soft_reset() = 0;
+
     /** Open the SIM card by setting the pin code for SIM.
      *
      *  @param sim_pin  PIN for the SIM card
