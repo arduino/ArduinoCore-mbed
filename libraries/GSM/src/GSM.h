@@ -101,6 +101,16 @@ public:
   void end(void);
 
   /*
+   * Send AT+CFUN=1,1 command to trigger a software reset. To be called only after end();
+   */
+  void reset();
+
+  /*
+   * Send AT^SMSO="fast command to power off the modem. To be called only after end();
+   */
+  void off();
+
+  /*
    * Change cellular state timeouts. Needs to be called before GSM.begin()
    */
   void setTimeout(unsigned long timeout);
@@ -157,7 +167,7 @@ private:
   static const char * getRegistrationStateString(const mbed::CellularNetwork::RegistrationStatus state);
   void onStatusChange(nsapi_event_t ev, intptr_t in);
 
-  void reset();
+  void hardwareReset();
   void on();
 };
 
