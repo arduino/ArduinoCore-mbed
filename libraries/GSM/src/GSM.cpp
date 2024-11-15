@@ -62,7 +62,7 @@ int arduino::GSMClass::begin(const char* pin, const char* apn, const char* usern
   const bool emergencyReset = restart || isCmuxEnable();
   DEBUG_INFO("Emergency reset %s", emergencyReset ? "enabled" : "disabled");
   if (emergencyReset) {
-    reset();
+    hardwareReset();
   }
 
   /* Create rising edge on pin ON */
@@ -137,6 +137,18 @@ bool arduino::GSMClass::isCmuxEnable() {
 void arduino::GSMClass::end() {
   if(_device) {
     _device->shutdown();
+  }
+}
+
+void arduino::GSMClass::reset() {
+  if(_device) {
+    _device->soft_reset();
+  }
+}
+
+void arduino::GSMClass::off() {
+  if(_device) {
+    _device->soft_power_off();
   }
 }
 
@@ -215,7 +227,7 @@ NetworkInterface* arduino::GSMClass::getNetwork() {
   return _context;
 }
 
-void arduino::GSMClass::reset() {
+void arduino::GSMClass::hardwareReset() {
   /* Reset logic is inverted */
   pinMode(MBED_CONF_GEMALTO_CINTERION_RST, OUTPUT);
   digitalWrite(MBED_CONF_GEMALTO_CINTERION_RST, HIGH);
