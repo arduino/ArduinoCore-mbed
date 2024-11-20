@@ -5,6 +5,7 @@
   ],
   "target_overrides": {
     "*": {
+      "target.lf_clock_src":"NRF_LF_SRC_SYNTH",
       "target.printf_lib": "std",
       "platform.stdio-buffered-serial": false,
       "platform.stdio-baud-rate": 115200,
