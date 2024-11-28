@@ -89,6 +89,9 @@ int Arduino_H7_Video::begin() {
   textFont(Font_5x7);
 #endif
 
+  /* Configure SDRAM */
+  SDRAM.begin(dsi_getFramebufferEnd()); // Moving this line from line 156 to here solves the artifacts issue
+
   /* Video controller/bridge init */
   _shield->init(_edidMode);
 
@@ -151,9 +154,6 @@ int Arduino_H7_Video::begin() {
 
   #endif
   #endif
-
-  /* Configure SDRAM */
-  SDRAM.begin(dsi_getFramebufferEnd()); //FIXME: SDRAM init after video controller init can cause display glitch at start-up
 
   return 0;
 }
