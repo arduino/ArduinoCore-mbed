@@ -89,6 +89,11 @@ int Arduino_H7_Video::begin() {
   textFont(Font_5x7);
 #endif
 
+#if defined(ARDUINO_GIGA) 
+  /* Configure SDRAM */
+  SDRAM.begin(dsi_getFramebufferEnd());
+#endif
+
   /* Video controller/bridge init */
   _shield->init(_edidMode);
 
@@ -149,11 +154,13 @@ int Arduino_H7_Video::begin() {
     disp_drv.sw_rotate = 1;
     lv_disp_drv_register(&disp_drv);        /* Finally register the driver */
 
-  #endif
-  #endif
+	#if !defined(ARDUINO_GIGA)
+	/* Configure SDRAM */
+	SDRAM.begin(dsi_getFramebufferEnd()); //FIXME: SDRAM init after video controller init can cause display glitch at start-up
+	#endif
 
-  /* Configure SDRAM */
-  SDRAM.begin(dsi_getFramebufferEnd()); //FIXME: SDRAM init after video controller init can cause display glitch at start-up
+  #endif
+  #endif
 
   return 0;
 }
