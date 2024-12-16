@@ -37,37 +37,28 @@ public:
   void setEccSlot(int KeySlot, const byte cert[], int certLen);
 
 private:
-  const byte* _client_cert;
-  const char* _ca_cert;
-  int _client_cert_len;
+  const byte* _cert;
+  int _certLen;
   int _keySlot;
   sss_object_t _keyObject;
 
   int setRootCAClientCertKey() {
-    if( NSAPI_ERROR_OK != ((TLSSocket*)sock)->set_root_ca_cert_path("/wlan/")) {
-      return 0;
+    int err = setRootCA();
+    if (err != NSAPI_ERROR_OK) {
+      return err;
     }
 
-    if(_hostname && !_disableSNI) {
-      ((TLSSocket*)sock)->set_hostname(_hostname);
+    if(SE05X.getObjectHandle(_keySlot, &_keyObject) != NSAPI_ERROR_OK) {
+      return NSAPI_ERROR_DEVICE_ERROR;
     }
 
-    if( NSAPI_ERROR_OK != ((TLSSocket*)sock)->append_root_ca_cert(_ca_cert_custom)) {
-      return 0;
+    if(((TLSSocket*)sock)->set_client_cert_key((void*)_cert,
+                                               (size_t)_certLen,
+                                               &_keyObject,
+                                               SE05X.getDeviceCtx()) != NSAPI_ERROR_OK) {
+      return NSAPI_ERROR_DEVICE_ERROR;
     }
-
-    if(!SE05X.getObjectHandle(_keySlot, &_keyObject)) {
-      return 0;
-    }
-
-    if( NSAPI_ERROR_OK != ((TLSSocket*)sock)->set_client_cert_key((void*)_client_cert,
-            (size_t)_client_cert_len,
-            &_keyObject,
-            SE05X.getDeviceCtx())) {
-      return 0;
-    }
-
-    return 1;
+    return NSAPI_ERROR_OK;
   }
 };
 
