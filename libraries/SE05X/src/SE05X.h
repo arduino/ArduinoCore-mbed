@@ -80,8 +80,8 @@ public:
     int readSlot(int slot, byte data[], int length);
     int writeSlot(int slot, const byte data[], int length);
     inline int locked() { return 1; }
-    inline int writeConfiguration(const byte data[]);
-    inline int readConfiguration(byte data[]);
+    int writeConfiguration(const byte data[]);
+    int readConfiguration(byte data[]);
     inline int lock() { return 1; }
 
 private:
