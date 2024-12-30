@@ -11,6 +11,8 @@
       "rtos.main-thread-stack-size": 32768,
       "cordio.max-connections": 5,
       "target.mbed_app_start": "0x8040000",
+      "nsapi.dns-response-wait-time": 5000,
+      "nsapi.dns-total-attempts": 3,
       "target.macros_add": [
         "METAL_INTERNAL",
         "VIRTIO_DRIVER_ONLY",
