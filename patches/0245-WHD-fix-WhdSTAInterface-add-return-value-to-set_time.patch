@@ -1,0 +1,24 @@
+From 310f0dd40c5b070ea2077c8a580f777a5cf17951 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Tue, 7 Jan 2025 09:47:09 +0100
+Subject: [PATCH] WHD: fix WhdSTAInterface, add return value to set_timeout
+
+---
+ .../drivers/emac/COMPONENT_WHD/interface/WhdSTAInterface.h       | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/connectivity/drivers/emac/COMPONENT_WHD/interface/WhdSTAInterface.h b/connectivity/drivers/emac/COMPONENT_WHD/interface/WhdSTAInterface.h
+index bfe933bac7..8d8f540759 100644
+--- a/connectivity/drivers/emac/COMPONENT_WHD/interface/WhdSTAInterface.h
++++ b/connectivity/drivers/emac/COMPONENT_WHD/interface/WhdSTAInterface.h
+@@ -122,6 +122,7 @@ public:
+     nsapi_error_t set_timeout(uint32_t timeout)
+     {
+         _timeout = timeout;
++        return NSAPI_ERROR_OK;
+     }
+ 
+     /** Set blocking status of interface. 
+-- 
+2.45.2
+
