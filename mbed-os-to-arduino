@@ -164,7 +164,7 @@ generate_includes () {
 
 	find ./BUILD/"$BOARDNAME"/GCC_ARM${PROFILE}/ -type f -name '.include*' -print0 | xargs -0 cat \
 	| tr ' ' '\n' | tr -d '"' | sed -e 's#-I./mbed-os#-iwithprefixbefore/mbed#g' \
-	| sed '/^-I./d' | sed '/lwipstack/d' | cat \
+	| sed '/^-I./d' | cat \
 	> "$ARDUINOVARIANT"/includes.txt
 
 	echo -n " copying to destination... "

@@ -1,4 +1,8 @@
 #include "SocketHelpers.h"
+#include "lwip/prot/icmp.h"
+#include "lwip/inet_chksum.h"
+#include "lwip/prot/ip4.h"
+#include <ICMPSocket.h>
 
 uint8_t* arduino::MbedSocketClass::macAddress(uint8_t* mac) {
   const char* mac_str = getNetwork()->get_mac_address();
@@ -74,6 +78,24 @@ arduino::IPAddress arduino::MbedSocketClass::dnsIP(int n) {
   return ipAddressFromSocketAddress(ip);
 }
 
+int arduino::MbedSocketClass::ping(const char *hostname, uint8_t ttl)
+{
+  SocketAddress socketAddress;
+  gethostbyname(getNetwork(),hostname, &socketAddress);
+  return ping(socketAddress, ttl);
+}
+
+int arduino::MbedSocketClass::ping(const String &hostname, uint8_t ttl)
+{
+  return ping(hostname.c_str(), ttl);
+}
+
+int arduino::MbedSocketClass::ping(IPAddress host, uint8_t ttl)
+{
+  SocketAddress socketAddress = socketAddressFromIpAddress(host, 0);
+  return ping(socketAddress, ttl);
+}
+
 void arduino::MbedSocketClass::config(arduino::IPAddress local_ip) {
   IPAddress dns = local_ip;
   dns[3] = 1;
@@ -117,6 +139,72 @@ void arduino::MbedSocketClass::setDNS(IPAddress dns_server1, IPAddress dns_serve
   setDNS(dns_server1);
   nsapi_addr_t convertedDNSServer2 = { NSAPI_IPv4, { dns_server2[0], dns_server2[1], dns_server2[2], dns_server2[3] } };
   _dnsServer2 = SocketAddress(convertedDNSServer2);
+}
+
+int arduino::MbedSocketClass::ping(SocketAddress &socketAddress, uint8_t ttl)
+{
+  const uint32_t timeout = 5000;
+
+  /* ttl is not supported by mbed ICMPSocket. Default value used is 255 */
+  (void)ttl;
+  ICMPSocket s;
+  s.set_timeout(timeout);
+  s.open(getNetwork());
+
+  struct __attribute__((__packed__)) {
+    struct icmp_echo_hdr header;
+    uint8_t data[32];
+  } request;
+
+  ICMPH_TYPE_SET(&request.header, ICMP_ECHO);
+  ICMPH_CODE_SET(&request.header, 0);
+  request.header.chksum = 0;
+  request.header.id = 0xAFAF;
+  request.header.seqno = random(0xffff);
+
+  for (size_t i = 0; i < sizeof(request.data); i++) {
+    request.data[i] = i;
+  }
+
+  request.header.chksum = inet_chksum(&request, sizeof(request));
+  unsigned long recvTime = 0;
+  unsigned long sendTime = millis();
+
+  int res = s.sendto(socketAddress,&request, sizeof(request));
+  if(res <= 0){
+    return -1;
+  }
+
+  uint32_t startRec = millis();
+  do {
+    struct __attribute__((__packed__)) {
+      struct ip_hdr ipHeader;
+      struct icmp_echo_hdr header;
+    } response;
+
+    int rxSize = s.recvfrom(&socketAddress, &response, sizeof(response));
+    if (rxSize < 0) {
+      // time out
+      break;
+    }
+
+    if (rxSize < sizeof(response)) {
+      // too short
+      continue;
+    }
+
+    if ((response.header.id == request.header.id) && (response.header.seqno == request.header.seqno)) {
+      recvTime = millis();
+    }
+  } while (recvTime == 0 && (millis() - startRec) < timeout);
+
+  s.close();
+
+  if (recvTime == 0) {
+    return -1;
+  } else {
+    return (recvTime - sendTime);
+  }
 }
 
 arduino::IPAddress arduino::MbedSocketClass::ipAddressFromSocketAddress(SocketAddress socketAddress) {
