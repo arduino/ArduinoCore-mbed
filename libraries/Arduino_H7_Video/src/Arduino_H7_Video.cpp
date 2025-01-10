@@ -95,7 +95,10 @@ int Arduino_H7_Video::begin() {
 #endif
 
   /* Video controller/bridge init */
-  _shield->init(_edidMode);
+  int err_code = _shield->init(_edidMode);
+  if (err_code < 0) {
+    return err_code;
+  }
 
   #if __has_include("lvgl.h")
     /* Initiliaze LVGL library */

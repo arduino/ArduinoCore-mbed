@@ -31,13 +31,22 @@ int USBCVideoClass::init(int edidmode) {
     }
 
     //Checking HDMI plug event
-    anx7625_wait_hpd_event(0);
+    err_code = anx7625_wait_hpd_event(0);
+    if(err_code < 0) {
+        return err_code;
+    }
 
     //Read EDID
-    anx7625_dp_get_edid(0, &recognized_edid);
+    err_code = anx7625_dp_get_edid(0, &recognized_edid);
+    if(err_code < 0) {
+        return err_code;
+    }
 
     //DSI Configuration
-    anx7625_dp_start(0, &recognized_edid, (enum edid_modes) edidmode);
+    err_code = anx7625_dp_start(0, &recognized_edid, (enum edid_modes) edidmode);
+    if(err_code < 0) {
+        return err_code;
+    }
 
     return 0;
 }

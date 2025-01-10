@@ -520,15 +520,21 @@ int anx7625_init(uint8_t bus) {
 	return 0;
 }
 
-void anx7625_wait_hpd_event(uint8_t bus) {
+int anx7625_wait_hpd_event(uint8_t bus) {
 	ANXINFO("Waiting for HDMI hot plug event...\n");
-	
-	while (1) {
+
+	int retry_hpd_change = 10000;
+	while (--retry_hpd_change) {
 		mdelay(10);
 		int detected = anx7625_hpd_change_detect(bus);
-		if (detected == 1)
-			break;
+		if (detected < 0)
+			return -1;
+		if (detected > 0)
+			return 0;
 	}
+
+	ANXERROR("Timed out to detect HPD change on bus %d.\n", bus);
+	return -1;
 }
 
 int anx7625_get_cc_status(uint8_t bus, uint8_t *cc_status) {
