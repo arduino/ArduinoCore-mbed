@@ -57,6 +57,9 @@ public:
         */
   void config(IPAddress local_ip, IPAddress dns_server, IPAddress gateway, IPAddress subnet);
 
+  // When using DHCP the hostname provided will be used.
+  int setHostname(const char* hostname);
+
   /* Change DNS Ip configuration
      *
      * param dns_server1: ip configuration for DNS server 1
