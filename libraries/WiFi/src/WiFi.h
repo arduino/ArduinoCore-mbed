@@ -55,25 +55,25 @@ public:
     : wifi_if(_if){};
 
   /*
-     * Get firmware version
-     */
+   * Get firmware version
+   */
   static const char* firmwareVersion();
 
   /* Start Wifi connection for OPEN networks
-     *
-     * param ssid: Pointer to the SSID string.
-     */
+   *
+   * param ssid: Pointer to the SSID string.
+   */
   int begin(const char* ssid);
 
-  void MACAddress(uint8_t *mac_address);
+  void MACAddress(uint8_t *mac_address) __attribute__((deprecated("Use macAddress(uint8_t *mac_address)")));
 
   /* Start Wifi connection with passphrase
-     * the most secure supported mode will be automatically selected
-     *
-     * param ssid: Pointer to the SSID string.
-     * param passphrase: Passphrase. Valid characters in a passphrase
-     *        must be between ASCII 32-126 (decimal).
-     */
+   * the most secure supported mode will be automatically selected
+   *
+   * param ssid: Pointer to the SSID string.
+   * param passphrase: Passphrase. Valid characters in a passphrase
+   *        must be between ASCII 32-126 (decimal).
+   */
   int begin(const char* ssid, const char* passphrase, wl_enc_type security = ENC_TYPE_UNKNOWN);
 
   // Inherit config methods from the parent class
@@ -84,86 +84,86 @@ public:
   int beginAP(const char* ssid, const char* passphrase, uint8_t channel = DEFAULT_AP_CHANNEL);
 
   /*
-     * Disconnect from the network
-     *
-     * return: one value of wl_status_t enum
-     */
+   * Disconnect from the network
+   *
+   * return: one value of wl_status_t enum
+   */
   int disconnect(void);
 
   void end(void);
 
   /*
-     * Return the current SSID associated with the network
-     *
-     * return: ssid string
-     */
+   * Return the current SSID associated with the network
+   *
+   * return: ssid string
+   */
   char* SSID();
 
   /*
-      * Return the current BSSID associated with the network.
-      * It is the MAC address of the Access Point
-      *
-      * return: pointer to uint8_t array with length WL_MAC_ADDR_LENGTH
-      */
+   * Return the current BSSID associated with the network.
+   * It is the MAC address of the Access Point
+   *
+   * return: pointer to uint8_t array with length WL_MAC_ADDR_LENGTH
+   */
   uint8_t* BSSID(uint8_t* bssid);
 
   /*
-      * Return the current RSSI /Received Signal Strength in dBm)
-      * associated with the network
-      *
-      * return: signed value
-      */
+   * Return the current RSSI /Received Signal Strength in dBm)
+   * associated with the network
+   *
+   * return: signed value
+   */
   int32_t RSSI();
 
   /*
-      * Return the Encryption Type associated with the network
-      *
-      * return: one value of wl_enc_type enum
-      */
+   * Return the Encryption Type associated with the network
+   *
+   * return: one value of wl_enc_type enum
+   */
   uint8_t encryptionType();
 
   /*
-     * Start scan WiFi networks available
-     *
-     * return: Number of discovered networks
-     */
+   * Start scan WiFi networks available
+   *
+   * return: Number of discovered networks
+   */
   int8_t scanNetworks();
 
   /*
-     * Return the SSID discovered during the network scan.
-     *
-     * param networkItem: specify from which network item want to get the information
-	 *
-     * return: ssid string of the specified item on the networks scanned list
-     */
+   * Return the SSID discovered during the network scan.
+   *
+   * param networkItem: specify from which network item want to get the information
+   *
+   * return: ssid string of the specified item on the networks scanned list
+   */
   char* SSID(uint8_t networkItem);
 
   /*
-     * Return the encryption type of the networks discovered during the scanNetworks
-     *
-     * param networkItem: specify from which network item want to get the information
-	 *
-     * return: encryption type (enum wl_enc_type) of the specified item on the networks scanned list
-     */
+   * Return the encryption type of the networks discovered during the scanNetworks
+   *
+   * param networkItem: specify from which network item want to get the information
+   *
+   * return: encryption type (enum wl_enc_type) of the specified item on the networks scanned list
+   */
   uint8_t encryptionType(uint8_t networkItem);
 
   uint8_t* BSSID(uint8_t networkItem, uint8_t* bssid);
   uint8_t channel(uint8_t networkItem);
 
   /*
-     * Return the RSSI of the networks discovered during the scanNetworks
-     *
-     * param networkItem: specify from which network item want to get the information
-	 *
-     * return: signed value of RSSI of the specified item on the networks scanned list
-     */
+   * Return the RSSI of the networks discovered during the scanNetworks
+   *
+   * param networkItem: specify from which network item want to get the information
+   *
+   * return: signed value of RSSI of the specified item on the networks scanned list
+   */
   int32_t RSSI(uint8_t networkItem);
 
   /*
-     * Return Connection status.
-     *
-     * return: one of the value defined in wl_status_t
-     */
+   * Return Connection status.
+   *
+   * return: one of the value defined in wl_status_t
+   */
   uint8_t status();
 
   unsigned long getTime();
