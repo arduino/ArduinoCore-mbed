@@ -14,6 +14,7 @@
       "cellular.offload-dns-queries": true,
       "cellular.at-handler-buffer-size": 512,
       "mbed-trace.enable": true,
+      "nsapi.dns-response-wait-time": 2000,
       "target.mbed_app_start": "0x8040000",
       "target.macros_add": [
         "BT_UART_NO_3M_SUPPORT",
