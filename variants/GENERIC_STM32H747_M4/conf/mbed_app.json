@@ -11,6 +11,7 @@
       "rtos.main-thread-stack-size": 32768,
       "cordio.max-connections": 5,
       "target.lse_available": 0,
+      "lwip.raw-socket-enabled": true,
       "target.device_has_remove": [
         "USBDEVICE",
         "EMAC"

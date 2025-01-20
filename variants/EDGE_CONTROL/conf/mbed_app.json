@@ -1,4 +1,4 @@
-{
+{	
 	"macros": [
 		"MBED_HEAP_STATS_ENABLED=1",
 		"MBED_STACK_STATS_ENABLED=1",
@@ -19,7 +19,8 @@
 			"cellular.offload-dns-queries": true,
 			"cellular.at-handler-buffer-size": 1024,
 			"mbed-trace.enable": true,
-			"target.mbed_app_start": "0x10000"
+			"target.mbed_app_start": "0x10000",
+			"lwip.raw-socket-enabled": true
 		},
 		"EDGE_CONTROL": {
 			"sd.SPI_MOSI": "P0_20",

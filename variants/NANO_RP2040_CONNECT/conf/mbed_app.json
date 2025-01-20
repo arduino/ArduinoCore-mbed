@@ -9,7 +9,8 @@
       "platform.callback-nontrivial": true,
       "platform.all-stats-enabled": true,
       "platform.memory-tracing-enabled": true,
-      "rtos.main-thread-stack-size": 32768
+      "rtos.main-thread-stack-size": 32768,
+      "lwip.raw-socket-enabled": true
     }
   }
 }

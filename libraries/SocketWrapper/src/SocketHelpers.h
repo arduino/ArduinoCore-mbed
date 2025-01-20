@@ -112,6 +112,15 @@ public:
   virtual NetworkInterface* getNetwork() = 0;
   
   /*
+     * Ping the specified target.
+     *
+     * return: RTT in milliseconds or -1 on error
+     */
+  int ping(const char* hostname, uint8_t ttl = 128);
+  int ping(const String &hostname, uint8_t ttl = 128);
+  int ping(IPAddress host, uint8_t ttl = 128);
+
+  /*
      * Download a file from an HTTP endpoint and save it in the provided `target` location on the fs
      * The parameter cbk can be used to perform actions on the buffer before saving on the fs
      *
@@ -155,6 +164,7 @@ protected:
 
   void body_callback(const char* data, uint32_t data_len);
 
+  int ping(SocketAddress &socketAddress, uint8_t ttl);
   static arduino::IPAddress ipAddressFromSocketAddress(SocketAddress socketAddress);
   static SocketAddress socketAddressFromIpAddress(arduino::IPAddress ip, uint16_t port);
   static nsapi_error_t gethostbyname(NetworkInterface* interface, const char* aHostname, SocketAddress* socketAddress);
