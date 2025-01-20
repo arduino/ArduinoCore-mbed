@@ -385,9 +385,13 @@ const char* arduino::WiFiClass::firmwareVersion() {
   }
 
   if (firmware_available) {
-    return WHD_VERSION;
+    const char* whd_version = WHD_VERSION;
+    if (whd_version[0] == 'v') {
+      return  ++whd_version;
+    }
+    return whd_version;
   } else {
-    return "v0.0.0";
+    return "0.0.0";
   }
 }
 
