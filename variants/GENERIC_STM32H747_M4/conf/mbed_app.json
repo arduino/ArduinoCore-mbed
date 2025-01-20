@@ -9,7 +9,6 @@
       "platform.callback-nontrivial": true,
       "platform.all-stats-enabled": true,
       "rtos.main-thread-stack-size": 32768,
-      "nsapi.dns-response-wait-time": 2000,
       "cordio.max-connections": 5,
       "target.lse_available": 0,
       "target.device_has_remove": [
