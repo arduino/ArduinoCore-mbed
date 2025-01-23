@@ -76,7 +76,6 @@ class UART : public HardwareSerial {
 		mbed_usb_serial* _usb_serial = NULL;
 		PinName _tx, _rx, _rts, _cts;
 		RingBufferN<256> rx_buffer;
-		uint8_t intermediate_buf[4];
 		bool is_usb = false;
 };
 }
