@@ -122,14 +122,22 @@ size_t arduino::MbedI2C::write(const uint8_t* data, int len) {
 }
 
 int arduino::MbedI2C::read() {
+	int rv = -1;
+	core_util_critical_section_enter();
+	
 	if (rxBuffer.available()) {
-		return rxBuffer.read_char();
+
+		rv = rxBuffer.read_char();
 	}
-	return -1;
+	core_util_critical_section_exit();
+	return rv;
 }
 
 int arduino::MbedI2C::available() {
-	return rxBuffer.available();
+	core_util_critical_section_enter();
+	int rv = rxBuffer.available();
+	core_util_critical_section_exit();
+	return rv;
 }
 
 int arduino::MbedI2C::peek() {
@@ -151,13 +159,16 @@ void arduino::MbedI2C::receiveThd() {
 					onRequestCb();
 				}
 				if (usedTxBuffer != 0) {
+					core_util_critical_section_enter();
 					slave->write((const char *) txBuffer, usedTxBuffer);
+					core_util_critical_section_exit();
 					usedTxBuffer = 0;
 				}
 				//slave->stop();
 				break;
 			case mbed::I2CSlave::WriteGeneral:
 			case mbed::I2CSlave::WriteAddressed:
+				core_util_critical_section_enter();
 				rxBuffer.clear();
 				char buf[240];
 				c = slave->read(buf, sizeof(buf));
@@ -171,6 +182,7 @@ void arduino::MbedI2C::receiveThd() {
 				if (rxBuffer.available() > 0 && onReceiveCb != NULL) {
 					onReceiveCb(rxBuffer.available());
 				}
+				core_util_critical_section_exit();
 				//slave->stop();
 				break;
 		case mbed::I2CSlave::NoData:
