@@ -1,0 +1,25 @@
+From f5b74a5ac71cd1e01ad713ffdbb3f6601604816c Mon Sep 17 00:00:00 2001
+From: fabik111 <fabiomassimo.centonze@gmail.com>
+Date: Tue, 29 Oct 2024 15:20:53 +0100
+Subject: [PATCH] BLE: remove blocking loop for error handling
+
+---
+ .../drivers/ble/FEATURE_BLE/COMPONENT_CYW43XXX/HCIDriver.cpp    | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/connectivity/drivers/ble/FEATURE_BLE/COMPONENT_CYW43XXX/HCIDriver.cpp b/connectivity/drivers/ble/FEATURE_BLE/COMPONENT_CYW43XXX/HCIDriver.cpp
+index ff389c9f81..6a2d51eca5 100644
+--- a/connectivity/drivers/ble/FEATURE_BLE/COMPONENT_CYW43XXX/HCIDriver.cpp
++++ b/connectivity/drivers/ble/FEATURE_BLE/COMPONENT_CYW43XXX/HCIDriver.cpp
+@@ -408,7 +408,7 @@ private:
+         if (cmd_opcode != opcode)  {
+             // DO something in case of error
+ 
+-            while (true);
++            return;
+ 
+         }
+ 
+-- 
+2.51.0
+
