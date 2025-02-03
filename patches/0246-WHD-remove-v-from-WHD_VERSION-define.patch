@@ -1,0 +1,25 @@
+From fa1e9697ca3b74489bd2eb08ab9ab1ffeee2a298 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Fri, 31 Jan 2025 16:34:05 +0100
+Subject: [PATCH 246/247] WHD: remove v from WHD_VERSION define
+
+---
+ .../wifi/COMPONENT_WHD/wifi-host-driver/inc/whd_version.h      | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/connectivity/drivers/wifi/COMPONENT_WHD/wifi-host-driver/inc/whd_version.h b/connectivity/drivers/wifi/COMPONENT_WHD/wifi-host-driver/inc/whd_version.h
+index 1caef23b67..5f69d8c3e0 100755
+--- a/connectivity/drivers/wifi/COMPONENT_WHD/wifi-host-driver/inc/whd_version.h
++++ b/connectivity/drivers/wifi/COMPONENT_WHD/wifi-host-driver/inc/whd_version.h
+@@ -15,6 +15,7 @@
+  * limitations under the License.
+  */
+ 
+-#define WHD_VERSION "v1.94.0"
++/* This define is used by arduino::WiFiClass::firmwareVersion() do not prepend v */
++#define WHD_VERSION "1.94.0"
+ #define WHD_BRANCH "v1.94.0"
+ #define WHD_DATE "2021-04-27 16:54:34 +0800"
+-- 
+2.47.2
+
