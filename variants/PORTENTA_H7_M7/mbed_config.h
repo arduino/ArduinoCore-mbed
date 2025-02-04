@@ -227,7 +227,7 @@
 #define MBED_CONF_LWIP_PPP_IPV6_ENABLED                                         0                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_PPP_THREAD_STACKSIZE                                     768                                                                                              // set by library:lwip
 #define MBED_CONF_LWIP_PRESENT                                                  1                                                                                                // set by library:lwip
-#define MBED_CONF_LWIP_RAW_SOCKET_ENABLED                                       0                                                                                                // set by library:lwip
+#define MBED_CONF_LWIP_RAW_SOCKET_ENABLED                                       1                                                                                                // set by application[*]
 #define MBED_CONF_LWIP_SOCKET_MAX                                               4                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_TCPIP_THREAD_PRIORITY                                    osPriorityNormal                                                                                 // set by library:lwip
 #define MBED_CONF_LWIP_TCPIP_THREAD_STACKSIZE                                   1200                                                                                             // set by library:lwip
@@ -252,9 +252,9 @@
 #define MBED_CONF_NSAPI_DEFAULT_WIFI_SECURITY                                   NONE                                                                                             // set by library:nsapi
 #define MBED_CONF_NSAPI_DNS_ADDRESSES_LIMIT                                     10                                                                                               // set by library:nsapi
 #define MBED_CONF_NSAPI_DNS_CACHE_SIZE                                          3                                                                                                // set by library:nsapi
-#define MBED_CONF_NSAPI_DNS_RESPONSE_WAIT_TIME                                  10000                                                                                            // set by library:nsapi
+#define MBED_CONF_NSAPI_DNS_RESPONSE_WAIT_TIME                                  5000                                                                                             // set by application[*]
 #define MBED_CONF_NSAPI_DNS_RETRIES                                             1                                                                                                // set by library:nsapi
-#define MBED_CONF_NSAPI_DNS_TOTAL_ATTEMPTS                                      10                                                                                               // set by library:nsapi
+#define MBED_CONF_NSAPI_DNS_TOTAL_ATTEMPTS                                      3                                                                                                // set by application[*]
 #define MBED_CONF_NSAPI_PRESENT                                                 1                                                                                                // set by library:nsapi
 #define MBED_CONF_NSAPI_SOCKET_STATS_ENABLED                                    0                                                                                                // set by library:nsapi
 #define MBED_CONF_NSAPI_SOCKET_STATS_MAX_COUNT                                  10                                                                                               // set by library:nsapi

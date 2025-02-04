@@ -239,7 +239,7 @@
 #define MBED_CONF_LWIP_PPP_IPV6_ENABLED                                         0                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_PPP_THREAD_STACKSIZE                                     768                                                                                              // set by library:lwip
 #define MBED_CONF_LWIP_PRESENT                                                  1                                                                                                // set by library:lwip
-#define MBED_CONF_LWIP_RAW_SOCKET_ENABLED                                       0                                                                                                // set by library:lwip
+#define MBED_CONF_LWIP_RAW_SOCKET_ENABLED                                       1                                                                                                // set by application[*]
 #define MBED_CONF_LWIP_SOCKET_MAX                                               4                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_TCPIP_THREAD_PRIORITY                                    osPriorityNormal                                                                                 // set by library:lwip
 #define MBED_CONF_LWIP_TCPIP_THREAD_STACKSIZE                                   1200                                                                                             // set by library:lwip
