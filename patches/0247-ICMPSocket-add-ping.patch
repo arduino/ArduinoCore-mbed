@@ -1,0 +1,106 @@
+From 933694e0f35451d21eed77a93fa346570de20878 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Tue, 4 Feb 2025 14:31:59 +0100
+Subject: [PATCH] ICMPSocket: add ping
+
+---
+ .../netsocket/include/netsocket/ICMPSocket.h  |  4 ++
+ connectivity/netsocket/source/ICMPSocket.cpp  | 61 +++++++++++++++++++
+ 2 files changed, 65 insertions(+)
+
+diff --git a/connectivity/netsocket/include/netsocket/ICMPSocket.h b/connectivity/netsocket/include/netsocket/ICMPSocket.h
+index 1837bc8e09..5e1ee8fb03 100644
+--- a/connectivity/netsocket/include/netsocket/ICMPSocket.h
++++ b/connectivity/netsocket/include/netsocket/ICMPSocket.h
+@@ -37,6 +37,10 @@ public:
+      */
+     ICMPSocket();
+ 
++#if MBED_CONF_LWIP_RAW_SOCKET_ENABLED
++    int ping(SocketAddress &socketAddress, uint32_t timeout);
++#endif
++
+ #if !defined(DOXYGEN_ONLY)
+ 
+ protected:
+diff --git a/connectivity/netsocket/source/ICMPSocket.cpp b/connectivity/netsocket/source/ICMPSocket.cpp
+index f6c9b98de1..d8ea954835 100644
+--- a/connectivity/netsocket/source/ICMPSocket.cpp
++++ b/connectivity/netsocket/source/ICMPSocket.cpp
+@@ -16,12 +16,73 @@
+  */
+ 
+ #include "ICMPSocket.h"
++#if MBED_CONF_LWIP_RAW_SOCKET_ENABLED
++#include "drivers/Timer.h"
++#include "lwip/prot/icmp.h"
++#include "lwip/inet_chksum.h"
++#include "lwip/prot/ip4.h"
++#endif
+ 
+ ICMPSocket::ICMPSocket()
+ {
+     _socket_stats.stats_update_proto(this, NSAPI_ICMP);
+ }
+ 
++#if MBED_CONF_LWIP_RAW_SOCKET_ENABLED
++int ICMPSocket::ping(SocketAddress &socketAddress, uint32_t timeout)
++{
++    struct __attribute__((__packed__)) {
++        struct icmp_echo_hdr header;
++        uint8_t data[32];
++    } request;
++
++    ICMPH_TYPE_SET(&request.header, ICMP_ECHO);
++    ICMPH_CODE_SET(&request.header, 0);
++    request.header.chksum = 0;
++    request.header.id = 0xAFAF;
++    request.header.seqno = random();
++
++    for (size_t i = 0; i < sizeof(request.data); i++) {
++      request.data[i] = i;
++    }
++
++    request.header.chksum = inet_chksum(&request, sizeof(request));
++
++    int res = sendto(socketAddress, &request, sizeof(request));
++    if (res <= 0){
++        return -1;
++    }
++
++    mbed::Timer timer;
++    timer.start();
++    int elapsed = -1;
++    do {
++        struct __attribute__((__packed__)) {
++            struct ip_hdr ipHeader;
++            struct icmp_echo_hdr header;
++        } response;
++
++        int rxSize = recvfrom(&socketAddress, &response, sizeof(response));
++        if (rxSize < 0) {
++            // time out
++            break;
++        }
++
++        if (rxSize < sizeof(response)) {
++            // too short
++            continue;
++        }
++
++        if ((response.header.id == request.header.id) && (response.header.seqno == request.header.seqno)) {
++            elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(timer.elapsed_time()).count();
++            timer.stop();
++        }
++  } while (elapsed == -1 && std::chrono::duration_cast<std::chrono::milliseconds>(timer.elapsed_time()).count() < timeout);
++
++  return elapsed;
++}
++#endif
++
+ nsapi_protocol_t ICMPSocket::get_proto()
+ {
+     return NSAPI_ICMP;
+-- 
+2.47.2
+
