@@ -1,4 +1,5 @@
 #include "SocketHelpers.h"
+#include <ICMPSocket.h>
 
 uint8_t* arduino::MbedSocketClass::macAddress(uint8_t* mac) {
   const char* mac_str = getNetwork()->get_mac_address();
@@ -74,6 +75,24 @@ arduino::IPAddress arduino::MbedSocketClass::dnsIP(int n) {
   return ipAddressFromSocketAddress(ip);
 }
 
+int arduino::MbedSocketClass::ping(const char *hostname, uint8_t ttl)
+{
+  SocketAddress socketAddress;
+  gethostbyname(getNetwork(),hostname, &socketAddress);
+  return ping(socketAddress, ttl);
+}
+
+int arduino::MbedSocketClass::ping(const String &hostname, uint8_t ttl)
+{
+  return ping(hostname.c_str(), ttl);
+}
+
+int arduino::MbedSocketClass::ping(IPAddress host, uint8_t ttl)
+{
+  SocketAddress socketAddress = socketAddressFromIpAddress(host, 0);
+  return ping(socketAddress, ttl);
+}
+
 void arduino::MbedSocketClass::config(arduino::IPAddress local_ip) {
   IPAddress dns = local_ip;
   dns[3] = 1;
@@ -117,6 +136,19 @@ void arduino::MbedSocketClass::setDNS(IPAddress dns_server1, IPAddress dns_serve
   setDNS(dns_server1);
   nsapi_addr_t convertedDNSServer2 = { NSAPI_IPv4, { dns_server2[0], dns_server2[1], dns_server2[2], dns_server2[3] } };
   _dnsServer2 = SocketAddress(convertedDNSServer2);
+}
+
+int arduino::MbedSocketClass::ping(SocketAddress &socketAddress, uint8_t ttl, uint32_t timeout)
+{
+  /* ttl is not supported by mbed ICMPSocket. Default value used is 255 */
+  (void)ttl;
+  ICMPSocket s;
+  s.set_timeout(timeout);
+  s.open(getNetwork());
+  int response = s.ping(socketAddress, timeout);
+  s.close();
+
+  return response;
 }
 
 arduino::IPAddress arduino::MbedSocketClass::ipAddressFromSocketAddress(SocketAddress socketAddress) {

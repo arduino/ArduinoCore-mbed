@@ -17,6 +17,7 @@
       "target.mbed_app_start": "0x8040000",
       "nsapi.dns-response-wait-time": 5000,
       "nsapi.dns-total-attempts": 3,
+      "lwip.raw-socket-enabled": true,
       "target.macros_add": [
         "BT_UART_NO_3M_SUPPORT",
         "USB_DYNAMIC_CONFIGURATION",

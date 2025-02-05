@@ -37,6 +37,10 @@ public:
      */
     ICMPSocket();
 
+#if MBED_CONF_LWIP_RAW_SOCKET_ENABLED
+    int ping(SocketAddress &socketAddress, uint32_t timeout);
+#endif
+
 #if !defined(DOXYGEN_ONLY)
 
 protected:

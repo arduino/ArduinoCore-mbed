@@ -122,6 +122,7 @@ public:
     nsapi_error_t set_timeout(uint32_t timeout)
     {
         _timeout = timeout;
+        return NSAPI_ERROR_OK;
     }
 
     /** Set blocking status of interface. 

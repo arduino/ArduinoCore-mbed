@@ -13,6 +13,7 @@
       "target.mbed_app_start": "0x8040000",
       "nsapi.dns-response-wait-time": 5000,
       "nsapi.dns-total-attempts": 3,
+      "lwip.raw-socket-enabled": true,
       "target.macros_add": [
         "METAL_INTERNAL",
         "VIRTIO_DRIVER_ONLY",
