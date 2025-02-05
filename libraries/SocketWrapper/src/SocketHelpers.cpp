@@ -132,7 +132,11 @@ SocketAddress arduino::MbedSocketClass::socketAddressFromIpAddress(arduino::IPAd
 nsapi_error_t arduino::MbedSocketClass::gethostbyname(NetworkInterface* interface, const char* aHostname, SocketAddress* socketAddress) {
   char ifname[5] {};
   interface->get_interface_name(ifname);
-  return interface->gethostbyname(aHostname, socketAddress, NSAPI_UNSPEC, ifname);
+  nsapi_version_t version = NSAPI_IPv4;
+#if MBED_CONF_LWIP_IPV6_ENABLED
+  version = NSAPI_UNSPEC;
+#endif
+  return interface->gethostbyname(aHostname, socketAddress, version, ifname);
 }
 
 // Download helper
