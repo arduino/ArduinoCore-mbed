@@ -149,13 +149,11 @@ static const uint8_t SCK  = PIN_SPI_SCK;
 #define _BOARD_VENDORID		0x2341
 #define _BOARD_PRODUCTID	0x0264
 
-#ifndef FIRST_PROGRAMMING
 uint16_t _getVid_();
 uint16_t _getPid_();
 
 // Retrieve (Arduino OUI) Ethernet MAC Address from QSPIF OTP
 uint8_t _getSecureEthMac_(uint8_t *);
-#endif
 
 #define BOARD_NAME			"Arduino Opta"
 
