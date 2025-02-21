@@ -313,26 +313,19 @@ uint16_t boardRevision() {
     return (((OptaBoardInfo*)_boardInfo)->revision);
 }
 
+#ifndef FIRST_PROGRAMMING
 uint16_t _getVid_() {
-#ifdef FIRST_PROGRAMMING
-    return _BOARD_VENDORID;
-#else
     if (!has_otp_info) {
       getSecureFlashData();
     }
     return ((OptaBoardInfo*)_boardInfo)->vid;
-#endif
 }
 
 uint16_t _getPid_() {
-#ifdef FIRST_PROGRAMMING
-    return _BOARD_PRODUCTID;
-#else
     if (!has_otp_info) {
       getSecureFlashData();
     }
     return ((OptaBoardInfo*)_boardInfo)->pid;
-#endif
 }
 
 uint8_t _getSecureEthMac_(uint8_t *mac_address) {
@@ -349,6 +342,7 @@ uint8_t mbed_otp_mac_address(char *mac)
   auto ret = _getSecureEthMac_(reinterpret_cast<uint8_t *>(mac));
   return ret;
 }
+#endif
 
 #define BOARD_REVISION(x,y)   (x << 8 | y)
 
