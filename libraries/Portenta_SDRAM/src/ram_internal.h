@@ -14,7 +14,13 @@ bool sdram_init(void);
 #define MICROPY_HW_SDRAM_TIMING_TRP         (3)
 #define MICROPY_HW_SDRAM_TIMING_TRCD        (3)
 #define MICROPY_HW_SDRAM_REFRESH_RATE       (64) // ms
+
+#ifdef ARDUINO_GIGA
+#define MICROPY_HW_SDRAM_FREQUENCY          (120000) // 100 MHz
+#else
 #define MICROPY_HW_SDRAM_FREQUENCY          (100000) // 100 MHz
+#endif
+
 #define MICROPY_HW_SDRAM_REFRESH_CYCLES     4096
 
 #define MICROPY_HW_SDRAM_BURST_LENGTH       1
