@@ -74,7 +74,6 @@ void setup() {
     if(default_scheme) {
       mbed::MBRBlockDevice::partition(&root, 2, 0x0B, 1024 * 1024, 13 * 1024 * 1024);
       mbed::MBRBlockDevice::partition(&root, 3, 0x0B, 13 * 1024 * 1024, 14 * 1024 * 1024);
-      mbed::MBRBlockDevice::partition(&root, 4, 0x0B, 14 * 1024 * 1024, 14 * 1024 * 1024);
       // use space from 15.5MB to 16 MB for another fw, memory mapped
     } else {
       mbed::MBRBlockDevice::partition(&root, 2, 0x0B, 1024 * 1024, 6 * 1024 * 1024);
