@@ -142,11 +142,14 @@ int arduino::MbedSocketClass::ping(SocketAddress &socketAddress, uint8_t ttl, ui
 {
   /* ttl is not supported by mbed ICMPSocket. Default value used is 255 */
   (void)ttl;
+  int response = -1;
+#if MBED_CONF_LWIP_RAW_SOCKET_ENABLED
   ICMPSocket s;
   s.set_timeout(timeout);
   s.open(getNetwork());
-  int response = s.ping(socketAddress, timeout);
+  response = s.ping(socketAddress, timeout);
   s.close();
+#endif
 
   return response;
 }
