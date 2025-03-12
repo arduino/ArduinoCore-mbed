@@ -67,14 +67,29 @@ void setup() {
     MBRBlockDevice::partition(root, 4, 0x0B, 7 * 1024 * 1024, 14 * 1024 * 1024);
     // use space from 15.5MB to 16 MB for another fw, memory mapped
 
-    int err = wifi_data_fs.reformat(&wifi_data);
-    if (err) {
+    bool reformat = true;
+
+    if(!wifi_data_fs.mount(&wifi_data)) {
+      Serial.println("\nPartition 1 already contains a filesystem, do you want to reformat it? Y/[n]");
+      wifi_data_fs.unmount();
+
+      reformat = waitResponse();
+    }
+
+    if (reformat && wifi_data_fs.reformat(&wifi_data)) {
       Serial.println("Error formatting WiFi partition");
       return;
     }
 
-    err = ota_data_fs.reformat(&ota_data);
-    if (err) {
+    reformat = true;
+    if(!ota_data_fs.mount(&ota_data)) {
+      Serial.println("\nPartition 2 already contains a filesystem, do you want to reformat it? Y/[n]");
+      ota_data_fs.unmount();
+
+      reformat = waitResponse();
+    }
+
+    if (reformat && ota_data_fs.reformat(&ota_data)) {
       Serial.println("Error formatting OTA partition");
       return;
     }
@@ -90,11 +105,19 @@ void setup() {
       user_data_fs = new mbed::FATFileSystem("user");
     }
 
-    err = user_data_fs->reformat(&user_data);
-    if (err) {
+    reformat = true;
+    if(!user_data_fs->mount(&user_data)) {
+      Serial.println("\nPartition 4 already contains a filesystem, do you want to reformat it? Y/[n]");
+      user_data_fs->unmount();
+
+      reformat = waitResponse();
+    }
+
+    if (reformat && user_data_fs->reformat(&user_data)) {
       Serial.println("Error formatting user partition");
       return;
     }
+
     Serial.println("\nQSPI Flash formatted!");
   }
 
