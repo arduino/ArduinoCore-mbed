@@ -3,7 +3,7 @@
 #include "LittleFileSystem.h"
 #include "FATFileSystem.h"
 
-#ifndef CORE_CM7  
+#ifndef CORE_CM7
   #error Format QSPI flash by uploading the sketch to the M7 core instead of the M4 core.
 #endif
 
