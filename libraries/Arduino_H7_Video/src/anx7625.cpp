@@ -630,6 +630,11 @@ bool anx7625_is_power_provider(uint8_t bus) {
 	}
 }
 
+int anx7625_get_hpd_event(uint8_t bus)  {
+	int ret = anx7625_hpd_change_detect(bus);;
+	return ret;
+}
+
 int i2c_writeb(uint8_t bus, uint8_t saddr, uint8_t offset, uint8_t val) {
 	char cmd[2];
 	cmd[0] = offset;

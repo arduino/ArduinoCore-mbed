@@ -106,6 +106,13 @@ public:
    */
   bool isRotated();
 
+  /**
+   * @brief Get the status of the display.
+   * 
+   * @return int The Status of the display.
+   */
+   int getStatus();
+
 #ifdef HAS_ARDUINOGRAPHICS
   /**
    * @brief Clear the display.
