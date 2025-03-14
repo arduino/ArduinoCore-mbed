@@ -75,22 +75,22 @@ arduino::IPAddress arduino::MbedSocketClass::dnsIP(int n) {
   return ipAddressFromSocketAddress(ip);
 }
 
-int arduino::MbedSocketClass::ping(const char *hostname, uint8_t ttl)
+int arduino::MbedSocketClass::ping(const char *hostname, uint8_t ttl, uint32_t timeout)
 {
   SocketAddress socketAddress;
   gethostbyname(getNetwork(),hostname, &socketAddress);
-  return ping(socketAddress, ttl);
+  return ping(socketAddress, ttl, timeout);
 }
 
-int arduino::MbedSocketClass::ping(const String &hostname, uint8_t ttl)
+int arduino::MbedSocketClass::ping(const String &hostname, uint8_t ttl, uint32_t timeout)
 {
-  return ping(hostname.c_str(), ttl);
+  return ping(hostname.c_str(), ttl, timeout);
 }
 
-int arduino::MbedSocketClass::ping(IPAddress host, uint8_t ttl)
+int arduino::MbedSocketClass::ping(IPAddress host, uint8_t ttl, uint32_t timeout)
 {
   SocketAddress socketAddress = socketAddressFromIpAddress(host, 0);
-  return ping(socketAddress, ttl);
+  return ping(socketAddress, ttl, timeout);
 }
 
 void arduino::MbedSocketClass::config(arduino::IPAddress local_ip) {
