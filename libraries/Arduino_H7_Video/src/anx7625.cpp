@@ -631,7 +631,7 @@ bool anx7625_is_power_provider(uint8_t bus) {
 }
 
 int anx7625_get_hpd_event(uint8_t bus)  {
-	int ret = anx7625_hpd_change_detect(bus);;
+	int ret = anx7625_hpd_change_detect(bus);
 	return ret;
 }
 

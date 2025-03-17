@@ -19,7 +19,7 @@ int GigaDisplayShieldClass::getEdidMode(int h, int v) {
 }
 
 int GigaDisplayShieldClass::getStatus() {
-    return 1;
+    return 1; // TODO: Not implemented;
 }
 
 int USBCVideoClass::init(int edidmode) {

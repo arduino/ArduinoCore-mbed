@@ -107,11 +107,11 @@ public:
   bool isRotated();
 
   /**
-   * @brief Get the status of the display.
+   * @brief Checks if the display is connected.  
    * 
-   * @return int The Status of the display.
+   * @return true if the display is connected, false otherwise. 
    */
-   int getStatus();
+   bool detect();
 
 #ifdef HAS_ARDUINOGRAPHICS
   /**
