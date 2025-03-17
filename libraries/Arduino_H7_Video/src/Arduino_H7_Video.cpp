@@ -179,7 +179,7 @@ bool Arduino_H7_Video::isRotated() {
   return _rotated;
 }
 
-bool Arduino_H7_Video::getStatus()
+bool Arduino_H7_Video::detect()
 {
   return (_shield->getStatus() > 0);
 }
