@@ -106,6 +106,13 @@ public:
    */
   bool isRotated();
 
+  /**
+   * @brief Checks if the display is connected.  
+   * 
+   * @return true if the display is connected, false otherwise. 
+   */
+   bool detect();
+
 #ifdef HAS_ARDUINOGRAPHICS
   /**
    * @brief Clear the display.

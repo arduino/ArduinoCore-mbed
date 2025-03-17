@@ -18,6 +18,10 @@ int GigaDisplayShieldClass::getEdidMode(int h, int v) {
     return EDID_MODE_480x800_60Hz;
 }
 
+int GigaDisplayShieldClass::getStatus() {
+    return 1; // TODO: Not implemented;
+}
+
 int USBCVideoClass::init(int edidmode) {
     struct edid recognized_edid;
     int err_code = 0;
@@ -55,6 +59,12 @@ int USBCVideoClass::getEdidMode(int h, int v) {
     int edidmode = video_modes_get_edid(h, v);
 
     return edidmode;
+}
+
+int USBCVideoClass::getStatus() {
+    int detected = anx7625_get_hpd_event(0);
+
+    return detected;
 }
 
 GigaDisplayShieldClass GigaDisplayShield;

@@ -14,6 +14,7 @@ The main class for managing the video controller and the display.
 | `public ` [`Arduino_H7_Video`](#public-arduino_h7_videoint-width-int-height-h7displayshield-shield) | Construct a new Arduino_H7_Video object with the specified width, height, and display shield. |
 | `public int` [`begin`](#public-int-begin) | Initialize the video controller and display. |
 | `public void` [`end`](#public-void-end) | De-initialize the video controller and display. |
+| `public bool` [`detect`](#public-bool-detect) | Checks if the display is connected. |
 | `public int` [`width`](#public-int-width) | Get the width of the display. |
 | `public int` [`height`](#public-int-height) | Get the height of the display. |
 | `public bool` [`isRotated`](#public-bool-isrotated) | Check if the display is rotated. |
@@ -51,6 +52,15 @@ Initialize the video controller and display.
 ### `public void` [`end`](#)`()`
 
 De-initialize the video controller and display.
+
+---
+
+### `public bool` [`detect`](#)`()`
+
+Checks if the display is connected.
+
+#### Returns
+`bool`: True if the display is connected, False otherwis.
 
 ---
 

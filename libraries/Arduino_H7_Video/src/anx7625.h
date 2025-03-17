@@ -24,5 +24,6 @@ int 	anx7625_wait_hpd_event(uint8_t bus);
 int 	anx7625_get_cc_status(uint8_t bus, uint8_t *cc_status);
 int 	anx7625_read_system_status(uint8_t bus, uint8_t *sys_status);
 bool 	anx7625_is_power_provider(uint8_t bus);
+int 	anx7625_get_hpd_event(uint8_t bus);
 
 #endif  /* _ANX7625_H */
