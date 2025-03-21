@@ -37,6 +37,7 @@ class MbedI2C : public HardwareI2C
     MbedI2C(int sda, int scl);
     MbedI2C(PinName sda, PinName scl);
     virtual void begin();
+    virtual void begin(int sda, int scl);
     #ifndef DEVICE_I2CSLAVE
     virtual void __attribute__ ((error("I2C Slave mode is not supported"))) begin(uint8_t address);
     #else
