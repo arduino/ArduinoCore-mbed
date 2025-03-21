@@ -145,6 +145,7 @@ int arduino::MbedI2C::peek() {
 }
 
 void arduino::MbedI2C::flush() {
+	rxBuffer.clear();
 }
 
 #ifdef DEVICE_I2CSLAVE
