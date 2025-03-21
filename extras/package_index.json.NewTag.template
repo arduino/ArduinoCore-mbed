@@ -42,7 +42,7 @@
               "name": "Raspberry Pi Pico"
             },
             {
-              "name": "Nicla Sense ME"
+              "name": "Arduino Nicla Sense ME"
             },
             {
               "name": "Arduino Nicla Vision"
@@ -284,13 +284,13 @@
           },
           "boards": [
             {
-              "name": "Nicla Sense ME"
+              "name": "Arduino Nicla Sense ME"
             },
             {
-              "name": "Nicla Voice"
+              "name": "Arduino Nicla Voice"
             },
             {
-              "name": "Nicla Vision"
+              "name": "Arduino Nicla Vision"
             }
           ],
           "toolsDependencies": [
@@ -335,7 +335,7 @@
           },
           "boards": [
             {
-              "name": "Arduino Finder Opta"
+              "name": "Opta™"
             }
           ],
           "toolsDependencies": [
