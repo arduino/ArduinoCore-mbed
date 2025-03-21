@@ -26,8 +26,8 @@ arduino::MbedSSLSE050Client::MbedSSLSE050Client() {
 void arduino::MbedSSLSE050Client::setEccSlot(int KeySlot, const byte cert[], int certLen) {
 
   _keySlot = KeySlot;
-  _client_cert_len = certLen;
-  _client_cert = cert;
+  _certLen = certLen;
+  _cert = cert;
 }
 
 void  WiFiSSLSE050Client::setEccSlot(int KeySlot, const byte cert[], int certLen) {
