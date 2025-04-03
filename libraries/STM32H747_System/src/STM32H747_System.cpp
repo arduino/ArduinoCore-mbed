@@ -6,7 +6,6 @@
 extern RTC_HandleTypeDef RTCHandle;
 
 uint8_t STM32H747::readReg(uint8_t subAddress) {
-  char response = 0xFF;
   Wire1.beginTransmission(PMIC_ADDRESS);
   Wire1.write(subAddress);
   Wire1.endTransmission(false);
