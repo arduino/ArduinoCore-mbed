@@ -111,10 +111,6 @@ int Arduino_H7_Video::begin() {
     if (buf1 == NULL) {
       return 2; /* Insuff memory err */
     }
-    static lv_color_t * buf2 = (lv_color_t*)malloc((width() * height() / 10)); /* Declare a buffer for 1/10 screen size */
-    if (buf2 == NULL) {
-      return 2; /* Insuff memory err */
-    }
 
     lv_display_t *display;
     if(_rotated) {
