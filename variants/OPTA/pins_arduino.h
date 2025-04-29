@@ -68,6 +68,16 @@ static const uint8_t A6  = PIN_A6;
 static const uint8_t A7  = PIN_A7;
 #define ADC_RESOLUTION 12
 
+// Pin mapping to match serigraphy
+static const uint8_t I1  = PIN_A0;
+static const uint8_t I2  = PIN_A1;
+static const uint8_t I3  = PIN_A2;
+static const uint8_t I4  = PIN_A3;
+static const uint8_t I5  = PIN_A4;
+static const uint8_t I6  = PIN_A5;
+static const uint8_t I7  = PIN_A6;
+static const uint8_t I8  = PIN_A7;
+
 // Digital pins
 // -----------
 #define D0  (0u)
