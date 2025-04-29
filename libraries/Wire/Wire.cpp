@@ -158,8 +158,12 @@ void arduino::MbedI2C::receiveThd() {
 					onRequestCb();
 				}
 				if (usedTxBuffer != 0) {
-					slave->write((const char *) txBuffer, usedTxBuffer);
+					core_util_critical_section_enter();
+					uint8_t tempTxBuffer[usedTxBuffer];
+					memcpy(tempTxBuffer, txBuffer, sizeof(tempTxBuffer));
 					usedTxBuffer = 0;
+					core_util_critical_section_exit();
+					slave->write((const char *) tempTxBuffer, sizeof(tempTxBuffer));
 				}
 				//slave->stop();
 				break;
