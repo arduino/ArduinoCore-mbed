@@ -767,6 +767,9 @@ giga.menu.split.100_0=2MB M7 + M4 in SDRAM
 giga.menu.split.75_25=1.5MB M7 + 0.5MB M4
 giga.menu.split.50_50=1MB M7 + 1MB M4
 
+giga.menu.security.none=None
+giga.menu.security.sien=Signature + Encryption
+
 giga.menu.target_core.cm7.build.variant=GIGA
 giga.menu.target_core.cm7.build.mcu=cortex-m7
 giga.menu.target_core.cm7.build.fpu=-mfpu=fpv5-d16
@@ -792,6 +795,14 @@ giga.build.board=GIGA
 giga.build.ldscript=linker_script.ld
 giga.build.extra_ldflags=-DCM4_BINARY_START=0x08180000
 giga.compiler.mbed.arch.define=
+giga.build.slot_size=0x1E0000
+giga.build.header_size=0x20000
+giga.build.alignment=32
+giga.build.version=1.2.3+4
+giga.menu.security.sien.recipe.hooks.objcopy.postobjcopy.1.pattern="{tools.imgtool.path}/{tools.imgtool.cmd}" {tools.imgtool.flags}
+giga.menu.security.sien.build.keys.keychain={runtime.platform.path}/libraries/MCUboot/default_keys
+giga.menu.security.sien.build.keys.sign_key=ecdsa-p256-signing-priv-key.pem
+giga.menu.security.sien.build.keys.encrypt_key=ecdsa-p256-encrypt-pub-key.pem
 giga.compiler.mbed.defines={build.variant.path}/defines.txt
 giga.compiler.mbed.ldflags={build.variant.path}/ldflags.txt
 giga.compiler.mbed.cflags={build.variant.path}/cflags.txt
@@ -825,7 +836,12 @@ giga.upload.native_usb=true
 giga.upload.maximum_size=1966080
 giga.upload.maximum_data_size=523624
 
-giga.menu.target_core.cm7.upload.address=0x08040000
+giga.menu.security.none.upload.interface=0
+giga.menu.security.sien.upload.interface=2
+
+giga.menu.security.none.upload.address_m7=0x08040000
+giga.menu.security.sien.upload.address_m7=0xA0000000
+giga.menu.target_core.cm7.upload.address={upload.address_m7}
 
 giga.menu.target_core.cm7.menu.split.50_50.upload.maximum_size=786432
 giga.menu.target_core.cm7.menu.split.75_25.upload.maximum_size=1441792
