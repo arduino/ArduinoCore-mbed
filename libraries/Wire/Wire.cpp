@@ -124,7 +124,6 @@ size_t arduino::MbedI2C::write(const uint8_t* data, int len) {
 int arduino::MbedI2C::read() {
 	int rv = -1;
 	core_util_critical_section_enter();
-	
 	if (rxBuffer.available()) {
 
 		rv = rxBuffer.read_char();
@@ -159,9 +158,7 @@ void arduino::MbedI2C::receiveThd() {
 					onRequestCb();
 				}
 				if (usedTxBuffer != 0) {
-					core_util_critical_section_enter();
 					slave->write((const char *) txBuffer, usedTxBuffer);
-					core_util_critical_section_exit();
 					usedTxBuffer = 0;
 				}
 				//slave->stop();
