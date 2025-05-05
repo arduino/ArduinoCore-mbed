@@ -1,4 +1,4 @@
-#include "QSPIFBlockDevice.h"
+#include "BlockDevice.h"
 #include "MBRBlockDevice.h"
 #include "LittleFileSystem.h"
 #include "FATFileSystem.h"
@@ -8,10 +8,10 @@
 #endif
 
 
-QSPIFBlockDevice root(QSPI_SO0, QSPI_SO1, QSPI_SO2, QSPI_SO3,  QSPI_SCK, QSPI_CS, QSPIF_POLARITY_MODE_1, 40000000);
-mbed::MBRBlockDevice wifi_data(&root, 1);
-mbed::MBRBlockDevice ota_data(&root, 2);
-mbed::MBRBlockDevice user_data(&root, 3);
+mbed::BlockDevice* root = mbed::BlockDevice::get_default_instance();
+mbed::MBRBlockDevice wifi_data(root, 1);
+mbed::MBRBlockDevice ota_data(root, 2);
+mbed::MBRBlockDevice user_data(root, 3);
 mbed::FATFileSystem wifi_data_fs("wlan");
 mbed::FATFileSystem ota_data_fs("fs");
 mbed::FileSystem * user_data_fs;
@@ -60,14 +60,14 @@ void setup() {
   Serial.println("Do you want to proceed? Y/[n]");
 
   if (true == waitResponse()) {
-    mbed::MBRBlockDevice::partition(&root, 1, 0x0B, 0, 1024 * 1024);
+    mbed::MBRBlockDevice::partition(root, 1, 0x0B, 0, 1024 * 1024);
     if(default_scheme) {
-      mbed::MBRBlockDevice::partition(&root, 3, 0x0B, 14 * 1024 * 1024, 14 * 1024 * 1024);
-      mbed::MBRBlockDevice::partition(&root, 2, 0x0B, 1024 * 1024, 14 * 1024 * 1024);
+      mbed::MBRBlockDevice::partition(root, 3, 0x0B, 14 * 1024 * 1024, 14 * 1024 * 1024);
+      mbed::MBRBlockDevice::partition(root, 2, 0x0B, 1024 * 1024, 14 * 1024 * 1024);
       // use space from 15.5MB to 16 MB for another fw, memory mapped
     } else {
-      mbed::MBRBlockDevice::partition(&root, 2, 0x0B, 1024 * 1024, 6 * 1024 * 1024);
-      mbed::MBRBlockDevice::partition(&root, 3, 0x0B, 6 * 1024 * 1024, 14 * 1024 * 1024);
+      mbed::MBRBlockDevice::partition(root, 2, 0x0B, 1024 * 1024, 6 * 1024 * 1024);
+      mbed::MBRBlockDevice::partition(root, 3, 0x0B, 6 * 1024 * 1024, 14 * 1024 * 1024);
       // use space from 15.5MB to 16 MB for another fw, memory mapped
     }
 
