@@ -46,32 +46,20 @@ void setup() {
   Serial.begin(115200);
   while (!Serial);
 
-  Serial.println("Available partition schemes:");
-  Serial.println("\nPartition scheme 1");
-  Serial.println("Partition 1: WiFi firmware and certificates 1MB");
-  Serial.println("Partition 2: OTA and user data 13MB");
-  Serial.println("\nPartition scheme 2");
+  Serial.println("\nWARNING! Running the sketch all the content of the QSPI flash will be erased.");
+  Serial.println("The following partitions will be created:");
   Serial.println("Partition 1: WiFi firmware and certificates 1MB");
   Serial.println("Partition 2: OTA 5MB");
-  Serial.println("Partition 3: User data 8MB"),
-  Serial.println("\nDo you want to use partition scheme 1? Y/[n]");
-  Serial.println("If No, partition scheme 2 will be used.");
-  bool default_scheme = waitResponse();
-
-  Serial.println("\nWARNING! Running the sketch all the content of the QSPI flash will be erased.");
+  Serial.println("Partition 3: Provisioning KVStore 1MB");
+  Serial.println("Partition 4: User data / OPTA PLC runtime 7MB"),
   Serial.println("Do you want to proceed? Y/[n]");
 
   if (true == waitResponse()) {
-    MBRBlockDevice::partition(root, 1, 0x0B, 0, 1024 * 1024);
-    if(default_scheme) {
-      MBRBlockDevice::partition(root, 3, 0x0B, 14 * 1024 * 1024, 14 * 1024 * 1024);
-      mbed::MBRBlockDevice::partition(root, 2, 0x0B, 1024 * 1024, 14 * 1024 * 1024);
-      // use space from 15.5MB to 16 MB for another fw, memory mapped
-    } else {
-      MBRBlockDevice::partition(root, 2, 0x0B, 1024 * 1024, 6 * 1024 * 1024);
-      MBRBlockDevice::partition(root, 3, 0x0B, 6 * 1024 * 1024, 14 * 1024 * 1024);
-      // use space from 15.5MB to 16 MB for another fw, memory mapped
-    }
+    MBRBlockDevice::partition(root, 1, 0x0B, 0, 1 * 1024 * 1024);
+    MBRBlockDevice::partition(root, 2, 0x0B, 1 * 1024 * 1024,  6 * 1024 * 1024);
+    MBRBlockDevice::partition(root, 3, 0x0B, 6 * 1024 * 1024,  7 * 1024 * 1024);
+    MBRBlockDevice::partition(root, 4, 0x0B, 7 * 1024 * 1024, 14 * 1024 * 1024);
+    // use space from 15.5MB to 16 MB for another fw, memory mapped
 
     int err = wifi_data_fs.reformat(&wifi_data);
     if (err) {
@@ -85,23 +73,21 @@ void setup() {
       return;
     }
 
-    if(!default_scheme) {
-      Serial.println("\nDo you want to use LittleFS to format user data partition? Y/[n]");
-      Serial.println("If No, FatFS will be used to format user partition.");
+    Serial.println("\nDo you want to use LittleFS to format user data partition? Y/[n]");
+    Serial.println("If No, FatFS will be used to format user partition.");
 
-      if (true == waitResponse()) {
-        Serial.println("Formatting user partition with LittleFS.");
-        user_data_fs = new mbed::LittleFileSystem("user");
-      } else {
-        Serial.println("Formatting user partition with FatFS.");
-        user_data_fs = new mbed::FATFileSystem("user");
-      }
+    if (true == waitResponse()) {
+      Serial.println("Formatting user partition with LittleFS.");
+      user_data_fs = new mbed::LittleFileSystem("user");
+    } else {
+      Serial.println("Formatting user partition with FatFS.");
+      user_data_fs = new mbed::FATFileSystem("user");
+    }
 
-      err = user_data_fs->reformat(&user_data);
-      if (err) {
-        Serial.println("Error formatting user partition");
-        return;
-      }
+    err = user_data_fs->reformat(&user_data);
+    if (err) {
+      Serial.println("Error formatting user partition");
+      return;
     }
     Serial.println("\nQSPI Flash formatted!");
   }
