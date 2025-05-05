@@ -71,7 +71,7 @@ void arduino::MbedClient::configureSocket(Socket *_s) {
   }
   mutex->lock();
   if (reader_th == nullptr) {
-    reader_th = new rtos::Thread(osPriorityNormal - 2);
+    reader_th = new rtos::Thread(osPriorityNormal, OS_STACK_SIZE, nullptr, "readSocket");
     reader_th->start(mbed::callback(this, &MbedClient::readSocket));
   }
   mutex->unlock();
