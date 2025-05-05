@@ -43,6 +43,7 @@ public:
     void stopGNSS();
     void PSMEnable();
     void PSMDisable();
+    int ping(const char *host, int ttl);
 
 protected:
 
