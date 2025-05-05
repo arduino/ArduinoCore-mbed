@@ -124,7 +124,6 @@ size_t arduino::MbedI2C::write(const uint8_t* data, int len) {
 int arduino::MbedI2C::read() {
 	int rv = -1;
 	core_util_critical_section_enter();
-	
 	if (rxBuffer.available()) {
 
 		rv = rxBuffer.read_char();
@@ -160,9 +159,12 @@ void arduino::MbedI2C::receiveThd() {
 				}
 				if (usedTxBuffer != 0) {
 					core_util_critical_section_enter();
-					slave->write((const char *) txBuffer, usedTxBuffer);
-					core_util_critical_section_exit();
+					uint8_t tempTxBuffer[256];
+					uint8_t usedTempTxBuffer = usedTxBuffer;
+					memcpy(tempTxBuffer, txBuffer, usedTempTxBuffer);
 					usedTxBuffer = 0;
+					core_util_critical_section_exit();
+					slave->write((const char *) tempTxBuffer, usedTempTxBuffer);
 				}
 				//slave->stop();
 				break;
