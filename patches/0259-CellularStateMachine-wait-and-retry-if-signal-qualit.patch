@@ -1,0 +1,26 @@
+From fd40e55bb7b121a0485bec2159672673b6c9bbf4 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Thu, 14 Nov 2024 16:03:10 +0100
+Subject: [PATCH] CellularStateMachine: wait and retry if signal
+ quality is unknown
+
+---
+ .../cellular/source/framework/device/CellularStateMachine.cpp   | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/connectivity/cellular/source/framework/device/CellularStateMachine.cpp b/connectivity/cellular/source/framework/device/CellularStateMachine.cpp
+index 37416ca72e..a87c9e0d02 100644
+--- a/connectivity/cellular/source/framework/device/CellularStateMachine.cpp
++++ b/connectivity/cellular/source/framework/device/CellularStateMachine.cpp
+@@ -458,7 +458,7 @@ void CellularStateMachine::state_signal_quality()
+ {
+     _cb_data.error = _network.get_signal_quality(_signal_quality.rssi, &_signal_quality.ber);
+ 
+-    if (_cb_data.error != NSAPI_ERROR_OK) {
++    if ((_cb_data.error != NSAPI_ERROR_OK) || (_signal_quality.rssi == CellularNetwork::SignalQuality::SignalQualityUnknown)) {
+         retry_state_or_fail();
+     } else {
+         _cb_data.data = &_signal_quality;
+-- 
+2.45.2
+

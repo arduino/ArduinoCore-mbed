@@ -1,0 +1,57 @@
+From a76136121ab8066a1ee4afab9254552752b96a5d Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Wed, 13 Nov 2024 08:28:13 +0100
+Subject: [PATCH] GEMALTO CINTERION: fix enable cmux command
+
+---
+ .../cellular/source/framework/AT/AT_CellularDevice.cpp   | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/connectivity/cellular/source/framework/AT/AT_CellularDevice.cpp b/connectivity/cellular/source/framework/AT/AT_CellularDevice.cpp
+index 08229ba49b..3eccc4a5c0 100644
+--- a/connectivity/cellular/source/framework/AT/AT_CellularDevice.cpp
++++ b/connectivity/cellular/source/framework/AT/AT_CellularDevice.cpp
+@@ -50,6 +50,7 @@ AT_CellularDevice::AT_CellularDevice(FileHandle *fh, char *delim):
+     _context_list(0),
+     _default_timeout(DEFAULT_AT_TIMEOUT),
+     _modem_debug_on(false),
++    _cmux_status(false),
+     _property_array(NULL)
+ {
+     MBED_ASSERT(fh);
+@@ -243,10 +244,10 @@ nsapi_error_t AT_CellularDevice::get_sim_state(SimState &state)
+ 
+ nsapi_error_t AT_CellularDevice::enable_cmux()
+ {
+-setup_at_handler();
+-
++    setup_at_handler();
+     _at.lock();
+     for (int retry = 1; retry <= 3; retry++) {
++        is_ready();
+         _at.clear_error();
+         _at.flush();
+         _at.at_cmd_discard("E0", "");
+@@ -259,10 +260,9 @@ setup_at_handler();
+         tr_debug("Wait 100ms to init modem");
+         rtos::ThisThread::sleep_for(100ms); // let modem have time to get ready
+     }
+- return _at.unlock_return_error();
++    return _at.unlock_return_error();
+ }
+ 
+-
+ bool AT_CellularDevice::is_cmux_enabled()
+ {
+     return _cmux_status;
+@@ -272,6 +272,7 @@ void AT_CellularDevice::set_cmux_status_flag(bool cmux_status)
+ {
+     _cmux_status = cmux_status;
+ }
++
+ nsapi_error_t AT_CellularDevice::set_pin(const char *sim_pin)
+ {
+     // if SIM is already in ready state then settings the PIN
+-- 
+2.45.2
+

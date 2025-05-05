@@ -1,0 +1,42 @@
+From 13bc587f70e1c4f9f61650cfd7c8ebc538bdcf09 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Wed, 13 Nov 2024 08:29:14 +0100
+Subject: [PATCH] GEMALTO CINTERION: override shutdown function
+
+---
+ .../cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.cpp        | 6 ++++++
+ .../drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.h  | 1 +
+ 2 files changed, 7 insertions(+)
+
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.cpp b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.cpp
+index 1f82199106..c00c1880e4 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.cpp
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.cpp
+@@ -92,6 +92,12 @@ nsapi_error_t GEMALTO_CINTERION::init()
+     return NSAPI_ERROR_OK;
+ }
+ 
++nsapi_error_t GEMALTO_CINTERION::shutdown()
++{
++    CellularDevice::shutdown();
++    return NSAPI_ERROR_OK;
++}
++
+ GEMALTO_CINTERION::Module GEMALTO_CINTERION::get_module()
+ {
+     return _module;
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.h b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.h
+index 21d5888383..e77078cb49 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.h
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION.h
+@@ -55,6 +55,7 @@ protected: // AT_CellularDevice
+ 
+ protected:
+     virtual nsapi_error_t init();
++    virtual nsapi_error_t shutdown();
+ 
+ private:
+     static Module _module;
+-- 
+2.45.2
+

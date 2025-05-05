@@ -1,0 +1,29 @@
+From f40d4a9d65ee9163921271697d316c1061aca946 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Thu, 31 Oct 2024 11:05:18 +0100
+Subject: [PATCH] GEMALTO CINTERION: cleanup stack before connection
+
+  Allows to re-connect after a disconnection
+---
+ .../GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.cpp  | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.cpp b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.cpp
+index 78955c599e..76c788cdaf 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.cpp
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularContext.cpp
+@@ -35,6 +35,11 @@ nsapi_error_t GEMALTO_CINTERION_CellularContext::connect(const char *sim_pin, co
+ {
+     nsapi_error_t error = NSAPI_ERROR_OK;
+ 
++    if (_stack) {
++        delete _stack;
++        _stack = NULL;
++    }
++
+     set_sim_pin(sim_pin);
+     set_credentials(apn, uname, pwd);
+ 
+-- 
+2.45.2
+
