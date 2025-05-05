@@ -2,6 +2,8 @@
 #include "MBRBlockDevice.h"
 #include "LittleFileSystem.h"
 #include "FATFileSystem.h"
+#include "wiced_resource.h"
+#include "certificates.h"
 
 #ifndef CORE_CM7
   #error Format QSPI flash by uploading the sketch to the M7 core instead of the M4 core.
@@ -41,6 +43,20 @@ bool waitResponse() {
   }
 }
 
+void printProgress(uint32_t offset, uint32_t size, uint32_t threshold, bool reset) {
+  static int percent_done = 0;
+  if (reset == true) {
+    percent_done = 0;
+    Serial.println("Flashed " + String(percent_done) + "%");
+  } else {
+    uint32_t percent_done_new = offset * 100 / size;
+    if (percent_done_new >= percent_done + threshold) {
+      percent_done = percent_done_new;
+      Serial.println("Flashed " + String(percent_done) + "%");
+    }
+  }
+}
+
 void setup() {
 
   Serial.begin(115200);
@@ -68,7 +84,6 @@ void setup() {
     // use space from 15.5MB to 16 MB for another fw, memory mapped
 
     bool reformat = true;
-
     if(!wifi_data_fs.mount(&wifi_data)) {
       Serial.println("\nPartition 1 already contains a filesystem, do you want to reformat it? Y/[n]");
       wifi_data_fs.unmount();
@@ -79,6 +94,16 @@ void setup() {
     if (reformat && wifi_data_fs.reformat(&wifi_data)) {
       Serial.println("Error formatting WiFi partition");
       return;
+    }
+
+    bool restore = true;
+    if (reformat) {
+      Serial.println("\nDo you want to restore the WiFi firmware and certificates? Y/[n]");
+      restore = waitResponse();
+    }
+
+    if (reformat && restore) {
+      flashWiFiFirmwareAndCertificates();
     }
 
     reformat = true;
@@ -122,6 +147,49 @@ void setup() {
   }
 
   Serial.println("It's now safe to reboot or disconnect your board.");
+}
+
+void flashWiFiFirmwareAndCertificates() {
+  extern const unsigned char wifi_firmware_image_data[];
+  extern const resource_hnd_t wifi_firmware_image;
+  FILE* fp = fopen("/wlan/4343WA1.BIN", "wb");
+  const int file_size = 421098;
+  int chunck_size = 1024;
+  int byte_count = 0;
+
+  Serial.println("Flashing WiFi firmware");
+  printProgress(byte_count, file_size, 10, true);
+  while (byte_count < file_size) {
+    if(byte_count + chunck_size > file_size)
+      chunck_size = file_size - byte_count;
+    int ret = fwrite(&wifi_firmware_image_data[byte_count], chunck_size, 1, fp);
+    if (ret != 1) {
+      Serial.println("Error writing firmware data");
+      break;
+    }
+    byte_count += chunck_size;
+    printProgress(byte_count, file_size, 10, false);
+  }
+  fclose(fp);
+
+  fp = fopen("/wlan/cacert.pem", "wb");
+
+  Serial.println("Flashing certificates");
+  chunck_size = 128;
+  byte_count = 0;
+  printProgress(byte_count, cacert_pem_len, 10, true);
+  while (byte_count < cacert_pem_len) {
+    if(byte_count + chunck_size > cacert_pem_len)
+      chunck_size = cacert_pem_len - byte_count;
+    int ret = fwrite(&cacert_pem[byte_count], chunck_size, 1 ,fp);
+    if (ret != 1) {
+      Serial.println("Error writing certificates");
+      break;
+    }
+    byte_count += chunck_size;
+    printProgress(byte_count, cacert_pem_len, 10, false);
+  }
+  fclose(fp);
 }
 
 void loop() {
