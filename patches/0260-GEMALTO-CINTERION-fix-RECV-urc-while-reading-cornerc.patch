@@ -1,0 +1,26 @@
+From b1dabe5a8983493bab170e2d8b8f2a1ba40e4199 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Fri, 15 Nov 2024 11:37:52 +0100
+Subject: [PATCH] GEMALTO CINTERION fix RECV urc while reading
+ cornercase
+
+---
+ .../GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp       | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+index 8f7b44818a..d164f85eb2 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+@@ -598,6 +598,8 @@ sisr_retry:
+     if (len == 0) {
+         tr_debug("Socket %d no data", socket->id);
+         _at.resp_stop();
++        _at.process_oob();
++        socket->pending_bytes = 0;
+         RESTORE_URCs_AND_RETURN(NSAPI_ERROR_WOULD_BLOCK);
+     }
+     if (len == -1) {
+-- 
+2.45.2
+

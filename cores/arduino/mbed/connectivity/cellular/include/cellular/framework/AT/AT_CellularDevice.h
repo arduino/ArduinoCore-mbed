@@ -80,6 +80,8 @@ public:
 
     virtual nsapi_error_t soft_power_off();
 
+    virtual nsapi_error_t soft_reset();
+
     virtual nsapi_error_t set_pin(const char *sim_pin);
 
     virtual nsapi_error_t get_sim_state(SimState &state);

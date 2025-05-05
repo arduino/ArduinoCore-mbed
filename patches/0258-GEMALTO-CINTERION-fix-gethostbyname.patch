@@ -1,0 +1,25 @@
+From 46b1511db274990eb52e89c31e3e26af01d48d38 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Thu, 14 Nov 2024 16:00:17 +0100
+Subject: [PATCH] GEMALTO CINTERION: fix gethostbyname()
+
+  Add missing _at.unlock()
+---
+ .../GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp        | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+index 938cdbfef2..8f7b44818a 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+@@ -309,6 +309,7 @@ nsapi_error_t GEMALTO_CINTERION_CellularStack::gethostbyname(const char *host, S
+         } else {
+             //Null string received
+             tr_info("Read %d bytes. Null string", size);
++            _at.unlock();
+             return NSAPI_ERROR_NO_ADDRESS;
+         }
+     }
+-- 
+2.45.2
+

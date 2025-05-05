@@ -1,0 +1,33 @@
+From ec7cc4e660b366364d8b11e4ee6480c41141ff04 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Wed, 26 Mar 2025 15:08:40 +0100
+Subject: [PATCH] GEMALTO CINTERION: add 1ms sleep in socket sendto
+
+---
+ .../GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp      | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+index d164f85eb2..898f81cf66 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+@@ -19,6 +19,7 @@
+ #include "GEMALTO_CINTERION_CellularStack.h"
+ #include "GEMALTO_CINTERION.h"
+ #include "CellularLog.h"
++#include "platform/mbed_thread.h"
+ #include "rtos.h"
+ 
+ using namespace std::chrono_literals;
+@@ -538,6 +539,8 @@ sisw_retry:
+         socket->tx_ready = false;
+     }
+ 
++    thread_sleep_for(1);  // wait for modem to process the data;
++
+     return (_at.get_last_error() == NSAPI_ERROR_OK) ? accept_len : NSAPI_ERROR_DEVICE_ERROR;
+ }
+ 
+-- 
+2.47.2
+

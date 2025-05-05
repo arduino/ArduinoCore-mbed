@@ -1,0 +1,32 @@
+From 62867abe6811f785373cae9e9b5cfe41774b846b Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Wed, 13 Nov 2024 08:30:47 +0100
+Subject: [PATCH] GEMALTO CINTERION: use default timeout to close
+ sockets
+
+---
+ .../GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp     | 4 ----
+ 1 file changed, 4 deletions(-)
+
+diff --git a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+index a96cb2b360..f96ae481f0 100644
+--- a/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
++++ b/connectivity/drivers/cellular/GEMALTO/CINTERION/GEMALTO_CINTERION_CellularStack.cpp
+@@ -252,14 +252,10 @@ nsapi_error_t GEMALTO_CINTERION_CellularStack::socket_close_impl(int sock_id)
+ {
+     tr_debug("Cinterion close %d", sock_id);
+ 
+-    _at.set_at_timeout(FAILURE_TIMEOUT);
+-
+     _at.at_cmd_discard("^SISC", "=", "%d", sock_id);
+ 
+     _at.clear_error(); // clear SISS even though SISC fails
+ 
+-    _at.restore_at_timeout();
+-
+     return _at.get_last_error();
+ }
+ 
+-- 
+2.45.2
+
