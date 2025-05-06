@@ -22,6 +22,7 @@ FileSystem * user_data_fs;
 
 bool waitResponse() {
   bool confirmation = false;
+  bool proceed = false;
   while (confirmation == false) {
     if (Serial.available()) {
       char choice = Serial.read();
@@ -29,18 +30,19 @@ bool waitResponse() {
         case 'y':
         case 'Y':
           confirmation = true;
-          return true;
+          proceed = true;
           break;
         case 'n':
         case 'N':
           confirmation = true;
-          return false;
+          proceed = false;
           break;
         default:
           continue;
       }
     }
   }
+  return proceed;
 }
 
 void printProgress(uint32_t offset, uint32_t size, uint32_t threshold, bool reset) {
@@ -151,11 +153,10 @@ void setup() {
 
 void flashWiFiFirmwareAndCertificates() {
   extern const unsigned char wifi_firmware_image_data[];
-  extern const resource_hnd_t wifi_firmware_image;
   FILE* fp = fopen("/wlan/4343WA1.BIN", "wb");
-  const int file_size = 421098;
-  int chunck_size = 1024;
-  int byte_count = 0;
+  const uint32_t file_size = 421098;
+  uint32_t chunck_size = 1024;
+  uint32_t byte_count = 0;
 
   Serial.println("Flashing WiFi firmware");
   printProgress(byte_count, file_size, 10, true);
