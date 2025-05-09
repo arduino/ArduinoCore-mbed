@@ -195,7 +195,9 @@ void Arduino_H7_Video::beginDraw() {
 
 void Arduino_H7_Video::endDraw() {
   ArduinoGraphics::endDraw();
-
+#ifdef CORE_CM7
+	SCB_CleanInvalidateDCache();
+#endif
   dsi_drawCurrentFrameBuffer();
 }
 
@@ -235,7 +237,9 @@ void Arduino_H7_Video::set(int x, int y, uint8_t r, uint8_t g, uint8_t b) {
       return;
 
     uint32_t color =  (uint32_t)((uint32_t)(r << 16) | (uint32_t)(g << 8) | (uint32_t)(b << 0));
-    dsi_lcdFillArea((void *)(dsi_getCurrentFrameBuffer() + ((x_rot + (dsi_getDisplayXSize() * y_rot)) * sizeof(uint16_t))), 1, 1, color);
+
+    uint16_t *pData = (uint16_t *)dsi_getCurrentFrameBuffer() + ((x_rot + (dsi_getDisplayXSize() * y_rot)));
+    *pData = color;
 }
 #endif
 
