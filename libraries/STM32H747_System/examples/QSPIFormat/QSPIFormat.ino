@@ -96,7 +96,7 @@ void setup() {
     // use space from 15.5MB to 16 MB for another fw, memory mapped
 
     bool reformat = true;
-    if(!wifi_data_fs.mount(&wifi_data)) {
+    if (!wifi_data_fs.mount(&wifi_data)) {
       Serial.println("\nPartition 1 already contains a filesystem, do you want to reformat it? Y/[n]");
       wifi_data_fs.unmount();
 
@@ -119,7 +119,7 @@ void setup() {
     }
 
     reformat = true;
-    if(!ota_data_fs.mount(&ota_data)) {
+    if (!ota_data_fs.mount(&ota_data)) {
       Serial.println("\nPartition 2 already contains a filesystem, do you want to reformat it? Y/[n]");
       ota_data_fs.unmount();
 
@@ -143,7 +143,7 @@ void setup() {
     }
 
     reformat = true;
-    if(!user_data_fs->mount(&user_data)) {
+    if (!user_data_fs->mount(&user_data)) {
       Serial.println("\nPartition 4 already contains a filesystem, do you want to reformat it? Y/[n]");
       user_data_fs->unmount();
 
