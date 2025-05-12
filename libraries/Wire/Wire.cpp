@@ -170,10 +170,10 @@ void arduino::MbedI2C::receiveThd() {
 				break;
 			case mbed::I2CSlave::WriteGeneral:
 			case mbed::I2CSlave::WriteAddressed:
-				core_util_critical_section_enter();
-				rxBuffer.clear();
 				char buf[240];
 				c = slave->read(buf, sizeof(buf));
+				core_util_critical_section_enter();
+				rxBuffer.clear();
 				for (buf_idx = 0; buf_idx < c; buf_idx++) {
 					if (rxBuffer.availableForStore()) {
 						rxBuffer.store_char(uint8_t(buf[buf_idx]));
