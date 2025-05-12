@@ -79,8 +79,11 @@ void setup() {
     }
 
     Serial.println("Do you want to perform a full erase of the QSPI flash before proceeding? Y/[n]");
+    Serial.println("Note: Full flash erase can take up to one minute.");
     if (true == waitResponse()) {
+      Serial.println("Full erase started, please wait...");
       root->erase(0x0, root->size());
+      Serial.println("Full erase completed.");
     } else {
       // Erase only the first sector containing the MBR
       root->erase(0x0, root->get_erase_size());
