@@ -213,13 +213,13 @@ int arduino::WiFiClass::setSSID(const char* ssid) {
 
 int8_t arduino::WiFiClass::scanNetworks() {
   connected_ap = SSID_MAX_COUNT;
-  uint8_t count = SSID_MAX_COUNT;
   if (ap_list != nullptr) {
     delete[]ap_list;
     ap_list = nullptr;
   }
-  ap_list = new WiFiAccessPoint[count];
-  return wifi_if->scan(ap_list, count);
+
+  ap_list = new WiFiAccessPoint[SSID_MAX_COUNT];
+  return wifi_if->scan(ap_list, SSID_MAX_COUNT);
 }
 
 char* arduino::WiFiClass::SSID(uint8_t networkItem) {
