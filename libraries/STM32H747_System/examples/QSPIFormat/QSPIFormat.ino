@@ -171,20 +171,20 @@ extern const unsigned char wifi_firmware_image_data[];
 
 void flashWiFiFirmwareAndCertificates() {
   FILE* fp = fopen("/wlan/4343WA1.BIN", "wb");
-  uint32_t chunck_size = 1024;
+  uint32_t chunk_size = 1024;
   uint32_t byte_count = 0;
 
   Serial.println("Flashing WiFi firmware");
   printProgress(byte_count, file_size, 10, true);
   while (byte_count < file_size) {
-    if(byte_count + chunck_size > file_size)
-      chunck_size = file_size - byte_count;
-    int ret = fwrite(&wifi_firmware_image_data[byte_count], chunck_size, 1, fp);
+    if(byte_count + chunk_size > file_size)
+      chunk_size = file_size - byte_count;
+    int ret = fwrite(&wifi_firmware_image_data[byte_count], chunk_size, 1, fp);
     if (ret != 1) {
       Serial.println("Error writing firmware data");
       break;
     }
-    byte_count += chunck_size;
+    byte_count += chunk_size;
     printProgress(byte_count, file_size, 10, false);
   }
   fclose(fp);
@@ -192,39 +192,39 @@ void flashWiFiFirmwareAndCertificates() {
   fp = fopen("/wlan/cacert.pem", "wb");
 
   Serial.println("Flashing certificates");
-  chunck_size = 128;
+  chunk_size = 128;
   byte_count = 0;
   printProgress(byte_count, cacert_pem_len, 10, true);
   while (byte_count < cacert_pem_len) {
-    if(byte_count + chunck_size > cacert_pem_len)
-      chunck_size = cacert_pem_len - byte_count;
-    int ret = fwrite(&cacert_pem[byte_count], chunck_size, 1 ,fp);
+    if(byte_count + chunk_size > cacert_pem_len)
+      chunk_size = cacert_pem_len - byte_count;
+    int ret = fwrite(&cacert_pem[byte_count], chunk_size, 1 ,fp);
     if (ret != 1) {
       Serial.println("Error writing certificates");
       break;
     }
-    byte_count += chunck_size;
+    byte_count += chunk_size;
     printProgress(byte_count, cacert_pem_len, 10, false);
   }
   fclose(fp);
 }
 
 void flashWiFiFirmwareMapped() {
-  uint32_t chunck_size = 1024;
+  uint32_t chunk_size = 1024;
   uint32_t byte_count = 0;
   const uint32_t offset = 15 * 1024 * 1024 + 1024 * 512;
 
   Serial.println("Flashing memory mapped WiFi firmware");
   printProgress(byte_count, file_size, 10, true);
   while (byte_count < file_size) {
-    if (byte_count + chunck_size > file_size)
-      chunck_size = file_size - byte_count;
-    int ret = root->program(wifi_firmware_image_data, offset + byte_count, chunck_size);
+    if (byte_count + chunk_size > file_size)
+      chunk_size = file_size - byte_count;
+    int ret = root->program(wifi_firmware_image_data, offset + byte_count, chunk_size);
     if (ret != 0) {
       Serial.println("Error writing memory mapped firmware");
       break;
     }
-    byte_count += chunck_size;
+    byte_count += chunk_size;
     printProgress(byte_count, file_size, 10, false);
   }
 }
