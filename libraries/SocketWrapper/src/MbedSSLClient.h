@@ -48,18 +48,47 @@ public:
     _disableSNI = statusSNI;
   }
 
-  void appendCustomCACert(const char* ca_cert) {
-    _ca_cert_custom = ca_cert;
+  void appendCustomCACert(const char* rootCA) {
+    _rootCA = rootCA;
+    _appendCA = true;
+  }
+  void setCACert(const char* rootCA) {
+    _rootCA = rootCA;
+    _appendCA = false;
+  }
+  void setCertificate(const char* clientCert) {
+    _clientCert = clientCert;
+  }
+  void setPrivateKey(const char* privateKey) {
+    _privateKey = privateKey;
   }
 
-protected:
-  const char* _ca_cert_custom;
-  const char* _hostname;
-  bool _disableSNI;
-
 private:
+  const char* _rootCA;
+  const char* _hostname;
+  const char* _clientCert;
+  const char* _privateKey;
+  bool _disableSNI;
+  bool _appendCA;
+
+protected:
   int setRootCA() {
     int err = 0;
+
+    if(_hostname && !_disableSNI) {
+      ((TLSSocket*)sock)->set_hostname(_hostname);
+    }
+
+    if(_clientCert && _privateKey) {
+      err = ((TLSSocket*)sock)->set_client_cert_key(_clientCert, _privateKey);
+      if( err != NSAPI_ERROR_OK) {
+        return err;
+      }
+    }
+
+    if(!_appendCA && _rootCA) {
+      return ((TLSSocket*)sock)->set_root_ca_cert(_rootCA);
+    }
 
 #if defined(MBEDTLS_FS_IO)
     mbed::BlockDevice* root = mbed::BlockDevice::get_default_instance();
@@ -82,12 +111,8 @@ private:
     }
 #endif
 
-    if(_hostname && !_disableSNI) {
-      ((TLSSocket*)sock)->set_hostname(_hostname);
-    }
-
-    if(_ca_cert_custom != NULL) {
-      err = ((TLSSocket*)sock)->append_root_ca_cert(_ca_cert_custom);
+    if(_rootCA != NULL) {
+      err = ((TLSSocket*)sock)->append_root_ca_cert(_rootCA);
     }
     return err;
   }
