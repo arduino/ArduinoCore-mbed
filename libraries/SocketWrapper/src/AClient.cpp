@@ -143,3 +143,24 @@ void arduino::ASslClient::appendCustomCACert(const char* ca_cert) {
   }
   static_cast<MbedSSLClient*>(client.get())->appendCustomCACert(ca_cert);
 }
+
+void arduino::ASslClient::setCACert(const char* rootCA) {
+  if (!client) {
+    newMbedClient();
+  }
+  static_cast<MbedSSLClient*>(client.get())->setCACert(rootCA);
+}
+
+void arduino::ASslClient::setCertificate(const char* clientCert) {
+  if (!client) {
+    newMbedClient();
+  }
+  static_cast<MbedSSLClient*>(client.get())->setCertificate(clientCert);
+}
+
+void arduino::ASslClient::setPrivateKey(const char* privateKey) {
+  if (!client) {
+    newMbedClient();
+  }
+  static_cast<MbedSSLClient*>(client.get())->setPrivateKey(privateKey);
+}
