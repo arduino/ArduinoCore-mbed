@@ -25,8 +25,8 @@
           "toolsDependencies": [
             {
               "packager": "arduino",
-              "name": "openocd",
-              "version": "0.11.0-arduino2"
+              "name": "adb",
+              "version": "32.0.0"
             },
             {
               "packager": "arduino",
@@ -35,18 +35,18 @@
             },
             {
               "packager": "arduino",
-              "version": "0.10.0-arduino1",
-              "name": "dfu-util"
+              "name": "dfu-util",
+              "version": "0.10.0-arduino1"
             },
             {
               "packager": "arduino",
-              "version": "1.8.0-arduino.2",
-              "name": "imgtool"
+              "name": "imgtool",
+              "version": "1.8.0-arduino.2"
             },
             {
               "packager": "arduino",
-              "version": "32.0.0",
-              "name": "adb"
+              "name": "openocd",
+              "version": "0.11.0-arduino2"
             }
           ]
         }
