@@ -1,0 +1,59 @@
+{
+  "packages": [
+    {
+      "platforms": [
+        {
+          "name": "Arduino Mbed OS Nicla Boards",
+          "architecture": "mbed_nicla",
+          "version": "%%VERSION%%",
+          "category": "Arduino",
+          "url": "http://downloads.arduino.cc/cores/staging/%%NICLA_FILENAME%%",
+          "archiveFileName": "%%NICLA_FILENAME%%",
+          "checksum": "SHA-256:%%NICLA_CHECKSUM%%",
+          "size": "%%NICLA_SIZE%%",
+          "help": {
+            "online": "https://github.com/arduino/ArduinoCore-mbed/issues"
+          },
+          "boards": [
+            {
+              "name": "Nicla Sense ME"
+            },
+            {
+              "name": "Nicla Voice"
+            },
+            {
+              "name": "Nicla Vision"
+            }
+          ],
+          "toolsDependencies": [
+            {
+              "packager": "arduino",
+              "name": "openocd",
+              "version": "0.11.0-arduino2"
+            },
+            {
+              "packager": "arduino",
+              "name": "arm-none-eabi-gcc",
+              "version": "7-2017q4"
+            },
+            {
+              "packager": "arduino",
+              "name": "bossac",
+              "version": "1.9.1-arduino2"
+            },
+            {
+              "packager": "arduino",
+              "version": "0.10.0-arduino1",
+              "name": "dfu-util"
+            },
+            {
+              "packager": "arduino",
+              "version": "1.0.6",
+              "name": "rp2040tools"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "packages": [
+    {
+      "platforms": [
+        {
+          "name": "Arduino Mbed OS Stella Boards",
+          "architecture": "mbed_stella",
+          "version": "%%VERSION%%",
+          "category": "Arduino",
+          "url": "http://downloads.arduino.cc/cores/staging/%%STELLA_FILENAME%%",
+          "archiveFileName": "%%STELLA_FILENAME%%",
+          "checksum": "SHA-256:%%STELLA_CHECKSUM%%",
+          "size": "%%STELLA_SIZE%%",
+          "help": {
+            "online": "https://github.com/arduino/ArduinoCore-mbed/issues"
+          },
+          "boards": [
+            {
+              "name": "Arduino Stella"
+            }
+          ],
+          "toolsDependencies": [
+            {
+              "packager": "arduino",
+              "name": "openocd",
+              "version": "0.11.0-arduino2"
+            },
+            {
+              "packager": "arduino",
+              "name": "arm-none-eabi-gcc",
+              "version": "7-2017q4"
+            },
+            {
+              "packager": "arduino",
+              "name": "bossac",
+              "version": "1.9.1-arduino2"
+            },
+            {
+              "packager": "arduino",
+              "version": "0.10.0-arduino1",
+              "name": "dfu-util"
+            },
+            {
+              "packager": "arduino",
+              "version": "1.0.6",
+              "name": "rp2040tools"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
