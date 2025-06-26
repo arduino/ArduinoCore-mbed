@@ -80,11 +80,12 @@ CHKSUM=`sha256sum $FILENAME | awk '{ print $1 }'`
 SIZE=`wc -c $FILENAME | awk '{ print $1 }'`
 FLAVOUR_TAG=${FLAVOUR^^}_
 FLAVOUR_NAME=${FLAVOUR,,}
+VERSION_NAME=${VERSION//./-}
 
 cat ArduinoCore-mbed/extras/mbed_$FLAVOUR_NAME-tag.template.json |
 sed "s/%%VERSION%%/${VERSION}/" |
 sed "s/%%${FLAVOUR_TAG}FILENAME%%/${FILENAME}/" |
 sed "s/%%${FLAVOUR_TAG}CHECKSUM%%/${CHKSUM}/" |
-sed "s/%%${FLAVOUR_TAG}SIZE%%/${SIZE}/" > mbed_$FLAVOUR_NAME-$VERSION.json
+sed "s/%%${FLAVOUR_TAG}SIZE%%/${SIZE}/" > mbed_$FLAVOUR_NAME-$VERSION_NAME.json
 
 cd -
