@@ -73,10 +73,18 @@ BASE_FOLDER=`basename $PWD`
 #Package! (remove .git, patches folders)
 cd ..
 tar --exclude='*.git*' --exclude='*patches*' -cjhf ArduinoCore-mbed-$FLAVOUR-$VERSION.tar.bz2 $BASE_FOLDER
-if [ x$FLAVOUR == x ]; then
-mv ArduinoCore-mbed-$FLAVOUR-$VERSION.tar.bz2 ArduinoCore-mbed-$VERSION.tar.bz2
-echo FILENAME=ArduinoCore-mbed-$VERSION.tar.bz2 > /tmp/env
-else
-echo FILENAME=ArduinoCore-mbed-$FLAVOUR-$VERSION.tar.bz2 > /tmp/env
-fi
+
+# Create JSON file for the package
+FILENAME=ArduinoCore-mbed-$FLAVOUR-$VERSION.tar.bz2
+CHKSUM=`sha256sum $FILENAME | awk '{ print $1 }'`
+SIZE=`wc -c $FILENAME | awk '{ print $1 }'`
+FLAVOUR_TAG=${FLAVOUR^^}_
+FLAVOUR_NAME=${FLAVOUR,,}
+
+cat ArduinoCore-mbed/extras/mbed_$FLAVOUR_NAME-tag.template.json |
+sed "s/%%VERSION%%/${VERSION}/" |
+sed "s/%%${FLAVOUR_TAG}FILENAME%%/${FILENAME}/" |
+sed "s/%%${FLAVOUR_TAG}CHECKSUM%%/${CHKSUM}/" |
+sed "s/%%${FLAVOUR_TAG}SIZE%%/${SIZE}/" > mbed_$FLAVOUR_NAME-$VERSION.json
+
 cd -
