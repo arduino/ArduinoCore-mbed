@@ -1,5 +1,5 @@
 export FLAVOUR="stella"
-export VARIANTS=("ARDUINO_NANO33BLE")
+export VARIANTS=("STELLA")
 export FQBNS=("stella")
 export LIBRARIES=("PDM SPI Wire MRI USBHID USBMIDI USBMSD ThreadDebug Scheduler SFU Nano33BLE_System SocketWrapper MLC")
 export BOOTLOADERS=("nano33ble")

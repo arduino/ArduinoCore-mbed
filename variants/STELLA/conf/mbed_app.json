@@ -1,0 +1,19 @@
+{
+  "macros": [
+    "NRFX_GPIOTE_CONFIG_NUM_OF_LOW_POWER_EVENTS=8",
+    "NRFX_WDT_ENABLED=1"
+  ],
+  "target_overrides": {
+    "*": {
+      "target.printf_lib": "std",
+      "platform.stdio-buffered-serial": false,
+      "platform.stdio-baud-rate": 115200,
+      "platform.default-serial-baud-rate": 115200,
+      "platform.callback-nontrivial": true,
+      "rtos.main-thread-stack-size": 32768,
+      "cordio.max-connections": 5,
+      "platform.all-stats-enabled": true,
+      "target.mbed_app_start": "0x10000"
+    }
+  }
+}
