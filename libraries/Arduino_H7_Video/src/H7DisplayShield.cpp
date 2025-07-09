@@ -41,10 +41,7 @@ int USBCVideoClass::init(int edidmode) {
     }
 
     //Read EDID
-    err_code = anx7625_dp_get_edid(0, &recognized_edid);
-    if(err_code < 0) {
-        return err_code;
-    }
+    anx7625_dp_get_edid(0, &recognized_edid);
 
     //DSI Configuration
     err_code = anx7625_dp_start(0, &recognized_edid, (enum edid_modes) edidmode);
