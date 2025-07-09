@@ -22,8 +22,19 @@ Arduino_H7_Video Display(800, 480, GigaDisplayShield);
 
 Image img_arduinologo(ENCODING_RGB16, (uint8_t *) texture_raw, 300, 300);
 
+void error() {
+    while (true) {
+        digitalWrite(LEDR, LOW);
+        delay(500);
+        digitalWrite(LEDR, HIGH);
+        delay(500);
+    }
+}
+
 void setup() {
-  Display.begin();
+  if (Display.begin()) {
+      error();
+  }
 
   Display.beginDraw();
   Display.image(img_arduinologo, (Display.width() - img_arduinologo.width())/2, (Display.height() - img_arduinologo.height())/2);

@@ -11,9 +11,20 @@
 Arduino_H7_Video Display(800, 480, GigaDisplayShield);
 //Arduino_H7_Video Display(1024, 768, USBCVideo);
 
+void error() {
+    while (true) {
+        digitalWrite(LEDR, LOW);
+        delay(500);
+        digitalWrite(LEDR, HIGH);
+        delay(500);
+    }
+}
+
 void setup() {
-  Display.begin();
-  
+  if (Display.begin()) {
+      error();
+  }
+
   Display.beginDraw();
   Display.background(255, 255, 255);
   Display.clear();
