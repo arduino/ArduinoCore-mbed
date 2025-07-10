@@ -28,10 +28,22 @@ static void set_slider_val(void * bar, int32_t val) {
   lv_bar_set_value((lv_obj_t *)bar, val, LV_ANIM_ON);
 }
 
+void error() {
+    while (true) {
+        digitalWrite(LEDR, LOW);
+        delay(500);
+        digitalWrite(LEDR, HIGH);
+        delay(500);
+    }
+}
+
 void setup() {
   Serial.begin(115200);
 
-  Display.begin();
+  if (Display.begin()) {
+      error();
+  }
+
   TouchDetector.begin();
 
   /* Create a container with grid 2x2 */
