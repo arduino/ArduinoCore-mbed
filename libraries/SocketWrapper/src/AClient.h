@@ -74,6 +74,9 @@ public:
   void disableSNI(bool statusSNI);
 
   void appendCustomCACert(const char* ca_cert);
+  void setCACert(const char* rootCA);
+  void setCertificate(const char* clientCert);
+  void setPrivateKey(const char* privateKey);
 
 protected:
   virtual void newMbedClient();
