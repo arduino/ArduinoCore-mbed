@@ -1,0 +1,41 @@
+From ea6de4294479343e4ea44cd54e1dd40252be3707 Mon Sep 17 00:00:00 2001
+From: pennam <m.pennasilico@arduino.cc>
+Date: Tue, 1 Oct 2024 13:21:36 +0200
+Subject: [PATCH] lwip: set tcp-mss to 1460
+
+---
+ connectivity/lwipstack/mbed_lib.json | 12 ++++++++----
+ 1 file changed, 8 insertions(+), 4 deletions(-)
+
+diff --git a/connectivity/lwipstack/mbed_lib.json b/connectivity/lwipstack/mbed_lib.json
+index f6607b6ffc..1b48aa63d9 100644
+--- a/connectivity/lwipstack/mbed_lib.json
++++ b/connectivity/lwipstack/mbed_lib.json
+@@ -223,16 +223,20 @@
+             "mem-size": 36560
+         },
+         "PORTENTA_H7": {
+-            "mem-size": 16000
++            "mem-size": 16000,
++            "tcp-mss": 1460
+         },
+         "NICLA_VISION": {
+-            "mem-size": 16000
++            "mem-size": 16000,
++            "tcp-mss": 1460
+         },
+         "OPTA": {
+-            "mem-size": 16000
++            "mem-size": 16000,
++            "tcp-mss": 1460
+         },
+         "GIGA": {
+-            "mem-size": 16000
++            "mem-size": 16000,
++            "tcp-mss": 1460
+         },
+         "FVP_MPS2_M3": {
+             "mem-size": 36560
+-- 
+2.45.2
+
