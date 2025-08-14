@@ -67,6 +67,7 @@ int arduino::WiFiClass::begin(const char* ssid, const char* passphrase, wl_enc_t
       return _currentNetworkStatus;
     }
   } else {
+    connected_ap = SSID_MAX_COUNT;
     _security = enum2sec(security);
   }
 
