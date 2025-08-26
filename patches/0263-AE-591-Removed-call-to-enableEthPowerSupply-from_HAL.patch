@@ -1,0 +1,25 @@
+From c7060913dd186360849d4c08cc4b75f88a635076 Mon Sep 17 00:00:00 2001
+From: Bogdan Ivanus <b.ivanus@arduino.cc>
+Date: Mon, 25 Aug 2025 20:11:02 +0300
+Subject: [PATCH] AE-591: Removed call to enableEthPowerSupply()
+ from_HAL_ETH_MspInit.
+
+---
+ .../TARGET_STM32H7/TARGET_PORTENTA_H7/stm32h7_eth_init.c         | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/connectivity/drivers/emac/TARGET_STM/TARGET_STM32H7/TARGET_PORTENTA_H7/stm32h7_eth_init.c b/connectivity/drivers/emac/TARGET_STM/TARGET_STM32H7/TARGET_PORTENTA_H7/stm32h7_eth_init.c
+index 7f5b4206cb..e5d37a46ad 100644
+--- a/connectivity/drivers/emac/TARGET_STM/TARGET_STM32H7/TARGET_PORTENTA_H7/stm32h7_eth_init.c
++++ b/connectivity/drivers/emac/TARGET_STM/TARGET_STM32H7/TARGET_PORTENTA_H7/stm32h7_eth_init.c
+@@ -63,7 +63,6 @@ void HAL_ETH_MspInit(ETH_HandleTypeDef *heth)
+ {
+     GPIO_InitTypeDef GPIO_InitStruct;
+     if (heth->Instance == ETH) {
+-        enableEthPowerSupply();
+ 
+ #if !(defined(DUAL_CORE) && defined(CORE_CM4))
+         /* Disable DCache for STM32H7 family */
+-- 
+2.50.1.windows.1
+
