@@ -139,7 +139,7 @@ extern "C" {
 void initVariant() {
   // turn power LED on
   pinMode(LED_PWR, OUTPUT);
-  digitalWrite(LED_PWR, HIGH);
+  digitalWrite(LED_PWR, LOW);
 
   // Errata Nano33BLE - I2C pullup is controlled by the SWO pin.
   // Configure the TRACEMUX to disable routing SWO signal to pin.
