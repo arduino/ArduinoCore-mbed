@@ -105,10 +105,10 @@ PinDescription g_APinDescription[] = {
   { P0_3,  NULL, NULL, NULL },     // A7
 
   // LEDs
-  { P0_24, NULL, NULL, NULL },     // LED R
-  { P0_16, NULL, NULL, NULL },     // LED G
-  { P0_6,  NULL, NULL, NULL },     // LED B
-  { P1_9,  NULL, NULL, NULL },     // LED PWR
+  { P1_4,  NULL, NULL, NULL },     // LED R
+  { P1_3,  NULL, NULL, NULL },     // LED G
+  { P1_2,  NULL, NULL, NULL },     // LED B
+  { P1_5,  NULL, NULL, NULL },     // LED PWR
 
   { P0_19, NULL, NULL, NULL },     // INT APDS
 
@@ -139,7 +139,7 @@ extern "C" {
 void initVariant() {
   // turn power LED on
   pinMode(LED_PWR, OUTPUT);
-  digitalWrite(LED_PWR, HIGH);
+  digitalWrite(LED_PWR, LOW);
 
   // Errata Nano33BLE - I2C pullup is controlled by the SWO pin.
   // Configure the TRACEMUX to disable routing SWO signal to pin.
