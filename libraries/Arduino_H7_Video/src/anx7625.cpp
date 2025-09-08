@@ -475,8 +475,8 @@ int anx7625_dp_get_edid(uint8_t bus, struct edid *out) {
 
 	ret = decode_edid(edid, (block_num + 1) * ONE_BLOCK_SIZE, out);
 	if (ret != EDID_CONFORMANT) {
-		ANXERROR("Failed to decode EDID.\n");
-		return -1;
+		ANXINFO("Non conformant EDID.\n");
+		return 0;
 	}
 
 	return 0;
