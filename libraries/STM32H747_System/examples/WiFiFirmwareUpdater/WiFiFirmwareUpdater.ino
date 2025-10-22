@@ -107,6 +107,12 @@ void setup() {
   byte_count = 0;
   const uint32_t offset = 15 * 1024 * 1024 + 1024 * 512;
 
+  // Make sure QSPI is erased before programming
+  Serial.println("Erasing memory mapped firmware area...");
+  err = root.erase(14 * 1024 * 1024, 2 * 1024 * 1024);
+  if (err != 0) {
+    Serial.println("Error erasing memory mapped firmware area");
+  }
   Serial.println("Flashing memory mapped firmware");
   printProgress(byte_count, file_size, 10, true);
   while (byte_count < file_size) {
