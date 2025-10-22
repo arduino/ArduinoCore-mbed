@@ -112,7 +112,7 @@ void setup() {
   while (byte_count < file_size) {
     if(byte_count + chunck_size > file_size)
       chunck_size = file_size - byte_count;
-    int ret = root.program(wifi_firmware_image_data, offset + byte_count, chunck_size);
+    int ret = root.program(&wifi_firmware_image_data[byte_count], offset + byte_count, chunck_size);
     if (ret != 0) {
       Serial.println("Error writing firmware data");
       break;
