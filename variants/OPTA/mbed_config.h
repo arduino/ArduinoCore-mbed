@@ -227,7 +227,7 @@
 #define MBED_CONF_LWIP_PPP_THREAD_STACKSIZE                                     768                                                                                              // set by library:lwip
 #define MBED_CONF_LWIP_PRESENT                                                  1                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_RAW_SOCKET_ENABLED                                       1                                                                                                // set by application[*]
-#define MBED_CONF_LWIP_SOCKET_MAX                                               4                                                                                                // set by library:lwip
+#define MBED_CONF_LWIP_SOCKET_MAX                                               8                                                                                                // set by application[OPTA]
 #define MBED_CONF_LWIP_TCPIP_THREAD_PRIORITY                                    osPriorityNormal                                                                                 // set by library:lwip
 #define MBED_CONF_LWIP_TCPIP_THREAD_STACKSIZE                                   1200                                                                                             // set by library:lwip
 #define MBED_CONF_LWIP_TCP_CLOSE_TIMEOUT                                        1000                                                                                             // set by library:lwip
@@ -236,10 +236,10 @@
 #define MBED_CONF_LWIP_TCP_MSS                                                  536                                                                                              // set by library:lwip
 #define MBED_CONF_LWIP_TCP_SERVER_MAX                                           4                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_TCP_SND_BUF                                              (2 * TCP_MSS)                                                                                    // set by library:lwip
-#define MBED_CONF_LWIP_TCP_SOCKET_MAX                                           4                                                                                                // set by library:lwip
+#define MBED_CONF_LWIP_TCP_SOCKET_MAX                                           8                                                                                                // set by application[OPTA]
 #define MBED_CONF_LWIP_TCP_SYNMAXRTX                                            6                                                                                                // set by library:lwip
 #define MBED_CONF_LWIP_TCP_WND                                                  (4 * TCP_MSS)                                                                                    // set by library:lwip
-#define MBED_CONF_LWIP_UDP_SOCKET_MAX                                           4                                                                                                // set by library:lwip
+#define MBED_CONF_LWIP_UDP_SOCKET_MAX                                           8                                                                                                // set by application[OPTA]
 #define MBED_CONF_LWIP_USE_MBED_TRACE                                           0                                                                                                // set by library:lwip
 #define MBED_CONF_MCR20A_PROVIDE_DEFAULT                                        0                                                                                                // set by library:mcr20a
 #define MBED_CONF_NANOSTACK_LIBSERVICE_NSDYNMEM_TRACKER_ENABLED                 0                                                                                                // set by library:nanostack-libservice

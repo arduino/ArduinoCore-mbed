@@ -49,6 +49,12 @@ To install ARM build tools, use the `Boards Manager` option in the Arduino IDE t
 
 The backbone of the packaging process is the https://github.com/arduino/ArduinoCore-mbed/blob/master/mbed-os-to-arduino script. It basically compiles a blank Mbed OS project for any supported target board, recovering the files that will be needed at compile time and copying them to the right location. This script is compatible only with Linux. If you are using macOS, use the https://github.com/arduino/ArduinoCore-mbed/blob/master/mbed-os-to-arduino-macos script.
 
+macos example:
+```
+rm -rf /private/tmp/mbed-os-program 
+./mbed-os-to-arduino-macos -a -c OPTA:OPTA
+```
+
 It can be used for a variety of tasks including:
 
 ### Recompiling libmbed with source level debug support
