@@ -221,6 +221,14 @@ generate_flags () {
 				sed -i "s?.heap (COPY)?.heap (NOLOAD)?g" $ARDUINOVARIANT/linker_script.ld
 				sed -i "s?.stack_dummy (COPY)?.stack_dummy (NOLOAD)?g" $ARDUINOVARIANT/linker_script.ld
 				fi
+
+				if [[ $ARDUINOVARIANT == *OPTA* ]]; then
+			        echo "Adding PLC section to $ARDUINOVARIANT/linker_script.ld"
+			        PLC_SECTION=".plc_section 0x3800F000 (NOLOAD):  {\n \
+				        *(.plc_buffer)\n \
+				        } > RAM_D3\n"
+					sed -i "s?.heap (COPY):?${PLC_SECTION}\n    .heap (COPY):?g" $ARDUINOVARIANT/linker_script.ld
+			    fi
 			fi
 			echo "Patching linker scripts"
 			sed -i 's/0x8100000/CM4_BINARY_START/g' "$ARDUINOVARIANT"/linker_script.ld
