@@ -107,12 +107,18 @@ void setup() {
   byte_count = 0;
   const uint32_t offset = 15 * 1024 * 1024 + 1024 * 512;
 
+  // Make sure QSPI is erased before programming
+  Serial.println("Erasing memory mapped firmware area...");
+  err = root.erase(14 * 1024 * 1024, 2 * 1024 * 1024);
+  if (err != 0) {
+    Serial.println("Error erasing memory mapped firmware area");
+  }
   Serial.println("Flashing memory mapped firmware");
   printProgress(byte_count, file_size, 10, true);
   while (byte_count < file_size) {
     if(byte_count + chunck_size > file_size)
       chunck_size = file_size - byte_count;
-    int ret = root.program(wifi_firmware_image_data, offset + byte_count, chunck_size);
+    int ret = root.program(&wifi_firmware_image_data[byte_count], offset + byte_count, chunck_size);
     if (ret != 0) {
       Serial.println("Error writing firmware data");
       break;

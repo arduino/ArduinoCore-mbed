@@ -219,7 +219,7 @@ void flashWiFiFirmwareMapped() {
   while (byte_count < file_size) {
     if (byte_count + chunk_size > file_size)
       chunk_size = file_size - byte_count;
-    int ret = root->program(wifi_firmware_image_data, offset + byte_count, chunk_size);
+    int ret = root->program(&wifi_firmware_image_data[byte_count], offset + byte_count, chunk_size);
     if (ret != 0) {
       Serial.println("Error writing memory mapped firmware");
       break;
