@@ -224,10 +224,13 @@ generate_flags () {
 
 				if [[ $ARDUINOVARIANT == *OPTA* ]]; then
 			        echo "Adding PLC section to $ARDUINOVARIANT/linker_script.ld"
-			        PLC_SECTION=".plc_section 0x3800F000 (NOLOAD):  {\n \
-				        *(.plc_buffer)\n \
-				        } > RAM_D3\n"
-					sed -i "s?.heap (COPY):?${PLC_SECTION}\n    .heap (COPY):?g" $ARDUINOVARIANT/linker_script.ld
+					PLC_SECTION=".plc_d3_section 0x3800F000 (NOLOAD):  {\n \
+									*(.plc_buffer)\n \
+								} > RAM_D3\n \
+								.plc_d2_section 0x30000000 (NOLOAD):  {\n \
+									*(.plc_code)\n \
+								} > RAM_D2\n"
+					sed -i "s?.heap (COPY):?${PLC_SECTION}    .heap (COPY):?g" $ARDUINOVARIANT/linker_script.ld
 			    fi
 			fi
 			echo "Patching linker scripts"
