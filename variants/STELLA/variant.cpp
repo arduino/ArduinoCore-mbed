@@ -118,8 +118,8 @@ PinDescription g_APinDescription[] = {
   { P0_25, NULL, NULL, NULL },     // PDM DIN
 
   // Internal I2C
-  { P0_14, NULL, NULL, NULL },     // SDA2
-  { P0_15, NULL, NULL, NULL },     // SCL2
+  { P1_9, NULL, NULL, NULL },     // SDA2
+  { P0_11, NULL, NULL, NULL },     // SCL2
 
   // Internal I2C
   { P1_0,  NULL, NULL, NULL },     // I2C_PULL
