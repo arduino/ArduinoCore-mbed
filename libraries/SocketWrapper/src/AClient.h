@@ -71,9 +71,16 @@ public:
 
   ASslClient() {}
 
+  /* The disableSNI function needs to be called prior to connect */
   void disableSNI(bool statusSNI);
-
+  /* The appendCustomCACert function needs to be called prior to connect */
   void appendCustomCACert(const char* ca_cert);
+  /* The setCACert function needs to be called prior to connect */
+  void setCACert(const char* rootCA);
+  /* The setCertificate function needs to be called prior to connect */
+  void setCertificate(const char* clientCert);
+  /* The setPrivateKey function needs to be called prior to connect */
+  void setPrivateKey(const char* privateKey);
 
 protected:
   virtual void newMbedClient();
