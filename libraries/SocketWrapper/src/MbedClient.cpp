@@ -18,7 +18,7 @@ void arduino::MbedClient::readSocket() {
   uint8_t data[SOCKET_BUFFER_SIZE];
 
   while (sock != nullptr) {
-    event->wait_any(0xFF, 100);
+
     int ret = NSAPI_ERROR_WOULD_BLOCK;
     do {
       mutex->lock();
