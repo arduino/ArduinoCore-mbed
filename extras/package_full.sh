@@ -1,7 +1,7 @@
 #Get version from git(hub) tag
 export VERSION="4.4.1"
 
-FLAVOURS=`ls *.variables`
+FLAVOURS=`find ./extras/variables/*.variables`
 
 for flavour in $FLAVOURS; do
 
@@ -13,6 +13,6 @@ git clean -dxf
 # Clone ArduinoCore-api in parent folder and create symlinks
 git clone git@github.com:arduino/ArduinoCore-API.git ../api/
 ln -s ../../../api/api cores/arduino/api
-./package.sh $flavour
+./extras/package.sh $flavour
 
 done
