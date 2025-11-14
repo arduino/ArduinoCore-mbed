@@ -11,7 +11,7 @@ git reset --hard
 git clean -dxf
 
 # Clone ArduinoCore-api in parent folder and create symlinks
-git clone https://github.com/arduino/ArduinoCore-API.git ../api/
+git clone --depth=1 https://github.com/arduino/ArduinoCore-API.git ../api/
 ln -s ../../../api/api cores/arduino/api
 ./extras/package.sh $flavour
 
