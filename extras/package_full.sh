@@ -1,5 +1,5 @@
 #Get version from git(hub) tag
-export VERSION="4.4.1"
+export VERSION=$1
 
 FLAVOURS=`find ./extras/variables/*.variables`
 
