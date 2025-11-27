@@ -63,7 +63,7 @@ struct envie_edid_mode envie_known_modes[NUM_KNOWN_MODES] = {
 
 enum edid_modes video_modes_get_edid(uint32_t h_check, uint32_t v_check) {
 	int sum = 0;
-	int sel_mode = -1;
+	int sel_mode = EDID_MODE_AUTO;
 	int sel_sum = 0;
 
 	for (int i = 0; i<NUM_KNOWN_MODES; i++) {
@@ -74,7 +74,7 @@ enum edid_modes video_modes_get_edid(uint32_t h_check, uint32_t v_check) {
 			sum = -1;
 		}
 
-		if (sum >= 0 && ((sel_mode == -1) || (sum < sel_sum))) {
+		if (sum >= 0 && ((sel_mode == EDID_MODE_AUTO) || (sum < sel_sum))) {
 			sel_mode = i;
 			sel_sum = sum;
 		}
@@ -88,14 +88,13 @@ enum edid_modes video_modes_get_edid(uint32_t h_check, uint32_t v_check) {
 			sum = -1;
 		}
 
-		if (sum >= 0 && ((sel_mode == -1) || (sum < sel_sum))) {
+		if (sum >= 0 && ((sel_mode == EDID_MODE_AUTO) || (sum < sel_sum))) {
 			sel_mode = i;
 			sel_sum = sum;
 		}
 	}
 
-	if (sel_mode == -1 						|| 
-		sel_mode == EDID_MODE_1280x768_60Hz ||
+	if (sel_mode == EDID_MODE_1280x768_60Hz ||
 		sel_mode == EDID_MODE_1280x720_60Hz || 
 		sel_mode == EDID_MODE_1920x1080_60Hz) {
 		sel_mode = EDID_MODE_1024x768_60Hz;
