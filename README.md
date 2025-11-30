@@ -17,18 +17,18 @@ Note:
 ```bash
 mkdir -p $sketchbook/hardware/arduino-git
 cd $sketchbook/hardware/arduino-git
-git clone git@github.com:arduino/ArduinoCore-mbed mbed
+git clone https://github.com/arduino/ArduinoCore-mbed.git mbed
 ```
 
 ### Clone https://github.com/arduino/ArduinoCore-API into a directory of your choice.
 
 ```bash
-git clone git@github.com:arduino/ArduinoCore-API
+git clone https://github.com/arduino/ArduinoCore-API
 ```
 
 ### Update the `api` symlink
 
-Create a symlink to `ArduinoCore-API/api` in `$sketchbook/hardware/arduino-git/mbed/cores/arduino`.
+Create a symlink to the `ArduinoCore-API/api` folder from the cloned repo in `$sketchbook/hardware/arduino-git/mbed/cores/arduino`.
 
 ### Test things out
 
