@@ -94,7 +94,12 @@ SECTIONS
         __bss_end__ = .;
         _ebss = .;
     } > RAM
-    .pdm_section 0x3800FC00 (NOLOAD):  {
+    .openamp_section (NOLOAD) : {
+ 				. = ABSOLUTE(0x38000000);
+ 				*(.resource_table)
+ 				} >RAM_D3  AT > FLASH
+ 				.pdm_section (NOLOAD) : {
+ 				. = ABSOLUTE(0x3800FC00);
  				*(.pdm_buffer)
  				} > RAM_D3
  					_dtcm_lma = __etext + SIZEOF(.data);
