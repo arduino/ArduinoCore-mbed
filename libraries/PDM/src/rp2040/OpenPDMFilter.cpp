@@ -30,18 +30,19 @@
 /* Includes ------------------------------------------------------------------*/
 
 #include "OpenPDMFilter.h"
-
+#include <Arduino.h>
+#include "FlashIAPBlockDevice.h"
 
 /* Variables -----------------------------------------------------------------*/
 
 uint32_t div_const = 0;
 int64_t sub_const = 0;
-uint32_t sinc[DECIMATION_MAX * SINCN];
-uint32_t sinc1[DECIMATION_MAX];
-uint32_t sinc2[DECIMATION_MAX * 2];
-uint32_t coef[SINCN][DECIMATION_MAX];
+uint32_t* sinc;
+uint32_t* sinc1;
+uint32_t* sinc2;
+uint32_t** coef;
 #ifdef USE_LUT
-int32_t lut[256][DECIMATION_MAX / 8][SINCN];
+int32_t*** lut;
 #endif
 
 
@@ -166,6 +167,23 @@ void Open_PDM_Filter_Init(TPDMFilter_InitStruct *Param)
   uint16_t i, j;
   int64_t sum = 0;
 
+  sinc = (uint32_t*)malloc(DECIMATION_MAX * SINCN * sizeof(uint32_t));
+  sinc1 = (uint32_t*)malloc(DECIMATION_MAX * sizeof(uint32_t));
+  sinc2 = (uint32_t*)malloc(DECIMATION_MAX * 2 * sizeof(uint32_t));
+  coef = (uint32_t**)malloc(SINCN * sizeof(uint32_t*));
+  for (int i = 0; i < SINCN; i++) {
+    coef[i] = (uint32_t*)malloc(DECIMATION_MAX * sizeof(uint32_t));
+  }
+  #ifdef USE_LUT
+  lut = (int32_t***)malloc(256 * sizeof(int32_t**));
+  for (int i = 0; i < 256; i++) {
+    lut[i] = (int32_t**)malloc(DECIMATION_MAX / 8 * sizeof(int32_t*));
+    for (int j = 0; j < DECIMATION_MAX / 8; j++) {
+      lut[i][j] = (int32_t*)malloc(SINCN * sizeof(int32_t));
+    }
+  }
+  #endif
+
   uint8_t decimation = Param->Decimation;
 
   for (i = 0; i < SINCN; i++) {
@@ -213,6 +231,43 @@ void Open_PDM_Filter_Init(TPDMFilter_InitStruct *Param)
                        ((c >> 1) & 0x01) * coef_p[d * 8 + 6] +
                        ((c     ) & 0x01) * coef_p[d * 8 + 7];
   }
+
+
+#if 0
+  // 1MB block device, 1MB into flash storage
+  static FlashIAPBlockDevice bd(XIP_BASE + 0x100000, 0x100000);
+  int err = bd.init();
+  err = bd.program(lut, 0, DECIMATION_MAX / 8 * SINCN * 256 * sizeof(int32_t));
+
+  int32_t*** _lut = lut;
+
+  lut = (int32_t***)(XIP_BASE + 0x100000);
+
+/*
+  for (int i = 0; i < 256; i++) {
+    for (int j = 0; j < DECIMATION_MAX / 8; j++) {
+      for (int k = 0; k < SINCN; k++) {
+        Serial.println(lut[i][j][k]);
+      }
+    }
+  }
+*/
+
+  for (int i = 0; i < 256; i++) {
+    for (int j = 0; j < DECIMATION_MAX / 8; j++) {
+      free(_lut[i][j]);
+    }
+    free(_lut[i]);
+  }
+#endif
+
+  free(sinc);
+  free(sinc1);
+  free(sinc2);
+  for (int i = 0; i < SINCN; i++) {
+    free(coef[i]);
+  }
+
 #endif
 }
 
