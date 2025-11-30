@@ -49,6 +49,8 @@ void pinMode(PinName pin, PinMode mode)
   }
 }
 
+extern uint8_t _pinMode[];
+
 void pinMode(pin_size_t pin, PinMode mode)
 {
   if (pin >= PINS_COUNT) {
@@ -60,6 +62,8 @@ void pinMode(pin_size_t pin, PinMode mode)
   }
   gpio = new mbed::DigitalInOut(digitalPinToPinName(pin));
   digitalPinToGpio(pin) = gpio;
+
+  _pinMode[pin] = mode;
 
   switch (mode) {
     case INPUT:
