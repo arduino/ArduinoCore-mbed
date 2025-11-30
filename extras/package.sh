@@ -82,7 +82,7 @@ FLAVOUR_TAG=${FLAVOUR^^}_
 FLAVOUR_NAME=${FLAVOUR,,}
 VERSION_NAME=${VERSION//./-}
 
-cat ArduinoCore-mbed/extras/mbed_$FLAVOUR_NAME-tag.template.json |
+cat ArduinoCore-mbed/extras/json/mbed_$FLAVOUR_NAME-tag.template.json |
 sed "s/%%VERSION%%/${VERSION}/" |
 sed "s/%%${FLAVOUR_TAG}FILENAME%%/${FILENAME}/" |
 sed "s/%%${FLAVOUR_TAG}CHECKSUM%%/${CHKSUM}/" |
