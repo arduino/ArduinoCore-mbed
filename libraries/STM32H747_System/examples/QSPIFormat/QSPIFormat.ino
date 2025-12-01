@@ -138,7 +138,7 @@ void setup() {
 
     Serial.println("\nDo you want to use LittleFS to format user data partition? Y/[n]");
     Serial.println("If No, FatFS will be used to format user partition.");
-    Serial.println("Note: LittleFS is not supported by the OPTA PLC runtime.");
+    Serial.println("Note: Arduino PLC IDE is using LittleFS to store runtime data on this partition.");
     if (true == waitResponse()) {
       Serial.println("Formatting user partition with LittleFS.");
       user_data_fs = new mbed::LittleFileSystem("user");
