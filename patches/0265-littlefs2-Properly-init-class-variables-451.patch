@@ -1,0 +1,45 @@
+From 4c7dfb1748407146b5bc0a4fe05a35aec56918db Mon Sep 17 00:00:00 2001
+From: Jamie Smith <jsmith@crackofdawn.onmicrosoft.com>
+Date: Thu, 17 Apr 2025 00:37:26 -0700
+Subject: [PATCH] littlefs2: Properly init class variables (#451)
+
+* littlefs2: Properly init class variables
+
+* Style fix
+---
+ .../littlefsv2/include/littlefsv2/LittleFileSystem2.h       | 6 +++---
+ storage/filesystem/littlefsv2/source/LittleFileSystem2.cpp  | 1 -
+ 2 files changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/storage/filesystem/littlefsv2/include/littlefsv2/LittleFileSystem2.h b/storage/filesystem/littlefsv2/include/littlefsv2/LittleFileSystem2.h
+index d753b3fb11..0d13ef7fb5 100644
+--- a/storage/filesystem/littlefsv2/include/littlefsv2/LittleFileSystem2.h
++++ b/storage/filesystem/littlefsv2/include/littlefsv2/LittleFileSystem2.h
+@@ -289,9 +289,9 @@ protected:
+ #endif //!(DOXYGEN_ONLY)
+ 
+ private:
+-    lfs2_t _lfs; // The actual file system
+-    struct lfs2_config _config;
+-    mbed::BlockDevice *_bd; // The block device
++    lfs2_t _lfs{}; // The actual file system
++    struct lfs2_config _config {};
++    mbed::BlockDevice *_bd = nullptr; // The block device
+ 
+     // thread-safe locking
+     PlatformMutex _mutex;
+diff --git a/storage/filesystem/littlefsv2/source/LittleFileSystem2.cpp b/storage/filesystem/littlefsv2/source/LittleFileSystem2.cpp
+index ea270a48d3..f5ac519e0b 100644
+--- a/storage/filesystem/littlefsv2/source/LittleFileSystem2.cpp
++++ b/storage/filesystem/littlefsv2/source/LittleFileSystem2.cpp
+@@ -149,7 +149,6 @@ LittleFileSystem2::LittleFileSystem2(const char *name, BlockDevice *bd,
+                                      lfs2_size_t cache_size, lfs2_size_t lookahead_size)
+     : FileSystem(name)
+ {
+-    memset(&_config, 0, sizeof(_config));
+     _config.block_size = block_size;
+     _config.block_cycles = block_cycles;
+     _config.cache_size = cache_size;
+-- 
+2.51.0
+
