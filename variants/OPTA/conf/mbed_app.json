@@ -21,6 +21,11 @@
         "METAL_MAX_DEVICE_REGIONS=2",
         "RPMSG_BUFFER_SIZE=512"
       ]
+    },
+    "OPTA": {
+        "lwip.socket-max": 8,
+        "lwip.tcp-socket-max": 8,
+        "lwip.udp-socket-max": 8
     }
   }
 }
