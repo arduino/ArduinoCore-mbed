@@ -129,7 +129,6 @@ jobs:
               - libraries/PDM
               - libraries/Camera/examples/CameraCaptureRawBytes
               - libraries/Camera/examples/CameraCaptureZoomPan
-              - libraries/SE05X
               - libraries/STM32H747_System
               - libraries/ThreadDebug
               - libraries/USBHID
