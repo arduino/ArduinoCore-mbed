@@ -289,9 +289,9 @@ protected:
 #endif //!(DOXYGEN_ONLY)
 
 private:
-    lfs2_t _lfs; // The actual file system
-    struct lfs2_config _config;
-    mbed::BlockDevice *_bd; // The block device
+    lfs2_t _lfs{}; // The actual file system
+    struct lfs2_config _config {};
+    mbed::BlockDevice *_bd = nullptr; // The block device
 
     // thread-safe locking
     PlatformMutex _mutex;
