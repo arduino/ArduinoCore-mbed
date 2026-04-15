@@ -1,5 +1,10 @@
 #include "WiFi.h"
 
+#if defined(ARDUINO_OPTA)
+#include <opta_info.h>
+extern uint8_t* boardInfo();
+#endif
+
 #define SSID_MAX_LENGTH 32
 #define SSID_MAX_COUNT  64
 
@@ -46,8 +51,26 @@ bool arduino::WiFiClass::isVisible(const char* ssid) {
   return false;
 }
 
+arduino::WiFiClass::WiFiClass(WiFiInterface* _if)
+: wifi_if(_if) {
+#if defined(ARDUINO_OPTA)
+  /* opta have factory variants without wifi module present. in order to check for this, we need to
+   * check variant configuration at runtime
+   */
+
+  OptaBoardInfo* info = reinterpret_cast<OptaBoardInfo*>(boardInfo());
+  if (info->_board_functionalities.wifi != 1) {
+    _currentNetworkStatus = WL_NO_MODULE;
+    wifi_if = nullptr;
+  }
+#endif
+}
+
 int arduino::WiFiClass::begin(const char* ssid, const char* passphrase, wl_enc_type security) {
-  if (wifi_if == nullptr) {
+  if (wifi_if == nullptr || _currentNetworkStatus == WL_NO_MODULE) {
+#if defined(ARDUINO_OPTA)
+    Serial.println("This Arduino Opta device doesn't support wifi connectivity");
+#endif
     return 0;
   }
 
@@ -380,6 +403,10 @@ wiced_result_t whd_firmware_check_hook(const char* mounted_name, int mount_err) 
 
 #include "whd_version.h"
 const char* arduino::WiFiClass::firmwareVersion() {
+  if(_currentNetworkStatus == WL_NO_MODULE) {
+    return "";
+  }
+
   if (!firmware_available) {
     /* Try to mount WiFi firmware filesystem */
     wiced_filesystem_init();

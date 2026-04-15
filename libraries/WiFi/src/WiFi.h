@@ -51,8 +51,7 @@ public:
   static int16_t _state[MAX_SOCK_NUM];
   static uint16_t _server_port[MAX_SOCK_NUM];
 
-  WiFiClass(WiFiInterface* _if)
-    : wifi_if(_if){};
+  WiFiClass(WiFiInterface* _if);
 
   /*
    * Get firmware version
