@@ -57,7 +57,7 @@ public:
   /*
    * Get firmware version
    */
-  static const char* firmwareVersion();
+  const char* firmwareVersion();
 
   /* Start Wifi connection for OPEN networks
    *
