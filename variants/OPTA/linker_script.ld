@@ -103,6 +103,12 @@ SECTIONS
  					*(.dtcm*)
  					_edtcm = .;
  					} > DTCMRAM
+    .plc_d3_section 0x3800F000 (NOLOAD):  {
+ 									*(.plc_buffer)
+ 								} > RAM_D3
+ 								.plc_d2_section 0x30000000 (NOLOAD):  {
+ 									*(.plc_code)
+ 								} > RAM_D2
     .heap (COPY):
     {
         __end__ = .;
