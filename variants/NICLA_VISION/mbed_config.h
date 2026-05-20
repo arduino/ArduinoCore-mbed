@@ -431,7 +431,6 @@
 #define WSF_TRACE_ENABLED                                                       0                                                                                                // set by library:cordio
 // Macros
 #define MBEDTLS_CIPHER_MODE_CTR                                                                                                                                                  // defined by library:SecureStore
-#define MBEDTLS_USER_CONFIG_FILE                                                "conf/custom_mbedtls_config.h"                                                                        // defined by application
 #define NSAPI_PPP_AVAILABLE                                                     (MBED_CONF_PPP_ENABLED || MBED_CONF_LWIP_PPP_ENABLED)                                            // defined by library:ppp
 #define NSDYNMEM_TRACKER_ENABLED                                                MBED_CONF_NANOSTACK_LIBSERVICE_NSDYNMEM_TRACKER_ENABLED                                          // defined by library:nanostack-libservice
 #define UNITY_INCLUDE_CONFIG_H                                                                                                                                                   // defined by library:utest

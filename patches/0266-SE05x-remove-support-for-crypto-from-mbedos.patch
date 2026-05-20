@@ -1,0 +1,38 @@
+From b675aff2d931af574053bfc49da4433a0b2ba2b3 Mon Sep 17 00:00:00 2001
+From: Andrea Gilardoni <a.gilardoni@arduino.cc>
+Date: Mon, 18 May 2026 16:13:48 +0200
+Subject: [PATCH] SE05x: remove support for crypto from mbedos
+
+in favor of external library for se05x crypto shared among all cores
+---
+ targets/targets.json | 8 ++------
+ 1 file changed, 2 insertions(+), 6 deletions(-)
+
+diff --git a/targets/targets.json b/targets/targets.json
+index f69cbeef40..6cff815ec4 100644
+--- a/targets/targets.json
++++ b/targets/targets.json
+@@ -3686,18 +3686,14 @@
+             "QSPIF",
+             "WHD",
+             "4343W_FS",
+-            "CYW43XXX",
+-            "SE050"
++            "CYW43XXX"
+         ],
+         "macros_add": [
+             "MBEDTLS_FS_IO",
+             "MBEDTLS_SHA1_C",
+             "CM4_BOOT_BY_APPLICATION",
+             "QSPI_NO_SAMPLE_SHIFT",
+-            "CYW43XXX_UNBUFFERED_UART",
+-            "T1oI2C",
+-            "T1oI2C_UM11225",
+-            "FLOW_SILENT"
++            "CYW43XXX_UNBUFFERED_UART"
+         ],
+         "device_has_add": [
+             "USBDEVICE",
+-- 
+2.53.0
+
