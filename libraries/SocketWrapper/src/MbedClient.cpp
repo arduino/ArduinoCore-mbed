@@ -22,28 +22,30 @@ void arduino::MbedClient::readSocket() {
     int ret = NSAPI_ERROR_WOULD_BLOCK;
     do {
       mutex->lock();
-      if (sock != nullptr && rxBuffer.availableForStore() == 0) {
+      if (sock == nullptr) {
+        mutex->unlock();
+        goto cleanup;
+      }
+      if (rxBuffer.availableForStore() == 0) {
         mutex->unlock();
         yield();
         continue;
-      } else if (sock == nullptr) {
-        goto cleanup;
       }
       ret = sock->recv(data, rxBuffer.availableForStore());
       if (ret < 0 && ret != NSAPI_ERROR_WOULD_BLOCK) {
+        mutex->unlock();
         goto cleanup;
       }
       if (ret == NSAPI_ERROR_WOULD_BLOCK || ret == 0) {
-        yield();
         mutex->unlock();
-        continue;
+        break;
       }
       for (int i = 0; i < ret; i++) {
         rxBuffer.store_char(data[i]);
       }
       mutex->unlock();
       _status = true;
-    } while (ret == NSAPI_ERROR_WOULD_BLOCK || ret > 0);
+    } while (true);
   }
 cleanup:
   _status = false;
@@ -92,6 +94,7 @@ int arduino::MbedClient::connect(SocketAddress socketAddress) {
   }
 
   if (static_cast<TCPSocket *>(sock)->open(getNetwork()) != NSAPI_ERROR_OK) {
+    _status = false;
     return 0;
   }
 
@@ -111,6 +114,7 @@ int arduino::MbedClient::connect(SocketAddress socketAddress) {
     configureSocket(sock);
     _status = true;
   } else {
+    sock->close();
     _status = false;
   }
 
@@ -145,6 +149,7 @@ int arduino::MbedClient::connectSSL(SocketAddress socketAddress) {
   }
 
   if (static_cast<TLSSocket *>(sock)->open(getNetwork()) != NSAPI_ERROR_OK) {
+    _status = false;
     return 0;
   }
 
@@ -176,6 +181,7 @@ restart_connect:
     configureSocket(sock);
     _status = true;
   } else {
+    sock->close();
     _status = false;
   }
 
@@ -213,8 +219,9 @@ int arduino::MbedClient::available() {
 }
 
 int arduino::MbedClient::read() {
-  if (sock == nullptr)
+  if (mutex == nullptr) {
     return -1;
+  }
   mutex->lock();
   if (!available()) {
     mutex->unlock();
@@ -227,8 +234,9 @@ int arduino::MbedClient::read() {
 }
 
 int arduino::MbedClient::read(uint8_t *data, size_t len) {
-  if (sock == nullptr)
+  if (mutex == nullptr) {
     return 0;
+  }
   mutex->lock();
   int avail = available();
 
@@ -250,7 +258,14 @@ int arduino::MbedClient::read(uint8_t *data, size_t len) {
 }
 
 int arduino::MbedClient::peek() {
-  return rxBuffer.peek();
+  if (mutex == nullptr) {
+    return 0;
+  }
+  mutex->lock();
+  int res = rxBuffer.peek();
+  mutex->unlock();
+
+  return res;
 }
 
 void arduino::MbedClient::flush() {
