@@ -1,0 +1,100 @@
+From 2ec69171e77ebd105064c8c2c9ba4df58bb1a992 Mon Sep 17 00:00:00 2001
+From: Simon Arlott <sa.me.uk>
+Date: Mon, 19 May 2025 18:59:40 +0100
+Subject: [PATCH 2/2] RP2040: us_ticker: don't modify the system uptime
+
+There is only one user of this API, the mbed timer queue. It sets targets
+a maximum of (2**32)//16*7 microseconds in the future. Assuming there are
+no other timer events to be scheduled, after 3 instances of this at 5637s
+uptime the 64-bit uptime gets wrapped.
+
+Never modify the system uptime because that makes it unusable when the
+64-bit uptime that should never wrap, unexpectedly does. With the uptime
+proceeding as normal into large 64-bit values the 32-bit timestamp needs
+special handling.
+
+It's ambiguous what the 32-bit timestamp means because time advances while
+the ticker functions are being called, so the 64-bit time could wrap
+between calculating the next 32-bit timestamp and setting it as the target
+time.
+
+The only way to avoid this is to know for certain what the caller meant by
+keeping track of the last 32-bit value that was read. This relies on there
+only being caller but other mbed timer implementations already keep track
+of the last call to us_ticker_read() to handle ambiguity in timestamp
+values.
+
+Track the last read of the full 64-bit time too, so that we can always
+prepare the correct 64-bit time value. Avoid reading the current time
+repeatedly because it could change between calls.
+
+If the timestamp is in the near future it's possible that it has been set
+too late and the time has been missed. Force a timer interrupt when this
+happens.
+---
+ .../TARGET_RP2040/us_ticker.c                 | 39 ++++++++++---------
+ 1 file changed, 21 insertions(+), 18 deletions(-)
+
+diff --git a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/us_ticker.c b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/us_ticker.c
+index 3a5e1f1686f..2062ac36118 100644
+--- a/targets/TARGET_RASPBERRYPI/TARGET_RP2040/us_ticker.c
++++ b/targets/TARGET_RASPBERRYPI/TARGET_RP2040/us_ticker.c
+@@ -54,6 +54,7 @@ const ticker_info_t* us_ticker_get_info()
+ }
+ 
+ static const uint8_t alarm_num = 0;
++static uint64_t last_read_u64 = 0;
+ 
+ static void us_ticker_irq_handler_internal(uint alarm_src) {
+     if (alarm_num == alarm_src) {
+@@ -69,30 +70,32 @@ void us_ticker_init(void)
+ 
+ uint32_t us_ticker_read()
+ {
+-    return time_us_32();
++    uint64_t now_u64 = time_us_64();
++
++    core_util_critical_section_enter();
++    last_read_u64 = now_u64;
++    core_util_critical_section_exit();
++
++    return now_u64;
+ }
+ 
+-void us_ticker_set_interrupt(timestamp_t timestamp)
++void us_ticker_set_interrupt(timestamp_t timestamp_u32)
+ {
+     core_util_critical_section_enter();
+ 
+-    uint64_t _timestamp = (uint64_t)timestamp;
+-
+-    if (timestamp < time_us_32()) {
+-        //32 bit timestamp has been wrapped
+-        //We need to provide a 64 bit timestamp able to fire the irq for this round
+-        _timestamp = (((time_us_64() >> 32) + 1) << 32) + timestamp;
+-    } else {
+-        //Then, at the next round, wrap the 64 bit timer to follow the 32 bit one
+-        if ((time_us_64() >> 32) > 0) {
+-            uint64_t current_time = time_us_64();
+-            uint64_t wrapped_time = current_time - 0xFFFFFFFF;
+-            timer_hw->timelw = (uint32_t)wrapped_time;
+-            timer_hw->timehw = 0;
+-        }
++    uint32_t last_read_u32 = (uint32_t)last_read_u64;
++    uint64_t timestamp_u64 = (uint64_t)timestamp_u32 | (last_read_u64 & 0xFFFFFFFF00000000ULL);
++
++    if (timestamp_u32 < last_read_u32) {
++        timestamp_u64 += 1ULL << 32;
++    }
++
++    absolute_time_t target = { timestamp_u64 };
++    bool missed = hardware_alarm_set_target(alarm_num, target);
++
++    if (missed) {
++        us_ticker_fire_interrupt();
+     }
+-    absolute_time_t target = { _timestamp };
+-    hardware_alarm_set_target(alarm_num, target);
+ 
+     core_util_critical_section_exit();
+ }
