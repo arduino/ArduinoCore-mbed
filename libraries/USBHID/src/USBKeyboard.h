@@ -60,18 +60,6 @@ enum FUNCTION_KEY {
     KEY_F10,        /* F10 key */
     KEY_F11,        /* F11 key */
     KEY_F12,        /* F12 key */
-    KEY_F13,        /* F13 key */
-    KEY_F14,        /* F14 key */
-    KEY_F15,        /* F15 key */
-    KEY_F16,        /* F16 key */
-    KEY_F17,        /* F17 key */
-    KEY_F18,        /* F18 key */
-    KEY_F19,        /* F19 key */
-    KEY_F20,        /* F20 key */
-    KEY_F21,        /* F21 key */
-    KEY_F22,        /* F22 key */
-    KEY_F23,        /* F23 key */
-    KEY_F24,        /* F24 key */
 
     KEY_PRINT_SCREEN,   /* Print Screen key */
     KEY_SCROLL_LOCK,    /* Scroll lock */
@@ -189,6 +177,37 @@ public:
     virtual int _putc(int c);
 
     /**
+    * Clear the persistent list of keys pressed.
+    * Currently has a limit of 10 keys.
+    */
+    void emptyButtonBuffer();
+
+    /**
+    * Add a button to the persistent list of keys pressed.
+    * Currently has a limit of 10 keys.
+    *
+    * @param c character to be added to the list.
+    */
+    void press_button(uint8_t c);
+
+    /**
+    * Send a report with all the pressed keys, then release them.
+    * Currently has a limit of 10 keys.
+    *
+    * @returns true if there is no error, false otherwise
+    */
+    bool sendReleaseAll();
+
+    /**
+    * Send a report with the keys in the array, then release them.
+    * Currently has a limit of 10 keys.
+    *
+    * @param keys_array Array containing the keys you want to send.
+    * @returns true if there is no error, false otherwise
+    */
+    bool sendReleaseKeys(uint8_t* keys_array);
+
+    /**
     * Control media keys
     *
     * @param key media key pressed (KEY_NEXT_TRACK, KEY_PREVIOUS_TRACK, KEY_STOP, KEY_PLAY_PAUSE, KEY_MUTE, KEY_VOLUME_UP, KEY_VOLUME_DOWN)
@@ -231,6 +250,7 @@ private:
     //dummy otherwise it doesn't compile (we must define all methods of an abstract class)
     virtual int _getc();
 
+    uint8_t _keys_pressed[10];
     uint8_t _configuration_descriptor[41];
     uint8_t _lock_status;
     PlatformMutex _mutex;
