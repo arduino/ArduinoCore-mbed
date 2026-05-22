@@ -81,9 +81,11 @@ void arduino::MbedSPI::beginTransaction(SPISettings settings) {
         dev->obj->frequency(settings.getClockFreq());
         this->settings = settings;
     }
+    spiLockMutex.lock();
 }
 
 void arduino::MbedSPI::endTransaction(void) {
+    spiLockMutex.unlock();
     // spinlock until transmission is over (if using ASYNC transfer)
 }
 
