@@ -22,6 +22,15 @@
 
 #define REPORT_ID_KEYBOARD 1
 #define REPORT_ID_VOLUME   3
+/**
+    TODO:
+    * Alter functions to use CUSTSIZE for size of report.
+        Would need to alter change line 410 as well.
+    * Currently report only takes the first modifier key
+        pressed.  Should either change this, or use
+        key_code_raw to send the hex codes.
+**/
+
 
 using namespace arduino;
 
@@ -32,7 +41,7 @@ typedef struct {
 
 #ifdef US_KEYBOARD
 /* US keyboard (as HID standard) */
-#define KEYMAP_SIZE (164)
+#define KEYMAP_SIZE (152)
 const KEYMAP keymap[KEYMAP_SIZE] = {
     {0, 0},             /* NUL */
     {0, 0},             /* SOH */
@@ -175,18 +184,6 @@ const KEYMAP keymap[KEYMAP_SIZE] = {
     {0x43, 0},          /* F10 */
     {0x44, 0},          /* F11 */
     {0x45, 0},          /* F12 */
-    {0x68, 0},          /* F13 */
-    {0x69, 0},          /* F14 */
-    {0x6a, 0},          /* F15 */
-    {0x6b, 0},          /* F16 */
-    {0x6c, 0},          /* F17 */
-    {0x6d, 0},          /* F18 */
-    {0x6e, 0},          /* F19 */
-    {0x6f, 0},          /* F20 */
-    {0x70, 0},          /* F21 */
-    {0x71, 0},          /* F22 */
-    {0x72, 0},          /* F23 */
-    {0x73, 0},          /* F24 */
 
     {0x46, 0},          /* PRINT_SCREEN */
     {0x47, 0},          /* SCROLL_LOCK */
@@ -205,7 +202,7 @@ const KEYMAP keymap[KEYMAP_SIZE] = {
 
 #else
 /* UK keyboard */
-#define KEYMAP_SIZE (164)
+#define KEYMAP_SIZE (152)
 const KEYMAP keymap[KEYMAP_SIZE] = {
     {0, 0},             /* NUL */
     {0, 0},             /* SOH */
@@ -348,18 +345,6 @@ const KEYMAP keymap[KEYMAP_SIZE] = {
     {0x43, 0},          /* F10 */
     {0x44, 0},          /* F11 */
     {0x45, 0},          /* F12 */
-    {0x68, 0},          /* F13 */
-    {0x69, 0},          /* F14 */
-    {0x6a, 0},          /* F15 */
-    {0x6b, 0},          /* F16 */
-    {0x6c, 0},          /* F17 */
-    {0x6d, 0},          /* F18 */
-    {0x6e, 0},          /* F19 */
-    {0x6f, 0},          /* F20 */
-    {0x70, 0},          /* F21 */
-    {0x71, 0},          /* F22 */
-    {0x72, 0},          /* F23 */
-    {0x73, 0},          /* F24 */
 
     {0x46, 0},          /* PRINT_SCREEN */
     {0x47, 0},          /* SCROLL_LOCK */
@@ -417,6 +402,7 @@ const uint8_t *USBKeyboard::report_desc()
         INPUT(1), 0x01,                         // Constant
 
 
+        // LED section.
         REPORT_COUNT(1), 0x05,
         REPORT_SIZE(1), 0x01,
         USAGE_PAGE(1), 0x08,                    // LEDs
@@ -428,7 +414,9 @@ const uint8_t *USBKeyboard::report_desc()
         OUTPUT(1), 0x01,                        // Constant
 
 
-        REPORT_COUNT(1), 0x06,
+        // Keyboard section.
+        //REPORT_COUNT(1), 0x06,
+        REPORT_COUNT(1), 0x0A,                  // Allows up to 10 keys.
         REPORT_SIZE(1), 0x08,
         LOGICAL_MINIMUM(1), 0x00,
         LOGICAL_MAXIMUM(1), 0x65,
@@ -464,6 +452,16 @@ const uint8_t *USBKeyboard::report_desc()
     return reportDescriptor;
 }
 
+void USBKeyboard::emptyButtonBuffer()
+{
+    // Using hard-coded value of 10 for keys pressed array for testing.
+    // Empties the pressed buttons buffer.
+    // Buffer is 10 (0 through 9) long.
+    for(int i = 0; i < 10; i++)
+    {
+        _keys_pressed[i] = 0;
+    }
+}
 
 void USBKeyboard::report_rx()
 {
@@ -484,6 +482,133 @@ uint8_t USBKeyboard::lock_status()
 int USBKeyboard::_putc(int c)
 {
     return key_code(c, keymap[c].modifier);
+}
+
+void USBKeyboard::press_button(uint8_t c)
+{
+    if(_keys_pressed[0] != c && _keys_pressed[1] != c &&
+    _keys_pressed[2] != c && _keys_pressed[3] != c &&
+    _keys_pressed[4] != c && _keys_pressed[5] != c &&
+    _keys_pressed[6] != c && _keys_pressed[7] != c &&
+    _keys_pressed[8] != c && _keys_pressed[9] != c)
+    {
+        for(int i = 0; i < 10 ; i++)
+        {
+            if(_keys_pressed[i] == 0)
+            {
+                _keys_pressed[i] = c;
+                //////////////////////////////////////////////////////////
+                // If we don't break, it'll loop through and put the    //
+                // character in all 10 slots, since we've already       //
+                // checked if it was in the array *BEFORE* starting the //
+                // loop.                                                //
+                //////////////////////////////////////////////////////////
+                break;
+            }
+        }
+    }
+
+}
+
+bool USBKeyboard::sendReleaseAll()
+{
+    _mutex.lock();
+
+    // Testing with hardcoded values of array size 10, and
+    // report length 13.
+
+    // Send simulated keyboard buttons, and empty the button pressed buffer.
+    // Returns true if successful.
+    HID_REPORT report;
+
+    report.data[0] = REPORT_ID_KEYBOARD;
+    report.data[1] = 0;
+    report.data[2] = 0;
+    for(int i = 3; i < 13; i++)
+    {
+        report.data[i] = keymap[_keys_pressed[i-3]].usage;
+        if(keymap[_keys_pressed[i-3]].modifier && !report.data[1]) {
+            report.data[1] = keymap[_keys_pressed[i-3]].modifier;
+        }
+    }
+
+    report.length = 13;
+
+    if (!send(&report)) {
+        _mutex.unlock();
+        return false;
+    }
+
+    // Need to clear the modifier from the report.
+    report.data[1] = 0;
+    for(int i = 3; i < 13; i++)
+    {
+        report.data[i] = 0;
+    }
+
+    emptyButtonBuffer();
+
+    if (!send(&report)) {
+        _mutex.unlock();
+        return false;
+    }
+
+
+    _mutex.unlock();
+    return true;
+
+}
+
+bool USBKeyboard::sendReleaseKeys(uint8_t* keys_array)
+{
+    _mutex.lock();
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Should add a keys_array_length as an additional argument, so we can    //
+    // handle different sizes.  For now, we're just using a                   //
+    // hardcoded value of 10 for the keys array, and 13 for the                //
+    // HID report length.  If we send the wrong size report the               //
+    // computer will get confused.                                            //
+    ////////////////////////////////////////////////////////////////////////////
+    
+    // Send simulated keyboard buttons, and empty the button pressed buffer.
+    // Returns true if successful.
+    HID_REPORT report;
+
+    report.data[0] = REPORT_ID_KEYBOARD;
+    report.data[1] = 0;
+    report.data[2] = 0;
+    for(int i = 3; i < 13; i++)
+    {
+        report.data[i] = keymap[keys_array[i-3]].usage;
+        if(keymap[keys_array[i-3]].modifier && !report.data[1]) {
+            report.data[1] = keymap[keys_array[i-3]].modifier;
+        }
+    }
+
+    report.length = 13;
+
+    if (!send(&report)) {
+        _mutex.unlock();
+        return false;
+    }
+
+    // Need to clear the modifier from the report.
+    report.data[1] = 0;
+    for(int i = 3; i < 13; i++)
+    {
+        report.data[i] = 0;
+        keys_array[i-3] = 0;
+    }
+
+    if (!send(&report)) {
+        _mutex.unlock();
+        return false;
+    }
+
+
+    _mutex.unlock();
+    return true;
 }
 
 bool USBKeyboard::key_code(uint8_t key, uint8_t modifier)
@@ -507,8 +632,12 @@ bool USBKeyboard::key_code_raw(uint8_t key, uint8_t modifier)
     report.data[6] = 0;
     report.data[7] = 0;
     report.data[8] = 0;
+    report.data[9] = 0;
+    report.data[10] = 0;
+    report.data[11] = 0;
+    report.data[12] = 0;
 
-    report.length = 9;
+    report.length = 13;
 
     if (!send(&report)) {
         _mutex.unlock();
