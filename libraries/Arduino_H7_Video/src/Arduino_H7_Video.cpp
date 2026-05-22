@@ -251,7 +251,11 @@ void lvgl_displayFlushing(lv_display_t * disp, const lv_area_t * area, unsigned 
     lv_display_rotation_t rotation = lv_display_get_rotation(disp);
     lv_area_t rotated_area;
     if (rotation != LV_DISPLAY_ROTATION_0) {
-        rotated_buf = (uint8_t*)realloc(rotated_buf, w * h * 4);
+        uint8_t* new_buf = (uint8_t*)realloc(rotated_buf, w * h * 2);
+        if (new_buf == NULL) {
+            return; // Insufficient memory error
+        }
+        rotated_buf = new_buf;
         lv_color_format_t cf = lv_display_get_color_format(disp);
         #if (LVGL_VERSION_MINOR < 2) 
         rotation = LV_DISPLAY_ROTATION_90; // bugfix: force 90 degree rotation for lvgl 9.1 end earlier
@@ -277,6 +281,13 @@ void lvgl_displayFlushing(lv_display_t * disp, const lv_area_t * area, unsigned 
     uint32_t offsetPos  = (area_in_use->x1 + (dsi_getDisplayXSize() * area_in_use->y1)) * sizeof(uint16_t);
 
     dsi_lcdDrawImage((void *) px_map, (void *)(dsi_getActiveFrameBuffer() + offsetPos), w, h, DMA2D_INPUT_RGB565);
+
+    // free the rotated buffer if it was allocated
+    if (rotation != LV_DISPLAY_ROTATION_0) {
+        free(rotated_buf);
+        rotated_buf = nullptr;
+    }
+
     lv_display_flush_ready(disp);         /* Indicate you are ready with the flushing*/
 }
 #else
