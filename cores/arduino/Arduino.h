@@ -57,10 +57,12 @@ extern "C"{
 #define NOT_AN_INTERRUPT 255
 
 // undefine stdlib's abs if encountered
+#if __cplusplus < 201703L
 #ifdef abs
 #undef abs
 #endif // abs
 #define abs(x) ((x)>0?(x):-(x))
+#endif
 
 #define interrupts()        __enable_irq()
 #define noInterrupts()      __disable_irq()
