@@ -242,6 +242,7 @@ void Arduino_H7_Video::set(int x, int y, uint8_t r, uint8_t g, uint8_t b) {
 #if __has_include("lvgl.h")
 #if (LVGL_VERSION_MAJOR == 9)
 static uint8_t* rotated_buf = nullptr;
+static size_t rotated_buf_size = 0;
 void lvgl_displayFlushing(lv_display_t * disp, const lv_area_t * area, unsigned char * px_map) {
     uint32_t w     = lv_area_get_width(area);
     uint32_t h     = lv_area_get_height(area);
@@ -251,7 +252,22 @@ void lvgl_displayFlushing(lv_display_t * disp, const lv_area_t * area, unsigned 
     lv_display_rotation_t rotation = lv_display_get_rotation(disp);
     lv_area_t rotated_area;
     if (rotation != LV_DISPLAY_ROTATION_0) {
-        rotated_buf = (uint8_t*)realloc(rotated_buf, w * h * 4);
+        /* Grow the rotate buffer only when a larger area arrives, instead of reallocating on every flush. The per-flush realloc churned the heap
+          and could fail mid-draw (and leaked / dereferenced NULL because the result was assigned straight back to rotated_buf). */
+        size_t needed = w * h * 4;
+        if (needed > rotated_buf_size)
+        {
+          uint8_t *p = (uint8_t *)realloc(rotated_buf, needed);
+          if (p == NULL)
+          {
+            LV_ASSERT_MSG(false, "Failed to allocate rotated_buf");
+            return;
+          }
+
+          rotated_buf = p;
+          rotated_buf_size = needed;
+        }
+    
         lv_color_format_t cf = lv_display_get_color_format(disp);
         #if (LVGL_VERSION_MINOR < 2) 
         rotation = LV_DISPLAY_ROTATION_90; // bugfix: force 90 degree rotation for lvgl 9.1 end earlier
