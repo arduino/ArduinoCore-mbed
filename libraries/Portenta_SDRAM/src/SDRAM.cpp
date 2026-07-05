@@ -29,6 +29,7 @@ static void MPU_Config() {
 }
 
 int SDRAMClass::begin(uint32_t start_address) {
+	static uint32_t malloc_start_address = 0;
 
 	if (FMC_SDRAM_DEVICE->SDCMR == 0x00000000U) {
 		bool ret = sdram_init();
@@ -51,7 +52,13 @@ int SDRAMClass::begin(uint32_t start_address) {
 	}
 
 	if (start_address) {
-		malloc_addblock((void*)start_address, SDRAM_END_ADDRESS - start_address);
+		if (malloc_start_address && malloc_start_address != start_address) {
+			return 0;
+		}
+		if (!malloc_start_address) {
+			malloc_addblock((void*)start_address, SDRAM_END_ADDRESS - start_address);
+			malloc_start_address = start_address;
+		}
 	}
 
 	return 1;
