@@ -37,7 +37,6 @@ public:
 
     void stop(void) {
         ticker.detach();
-        pin = 0;
     }
 
     void start_timeout(void) {
