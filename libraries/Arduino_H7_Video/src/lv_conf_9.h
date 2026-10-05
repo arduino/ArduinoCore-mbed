@@ -102,7 +102,10 @@
     #define LV_DRAW_SW_DRAW_UNIT_CNT    1
 
     /* Use Arm-2D to accelerate the sw render */
-    #define LV_USE_DRAW_ARM2D_SYNC      1
+    /* The core does not ship the Arm-2D library. Keep this disabled so LVGL 9.6+
+     * does not include arm_2d.h for sketches using Arduino_H7_Video.
+     */
+    #define LV_USE_DRAW_ARM2D_SYNC      0
 
     /* If a widget has `style_opa < 255` (not `bg_opa`, `text_opa` etc) or not NORMAL blend mode
      * it is buffered into a "simple" layer before rendering. The widget can be buffered in smaller chunks.
