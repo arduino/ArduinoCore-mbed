@@ -22,6 +22,9 @@
 
 void pinMode(PinName pinNumber, PinMode pinMode);
 void digitalWrite(PinName pinNumber, PinStatus status);
+inline void digitalWrite(PinName pinNumber, int status) {
+	digitalWrite(pinNumber, (PinStatus)status);
+};
 PinStatus digitalRead(PinName pinNumber);
 int analogRead(PinName pinNumber);
 void analogWrite(PinName pinNumber, int value);
