@@ -70,6 +70,17 @@ void analogWrite(pin_size_t pin, int val)
 #endif
   float percent = (float)val/(float)((1 << write_resolution)-1);
   mbed::PwmOut* pwm = digitalPinToPwm(pin);
+
+  /* Check if this pin has been previously configured as a GPIO pin.
+   * If it has, delete the GPIO allocation as well as the PWM allocation
+   * to enforce a full re-initialisation of the PWM module.
+   */
+  mbed::DigitalInOut * gpio = digitalPinToGpio(pin);
+  if ((gpio != NULL) && (pwm != NULL)) {
+    delete gpio; gpio = NULL; digitalPinToGpio(pin) = NULL;
+    delete pwm; pwm = NULL; digitalPinToPwm(pin) = NULL;
+  }
+
   if (pwm == NULL) {
     pwm = new mbed::PwmOut(digitalPinToPinName(pin));
     digitalPinToPwm(pin) = pwm;
